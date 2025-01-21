@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas de Squid</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>Panel de Control Squid</h1>
+                <p class="subtitle">Monitoreo de Solicitudes Activas</p>
+            </div>
+        </header>
+
+        {% set valid_users = {} %}
+        {% for user, connections in grouped_connections.items() %}
+            {% if user and user != "-" and user != "Anónimo" %}
+                {% set _ = valid_users.update({user: connections}) %}
+            {% endif %}
+        {% endfor %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <span class="stat-label">Usuarios Activos</span>
+                    <span class="stat-value">{{ valid_users|length }}</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔄</div>
+                <div class="stat-info">
+                    <span class="stat-label">Conexiones Totales</span>
+                    <span class="stat-value">
+                        {% set total = namespace(value=0) %}
+                        {% for connections in valid_users.values() %}
+                            {% set total.value = total.value + connections|length %}
+                        {% endfor %}
+                        {{ total.value }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {% for user, connections in valid_users.items() %}
+        <div class="user-section">
+            <div class="user-header">
+                <h2>👤 {{ user }}</h2>
+                <div class="user-stats">
+                    <span class="connection-count">{{ connections|length }} conexiones</span>
+                    {% set total_data = namespace(value=0) %}
+                    {% set total_requests = namespace(value=0) %}
+                    {% for connection in connections %}
+                        {% if connection.fd_total != "N/A" %}
+                            {% set total_data.value = total_data.value + connection.fd_total %}
+                        {% endif %}
+                        {% set total_requests.value = total_requests.value + connection.nrequests %}
+                    {% endfor %}
+                    <span class="data-usage">{{ (total_data.value / 1024 / 1024)|round(2) }} MB transferidos</span>
+                    <span class="total-requests">{{ total_requests.value }} solicitudes</span>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tiempo</th>
+                            <th>Método</th>
+                            <th>URL</th>
+                            <th>Datos</th>
+                            <th>Delay Pool</th>
+                            <th>Solicitudes</th>
+                            <th>Dir. Remota</th>
+                            <th>Dir. Local</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for connection in connections %}
+                        <tr>
+                            <td class="time-cell">
+                                {% set seconds = connection.elapsed_time|float %}
+                                {% if seconds >= 3600 %}
+                                    {{ "%.2f"|format(seconds/3600) }} horas
+                                {% elif seconds >= 60 %}
+                                    {{ "%.2f"|format(seconds/60) }} min
+                                {% else %}
+                                    {{ "%.2f"|format(seconds) }} seg
+                                {% endif %}
+                            </td>
+                            <td class="method-cell">
+                                <span class="method-badge {{ connection.logType|lower }}">
+                                    {{ connection.logType }}
+                                </span>
+                            </td>
+                            <td class="url-cell">
+                                <div class="url-content" title="{{ connection.uri }}">
+                                    {{ connection.uri }}
+                                </div>
+                            </td>
+                            <td class="data-cell">
+                                {% if connection.fd_total != "N/A" %}
+                                    {{ (connection.fd_total / 1024 /1024)|round(2) }} MB
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="pool-cell">
+                                {% if connection.delay_pool != "N/A" %}
+                                    <span class="pool-badge">Pool {{ connection.delay_pool }}</span>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="requests-cell">
+                                {{ connection.nrequests }}
+                            </td>
+                            <td class="ip-cell">{{ connection.remote }}</td>
+                            <td class="ip-cell">{{ connection.local }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
