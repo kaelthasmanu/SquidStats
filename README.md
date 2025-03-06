@@ -25,7 +25,7 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/kaelthasmanu/SquidStats.git](https://github.com/kaelthasmanu/SquidStats.git)
+   git clone https://github.com/kaelthasmanu/SquidStats.git
    cd squid-log-parser-dashboard
    ```
 2. Install requeriments python:
