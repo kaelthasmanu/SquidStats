@@ -36,6 +36,18 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
 ```bash
 python app.py
 ```
+🕒 Run on System Startup
+To ensure the application starts automatically when the system boots, add the following cron job:
+1. Open with a editor the file crontab
+```bash
+nano /etc/crontab
+```
+2. Add the following line to the crontab file(change path_app for your path):
+```bash
+@reboot root nohup python3 path_app/main.py &
+```
+3. Save
+
 ## 🛠️ Technologies Used
 
   Backend: Python, Flask
