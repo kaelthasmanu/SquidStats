@@ -4,6 +4,9 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
 
 ---
 
+![DEMO](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg "DEMO")
+
+
 ## 🌟 Features
 - **Real-time Log Parsing**: Parses active Squid connections and displays detailed information.
 - **User Monitoring**: Identifies connections by username, URI, and log type.
