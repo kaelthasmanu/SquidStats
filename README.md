@@ -39,6 +39,11 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
 ```bash
 python app.py
 ```
+4. With your preferred browser, visit the installation URL:
+```bash
+http://ip/hostname:5000
+```
+
 🕒 Run on System Startup
 To ensure the application starts automatically when the system boots, add the following cron job:
 1. Open with a editor the file crontab
