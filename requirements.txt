@@ -1,1 +1,2 @@
 Flask
+python-dotenv

@@ -1,8 +1,12 @@
 import socket
 import re
+from dotenv import load_dotenv
+import os
 
-SQUID_HOST = "10.34.8.15"
-SQUID_PORT = 3128
+load_dotenv()
+
+SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
+SQUID_PORT = int(os.getenv("SQUID_PORT", "3128"))
 
 
 def fetch_squid_cache_stats():

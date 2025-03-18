@@ -40,16 +40,21 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
    ```
 2. Install requeriments python:
   ```bash
-  pip install -r requirements.txt
+    pip install -r requirements.txt
   ```
-3. Run App 🚀:
-```bash
-python app.py
-```
+3. Create a .env file in the project root and add the following content:
+  ```bash
+    SQUID_HOST="127.0.0.1"
+    SQUID_PORT=3128
+  ```
+4. Run App 🚀:
+  ```bash
+    python app.py
+  ```
 4. With your preferred browser, visit the installation URL:
-```bash
-http://ip/hostname:5000
-```
+  ```bash
+    http://ip/hostname:5000 
+  ```
 
 🕒 Run on System Startup
 To ensure the application starts automatically when the system boots, add the following cron job:

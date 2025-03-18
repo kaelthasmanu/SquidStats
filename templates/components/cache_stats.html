@@ -14,12 +14,20 @@
         <div class="card">
             <i class="fas fa-hdd"></i>
             <h3>Espacio total en disco</h3>
-            <p>{{ (cache_stats.fs_space_total / 1024 )|int }} MB</p>
+            {% if (cache_stats.fs_space_total / 1024) < 1024 %}
+                <p>{{ (cache_stats.fs_space_total / 1024 )|int }} MB</p>
+            {% else %}
+                <p>{{ (cache_stats.fs_space_total / 1024 / 1024 )|round(2) }} GB</p>
+            {% endif %}
         </div>
         <div class="card">
             <i class="fas fa-folder-open"></i>
             <h3>Espacio usado en disco</h3>
-            <p>{{ (cache_stats.fs_space_used / 1024 )|int }} MB</p>
+            {% if (cache_stats.fs_space_used / 1024) < 1024 %}
+                <p>{{ (cache_stats.fs_space_used / 1024 )|int }} MB</p>
+            {% else %}
+                <p>{{ (cache_stats.fs_space_used / 1024 / 1024 )|round(2) }} GB</p>
+            {% endif %}
         </div>
         <div class="card">
             <i class="fas fa-recycle"></i>
