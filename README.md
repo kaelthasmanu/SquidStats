@@ -68,6 +68,9 @@ nano /etc/crontab
 ```
 3. Save
 
+## 🧪 Testing Information
+This software has been thoroughly tested and is compatible with Squid version 6.12. Please ensure your Squid installation matches this version or newer for optimal performance.
+
 ## 🛠️ Technologies Used
 
   Backend: Python, Flask
