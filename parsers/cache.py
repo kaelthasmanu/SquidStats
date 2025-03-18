@@ -1,7 +1,7 @@
 import socket
 import re
 
-SQUID_HOST = "127.0.0.1"
+SQUID_HOST = "10.34.8.15"
 SQUID_PORT = 3128
 
 
