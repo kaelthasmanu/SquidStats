@@ -27,6 +27,10 @@ def cache_stats():
     print(data)
     return render_template('cacheView.html', cache_stats=stats_data)
 
+@app.route('/logs')
+def logs():
+
+    return render_template('logsView.html')
 
 
 if __name__ == '__main__':
