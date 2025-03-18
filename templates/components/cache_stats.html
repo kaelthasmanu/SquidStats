@@ -1,0 +1,46 @@
+<section class="cache-stats">
+    <h2><i class="fas fa-server"></i> Estadísticas de Caché</h2>
+    <div class="stats-container">
+        <div class="card">
+            <i class="fas fa-database"></i>
+            <h3>Entradas almacenadas</h3>
+            <p>{{ cache_stats.store_entries }}</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-chart-pie"></i>
+            <h3>Uso de capacidad</h3>
+            <p>{{ cache_stats.capacity_used }}%</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-hdd"></i>
+            <h3>Espacio total en disco</h3>
+            <p>{{ (cache_stats.fs_space_total / 1024 / 1024)|int }} MB</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-folder-open"></i>
+            <h3>Espacio usado en disco</h3>
+            <p>{{ (cache_stats.fs_space_used / 1024 / 1024)|int }} MB</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-recycle"></i>
+            <h3>Política de eliminación</h3>
+            <p>{{ cache_stats.removal_policy }}</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-clock"></i>
+            <h3>Edad LRU</h3>
+            <p>{{ cache_stats.lru_age_days }} días</p>
+        </div>
+    </div>
+
+    <!-- Leyenda explicativa -->
+    <div class="cache-legend">
+        <h3><i class="fas fa-info-circle"></i> Información sobre las métricas</h3>
+        <p><strong>Entradas almacenadas:</strong> Número de objetos actualmente en la caché de Squid.</p>
+        <p><strong>Uso de capacidad:</strong> Porcentaje de almacenamiento de caché utilizado en relación con el tamaño máximo asignado (<code>max_swap_size</code>).</p>
+        <p><strong>Espacio total en disco:</strong> Espacio total del sistema de archivos donde se almacena la caché.</p>
+        <p><strong>Espacio usado en disco:</strong> Cantidad de espacio en disco ocupada por Squid, incluyendo metadatos.</p>
+        <p><strong>Política de eliminación:</strong> Método usado para descartar objetos antiguos de la caché. "LRU" (Least Recently Used) elimina los menos utilizados recientemente.</p>
+        <p><strong>Edad LRU:</strong> Tiempo en días del objeto más antiguo almacenado en caché antes de ser eliminado.</p>
+    </div>
+</section>

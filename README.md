@@ -52,7 +52,7 @@ nano /etc/crontab
 ```
 2. Add the following line to the crontab file(change path_app for your path):
 ```bash
-@reboot root nohup python3 path_app/main.py &
+@reboot root nohup python3 path_app/app.py &
 ```
 3. Save
 
