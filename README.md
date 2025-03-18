@@ -6,6 +6,7 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
 
 ![DEMO](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg "DEMO")
 
+![DEMO2](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/Screenshot%20from%202025-03-18%2001-02-36.png "DEMO2")
 
 ## 🌟 Features
 - **Real-time Log Parsing**: Parses active Squid connections and displays detailed information.
@@ -15,6 +16,12 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
   - Number of requests per connection.
   - Delay pool usage.
 - **Interactive Dashboard**: Clean interface for easy data interpretation.
+- **Squid Cache Statistics**: 
+  - Stored entries.
+  - Used and free capacity
+  - Maximum and current cache size
+  - Disk space and inode usage
+  - Age of cached objects
 
 ---
 
