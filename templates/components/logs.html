@@ -23,7 +23,17 @@
                 </div>
                 <div class="stats-badge">
                     <span class="requests">{{ user.total_requests }} reqs</span>
-                    <span class="data">{{ (user.total_data/1024)|round(2) }} KB</span>
+                    <span class="data">
+                        {% if user.total_data < 1024 %}
+                            {{ user.total_data }} B
+                        {% elif user.total_data < 1024 * 1024 %}
+                            {{ (user.total_data / 1024)|round(2) }} KB
+                        {% elif user.total_data < 1024 * 1024 * 1024 %}
+                            {{ (user.total_data / 1024 / 1024)|round(2) }} MB
+                        {% else %}
+                            {{ (user.total_data / 1024 / 1024 / 1024)|round(2) }} GB
+                        {% endif %}
+                    </span>
                 </div>
             </div>
 
@@ -34,7 +44,17 @@
                 </div>
                 <div class="metric">
                     <span class="metric-label">Data</span>
-                    <span class="metric-value">{{ (user.total_data/1024)|round(2) }} KB</span>
+                    <span class="metric-value">
+                        {% if user.total_data < 1024 %}
+                            {{ user.total_data }} B
+                        {% elif user.total_data < 1024 * 1024 %}
+                            {{ (user.total_data / 1024)|round(2) }} KB
+                        {% elif user.total_data < 1024 * 1024 * 1024 %}
+                            {{ (user.total_data / 1024 / 1024)|round(2) }} MB
+                        {% else %}
+                            {{ (user.total_data / 1024 / 1024 / 1024)|round(2) }} GB
+                        {% endif %}
+                    </span>
                 </div>
             </div>
 
@@ -47,7 +67,17 @@
                         <div class="log-details">
                             <span class="response-badge response-{{ log.response }}">{{ log.response }}</span>
                             <span class="log-meta">{{ log.request_count }} reqs</span>
-                            <span class="log-meta">{{ (log.data_transmitted/1024)|round(2) }} KB</span>
+                            <span class="log-meta">
+                                {% if log.data_transmitted < 1024 %}
+                                    {{ log.data_transmitted }} B
+                                {% elif log.data_transmitted < 1024 * 1024 %}
+                                    {{ (log.data_transmitted / 1024)|round(2) }} KB
+                                {% elif log.data_transmitted < 1024 * 1024 * 1024 %}
+                                    {{ (log.data_transmitted / 1024 / 1024)|round(2) }} MB
+                                {% else %}
+                                    {{ (log.data_transmitted / 1024 / 1024 / 1024)|round(2) }} GB
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                     {% else %}
