@@ -70,24 +70,6 @@ def logs():
         db = get_session()
         users_data = get_users_with_logs_optimized(db)
 
-        # Debug: imprimir cuántos usuarios se obtuvieron
-        print(f"Total usuarios obtenidos: {len(users_data)}")
-
-        # Debug: imprimir todos los IDs de usuario
-        print("IDs de usuarios encontrados:", [user['user_id'] for user in users_data])
-
-        # Ejemplo de uso
-        for user in users_data:
-            print(f"Usuario: {user['username']}")
-            print(f"IP: {user['ip']}")
-            print(f"Total requests: {user['total_requests']}")
-            print(f"Total data: {user['total_data']}")
-            print("Logs:")
-            for log in user['logs']:
-                print(
-                    f"  - {log['url']} (Respuesta: {log['response']}, Requests: {log['request_count']}, Data: {log['data_transmitted']})")
-            print("\n")
-
         return render_template('logsView.html', users_data=users_data)
     except Exception as e:
         print(f"Error en ruta /logs: {e}")
