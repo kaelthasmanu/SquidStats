@@ -1,1 +1,132 @@
-<h1>Working in the next version :)</h1>
+<div class="users-dashboard">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">User Activity Dashboard</h1>
+
+        <div class="search-container">
+            <input type="text" id="username-search" placeholder="Search by username..." class="search-input">
+            <button class="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="users-container" id="users-container">
+        {% for user in users_data %}
+        <div class="user-card" data-username="{{ user.username|lower }}">
+            <div class="user-header">
+                <div class="avatar">{{ user.username|first|upper }}</div>
+                <div class="user-info">
+                    <h3 class="username">{{ user.username }}</h3>
+                    <span class="ip-address">{{ user.ip }}</span>
+                </div>
+                <div class="stats-badge">
+                    <span class="requests">{{ user.total_requests }} reqs</span>
+                    <span class="data">{{ (user.total_data/1024)|round(2) }} KB</span>
+                </div>
+            </div>
+
+            <div class="metrics">
+                <div class="metric">
+                    <span class="metric-label">Requests</span>
+                    <span class="metric-value">{{ user.total_requests }}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Data</span>
+                    <span class="metric-value">{{ (user.total_data/1024)|round(2) }} KB</span>
+                </div>
+            </div>
+
+            <div class="logs-section">
+                <h4 class="logs-title">Recent Activity</h4>
+                <div class="logs-list">
+                    {% for log in user.logs %}
+                    <div class="log-entry">
+                        <div class="log-url">{{ log.url|truncate(40) }}</div>
+                        <div class="log-details">
+                            <span class="response-badge response-{{ log.response }}">{{ log.response }}</span>
+                            <span class="log-meta">{{ log.request_count }} reqs</span>
+                            <span class="log-meta">{{ (log.data_transmitted/1024)|round(2) }} KB</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="no-logs">No activity recorded</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="pagination-container">
+        <button id="prev-page" class="pagination-button" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+            </svg>
+            Previous
+        </button>
+        <div class="page-numbers" id="page-numbers"></div>
+        <button id="next-page" class="pagination-button">
+            Next
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("username-search");
+    const userCards = Array.from(document.querySelectorAll(".user-card"));
+    const usersContainer = document.getElementById("users-container");
+
+    const prevBtn = document.getElementById("prev-page");
+    const nextBtn = document.getElementById("next-page");
+    const pageNumbers = document.getElementById("page-numbers");
+
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredUsers = [...userCards];
+
+    function renderPage(page = 1) {
+        const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+        currentPage = Math.min(Math.max(1, page), totalPages);
+
+        // Oculta todos los usuarios
+        userCards.forEach(card => card.style.display = "none");
+
+        // Muestra los usuarios de la página actual
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageItems = filteredUsers.slice(start, end);
+
+        pageItems.forEach(card => card.style.display = "");
+
+        // Actualiza botones
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+
+        // Actualiza los números de página
+        pageNumbers.innerHTML = `Page ${currentPage} of ${totalPages}`;
+    }
+
+    function filterUsers() {
+        const searchValue = searchInput.value.toLowerCase();
+        filteredUsers = userCards.filter(card => {
+            const username = card.getAttribute("data-username");
+            return username.includes(searchValue);
+        });
+        renderPage(1); // Reinicia a la primera página
+    }
+
+    // Listeners
+    searchInput.addEventListener("input", filterUsers);
+    prevBtn.addEventListener("click", () => renderPage(currentPage - 1));
+    nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
+
+    // Inicial
+    renderPage(1);
+});
+</script>

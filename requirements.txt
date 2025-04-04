@@ -1,2 +1,4 @@
 Flask
 python-dotenv
+sqlalchemy
+flask_apscheduler
