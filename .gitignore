@@ -3,6 +3,7 @@ instance/*
 !instance/.gitignore
 .webassets-cache
 .env
+*.db
 
 ### Python template
 # Byte-compiled / optimized / DLL files
