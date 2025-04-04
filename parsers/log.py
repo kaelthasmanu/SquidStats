@@ -139,7 +139,6 @@ def process_logs(log_file):
                         # Commit por lotes
                         if processed_lines % batch_size == 0:
                             session.commit()
-                            print(f"Procesadas {processed_lines} líneas")
 
                     except SQLAlchemyError as e:
                         session.rollback()

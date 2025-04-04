@@ -6,6 +6,8 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
 
 ![DEMO](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg "DEMO")
 
+![DEMO](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg "DEMO")
+
 ![DEMO2](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/Screenshot%20from%202025-03-18%2001-02-36.png "DEMO2")
 
 ## 🌟 Features
@@ -22,8 +24,16 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
   - Maximum and current cache size
   - Disk space and inode usage
   - Age of cached objects
+- **Logs Users**: 
+  - User activity monitoring 👥
+  - Beautiful visualizations 📊 
+  - Advanced filtering & search 🔍 
+  - Paginated results 📄
 
 ---
+
+### ⚠️ First Execution Alert ⚠️
+Warning: 🚨 The first execution may cause high CPU usage.
 
 ## 🚀 Getting Started
 
