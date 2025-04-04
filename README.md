@@ -6,7 +6,7 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
 
 ![DEMO](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg "DEMO")
 
-![DEMO](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg "DEMO")
+![DEMO](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-04-04_15-45-33.jpg "DEMO")
 
 ![DEMO2](https://github.com/kaelthasmanu/SquidStats/blob/main/assets/Screenshot%20from%202025-03-18%2001-02-36.png "DEMO2")
 
