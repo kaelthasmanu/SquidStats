@@ -94,21 +94,17 @@ document.addEventListener("DOMContentLoaded", function () {
         const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
         currentPage = Math.min(Math.max(1, page), totalPages);
 
-        // Oculta todos los usuarios
         userCards.forEach(card => card.style.display = "none");
 
-        // Muestra los usuarios de la página actual
         const start = (currentPage - 1) * itemsPerPage;
         const end = start + itemsPerPage;
         const pageItems = filteredUsers.slice(start, end);
 
         pageItems.forEach(card => card.style.display = "");
 
-        // Actualiza botones
         prevBtn.disabled = currentPage === 1;
         nextBtn.disabled = currentPage === totalPages;
 
-        // Actualiza los números de página
         pageNumbers.innerHTML = `Page ${currentPage} of ${totalPages}`;
     }
 
@@ -118,15 +114,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const username = card.getAttribute("data-username");
             return username.includes(searchValue);
         });
-        renderPage(1); // Reinicia a la primera página
+        renderPage(1);
     }
 
-    // Listeners
     searchInput.addEventListener("input", filterUsers);
     prevBtn.addEventListener("click", () => renderPage(currentPage - 1));
     nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
 
-    // Inicial
     renderPage(1);
 });
 </script>

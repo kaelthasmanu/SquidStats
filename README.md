@@ -46,6 +46,9 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
   ```bash
     SQUID_HOST="127.0.0.1"
     SQUID_PORT=3128
+    FLASK_DEBUG = "True"
+    SQUID_LOG = "/home/manuel/Desktop/SquidStats/parsers/access.log"
+    DATABASE = /home/manuel/Desktop/SquidStats/logs.db
   ```
 4. Run App 🚀:
   ```bash

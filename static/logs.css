@@ -214,7 +214,6 @@ body {
     font-style: italic;
 }
 
-/* Custom scrollbar */
 .logs-list::-webkit-scrollbar {
     width: 6px;
 }
@@ -276,13 +275,11 @@ body {
     background: var(--secondary-color);
 }
 
-/* Cambiamos a 4 cards por fila */
 .users-container {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 
-/* Paginación */
 .pagination-container {
     display: flex;
     justify-content: center;
@@ -341,7 +338,6 @@ body {
     color: white;
 }
 
-/* Mensaje cuando no hay resultados */
 .no-results {
     grid-column: 1 / -1;
     text-align: center;
