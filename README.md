@@ -41,7 +41,13 @@ Warning: 🚨 The first execution may cause high CPU usage.
 - Python 3.10+
 - Squid proxy server
 - `squidclient` installed on the server
-
+- For compatibility with user logs, use this format in /etc/squid/squid.conf:
+```bash 
+  logformat detailed \
+  "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st/%<bs"
+  
+  access_log /var/log/squid/access.log detailed
+```
 ### Installation
 1. Clone the repository:
    ```bash
