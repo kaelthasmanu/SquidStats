@@ -24,6 +24,8 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
+refresh_interval = int(os.getenv("REFRESH_INTERVAL", 60))
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -43,7 +45,11 @@ def index():
 
         connections = parse_raw_data(raw_data)
         grouped_connections = group_by_user(connections)
-        return render_template('index.html', grouped_connections=grouped_connections)
+
+        return render_template(
+            'index.html',
+            grouped_connections=grouped_connections,
+            refresh_interval=refresh_interval)
 
     except Exception as e:
         logger.error(f"Unexpected error in index route: {str(e)}")
@@ -57,7 +63,8 @@ def cache_stats():
         data = fetch_squid_cache_stats()
         stats_data = vars(data) if hasattr(data, '__dict__') else data
         logger.info("Successfully fetched cache statistics")
-        return render_template('cacheView.html', cache_stats=stats_data)
+        return render_template('cacheView.html', cache_stats=stats_data,
+                               refresh_interval=refresh_interval)
 
     except Exception as e:
         logger.error(f"Error fetching cache stats: {str(e)}")
@@ -75,7 +82,7 @@ def logs():
         print(f"Error en ruta /logs: {e}")
         return render_template('error.html', message="Error retrieving logs"), 500
 
-@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
+@scheduler.task('interval', id='do_job_1', seconds=120, misfire_grace_time=900)
 def init_scheduler():
     """Initialize and start the background scheduler for log processing"""
     log_file = os.getenv("SQUID_LOG", "access.log")

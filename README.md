@@ -59,6 +59,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
     FLASK_DEBUG = "True"
     SQUID_LOG = "/home/manuel/Desktop/SquidStats/parsers/access.log"
     DATABASE = /home/manuel/Desktop/SquidStats/logs.db
+    REFRESH_INTERVAL = 60
   ```
 4. Run App 🚀:
   ```bash
@@ -103,6 +104,12 @@ This software has been thoroughly tested and is compatible with Squid version 6.
   git push origin feature-name
   ```
 4.Open a pull request.
+
+<!-- CONTACT -->
+## Contact
+Manuel - ([Telegram](https://t.me/king_0f_deathhh)) ([Email](mailto:manuelalberto.gorrin@gmail.com))
+
+Project Link: ([SquidStats](https://github.com/kaelthasmanu/cucuota))
 
 ## 📄 License
 

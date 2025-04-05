@@ -32,7 +32,17 @@ class Log(Base):
     user = relationship("User", back_populates="logs")
 
 def get_engine():
-    return create_engine(f"sqlite:///{os.getenv("DATABASE", "logs.db")}", echo=False)
+    db_path = os.getenv("DATABASE", "logs.db")
+    db_dir = os.path.dirname(os.path.abspath(db_path))
+
+    try:
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir)
+    except OSError as e:
+        print("Error creando directorio para la base de datos", e)
+        return
+
+    return create_engine(f"sqlite:///{db_path}", echo=False)
 
 def get_session():
     engine = get_engine()
