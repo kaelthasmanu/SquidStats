@@ -2,7 +2,7 @@ import socket
 import os
 
 SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
-SQUID_PORT = int(os.getenv("SQUID_PORT", "3128"))
+SQUID_PORT = int(os.getenv("SQUID_PORT", 3128))
 
 def fetch_squid_data():
     try:

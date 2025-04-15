@@ -9,13 +9,14 @@ import logging
 from parsers.log import process_logs
 from flask_apscheduler import APScheduler
 from services.fetch_data_logs import get_users_with_logs_optimized
+from dotenv import load_dotenv
 
 
 # set configuration values
 class Config:
     SCHEDULER_API_ENABLED = True
 
-# Load environment variables
+load_dotenv()
 
 # Initialize Flask application
 app = Flask(__name__, static_folder='./static')
@@ -70,7 +71,6 @@ def cache_stats():
         logger.error(f"Error fetching cache stats: {str(e)}")
         return render_template('error.html', message="Error retrieving cache statistics"), 500
 
-
 @app.route('/logs')
 def logs():
     try:
@@ -85,7 +85,7 @@ def logs():
 @scheduler.task('interval', id='do_job_1', seconds=120, misfire_grace_time=900)
 def init_scheduler():
     """Initialize and start the background scheduler for log processing"""
-    log_file = os.getenv("SQUID_LOG", "access.log")
+    log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
     logger.info(f"Configurando scheduler para el archivo de log: {log_file}")
 
     if not os.path.exists(log_file):
