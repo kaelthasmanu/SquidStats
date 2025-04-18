@@ -6,6 +6,25 @@
 {% block content %}
     <h1><i class="fas fa-server"></i> Estadísticas de Squid</h1>
 
-    {% include 'components/connections.html' %}
+    <div id="datos-conexiones">
+        {% include 'partials/conexiones.html' %}
+    </div>
+    <script>
+        async function refrescarConexiones() {
+            try {
+                const response = await fetch('/actualizar-conexiones');
+                if (!response.ok) throw new Error("Respuesta no OK");
+                const html = await response.text();
+                document.getElementById('datos-conexiones').innerHTML = html;
+            } catch (error) {
+                console.error("Error al actualizar conexiones:", error);
+            }
+        }
 
+        // Llama a la función cada 15 segundos
+        setInterval(refrescarConexiones, 15000);
+
+        // También actualiza al cargar la página
+        window.onload = refrescarConexiones;
+    </script>
 {% endblock %}

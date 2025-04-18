@@ -1,5 +1,4 @@
 from flask import Flask, render_template
-
 from database.database import get_session
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
@@ -25,15 +24,12 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-refresh_interval = int(os.getenv("REFRESH_INTERVAL", 60))
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
 
 @app.route('/')
 def index():
@@ -49,12 +45,32 @@ def index():
 
         return render_template(
             'index.html',
-            grouped_connections=grouped_connections,
-            refresh_interval=refresh_interval)
+            grouped_connections=grouped_connections)
 
     except Exception as e:
         logger.error(f"Unexpected error in index route: {str(e)}")
         return render_template('error.html', message="An unexpected error occurred"), 500
+
+@app.route('/actualizar-conexiones')
+def actualizar_conexiones():
+    """Retorna solo el HTML parcial de las conexiones por usuario"""
+    try:
+        raw_data = fetch_squid_data()
+        if 'Error' in raw_data:
+            logger.error(f"Failed to fetch Squid data: {raw_data}")
+            return "Error", 500
+
+        connections = parse_raw_data(raw_data)
+        grouped_connections = group_by_user(connections)
+
+        # Renderiza solo el fragmento parcial que actualizarás con JS
+        return render_template('partials/conexiones.html', grouped_connections=grouped_connections)
+
+    except Exception as e:
+        logger.error(f"Unexpected error in /actualizar-conexiones route: {str(e)}")
+        return "Error interno", 500
+
+
 
 
 @app.route('/stats')
