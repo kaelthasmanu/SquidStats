@@ -52,9 +52,9 @@ Warning: 🚨 The first execution may cause high CPU usage.
 1. Clone the repository:
    ```bash
    git clone https://github.com/kaelthasmanu/SquidStats.git
-   cd squid-log-parser-dashboard
+   cd SquidStats
    ```
-2. Install requeriments python:
+2. Install requeriments python with pip or pip3:
   ```bash
     pip install -r requirements.txt
   ```
@@ -64,10 +64,10 @@ Warning: 🚨 The first execution may cause high CPU usage.
     SQUID_PORT=3128
     FLASK_DEBUG = "True"
     SQUID_LOG = "/home/manuel/Desktop/SquidStats/parsers/access.log"
-    DATABASE = /home/manuel/Desktop/SquidStats/logs.db
+    DATABASE = "/home/manuel/Desktop/SquidStats/logs.db"
     REFRESH_INTERVAL = 60
   ```
-4. Run App 🚀:
+4. Run App with python or python3  🚀:
   ```bash
     python app.py
   ```
