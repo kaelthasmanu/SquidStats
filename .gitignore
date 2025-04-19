@@ -4,6 +4,7 @@ instance/*
 .webassets-cache
 .env
 *.db
+*.db-journal
 
 ### Python template
 # Byte-compiled / optimized / DLL files

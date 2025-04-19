@@ -53,7 +53,6 @@ def index():
 
 @app.route('/actualizar-conexiones')
 def actualizar_conexiones():
-    """Retorna solo el HTML parcial de las conexiones por usuario"""
     try:
         raw_data = fetch_squid_data()
         if 'Error' in raw_data:
@@ -62,8 +61,6 @@ def actualizar_conexiones():
 
         connections = parse_raw_data(raw_data)
         grouped_connections = group_by_user(connections)
-
-        # Renderiza solo el fragmento parcial que actualizarás con JS
         return render_template('partials/conexiones.html', grouped_connections=grouped_connections)
 
     except Exception as e:
@@ -80,8 +77,7 @@ def cache_stats():
         data = fetch_squid_cache_stats()
         stats_data = vars(data) if hasattr(data, '__dict__') else data
         logger.info("Successfully fetched cache statistics")
-        return render_template('cacheView.html', cache_stats=stats_data,
-                               refresh_interval=refresh_interval)
+        return render_template('cacheView.html', cache_stats=stats_data)
 
     except Exception as e:
         logger.error(f"Error fetching cache stats: {str(e)}")
@@ -98,7 +94,7 @@ def logs():
         print(f"Error en ruta /logs: {e}")
         return render_template('error.html', message="Error retrieving logs"), 500
 
-@scheduler.task('interval', id='do_job_1', seconds=120, misfire_grace_time=900)
+@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
 def init_scheduler():
     """Initialize and start the background scheduler for log processing"""
     log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
