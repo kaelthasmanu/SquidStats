@@ -84,6 +84,23 @@ function installDependencies() {
 
 }
 
+function createEnvFile() {
+    local env_file="/opt/squidstats/.env"
+
+    echo "Creando archivo de configuración .env..."
+
+    cat > "$env_file" << EOF
+SQUID_HOST = "127.0.0.1"
+SQUID_PORT = 3128
+FLASK_DEBUG = "True"
+SQUID_LOG = "/var/log/squid/access.log"
+DATABASE = "/opt/squidstats/logs.db"
+REFRESH_INTERVAL = 60
+EOF
+
+    ok "Archivo .env creado correctamente en $env_file"
+}
+
 function executeApp() {
     ok "Proceso completado... Visite la URL http://IP:5000 para ver la app \n Para salir presione ctrl+c"
     python3 /opt/squidstats/app.py
@@ -100,6 +117,8 @@ function main() {
     clonRepo
 
     installDependencies
+
+    createEnvFile
 
     executeApp
 }
