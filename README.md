@@ -47,7 +47,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
 - For compatibility with user logs, use this format in /etc/squid/squid.conf:
 ```bash 
   logformat detailed \
-  "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st/%<bs"
+  "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
   
   access_log /var/log/squid/access.log detailed
 ```
