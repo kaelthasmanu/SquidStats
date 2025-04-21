@@ -15,8 +15,53 @@ function checkSudo() {
     fi
 }
 
+function setupVenv() {
+    local venv_dir="/opt/squidstats/venv"
+
+    if [ -d "$venv_dir" ]; then
+        echo "Entorno virtual ya existe en $venv_dir"
+        return 0
+    fi
+
+    echo "Creando entorno virtual Python en $venv_dir"
+    python3 -m venv "$venv_dir"
+
+    if [ $? -ne 0 ]; then
+        error "Error al crear el entorno virtual"
+        return 1
+    fi
+
+    ok "Entorno virtual creado correctamente"
+    return 0
+}
+
+function installDependencies() {
+    local venv_dir="/opt/squidstats/venv"
+
+    if [ ! -d "$venv_dir" ]; then
+        error "El entorno virtual no existe en $venv_dir"
+        return 1
+    fi
+
+    echo "Activando entorno virtual y instalando dependencias..."
+    source "$venv_dir/bin/activate"
+
+    pip install --upgrade pip
+    pip install -r /opt/squidstats/requirements.txt
+
+    if [ $? -ne 0 ]; then
+        error "Error al instalar dependencias"
+        deactivate
+        return 1
+    fi
+
+    ok "Dependencias instaladas correctamente en el entorno virtual"
+    deactivate
+    return 0
+}
+
 function checkPackages() {
-    local paquetes=("git" "python3" "python3-pip")
+    local paquetes=("git" "python3" "python3-pip" "python3-venv")
     local faltantes=()
 
     for pkg in "${paquetes[@]}"; do
@@ -50,14 +95,6 @@ function checkSquidLog() {
         echo "Archivo de log de Squid encontrado: $log_file"
         return 0
     fi
-}
-
-function installDependencies() {
-    cd /opt/squidstats
-
-    echo "Instalando Dependencias..."
-    pip3 install -r requirements.txt --break-system-packages
-
 }
 
 function updateOrCloneRepo() {
@@ -130,9 +167,10 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/squidstats
-ExecStart=/usr/bin/python3 /opt/squidstats/app.py
+ExecStart=/opt/squidstats/venv/bin/python /opt/squidstats/app.py
 Restart=always
 RestartSec=5
+EnvironmentFile=/opt/squidstats/.env
 
 [Install]
 WantedBy=multi-user.target
@@ -158,6 +196,8 @@ function main() {
     checkSquidLog
 
     clonRepo
+
+    setupVenv
 
     installDependencies
 
