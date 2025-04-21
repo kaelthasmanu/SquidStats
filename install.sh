@@ -52,36 +52,53 @@ function checkSquidLog() {
     fi
 }
 
-function clonRepo() {
-    local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local destino="/opt/squidstats"
-
-    echo "Preparando para clonar repositorio $repo_url en $destino..."
-
-    mkdir -p "$(dirname "$destino")"
-
-    if [ -d "$destino" ]; then
-        echo "Eliminando directorio existente $destino..."
-        rm -rf "$destino"
-    fi
-
-    echo "Clonando repositorio..."
-
-    if git clone "$repo_url" "$destino"; then
-        chown -R $USER:$USER "$destino"
-        ok "Repositorio clonado exitosamente en $destino"
-    else
-        mostrar_error "Error al clonar el repositorio"
-        return 1
-    fi
-}
-
 function installDependencies() {
     cd /opt/squidstats
 
     echo "Instalando Dependencias..."
     pip3 install -r requirements.txt --break-system-packages
 
+}
+
+function updateOrCloneRepo() {
+    local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
+    local destino="/opt/squidstats"
+    local env_exists=false
+
+
+    if [ -d "$destino" ]; then
+        echo "El directorio $destino ya existe, intentando actualizar con git pull..."
+        cd "$destino"
+
+        if [ -d ".git" ]; then
+            if [ -f ".env" ]; then
+                env_exists=true
+                echo ".env existente detectado, se preservará"
+            fi
+
+            if git pull; then
+                ok "Repositorio actualizado exitosamente"
+                return 0
+            else
+                error "Error al actualizar el repositorio, se procederá a clonar de nuevo"
+                cd ..
+                rm -rf "$destino"
+            fi
+        else
+            error "El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
+            rm -rf "$destino"
+        fi
+    fi
+
+    echo "Clonando repositorio por primera vez..."
+    if git clone "$repo_url" "$destino"; then
+        chown -R $USER:$USER "$destino"
+        ok "Repositorio clonado exitosamente en $destino"
+        return 0
+    else
+        error "Error al clonar el repositorio"
+        return 1
+    fi
 }
 
 function createEnvFile() {
@@ -101,9 +118,35 @@ EOF
     ok "Archivo .env creado correctamente en $env_file"
 }
 
+function createService() {
+  touch /etc/systemd/system/squidstats.service
+
+   cat > /etc/systemd/system/squidstats.service << EOF
+[Unit]
+Description=SquidStats
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/squidstats
+ExecStart=/usr/bin/python3 /opt/squidstats/app.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable squidstats.service
+systemctl start squidstats.service
+
+}
+
 function executeApp() {
+    createService
     ok "Proceso completado... Visite la URL http://IP:5000 para ver la app \n Para salir presione ctrl+c"
-    python3 /opt/squidstats/app.py
 }
 
 function main() {
