@@ -11,12 +11,10 @@ from database.database import get_session, User, Log
 
 def get_users_with_logs_optimized(db: Session) -> List[Dict[str, Any]]:
     try:
-        # Primero obtener todos los usuarios (excepto el que tiene username "-")
         users = db.query(User).filter(User.username != "-").all()
 
         users_data = []
         for user in users:
-            # Obtener logs para cada usuario
             logs = db.query(Log).filter(Log.user_id == user.id).all()
 
             total_requests = sum(log.request_count for log in logs)

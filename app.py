@@ -9,7 +9,8 @@ from parsers.log import process_logs
 from flask_apscheduler import APScheduler
 from services.fetch_data_logs import get_users_with_logs_optimized
 from dotenv import load_dotenv
-
+from services.get_reports import get_important_metrics
+from utils.colors import color_map
 
 # set configuration values
 class Config:
@@ -67,9 +68,6 @@ def actualizar_conexiones():
         logger.error(f"Unexpected error in /actualizar-conexiones route: {str(e)}")
         return "Error interno", 500
 
-
-
-
 @app.route('/stats')
 def cache_stats():
     """Page showing Squid cache statistics."""
@@ -106,6 +104,43 @@ def init_scheduler():
     else:
         process_logs(log_file)
 
+@app.template_filter('divide')
+def divide_filter(value, divisor):
+    return value / divisor
+
+@app.template_filter('format_bytes')
+def format_bytes_filter(value):
+    value = int(value)
+    if value >= 1024**3:  # GB
+        return f"{(value / (1024**3)):.2f} GB"
+    elif value >= 1024**2:  # MB
+        return f"{(value / (1024**2)):.2f} MB"
+    elif value >= 1024:  # KB
+        return f"{(value / 1024):.2f} KB"
+    return f"{value} bytes"
+
+
+@app.route('/reports')
+def reports():
+    db = get_session()
+    metrics = get_important_metrics(db)
+
+    http_codes = metrics['http_response_distribution']
+    http_codes = sorted(metrics['http_response_distribution'], key=lambda x: x['count'], reverse=True)
+    main_codes = http_codes[:8]
+    other_codes = http_codes[8:]
+
+    if other_codes:
+        other_count = sum(item['count'] for item in other_codes)
+        main_codes.append({'response_code': 'Otros', 'count': other_count})
+
+    metrics['http_response_distribution_chart'] = {
+        'labels': [str(item['response_code']) for item in main_codes],
+        'data': [item['count'] for item in main_codes],
+        'colors': [color_map.get(str(code['response_code']), color_map['Otros']) for code in main_codes]
+    }
+
+    return render_template('reports.html', metrics=metrics)
 
 if __name__ == "__main__":
 

@@ -117,7 +117,6 @@ def process_logs(log_file):
                             session.add(user)
                             session.flush()
 
-                        # Manejo de logs
                         log_entry = session.query(Log).filter_by(
                             user_id=user.id,
                             url=log_data['url']
@@ -135,8 +134,6 @@ def process_logs(log_file):
                                 data_transmitted=log_data['data_transmitted']
                             )
                             session.add(new_log)
-
-                        # Commit por lotes
                         if processed_lines % batch_size == 0:
                             session.commit()
 
