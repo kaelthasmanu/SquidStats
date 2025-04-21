@@ -55,7 +55,23 @@ Warning: 🚨 The first execution may cause high CPU usage.
   
   access_log /var/log/squid/access.log detailed
 ```
-### Installation
+### Installation With Script(Beta Version)
+1. Get Script With curl o wget:
+  ```bash
+   wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+   ``` 
+
+2. Add permission execution:
+  ```bash
+   sudo chmod +x install.sh
+   ```
+
+3. Execute the script:
+  ```bash
+   sudo ./install.sh
+   ```
+
+### Installation Manual
 1. Clone the repository:
    ```bash
    git clone https://github.com/kaelthasmanu/SquidStats.git
