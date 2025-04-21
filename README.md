@@ -29,6 +29,13 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
   - Beautiful visualizations 📊 
   - Advanced filtering & search 🔍 
   - Paginated results 📄
+- **Top Graphs**: 
+  - Top 20 Users Activity
+  - Top 20 Users Data Usage
+  - Total Users
+  - Total Transmitted Data
+  - Total Request 
+  - And More...
 
 ---
 
