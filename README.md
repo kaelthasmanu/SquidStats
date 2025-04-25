@@ -32,6 +32,7 @@ A modern tool for parsing and analyzing Squid logs, providing a sleek and user-f
   - Total Transmitted Data
   - Total Request 
   - And More...
+- **And More** 
 
 ---
 
@@ -78,12 +79,14 @@ Warning: 🚨 The first execution may cause high CPU usage.
     pip install -r requirements.txt
   ```
 3. Create a .env file in the project root and add the following content:
+  Note: for use MARIADB need your own database running
   ```bash
     SQUID_HOST="127.0.0.1"
     SQUID_PORT=3128
     FLASK_DEBUG = "True"
+    DATABASE_TYPE="SQLITE" # You can use "MARIADB" or "SQLITE"
     SQUID_LOG = "/home/manuel/Desktop/SquidStats/parsers/access.log"
-    DATABASE = "/home/manuel/Desktop/SquidStats/logs.db"
+    DATABASE_STRING_CONNECTION = "/home/manuel/Desktop/SquidStats/logs.db" #or mysql+pymysql://user:password@host:port/db
     REFRESH_INTERVAL = 60
   ```
 4. Run App with python or python3  🚀:

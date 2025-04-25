@@ -61,7 +61,7 @@ function installDependencies() {
 }
 
 function checkPackages() {
-    local paquetes=("git" "python3" "python3-pip" "python3-venv")
+    local paquetes=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl")
     local faltantes=()
 
     for pkg in "${paquetes[@]}"; do
@@ -102,7 +102,6 @@ function updateOrCloneRepo() {
     local destino="/opt/squidstats"
     local env_exists=false
 
-
     if [ -d "$destino" ]; then
         echo "El directorio $destino ya existe, intentando actualizar con git pull..."
         cd "$destino"
@@ -138,27 +137,52 @@ function updateOrCloneRepo() {
     fi
 }
 
+function moveDB(){
+  local databaseSQlite="/opt/squidstats/logs.db"
+  if [ -f "$databaseSQlite" ]; then
+    rm -rf /opt/squidstats/logs.db
+  fi
+  return 0
+}
+
 function createEnvFile() {
     local env_file="/opt/squidstats/.env"
 
-    echo "Creando archivo de configuración .env..."
+    if [ -f "$env_file" ]; then
+        echo "El archivo .env ya existe en $env_file."
 
-    cat > "$env_file" << EOF
+        if grep -q "^DATABASE\s*=" "$env_file"; then
+            echo "Actualizando variable DATABASE a DATABASE_STRING_CONNECTION..."
+            sed -i 's/^DATABASE\(\s*=\s*\)\(.*\)/DATABASE_STRING_CONNECTION\1\2/' "$env_file"
+            ok "Variable actualizada correctamente."
+        fi
+        return 0
+    else
+        echo "Creando archivo de configuración .env..."
+        cat > "$env_file" << EOF
 SQUID_HOST = "127.0.0.1"
 SQUID_PORT = 3128
 FLASK_DEBUG = "True"
+DATABASE_TYPE="SQLITE"
 SQUID_LOG = "/var/log/squid/access.log"
-DATABASE = "/opt/squidstats/logs.db"
+DATABASE_STRING_CONNECTION = "/opt/squidstats/"
 REFRESH_INTERVAL = 60
 EOF
-
-    ok "Archivo .env creado correctamente en $env_file"
+        ok "Archivo .env creado correctamente en $env_file"
+        return 0
+    fi
 }
 
 function createService() {
-  touch /etc/systemd/system/squidstats.service
+    local service_file="/etc/systemd/system/squidstats.service"
 
-   cat > /etc/systemd/system/squidstats.service << EOF
+    if [ -f "$service_file" ]; then
+        echo "El servicio ya existe en $service_file, no se realizan cambios."
+        return 0
+    fi
+
+    echo "Creando servicio en $service_file..."
+    cat > "$service_file" << EOF
 [Unit]
 Description=SquidStats
 After=network.target
@@ -176,34 +200,54 @@ EnvironmentFile=/opt/squidstats/.env
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload
-systemctl enable squidstats.service
-systemctl start squidstats.service
-
+    systemctl daemon-reload
+    systemctl enable squidstats.service
+    systemctl start squidstats.service
+    ok "Servicio creado y iniciado correctamente"
 }
 
-function executeApp() {
-    createService
-    ok "Proceso completado... Visite la URL http://IP:5000 para ver la app \n Para salir presione ctrl+c"
+function configureDatabase() {
+    local env_file="/opt/squidstats/.env"
+
+    echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
+    echo "Seleccione el tipo de base de datos:"
+    echo "1) SQLite (por defecto)"
+    echo "2) MariaDB"
+    read -p "Opción [1/2]: " choice
+
+    case $choice in
+        2)
+            read -p "Ingrese connection string (mysql+pymysql://user:password@host:port/db): " conn_str
+            if [[ "$conn_str" != mysql+pymysql://* ]]; then
+                error "Formato inválido. Debe comenzar con: mysql+pymysql://"
+                return 1
+            fi
+            escaped_str=$(sed 's/[\/&]/\\&/g' <<< "$conn_str")
+            sed -i "s/^DATABASE_STRING_CONNECTION\s*=.*/DATABASE_STRING_CONNECTION = \"${escaped_str}\"/" "$env_file"
+            sed -i "s/^DATABASE_TYPE\s*=.*/DATABASE_TYPE = "MARIADB" "$env_file"
+            ok "Configuración MariaDB actualizada!"
+            ;;
+        *)
+            sqlite_path="/opt/squidstats/"
+            sed -i "s/^DATABASE_STRING_CONNECTION\s*=.*/DATABASE_STRING_CONNECTION = \"${sqlite_path}\"/" "$env_file"
+            sed -i "s/^DATABASE_TYPE\s*=.*/DATABASE_TYPE = "SQLITE" "$env_file"
+            ok "Configuración SQLite establecida!"
+            ;;
+    esac
 }
 
 function main() {
-
     checkSudo
-
     checkPackages
-
     checkSquidLog
-
-    clonRepo
-
+    updateOrCloneRepo
     setupVenv
-
     installDependencies
-
     createEnvFile
+    configureDatabase
+    createService
 
-    executeApp
+    ok "Instalación completada! Acceda en: \033[1;37mhttp://<TU_IP>:5000\033[0m"
 }
 
 main

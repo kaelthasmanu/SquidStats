@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, flash, redirect
 from database.database import get_session
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
@@ -11,6 +11,7 @@ from services.fetch_data_logs import get_users_with_logs_optimized
 from dotenv import load_dotenv
 from services.get_reports import get_important_metrics
 from utils.colors import color_map
+from utils.updateSquid import update_squid
 
 # set configuration values
 class Config:
@@ -22,6 +23,7 @@ load_dotenv()
 app = Flask(__name__, static_folder='./static')
 app.config.from_object(Config())
 scheduler = APScheduler()
+app.secret_key = os.urandom(24).hex()
 scheduler.init_app(app)
 scheduler.start()
 
@@ -141,6 +143,15 @@ def reports():
     }
 
     return render_template('reports.html', metrics=metrics)
+
+@app.route('/install', methods=['POST'])
+def install_package():
+    install = update_squid()
+    if install == False:
+        return redirect('/')
+    else:
+        return redirect('/')
+
 
 if __name__ == "__main__":
 
