@@ -139,9 +139,24 @@ function updateOrCloneRepo() {
 
 function moveDB(){
   local databaseSQlite="/opt/squidstats/logs.db"
-  if [ -f "$databaseSQlite" ]; then
-    rm -rf /opt/squidstats/logs.db
+  local env_file="/opt/squidstats/.env"
+  local current_version=0
+
+  if [ -f "$env_file" ]; then
+    version_line=$(grep -E '^VERSION\s*=' "$env_file")
+    if [ $? -eq 0 ]; then
+      current_version=$(echo "$version_line" | cut -d= -f2 | tr -d ' "\r' | grep -Eo '^[0-9]+' || echo 0)
+    fi
   fi
+
+  if [ -f "$databaseSQlite" ] && [ "$current_version" -lt 2 ]; then
+    echo "Eliminando base de datos antigua por actualización..."
+    rm -rf "$databaseSQlite"
+    ok "Base de datos antigua eliminada"
+  else
+    echo "Base de datos no requiere actualización"
+  fi
+
   return 0
 }
 
@@ -160,6 +175,7 @@ function createEnvFile() {
     else
         echo "Creando archivo de configuración .env..."
         cat > "$env_file" << EOF
+VERSION=2
 SQUID_HOST = "127.0.0.1"
 SQUID_PORT = 3128
 FLASK_DEBUG = "True"
@@ -244,6 +260,7 @@ function main() {
     setupVenv
     installDependencies
     createEnvFile
+    moveDB
     configureDatabase
     createService
 

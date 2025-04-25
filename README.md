@@ -86,7 +86,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
     FLASK_DEBUG = "True"
     DATABASE_TYPE="SQLITE" # You can use "MARIADB" or "SQLITE"
     SQUID_LOG = "/home/manuel/Desktop/SquidStats/parsers/access.log"
-    DATABASE_STRING_CONNECTION = "/home/manuel/Desktop/SquidStats/logs.db" #or mysql+pymysql://user:password@host:port/db
+    DATABASE_STRING_CONNECTION = "/home/manuel/Desktop/SquidStats/" #or mysql+pymysql://user:password@host:port/db
     REFRESH_INTERVAL = 60
   ```
 4. Run App with python or python3  🚀:
