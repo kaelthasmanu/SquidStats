@@ -228,7 +228,7 @@ function configureDatabase() {
     echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
     echo "Seleccione el tipo de base de datos:"
     echo "1) SQLite (por defecto)"
-    echo "2) MariaDB"
+    echo "2) MariaDB(necesitas tener mariadb ejecutándose)"
     read -p "Opción [1/2]: " choice
 
     case $choice in
