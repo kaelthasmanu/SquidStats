@@ -78,8 +78,8 @@ Warning: 🚨 The first execution may cause high CPU usage.
   ```bash
     pip install -r requirements.txt
   ```
-3. Create a .env file in the project root and add the following content:
-  \n Note: for use MARIADB need your own database running
+3. Create a .env file in the project root and add the following content:\
+  Note: for use MARIADB need your own database running
   ```bash
     SQUID_HOST="127.0.0.1"
     SQUID_PORT=3128
