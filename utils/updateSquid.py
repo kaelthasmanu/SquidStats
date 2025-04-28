@@ -27,7 +27,7 @@ def update_squid():
             print('Error procesando versión', 'error')
             return False
 
-        # Construir nombre del paquete
+        # Create name package
         package_name = f"squid_{latest_version}-{os_id}-{codename}_amd64.deb"
         download_url = f"https://github.com/cuza/squid/releases/download/{latest_version}/{package_name}"
 
@@ -44,11 +44,15 @@ def update_squid():
         if download.returncode != 0:
             print('Error descargando el paquete', 'error')
             return False
+        else:
+            subprocess.run(['apt', 'update'])
 
-        install = subprocess.run(['dpkg', '-i', f'/tmp/{package_name}'])
+        install = subprocess.run(['dpkg', '-i', '--force-overwrite', f'/tmp/{package_name}'])
         if install.returncode != 0:
             print('Error instalando el paquete', 'error')
             return False
+        else:
+            subprocess.run(['apt', 'install', '-f',])
 
         subprocess.run(['rm', '-f', f'/tmp/{package_name}'])
         squid_check = subprocess.run(['squid', '-v'], capture_output=True, text=True)
