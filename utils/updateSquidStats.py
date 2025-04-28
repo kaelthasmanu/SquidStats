@@ -5,7 +5,7 @@ import platform
 def updateSquidStats():
     try:
         script_install = subprocess.run(
-            ['wget', '-O' , '/tmp/install.sh', 'https://github.com/kaelthasmanu/SquidStats/blob/main/install.sh'],
+            ['wget', '-O' , '/tmp/install.sh', 'https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh'],
             capture_output=True, text=True
         )
 
