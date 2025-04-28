@@ -50,9 +50,7 @@ def update_squid():
         install = subprocess.run(['dpkg', '-i', '--force-overwrite', f'/tmp/{package_name}'])
         if install.returncode != 0:
             print('Error instalando el paquete', 'error')
-            return False
-        else:
-            subprocess.run(['apt', 'install', '-f',])
+            subprocess.run(['apt', 'install', '-f', '-y'])
 
         subprocess.run(['rm', '-f', f'/tmp/{package_name}'])
         squid_check = subprocess.run(['squid', '-v'], capture_output=True, text=True)

@@ -1,270 +1,270 @@
-#! /bin/bash
+  #! /bin/bash
 
-function error() {
-    echo -e "\n\033[1;41m$1\033[0m\n"
-}
+  function error() {
+      echo -e "\n\033[1;41m$1\033[0m\n"
+  }
 
-function ok() {
-    echo -e "\n\033[1;42m$1\033[0m\n"
-}
+  function ok() {
+      echo -e "\n\033[1;42m$1\033[0m\n"
+  }
 
-function checkSudo() {
-    if [ "$EUID" -ne 0 ]; then
-        error "ERROR: Este script debe ejecutarse con privilegios de superusuario.\nPor favor, ejecútelo con: sudo $0"
-        exit 1
-    fi
-}
+  function checkSudo() {
+      if [ "$EUID" -ne 0 ]; then
+          error "ERROR: Este script debe ejecutarse con privilegios de superusuario.\nPor favor, ejecútelo con: sudo $0"
+          exit 1
+      fi
+  }
 
-function setupVenv() {
-    local venv_dir="/opt/squidstats/venv"
+  function setupVenv() {
+      local venv_dir="/opt/squidstats/venv"
 
-    if [ -d "$venv_dir" ]; then
-        echo "Entorno virtual ya existe en $venv_dir"
-        return 0
-    fi
+      if [ -d "$venv_dir" ]; then
+          echo "Entorno virtual ya existe en $venv_dir"
+          return 0
+      fi
 
-    echo "Creando entorno virtual Python en $venv_dir"
-    python3 -m venv "$venv_dir"
+      echo "Creando entorno virtual Python en $venv_dir"
+      python3 -m venv "$venv_dir"
 
-    if [ $? -ne 0 ]; then
-        error "Error al crear el entorno virtual"
-        return 1
-    fi
+      if [ $? -ne 0 ]; then
+          error "Error al crear el entorno virtual"
+          return 1
+      fi
 
-    ok "Entorno virtual creado correctamente"
-    return 0
-}
+      ok "Entorno virtual creado correctamente"
+      return 0
+  }
 
-function installDependencies() {
-    local venv_dir="/opt/squidstats/venv"
+  function installDependencies() {
+      local venv_dir="/opt/squidstats/venv"
 
-    if [ ! -d "$venv_dir" ]; then
-        error "El entorno virtual no existe en $venv_dir"
-        return 1
-    fi
+      if [ ! -d "$venv_dir" ]; then
+          error "El entorno virtual no existe en $venv_dir"
+          return 1
+      fi
 
-    echo "Activando entorno virtual y instalando dependencias..."
-    source "$venv_dir/bin/activate"
+      echo "Activando entorno virtual y instalando dependencias..."
+      source "$venv_dir/bin/activate"
 
-    pip install --upgrade pip
-    pip install -r /opt/squidstats/requirements.txt
+      pip install --upgrade pip
+      pip install -r /opt/squidstats/requirements.txt
 
-    if [ $? -ne 0 ]; then
-        error "Error al instalar dependencias"
-        deactivate
-        return 1
-    fi
+      if [ $? -ne 0 ]; then
+          error "Error al instalar dependencias"
+          deactivate
+          return 1
+      fi
 
-    ok "Dependencias instaladas correctamente en el entorno virtual"
-    deactivate
-    return 0
-}
+      ok "Dependencias instaladas correctamente en el entorno virtual"
+      deactivate
+      return 0
+  }
 
-function checkPackages() {
-    local paquetes=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl")
-    local faltantes=()
+  function checkPackages() {
+      local paquetes=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl")
+      local faltantes=()
 
-    for pkg in "${paquetes[@]}"; do
-        if ! dpkg -l | grep -q "^ii  $pkg "; then
-            faltantes+=("$pkg")
-        fi
-    done
+      for pkg in "${paquetes[@]}"; do
+          if ! dpkg -l | grep -q "^ii  $pkg "; then
+              faltantes+=("$pkg")
+          fi
+      done
 
-    if [ ${#faltantes[@]} -ne 0 ]; then
-        echo "Instalando paquetes faltantes: ${faltantes[*]}"
-        apt-get update
+      if [ ${#faltantes[@]} -ne 0 ]; then
+          echo "Instalando paquetes faltantes: ${faltantes[*]}"
+          apt-get update
 
-        if ! apt-get install -y "${faltantes[@]}"; then
-            error "ERROR: Compruebe la versión de su OS se recomienda Ubuntu20.04+ o Debian12+"
-            exit 1
-        fi
+          if ! apt-get install -y "${faltantes[@]}"; then
+              error "ERROR: Compruebe la versión de su OS se recomienda Ubuntu20.04+ o Debian12+"
+              exit 1
+          fi
 
-        ok "Paquetes instalados correctamente"
-    else
-        echo "Todos los paquetes necesarios ya están instalados"
-    fi
-}
+          ok "Paquetes instalados correctamente"
+      else
+          echo "Todos los paquetes necesarios ya están instalados"
+      fi
+  }
 
-function checkSquidLog() {
-    local log_file="/var/log/squid/access.log"
+  function checkSquidLog() {
+      local log_file="/var/log/squid/access.log"
 
-    if [ ! -f "$log_file" ]; then
-        error "¡ADVERTENCIA!: ¿Tiene Squid realmente instalado? No hemos encontrado el log en la ruta por defecto"
-        return 1
-    else
-        echo "Archivo de log de Squid encontrado: $log_file"
-        return 0
-    fi
-}
+      if [ ! -f "$log_file" ]; then
+          error "¡ADVERTENCIA!: ¿Tiene Squid realmente instalado? No hemos encontrado el log en la ruta por defecto"
+          return 1
+      else
+          echo "Archivo de log de Squid encontrado: $log_file"
+          return 0
+      fi
+  }
 
-function updateOrCloneRepo() {
-    local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local destino="/opt/squidstats"
-    local env_exists=false
+  function updateOrCloneRepo() {
+      local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
+      local destino="/opt/squidstats"
+      local env_exists=false
 
-    if [ -d "$destino" ]; then
-        echo "El directorio $destino ya existe, intentando actualizar con git pull..."
-        cd "$destino"
+      if [ -d "$destino" ]; then
+          echo "El directorio $destino ya existe, intentando actualizar con git pull..."
+          cd "$destino"
 
-        if [ -d ".git" ]; then
-            if [ -f ".env" ]; then
-                env_exists=true
-                echo ".env existente detectado, se preservará"
-            fi
+          if [ -d ".git" ]; then
+              if [ -f ".env" ]; then
+                  env_exists=true
+                  echo ".env existente detectado, se preservará"
+              fi
 
-            if git pull; then
-                ok "Repositorio actualizado exitosamente"
-                return 0
-            else
-                error "Error al actualizar el repositorio, se procederá a clonar de nuevo"
-                cd ..
-                rm -rf "$destino"
-            fi
-        else
-            error "El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
-            rm -rf "$destino"
-        fi
-    fi
+              if git pull; then
+                  ok "Repositorio actualizado exitosamente"
+                  return 0
+              else
+                  error "Error al actualizar el repositorio, se procederá a clonar de nuevo"
+                  cd ..
+                  rm -rf "$destino"
+              fi
+          else
+              error "El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
+              rm -rf "$destino"
+          fi
+      fi
 
-    echo "Clonando repositorio por primera vez..."
-    if git clone "$repo_url" "$destino"; then
-        chown -R $USER:$USER "$destino"
-        ok "Repositorio clonado exitosamente en $destino"
-        return 0
-    else
-        error "Error al clonar el repositorio"
-        return 1
-    fi
-}
+      echo "Clonando repositorio por primera vez..."
+      if git clone "$repo_url" "$destino"; then
+          chown -R $USER:$USER "$destino"
+          ok "Repositorio clonado exitosamente en $destino"
+          return 0
+      else
+          error "Error al clonar el repositorio"
+          return 1
+      fi
+  }
 
-function moveDB(){
-  local databaseSQlite="/opt/squidstats/logs.db"
-  local env_file="/opt/squidstats/.env"
-  local current_version=0
-
-  if [ -f "$env_file" ]; then
-    version_line=$(grep -E '^VERSION\s*=' "$env_file")
-    if [ $? -eq 0 ]; then
-      current_version=$(echo "$version_line" | cut -d= -f2 | tr -d ' "\r' | grep -Eo '^[0-9]+' || echo 0)
-    fi
-  fi
-
-  if [ -f "$databaseSQlite" ] && [ "$current_version" -lt 2 ]; then
-    echo "Eliminando base de datos antigua por actualización..."
-    rm -rf "$databaseSQlite"
-    ok "Base de datos antigua eliminada"
-  else
-    echo "Base de datos no requiere actualización"
-  fi
-
-  return 0
-}
-
-function createEnvFile() {
+  function moveDB(){
+    local databaseSQlite="/opt/squidstats/logs.db"
     local env_file="/opt/squidstats/.env"
+    local current_version=0
 
     if [ -f "$env_file" ]; then
-        echo "El archivo .env ya existe en $env_file."
+      version_line=$(grep -E '^VERSION\s*=' "$env_file")
+      if [ $? -eq 0 ]; then
+        current_version=$(echo "$version_line" | cut -d= -f2 | tr -d ' "\r' | grep -Eo '^[0-9]+' || echo 0)
+      fi
+    fi
 
-        if grep -q "^DATABASE\s*=" "$env_file"; then
-            echo "Actualizando variable DATABASE a DATABASE_STRING_CONNECTION..."
-            sed -i 's/^DATABASE\(\s*=\s*\)\(.*\)/DATABASE_STRING_CONNECTION\1\2/' "$env_file"
-            ok "Variable actualizada correctamente."
-        fi
-        return 0
+    if [ -f "$databaseSQlite" ] && [ "$current_version" -lt 2 ]; then
+      echo "Eliminando base de datos antigua por actualización..."
+      rm -rf "$databaseSQlite"
+      ok "Base de datos antigua eliminada"
     else
-        echo "Creando archivo de configuración .env..."
-        cat > "$env_file" << EOF
-VERSION=2
-SQUID_HOST = "127.0.0.1"
-SQUID_PORT = 3128
-FLASK_DEBUG = "True"
-DATABASE_TYPE="SQLITE"
-SQUID_LOG = "/var/log/squid/access.log"
-DATABASE_STRING_CONNECTION = "/opt/squidstats/"
-REFRESH_INTERVAL = 60
-EOF
-        ok "Archivo .env creado correctamente en $env_file"
-        return 0
-    fi
-}
-
-function createService() {
-    local service_file="/etc/systemd/system/squidstats.service"
-
-    if [ -f "$service_file" ]; then
-        echo "El servicio ya existe en $service_file, no se realizan cambios."
-        return 0
+      echo "Base de datos no requiere actualización"
     fi
 
-    echo "Creando servicio en $service_file..."
-    cat > "$service_file" << EOF
-[Unit]
-Description=SquidStats
-After=network.target
+    return 0
+  }
 
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/squidstats
-ExecStart=/opt/squidstats/venv/bin/python /opt/squidstats/app.py
-Restart=always
-RestartSec=5
-EnvironmentFile=/opt/squidstats/.env
+  function createEnvFile() {
+      local env_file="/opt/squidstats/.env"
 
-[Install]
-WantedBy=multi-user.target
-EOF
+      if [ -f "$env_file" ]; then
+          echo "El archivo .env ya existe en $env_file."
 
-    systemctl daemon-reload
-    systemctl enable squidstats.service
-    systemctl start squidstats.service
-    ok "Servicio creado y iniciado correctamente"
-}
+          if grep -q "^DATABASE\s*=" "$env_file"; then
+              echo "Actualizando variable DATABASE a DATABASE_STRING_CONNECTION..."
+              sed -i 's/^DATABASE\(\s*=\s*\)\(.*\)/DATABASE_STRING_CONNECTION\1\2/' "$env_file"
+              ok "Variable actualizada correctamente."
+          fi
+          return 0
+      else
+          echo "Creando archivo de configuración .env..."
+          cat > "$env_file" << EOF
+  VERSION=2
+  SQUID_HOST = "127.0.0.1"
+  SQUID_PORT = 3128
+  FLASK_DEBUG = "True"
+  DATABASE_TYPE="SQLITE"
+  SQUID_LOG = "/var/log/squid/access.log"
+  DATABASE_STRING_CONNECTION = "/opt/squidstats/"
+  REFRESH_INTERVAL = 60
+  EOF
+          ok "Archivo .env creado correctamente en $env_file"
+          return 0
+      fi
+  }
 
-function configureDatabase() {
-    local env_file="/opt/squidstats/.env"
+  function createService() {
+      local service_file="/etc/systemd/system/squidstats.service"
 
-    echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
-    echo "Seleccione el tipo de base de datos:"
-    echo "1) SQLite (por defecto)"
-    echo "2) MariaDB(necesitas tener mariadb ejecutándose)"
-    read -p "Opción [1/2]: " choice
+      if [ -f "$service_file" ]; then
+          echo "El servicio ya existe en $service_file, no se realizan cambios."
+          return 0
+      fi
 
-    case $choice in
-        2)
-            read -p "Ingrese connection string (mysql+pymysql://user:password@host:port/db): " conn_str
-            if [[ "$conn_str" != mysql+pymysql://* ]]; then
-                error "Formato inválido. Debe comenzar con: mysql+pymysql://"
-                return 1
-            fi
-            escaped_str=$(sed 's/[\/&]/\\&/g' <<< "$conn_str")
-            sed -i "s/^DATABASE_STRING_CONNECTION\s*=.*/DATABASE_STRING_CONNECTION = \"${escaped_str}\"/" "$env_file"
-            sed -i "s/^DATABASE_TYPE\s*=.*/DATABASE_TYPE = "MARIADB" "$env_file"
-            ok "Configuración MariaDB actualizada!"
-            ;;
-        *)
-            sqlite_path="/opt/squidstats/"
-            sed -i "s/^DATABASE_STRING_CONNECTION\s*=.*/DATABASE_STRING_CONNECTION = \"${sqlite_path}\"/" "$env_file"
-            sed -i "s/^DATABASE_TYPE\s*=.*/DATABASE_TYPE = "SQLITE" "$env_file"
-            ok "Configuración SQLite establecida!"
-            ;;
-    esac
-}
+      echo "Creando servicio en $service_file..."
+      cat > "$service_file" << EOF
+  [Unit]
+  Description=SquidStats
+  After=network.target
 
-function main() {
-    checkSudo
-    checkPackages
-    checkSquidLog
-    updateOrCloneRepo
-    setupVenv
-    installDependencies
-    createEnvFile
-    moveDB
-    configureDatabase
-    createService
+  [Service]
+  Type=simple
+  User=root
+  WorkingDirectory=/opt/squidstats
+  ExecStart=/opt/squidstats/venv/bin/python /opt/squidstats/app.py
+  Restart=always
+  RestartSec=5
+  EnvironmentFile=/opt/squidstats/.env
 
-    ok "Instalación completada! Acceda en: \033[1;37mhttp://<TU_IP>:5000\033[0m"
-}
+  [Install]
+  WantedBy=multi-user.target
+  EOF
 
-main
+      systemctl daemon-reload
+      systemctl enable squidstats.service
+      systemctl start squidstats.service
+      ok "Servicio creado y iniciado correctamente"
+  }
+
+  function configureDatabase() {
+      local env_file="/opt/squidstats/.env"
+
+      echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
+      echo "Seleccione el tipo de base de datos:"
+      echo "1) SQLite (por defecto)"
+      echo "2) MariaDB(necesitas tener mariadb ejecutándose)"
+      read -p "Opción [1/2]: " choice
+
+      case $choice in
+          2)
+              read -p "Ingrese connection string (mysql+pymysql://user:password@host:port/db): " conn_str
+              if [[ "$conn_str" != mysql+pymysql://* ]]; then
+                  error "Formato inválido. Debe comenzar con: mysql+pymysql://"
+                  return 1
+              fi
+              escaped_str=$(sed 's/[\/&]/\\&/g' <<< "$conn_str")
+              sed -i "s/^DATABASE_STRING_CONNECTION\s*=.*/DATABASE_STRING_CONNECTION = \"${escaped_str}\"/" "$env_file"
+              sed -i "s/^DATABASE_TYPE\s*=.*/DATABASE_TYPE = "MARIADB" "$env_file"
+              ok "Configuración MariaDB actualizada!"
+              ;;
+          *)
+              sqlite_path="/opt/squidstats/"
+              sed -i "s/^DATABASE_STRING_CONNECTION\s*=.*/DATABASE_STRING_CONNECTION = \"${sqlite_path}\"/" "$env_file"
+              sed -i "s/^DATABASE_TYPE\s*=.*/DATABASE_TYPE = "SQLITE" "$env_file"
+              ok "Configuración SQLite establecida!"
+              ;;
+      esac
+  }
+
+  function main() {
+      checkSudo
+      checkPackages
+      checkSquidLog
+      updateOrCloneRepo
+      setupVenv
+      installDependencies
+      createEnvFile
+      moveDB
+      configureDatabase
+      createService
+
+      ok "Instalación completada! Acceda en: \033[1;37mhttp://<TU_IP>:5000\033[0m"
+  }
+
+  main
