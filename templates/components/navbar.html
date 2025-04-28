@@ -61,27 +61,16 @@
                     <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
                         <div class="flex items-center mb-4">
                             <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mr-2"></i>
-                            <!-- <h3 class="text-lg font-semibold">Confirmar Actualización Web</h3> -->
-                            <h3 class="text-lg font-semibold">Implementacion para la proxima version</h3>
+                            <h3 class="text-lg font-semibold">Confirmar Actualización Web</h3>
                         </div>
                         <p class="text-gray-600 mb-4">
-                            <!-- ¿Estás seguro de que deseas actualizar el servicio Web? -->
-                                    Implementacion en la proxima version
-                        <!--
+                            ¿Estás seguro de que deseas actualizar el servicio Web?
                             <ul class="list-disc list-inside text-gray-600 text-sm mb-4">
                                 <li>!!!Importante!!</li>
                                 <li>Guardar su configuración en caso de incompatibilidades</li>
                             </ul>
                         </p>
-                        -->
-                        <form method="POST" action="/install" class="flex justify-end space-x-3">
-                            <button type="button" @click="showWebModal = false" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                                    Si
-                                </button>
-                        </form>
-
-                        <!--
-                        <form method="POST" action="/install" class="flex justify-end space-x-3">
+                        <form method="POST" action="/update" class="flex justify-end space-x-3">
                             <button type="button" @click="showWebModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-800">
                                 Cancelar
                             </button>
@@ -89,7 +78,6 @@
                                 Confirmar
                             </button>
                         </form>
-                        -->
                     </div>
                 </div>
             </div>

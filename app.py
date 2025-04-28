@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from services.get_reports import get_important_metrics
 from utils.colors import color_map
 from utils.updateSquid import update_squid
+from utils.updateSquidStats import updateSquidStats
 
 # set configuration values
 class Config:
@@ -147,6 +148,14 @@ def reports():
 @app.route('/install', methods=['POST'])
 def install_package():
     install = update_squid()
+    if install == False:
+        return redirect('/')
+    else:
+        return redirect('/')
+
+@app.route('/update', methods=['POST'])
+def update_web():
+    install = updateSquidStats()
     if install == False:
         return redirect('/')
     else:
