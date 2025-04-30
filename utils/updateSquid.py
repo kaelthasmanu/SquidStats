@@ -52,8 +52,9 @@ def update_squid():
         if install.returncode != 0:
             print('Error instalando el paquete', 'error')
             subprocess.run(['apt', 'install', '-f', '-y'])
-            subprocess.run(['cp ', f'{os.getcwd()}/./utils/squid', '/etc/init.d/'])
-            subprocess.run(['systemctl ','daemon-reload'])
+
+        subprocess.run(['cp ', f'{os.getcwd()}/./utils/squid', '/etc/init.d/'])
+        subprocess.run(['systemctl ', 'daemon-reload'])
 
         subprocess.run(['rm', '-f', f'/tmp/{package_name}'])
         squid_check = subprocess.run(['squid', '-v'], capture_output=True, text=True)
