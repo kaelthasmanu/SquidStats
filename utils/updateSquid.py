@@ -54,6 +54,7 @@ def update_squid():
             subprocess.run(['apt', 'install', '-f', '-y'])
 
         subprocess.run(['cp', f'{os.getcwd()}/./utils/squid', '/etc/init.d/'])
+        subprocess.run(['chmod', '+x', '/etc/init.d/squid'])
         subprocess.run(['systemctl', 'daemon-reload'])
 
         subprocess.run(['rm', '-f', f'/tmp/{package_name}'])
