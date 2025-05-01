@@ -254,17 +254,38 @@ function configureDatabase() {
 
 function main() {
     checkSudo
-    checkPackages
-    checkSquidLog
-    updateOrCloneRepo
-    setupVenv
-    installDependencies
-    createEnvFile
-    moveDB
-    configureDatabase
-    createService
 
-    ok "Instalación completada! Acceda en: \033[1;37mhttp://<TU_IP>:5000\033[0m"
+     if [ "$1" = "--update" ]; then
+      echo "Actualizando Servicio..."
+      updateOrCloneRepo
+      ystemctl restart squidstats.service
+
+      ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
+    else
+      echo "Actualizando servicio..."
+      checkPackages
+      checkSquidLog
+      setupVenv
+      installDependencies
+      createEnvFile
+      moveDB
+      configureDatabase
+      createService
+
+      ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
+    fi
 }
 
-main
+case "$1" in
+    "--update")
+        main "$1"
+        ;;
+    "")
+        main
+        ;;
+    *)
+        echo "Parámetro no reconocido: $1"
+        echo "Uso: $0 [--update]"
+        exit 1
+        ;;
+esac

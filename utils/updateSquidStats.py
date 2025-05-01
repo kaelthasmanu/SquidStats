@@ -16,7 +16,7 @@ def updateSquidStats():
         subprocess.run(
             ['chmod', '+x', '/tmp/install.sh']
         )
-        subprocess.run(['bash' , '/tmp/install.sh'])
+        subprocess.run(['bash' , '/tmp/install.sh', '--update'])
         return True
 
     except Exception as e:
