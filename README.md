@@ -164,6 +164,25 @@ nano /etc/crontab
 ```
 3. Save
 
+Or can use service(daemon):
+
+1. Copy file service:
+  ```bash
+    cp ./utils/squidstats.service /etc/systemd/system/squidstats.service
+  ```
+2. Restart daemons:
+  ```bash
+    systemctl daemon-reload
+  ```
+3. Enable service:
+  ```bash
+    systemctl enable squidstats.service
+  ```
+3. Start service:
+  ```bash
+    systemctl start squidstats.service
+  ```
+
 ## Testing Information
 This software has been thoroughly tested and is compatible with Squid version 6.12. Please ensure your Squid installation matches this version or newer for optimal performance.
 
