@@ -97,7 +97,7 @@ def logs():
         print(f"Error en ruta /logs: {e}")
         return render_template('error.html', message="Error retrieving logs"), 500
 
-#@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
+@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
 def init_scheduler():
     """Initialize and start the background scheduler for log processing"""
     log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
