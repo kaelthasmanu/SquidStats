@@ -1,13 +1,17 @@
 <h1 align="center">
   <img alt="SQUIDSTAT logo" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/squidstats.png" width="300px"/><br/>
-  
+  <strong>The definitive analysis for your proxy</strong>
+</h1>
+
+<div align="center">
+  <!-- Banderas -->
   <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/README_es.md">
     <img height="20px" src="https://img.shields.io/badge/ES-flag.svg?color=555555&style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NTAgNTAwIj4NCjxwYXRoIGZpbGw9IiNjNjBiMWUiIGQ9Im0wLDBoNzUwdjUwMGgtNzUweiIvPg0KPHBhdGggZmlsbD0iI2ZmYzQwMCIgZD0ibTAsMTI1aDc1MHYyNTBoLTc1MHoiLz4NCjwvc3ZnPg0K">
   </a>
   <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/README.md">
     <img height="20px" src="https://img.shields.io/badge/EN-flag.svg?color=555555&style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNjAgMzAiIGhlaWdodD0iNjAwIj4NCjxkZWZzPg0KPGNsaXBQYXRoIGlkPSJ0Ij4NCjxwYXRoIGQ9Im0zMCwxNWgzMHYxNXp2MTVoLTMwemgtMzB2LTE1enYtMTVoMzB6Ii8+DQo8L2NsaXBQYXRoPg0KPC9kZWZzPg0KPHBhdGggZmlsbD0iIzAwMjQ3ZCIgZD0ibTAsMHYzMGg2MHYtMzB6Ii8+DQo8cGF0aCBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNiIgZD0ibTAsMGw2MCwzMG0wLTMwbC02MCwzMCIvPg0KPHBhdGggc3Ryb2tlPSIjY2YxNDJiIiBzdHJva2Utd2lkdGg9IjQiIGQ9Im0wLDBsNjAsMzBtMC0zMGwtNjAsMzAiIGNsaXAtcGF0aD0idXJsKCN0KSIvPg0KPHBhdGggc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIiBkPSJtMzAsMHYzMG0tMzAtMTVoNjAiLz4NCjxwYXRoIHN0cm9rZT0iI2NmMTQyYiIgc3Ryb2tlLXdpZHRoPSI2IiBkPSJtMzAsMHYzMG0tMzAtMTVoNjAiLz4NCjwvc3ZnPg0K">
   </a>
-</h1>
+</div>
 <a name="readme-top"></a>
 
 <h1 align="center">
@@ -55,6 +59,24 @@
 *A modern tool for parsing and analyzing Squid logs, providing a sleek and user-friendly dashboard to visualize real-time connection data. This project helps network administrators monitor and manage Squid proxy connections effectively.*
 
 **You can view the example [here](https://github.com/kaelthasmanu/SquidStats/tree/main/assets "Examples").**
+<div align="center">
+  <img src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg" 
+       alt="fig1" 
+       width="65%" 
+       style="min-width: 300px; max-width: 800px; border: 1px solid #ddd; border-radius: 6px;"/>
+</div>
+<div align="center">
+  <img src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-04-04_15-45-33.jpg" 
+       alt="fig2" 
+       width="65%" 
+       style="min-width: 300px; max-width: 800px; border: 1px solid #ddd; border-radius: 6px;"/>
+</div>
+<div align="center">
+  <img src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-04-21_02-13-38.jpg" 
+       alt="fig3" 
+       width="65%" 
+       style="min-width: 300px; max-width: 800px; border: 1px solid #ddd; border-radius: 6px;"/>
+</div>
 
 ### Goals of this project :
 
@@ -87,15 +109,19 @@
   
 <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 ---
-
 <!-- GETTING STARTED -->
 ## Getting Started
 [![SquidStat](https://img.shields.io/badge/Web-Project-teal.svg?colorA=teal&colorB=red&style=for-the-badge)](https://github.com/kaelthasmanu/SquidStats/)
+
+**The entire installation process in more detail can be found [here](https://www.sysadminsdecuba.com/2025/04/squidstat-analizador-de-logs-de-squid-diferente-y-100-cubano/).**
 
 ### Prerequisites
 - Python 3.10+
 - Squid proxy server
 - `squidclient` installed on the server
+```bash 
+apt install git python3 python3-pip python3-venv libmariadb-dev curl
+```
 - ⚠️ !!Important ⚠️ For compatibility with user logs, use this format in /etc/squid/squid.conf:
 ```bash 
   logformat detailed \
@@ -123,29 +149,37 @@
 ### Installation Manual
 1. Clone the repository:
    ```bash
-   git clone https://github.com/kaelthasmanu/SquidStats.git
-   cd SquidStats
+   mkdir -p /opt/squidstats
+   git clone https://github.com/kaelthasmanu/SquidStats.git /opt/squidstats
    ```
-2. Install requeriments python with pip or pip3:
+2.  Creating a virtual environment (venv):
   ```bash
-    pip install -r requirements.txt
+   cd /opt/squidstats/
+   python3 -m venv "/opt/squidstats/venv"
+   source venv/bin/activate
+   pip install --upgrade pip
+   ```
+3. Install requeriments python with pip or pip3:
+  ```bash
+    pip install -r /opt/squidstats/requirements.txt
   ```
-3. Create a .env file in the project root and add the following content:\
+4. Create a .env file in the project root and add the following content:\
   Note: for use MARIADB need your own database running
   ```bash
-    SQUID_HOST="127.0.0.1"
-    SQUID_PORT=3128
+    VERSION=2
+    SQUID_HOST = "127.0.0.1"
+    SQUID_PORT = 3128
     FLASK_DEBUG = "True"
-    DATABASE_TYPE="SQLITE" # You can use "MARIADB" or "SQLITE"
-    SQUID_LOG = "/home/manuel/Desktop/SquidStats/parsers/access.log"
-    DATABASE_STRING_CONNECTION = "/home/manuel/Desktop/SquidStats/" #or mysql+pymysql://user:password@host:port/db
+    DATABASE_TYPE="SQLITE"
+    SQUID_LOG = "/var/log/squid/access.log"
+    DATABASE_STRING_CONNECTION = "/opt/squidstats/"
     REFRESH_INTERVAL = 60
   ```
-4. Run App with python or python3  🚀:
+5. Run App with python or python3  🚀:
   ```bash
-    python app.py
+    python3 app.py
   ```
-4. With your preferred browser, visit the installation URL:
+6. With your preferred browser, visit the installation URL:
   ```bash
     http://ip/hostname:5000 
   ```
@@ -182,7 +216,8 @@ Or can use service(daemon):
   ```bash
     systemctl start squidstats.service
   ```
-
+<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+---
 ## Testing Information
 This software has been thoroughly tested and is compatible with Squid version 6.12. Please ensure your Squid installation matches this version or newer for optimal performance.
 
@@ -205,26 +240,28 @@ This software has been thoroughly tested and is compatible with Squid version 6.
   ```
 4.Open a pull request.
 
+**Contributors**
+<table style="width:100%">
+  <tr>
+    <th><b>Kaelthas</b></th>
+    <th><b>Alexminator</b></th>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/kaelthasmanu"><img src="https://avatars.githubusercontent.com/u/39976595?v=4" width=150px height=150px alt="kaelthasmanu"/></a></td>
+    <td align="center"><a href="https://github.com/alexminator"><img src="https://avatars.githubusercontent.com/u/9116486?s=400&v=4" width=150px height=150px alt="alexminator"/></a></td>
+  </tr>
+  <tr>
+    <td align="center"></a> <a href="https://www.linkedin.com/in/manuel-gorrin-095242238/"><img src="assets/linkedin-48.png" width="32px" height="32px"></a><a href="https://t.me/king_0f_deathhh"><img src="assets/telegram-app-48.png" width="32px" height="32px"></a></td>
+    <td align="center"><a href="https://twitter.com/alexminator99"><img src="assets/x_48.png" width="32px" height="32px"></a> <a href="https://www.linkedin.com/in/alexander-rivas-73532037/"><img src="assets/linkedin-48.png" width="32px" height="32px"></a><a href="https://t.me/Alexminator"><img src="assets/telegram-app-48.png" width="32px" height="32px"></a></td>
+  </tr>
+</table>
+
 ## License
 
 *The SquidStats project is released under the <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/LICENSE.md">MIT</a> license.*
 
 <!-- CONTACT -->
 ## Contact
-<table style="width:100%">
-  <tr>
-    <th><b>Kaelthas</b></th>
-        
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/kaelthasmanu"><img src="https://avatars.githubusercontent.com/u/39976595?v=4" width=150px height=150px alt="kaelthasmanu"/></a></td>
- 
-  </tr>
-  <tr>
-    <td align="center"></a> <a href="https://www.linkedin.com/in/manuel-gorrin-095242238/"><img src="assets/linkedin-48.png" width="32px" height="32px"></a><a href="https://t.me/king_0f_deathhh"><img src="assets/telegram-app-48.png" width="32px" height="32px"></a></td>
- </tr>
-</table>
-
 > **_Need help?_** 
 **_Feel free to contact me 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
 
