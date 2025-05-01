@@ -85,6 +85,23 @@
                     {% endfor %}
                 </div>
             </div>
+
+            <!-- Contenido expandido -->
+            <div class="expanded-content">
+                <div class="full-logs">
+                    <h4>Historial completo</h4>
+                    <div class="logs-table">
+                        {% for log in user.logs %}
+                        <div class="log-row">
+                            <div class="log-url">{{ log.url }}</div>
+                            <div class="log-response response-{{ log.response }}">{{ log.response }}</div>
+                            <div class="log-requests">{{ log.request_count }}</div>
+                            <div class="log-data">{{ log.data_transmitted|format_bytes }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -106,6 +123,8 @@
     </div>
 </div>
 
+<div class="overlay" id="overlay"></div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("username-search");
@@ -115,10 +134,45 @@ document.addEventListener("DOMContentLoaded", function () {
     const prevBtn = document.getElementById("prev-page");
     const nextBtn = document.getElementById("next-page");
     const pageNumbers = document.getElementById("page-numbers");
+    const overlay = document.getElementById('overlay');
 
     let currentPage = 1;
     const itemsPerPage = 12;
     let filteredUsers = [...userCards];
+
+    function expandCard(card) {
+        if (card.classList.contains('expanded')) return;
+
+        document.querySelectorAll('.user-card.expanded').forEach(expandedCard => {
+            expandedCard.classList.remove('expanded');
+        });
+
+        card.classList.add('expanded');
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function collapseCards() {
+        document.querySelectorAll('.user-card.expanded').forEach(card => {
+            card.classList.remove('expanded');
+        });
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    document.querySelectorAll('.user-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (!card.classList.contains('expanded')) {
+                expandCard(card);
+            }
+        });
+    });
+
+    overlay.addEventListener('click', collapseCards);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') collapseCards();
+    });
 
     function renderPage(page = 1) {
         const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -136,6 +190,7 @@ document.addEventListener("DOMContentLoaded", function () {
         nextBtn.disabled = currentPage === totalPages;
 
         pageNumbers.innerHTML = `Page ${currentPage} of ${totalPages}`;
+        collapseCards();
     }
 
     function filterUsers() {

@@ -345,3 +345,66 @@ body {
     font-size: 1.2rem;
     color: var(--gray-color);
 }
+
+.user-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+}
+
+.user-card.expanded {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 0 0 30px rgba(0,0,0,0.3);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+}
+
+.expanded-content {
+    display: none;
+}
+
+.user-card.expanded .expanded-content {
+    display: block;
+    margin-top: 2em;
+    border-top: 1px solid #eee;
+    padding-top: 2em;
+}
+
+.user-card.expanded .logs-list {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.logs-table {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 1em;
+    margin-top: 1em;
+}
+
+.log-row {
+    display: contents;
+}
+
+.log-row > div {
+    padding: 0.8em;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9em;
+}
