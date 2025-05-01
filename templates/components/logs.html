@@ -134,7 +134,18 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("username-search");
+    let userCards = Array.from(document.querySelectorAll(".user-card"));
+    let filteredUsers = [...userCards];
+    const usersContainer = document.getElementById("users-container");
 
+    const prevBtn = document.getElementById("prev-page");
+    const nextBtn = document.getElementById("next-page");
+    const pageNumbers = document.getElementById("page-numbers");
+    const overlay = document.getElementById('overlay');
+
+    let currentPage = 1;
+    const itemsPerPage = 12;
     const dateFilter = document.getElementById('date-filter');
 
 dateFilter.addEventListener('change', async (e) => {
@@ -162,17 +173,76 @@ dateFilter.addEventListener('change', async (e) => {
 
 function updateUsersData(usersData) {
     const usersContainer = document.getElementById('users-container');
-    usersContainer.innerHTML = '';
 
-    usersData.forEach(user => {
-        const userCard = document.createElement('div');
-        userCard.className = 'user-card';
-        userCard.dataset.username = user.username.toLowerCase();
+    const cardsHTML = usersData.map(user => `
+        <div class="user-card" data-username="${user.username.toLowerCase()}">
+            <div class="user-header">
+                <div class="avatar">${user.username.charAt(0).toUpperCase()}</div>
+                <div class="user-info">
+                    <h3 class="username">${user.username}</h3>
+                    <span class="ip-address">${user.ip}</span>
+                </div>
+                <div class="stats-badge">
+                    <span class="requests">${user.total_requests} reqs</span>
+                    <span class="data">${formatBytes(user.total_data)}</span>
+                </div>
+            </div>
 
-        usersContainer.appendChild(userCard);
-    });
+            <div class="metrics">
+                <div class="metric">
+                    <span class="metric-label">Requests</span>
+                    <span class="metric-value">${user.total_requests}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Data</span>
+                    <span class="metric-value">${formatBytes(user.total_data)}</span>
+                </div>
+            </div>
 
+            <div class="logs-section">
+                <h4 class="logs-title">Recent Activity</h4>
+                <div class="logs-list">
+                    ${user.logs.length > 0 ?
+                        user.logs.map(log => `
+                            <div class="log-entry">
+                                <div class="log-url">${truncate(log.url, 40)}</div>
+                                <div class="log-details">
+                                    <span class="response-badge response-${log.response}">${log.response}</span>
+                                    <span class="log-meta">${log.request_count} reqs</span>
+                                    <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
+                                </div>
+                            </div>
+                        `).join('') :
+                        '<div class="no-logs">No activity recorded</div>'}
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    usersContainer.innerHTML = cardsHTML;
+
+    userCards = Array.from(document.querySelectorAll(".user-card"));
+    filteredUsers = [...userCards];
+
+    renderPage(1);
     initializeCardInteractions();
+}
+
+function truncate(str, n) {
+    return str.length > n ? str.slice(0, n-1) + '...' : str;
+}
+
+function formatBytes(bytes) {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let value = bytes;
+    let unitIndex = 0;
+
+    while (value >= 1024 && unitIndex < units.length - 1) {
+        value /= 1024;
+        unitIndex++;
+    }
+
+    return `${value.toFixed(2)} ${units[unitIndex]}`;
 }
 
 function initializeCardInteractions() {
@@ -184,19 +254,6 @@ function initializeCardInteractions() {
         });
     });
 }
-
-    const searchInput = document.getElementById("username-search");
-    const userCards = Array.from(document.querySelectorAll(".user-card"));
-    const usersContainer = document.getElementById("users-container");
-
-    const prevBtn = document.getElementById("prev-page");
-    const nextBtn = document.getElementById("next-page");
-    const pageNumbers = document.getElementById("page-numbers");
-    const overlay = document.getElementById('overlay');
-
-    let currentPage = 1;
-    const itemsPerPage = 12;
-    let filteredUsers = [...userCards];
 
     function expandCard(card) {
         if (card.classList.contains('expanded')) return;

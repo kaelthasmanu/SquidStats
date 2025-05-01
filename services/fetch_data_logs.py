@@ -8,7 +8,7 @@ current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
 sys.path.append(str(project_root))
 
-from database.database import get_session, User, Log
+from database.database import User, Log
 
 def get_users_with_logs_optimized(db: Session) -> List[Dict[str, Any]]:
     try:
@@ -44,16 +44,20 @@ def get_users_with_logs_optimized(db: Session) -> List[Dict[str, Any]]:
     finally:
         db.close()
 
-def get_users_with_logs_by_date(db: Session,date_suffix: str):
+
+def get_users_with_logs_by_date(db: Session, date_suffix: str):
     try:
         users_table = f'users_{date_suffix}'
         logs_table = f'logs_{date_suffix}'
 
-        inspector = inspect(db.engine)
+        # Corregir aquí (usar get_bind())
+        inspector = inspect(db.get_bind())
+
         if not inspector.has_table(users_table) or not inspector.has_table(logs_table):
             return []
 
-        users = db.session.query(User). \
+        # Corregir consultas (remover .session)
+        users = db.query(User). \
             with_entities(
             User.id,
             User.username,
@@ -63,7 +67,7 @@ def get_users_with_logs_by_date(db: Session,date_suffix: str):
 
         users_data = []
         for user in users:
-            logs = db.session.query(Log). \
+            logs = db.query(Log). \
                 with_entities(
                 Log.url,
                 Log.response,
@@ -72,6 +76,7 @@ def get_users_with_logs_by_date(db: Session,date_suffix: str):
             ). \
                 from_statement(text(f'SELECT * FROM {logs_table} WHERE user_id = :user_id')). \
                 params(user_id=user.id).all()
+
 
             total_requests = sum(log.request_count for log in logs)
             total_data = sum(log.data_transmitted for log in logs)
