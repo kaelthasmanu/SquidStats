@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img alt="SQUIDSTAT logo" src="https://github.com/kaelthasmanu/SquidStats/blob/master/img/ALT_logo.png" width="300px"/><br/><strong>SquidStats</strong>
+  <img alt="SQUIDSTAT logo" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/squidstats.png" width="300px"/><br/>
   
   <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/README_es.md">
     <img height="20px" src="https://img.shields.io/badge/ES-flag.svg?color=555555&style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NTAgNTAwIj4NCjxwYXRoIGZpbGw9IiNjNjBiMWUiIGQ9Im0wLDBoNzUwdjUwMGgtNzUweiIvPg0KPHBhdGggZmlsbD0iI2ZmYzQwMCIgZD0ibTAsMTI1aDc1MHYyNTBoLTc1MHoiLz4NCjwvc3ZnPg0K">
@@ -20,48 +20,77 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/kaelthasmanu/SquidStats?logo=github&style=plastic)](https://github.com/kaelthasmanu/SquidStats/)
 [![Watchers](https://img.shields.io/github/watchers/kaelthasmanu/SquidStats?logo=github&color=teal&style=plastic)](https://github.com/kaelthasmanu/SquidStats/watchers)  
 </h1> 
-# Squid Log Parser Dashboard 🐙📊
+<h4 align="center">:star: Give me one star — it will motivate me to keep improving it!!</h4>
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About the Project</a>
+      <ul>
+        <li><a href="#goals-of-this-project-">Goals of this project</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation-script">Installation Script</a></li>
+        <li><a href="#installation-manual">Installation Manual</a></li>
+        <li><a href="#testing-information">Testing Information</a></li>
+      </ul>
+    </li>
+    <li><a href="#to-do">To do</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#technologies-used">Technologies Used</a></li>
+    <li><a href="#special-thanks">Special thanks</a></li>
+  </ol>
+</details>
 
-A modern tool for parsing and analyzing Squid logs, providing a sleek and user-friendly dashboard to visualize real-time connection data. This project helps network administrators monitor and manage Squid proxy connections effectively.
+<!-- ABOUT THE PROJECT -->
+## About the Project
 
----
+*A modern tool for parsing and analyzing Squid logs, providing a sleek and user-friendly dashboard to visualize real-time connection data. This project helps network administrators monitor and manage Squid proxy connections effectively.*
 
-![Examples](https://github.com/kaelthasmanu/SquidStats/tree/main/assets "Examples")
+**You can view the example [here](https://github.com/kaelthasmanu/SquidStats/tree/main/assets "Examples").**
 
-## 🌟 Features
-- **Real-time Log Parsing**: Parses active Squid connections and displays detailed information.
-- **User Monitoring**: Identifies connections by username, URI, and log type.
-- **Metrics Overview**:
+### Goals of this project :
+
+- **_Real-time Log Parsing_**: Parses active Squid connections and displays detailed information.
+- **_User Monitoring_**: Identifies connections by username, URI, and log type.
+- **_Metrics Overview_**:
   - Total read and written data for each connection.
   - Number of requests per connection.
   - Delay pool usage.
-- **Interactive Dashboard**: Clean interface for easy data interpretation.
-- **Squid Cache Statistics**: 
+- **_Interactive Dashboard_**: Clean interface for easy data interpretation.
+- **_Squid Cache Statistics_**: 
   - Stored entries.
   - Used and free capacity
   - Maximum and current cache size
   - Disk space and inode usage
   - Age of cached objects
-- **Logs Users**: 
+- **_Logs Users_**: 
   - User activity monitoring 👥
   - Beautiful visualizations 📊 
   - Advanced filtering & search 🔍 
   - Paginated results 📄
-- **Top Graphs**: 
+- **_Top Graphs_**: 
   - Top 20 Users Activity
   - Top 20 Users Data Usage
   - Total Users
   - Total Transmitted Data
   - Total Request 
   - And More...
-- **And More** 
-
+- **_And More_**
+  
+<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 ---
 
-### ⚠️ First Execution Alert ⚠️
-Warning: 🚨 The first execution may cause high CPU usage.
-
-## 🚀 Getting Started
+<!-- GETTING STARTED -->
+## Getting Started
+[![SquidStat](https://img.shields.io/badge/Web-Project-teal.svg?colorA=teal&colorB=red&style=for-the-badge)](https://github.com/kaelthasmanu/SquidStats/)
 
 ### Prerequisites
 - Python 3.10+
@@ -74,7 +103,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
   
   access_log /var/log/squid/access.log detailed
 ```
-### Installation With Script(Beta Version)
+### Installation Script
 1. Get Script With curl o wget:
   ```bash
    wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
@@ -89,7 +118,8 @@ Warning: 🚨 The first execution may cause high CPU usage.
   ```bash
    sudo ./install.sh
    ```
-
+<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+---
 ### Installation Manual
 1. Clone the repository:
    ```bash
@@ -119,6 +149,8 @@ Warning: 🚨 The first execution may cause high CPU usage.
   ```bash
     http://ip/hostname:5000 
   ```
+### ⚠️ First Execution Alert ⚠️
+Warning: 🚨 The first execution may cause high CPU usage.
 
 🕒 Run on System Startup
 To ensure the application starts automatically when the system boots, add the following cron job:
@@ -132,15 +164,14 @@ nano /etc/crontab
 ```
 3. Save
 
-## 🧪 Testing Information
+## Testing Information
 This software has been thoroughly tested and is compatible with Squid version 6.12. Please ensure your Squid installation matches this version or newer for optimal performance.
 
-## 🛠️ Technologies Used
+## To do
 
-  Backend: Python, Flask
-  Frontend: HTML, CSS
+*Make blah blah.*
 
-## 🤝 Contributing
+## Contributing
 1. Fork the repository:
    ```bash
    git checkout -b feature-name
@@ -155,12 +186,39 @@ This software has been thoroughly tested and is compatible with Squid version 6.
   ```
 4.Open a pull request.
 
+## License
+
+*The SquidStats project is released under the <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/LICENSE.md">MIT</a> license.*
+
 <!-- CONTACT -->
 ## Contact
-Manuel - ([Telegram](https://t.me/king_0f_deathhh)) ([Email](mailto:manuelalberto.gorrin@gmail.com))
+<table style="width:100%">
+  <tr>
+    <th><b>Kaelthas</b></th>
+        
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/kaelthasmanu"><img src="https://avatars.githubusercontent.com/u/39976595?v=4" width=150px height=150px alt="kaelthasmanu"/></a></td>
+ 
+  </tr>
+  <tr>
+    <td align="center"></a> <a href="https://www.linkedin.com/in/manuel-gorrin-095242238/"><img src="assets/linkedin-48.png" width="32px" height="32px"></a><a href="https://t.me/king_0f_deathhh"><img src="assets/telegram-app-48.png" width="32px" height="32px"></a></td>
+ </tr>
+</table>
+
+> **_Need help?_** 
+**_Feel free to contact me 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
 
 Project Link: ([SquidStats](https://github.com/kaelthasmanu/cucuota))
 
-## 📄 License
+## Technologies Used
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+  Backend: Python, Flask
+  Frontend: HTML, CSS
+
+## Special thanks
+* _To the Cuban Sysadmins community._
+* _To everyone who gave me his help when I had doubts._
+  
+<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+---
