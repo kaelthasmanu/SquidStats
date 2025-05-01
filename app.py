@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 from database.database import get_session
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
@@ -13,6 +13,8 @@ from services.get_reports import get_important_metrics
 from utils.colors import color_map
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
+from datetime import datetime
+from services.fetch_data_logs import get_users_with_logs_by_date
 
 # set configuration values
 class Config:
@@ -122,6 +124,28 @@ def format_bytes_filter(value):
         return f"{(value / 1024):.2f} KB"
     return f"{value} bytes"
 
+
+@app.route('/get-logs-by-date', methods=['POST'])
+def get_logs_by_date():
+    db = None
+    try:
+        date_str = request.json.get('date')
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d')
+        date_suffix = selected_date.strftime('%Y%m%d')
+
+        db = get_session()
+
+        users_data = get_users_with_logs_by_date(db, date_suffix)
+        return jsonify(users_data)
+
+    except ValueError as ve:
+        return jsonify({'error': 'Formato de fecha inválido'}), 400
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if db is not None:
+            db.close()
 
 @app.route('/reports')
 def reports():
