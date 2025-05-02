@@ -50,13 +50,11 @@ def get_users_with_logs_by_date(db: Session, date_suffix: str):
         users_table = f'users_{date_suffix}'
         logs_table = f'logs_{date_suffix}'
 
-        # Corregir aquí (usar get_bind())
         inspector = inspect(db.get_bind())
 
         if not inspector.has_table(users_table) or not inspector.has_table(logs_table):
             return []
 
-        # Corregir consultas (remover .session)
         users = db.query(User). \
             with_entities(
             User.id,

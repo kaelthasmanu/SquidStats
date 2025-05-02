@@ -258,7 +258,7 @@ function main() {
      if [ "$1" = "--update" ]; then
       echo "Actualizando Servicio..."
       updateOrCloneRepo
-      ystemctl restart squidstats.service
+      systemctl restart squidstats.service
 
       ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     else
