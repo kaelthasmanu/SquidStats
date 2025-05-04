@@ -236,7 +236,7 @@ Or can use service(daemon):
 <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 ---
 ## Testing Information
-This software has been thoroughly tested and is compatible with Squid version 6.12. Please ensure your Squid installation matches this version or newer for optimal performance.
+This software has been thoroughly tested and is compatible with Squid version 6.12 in Ubuntu 24.04 and Debian12. Please ensure your Squid installation matches this version or newer for optimal performance.
 
 ## To do
 
