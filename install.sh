@@ -140,21 +140,13 @@ function updateOrCloneRepo() {
 function moveDB() {
     local databaseSQlite="/opt/squidstats/logs.db"
     local env_file="/opt/squidstats/.env"
-    local current_version="0.0"
+    local current_version=0
 
     if [ -f "$env_file" ]; then
-        version_line=$(grep -E '^VERSION\s*=' "$env_file")
-        if [ $? -eq 0 ]; then
-            version_value=$(echo "$version_line" | cut -d= -f2 | tr -d ' "\r')
-            current_version=$(echo "$version_value" | grep -Eo '^[0-9]+(\.[0-9]+)?' || echo "0.0")
-        fi
+        current_version=$(grep -E '^VERSION\s*=' "$env_file" | cut -d= -f2 | tr -dc '0-9' || echo 0)
     fi
 
-    major=$(echo "$current_version" | cut -d. -f1)
-    minor=$(echo "$current_version" | cut -d. -f2)
-    minor=${minor:-0}
-
-    if [ -f "$databaseSQlite" ] && ( [ "$major" -lt 0 ] || { [ "$major" -eq 0 ] && [ "$minor" -lt 2 ]; } ); then
+    if [ -f "$databaseSQlite" ] && [ "$current_version" -lt 2 ]; then
         echo "Eliminando base de datos antigua por actualización..."
         rm -rf "$databaseSQlite"
         ok "Base de datos antigua eliminada"
@@ -269,6 +261,7 @@ function main() {
     else
       echo "Actualizando servicio..."
       checkPackages
+      updateOrCloneRepo
       checkSquidLog
       setupVenv
       installDependencies
