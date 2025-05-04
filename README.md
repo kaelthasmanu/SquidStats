@@ -186,6 +186,23 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
 ### ⚠️ First Execution Alert ⚠️
 Warning: 🚨 The first execution may cause high CPU usage.
 
+### Update project(web) with Script
+
+1. Get Script With curl o wget:
+  ```bash
+   wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+   ``` 
+
+2. Add permission execution:
+  ```bash
+   sudo chmod +x install.sh
+   ```
+
+3. Execute the script with parameters update:
+  ```bash
+   sudo ./install.sh --update
+   ```
+
 🕒 Run on System Startup
 To ensure the application starts automatically when the system boots, add the following cron job:
 1. Open with a editor the file crontab
