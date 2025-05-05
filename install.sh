@@ -290,7 +290,7 @@ case "$1" in
         ;;
     *)
         echo "Parámetro no reconocido: $1"
-        echo "Uso: $0 [--update]"
+        echo "Uso: $0 --update"
         exit 1
         ;;
 esac
