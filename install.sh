@@ -142,8 +142,15 @@ function moveDB() {
     local env_file="/opt/squidstats/.env"
     local current_version=0
 
-    if [ -f "$env_file" ]; then
-        current_version=$(grep -E '^VERSION\s*=' "$env_file" | cut -d= -f2 | tr -dc '0-9' || echo 0)
+    current_version=$(grep -E '^VERSION\s*=' "$env_file" | cut -d= -f2 | tr -dc '0-9' || echo 0)
+
+    if ! grep -qE '^VERSION\s*=' "$env_file"; then
+      echo "VERSION=2" >> "$env_file"
+        echo "Eliminando base de datos antigua por actualización..."
+        rm -rf "$databaseSQlite"
+        ok "Base de datos antigua eliminada"
+    else
+        echo "Base de datos no requiere actualización"
     fi
 
     if [ -f "$databaseSQlite" ] && [ "$current_version" -lt 2 ]; then
@@ -266,8 +273,8 @@ function main() {
       setupVenv
       installDependencies
       createEnvFile
-      moveDB
       configureDatabase
+      moveDB
       createService
 
       ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
