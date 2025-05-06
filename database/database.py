@@ -18,7 +18,6 @@ class User(Base):
     __tablename__ = get_table_names()[0]
     id = Column(Integer, primary_key=True)
     username = Column(String(255), unique=True, nullable=False)
-    username = Column(String, unique=True, nullable=False)
     ip = Column(String(255), nullable=False)
     logs = relationship("Log", back_populates="user")
 
