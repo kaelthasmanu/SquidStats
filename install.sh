@@ -232,25 +232,102 @@ function configureDatabase() {
     echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
     echo "Seleccione el tipo de base de datos:"
     echo "1) SQLite (por defecto)"
-    echo "2) MariaDB(necesitas tener mariadb ejecutándose)"
-    read -p "Opción [1/2]: " choice
+    echo "2) MariaDB (necesitas tener mariadb ejecutándose)"
+    
+    while true; do
+        read -p "Opción [1/2]: " choice
+        case $choice in
+            1|"") break;;  # Opción por defecto
+            2) break;;
+            *) error "Opción inválida. Intente nuevamente.";;
+        esac
+    done
 
     case $choice in
         2)
-            read -p "Ingrese connection string (mysql+pymysql://user:password@host:port/db): " conn_str
-            if [[ "$conn_str" != mysql+pymysql://* ]]; then
-                error "Formato inválido. Debe comenzar con: mysql+pymysql://"
-                return 1
-            fi
-            escaped_str=$(sed 's/[\/&]/\\&/g' <<< "$conn_str")
-            sed -i "s/^DATABASE_STRING_CONNECTION\s*=.*/DATABASE_STRING_CONNECTION = \"${escaped_str}\"/" "$env_file"
-            sed -i "s/^DATABASE_TYPE\s*=.*/DATABASE_TYPE = "MARIADB" "$env_file"
-            ok "Configuración MariaDB actualizada!"
+            while true; do
+                read -p "Ingrese cadena de conexión (mysql+pymysql://user:clave@host:port/db): " conn_str
+                
+                # Validación básica de formato
+                if [[ "$conn_str" != mysql+pymysql://* ]]; then
+                    error "Formato inválido. Debe comenzar con: mysql+pymysql://"
+                    continue
+                fi
+
+                # Validar y codificar con Python
+                validation_result=$(python3 -c "
+import sys
+import re
+from urllib.parse import quote
+
+try:
+    conn_str = sys.argv[1]
+    
+    # Dividir en partes principales
+    if not conn_str.startswith('mysql+pymysql://'):
+        raise ValueError('Esquema inválido. Debe comenzar con mysql+pymysql://')
+    
+    parts = conn_str.split('://', 1)[1].split('@', 1)
+    if len(parts) != 2:
+        raise ValueError('Formato incorrecto. Debe ser: usuario:clave@host:port/db')
+    
+    # Separar usuario:contraseña
+    user_pass, host_port_db = parts
+    if ':' not in user_pass:
+        raise ValueError('Falta usuario o contraseña')
+    
+    user, password = user_pass.split(':', 1)
+    
+    # Codificar contraseña
+    encoded_pass = quote(password, safe='')
+    
+    # Separar host:port/db
+    if '/' not in host_port_db:
+        raise ValueError('Falta nombre de la base de datos')
+    
+    host_port, db = host_port_db.split('/', 1)
+    
+    # Determinar si el puerto fue especificado
+    port_specified = ':' in host_port
+    if port_specified:
+        host, port = host_port.split(':', 1)
+        if not port.isdigit():
+            raise ValueError('Puerto debe ser numérico')
+        port = int(port)
+        if not (1 <= port <= 65535):
+            raise ValueError(f'Puerto inválido: {port}')
+    else:
+        host = host_port
+        port = 3306  # Valor por defecto
+    
+    # Reconstruir conexión codificada (incluir puerto si fue especificado)
+    encoded_conn = f'mysql+pymysql://{user}:{encoded_pass}@{host}'
+    if port_specified:
+        encoded_conn += f':{port}'
+    encoded_conn += f'/{db}'
+    
+    print(encoded_conn)
+    
+except Exception as e:
+    sys.exit(f'ERROR: {e}')
+" "$conn_str" 2>&1)
+
+                if [[ $? -eq 0 ]]; then
+                    # Actualizar .env con la versión codificada
+                    escaped_str=$(sed 's/[\/&|]/\\&/g' <<< "$validation_result")
+                    sed -i "s|^DATABASE_STRING_CONNECTION\s*=.*|DATABASE_STRING_CONNECTION = \"${escaped_str}\"|" "$env_file"
+                    sed -i "s|^DATABASE_TYPE\s*=.*|DATABASE_TYPE = MARIADB|" "$env_file"
+                    ok "Configuración MariaDB actualizada!\nCadena codificada: $validation_result"
+                    break
+                else
+                    error "Error en la cadena:\n${validation_result#ERROR: }"
+                fi
+            done
             ;;
         *)
             sqlite_path="/opt/squidstats/"
-            sed -i "s/^DATABASE_STRING_CONNECTION\s*=.*/DATABASE_STRING_CONNECTION = \"${sqlite_path}\"/" "$env_file"
-            sed -i "s/^DATABASE_TYPE\s*=.*/DATABASE_TYPE = "SQLITE" "$env_file"
+            sed -i "s|^DATABASE_STRING_CONNECTION\s*=.*|DATABASE_STRING_CONNECTION = \"${sqlite_path}\"|" "$env_file"
+            sed -i "s|^DATABASE_TYPE\s*=.*|DATABASE_TYPE = SQLITE|" "$env_file"
             ok "Configuración SQLite establecida!"
             ;;
     esac
