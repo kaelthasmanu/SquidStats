@@ -275,6 +275,67 @@ function configureDatabase() {
     esac
 }
 
+function patchSquidConf() {
+    local squid_conf=""
+    # Busca squid.conf en rutas típicas
+    if [ -f "/etc/squid/squid.conf" ]; then
+        squid_conf="/etc/squid/squid.conf"
+    elif [ -f "/etc/squid3/squid.conf" ]; then
+        squid_conf="/etc/squid3/squid.conf"
+    else
+        error "Debe tener instalado un servidor proxy Squid. No se encontró squid.conf en /etc/squid/ ni /etc/squid3/"
+        return 1
+    fi
+
+    # Backup antes de modificar
+    cp "$squid_conf" "${squid_conf}.back"
+    ok "Backup realizado: ${squid_conf}.back"
+
+    local logformat_line='logformat detailed \'
+    logformat_line+='
+  "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st'
+    local access_detailed='access_log /var/log/squid/access.log detailed'
+    local access_default='access_log /var/log/squid/defaultaccess.log'
+
+    # Busca si existe una línea access_log /var/log/squid/access.log (sin detailed)
+    if grep -q '^access_log[[:space:]]\+/var/log/squid/access\.log[[:space:]]*$' "$squid_conf"; then
+        # Si no existe logformat detailed, lo agrega encima de la línea access_log
+        if ! grep -q '^logformat detailed' "$squid_conf"; then
+            awk -v l1="$logformat_line" '
+                BEGIN{inserted=0}
+                /^access_log[[:space:]]+\/var\/log\/squid\/access\.log[[:space:]]*$/ && !inserted {
+                    print l1
+                    inserted=1
+                }
+                {print}
+            ' "$squid_conf" > "${squid_conf}.tmp" && mv "${squid_conf}.tmp" "$squid_conf"
+            ok "Se agregó logformat detailed encima de access_log /var/log/squid/access.log"
+        else
+            echo "logformat detailed ya existe, no se agrega de nuevo."
+        fi
+        # Modifica la línea access_log para agregar detailed al final y agrega defaultaccess.log debajo
+        awk -v l2="$access_default" '
+            {
+                if ($0 ~ /^access_log[[:space:]]+\/var\/log\/squid\/access\.log[[:space:]]*$/) {
+                    print $0 " detailed"
+                    print l2
+                } else {
+                    print
+                }
+            }
+        ' "$squid_conf" > "${squid_conf}.tmp" && mv "${squid_conf}.tmp" "$squid_conf"
+        ok "Se modificó access_log /var/log/squid/access.log para usar detailed y se agregó access_log defaultaccess.log debajo."
+    else
+        # No existe access_log /var/log/squid/access.log, agrega todo al final
+        {
+            echo "$logformat_line"
+            echo "$access_detailed"
+            echo "$access_default"
+        } >> "$squid_conf"
+        ok "Se agregaron logformat y ambos access_log al final de $squid_conf"
+    fi
+}
+
 function main() {
     checkSudo
 
@@ -288,6 +349,7 @@ function main() {
       echo "Actualizando servicio..."
       checkPackages
       updateOrCloneRepo
+      patchSquidConf
       checkSquidLog
       setupVenv
       installDependencies
