@@ -118,7 +118,7 @@
 - Servidor proxy Squid 
 - `squidclient` instalado en su servidor
 ```bash 
-apt install git python3 python3-pip python3-venv libmariadb-dev curl
+apt install git python3 python3-pip python3-venv python3-mysql libmariadb-dev curl
 ```
 - ⚠️ !!Importante ⚠️ Para compatibilidad con los registros de usuarios, utilice este formato en /etc/squid/squid.conf:
 ```bash 
