@@ -61,7 +61,7 @@ function installDependencies() {
 }
 
 function checkPackages() {
-    local paquetes=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl")
+    local paquetes=("git" "python3" "python3-pip" "python3-venv" "python3-mysql" "libmariadb-dev" "curl")
     local faltantes=()
 
     for pkg in "${paquetes[@]}"; do
@@ -89,7 +89,7 @@ function checkSquidLog() {
     local log_file="/var/log/squid/access.log"
 
     if [ ! -f "$log_file" ]; then
-        error "¡ADVERTENCIA!: ¿Tiene Squid realmente instalado? No hemos encontrado el log en la ruta por defecto"
+        error "¡ADVERTENCIA!: No hemos encontrado el log en la ruta por defecto. Recargue su squid, navegue y genere logs para crearlo"
         return 1
     else
         echo "Archivo de log de Squid encontrado: $log_file"
@@ -332,7 +332,7 @@ function patchSquidConf() {
             echo "$access_detailed"
             echo "$access_default"
         } >> "$squid_conf"
-        ok "Se agregaron logformat y ambos access_log al final de $squid_conf"
+        ok "Se agregaron logformat detailed, access_log /var/log/squid/access.log detailed y access_log /var/log/squid/defaultaccess.log al final de $squid_conf"
     fi
 }
 
