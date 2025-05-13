@@ -120,7 +120,7 @@
 - Squid proxy server
 - `squidclient` installed on the server
 ```bash 
-apt install git python3 python3-pip python3-venv python3-mysql libmariadb-dev curl
+apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev curl
 ```
 - ⚠️ !!Important ⚠️ For compatibility with user logs, use this format in /etc/squid/squid.conf:
 ```bash 
