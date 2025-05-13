@@ -61,7 +61,7 @@ function installDependencies() {
 }
 
 function checkPackages() {
-    local paquetes=("git" "python3" "python3-pip" "python3-venv" "python3-mysql" "libmariadb-dev" "curl")
+    local paquetes=("git" "python3" "python3-pip" "python3-venv" "python3-pymysql" "libmariadb-dev" "curl")
     local faltantes=()
 
     for pkg in "${paquetes[@]}"; do
