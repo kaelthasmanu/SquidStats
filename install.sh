@@ -346,7 +346,7 @@ function main() {
 
       ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     else
-      echo "Actualizando servicio..."
+      echo "Instalando aplicación web..."
       checkPackages
       updateOrCloneRepo
       patchSquidConf
