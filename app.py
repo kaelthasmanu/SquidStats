@@ -51,7 +51,7 @@ def index():
 
         return render_template(
             'index.html',
-            grouped_connections=grouped_connections)
+            grouped_connections=grouped_connections, page_icon='favicon.ico')
 
     except Exception as e:
         logger.error(f"Unexpected error in index route: {str(e)}")
@@ -80,7 +80,7 @@ def cache_stats():
         data = fetch_squid_cache_stats()
         stats_data = vars(data) if hasattr(data, '__dict__') else data
         logger.info("Successfully fetched cache statistics")
-        return render_template('cacheView.html', cache_stats=stats_data)
+        return render_template('cacheView.html', cache_stats=stats_data, page_icon='statistics.ico')
 
     except Exception as e:
         logger.error(f"Error fetching cache stats: {str(e)}")
@@ -92,7 +92,7 @@ def logs():
         db = get_session()
         users_data = get_users_with_logs_optimized(db)
 
-        return render_template('logsView.html', users_data=users_data)
+        return render_template('logsView.html', users_data=users_data, page_icon='user.ico')
     except Exception as e:
         print(f"Error en ruta /logs: {e}")
         return render_template('error.html', message="Error retrieving logs"), 500
@@ -168,7 +168,7 @@ def reports():
         'colors': [color_map.get(str(code['response_code']), color_map['Otros']) for code in main_codes]
     }
 
-    return render_template('reports.html', metrics=metrics)
+    return render_template('reports.html', metrics=metrics, page_icon='bar.ico')
 
 @app.route('/install', methods=['POST'])
 def install_package():
