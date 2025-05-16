@@ -92,7 +92,7 @@ def logs():
         db = get_session()
         users_data = get_users_with_logs_optimized(db)
 
-        return render_template('logsView.html', users_data=users_data, page_icon='user.ico', page_title='Actividad usuarios')
+        return render_template('logsView.html', users_data=users_data, page_icon='user.ico', page_title='Actividad usuarios' )
     except Exception as e:
         print(f"Error en ruta /logs: {e}")
         return render_template('error.html', message="Error retrieving logs"), 500
