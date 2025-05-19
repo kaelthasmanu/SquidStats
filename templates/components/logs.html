@@ -21,45 +21,44 @@
             </div>
         </div>
 
-        <div class="users-container" id="users-container">
-            {% for user in users_data %}
-            <div class="user-card" data-username="{{ user.username|lower }}">
-                <div class="user-header">
-                    <div class="user-header-left">
-                        <div class="avatar">{{ user.username|first|upper }}</div>
-                        <div class="user-info">
-                            <h3 class="username">{{ user.username }}</h3>
-                            <span class="ip-address">{{ user.ip }}</span>
-                        </div>
-                        <button class="activity-button" onclick="event.stopPropagation(); openLogsModal({{ loop.index0 }})">Actividad</button>
-                    </div>
-
-                    <div class="user-header-right">
-                        <div class="metrics">
-                            <div class="metric">
-                                <span class="metric-label">Requests</span>
-                                <span class="metric-value">{{ user.total_requests }}</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Data</span>
-                                <span class="metric-value">
-                                    {% if user.total_data < 1024 %}
-                                        {{ user.total_data }} B
-                                    {% elif user.total_data < 1024 * 1024 %}
-                                        {{ (user.total_data / 1024)|round(2) }} KB
-                                    {% elif user.total_data < 1024 * 1024 * 1024 %}
-                                        {{ (user.total_data / 1024 / 1024)|round(2) }} MB
-                                    {% else %}
-                                        {{ (user.total_data / 1024 / 1024 / 1024)|round(2) }} GB
-                                    {% endif %}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+    <div class="users-container" id="users-container">
+        {% for user in users_data %}
+        <div class="user-card" data-username="{{ user.username|lower }}">
+            <!-- Cabecera simplificada -->
+            <header class="card-header">
+                <div class="avatar">{{ user.username|first|upper }}</div>
+                <div class="user-info">
+                    <h3 class="username">{{ user.username }}</h3>
+                    <span class="ip-address">{{ user.ip }}</span>
                 </div>
+            </header>
+
+            <!-- Botón central -->
+            <div class="card-action">
+                <button class="activity-button" data-index="{{ loop.index0 }}">
+                    ACTIVIDAD
+                </button>
             </div>
-            {% endfor %}
+
+
+            <!-- Franja inferior con métricas -->
+            <footer class="card-footer">
+                <div class="footer-item">
+                    <span class="label">Requests:</span>
+                    <span class="value">{{ user.total_requests }}</span>
+                </div>
+                <div class="footer-item">
+                    <span class="label">Data:</span>
+                    <span class="value">
+                        {% if user.total_data < 1024 %} {{ user.total_data }} B {% elif user.total_data < 1024*1024 %}
+                            {{ (user.total_data/1024)|round(2) }} KB {% elif user.total_data < 1024*1024*1024 %} {{
+                            (user.total_data/1024/1024)|round(2) }} MB {% else %} {{
+                            (user.total_data/1024/1024/1024)|round(2) }} GB {% endif %} </span>
+                </div>
+            </footer>
         </div>
+        {% endfor %}
+    </div>
 
         <div class="pagination-container">
             <button id="prev-page" class="pagination-button" disabled>
@@ -130,7 +129,7 @@
         const dateFilter = document.getElementById("date-filter");
 
         let currentPage = 1;
-        const itemsPerPage = 12;
+        const itemsPerPage = 15;
 
         // 🔹 Siempre configurar el input con la fecha actual al cargar
         const today = new Date().toISOString().split('T')[0];
@@ -161,62 +160,46 @@
             }
         });
 
-    function updateUsersData(usersData) {
-    const cardsHTML = usersData.map((user, index) => `
-        <div class="user-card" data-username="${user.username.toLowerCase()}">
-            <div class="user-header">
-                <div class="user-header-left">
-                    <div class="avatar">${user.username.charAt(0).toUpperCase()}</div>
-                    <div class="user-info">
-                        <h3 class="username">${user.username}</h3>
-                        <span class="ip-address">${user.ip}</span>
-                    </div>
-                    <button class="activity-button" onclick="event.stopPropagation(); openLogsModal(${index})">Actividad</button>
-                </div>
-                <div class="user-header-right">
-                    <div class="metrics">
-                        <div class="metric">
-                            <span class="metric-label">Requests</span>
-                            <span class="metric-value">${user.total_requests}</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Data</span>
-                            <span class="metric-value">${formatBytes(user.total_data)}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+       function updateUsersData(usersData) {
+            const cardsHTML = usersData.map((user, index) => `
+    <div class="user-card" data-username="${user.username.toLowerCase()}">
+      <!-- Cabecera simplificada -->
+      <header class="card-header">
+        <div class="avatar">${user.username.charAt(0).toUpperCase()}</div>
+        <div class="user-info">
+          <h3 class="username">${user.username}</h3>
+          <span class="ip-address">${user.ip}</span>
         </div>
+      </header>
 
-        <div class="logs-modal" id="logs-modal-${index}">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeLogsModal(${index})">&times;</span>
-                <h4 class="logs-title">Actividad reciente - <span class="username-highlight">${user.username}</span></h4>
-                <div class="logs-list">
-                    ${user.logs.length > 0 ? user.logs.map(log => `
-                        <div class="log-entry">
-                            <div class="log-url">${truncate(log.url, 40)}</div>
-                            <div class="log-details">
-                                <span class="response-badge response-${log.response}">${log.response}</span>
-                                <span class="log-meta">${log.request_count} reqs</span>
-                                <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
-                            </div>
-                        </div>
-                    `).join('') : '<div class="no-logs">No hay actividad registrada</div>'}
-                </div>
-            </div>
+      <!-- Botón central -->
+<div class="card-action">
+  <button class="activity-button" onclick="event.stopPropagation(); openLogsModal(${index});">
+    ACTIVIDAD
+  </button>
+</div>
+
+      <!-- Franja inferior con métricas -->
+      <footer class="card-footer">
+        <div class="footer-item">
+          <span class="label">Requests:</span>
+          <span class="value">${user.total_requests}</span>
         </div>
-    `).join('');
+        <div class="footer-item">
+          <span class="label">Data:</span>
+          <span class="value">${formatBytes(user.total_data)}</span>
+        </div>
+      </footer>
+    </div>
+  `).join('');
 
-    usersContainer.innerHTML = cardsHTML;
-
-    userCards = Array.from(document.querySelectorAll(".user-card"));
-    filteredUsers = [...userCards];
-
-    renderPage(1);
-    filterUsers();
-    applyCardInteractions();
-}
+            usersContainer.innerHTML = cardsHTML;
+            userCards = Array.from(document.querySelectorAll(".user-card"));
+            filteredUsers = [...userCards];
+            renderPage(1);
+            filterUsers();
+            applyCardInteractions();
+        }
 
 
         function truncate(str, n) {
