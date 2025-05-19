@@ -1,127 +1,46 @@
-    <div class="users-dashboard">
-        <div class="dashboard-header">
-            <h1 class="dashboard-title">Panel Actividad de Usuarios</h1>
+<div class="users-dashboard">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Panel Actividad de Usuarios</h1>
 
-            <div class="filters-container flex gap-4 items-center">
-                <div class="date-filter">
-                    <input type="date" id="date-filter"
-                           class="px-4 py-2 border rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-
-                <div class="search-container">
-                    <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input">
-                    <button class="search-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                             viewBox="0 0 16 16">
-                            <path
-                                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                        </svg>
-                    </button>
-                </div>
+        <div class="filters-container flex gap-4 items-center">
+            <div class="date-filter">
+                <input type="date" id="date-filter"
+                    class="px-4 py-2 border rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
-        </div>
 
-    <div class="users-container" id="users-container">
-        {% for user in users_data %}
-        <div class="user-card" data-username="{{ user.username|lower }}">
-            <!-- Cabecera simplificada -->
-            <header class="card-header">
-                <div class="avatar">{{ user.username|first|upper }}</div>
-                <div class="user-info">
-                    <h3 class="username">{{ user.username }}</h3>
-                    <span class="ip-address">{{ user.ip }}</span>
-                </div>
-            </header>
-
-            <!-- Botón central -->
-            <div class="card-action">
-                <button class="activity-button" data-index="{{ loop.index0 }}">
-                    ACTIVIDAD
+            <div class="search-container">
+                <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input">
+                <button class="search-button">
+                    <!-- icono lupa -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                    </svg>
                 </button>
             </div>
-
-
-            <!-- Franja inferior con métricas -->
-            <footer class="card-footer">
-                <div class="footer-item">
-                    <span class="label">Requests:</span>
-                    <span class="value">{{ user.total_requests }}</span>
-                </div>
-                <div class="footer-item">
-                    <span class="label">Data:</span>
-                    <span class="value">
-                        {% if user.total_data < 1024 %} {{ user.total_data }} B {% elif user.total_data < 1024*1024 %}
-                            {{ (user.total_data/1024)|round(2) }} KB {% elif user.total_data < 1024*1024*1024 %} {{
-                            (user.total_data/1024/1024)|round(2) }} MB {% else %} {{
-                            (user.total_data/1024/1024/1024)|round(2) }} GB {% endif %} </span>
-                </div>
-            </footer>
         </div>
-        {% endfor %}
     </div>
 
-        <div class="pagination-container">
-            <button id="prev-page" class="pagination-button" disabled>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                     viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                          d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
-                </svg>
-                Anterior
-            </button>
-            <div class="page-numbers" id="page-numbers"></div>
-            <button id="next-page" class="pagination-button">
-                Siguiente
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                     viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                </svg>
-            </button>
-        </div>
+    <div class="users-container" id="users-container"></div>
+    <div id="modals-container"></div>
 
-        <div class="overlay" id="overlay"></div>
-
-        {% for user in users_data %}
-        <div class="logs-modal" id="logs-modal-{{ loop.index0 }}">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeLogsModal({{ loop.index0 }})">&times;</span>
-                <h4 class="logs-title">Actividad reciente - <span class="username-highlight">{{ user.username }}</span></h4>
-                <div class="logs-list">
-                    {% for log in user.logs %}
-                    <div class="log-entry">
-                        <div class="log-url">{{ log.url|truncate(40) }}</div>
-                        <div class="log-details">
-                            <span class="response-badge response-{{ log.response }}">{{ log.response }}</span>
-                            <span class="log-meta">{{ log.request_count }} reqs</span>
-                            <span class="log-meta">
-                                {% if log.data_transmitted < 1024 %}
-                                    {{ log.data_transmitted }} B
-                                {% elif log.data_transmitted < 1024 * 1024 %}
-                                    {{ (log.data_transmitted / 1024)|round(2) }} KB
-                                {% elif log.data_transmitted < 1024 * 1024 * 1024 %}
-                                    {{ (log.data_transmitted / 1024 / 1024)|round(2) }} MB
-                                {% else %}
-                                    {{ (log.data_transmitted / 1024 / 1024 / 1024)|round(2) }} GB
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="no-logs">No hay actividad registrada</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+    <div class="pagination-container">
+        <button id="prev-page" class="pagination-button" disabled>Anterior</button>
+        <div class="page-numbers" id="page-numbers"></div>
+        <button id="next-page" class="pagination-button">Siguiente</button>
     </div>
+
+    <div class="overlay" id="overlay"></div>
+</div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("username-search");
-        let userCards = Array.from(document.querySelectorAll(".user-card"));
-        let filteredUsers = [...userCards];
+        let userCards = [];
+        let filteredUsers = [];
         const usersContainer = document.getElementById("users-container");
+        const modalsContainer = document.getElementById("modals-container");
 
         const prevBtn = document.getElementById("prev-page");
         const nextBtn = document.getElementById("next-page");
@@ -131,7 +50,6 @@
         let currentPage = 1;
         const itemsPerPage = 15;
 
-        // 🔹 Siempre configurar el input con la fecha actual al cargar
         const today = new Date().toISOString().split('T')[0];
         if (!dateFilter.value) {
             dateFilter.value = today;
@@ -160,10 +78,9 @@
             }
         });
 
-       function updateUsersData(usersData) {
+        function updateUsersData(usersData) {
             const cardsHTML = usersData.map((user, index) => `
     <div class="user-card" data-username="${user.username.toLowerCase()}">
-      <!-- Cabecera simplificada -->
       <header class="card-header">
         <div class="avatar">${user.username.charAt(0).toUpperCase()}</div>
         <div class="user-info">
@@ -172,14 +89,12 @@
         </div>
       </header>
 
-      <!-- Botón central -->
-<div class="card-action">
-  <button class="activity-button" onclick="event.stopPropagation(); openLogsModal(${index});">
-    ACTIVIDAD
-  </button>
-</div>
+      <div class="card-action">
+        <button class="activity-button" onclick="event.stopPropagation(); openLogsModal(${index});">
+          ACTIVIDAD
+        </button>
+      </div>
 
-      <!-- Franja inferior con métricas -->
       <footer class="card-footer">
         <div class="footer-item">
           <span class="label">Requests:</span>
@@ -193,14 +108,38 @@
     </div>
   `).join('');
 
+            const modalsHTML = usersData.map((user, index) => `
+    <div class="logs-modal" id="logs-modal-${index}">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeLogsModal(${index})">&times;</span>
+        <h4 class="logs-title">Actividad reciente - <span class="username-highlight">${user.username}</span></h4>
+        <div class="logs-list">
+          ${user.logs.length > 0
+            ? user.logs.map(log => `
+              <div class="log-entry">
+                <div class="log-url">${truncate(log.url, 40)}</div>
+                <div class="log-details">
+                  <span class="response-badge response-${log.response}">${log.response}</span>
+                  <span class="log-meta">${log.request_count} reqs</span>
+                  <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
+                </div>
+              </div>
+            `).join('')
+            : '<div class="no-logs">No hay actividad registrada</div>'}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
             usersContainer.innerHTML = cardsHTML;
+            modalsContainer.innerHTML = modalsHTML;
+
             userCards = Array.from(document.querySelectorAll(".user-card"));
             filteredUsers = [...userCards];
+
             renderPage(1);
             filterUsers();
-            applyCardInteractions();
         }
-
 
         function truncate(str, n) {
             return str.length > n ? str.slice(0, n - 1) + "..." : str;
@@ -210,12 +149,10 @@
             const units = ["B", "KB", "MB", "GB"];
             let value = bytes;
             let unitIndex = 0;
-
             while (value >= 1024 && unitIndex < units.length - 1) {
                 value /= 1024;
                 unitIndex++;
             }
-
             return `${value.toFixed(2)} ${units[unitIndex]}`;
         }
 
@@ -234,7 +171,7 @@
             prevBtn.disabled = currentPage === 1;
             nextBtn.disabled = currentPage === totalPages;
 
-            pageNumbers.innerHTML = `Page ${currentPage} of ${totalPages}`;
+            pageNumbers.innerHTML = `Página ${currentPage} de ${totalPages}`;
         }
 
         function filterUsers() {
@@ -251,38 +188,8 @@
         nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
 
         renderPage(1);
-
-        // Carga datos iniciales para la fecha actual
         dateFilter.dispatchEvent(new Event("change"));
     });
-
-    function applyCardInteractions() {
-    // Ejemplo: si las tarjetas tienen un botón para expandirse
-    const cards = document.querySelectorAll('.user-card');
-
-    cards.forEach(card => {
-        const header = card.querySelector('.user-header');
-        if (header) {
-            header.addEventListener('click', () => {
-                card.classList.toggle('expanded'); // o la clase que use tu CSS
-            });
-        }
-
-        // Si hay modales dentro de la tarjeta
-        const openBtn = card.querySelector('[data-open-modal]');
-        const closeBtn = card.querySelector('[data-close-modal]');
-        const modal = card.querySelector('.modal');
-
-        if (openBtn && modal) {
-            openBtn.addEventListener('click', () => modal.classList.add('active'));
-        }
-
-        if (closeBtn && modal) {
-            closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-        }
-    });
-}
-
 
     function openLogsModal(index) {
         document.getElementById(`logs-modal-${index}`).classList.add("active");
@@ -292,4 +199,3 @@
         document.getElementById(`logs-modal-${index}`).classList.remove("active");
     }
 </script>
-
