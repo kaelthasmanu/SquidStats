@@ -79,6 +79,7 @@
         });
 
         function updateUsersData(usersData) {
+            console.log(usersData);
             const cardsHTML = usersData.map((user, index) => `
     <div class="user-card" data-username="${user.username.toLowerCase()}">
       <header class="card-header">
