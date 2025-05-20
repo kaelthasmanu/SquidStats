@@ -1,52 +1,130 @@
 <section class="cache-stats">
     <div class="stats-container">
-        <div class="card">
-            <i class="fas fa-database"></i>
-            <h3>Entradas almacenadas</h3>
-            <p>{{ cache_stats.store_entries }}</p>
-        </div>
-        <div class="card">
-            <i class="fas fa-chart-pie"></i>
-            <h3>Uso de capacidad</h3>
-            <p>{{ cache_stats.capacity_used }}%</p>
-        </div>
-        <div class="card">
-            <i class="fas fa-hdd"></i>
-            <h3>Espacio total en disco</h3>
-            {% if (cache_stats.fs_space_total / 1024) < 1024 %}
-                <p>{{ (cache_stats.fs_space_total / 1024 )|int }} MB</p>
-            {% else %}
-                <p>{{ (cache_stats.fs_space_total / 1024 / 1024 )|round(2) }} GB</p>
-            {% endif %}
-        </div>
-        <div class="card">
-            <i class="fas fa-folder-open"></i>
-            <h3>Espacio usado en disco</h3>
-            {% if (cache_stats.fs_space_used / 1024) < 1024 %}
-                <p>{{ (cache_stats.fs_space_used / 1024 )|int }} MB</p>
-            {% else %}
-                <p>{{ (cache_stats.fs_space_used / 1024 / 1024 )|round(2) }} GB</p>
-            {% endif %}
-        </div>
-        <div class="card">
-            <i class="fas fa-recycle"></i>
-            <h3>Política de eliminación</h3>
-            <p>{{ cache_stats.removal_policy }}</p>
-        </div>
-        <div class="card">
-            <i class="fas fa-clock"></i>
-            <h3>Edad LRU</h3>
-            <p>{{ cache_stats.lru_age_days }} días</p>
-        </div>
-    </div>
 
-    <div class="cache-legend">
-        <h3><i class="fas fa-info-circle"></i> Información sobre las métricas</h3>
-        <p><strong>Entradas almacenadas:</strong> Número de objetos actualmente en la caché de Squid.</p>
-        <p><strong>Uso de capacidad:</strong> Porcentaje de almacenamiento de caché utilizado en relación con el tamaño máximo asignado (<code>max_swap_size</code>).</p>
-        <p><strong>Espacio total en disco:</strong> Espacio total del sistema de archivos donde se almacena la caché.</p>
-        <p><strong>Espacio usado en disco:</strong> Cantidad de espacio en disco ocupada por Squid, incluyendo metadatos.</p>
-        <p><strong>Política de eliminación:</strong> Método usado para descartar objetos antiguos de la caché. "LRU" (Least Recently Used) elimina los menos utilizados recientemente.</p>
-        <p><strong>Edad LRU:</strong> Tiempo en días del objeto más antiguo almacenado en caché antes de ser eliminado.</p>
-    </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 bg-slate-100">
+
+            <!-- Flip Card: Entradas almacenadas -->
+            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
+                <div
+                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                    <!-- Front -->
+                    <div
+                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                        <i class="fas fa-database text-3xl text-blue-600 mb-2"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Entradas almacenadas</h3>
+                        <p class="text-xl text-blue-800">{{ cache_stats.store_entries }}</p>
+                    </div>
+                    <!-- Back -->
+                    <div
+                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                        <h3 class="text-xl font-bold mb-2">Entradas Almacenadas</h3>
+                        <p class="text-sm">Número de objetos actualmente en la caché de Squid.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flip Card: Uso de capacidad -->
+            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
+                <div
+                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                    <!-- Front -->
+                    <div
+                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                        <i class="fas fa-chart-pie text-3xl text-blue-600 mb-2"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Uso de capacidad</h3>
+                        <p class="text-xl text-blue-800">{{ cache_stats.capacity_used }}%</p>
+                    </div>
+                    <!-- Back -->
+                    <div
+                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                        <h3 class="text-lg font-semibold mb-2">Uso de capacidad</h3>
+                        <p class="text-sm">Porcentaje del almacenamiento de caché en uso actualmente.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flip Card: Espacio total en disco -->
+            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
+                <div
+                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                    <div
+                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                        <i class="fas fa-hdd text-3xl text-blue-600 mb-2"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Espacio total</h3>
+                        {% if (cache_stats.fs_space_total / 1024) < 1024 %} <p class="text-xl text-blue-800">{{
+                            (cache_stats.fs_space_total / 1024)|int }} MB</p>
+                            {% else %}
+                            <p class="text-xl text-blue-800">{{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }}
+                                GB</p>
+                            {% endif %}
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                        <h3 class="text-lg font-semibold mb-2">Espacio total</h3>
+                        <p class="text-sm">Tamaño total del disco asignado a la caché de Squid.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flip Card: Espacio usado en disco -->
+            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
+                <div
+                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                    <div
+                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                        <i class="fas fa-folder-open text-3xl text-blue-600 mb-2"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Espacio usado</h3>
+                        {% if (cache_stats.fs_space_used / 1024) < 1024 %} <p class="text-xl text-blue-800">{{
+                            (cache_stats.fs_space_used / 1024 )|int }} MB</p>
+                            {% else %}
+                            <p class="text-xl text-blue-800">{{ (cache_stats.fs_space_used / 1024 / 1024 )|round(2) }}
+                                GB</p>
+                            {% endif %}
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                        <h3 class="text-lg font-semibold mb-2">Espacio usado</h3>
+                        <p class="text-sm">Cantidad de espacio de disco ya ocupado por objetos en caché.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flip Card: Política de eliminación -->
+            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
+                <div
+                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                    <div
+                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                        <i class="fas fa-recycle text-3xl text-blue-600 mb-2"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Eliminación</h3>
+                        <p class="text-xl text-blue-800">{{ cache_stats.removal_policy }}</p>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                        <h3 class="text-lg font-semibold mb-2">Política de eliminación</h3>
+                        <p class="text-sm">Método que Squid usa para eliminar objetos antiguos de la caché.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flip Card: Edad LRU -->
+            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
+                <div
+                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                    <div
+                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                        <i class="fas fa-clock text-3xl text-blue-600 mb-2"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Edad LRU</h3>
+                        <p class="text-xl text-blue-800">{{ cache_stats.lru_age_days }} días</p>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                        <h3 class="text-lg font-semibold mb-2">Edad LRU</h3>
+                        <p class="text-sm">Tiempo desde que el objeto menos usado fue accedido por última vez.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
 </section>
