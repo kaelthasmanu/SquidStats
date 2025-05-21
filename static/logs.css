@@ -157,48 +157,9 @@ body {
 }
 
 /* =================== Modal =================== */
-.logs-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--modal-bg);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
 
-.logs-modal.active {
-    display: flex;
-}
 
-.modal-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
 
-.close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #888;
-    cursor: pointer;
-}
-
-.close-modal:hover {
-    color: #333;
-}
 
 /* =================== Logs =================== */
 .logs-section {

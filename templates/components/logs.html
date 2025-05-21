@@ -1,83 +1,87 @@
 <div class="users-dashboard">
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">Panel Actividad de Usuarios</h1>
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Panel Actividad de Usuarios</h1>
 
-        <div class="filters-container flex gap-4 items-center">
-            <div class="date-filter">
-                <input type="date" id="date-filter" class="px-4 py-2 border rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
+    <div class="filters-container flex gap-4 items-center">
+      <div class="date-filter">
+        <input type="date" id="date-filter"
+          class="px-4 py-2 border rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+      </div>
 
-            <div class="search-container">
-                <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input">
-                <button class="search-button">
-                    <!-- icono lupa -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
-                    </svg>
-                </button>
-            </div>
-        </div>
+      <div class="search-container">
+        <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input">
+        <button class="search-button">
+          <!-- icono lupa -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path
+              d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+          </svg>
+        </button>
+      </div>
     </div>
+  </div>
 
-    <div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
-    <div id="modals-container"></div>
+  <div
+    class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4"
+    id="users-container"></div>
+  <div id="modals-container"></div>
 
-    <div class="pagination-container">
-        <button id="prev-page" class="pagination-button" disabled>Anterior</button>
-        <div class="page-numbers" id="page-numbers"></div>
-        <button id="next-page" class="pagination-button">Siguiente</button>
-    </div>
+  <div class="pagination-container">
+    <button id="prev-page" class="pagination-button" disabled>Anterior</button>
+    <div class="page-numbers" id="page-numbers"></div>
+    <button id="next-page" class="pagination-button">Siguiente</button>
+  </div>
 
-    <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden" id="overlay"></div>
+  <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden" id="overlay"></div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const searchInput = document.getElementById("username-search");
-        let userCards = [];
-        let filteredUsers = [];
-        const usersContainer = document.getElementById("users-container");
-        const modalsContainer = document.getElementById("modals-container");
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("username-search");
+    let userCards = [];
+    let filteredUsers = [];
+    const usersContainer = document.getElementById("users-container");
+    const modalsContainer = document.getElementById("modals-container");
 
-        const prevBtn = document.getElementById("prev-page");
-        const nextBtn = document.getElementById("next-page");
-        const pageNumbers = document.getElementById("page-numbers");
-        const dateFilter = document.getElementById("date-filter");
+    const prevBtn = document.getElementById("prev-page");
+    const nextBtn = document.getElementById("next-page");
+    const pageNumbers = document.getElementById("page-numbers");
+    const dateFilter = document.getElementById("date-filter");
 
-        let currentPage = 1;
-        const itemsPerPage = 15;
+    let currentPage = 1;
+    const itemsPerPage = 15;
 
-        const today = new Date().toISOString().split('T')[0];
-        if (!dateFilter.value) {
-            dateFilter.value = today;
-        }
+    const today = new Date().toISOString().split('T')[0];
+    if (!dateFilter.value) {
+      dateFilter.value = today;
+    }
 
-        dateFilter.addEventListener("change", async (e) => {
-            const selectedDate = e.target.value;
-            if (!selectedDate) return;
+    dateFilter.addEventListener("change", async (e) => {
+      const selectedDate = e.target.value;
+      if (!selectedDate) return;
 
-            try {
-                const response = await fetch("/get-logs-by-date", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ date: selectedDate }),
-                });
-
-                if (!response.ok) throw new Error("Error fetching data");
-
-                const usersData = await response.json();
-                updateUsersData(usersData);
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Error al cargar los datos");
-            }
+      try {
+        const response = await fetch("/get-logs-by-date", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ date: selectedDate }),
         });
 
-        function updateUsersData(usersData) {
-            console.log(usersData);
-            const cardsHTML = usersData.map((user, index) => `
+        if (!response.ok) throw new Error("Error fetching data");
+
+        const usersData = await response.json();
+        updateUsersData(usersData);
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error al cargar los datos");
+      }
+    });
+
+    function updateUsersData(usersData) {
+      console.log(usersData);
+      const cardsHTML = usersData.map((user, index) => `
     <div class="user-card  w-full max-w-[320px] mx-auto rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 flex flex-col justify-between overflow-hidden" data-username="${user.username.toLowerCase()}">
       <header class="card-header flex flex-col items-center p-4 bg-gradient-to-l from-[#00D2C8] to-[#1A8A9D] text-[#FAEAFF]">
         <div class="avatar bg-[var(--primary-color)] text-white text-[1.9rem] font-bold w-[100px] h-[100px] rounded-full flex items-center justify-center border-[4px] border-white mb-0">${user.username.charAt(0).toUpperCase()}</div>
@@ -106,14 +110,14 @@
     </div>
   `).join('');
 
-            const modalsHTML = usersData.map((user, index) => `
-    <div class="logs-modal" id="logs-modal-${index}">
-      <div class="modal-content">
-        <span class="close-modal" onclick="closeLogsModal(${index})">&times;</span>
+      const modalsHTML = usersData.map((user, index) => `
+    <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center" id="logs-modal-${index}">
+      <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative">
+        <span class="close-modal absolute top-4 right-6 text-2xl font-bold text-gray-500 hover:text-gray-800 cursor-pointer" onclick="closeLogsModal(${index})">&times;</span>
         <h4 class="logs-title">Actividad reciente - <span class="username-highlight">${user.username}</span></h4>
         <div class="logs-list">
           ${user.logs.length > 0
-            ? user.logs.map(log => `
+          ? user.logs.map(log => `
               <div class="log-entry">
                 <div class="log-url">${truncate(log.url, 40)}</div>
                 <div class="log-details">
@@ -123,80 +127,99 @@
                 </div>
               </div>
             `).join('')
-            : '<div class="no-logs">No hay actividad registrada</div>'}
+          : '<div class="no-logs">No hay actividad registrada</div>'}
         </div>
       </div>
     </div>
   `).join('');
 
-            usersContainer.innerHTML = cardsHTML;
-            modalsContainer.innerHTML = modalsHTML;
+      usersContainer.innerHTML = cardsHTML;
+      modalsContainer.innerHTML = modalsHTML;
 
-            userCards = Array.from(document.querySelectorAll(".user-card"));
-            filteredUsers = [...userCards];
+      userCards = Array.from(document.querySelectorAll(".user-card"));
+      filteredUsers = [...userCards];
 
-            renderPage(1);
-            filterUsers();
-        }
+      renderPage(1);
+      filterUsers();
+    }
 
-        function truncate(str, n) {
-            return str.length > n ? str.slice(0, n - 1) + "..." : str;
-        }
+    function truncate(str, n) {
+      return str.length > n ? str.slice(0, n - 1) + "..." : str;
+    }
 
-        function formatBytes(bytes) {
-            const units = ["B", "KB", "MB", "GB"];
-            let value = bytes;
-            let unitIndex = 0;
-            while (value >= 1024 && unitIndex < units.length - 1) {
-                value /= 1024;
-                unitIndex++;
-            }
-            return `${value.toFixed(2)} ${units[unitIndex]}`;
-        }
+    function formatBytes(bytes) {
+      const units = ["B", "KB", "MB", "GB"];
+      let value = bytes;
+      let unitIndex = 0;
+      while (value >= 1024 && unitIndex < units.length - 1) {
+        value /= 1024;
+        unitIndex++;
+      }
+      return `${value.toFixed(2)} ${units[unitIndex]}`;
+    }
 
-        function renderPage(page = 1) {
-            const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-            currentPage = Math.min(Math.max(1, page), totalPages);
+    function renderPage(page = 1) {
+      const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+      currentPage = Math.min(Math.max(1, page), totalPages);
 
-            userCards.forEach(card => (card.style.display = "none"));
+      userCards.forEach(card => (card.style.display = "none"));
 
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageItems = filteredUsers.slice(start, end);
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageItems = filteredUsers.slice(start, end);
 
-            pageItems.forEach(card => (card.style.display = ""));
+      pageItems.forEach(card => (card.style.display = ""));
 
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages;
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
 
-            pageNumbers.innerHTML = `Página ${currentPage} de ${totalPages}`;
-        }
+      pageNumbers.innerHTML = `Página ${currentPage} de ${totalPages}`;
+    }
 
-        function filterUsers() {
-            const searchValue = searchInput.value.toLowerCase();
-            filteredUsers = userCards.filter(card => {
-                const username = card.getAttribute("data-username");
-                return username.includes(searchValue);
-            });
-            renderPage(1);
-        }
+    function filterUsers() {
+      const searchValue = searchInput.value.toLowerCase();
+      filteredUsers = userCards.filter(card => {
+        const username = card.getAttribute("data-username");
+        return username.includes(searchValue);
+      });
+      renderPage(1);
+    }
 
-        searchInput.addEventListener("input", filterUsers);
-        prevBtn.addEventListener("click", () => renderPage(currentPage - 1));
-        nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
+    searchInput.addEventListener("input", filterUsers);
+    prevBtn.addEventListener("click", () => renderPage(currentPage - 1));
+    nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
 
-        renderPage(1);
-        dateFilter.dispatchEvent(new Event("change"));
-    });
+    renderPage(1);
+    dateFilter.dispatchEvent(new Event("change"));
+  });
 
-function openLogsModal(index) {
-    document.getElementById(`logs-modal-${index}`).classList.add("active");
-    document.getElementById("overlay").classList.remove("hidden");
-}
+  function openLogsModal(index) {
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const overlay = document.getElementById('overlay');
 
-function closeLogsModal(index) {
-    document.getElementById(`logs-modal-${index}`).classList.remove("active");
-    document.getElementById("overlay").classList.add("hidden");
-}
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    if (overlay) {
+      overlay.classList.remove('hidden');
+    }
+  }
+
+  function closeLogsModal(index) {
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const overlay = document.getElementById('overlay');
+
+    if (modal) {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    if (overlay) {
+      overlay.classList.add('hidden');
+    }
+  }
+
 
 </script>
