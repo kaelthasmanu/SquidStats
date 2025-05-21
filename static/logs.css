@@ -229,18 +229,6 @@ body {
     color: #ccc;
 }
 
-.response-badge {
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    margin-right: 0.8rem;
-    color: white;
-}
-.response-200 { background-color: #2ecc71; }
-.response-404 { background-color: #e74c3c; }
-.response-500 { background-color: #f39c12; }
-
 .no-logs {
     text-align: center;
     padding: 1rem;

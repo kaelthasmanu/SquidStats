@@ -110,42 +110,112 @@
     </div>
   `).join('');
 
-      const modalsHTML = usersData.map((user, index) => `
+      const modalsHTML = usersData.map((user, index) => {
+        // Conteo agrupado por rango de status
+        const responseCounts = {
+          informational: 0,   // 100–199
+          successful: 0,      // 200–299
+          redirection: 0,     // 300–399
+          clientError: 0,     // 400–499
+          serverError: 0,     // 500–599
+          unknown: 0          // Otros códigos
+        };
+
+        user.logs.forEach(log => {
+          const code = log.response;
+          if (code >= 100 && code <= 199) responseCounts.informational++;
+          else if (code >= 200 && code <= 299) responseCounts.successful++;
+          else if (code >= 300 && code <= 399) responseCounts.redirection++;
+          else if (code >= 400 && code <= 499) responseCounts.clientError++;
+          else if (code >= 500 && code <= 599) responseCounts.serverError++;
+          else responseCounts.unknown++;
+        });
+
+        // Definimos íconos y colores para cada rango
+        const responseGroups = {
+          informational: { icon: 'fa-info-circle', color: 'text-blue-500', label: 'Respuestas informativas (100–199)' },
+          successful: { icon: 'fa-circle-check', color: 'text-green-500', label: 'Respuestas exitosas (200–299)' },
+          redirection: { icon: 'fa-arrow-right', color: 'text-yellow-500', label: 'Mensajes de redirección (300–399)' },
+          clientError: { icon: 'fa-circle-xmark', color: 'text-red-500', label: 'Respuestas de error del cliente (400–499)' },
+          serverError: { icon: 'fa-triangle-exclamation', color: 'text-orange-400', label: 'Respuestas de error del servidor (500–599)' },
+          unknown: { icon: 'fa-question', color: 'text-gray-500', label: 'Otros' }
+        };
+
+        const responseSummary = Object.entries(responseCounts).map(([key, count]) => {
+          if (count === 0) return ''; // No mostramos rangos sin conteo
+          const { icon, color, label } = responseGroups[key];
+          return `
+      <div class="flex items-center gap-1 text-sm ${color}" title="${label}">
+        <i class="fa-solid ${icon}"></i>
+        <span>${count}</span>
+      </div>`;
+        }).join('');
+
+        // Luego devuelves el HTML completo del modal, usando responseSummary
+        return `
   <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center" id="logs-modal-${index}">
     <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative">
       <span class="close-modal absolute top-4 right-6 text-2xl font-bold text-gray-500 hover:text-gray-800 cursor-pointer" onclick="closeLogsModal(${index})">&times;</span>
-      <h4 class="logs-title">Actividad reciente - <span class="username-highlight">${user.username}</span></h4>
-      <div class="logs-list space-y-4 mt-4">
-        ${user.logs.length > 0
-          ? user.logs.map(log => {
-            const truncatedUrl = truncate(log.url, 40);
-            const isHttps = /:(443|8443)$/.test(log.url);
-            const protocol = isHttps ? 'https://' : 'http://';
-            const fullUrl = log.url.startsWith('http') ? log.url : protocol + log.url;
+      
+      <div class="flex justify-between items-center mb-2">
+        <h4 class="logs-title text-lg font-semibold">
+          Actividad reciente - <span class="username-highlight">${user.username}</span>
+        </h4>
+        <div class="flex gap-4 items-center">
+          ${responseSummary}
+        </div>
+      </div>
 
-            return `
-              <div class="log-entry flex justify-between items-start gap-4 border-b pb-2">
+      <div class="logs-list space-y-2 mt-2">
+        ${user.logs.length > 0
+            ? user.logs.map(log => {
+              const truncatedUrl = truncate(log.url, 40);
+              const isHttps = /:(443|8443)$/.test(log.url);
+              const protocol = isHttps ? 'https://' : 'http://';
+              const fullUrl = log.url.startsWith('http') ? log.url : protocol + log.url;
+
+              const responseColors = {
+                100: 'bg-blue-400',
+                200: 'bg-green-500',
+                300: 'bg-yellow-400',
+                400: 'bg-red-500',
+                500: 'bg-orange-400',
+                0: 'bg-gray-400'
+              };
+
+              // Para badge, elige color según rango de código
+              let badgeClass = 'bg-gray-400';
+              if (log.response >= 100 && log.response <= 199) badgeClass = 'bg-blue-400';
+              else if (log.response >= 200 && log.response <= 299) badgeClass = 'bg-green-500';
+              else if (log.response >= 300 && log.response <= 399) badgeClass = 'bg-yellow-400';
+              else if (log.response >= 400 && log.response <= 499) badgeClass = 'bg-red-500';
+              else if (log.response >= 500 && log.response <= 599) badgeClass = 'bg-orange-400';
+
+              return `
+              <div class="log-entry flex justify-between items-start gap-3 border-b border-gray-200 pb-1">
                 <div class="flex-1">
                   <div class="log-url text-sm font-medium text-gray-800">${truncatedUrl}</div>
                   <div class="log-details mt-1 flex flex-wrap gap-3 text-sm text-gray-600">
-                    <span class="response-badge response-${log.response}">${log.response}</span>
+                    <span class="response-badge ${badgeClass} inline-block px-2 py-[0.15rem] rounded-md text-[0.65rem] font-medium text-white mr-2">${log.response}</span>
                     <span class="log-meta">${log.request_count} reqs</span>
                     <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
                   </div>
                 </div>
                 <div class="self-start">
                   <i class="fa-solid fa-up-right-from-square text-blue-600 hover:text-blue-800 cursor-pointer text-lg"
-                     title="Abrir enlace"
-                     onclick="window.open('${fullUrl}', '_blank')"></i>
+                    title="Abrir enlace"
+                    onclick="window.open('${fullUrl}', '_blank')"></i>
                 </div>
               </div>`;
-          }).join('')
-          : '<div class="no-logs text-gray-500">No hay actividad registrada</div>'
-        }
+            }).join('')
+            : '<div class="no-logs text-gray-500">No hay actividad registrada</div>'
+          }
       </div>
     </div>
-  </div>
-`).join('');
+  </div>`;
+      }).join('');
+
+
 
       usersContainer.innerHTML = cardsHTML;
       modalsContainer.innerHTML = modalsHTML;
