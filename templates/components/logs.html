@@ -278,53 +278,64 @@
     dateFilter.dispatchEvent(new Event("change"));
   });
 
-    function openLogsModal(index) {
-      const modal = document.getElementById(`logs-modal-${index}`);
-      const overlay = document.getElementById('overlay');
-      const modalContent = modal.querySelector('.modal-content');
+  function openLogsModal(index) {
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const overlay = document.getElementById('overlay');
 
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
 
-        requestAnimationFrame(() => {
+      // Forzar render con opacity-0 primero
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0');
+
+      requestAnimationFrame(() => {
+        // Segundo frame: se fuerza la transición
+        setTimeout(() => {
           modal.classList.remove('opacity-0');
           modal.classList.add('opacity-100');
-        });
-
-        if (overlay) {
-          overlay.classList.remove('hidden');
-          requestAnimationFrame(() => {
-            overlay.classList.add('opacity-100');
-            overlay.classList.remove('opacity-0');
-          });
-        }
-      }
+        }, 10); // solo 10ms bastan para forzar el efecto
+      });
     }
+
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      overlay.classList.remove('opacity-100');
+      overlay.classList.add('opacity-0');
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          overlay.classList.remove('opacity-0');
+          overlay.classList.add('opacity-100');
+        }, 10);
+      });
+    }
+  }
 
   function closeLogsModal(index) {
-      const modal = document.getElementById(`logs-modal-${index}`);
-      const overlay = document.getElementById('overlay');
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const overlay = document.getElementById('overlay');
 
-      if (modal) {
-        modal.classList.remove('opacity-100');
-        modal.classList.add('opacity-0');
+    if (modal) {
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0');
 
-        // Espera a que termine la animación antes de ocultar
-        setTimeout(() => {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }, 1000); // Debe coincidir con la duracion de la clase
-      }
-
-      if (overlay) {
-        overlay.classList.remove('opacity-100');
-        overlay.classList.add('opacity-0');
-        setTimeout(() => {
-          overlay.classList.add('hidden');
-        }, 1000);
-      }
-
+      // Espera a que termine la animación antes de ocultar
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }, 1000); // Debe coincidir con la duracion de la clase
     }
 
-  </script>
+    if (overlay) {
+      overlay.classList.remove('opacity-100');
+      overlay.classList.add('opacity-0');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, 1000);
+    }
+
+  }
+
+</script>
