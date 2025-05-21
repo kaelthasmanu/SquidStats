@@ -32,7 +32,7 @@
     <button id="next-page" class="pagination-button">Siguiente</button>
   </div>
 
-  <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden" id="overlay"></div>
+  <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
 </div>
 
 <script>
@@ -153,11 +153,12 @@
 
         // Luego devuelves el HTML completo del modal, usando responseSummary
         return `
-  <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center" id="logs-modal-${index}">
-    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative">
-      <span class="close-modal absolute top-4 right-6 text-2xl font-bold text-gray-500 hover:text-gray-800 cursor-pointer" onclick="closeLogsModal(${index})">&times;</span>
-      
+  <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
+    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative onmouseleave="closeLogsModal(${index})">
       <div class="flex justify-between items-center mb-2">
+        <button onclick="closeLogsModal(${index})" class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl font-bold z-10" title="Cerrar">
+          &times;
+        </button>
         <h4 class="logs-title text-lg font-semibold">
           Actividad reciente - <span class="username-highlight">${user.username}</span>
         </h4>
@@ -277,33 +278,53 @@
     dateFilter.dispatchEvent(new Event("change"));
   });
 
-  function openLogsModal(index) {
-    const modal = document.getElementById(`logs-modal-${index}`);
-    const overlay = document.getElementById('overlay');
+    function openLogsModal(index) {
+      const modal = document.getElementById(`logs-modal-${index}`);
+      const overlay = document.getElementById('overlay');
+      const modalContent = modal.querySelector('.modal-content');
 
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
 
-    if (overlay) {
-      overlay.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          modal.classList.remove('opacity-0');
+          modal.classList.add('opacity-100');
+        });
+
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            overlay.classList.add('opacity-100');
+            overlay.classList.remove('opacity-0');
+          });
+        }
+      }
     }
-  }
 
   function closeLogsModal(index) {
-    const modal = document.getElementById(`logs-modal-${index}`);
-    const overlay = document.getElementById('overlay');
+      const modal = document.getElementById(`logs-modal-${index}`);
+      const overlay = document.getElementById('overlay');
 
-    if (modal) {
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+
+        // Espera a que termine la animación antes de ocultar
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }, 1000); // Debe coincidir con la duracion de la clase
+      }
+
+      if (overlay) {
+        overlay.classList.remove('opacity-100');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => {
+          overlay.classList.add('hidden');
+        }, 1000);
+      }
+
     }
 
-    if (overlay) {
-      overlay.classList.add('hidden');
-    }
-  }
-
-
-</script>
+  </script>
