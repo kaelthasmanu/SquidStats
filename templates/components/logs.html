@@ -111,27 +111,41 @@
   `).join('');
 
       const modalsHTML = usersData.map((user, index) => `
-    <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center" id="logs-modal-${index}">
-      <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative">
-        <span class="close-modal absolute top-4 right-6 text-2xl font-bold text-gray-500 hover:text-gray-800 cursor-pointer" onclick="closeLogsModal(${index})">&times;</span>
-        <h4 class="logs-title">Actividad reciente - <span class="username-highlight">${user.username}</span></h4>
-        <div class="logs-list">
-          ${user.logs.length > 0
-          ? user.logs.map(log => `
-              <div class="log-entry">
-                <div class="log-url">${truncate(log.url, 40)}</div>
-                <div class="log-details">
-                  <span class="response-badge response-${log.response}">${log.response}</span>
-                  <span class="log-meta">${log.request_count} reqs</span>
-                  <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
+  <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center" id="logs-modal-${index}">
+    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] relative">
+      <span class="close-modal absolute top-4 right-6 text-2xl font-bold text-gray-500 hover:text-gray-800 cursor-pointer" onclick="closeLogsModal(${index})">&times;</span>
+      <h4 class="logs-title">Actividad reciente - <span class="username-highlight">${user.username}</span></h4>
+      <div class="logs-list space-y-4 mt-4">
+        ${user.logs.length > 0
+          ? user.logs.map(log => {
+            const truncatedUrl = truncate(log.url, 40);
+            const isHttps = /:(443|8443)$/.test(log.url);
+            const protocol = isHttps ? 'https://' : 'http://';
+            const fullUrl = log.url.startsWith('http') ? log.url : protocol + log.url;
+
+            return `
+              <div class="log-entry flex justify-between items-start gap-4 border-b pb-2">
+                <div class="flex-1">
+                  <div class="log-url text-sm font-medium text-gray-800">${truncatedUrl}</div>
+                  <div class="log-details mt-1 flex flex-wrap gap-3 text-sm text-gray-600">
+                    <span class="response-badge response-${log.response}">${log.response}</span>
+                    <span class="log-meta">${log.request_count} reqs</span>
+                    <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
+                  </div>
                 </div>
-              </div>
-            `).join('')
-          : '<div class="no-logs">No hay actividad registrada</div>'}
-        </div>
+                <div class="self-start">
+                  <i class="fa-solid fa-up-right-from-square text-blue-600 hover:text-blue-800 cursor-pointer text-lg"
+                     title="Abrir enlace"
+                     onclick="window.open('${fullUrl}', '_blank')"></i>
+                </div>
+              </div>`;
+          }).join('')
+          : '<div class="no-logs text-gray-500">No hay actividad registrada</div>'
+        }
       </div>
     </div>
-  `).join('');
+  </div>
+`).join('');
 
       usersContainer.innerHTML = cardsHTML;
       modalsContainer.innerHTML = modalsHTML;
