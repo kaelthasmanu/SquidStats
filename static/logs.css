@@ -27,63 +27,10 @@ body {
 }
 
 /* =================== Dashboard =================== */
-.users-dashboard {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
 
-.dashboard-title {
-    text-align: center;
-    color: var(--primary-color);
-    margin-bottom: 2rem;
-    font-weight: 600;
-    font-size: 2.2rem;
-}
-
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
 
 /* =================== Search =================== */
-.search-container {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    overflow: hidden;
-    width: 300px;
-}
 
-.search-input {
-    flex-grow: 1;
-    border: none;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    outline: none;
-}
-
-.search-button {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.75rem 1rem;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.search-button:hover {
-    background: var(--secondary-color);
-}
 
 /* =================== User Cards =================== */
 
