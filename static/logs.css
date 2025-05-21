@@ -86,69 +86,11 @@ body {
 }
 
 /* =================== User Cards =================== */
-.users-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
 
-.user-card {
-    background: linear-gradient(to left, #00D2C8, #1A8A9D);
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    transition: transform 0.3s;
-}
 
-.user-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
 
 /* ---- Cabecera centrada ---- */
-.card-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
-    background: linear-gradient(to left, #00D2C8, #1A8A9D);
-    color: #FAEAFF;
-}
 
-.card-header .avatar {
-    background-color: var(--primary-color);
-    color: white;
-    font-size: 1.9rem;
-    font-weight: bold;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0;
-    border: 4px solid #FFFFFF;
-}
-
-.card-header .user-info {
-    text-align: center;
-    margin-top: 0;  /* separa usuario/IP del avatar */
-}
-
-.card-header .user-info .username {
-    font-weight: 600;
-    font-size: 1.2rem;
-    color: #FAEAFF;
-    margin-bottom: 0;
-}
-
-.card-header .user-info .ip-address {
-    font-size: 0.9rem;
-    color: #FAEAFF;
-}
 
 /* ---- Botón ACTIVIDAD posicionado a media frontera ---- */
 .card-action {
@@ -423,35 +365,5 @@ body {
     font-size: 0.9em;
 }
 
-/* =============== Ajustes finales =============== */
 
-/* Hacer las tarjetas más estrechas y menos altas */
-.users-container {
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* antes: 240px */
-  gap: 1rem;
-}
 
-.user-card {
-  /* Control estricto de tamaño */
-  width: 200px;
-  min-height: 280px;   /* antes usabas auto; aquí fijas una altura menor */
-}
-
-/* Aumentar tamaño de texto de usuario e IP */
-.card-header .user-info .username {
-  font-size: 1.4rem;   /* antes 1.2rem */
-}
-
-.card-header .user-info .ip-address {
-  font-size: 1.1rem;   /* antes 0.9rem */
-}
-
-/* Separar un poco los datos del footer */
-.card-footer .footer-item {
-  margin: 0 0.5rem;    /* espacio horizontal entre requests y data */
-}
-
-/* Opcional: ajustar altura del footer si hace falta */
-.card-footer {
-  padding: 1rem;       /* reducir un poco de 1.5rem */
-}
