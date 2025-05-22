@@ -26,87 +26,34 @@ body {
     padding: 0;
 }
 
-/* =================== Dashboard =================== */
-
-
-/* =================== Search =================== */
-
 
 /* =================== User Cards =================== */
+ /* Efectos del avatar */
+    
+    /* Efectos del footer */
+    .user-card .card-footer {
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      background-color: #1369ce;
+      position: absolute;
+      bottom: -70px; /* Ajustado para tarjeta estrecha */
+      left: 0;
+      transition: all 0.5s ease;
+    }
+    
+    .user-card:hover .card-footer {
+      bottom: 0;
+    }
+    
+    .user-card .card-footer li a:hover {
+      color: #1369ce;
+      background-color: #f7f5ec;
+    }
+    
+    /* Estilo del botón */
 
-
-
-/* ---- Cabecera centrada ---- */
-
-
-/* ---- Botón ACTIVIDAD posicionado a media frontera ---- */
-.card-action {
-    position: relative;
-    height: 1px;
-    margin: 0;
-}
-
-.card-action .activity-button {
-    position: absolute;
-    top: 100%; /* Parte inferior del .card-action */
-    left: 50%;
-    transform: translate(-50%, -50%); /* Subimos la mitad del alto del botón */
-    box-shadow: 0 0 15px 1px #000;
-    color: #FAEAFF;
-    background-color: #2F4858;
-    border-radius: 30px;
-    padding: 6px 18px;
-    transition: 250ms;
-    font-size: 0.85rem;
-    border: none;
-    font-weight: 500;
-    z-index: 10;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.card-action .activity-button:hover {
-    font-weight: bold;
-    color: #2F4858;
-    background-color: #FAEAFF;
-    padding: 5px 26px;   /* padding ligeramente mayor para hover */
-    transition: all 0.25s ease;
-}
-
-/* ---- Franja inferior con datos ---- */
-.card-footer {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: linear-gradient(to bottom, #2F4858, #2C687C);
-    color: #FAEAFF;
-    padding: 1.5rem;
-    border-top: none;
-    margin-top: -10px;
-}
-
-.card-footer .footer-item {
-    text-align: center;
-}
-
-.card-footer .footer-item .label {
-    display: block;
-    font-size: 0.75rem;
-    color: #FAEAFF;
-    margin-top: 12px; 
-}
-
-.card-footer .footer-item .value {
-    font-weight: 600;
-    font-size: 1rem;
-    color: #FAEAFF;
-    margin-top: 12px; 
-}
-
-/* =================== Modal =================== */
-
-
-
+    
 
 /* =================== Logs =================== */
 .logs-section {

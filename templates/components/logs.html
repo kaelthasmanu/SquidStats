@@ -1,16 +1,13 @@
 <div class="users-dashboard max-w-[1200px] mx-auto p-8">
   <div class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4">
-    <h1 class="dashboard-title text-center text-primary mb-8 font-semibold text-[2.2rem] text-blue-500">Panel Actividad de Usuarios
-    </h1>
+    <h1 class="dashboard-title text-center text-primary mb-8 font-semibold text-[2.2rem] text-blue-500">Panel Actividad de Usuarios</h1>
 <div class="filters-container flex gap-4 items-center">
 <div class="date-filter max-w-xs mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative">
   <input type="date" id="date-filter" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12">
 </div>
 
-  <div
-    class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[300px] relative">
-    <input type="text" id="username-search" placeholder="Buscar por usuario..."
-      class="search-input w-full pl-4 pr-12 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
+  <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[300px] relative">
+    <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input w-full pl-4 pr-12 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
     <!-- icono lupa -->
       <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
         <i class="fas fa-magnifying-glass text-2xl text-[#1A8A9D]"></i>
@@ -20,8 +17,7 @@
 </div>
 </div>
 
-<div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4"
-  id="users-container"></div>
+<div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
 <div id="modals-container"></div>
 
 <div class="pagination-container">
@@ -80,31 +76,41 @@
     function updateUsersData(usersData) {
       console.log(usersData);
       const cardsHTML = usersData.map((user, index) => `
-    <div class="user-card  w-full max-w-[320px] mx-auto rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 flex flex-col justify-between overflow-hidden" data-username="${user.username.toLowerCase()}">
-      <header class="card-header flex flex-col items-center p-4 bg-gradient-to-l from-[#00D2C8] to-[#1A8A9D] text-[#FAEAFF]">
-        <div class="avatar bg-[var(--primary-color)] text-white text-[1.9rem] font-bold w-[100px] h-[100px] rounded-full flex items-center justify-center border-[4px] border-white mb-0">${user.username.charAt(0).toUpperCase()}</div>
-        <div class="user-info text-center mt-0">
-          <h3 class="username font-semibold text-[1.2rem] text-[#FAEAFF] mb-0">${user.username}</h3>
-          <span class="ip-address text-[0.9rem] text-[#FAEAFF]">${user.ip}</span>
+    <div class="user-card group bg-[#f0f2f5] transition-[all] duration-[300ms] ease-[ease] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[35px]" data-username="${user.username.toLowerCase()}">
+        <!-- Avatar con efectos completos -->
+        <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] relative z-[1]">
+          <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-[300ms] ease-linear z-0 group-hover:h-full"></div>
+          <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
+          <div class="avatar w-full h-full rounded-full bg-slate-200 flex items-center justify-center text-[2.5rem] text-slate-500 relative transition-all duration-[900ms] ease-in-out group-hover:shadow-[0_0_0_10px_#f7f5ec] group-hover:scale-[0.7] z-[2]">
+            <i class="fas fa-user"></i>
+          </div>
         </div>
-      </header>
-
-      <div class="card-action">
-        <button class="activity-button" onclick="event.stopPropagation(); openLogsModal(${index});">
-          ACTIVIDAD
-        </button>
+        
+        <!-- Información de usuario -->
+        <div class="user-info mt-[-15px] mb-[12px] px-[15px]">
+          <h3 class="username font-semibold text-[1.2rem] text-[var(--text-primary)] mb-0">${user.username}</h3>
+          <h4 class="ip-address text-[0.9rem] text-[var(--text-primary)]">${user.ip}</h4>
+        </div>
+        
+        <!-- Botón de acción -->
+        <div class="card-action">
+          <button class="activity-button bg-[#1369ce] text-white border-none px-3 py-[6px] rounded cursor-pointer transition-all duration-300 my-2 font-medium inline-block text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5" onclick="event.stopPropagation(); openLogsModal(${index});">
+            ACTIVIDAD
+          </button>
+        </div>
+        
+        <!-- Footer -->
+        <ul class="card-footer">
+          <li class="inline-block">
+            <span class="label">Requests:</span>
+            <span class="value">${user.total_requests}</span>
+          </li>
+          <li class="inline-block">
+            <span class="label">Data:</span>
+            <span class="value">${formatBytes(user.total_data)}</span>
+          </li>
+        </ul>
       </div>
-
-      <footer class="card-footer">
-        <div class="footer-item">
-          <span class="label">Requests:</span>
-          <span class="value">${user.total_requests}</span>
-        </div>
-        <div class="footer-item">
-          <span class="label">Data:</span>
-          <span class="value">${formatBytes(user.total_data)}</span>
-        </div>
-      </footer>
     </div>
   `).join('');
 
@@ -152,7 +158,7 @@
         // Luego devuelves el HTML completo del modal, usando responseSummary
         return `
   <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
-    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative onmouseleave="closeLogsModal(${index})">
+    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
       <div class="flex justify-between items-center mb-2">
         <button onclick="closeLogsModal(${index})" class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl font-bold z-10" title="Cerrar">
           &times;
@@ -214,15 +220,12 @@
   </div>`;
       }).join('');
 
-
-
       usersContainer.innerHTML = cardsHTML;
       modalsContainer.innerHTML = modalsHTML;
 
       userCards = Array.from(document.querySelectorAll(".user-card"));
       filteredUsers = [...userCards];
 
-      renderPage(1);
       filterUsers();
     }
 
