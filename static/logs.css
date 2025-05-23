@@ -28,20 +28,7 @@ body {
 
 
 /* =================== User Cards =================== */
- /* Efectos del avatar */
-    
 
-    
-    .user-card:hover .card-footer {
-      bottom: 0;
-    }
-    
-    .user-card .card-footer li a:hover {
-      color: #1369ce;
-      background-color: #f7f5ec;
-    }
-    
-    /* Estilo del botón */
 
     
 

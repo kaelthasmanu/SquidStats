@@ -76,7 +76,7 @@
     function updateUsersData(usersData) {
       console.log(usersData);
       const cardsHTML = usersData.map((user, index) => `
-    <div class="user-card group bg-[#f0f2f5] transition-[all] duration-[300ms] ease-[ease] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[35px]" data-username="${user.username.toLowerCase()}">
+    <div class="user-card group bg-[#f0f2f5] transition-[all] duration-[300ms] ease-[ease] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
         <!-- Avatar con efectos completos -->
         <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] relative z-[1]">
           <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-[300ms] ease-linear z-0 group-hover:h-full"></div>
@@ -88,26 +88,26 @@
         
         <!-- Información de usuario -->
         <div class="user-info mt-[-15px] mb-4px] px-[15px]">
-          <h3 class="username font-semibold text-[1.2rem] text-[var(--text-primary)] mb-0">${user.username}</h3>
+          <h3 class="username font-semibold text-[1.2rem] text-[#1369ce] mb-0">${user.username}</h3>
           <h4 class="ip-address text-[0.9rem] text-[var(--text-primary)]">${user.ip}</h4>
         </div>
         
         <!-- Botón de acción -->
-        <div class="card-action">
-          <button class="activity-button bg-[#1369ce] text-white border-none px-3 py-[6px] rounded cursor-pointer transition-all duration-300 mt-0 mb-1 font-medium inline-block text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5" onclick="event.stopPropagation(); openLogsModal(${index});">
+        <div class="card-action px-[15px] mt-[2px] relative z-[2]">
+          <button class="activity-button w-full bg-[#1369ce] text-white font-bold py-2 rounded-md cursor-pointer transition-all duration-300 text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5 shadow-md" onclick="event.stopPropagation(); openLogsModal(${index});">
             ACTIVIDAD
           </button>
         </div>
         
         <!-- Footer -->
-        <ul class="card-footer absolute bottom-[-70px] left-0 w-full p-0 m-0 bg-[#1369ce] transition-all duration-500 ease-in-out group-hover:bottom-0">
-          <li class="inline-block">
-            <span class="label">Requests:</span>
-            <span class="value">${user.total_requests}</span>
+        <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] z-[1]">
+          <li class="inline-block flex flex-col items-center">
+            <span class="label text-xs font-light uppercase tracking-wide">Solicitudes:</span>
+            <span class="value font-semibold">${user.total_requests}</span>
           </li>
-          <li class="inline-block">
-            <span class="label">Data:</span>
-            <span class="value">${formatBytes(user.total_data)}</span>
+          <li class="inline-block flex flex-col items-center">
+            <span class="label text-xs font-light uppercase tracking-wide">Datos:</span>
+            <span class="value font-semibold">${formatBytes(user.total_data)}</span>
           </li>
         </ul>
       </div>
