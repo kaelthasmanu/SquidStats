@@ -21,10 +21,12 @@
 <div id="modals-container"></div>
 
 <div class="pagination-container flex justify-center items-center mt-12 gap-4">
-  <button id="prev-page" class="pagination-button px-6 py-3 bg-blue-600 text-white rounded-lg cursor-pointer flex items-center gap-2 font-medium transition-all hover:bg-blue-500 hover:-translate-y-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-70" disabled>Anterior</button>
-  <div class="page-numbers flex gap-2" id="page-numbers"></div>
-  <button id="next-page" class="pagination-button px-6 py-3 bg-blue-600 text-white rounded-lg cursor-pointer flex items-center gap-2 font-medium transition-all hover:bg-blue-500 hover:-translate-y-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-70">Siguiente</button>
-  </div>
+  <button id="first-page" class="pg-btn first bg-no-repeat bg-center bg-contain"><i class="fas fa-angle-double-left"></i></button>
+  <button id="prev-page" class="pg-btn prev bg-no-repeat bg-center bg-contain" disabled><i class="fas fa-angle-left"></i></button>
+  <div class="pagination flex gap-1" id="page-numbers"></div>
+  <button id="next-page" class="pg-btn next bg-no-repeat bg-center bg-contain"><i class="fas fa-angle-right"></i></button>
+  <button id="last-page" class="pg-btn last bg-no-repeat bg-center bg-contain"><i class="fas fa-angle-double-right"></i></button>
+</div>
 
   <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
 </div>
@@ -39,6 +41,8 @@
 
     const prevBtn = document.getElementById("prev-page");
     const nextBtn = document.getElementById("next-page");
+    const firstBtn = document.getElementById("first-page");
+    const lastBtn = document.getElementById("last-page");
     const pageNumbers = document.getElementById("page-numbers");
     const dateFilter = document.getElementById("date-filter");
 
@@ -264,8 +268,11 @@
 
       pageItems.forEach(card => (card.style.display = ""));
 
+      // Actualiza botones según la página actual
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
+      firstBtn.disabled = currentPage === 1;
+      lastBtn.disabled = currentPage === totalPages;
 
       pageNumbers.innerHTML = `Página ${currentPage} de ${totalPages}`;
     }
@@ -282,12 +289,16 @@
     searchInput.addEventListener("input", filterUsers);
     prevBtn.addEventListener("click", () => renderPage(currentPage - 1));
     nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
-
+    firstBtn.addEventListener("click", () => renderPage(1));
+    lastBtn.addEventListener("click", () => {
+      const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+      renderPage(totalPages);
+    });
     renderPage(1);
     dateFilter.dispatchEvent(new Event("change"));
   });
 
-  function openLogsModal(index) {
+        function openLogsModal(index) {
     const modal = document.getElementById(`logs-modal-${index}`);
     const overlay = document.getElementById('overlay');
 
