@@ -30,17 +30,7 @@ body {
 /* =================== User Cards =================== */
  /* Efectos del avatar */
     
-    /* Efectos del footer */
-    .user-card .card-footer {
-      width: 100%;
-      padding: 0;
-      margin: 0;
-      background-color: #1369ce;
-      position: absolute;
-      bottom: -70px; /* Ajustado para tarjeta estrecha */
-      left: 0;
-      transition: all 0.5s ease;
-    }
+
     
     .user-card:hover .card-footer {
       bottom: 0;

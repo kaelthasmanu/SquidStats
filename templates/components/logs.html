@@ -87,20 +87,20 @@
         </div>
         
         <!-- Información de usuario -->
-        <div class="user-info mt-[-15px] mb-[12px] px-[15px]">
+        <div class="user-info mt-[-15px] mb-4px] px-[15px]">
           <h3 class="username font-semibold text-[1.2rem] text-[var(--text-primary)] mb-0">${user.username}</h3>
           <h4 class="ip-address text-[0.9rem] text-[var(--text-primary)]">${user.ip}</h4>
         </div>
         
         <!-- Botón de acción -->
         <div class="card-action">
-          <button class="activity-button bg-[#1369ce] text-white border-none px-3 py-[6px] rounded cursor-pointer transition-all duration-300 my-2 font-medium inline-block text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5" onclick="event.stopPropagation(); openLogsModal(${index});">
+          <button class="activity-button bg-[#1369ce] text-white border-none px-3 py-[6px] rounded cursor-pointer transition-all duration-300 mt-0 mb-1 font-medium inline-block text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5" onclick="event.stopPropagation(); openLogsModal(${index});">
             ACTIVIDAD
           </button>
         </div>
         
         <!-- Footer -->
-        <ul class="card-footer">
+        <ul class="card-footer absolute bottom-[-70px] left-0 w-full p-0 m-0 bg-[#1369ce] transition-all duration-500 ease-in-out group-hover:bottom-0">
           <li class="inline-block">
             <span class="label">Requests:</span>
             <span class="value">${user.total_requests}</span>
