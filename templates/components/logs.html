@@ -146,14 +146,22 @@
         };
 
         const responseSummary = Object.entries(responseCounts).map(([key, count]) => {
-          if (count === 0) return ''; // No mostramos rangos sin conteo
+          if (count === 0) return '';
           const { icon, color, label } = responseGroups[key];
           return `
-      <div class="flex items-center gap-1 text-sm ${color}" title="${label}">
-        <i class="fa-solid ${icon}"></i>
-        <span>${count}</span>
-      </div>`;
+    <div class="filter-icon flex items-center gap-1 text-sm cursor-pointer transition-colors"
+         data-filter-type="${key}"
+         data-active="true"
+         data-color="${color}"
+         style="color: ${getComputedTailwindColor(color)}"
+         title="${label}"
+         onclick="toggleResponseFilter(this, ${index})">
+      <i class="fa-solid ${icon}"></i>
+      <span>${count}</span>
+    </div>`;
         }).join('');
+
+
 
         // Luego devuelves el HTML completo del modal, usando responseSummary
         return `
@@ -314,6 +322,44 @@
     }
   }
 
+  function toggleResponseFilter(el, modalIndex) {
+  const isActive = el.dataset.active === "true";
+  el.dataset.active = isActive ? "false" : "true";
+
+  if (isActive) {
+    el.style.color = "#9CA3AF"; // gray-400
+  } else {
+    const originalColor = el.dataset.color;
+    el.style.color = getComputedTailwindColor(originalColor);
+  }
+
+  const modal = document.getElementById(`logs-modal-${modalIndex}`);
+  const allFilters = modal.querySelectorAll(".filter-icon");
+  const activeTypes = [];
+
+  allFilters.forEach(f => {
+    if (f.dataset.active === "true") {
+      activeTypes.push(f.dataset.filterType);
+    }
+  });
+
+  const entries = modal.querySelectorAll(".log-entry");
+  entries.forEach(entry => {
+    const badge = entry.querySelector(".response-badge");
+    const code = parseInt(badge.textContent);
+
+    let type = 'unknown';
+    if (code >= 100 && code <= 199) type = 'informational';
+    else if (code >= 200 && code <= 299) type = 'successful';
+    else if (code >= 300 && code <= 399) type = 'redirection';
+    else if (code >= 400 && code <= 499) type = 'clientError';
+    else if (code >= 500 && code <= 599) type = 'serverError';
+
+    entry.style.display = activeTypes.includes(type) ? '' : 'none';
+  });
+}
+
+
   function closeLogsModal(index) {
     const modal = document.getElementById(`logs-modal-${index}`);
     const overlay = document.getElementById('overlay');
@@ -338,5 +384,17 @@
     }
 
   }
+
+function getComputedTailwindColor(className) {
+  const colorMap = {
+    'text-blue-500': '#3B82F6',
+    'text-green-500': '#22C55E',
+    'text-yellow-500': '#EAB308',
+    'text-red-500': '#EF4444',
+    'text-orange-400': '#FB923C',
+    'text-gray-500': '#6B7280'
+  };
+  return colorMap[className] || '#6B7280';
+}
 
 </script>
