@@ -107,43 +107,9 @@ body {
 }
 
 /* =================== Pagination =================== */
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 3rem;
-    gap: 1rem;
-}
 
-.pagination-button {
-    padding: 0.75rem 1.5rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-    transition: var(--transition);
-}
 
-.pagination-button:hover:not(:disabled) {
-    background: var(--secondary-color);
-    transform: translateY(-2px);
-}
 
-.pagination-button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.page-numbers {
-    display: flex;
-    gap: 0.5rem;
-}
 
 .page-number {
     width: 40px;

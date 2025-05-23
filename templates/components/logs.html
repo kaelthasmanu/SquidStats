@@ -6,7 +6,7 @@
   <input type="date" id="date-filter" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12">
 </div>
 
-  <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[300px] relative">
+  <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[250px] relative">
     <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input w-full pl-4 pr-12 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
     <!-- icono lupa -->
       <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
@@ -20,10 +20,10 @@
 <div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
 <div id="modals-container"></div>
 
-<div class="pagination-container">
-  <button id="prev-page" class="pagination-button" disabled>Anterior</button>
-  <div class="page-numbers" id="page-numbers"></div>
-    <button id="next-page" class="pagination-button">Siguiente</button>
+<div class="pagination-container flex justify-center items-center mt-12 gap-4">
+  <button id="prev-page" class="pagination-button px-6 py-3 bg-blue-600 text-white rounded-lg cursor-pointer flex items-center gap-2 font-medium transition-all hover:bg-blue-500 hover:-translate-y-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-70" disabled>Anterior</button>
+  <div class="page-numbers flex gap-2" id="page-numbers"></div>
+  <button id="next-page" class="pagination-button px-6 py-3 bg-blue-600 text-white rounded-lg cursor-pointer flex items-center gap-2 font-medium transition-all hover:bg-blue-500 hover:-translate-y-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-70">Siguiente</button>
   </div>
 
   <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
@@ -43,7 +43,7 @@
     const dateFilter = document.getElementById("date-filter");
 
     let currentPage = 1;
-    const itemsPerPage = 15;
+    const itemsPerPage = 5;
 
     const today = new Date().toISOString().split('T')[0];
     if (!dateFilter.value) {
