@@ -29,6 +29,7 @@ class DatabaseManager:
             Base.metadata.create_all(self.engine)
 
     def __enter__(self):
+        self._verify_tables()
         return self.session
 
     def __exit__(self, exc_type, exc_val, exc_tb):
