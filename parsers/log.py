@@ -13,9 +13,9 @@ from database.database import get_session, LogMetadata, User, Log, Base, get_eng
 
 
 class DatabaseManager:
-    def __init__(self):
-        self.engine = get_engine()
-        self.session = get_session()
+    def __init__(self, engine=None, session=None):
+        self.engine = engine if engine is not None else get_engine()
+        self.session = session if session is not None else get_session()
         self._verify_tables()
 
     def _verify_tables(self):
@@ -34,7 +34,7 @@ class DatabaseManager:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
-            if exc_type is None:
+            if (exc_type is None):
                 self.session.commit()
             else:
                 self.session.rollback()
@@ -163,3 +163,4 @@ def process_logs(log_file):
             session.rollback()
             print(f"Error crítico: {str(e)}")
             raise
+
