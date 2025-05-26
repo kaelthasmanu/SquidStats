@@ -21,11 +21,11 @@
 <div id="modals-container"></div>
 
 <div class="pagination-container flex justify-center items-center mt-12 gap-4">
-  <button id="first-page" class="pg-btn first bg-no-repeat bg-center bg-contain"><i class="fas fa-angle-double-left"></i></button>
-  <button id="prev-page" class="pg-btn prev bg-no-repeat bg-center bg-contain" disabled><i class="fas fa-angle-left"></i></button>
+  <button id="first-page" class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-double-left"></i></button>
+  <button id="prev-page" class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none" disabled><i class="fas fa-angle-left"></i></button>
   <div class="pagination flex gap-1" id="page-numbers"></div>
-  <button id="next-page" class="pg-btn next bg-no-repeat bg-center bg-contain"><i class="fas fa-angle-right"></i></button>
-  <button id="last-page" class="pg-btn last bg-no-repeat bg-center bg-contain"><i class="fas fa-angle-double-right"></i></button>
+  <button id="next-page" class="pg-btn next w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-right"></i></button>
+  <button id="last-page" class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-double-right"></i></button>
 </div>
 
   <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
@@ -47,7 +47,7 @@
     const dateFilter = document.getElementById("date-filter");
 
     let currentPage = 1;
-    const itemsPerPage = 5;
+    const itemsPerPage = 15;
 
     const today = new Date().toISOString().split('T')[0];
     if (!dateFilter.value) {
@@ -258,24 +258,54 @@
 
     function renderPage(page = 1) {
       const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-      currentPage = Math.min(Math.max(1, page), totalPages);
+      if (page < 1) page = 1;
+      if (page > totalPages) page = totalPages;
+      currentPage = page;
 
-      userCards.forEach(card => (card.style.display = "none"));
-
-      const start = (currentPage - 1) * itemsPerPage;
+      // Mostrar usuarios de esta página
+      const start = (page - 1) * itemsPerPage;
       const end = start + itemsPerPage;
-      const pageItems = filteredUsers.slice(start, end);
+      userCards.forEach((card, index) => {
+        card.style.display = (index >= start && index < end) ? "block" : "none";
+      });
 
-      pageItems.forEach(card => (card.style.display = ""));
+      // Generar botones de número de página
+      pageNumbers.innerHTML = "";
 
-      // Actualiza botones según la página actual
+      let startPage = Math.max(1, currentPage - 1);
+      let endPage = Math.min(totalPages, startPage + 2);
+
+      if (endPage - startPage < 2) {
+        startPage = Math.max(1, endPage - 2);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.className = `pg-btn text-lg px-3 py-1 rounded-full shadow-md font-medium ${i === currentPage ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800 hover:bg-gray-300"
+          }`;
+        btn.onclick = () => renderPage(i);
+        pageNumbers.appendChild(btn);
+      }
+
+      // Estado de los botones de navegación
+      firstBtn.disabled = currentPage === 1;
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
-      firstBtn.disabled = currentPage === 1;
       lastBtn.disabled = currentPage === totalPages;
 
-      pageNumbers.innerHTML = `Página ${currentPage} de ${totalPages}`;
+      const navBtns = [firstBtn, prevBtn, nextBtn, lastBtn];
+      navBtns.forEach(btn => {
+        if (btn.disabled) {
+          btn.classList.add("text-gray-400", "cursor-not-allowed");
+          btn.classList.remove("text-blue-500", "hover:text-blue-700");
+        } else {
+          btn.classList.remove("text-gray-400", "cursor-not-allowed");
+          btn.classList.add("text-blue-500", "hover:text-blue-700");
+        }
+      });
     }
+
 
     function filterUsers() {
       const searchValue = searchInput.value.toLowerCase();
@@ -298,114 +328,114 @@
     dateFilter.dispatchEvent(new Event("change"));
   });
 
-        function openLogsModal(index) {
-    const modal = document.getElementById(`logs-modal-${index}`);
-    const overlay = document.getElementById('overlay');
+      function openLogsModal(index) {
+        const modal = document.getElementById(`logs-modal-${index}`);
+        const overlay = document.getElementById('overlay');
 
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
 
-      // Forzar render con opacity-0 primero
-      modal.classList.remove('opacity-100');
-      modal.classList.add('opacity-0');
+          // Forzar render con opacity-0 primero
+          modal.classList.remove('opacity-100');
+          modal.classList.add('opacity-0');
 
-      requestAnimationFrame(() => {
-        // Segundo frame: se fuerza la transición
-        setTimeout(() => {
-          modal.classList.remove('opacity-0');
-          modal.classList.add('opacity-100');
-        }, 10); // solo 10ms bastan para forzar el efecto
-      });
-    }
+          requestAnimationFrame(() => {
+            // Segundo frame: se fuerza la transición
+            setTimeout(() => {
+              modal.classList.remove('opacity-0');
+              modal.classList.add('opacity-100');
+            }, 10); // solo 10ms bastan para forzar el efecto
+          });
+        }
 
-    if (overlay) {
-      overlay.classList.remove('hidden');
-      overlay.classList.remove('opacity-100');
-      overlay.classList.add('opacity-0');
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          overlay.classList.remove('opacity-100');
+          overlay.classList.add('opacity-0');
 
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          overlay.classList.remove('opacity-0');
-          overlay.classList.add('opacity-100');
-        }, 10);
-      });
-    }
-  }
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              overlay.classList.remove('opacity-0');
+              overlay.classList.add('opacity-100');
+            }, 10);
+          });
+        }
+      }
 
-  function toggleResponseFilter(el, modalIndex) {
-  const isActive = el.dataset.active === "true";
-  el.dataset.active = isActive ? "false" : "true";
+      function toggleResponseFilter(el, modalIndex) {
+        const isActive = el.dataset.active === "true";
+        el.dataset.active = isActive ? "false" : "true";
 
-  if (isActive) {
-    el.style.color = "#9CA3AF"; // gray-400
-  } else {
-    const originalColor = el.dataset.color;
-    el.style.color = getComputedTailwindColor(originalColor);
-  }
+        if (isActive) {
+          el.style.color = "#9CA3AF"; // gray-400
+        } else {
+          const originalColor = el.dataset.color;
+          el.style.color = getComputedTailwindColor(originalColor);
+        }
 
-  const modal = document.getElementById(`logs-modal-${modalIndex}`);
-  const allFilters = modal.querySelectorAll(".filter-icon");
-  const activeTypes = [];
+        const modal = document.getElementById(`logs-modal-${modalIndex}`);
+        const allFilters = modal.querySelectorAll(".filter-icon");
+        const activeTypes = [];
 
-  allFilters.forEach(f => {
-    if (f.dataset.active === "true") {
-      activeTypes.push(f.dataset.filterType);
-    }
-  });
+        allFilters.forEach(f => {
+          if (f.dataset.active === "true") {
+            activeTypes.push(f.dataset.filterType);
+          }
+        });
 
-  const entries = modal.querySelectorAll(".log-entry");
-  entries.forEach(entry => {
-    const badge = entry.querySelector(".response-badge");
-    const code = parseInt(badge.textContent);
+        const entries = modal.querySelectorAll(".log-entry");
+        entries.forEach(entry => {
+          const badge = entry.querySelector(".response-badge");
+          const code = parseInt(badge.textContent);
 
-    let type = 'unknown';
-    if (code >= 100 && code <= 199) type = 'informational';
-    else if (code >= 200 && code <= 299) type = 'successful';
-    else if (code >= 300 && code <= 399) type = 'redirection';
-    else if (code >= 400 && code <= 499) type = 'clientError';
-    else if (code >= 500 && code <= 599) type = 'serverError';
+          let type = 'unknown';
+          if (code >= 100 && code <= 199) type = 'informational';
+          else if (code >= 200 && code <= 299) type = 'successful';
+          else if (code >= 300 && code <= 399) type = 'redirection';
+          else if (code >= 400 && code <= 499) type = 'clientError';
+          else if (code >= 500 && code <= 599) type = 'serverError';
 
-    entry.style.display = activeTypes.includes(type) ? '' : 'none';
-  });
-}
+          entry.style.display = activeTypes.includes(type) ? '' : 'none';
+        });
+      }
 
 
-  function closeLogsModal(index) {
-    const modal = document.getElementById(`logs-modal-${index}`);
-    const overlay = document.getElementById('overlay');
+      function closeLogsModal(index) {
+        const modal = document.getElementById(`logs-modal-${index}`);
+        const overlay = document.getElementById('overlay');
 
-    if (modal) {
-      modal.classList.remove('opacity-100');
-      modal.classList.add('opacity-0');
+        if (modal) {
+          modal.classList.remove('opacity-100');
+          modal.classList.add('opacity-0');
 
-      // Espera a que termine la animación antes de ocultar
-      setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }, 1000); // Debe coincidir con la duracion de la clase
-    }
+          // Espera a que termine la animación antes de ocultar
+          setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+          }, 1000); // Debe coincidir con la duracion de la clase
+        }
 
-    if (overlay) {
-      overlay.classList.remove('opacity-100');
-      overlay.classList.add('opacity-0');
-      setTimeout(() => {
-        overlay.classList.add('hidden');
-      }, 1000);
-    }
+        if (overlay) {
+          overlay.classList.remove('opacity-100');
+          overlay.classList.add('opacity-0');
+          setTimeout(() => {
+            overlay.classList.add('hidden');
+          }, 1000);
+        }
 
-  }
+      }
 
-function getComputedTailwindColor(className) {
-  const colorMap = {
-    'text-blue-500': '#3B82F6',
-    'text-green-500': '#22C55E',
-    'text-yellow-500': '#EAB308',
-    'text-red-500': '#EF4444',
-    'text-orange-400': '#FB923C',
-    'text-gray-500': '#6B7280'
-  };
-  return colorMap[className] || '#6B7280';
-}
+      function getComputedTailwindColor(className) {
+        const colorMap = {
+          'text-blue-500': '#3B82F6',
+          'text-green-500': '#22C55E',
+          'text-yellow-500': '#EAB308',
+          'text-red-500': '#EF4444',
+          'text-orange-400': '#FB923C',
+          'text-gray-500': '#6B7280'
+        };
+        return colorMap[className] || '#6B7280';
+      }
 
-</script>
+    </script>

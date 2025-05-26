@@ -110,25 +110,6 @@ body {
 
 
 
-.page-number {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: white;
-    color: var(--primary-color);
-    cursor: pointer;
-    font-weight: 500;
-    box-shadow: var(--box-shadow);
-    transition: var(--transition);
-}
-
-.page-number:hover, .page-number.active {
-    background: var(--primary-color);
-    color: white;
-}
 
 /* =================== Logs Table =================== */
 .logs-table {
