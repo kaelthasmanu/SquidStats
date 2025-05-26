@@ -13,8 +13,8 @@ from services.get_reports import get_important_metrics
 from utils.colors import color_map
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
-import datetime
-#from services.fetch_data_logs import get_users_with_logs_by_date
+from datetime import datetime
+from services.fetch_data_logs import get_users_with_logs_by_date
 from services.blacklist_users import find_blacklisted_sites, find_blacklisted_sites_by_date
 
 # set configuration values
@@ -125,7 +125,6 @@ def format_bytes_filter(value):
         return f"{(value / 1024):.2f} KB"
     return f"{value} bytes"
 
-'''
 @app.route('/get-logs-by-date', methods=['POST'])
 def get_logs_by_date():
     db = None
@@ -148,7 +147,6 @@ def get_logs_by_date():
         if db is not None:
             db.close()
 
-'''
 @app.route('/reports')
 def reports():
     db = get_session()
@@ -221,7 +219,7 @@ def check_blacklist_by_date():
         date_str = data['date']
 
         try:
-            fecha_consulta = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+            fecha_consulta = datetime.strptime(date_str, '%Y-%m-%d').date()
         except ValueError:
             return jsonify({'error': 'Formato de fecha inválido (usar YYYY-MM-DD)'}), 400
 

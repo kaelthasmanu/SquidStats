@@ -24,7 +24,7 @@ def find_blacklisted_sites(db: Session, blacklist):
         for log_table in logs_tables:
             try:
                 date_str = log_table.split('_')[1]
-                log_date = datetime.datetime.strptime(date_str, "%Y%m%d").date()
+                log_date = datetime.strptime(date_str, "%Y%m%d").date()
                 formatted_date = log_date.strftime("%Y-%m-%d")
             except (IndexError, ValueError):
                 continue
