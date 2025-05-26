@@ -26,230 +26,10 @@ body {
     padding: 0;
 }
 
-/* =================== Dashboard =================== */
-.users-dashboard {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.dashboard-title {
-    text-align: center;
-    color: var(--primary-color);
-    margin-bottom: 2rem;
-    font-weight: 600;
-    font-size: 2.2rem;
-}
-
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-/* =================== Search =================== */
-.search-container {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    overflow: hidden;
-    width: 300px;
-}
-
-.search-input {
-    flex-grow: 1;
-    border: none;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    outline: none;
-}
-
-.search-button {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.75rem 1rem;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.search-button:hover {
-    background: var(--secondary-color);
-}
 
 /* =================== User Cards =================== */
-.users-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
 
-.user-card {
-    background-color: #ffffff;
-    border-radius: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 1.5rem;
-    transition: transform 0.3s;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    position: relative;
-    z-index: 1;
-}
-
-.user-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.user-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-}
-
-.user-header-left {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.avatar {
-    background-color: #3b82f6;
-    color: white;
-    font-size: 1.25rem;
-    font-weight: bold;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.user-info {
-    text-align: center;
-}
-
-.username {
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.ip-address {
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.user-header-right {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-}
-
-.metrics {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.25rem;
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-}
-
-.metric {
-    text-align: center;
-    padding: 0.5rem;
-}
-
-.metric-label {
-    font-size: 0.8rem;
-    color: var(--gray-color);
-    margin-bottom: 0.3rem;
-}
-
-.metric-value {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.activity-button {
-    margin-top: 0.5rem;
-    background-color: #3b82f6;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.activity-button:hover {
-    background-color: #2563eb;
-}
-
-.no-results {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 2rem;
-    font-size: 1.2rem;
-    color: var(--gray-color);
-}
-
-/* =================== Modal =================== */
-.logs-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--modal-bg);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
-
-.logs-modal.active {
-    display: flex;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #888;
-    cursor: pointer;
-}
-
-.close-modal:hover {
-    color: #333;
-}
+    
 
 /* =================== Logs =================== */
 .logs-section {
@@ -319,18 +99,6 @@ body {
     color: #ccc;
 }
 
-.response-badge {
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    margin-right: 0.8rem;
-    color: white;
-}
-.response-200 { background-color: #2ecc71; }
-.response-404 { background-color: #e74c3c; }
-.response-500 { background-color: #f39c12; }
-
 .no-logs {
     text-align: center;
     padding: 1rem;
@@ -339,63 +107,9 @@ body {
 }
 
 /* =================== Pagination =================== */
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 3rem;
-    gap: 1rem;
-}
 
-.pagination-button {
-    padding: 0.75rem 1.5rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-    transition: var(--transition);
-}
 
-.pagination-button:hover:not(:disabled) {
-    background: var(--secondary-color);
-    transform: translateY(-2px);
-}
 
-.pagination-button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.page-numbers {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.page-number {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: white;
-    color: var(--primary-color);
-    cursor: pointer;
-    font-weight: 500;
-    box-shadow: var(--box-shadow);
-    transition: var(--transition);
-}
-
-.page-number:hover, .page-number.active {
-    background: var(--primary-color);
-    color: white;
-}
 
 /* =================== Logs Table =================== */
 .logs-table {
@@ -415,3 +129,6 @@ body {
     border-radius: 6px;
     font-size: 0.9em;
 }
+
+
+

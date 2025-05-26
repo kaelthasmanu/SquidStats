@@ -1,312 +1,441 @@
-    <div class="users-dashboard">
-        <div class="dashboard-header">
-            <h1 class="dashboard-title">Panel Actividad de Usuarios</h1>
+<div class="users-dashboard max-w-[1200px] mx-auto p-8">
+  <div class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4">
+    <h1 class="dashboard-title text-center text-primary mb-8 font-semibold text-[2.2rem] text-blue-500">Panel Actividad de Usuarios</h1>
+<div class="filters-container flex gap-4 items-center">
+<div class="date-filter max-w-xs mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative">
+  <input type="date" id="date-filter" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12">
+</div>
 
-            <div class="filters-container flex gap-4 items-center">
-                <div class="date-filter">
-                    <input type="date" id="date-filter"
-                           class="px-4 py-2 border rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
+  <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[250px] relative">
+    <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input w-full pl-4 pr-12 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
+    <!-- icono lupa -->
+      <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+        <i class="fas fa-magnifying-glass text-2xl text-[#1A8A9D]"></i>
+      </div>
+  </div>
 
-                <div class="search-container">
-                    <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input">
-                    <button class="search-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                             viewBox="0 0 16 16">
-                            <path
-                                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
 
-        <div class="users-container" id="users-container">
-            {% for user in users_data %}
-            <div class="user-card" data-username="{{ user.username|lower }}">
-                <div class="user-header">
-                    <div class="user-header-left">
-                        <div class="avatar">{{ user.username|first|upper }}</div>
-                        <div class="user-info">
-                            <h3 class="username">{{ user.username }}</h3>
-                            <span class="ip-address">{{ user.ip }}</span>
-                        </div>
-                        <button class="activity-button" onclick="event.stopPropagation(); openLogsModal({{ loop.index0 }})">Actividad</button>
-                    </div>
+<div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
+<div id="modals-container"></div>
 
-                    <div class="user-header-right">
-                        <div class="metrics">
-                            <div class="metric">
-                                <span class="metric-label">Requests</span>
-                                <span class="metric-value">{{ user.total_requests }}</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Data</span>
-                                <span class="metric-value">
-                                    {% if user.total_data < 1024 %}
-                                        {{ user.total_data }} B
-                                    {% elif user.total_data < 1024 * 1024 %}
-                                        {{ (user.total_data / 1024)|round(2) }} KB
-                                    {% elif user.total_data < 1024 * 1024 * 1024 %}
-                                        {{ (user.total_data / 1024 / 1024)|round(2) }} MB
-                                    {% else %}
-                                        {{ (user.total_data / 1024 / 1024 / 1024)|round(2) }} GB
-                                    {% endif %}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+<div class="pagination-container flex justify-center items-center mt-12 gap-4">
+  <button id="first-page" class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-double-left"></i></button>
+  <button id="prev-page" class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none" disabled><i class="fas fa-angle-left"></i></button>
+  <div class="pagination flex gap-1" id="page-numbers"></div>
+  <button id="next-page" class="pg-btn next w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-right"></i></button>
+  <button id="last-page" class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-double-right"></i></button>
+</div>
 
-        <div class="pagination-container">
-            <button id="prev-page" class="pagination-button" disabled>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                     viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                          d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
-                </svg>
-                Anterior
-            </button>
-            <div class="page-numbers" id="page-numbers"></div>
-            <button id="next-page" class="pagination-button">
-                Siguiente
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                     viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                          d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="overlay" id="overlay"></div>
-
-        {% for user in users_data %}
-        <div class="logs-modal" id="logs-modal-{{ loop.index0 }}">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeLogsModal({{ loop.index0 }})">&times;</span>
-                <h4 class="logs-title">Actividad reciente - <span class="username-highlight">{{ user.username }}</span></h4>
-                <div class="logs-list">
-                    {% for log in user.logs %}
-                    <div class="log-entry">
-                        <div class="log-url">{{ log.url|truncate(40) }}</div>
-                        <div class="log-details">
-                            <span class="response-badge response-{{ log.response }}">{{ log.response }}</span>
-                            <span class="log-meta">{{ log.request_count }} reqs</span>
-                            <span class="log-meta">
-                                {% if log.data_transmitted < 1024 %}
-                                    {{ log.data_transmitted }} B
-                                {% elif log.data_transmitted < 1024 * 1024 %}
-                                    {{ (log.data_transmitted / 1024)|round(2) }} KB
-                                {% elif log.data_transmitted < 1024 * 1024 * 1024 %}
-                                    {{ (log.data_transmitted / 1024 / 1024)|round(2) }} MB
-                                {% else %}
-                                    {{ (log.data_transmitted / 1024 / 1024 / 1024)|round(2) }} GB
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="no-logs">No hay actividad registrada</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+  <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
+</div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const searchInput = document.getElementById("username-search");
-        let userCards = Array.from(document.querySelectorAll(".user-card"));
-        let filteredUsers = [...userCards];
-        const usersContainer = document.getElementById("users-container");
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("username-search");
+    let userCards = [];
+    let filteredUsers = [];
+    const usersContainer = document.getElementById("users-container");
+    const modalsContainer = document.getElementById("modals-container");
 
-        const prevBtn = document.getElementById("prev-page");
-        const nextBtn = document.getElementById("next-page");
-        const pageNumbers = document.getElementById("page-numbers");
-        const dateFilter = document.getElementById("date-filter");
+    const prevBtn = document.getElementById("prev-page");
+    const nextBtn = document.getElementById("next-page");
+    const firstBtn = document.getElementById("first-page");
+    const lastBtn = document.getElementById("last-page");
+    const pageNumbers = document.getElementById("page-numbers");
+    const dateFilter = document.getElementById("date-filter");
 
-        let currentPage = 1;
-        const itemsPerPage = 12;
+    let currentPage = 1;
+    const itemsPerPage = 15;
 
-        // 🔹 Siempre configurar el input con la fecha actual al cargar
-        const today = new Date().toISOString().split('T')[0];
-        if (!dateFilter.value) {
-            dateFilter.value = today;
-        }
+    const today = new Date().toISOString().split('T')[0];
+    if (!dateFilter.value) {
+      dateFilter.value = today;
+    }
 
-        dateFilter.addEventListener("change", async (e) => {
-            const selectedDate = e.target.value;
-            if (!selectedDate) return;
+    dateFilter.addEventListener("change", async (e) => {
+      const selectedDate = e.target.value;
+      if (!selectedDate) return;
 
-            try {
-                const response = await fetch("/get-logs-by-date", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ date: selectedDate }),
-                });
-
-                if (!response.ok) throw new Error("Error fetching data");
-
-                const usersData = await response.json();
-                updateUsersData(usersData);
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Error al cargar los datos");
-            }
+      try {
+        const response = await fetch("/get-logs-by-date", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ date: selectedDate }),
         });
 
+        if (!response.ok) throw new Error("Error fetching data");
+
+        const usersData = await response.json();
+        updateUsersData(usersData);
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error al cargar los datos");
+      }
+    });
+
     function updateUsersData(usersData) {
-    const cardsHTML = usersData.map((user, index) => `
-        <div class="user-card" data-username="${user.username.toLowerCase()}">
-            <div class="user-header">
-                <div class="user-header-left">
-                    <div class="avatar">${user.username.charAt(0).toUpperCase()}</div>
-                    <div class="user-info">
-                        <h3 class="username">${user.username}</h3>
-                        <span class="ip-address">${user.ip}</span>
-                    </div>
-                    <button class="activity-button" onclick="event.stopPropagation(); openLogsModal(${index})">Actividad</button>
-                </div>
-                <div class="user-header-right">
-                    <div class="metrics">
-                        <div class="metric">
-                            <span class="metric-label">Requests</span>
-                            <span class="metric-value">${user.total_requests}</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Data</span>
-                            <span class="metric-value">${formatBytes(user.total_data)}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      console.log(usersData);
+      const cardsHTML = usersData.map((user, index) => `
+    <div class="user-card group bg-[#f0f2f5] transition-[all] duration-[300ms] ease-[ease] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
+        <!-- Avatar con efectos completos -->
+        <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] relative z-[1]">
+          <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-[300ms] ease-linear z-0 group-hover:h-full"></div>
+          <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
+          <div class="avatar w-full h-full rounded-full bg-slate-200 flex items-center justify-center text-[2.5rem] text-slate-500 relative transition-all duration-[900ms] ease-in-out group-hover:shadow-[0_0_0_10px_#f7f5ec] group-hover:scale-[0.7] z-[2]">
+            <i class="fas fa-user"></i>
+          </div>
         </div>
-
-        <div class="logs-modal" id="logs-modal-${index}">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeLogsModal(${index})">&times;</span>
-                <h4 class="logs-title">Actividad reciente - <span class="username-highlight">${user.username}</span></h4>
-                <div class="logs-list">
-                    ${user.logs.length > 0 ? user.logs.map(log => `
-                        <div class="log-entry">
-                            <div class="log-url">${truncate(log.url, 40)}</div>
-                            <div class="log-details">
-                                <span class="response-badge response-${log.response}">${log.response}</span>
-                                <span class="log-meta">${log.request_count} reqs</span>
-                                <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
-                            </div>
-                        </div>
-                    `).join('') : '<div class="no-logs">No hay actividad registrada</div>'}
-                </div>
-            </div>
+        
+        <!-- Información de usuario -->
+        <div class="user-info mt-[-15px] mb-4px] px-[15px]">
+          <h3 class="username font-semibold text-[1.2rem] text-[#1369ce] mb-0">${user.username}</h3>
+          <h4 class="ip-address text-[0.9rem] text-gray-500">${user.ip}</h4>
         </div>
-    `).join('');
+        
+        <!-- Botón de acción -->
+        <div class="card-action px-[15px] mt-[2px] relative z-[2]">
+          <button class="activity-button w-full bg-[#1369ce] text-white font-bold py-2 rounded-md cursor-pointer transition-all duration-300 text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5 shadow-md" onclick="event.stopPropagation(); openLogsModal(${index});">
+            ACTIVIDAD
+          </button>
+        </div>
+        
+        <!-- Footer -->
+        <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] z-[1]">
+          <li class="inline-block flex flex-col items-center">
+            <span class="label text-xs font-light uppercase tracking-wide">Solicitudes:</span>
+            <span class="value font-semibold">${user.total_requests}</span>
+          </li>
+          <li class="inline-block flex flex-col items-center">
+            <span class="label text-xs font-light uppercase tracking-wide">Datos:</span>
+            <span class="value font-semibold">${formatBytes(user.total_data)}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  `).join('');
 
-    usersContainer.innerHTML = cardsHTML;
+      const modalsHTML = usersData.map((user, index) => {
+        // Conteo agrupado por rango de status
+        const responseCounts = {
+          informational: 0,   // 100–199
+          successful: 0,      // 200–299
+          redirection: 0,     // 300–399
+          clientError: 0,     // 400–499
+          serverError: 0,     // 500–599
+          unknown: 0          // Otros códigos
+        };
 
-    userCards = Array.from(document.querySelectorAll(".user-card"));
-    filteredUsers = [...userCards];
+        user.logs.forEach(log => {
+          const code = log.response;
+          if (code >= 100 && code <= 199) responseCounts.informational++;
+          else if (code >= 200 && code <= 299) responseCounts.successful++;
+          else if (code >= 300 && code <= 399) responseCounts.redirection++;
+          else if (code >= 400 && code <= 499) responseCounts.clientError++;
+          else if (code >= 500 && code <= 599) responseCounts.serverError++;
+          else responseCounts.unknown++;
+        });
 
+        // Definimos íconos y colores para cada rango
+        const responseGroups = {
+          informational: { icon: 'fa-info-circle', color: 'text-blue-500', label: 'Respuestas informativas (100–199)' },
+          successful: { icon: 'fa-circle-check', color: 'text-green-500', label: 'Respuestas exitosas (200–299)' },
+          redirection: { icon: 'fa-arrow-right', color: 'text-yellow-500', label: 'Mensajes de redirección (300–399)' },
+          clientError: { icon: 'fa-circle-xmark', color: 'text-red-500', label: 'Respuestas de error del cliente (400–499)' },
+          serverError: { icon: 'fa-triangle-exclamation', color: 'text-orange-400', label: 'Respuestas de error del servidor (500–599)' },
+          unknown: { icon: 'fa-question', color: 'text-gray-500', label: 'Otros' }
+        };
+
+        const responseSummary = Object.entries(responseCounts).map(([key, count]) => {
+          if (count === 0) return '';
+          const { icon, color, label } = responseGroups[key];
+          return `
+    <div class="filter-icon flex items-center gap-1 text-sm cursor-pointer transition-colors"
+         data-filter-type="${key}"
+         data-active="true"
+         data-color="${color}"
+         style="color: ${getComputedTailwindColor(color)}"
+         title="${label}"
+         onclick="toggleResponseFilter(this, ${index})">
+      <i class="fa-solid ${icon}"></i>
+      <span>${count}</span>
+    </div>`;
+        }).join('');
+
+
+
+        // Luego devuelves el HTML completo del modal, usando responseSummary
+        return `
+  <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
+    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
+      <div class="flex justify-between items-center mb-2">
+        <button onclick="closeLogsModal(${index})" class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl font-bold z-10" title="Cerrar">
+          &times;
+        </button>
+        <h4 class="logs-title text-lg font-semibold">
+          Actividad reciente - <span class="username-highlight">${user.username}</span>
+        </h4>
+        <div class="flex gap-4 items-center">
+          ${responseSummary}
+        </div>
+      </div>
+
+      <div class="logs-list space-y-2 mt-2">
+        ${user.logs.length > 0
+            ? user.logs.map(log => {
+              const truncatedUrl = truncate(log.url, 40);
+              const isHttps = /:(443|8443)$/.test(log.url);
+              const protocol = isHttps ? 'https://' : 'http://';
+              const fullUrl = log.url.startsWith('http') ? log.url : protocol + log.url;
+
+              const responseColors = {
+                100: 'bg-blue-400',
+                200: 'bg-green-500',
+                300: 'bg-yellow-400',
+                400: 'bg-red-500',
+                500: 'bg-orange-400',
+                0: 'bg-gray-400'
+              };
+
+              // Para badge, elige color según rango de código
+              let badgeClass = 'bg-gray-400';
+              if (log.response >= 100 && log.response <= 199) badgeClass = 'bg-blue-400';
+              else if (log.response >= 200 && log.response <= 299) badgeClass = 'bg-green-500';
+              else if (log.response >= 300 && log.response <= 399) badgeClass = 'bg-yellow-400';
+              else if (log.response >= 400 && log.response <= 499) badgeClass = 'bg-red-500';
+              else if (log.response >= 500 && log.response <= 599) badgeClass = 'bg-orange-400';
+
+              return `
+              <div class="log-entry flex justify-between items-start gap-3 border-b border-gray-200 pb-1">
+                <div class="flex-1">
+                  <div class="log-url text-sm font-medium text-gray-800">${truncatedUrl}</div>
+                  <div class="log-details mt-1 flex flex-wrap gap-3 text-sm text-gray-600">
+                    <span class="response-badge ${badgeClass} inline-block px-2 py-[0.15rem] rounded-md text-[0.65rem] font-medium text-white mr-2">${log.response}</span>
+                    <span class="log-meta">${log.request_count} reqs</span>
+                    <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
+                  </div>
+                </div>
+                <div class="self-start">
+                  <i class="fa-solid fa-up-right-from-square text-blue-600 hover:text-blue-800 cursor-pointer text-lg"
+                    title="Abrir enlace"
+                    onclick="window.open('${fullUrl}', '_blank')"></i>
+                </div>
+              </div>`;
+            }).join('')
+            : '<div class="no-logs text-gray-500">No hay actividad registrada</div>'
+          }
+      </div>
+    </div>
+  </div>`;
+      }).join('');
+
+      usersContainer.innerHTML = cardsHTML;
+      modalsContainer.innerHTML = modalsHTML;
+
+      userCards = Array.from(document.querySelectorAll(".user-card"));
+      filteredUsers = [...userCards];
+
+      filterUsers();
+    }
+
+    function truncate(str, n) {
+      return str.length > n ? str.slice(0, n - 1) + "..." : str;
+    }
+
+    function formatBytes(bytes) {
+      const units = ["B", "KB", "MB", "GB"];
+      let value = bytes;
+      let unitIndex = 0;
+      while (value >= 1024 && unitIndex < units.length - 1) {
+        value /= 1024;
+        unitIndex++;
+      }
+      return `${value.toFixed(2)} ${units[unitIndex]}`;
+    }
+
+    function renderPage(page = 1) {
+      const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+      if (page < 1) page = 1;
+      if (page > totalPages) page = totalPages;
+      currentPage = page;
+
+      // Mostrar usuarios de esta página
+      const start = (page - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      userCards.forEach((card, index) => {
+        card.style.display = (index >= start && index < end) ? "block" : "none";
+      });
+
+      // Generar botones de número de página
+      pageNumbers.innerHTML = "";
+
+      let startPage = Math.max(1, currentPage - 1);
+      let endPage = Math.min(totalPages, startPage + 2);
+
+      if (endPage - startPage < 2) {
+        startPage = Math.max(1, endPage - 2);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.className = `pg-btn text-lg px-3 py-1 rounded-full shadow-md font-medium ${i === currentPage ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800 hover:bg-gray-300"
+          }`;
+        btn.onclick = () => renderPage(i);
+        pageNumbers.appendChild(btn);
+      }
+
+      // Estado de los botones de navegación
+      firstBtn.disabled = currentPage === 1;
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+      lastBtn.disabled = currentPage === totalPages;
+
+      const navBtns = [firstBtn, prevBtn, nextBtn, lastBtn];
+      navBtns.forEach(btn => {
+        if (btn.disabled) {
+          btn.classList.add("text-gray-400", "cursor-not-allowed");
+          btn.classList.remove("text-blue-500", "hover:text-blue-700");
+        } else {
+          btn.classList.remove("text-gray-400", "cursor-not-allowed");
+          btn.classList.add("text-blue-500", "hover:text-blue-700");
+        }
+      });
+    }
+
+
+    function filterUsers() {
+      const searchValue = searchInput.value.toLowerCase();
+      filteredUsers = userCards.filter(card => {
+        const username = card.getAttribute("data-username");
+        return username.includes(searchValue);
+      });
+      renderPage(1);
+    }
+
+    searchInput.addEventListener("input", filterUsers);
+    prevBtn.addEventListener("click", () => renderPage(currentPage - 1));
+    nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
+    firstBtn.addEventListener("click", () => renderPage(1));
+    lastBtn.addEventListener("click", () => {
+      const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+      renderPage(totalPages);
+    });
     renderPage(1);
-    filterUsers();
-    applyCardInteractions();
-}
+    dateFilter.dispatchEvent(new Event("change"));
+  });
 
+      function openLogsModal(index) {
+        const modal = document.getElementById(`logs-modal-${index}`);
+        const overlay = document.getElementById('overlay');
 
-        function truncate(str, n) {
-            return str.length > n ? str.slice(0, n - 1) + "..." : str;
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+
+          // Forzar render con opacity-0 primero
+          modal.classList.remove('opacity-100');
+          modal.classList.add('opacity-0');
+
+          requestAnimationFrame(() => {
+            // Segundo frame: se fuerza la transición
+            setTimeout(() => {
+              modal.classList.remove('opacity-0');
+              modal.classList.add('opacity-100');
+            }, 10); // solo 10ms bastan para forzar el efecto
+          });
         }
 
-        function formatBytes(bytes) {
-            const units = ["B", "KB", "MB", "GB"];
-            let value = bytes;
-            let unitIndex = 0;
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          overlay.classList.remove('opacity-100');
+          overlay.classList.add('opacity-0');
 
-            while (value >= 1024 && unitIndex < units.length - 1) {
-                value /= 1024;
-                unitIndex++;
-            }
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              overlay.classList.remove('opacity-0');
+              overlay.classList.add('opacity-100');
+            }, 10);
+          });
+        }
+      }
 
-            return `${value.toFixed(2)} ${units[unitIndex]}`;
+      function toggleResponseFilter(el, modalIndex) {
+        const isActive = el.dataset.active === "true";
+        el.dataset.active = isActive ? "false" : "true";
+
+        if (isActive) {
+          el.style.color = "#9CA3AF"; // gray-400
+        } else {
+          const originalColor = el.dataset.color;
+          el.style.color = getComputedTailwindColor(originalColor);
         }
 
-        function renderPage(page = 1) {
-            const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-            currentPage = Math.min(Math.max(1, page), totalPages);
+        const modal = document.getElementById(`logs-modal-${modalIndex}`);
+        const allFilters = modal.querySelectorAll(".filter-icon");
+        const activeTypes = [];
 
-            userCards.forEach(card => (card.style.display = "none"));
+        allFilters.forEach(f => {
+          if (f.dataset.active === "true") {
+            activeTypes.push(f.dataset.filterType);
+          }
+        });
 
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageItems = filteredUsers.slice(start, end);
+        const entries = modal.querySelectorAll(".log-entry");
+        entries.forEach(entry => {
+          const badge = entry.querySelector(".response-badge");
+          const code = parseInt(badge.textContent);
 
-            pageItems.forEach(card => (card.style.display = ""));
+          let type = 'unknown';
+          if (code >= 100 && code <= 199) type = 'informational';
+          else if (code >= 200 && code <= 299) type = 'successful';
+          else if (code >= 300 && code <= 399) type = 'redirection';
+          else if (code >= 400 && code <= 499) type = 'clientError';
+          else if (code >= 500 && code <= 599) type = 'serverError';
 
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages;
+          entry.style.display = activeTypes.includes(type) ? '' : 'none';
+        });
+      }
 
-            pageNumbers.innerHTML = `Page ${currentPage} of ${totalPages}`;
+
+      function closeLogsModal(index) {
+        const modal = document.getElementById(`logs-modal-${index}`);
+        const overlay = document.getElementById('overlay');
+
+        if (modal) {
+          modal.classList.remove('opacity-100');
+          modal.classList.add('opacity-0');
+
+          // Espera a que termine la animación antes de ocultar
+          setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+          }, 1000); // Debe coincidir con la duracion de la clase
         }
 
-        function filterUsers() {
-            const searchValue = searchInput.value.toLowerCase();
-            filteredUsers = userCards.filter(card => {
-                const username = card.getAttribute("data-username");
-                return username.includes(searchValue);
-            });
-            renderPage(1);
+        if (overlay) {
+          overlay.classList.remove('opacity-100');
+          overlay.classList.add('opacity-0');
+          setTimeout(() => {
+            overlay.classList.add('hidden');
+          }, 1000);
         }
 
-        searchInput.addEventListener("input", filterUsers);
-        prevBtn.addEventListener("click", () => renderPage(currentPage - 1));
-        nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
+      }
 
-        renderPage(1);
+      function getComputedTailwindColor(className) {
+        const colorMap = {
+          'text-blue-500': '#3B82F6',
+          'text-green-500': '#22C55E',
+          'text-yellow-500': '#EAB308',
+          'text-red-500': '#EF4444',
+          'text-orange-400': '#FB923C',
+          'text-gray-500': '#6B7280'
+        };
+        return colorMap[className] || '#6B7280';
+      }
 
-        // Carga datos iniciales para la fecha actual
-        dateFilter.dispatchEvent(new Event("change"));
-    });
-
-    function applyCardInteractions() {
-    // Ejemplo: si las tarjetas tienen un botón para expandirse
-    const cards = document.querySelectorAll('.user-card');
-
-    cards.forEach(card => {
-        const header = card.querySelector('.user-header');
-        if (header) {
-            header.addEventListener('click', () => {
-                card.classList.toggle('expanded'); // o la clase que use tu CSS
-            });
-        }
-
-        // Si hay modales dentro de la tarjeta
-        const openBtn = card.querySelector('[data-open-modal]');
-        const closeBtn = card.querySelector('[data-close-modal]');
-        const modal = card.querySelector('.modal');
-
-        if (openBtn && modal) {
-            openBtn.addEventListener('click', () => modal.classList.add('active'));
-        }
-
-        if (closeBtn && modal) {
-            closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-        }
-    });
-}
-
-
-    function openLogsModal(index) {
-        document.getElementById(`logs-modal-${index}`).classList.add("active");
-    }
-
-    function closeLogsModal(index) {
-        document.getElementById(`logs-modal-${index}`).classList.remove("active");
-    }
-</script>
-
+    </script>
