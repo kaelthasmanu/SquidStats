@@ -11,15 +11,30 @@ sys.path.append(str(project_root))
 
 from database.database import get_session, User, Log, Base, LogMetadata, get_engine
 
-def find_blacklisted_sites(db: Session, blacklist):
+from typing import Dict, Any
+
+
+def find_blacklisted_sites(
+        db: Session,
+        blacklist: list,
+        page: int = 1,
+        per_page: int = 10
+) -> Dict[str, Any]:
     engine = get_engine()
     inspector = inspect(engine)
     results = []
+    total_results = 0
 
     try:
         all_tables = inspector.get_table_names()
+        logs_tables = sorted(
+            [t for t in all_tables if t.startswith('logs_') and len(t) == 13],
+            reverse=True
+        )
 
-        logs_tables = [t for t in all_tables if t.startswith('logs_') and len(t) == 13]
+        offset = (page - 1) * per_page
+        remaining = per_page
+        count_only = offset >= 1000
 
         for log_table in logs_tables:
             try:
@@ -34,28 +49,67 @@ def find_blacklisted_sites(db: Session, blacklist):
                 continue
 
             like_conditions = ' OR '.join([f"l.url LIKE :pattern{i}" for i in range(len(blacklist))])
-            query = text(f"""
+            base_query = f"""
                 SELECT u.username, l.url 
                 FROM {log_table} l
                 JOIN {user_table} u ON l.user_id = u.id
                 WHERE {like_conditions}
-            """)
+            """
 
-            params = {f'pattern{i}': f'%{site}%' for i, site in enumerate(blacklist)}
+            if not count_only:
+                count_query = text(f"SELECT COUNT(*) as total FROM ({base_query})")
+                count_params = {f'pattern{i}': f'%{site}%' for i, site in enumerate(blacklist)}
+                table_total = db.execute(count_query, count_params).scalar()
+                total_results += table_total
 
-            result = db.execute(query, params)
+                if offset >= table_total:
+                    offset -= table_total
+                    continue
 
-            for row in result:
-                results.append({
-                    'fecha': formatted_date,
-                    'usuario': row.username,
-                    'url': row.url
-                })
+                query = text(f"{base_query} LIMIT :limit OFFSET :offset")
+                params = {
+                    **{f'pattern{i}': f'%{site}%' for i, site in enumerate(blacklist)},
+                    'limit': remaining,
+                    'offset': offset
+                }
+
+                result = db.execute(query, params)
+                offset = 0
+
+                for row in result:
+                    results.append({
+                        'fecha': formatted_date,
+                        'usuario': row.username,
+                        'url': row.url
+                    })
+                    remaining -= 1
+                    if remaining == 0:
+                        break
+
+            if remaining == 0:
+                break
+
+        if count_only:
+            total_query = " + ".join([
+                f"(SELECT COUNT(*) FROM {log_table} l JOIN {log_table.replace('logs_', 'users_')} u "
+                f"ON l.user_id = u.id WHERE {' OR '.join([f'l.url LIKE \'%{s}%\' ' for s in blacklist])})"
+                for log_table in logs_tables
+            ])
+            total_results = db.execute(text(f"SELECT ({total_query})")).scalar()
 
     except SQLAlchemyError as e:
         print(f"Error de base de datos: {e}")
+        return {'error': str(e)}
 
-    return results
+    return {
+        'results': results,
+        'pagination': {
+            'total': total_results,
+            'page': page,
+            'per_page': per_page,
+            'total_pages': (total_results + per_page - 1) // per_page
+        }
+    }
 
 
 def find_blacklisted_sites_by_date(db: Session, blacklist: list, specific_date: datetime.date):
