@@ -45,6 +45,7 @@ def get_users_with_logs_optimized(db: Session) -> List[Dict[str, Any]]:
         db.close()
 
 
+'''
 def get_users_with_logs_by_date(db: Session, date_suffix: str):
     try:
         users_table = f'users_{date_suffix}'
@@ -97,3 +98,4 @@ def get_users_with_logs_by_date(db: Session, date_suffix: str):
     except Exception as e:
         print(f"Error en get_users_with_logs_by_date: {e}")
         raise
+'''
