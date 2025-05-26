@@ -1,7 +1,7 @@
 import sys
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
-import datetime
+from datetime import datetime
 from pathlib import Path
 from sqlalchemy.orm import Session
 
