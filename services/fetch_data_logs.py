@@ -44,7 +44,6 @@ def get_users_with_logs_optimized(db: Session) -> List[Dict[str, Any]]:
     finally:
         db.close()
 
-
 '''
 def get_users_with_logs_by_date(db: Session, date_suffix: str):
     try:
