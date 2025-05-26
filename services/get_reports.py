@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, func, desc
+import datetime
+from sqlalchemy import create_engine, func, desc, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, Session
 import sys
 from pathlib import Path
@@ -120,7 +121,7 @@ def get_metrics_by_date_range(start_date: str, end_date: str, db_session=None):
         date_str = current_dt.strftime("%Y%m%d")
         all_log_tables.append(f"logs_{date_str}")
         all_user_tables.append(f"users_{date_str}")
-        current_dt = current_dt + timedelta(days=1)
+        current_dt = current_dt + datetime.timedelta(days=1)
 
 
     try:

@@ -13,8 +13,9 @@ from services.get_reports import get_important_metrics
 from utils.colors import color_map
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
-from datetime import datetime
+import datetime
 from services.fetch_data_logs import get_users_with_logs_by_date
+from services.blacklist_users import find_blacklisted_sites, find_blacklisted_sites_by_date
 
 # set configuration values
 class Config:
@@ -136,7 +137,6 @@ def get_logs_by_date():
         db = get_session()
 
         users_data = get_users_with_logs_by_date(db, date_suffix)
-        print(users_data)
         return jsonify(users_data)
 
     except ValueError as ve:
@@ -186,6 +186,60 @@ def update_web():
     else:
         return redirect('/')
 
+
+@app.route('/blacklist', methods=['GET'])
+def check_blacklist():
+    db = None
+    db = get_session()
+    try:
+        blacklist = ["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]  # Ejemplo
+        resultados = find_blacklisted_sites(db, blacklist)
+
+        return render_template('blacklist.html',
+                               results=resultados,
+                               page_icon='shield-exclamation.ico',
+                               page_title='Registros de Blacklist')
+    except Exception as e:
+        logger.error(f"Error en check-blacklist: {str(e)}")
+        return jsonify({'error': 'Error interno del servidor'}), 500
+
+    finally:
+        if db is not None:
+            db.close()
+
+
+@app.route('/check-blacklist-by-date', methods=['POST'])
+def check_blacklist_by_date():
+    db = None
+    try:
+        data = request.get_json()
+        if not data or 'sites' not in data or 'date' not in data:
+            return jsonify({'error': 'Parámetros faltantes'}), 400
+
+        blacklist = data['sites']
+        date_str = data['date']
+
+        try:
+            fecha_consulta = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'error': 'Formato de fecha inválido (usar YYYY-MM-DD)'}), 400
+
+        db = get_session()
+        resultados = find_blacklisted_sites_by_date(db, blacklist, fecha_consulta)
+
+        return jsonify({
+            'date': date_str,
+            'count': len(resultados),
+            'results': resultados
+        })
+
+    except Exception as e:
+        logger.error(f"Error en check-blacklist-by-date: {str(e)}")
+        return jsonify({'error': 'Error interno del servidor'}), 500
+
+    finally:
+        if db is not None:
+            db.close()
 
 if __name__ == "__main__":
 
