@@ -17,7 +17,15 @@
 </div>
 </div>
 
-<div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
+<div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container">
+<div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
+      <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+  </div>
+</div>
 <div id="modals-container"></div>
 
 <div class="pagination-container flex justify-center items-center mt-12 gap-4">
@@ -59,25 +67,39 @@
       if (!selectedDate) return;
 
       try {
-        const response = await fetch("/get-logs-by-date", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ date: selectedDate }),
-        });
+    // Mostrar spinner de carga
+    usersContainer.innerHTML = `
+      <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
+        <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>`;
 
-        if (!response.ok) throw new Error("Error fetching data");
-
-        const usersData = await response.json();
-        updateUsersData(usersData);
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Error al cargar los datos");
-      }
+    const response = await fetch("/get-logs-by-date", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ date: selectedDate }),
     });
 
+    if (!response.ok) throw new Error("Error fetching data");
+
+    const usersData = await response.json();
+    updateUsersData(usersData);
+  } catch (error) {
+    console.error("Error:", error);
+    usersContainer.innerHTML = '<div class="text-red-500 text-center p-4 col-span-full">Error al cargar los datos</div>';
+  }
+});
+
+
     function updateUsersData(usersData) {
+        if (!usersData || usersData?.length === 0) {
+        usersContainer.innerHTML = '<div class="text-gray-500 text-center p-4 col-span-full">No se encontraron datos</div>';
+        return;
+      }
       console.log(usersData);
       const cardsHTML = usersData.map((user, index) => `
     <div class="user-card group bg-[#f0f2f5] transition-[all] duration-[300ms] ease-[ease] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
@@ -232,6 +254,8 @@
   </div>`;
       }).join('');
 
+
+
       usersContainer.innerHTML = cardsHTML;
       modalsContainer.innerHTML = modalsHTML;
 
@@ -240,6 +264,7 @@
 
       filterUsers();
     }
+
 
     function truncate(str, n) {
       return str.length > n ? str.slice(0, n - 1) + "..." : str;
