@@ -1,34 +1,50 @@
 <div class="users-dashboard max-w-[1200px] mx-auto p-8">
   <div class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4">
-    <h1 class="dashboard-title text-center text-primary mb-8 font-semibold text-[2.2rem] text-blue-500">Panel Actividad de Usuarios</h1>
-<div class="filters-container flex gap-4 items-center">
-<div class="date-filter max-w-xs mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative">
-  <input type="date" id="date-filter" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12">
-</div>
-
-  <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[250px] relative">
-    <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input w-full pl-4 pr-12 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
-    <!-- icono lupa -->
-      <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-        <i class="fas fa-magnifying-glass text-2xl text-[#1A8A9D]"></i>
+    <h1 class="dashboard-title text-center text-primary mb-8 font-semibold text-[2.2rem] text-blue-500">Panel Actividad
+      de Usuarios</h1>
+    <div class="filters-container flex gap-4 items-center">
+      <div class="date-filter max-w-xs mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative">
+        <input type="date" id="date-filter"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12">
       </div>
+
+      <div
+        class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[250px] relative">
+        <input type="text" id="username-search" placeholder="Buscar por usuario..."
+          class="search-input w-full pl-4 pr-12 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
+        <!-- icono lupa -->
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+          <i class="fas fa-magnifying-glass text-2xl text-[#1A8A9D]"></i>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-</div>
-</div>
+  <div
+    class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4"
+    id="users-container"></div>
+  <div id="modals-container"></div>
 
-<div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
-<div id="modals-container"></div>
+  <div class="pagination-container flex justify-center items-center mt-12 gap-4">
+    <button id="first-page"
+      class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i
+        class="fas fa-angle-double-left"></i></button>
+    <button id="prev-page"
+      class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"
+      disabled><i class="fas fa-angle-left"></i></button>
+    <div class="pagination flex gap-1" id="page-numbers"></div>
+    <button id="next-page"
+      class="pg-btn next w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i
+        class="fas fa-angle-right"></i></button>
+    <button id="last-page"
+      class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i
+        class="fas fa-angle-double-right"></i></button>
+  </div>
 
-<div class="pagination-container flex justify-center items-center mt-12 gap-4">
-  <button id="first-page" class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-double-left"></i></button>
-  <button id="prev-page" class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none" disabled><i class="fas fa-angle-left"></i></button>
-  <div class="pagination flex gap-1" id="page-numbers"></div>
-  <button id="next-page" class="pg-btn next w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-right"></i></button>
-  <button id="last-page" class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-double-right"></i></button>
-</div>
-
-  <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
+  <div
+    class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0"
+    id="overlay"></div>
 </div>
 
 <script>
@@ -170,7 +186,7 @@
         // Luego devuelves el HTML completo del modal, usando responseSummary
         return `
   <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
-    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
+    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
       <div class="flex justify-between items-center mb-2">
         <button onclick="closeLogsModal(${index})" class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl font-bold z-10" title="Cerrar">
           &times;
@@ -178,7 +194,27 @@
         <h4 class="logs-title text-lg font-semibold">
           Actividad reciente - <span class="username-highlight">${user.username}</span>
         </h4>
-        <div class="flex gap-4 items-center">
+
+<div id="searchBox-${index}" class="relative w-auto h-[36px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md overflow-hidden flex items-center border border-gray-300">
+  <!-- Botón de lupa -->
+  <div id="toggleBtn-${index}" class="absolute left-0 top-0 w-[36px] h-[36px] flex items-center justify-center cursor-pointer z-10">
+    <i class="fas fa-search text-blue-600 text-sm"></i>
+  </div>
+
+  <!-- Input -->
+  <div id="inputWrapper-${index}" class="ml-[36px] w-0 h-[36px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
+    <input id="mysearch-${index}" type="text" placeholder="Buscar URL..." class="w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]"/>
+  </div>
+
+  <!-- Botón de limpiar -->
+<button id="clearBtn-${index}" 
+        class="absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" 
+        title="Limpiar búsqueda">
+  <i class="fas fa-times text-lg leading-none"></i>
+</button>
+</div>
+
+        <div class="response-summary flex justify-end gap-4 items-center mb-4">
           ${responseSummary}
         </div>
       </div>
@@ -234,6 +270,43 @@
 
       usersContainer.innerHTML = cardsHTML;
       modalsContainer.innerHTML = modalsHTML;
+
+      usersData.forEach((user, index) => {
+        const toggleBtn = document.getElementById(`toggleBtn-${index}`);
+        const searchBox = document.getElementById(`searchBox-${index}`);
+        const inputWrapper = document.getElementById(`inputWrapper-${index}`);
+        const input = document.getElementById(`mysearch-${index}`);
+        const clearBtn = document.getElementById(`clearBtn-${index}`);
+
+        toggleBtn.addEventListener("click", () => {
+          const isExpanding = !inputWrapper.classList.contains("w-[180px]");
+
+          if (isExpanding) {
+            inputWrapper.classList.add("w-[180px]");
+            input.classList.remove("opacity-0");
+            clearBtn.classList.remove("opacity-0");
+            setTimeout(() => {
+              input.focus();
+            }, 300);
+          } else {
+            inputWrapper.classList.remove("w-[180px]");
+            input.classList.add("opacity-0");
+            clearBtn.classList.add("opacity-0");
+            input.value = "";
+            filterLogs(index);
+          }
+        });
+
+        clearBtn.addEventListener("click", () => {
+          input.value = "";
+          filterLogs(index);
+          input.focus();
+        });
+
+        input.addEventListener("input", () => {
+          filterLogs(index);
+        });
+      });
 
       userCards = Array.from(document.querySelectorAll(".user-card"));
       filteredUsers = [...userCards];
@@ -328,114 +401,127 @@
     dateFilter.dispatchEvent(new Event("change"));
   });
 
-      function openLogsModal(index) {
-        const modal = document.getElementById(`logs-modal-${index}`);
-        const overlay = document.getElementById('overlay');
+  function openLogsModal(index) {
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const overlay = document.getElementById('overlay');
 
-        if (modal) {
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
 
-          // Forzar render con opacity-0 primero
-          modal.classList.remove('opacity-100');
-          modal.classList.add('opacity-0');
+      // Forzar render con opacity-0 primero
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0');
 
-          requestAnimationFrame(() => {
-            // Segundo frame: se fuerza la transición
-            setTimeout(() => {
-              modal.classList.remove('opacity-0');
-              modal.classList.add('opacity-100');
-            }, 10); // solo 10ms bastan para forzar el efecto
-          });
-        }
+      requestAnimationFrame(() => {
+        // Segundo frame: se fuerza la transición
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          modal.classList.add('opacity-100');
+        }, 10); // solo 10ms bastan para forzar el efecto
+      });
+    }
 
-        if (overlay) {
-          overlay.classList.remove('hidden');
-          overlay.classList.remove('opacity-100');
-          overlay.classList.add('opacity-0');
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      overlay.classList.remove('opacity-100');
+      overlay.classList.add('opacity-0');
 
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              overlay.classList.remove('opacity-0');
-              overlay.classList.add('opacity-100');
-            }, 10);
-          });
-        }
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          overlay.classList.remove('opacity-0');
+          overlay.classList.add('opacity-100');
+        }, 10);
+      });
+    }
+  }
+
+  function toggleResponseFilter(el, modalIndex) {
+    const isActive = el.dataset.active === "true";
+    el.dataset.active = isActive ? "false" : "true";
+
+    if (isActive) {
+      el.style.color = "#9CA3AF"; // gray-400
+    } else {
+      const originalColor = el.dataset.color;
+      el.style.color = getComputedTailwindColor(originalColor);
+    }
+
+    const modal = document.getElementById(`logs-modal-${modalIndex}`);
+    const allFilters = modal.querySelectorAll(".filter-icon");
+    const activeTypes = [];
+
+    allFilters.forEach(f => {
+      if (f.dataset.active === "true") {
+        activeTypes.push(f.dataset.filterType);
       }
+    });
 
-      function toggleResponseFilter(el, modalIndex) {
-        const isActive = el.dataset.active === "true";
-        el.dataset.active = isActive ? "false" : "true";
+    const entries = modal.querySelectorAll(".log-entry");
+    entries.forEach(entry => {
+      const badge = entry.querySelector(".response-badge");
+      const code = parseInt(badge.textContent);
 
-        if (isActive) {
-          el.style.color = "#9CA3AF"; // gray-400
-        } else {
-          const originalColor = el.dataset.color;
-          el.style.color = getComputedTailwindColor(originalColor);
-        }
+      let type = 'unknown';
+      if (code >= 100 && code <= 199) type = 'informational';
+      else if (code >= 200 && code <= 299) type = 'successful';
+      else if (code >= 300 && code <= 399) type = 'redirection';
+      else if (code >= 400 && code <= 499) type = 'clientError';
+      else if (code >= 500 && code <= 599) type = 'serverError';
 
-        const modal = document.getElementById(`logs-modal-${modalIndex}`);
-        const allFilters = modal.querySelectorAll(".filter-icon");
-        const activeTypes = [];
-
-        allFilters.forEach(f => {
-          if (f.dataset.active === "true") {
-            activeTypes.push(f.dataset.filterType);
-          }
-        });
-
-        const entries = modal.querySelectorAll(".log-entry");
-        entries.forEach(entry => {
-          const badge = entry.querySelector(".response-badge");
-          const code = parseInt(badge.textContent);
-
-          let type = 'unknown';
-          if (code >= 100 && code <= 199) type = 'informational';
-          else if (code >= 200 && code <= 299) type = 'successful';
-          else if (code >= 300 && code <= 399) type = 'redirection';
-          else if (code >= 400 && code <= 499) type = 'clientError';
-          else if (code >= 500 && code <= 599) type = 'serverError';
-
-          entry.style.display = activeTypes.includes(type) ? '' : 'none';
-        });
-      }
+      entry.style.display = activeTypes.includes(type) ? '' : 'none';
+    });
+  }
 
 
-      function closeLogsModal(index) {
-        const modal = document.getElementById(`logs-modal-${index}`);
-        const overlay = document.getElementById('overlay');
+  function closeLogsModal(index) {
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const overlay = document.getElementById('overlay');
 
-        if (modal) {
-          modal.classList.remove('opacity-100');
-          modal.classList.add('opacity-0');
+    if (modal) {
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0');
 
-          // Espera a que termine la animación antes de ocultar
-          setTimeout(() => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-          }, 1000); // Debe coincidir con la duracion de la clase
-        }
+      // Espera a que termine la animación antes de ocultar
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }, 1000); // Debe coincidir con la duracion de la clase
+    }
 
-        if (overlay) {
-          overlay.classList.remove('opacity-100');
-          overlay.classList.add('opacity-0');
-          setTimeout(() => {
-            overlay.classList.add('hidden');
-          }, 1000);
-        }
+    if (overlay) {
+      overlay.classList.remove('opacity-100');
+      overlay.classList.add('opacity-0');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, 1000);
+    }
 
-      }
+  }
 
-      function getComputedTailwindColor(className) {
-        const colorMap = {
-          'text-blue-500': '#3B82F6',
-          'text-green-500': '#22C55E',
-          'text-yellow-500': '#EAB308',
-          'text-red-500': '#EF4444',
-          'text-orange-400': '#FB923C',
-          'text-gray-500': '#6B7280'
-        };
-        return colorMap[className] || '#6B7280';
-      }
+  function getComputedTailwindColor(className) {
+    const colorMap = {
+      'text-blue-500': '#3B82F6',
+      'text-green-500': '#22C55E',
+      'text-yellow-500': '#EAB308',
+      'text-red-500': '#EF4444',
+      'text-orange-400': '#FB923C',
+      'text-gray-500': '#6B7280'
+    };
+    return colorMap[className] || '#6B7280';
+  }
 
-    </script>
+  function filterLogs(index) {
+    const input = document.getElementById(`mysearch-${index}`);
+    const query = input.value.toLowerCase();
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const logEntries = modal.querySelectorAll(".log-entry");
+
+    logEntries.forEach(entry => {
+      const urlText = entry.querySelector(".log-url")?.textContent.toLowerCase() || "";
+      entry.style.display = urlText.includes(query) ? "flex" : "none";
+    });
+  }
+
+
+</script>
