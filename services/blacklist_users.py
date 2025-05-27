@@ -90,11 +90,15 @@ def find_blacklisted_sites(
                 break
 
         if count_only:
-            total_query = " + ".join([
-                f"(SELECT COUNT(*) FROM {log_table} l JOIN {log_table.replace('logs_', 'users_')} u "
-                f"ON l.user_id = u.id WHERE {' OR '.join([f'l.url LIKE \'%{s}%\' ' for s in blacklist])})"
-                for log_table in logs_tables
-            ])
+            total_parts = []
+            for log_table in logs_tables:
+                user_table = log_table.replace('logs_', 'users_')
+                like_conditions = " OR ".join([f"l.url LIKE '%{s}%'" for s in blacklist])
+                total_parts.append(
+                    f"(SELECT COUNT(*) FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id WHERE {like_conditions})"
+                )
+
+            total_query = " + ".join(total_parts)
             total_results = db.execute(text(f"SELECT ({total_query})")).scalar()
 
     except SQLAlchemyError as e:
