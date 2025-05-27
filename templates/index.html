@@ -19,9 +19,8 @@
                 console.error("Error al actualizar conexiones:", error);
             }
         }
-
-        // Call Function 15 seconds
-        setInterval(refrescarConexiones, 15000);
+        
+        setInterval(refrescarConexiones, 60000);
 
         window.onload = refrescarConexiones;
     </script>
