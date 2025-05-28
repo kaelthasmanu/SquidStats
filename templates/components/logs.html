@@ -186,7 +186,7 @@
         // Luego devuelves el HTML completo del modal, usando responseSummary
         return `
   <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
-    <div class="modal-content bg-white p-8 rounded-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
+    <div class="modal-content bg-white p-8 rounded-2xl w-[95%] max-w-[900px] max-h-[90vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
       <div class="flex justify-between items-center mb-2">
         <button onclick="closeLogsModal(${index})" class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl font-bold z-10" title="Cerrar">
           &times;
@@ -245,20 +245,44 @@
               else if (log.response >= 500 && log.response <= 599) badgeClass = 'bg-orange-400';
 
               return `
-              <div class="log-entry flex justify-between items-start gap-3 border-b border-gray-200 pb-1">
-                <div class="flex-1">
-                  <div class="log-url text-sm font-medium text-gray-800">${truncatedUrl}</div>
-                  <div class="log-details mt-1 flex flex-wrap gap-3 text-sm text-gray-600">
-                    <span class="response-badge ${badgeClass} inline-block px-2 py-[0.15rem] rounded-md text-[0.65rem] font-medium text-white mr-2">${log.response}</span>
-                    <span class="log-meta">${log.request_count} reqs</span>
-                    <span class="log-meta">${formatBytes(log.data_transmitted)}</span>
-                  </div>
-                </div>
-                <div class="self-start">
-                  <i class="fa-solid fa-up-right-from-square text-blue-600 hover:text-blue-800 cursor-pointer text-lg"
-                    title="Abrir enlace"
-                    onclick="window.open('${fullUrl}', '_blank')"></i>
-                </div>
+<div class="log-entry grid grid-cols-[1fr_auto] items-start gap-2 border-b border-gray-200 py-2">
+  <div class="log-details-grid">
+    <!-- Línea superior -->
+    <div class="flex items-baseline gap-3">
+      <span class="text-sm font-medium text-gray-800">${new Date(log.timestamp).toLocaleString()}</span>
+      <span class="text-xs font-semibold uppercase text-purple-600">${log.method}</span>
+      <span class="log-url text-sm font-medium text-gray-800 truncate">${truncatedUrl}</span>
+    </div>
+    
+    <!-- Línea inferior -->
+    <div class="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+      <span class="response-badge ${badgeClass} inline-block px-2 py-[0.15rem] rounded-md text-[0.65rem] font-medium text-white">
+        ${log.response}
+      </span>
+      <span class="log-meta flex items-center gap-1">
+        <i class="fas fa-hashtag text-gray-400"></i>
+        ${log.request_count} reqs
+      </span>
+      <span class="log-meta flex items-center gap-1">
+        <i class="fas fa-database text-gray-400"></i>
+        ${formatBytes(log.data_transmitted)}
+      </span>
+      <span class="log-meta flex items-center gap-1 text-xs text-gray-500">
+        <i class="fas fa-clock"></i>
+        ${(log.duration || 0).toFixed(2)}ms
+      </span>
+      ${log.ip ? `<span class="log-meta flex items-center gap-1 text-xs text-gray-500">
+        <i class="fas fa-globe"></i>
+        ${log.ip}
+      </span>` : ''}
+    </div>
+  </div>
+  
+  <div class="flex items-center gap-2">
+    <i class="fa-solid fa-up-right-from-square text-blue-600 hover:text-blue-800 cursor-pointer text-lg"
+       title="Abrir enlace"
+       onclick="window.open('${fullUrl}', '_blank')"></i>
+  </div>
               </div>`;
             }).join('')
             : '<div class="no-logs text-gray-500">No hay actividad registrada</div>'
@@ -401,127 +425,127 @@
     dateFilter.dispatchEvent(new Event("change"));
   });
 
-  function openLogsModal(index) {
-    const modal = document.getElementById(`logs-modal-${index}`);
-    const overlay = document.getElementById('overlay');
+                  function openLogsModal(index) {
+                    const modal = document.getElementById(`logs-modal-${index}`);
+                    const overlay = document.getElementById('overlay');
 
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+                    if (modal) {
+                      modal.classList.remove('hidden');
+                      modal.classList.add('flex');
 
-      // Forzar render con opacity-0 primero
-      modal.classList.remove('opacity-100');
-      modal.classList.add('opacity-0');
+                      // Forzar render con opacity-0 primero
+                      modal.classList.remove('opacity-100');
+                      modal.classList.add('opacity-0');
 
-      requestAnimationFrame(() => {
-        // Segundo frame: se fuerza la transición
-        setTimeout(() => {
-          modal.classList.remove('opacity-0');
-          modal.classList.add('opacity-100');
-        }, 10); // solo 10ms bastan para forzar el efecto
-      });
-    }
+                      requestAnimationFrame(() => {
+                        // Segundo frame: se fuerza la transición
+                        setTimeout(() => {
+                          modal.classList.remove('opacity-0');
+                          modal.classList.add('opacity-100');
+                        }, 10); // solo 10ms bastan para forzar el efecto
+                      });
+                    }
 
-    if (overlay) {
-      overlay.classList.remove('hidden');
-      overlay.classList.remove('opacity-100');
-      overlay.classList.add('opacity-0');
+                    if (overlay) {
+                      overlay.classList.remove('hidden');
+                      overlay.classList.remove('opacity-100');
+                      overlay.classList.add('opacity-0');
 
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          overlay.classList.remove('opacity-0');
-          overlay.classList.add('opacity-100');
-        }, 10);
-      });
-    }
-  }
+                      requestAnimationFrame(() => {
+                        setTimeout(() => {
+                          overlay.classList.remove('opacity-0');
+                          overlay.classList.add('opacity-100');
+                        }, 10);
+                      });
+                    }
+                  }
 
-  function toggleResponseFilter(el, modalIndex) {
-    const isActive = el.dataset.active === "true";
-    el.dataset.active = isActive ? "false" : "true";
+                  function toggleResponseFilter(el, modalIndex) {
+                    const isActive = el.dataset.active === "true";
+                    el.dataset.active = isActive ? "false" : "true";
 
-    if (isActive) {
-      el.style.color = "#9CA3AF"; // gray-400
-    } else {
-      const originalColor = el.dataset.color;
-      el.style.color = getComputedTailwindColor(originalColor);
-    }
+                    if (isActive) {
+                      el.style.color = "#9CA3AF"; // gray-400
+                    } else {
+                      const originalColor = el.dataset.color;
+                      el.style.color = getComputedTailwindColor(originalColor);
+                    }
 
-    const modal = document.getElementById(`logs-modal-${modalIndex}`);
-    const allFilters = modal.querySelectorAll(".filter-icon");
-    const activeTypes = [];
+                    const modal = document.getElementById(`logs-modal-${modalIndex}`);
+                    const allFilters = modal.querySelectorAll(".filter-icon");
+                    const activeTypes = [];
 
-    allFilters.forEach(f => {
-      if (f.dataset.active === "true") {
-        activeTypes.push(f.dataset.filterType);
-      }
-    });
+                    allFilters.forEach(f => {
+                      if (f.dataset.active === "true") {
+                        activeTypes.push(f.dataset.filterType);
+                      }
+                    });
 
-    const entries = modal.querySelectorAll(".log-entry");
-    entries.forEach(entry => {
-      const badge = entry.querySelector(".response-badge");
-      const code = parseInt(badge.textContent);
+                    const entries = modal.querySelectorAll(".log-entry");
+                    entries.forEach(entry => {
+                      const badge = entry.querySelector(".response-badge");
+                      const code = parseInt(badge.textContent);
 
-      let type = 'unknown';
-      if (code >= 100 && code <= 199) type = 'informational';
-      else if (code >= 200 && code <= 299) type = 'successful';
-      else if (code >= 300 && code <= 399) type = 'redirection';
-      else if (code >= 400 && code <= 499) type = 'clientError';
-      else if (code >= 500 && code <= 599) type = 'serverError';
+                      let type = 'unknown';
+                      if (code >= 100 && code <= 199) type = 'informational';
+                      else if (code >= 200 && code <= 299) type = 'successful';
+                      else if (code >= 300 && code <= 399) type = 'redirection';
+                      else if (code >= 400 && code <= 499) type = 'clientError';
+                      else if (code >= 500 && code <= 599) type = 'serverError';
 
-      entry.style.display = activeTypes.includes(type) ? '' : 'none';
-    });
-  }
-
-
-  function closeLogsModal(index) {
-    const modal = document.getElementById(`logs-modal-${index}`);
-    const overlay = document.getElementById('overlay');
-
-    if (modal) {
-      modal.classList.remove('opacity-100');
-      modal.classList.add('opacity-0');
-
-      // Espera a que termine la animación antes de ocultar
-      setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }, 1000); // Debe coincidir con la duracion de la clase
-    }
-
-    if (overlay) {
-      overlay.classList.remove('opacity-100');
-      overlay.classList.add('opacity-0');
-      setTimeout(() => {
-        overlay.classList.add('hidden');
-      }, 1000);
-    }
-
-  }
-
-  function getComputedTailwindColor(className) {
-    const colorMap = {
-      'text-blue-500': '#3B82F6',
-      'text-green-500': '#22C55E',
-      'text-yellow-500': '#EAB308',
-      'text-red-500': '#EF4444',
-      'text-orange-400': '#FB923C',
-      'text-gray-500': '#6B7280'
-    };
-    return colorMap[className] || '#6B7280';
-  }
-
-  function filterLogs(index) {
-    const input = document.getElementById(`mysearch-${index}`);
-    const query = input.value.toLowerCase();
-    const modal = document.getElementById(`logs-modal-${index}`);
-    const logEntries = modal.querySelectorAll(".log-entry");
-
-    logEntries.forEach(entry => {
-      const urlText = entry.querySelector(".log-url")?.textContent.toLowerCase() || "";
-      entry.style.display = urlText.includes(query) ? "flex" : "none";
-    });
-  }
+                      entry.style.display = activeTypes.includes(type) ? '' : 'none';
+                    });
+                  }
 
 
-</script>
+                  function closeLogsModal(index) {
+                    const modal = document.getElementById(`logs-modal-${index}`);
+                    const overlay = document.getElementById('overlay');
+
+                    if (modal) {
+                      modal.classList.remove('opacity-100');
+                      modal.classList.add('opacity-0');
+
+                      // Espera a que termine la animación antes de ocultar
+                      setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                      }, 1000); // Debe coincidir con la duracion de la clase
+                    }
+
+                    if (overlay) {
+                      overlay.classList.remove('opacity-100');
+                      overlay.classList.add('opacity-0');
+                      setTimeout(() => {
+                        overlay.classList.add('hidden');
+                      }, 1000);
+                    }
+
+                  }
+
+                  function getComputedTailwindColor(className) {
+                    const colorMap = {
+                      'text-blue-500': '#3B82F6',
+                      'text-green-500': '#22C55E',
+                      'text-yellow-500': '#EAB308',
+                      'text-red-500': '#EF4444',
+                      'text-orange-400': '#FB923C',
+                      'text-gray-500': '#6B7280'
+                    };
+                    return colorMap[className] || '#6B7280';
+                  }
+
+                  function filterLogs(index) {
+                    const input = document.getElementById(`mysearch-${index}`);
+                    const query = input.value.toLowerCase();
+                    const modal = document.getElementById(`logs-modal-${index}`);
+                    const logEntries = modal.querySelectorAll(".log-entry");
+
+                    logEntries.forEach(entry => {
+                      const urlText = entry.querySelector(".log-url")?.textContent.toLowerCase() || "";
+                      entry.style.display = urlText.includes(query) ? "flex" : "none";
+                    });
+                  }
+
+
+                </script>
