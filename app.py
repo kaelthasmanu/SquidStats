@@ -185,7 +185,7 @@ def update_web():
     else:
         return redirect('/')
 
-
+'''
 @app.route('/blacklist', methods=['GET'])
 def check_blacklist():
     db = None
@@ -205,36 +205,51 @@ def check_blacklist():
     finally:
         if db is not None:
             db.close()
+'''
 
 
-@app.route('/check-blacklist-by-date', methods=['POST'])
-def check_blacklist_by_date():
+@app.route('/blacklist', methods=['GET'])
+def blacklist_logs():
     db = None
     try:
-        data = request.get_json()
-        if not data or 'sites' not in data or 'date' not in data:
-            return jsonify({'error': 'Parámetros faltantes'}), 400
+        # Obtener parámetros de paginación
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
 
-        blacklist = data['sites']
-        date_str = data['date']
-
-        try:
-            fecha_consulta = datetime.strptime(date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return jsonify({'error': 'Formato de fecha inválido (usar YYYY-MM-DD)'}), 400
+        # Validar parámetros
+        if page < 1 or per_page < 1 or per_page > 100:
+            return render_template('error.html',
+                                   message="Parámetros de paginación inválidos"), 400
 
         db = get_session()
-        resultados = find_blacklisted_sites_by_date(db, blacklist, fecha_consulta)
 
-        return jsonify({
-            'date': date_str,
-            'count': len(resultados),
-            'results': resultados
-        })
+        # Obtener blacklist (podrías cargarla desde base de datos o config)
+        blacklist = ["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]
+
+        # Obtener resultados paginados
+        result_data = find_blacklisted_sites(db, blacklist, page, per_page)
+
+        if 'error' in result_data:
+            return render_template('error.html',
+                                   message=result_data['error']), 500
+
+        return render_template(
+            'blacklist.html',
+            results=result_data['results'],
+            pagination=result_data['pagination'],
+            current_page=page,
+            page_icon='shield-exclamation.ico',
+            page_title='Registros Bloqueados'
+        )
+
+    except ValueError:
+        return render_template('error.html',
+                               message="Parámetros inválidos"), 400
 
     except Exception as e:
-        logger.error(f"Error en check-blacklist-by-date: {str(e)}")
-        return jsonify({'error': 'Error interno del servidor'}), 500
+        logger.error(f"Error en blacklist_logs: {str(e)}")
+        return render_template('error.html',
+                               message="Error interno del servidor"), 500
 
     finally:
         if db is not None:
