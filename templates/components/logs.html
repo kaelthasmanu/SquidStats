@@ -184,36 +184,39 @@
         // Luego devuelves el HTML completo del modal, usando responseSummary
         return `
   <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
-    <div class="modal-content bg-white p-8 rounded-2xl w-[95%] max-w-[700px] max-h-[85vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
-      <div class="flex justify-between items-center mb-2">
-        <button onclick="closeLogsModal(${index})" class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl font-bold z-10" title="Cerrar">
-          &times;
-        </button>
-        <div class="flex items-center gap-3 items-start">
-        <h4 class="logs-title text-lg font-semibold">
-          Actividad reciente - <span class="username-highlight">${user.username}</span>
-        </h4>
+    <div class="modal-content bg-white p-8 rounded-2xl w-[95%] max-w-[650px] max-h-[85vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
+      <!-- Botón de cerrar mejorado - más pequeño y dentro del modal -->
+      <button onclick="closeLogsModal(${index})" 
+              class="close-btn absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full z-50 shadow-md transform transition-all duration-300 hover:bg-red-600 hover:scale-110 hover:rotate-90 hover:shadow-lg"
+              title="Cerrar">
+        <i class="fas fa-times text-base"></i>
+      </button>
 
-<div id="searchBox-${index}" class="relative w-auto h-[36px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md overflow-hidden flex items-center border border-gray-300">
-  <!-- Botón de lupa -->
-  <div id="toggleBtn-${index}" class="absolute left-0 top-0 w-[36px] h-[36px] flex items-center justify-center cursor-pointer z-10">
-    <i class="fas fa-search text-blue-600 text-sm"></i>
-  </div>
-
-  <!-- Input -->
-  <div id="inputWrapper-${index}" class="ml-[36px] w-0 h-[36px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
-    <input id="mysearch-${index}" type="text" placeholder="Buscar URL..." class="w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]"/>
-  </div>
-
-  <!-- Botón de limpiar -->
-<button id="clearBtn-${index}" 
-        class="absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" 
-        title="Limpiar búsqueda">
-  <i class="fas fa-times text-lg leading-none"></i>
-</button>
-</div>
-</div>
-        <div class="response-summary flex justify-end gap-4 items-center mb-4 mr-4">
+      <div class="flex flex-col"> 
+        <div class="flex justify-between items-center mb-2"> 
+          <div class="flex items-center gap-0 min-w-0"> 
+            <h4 class="logs-title text-lg font-semibold whitespace-nowrap truncate flex items-center">
+              Actividad reciente - <span class="username-highlight font-semibold truncate max-w-[120px] text-[#1369ce]">${user.username}</span>
+              
+              <!-- Lupa directamente después del nombre -->
+              <div id="searchBox-${index}" class="ml-2 relative w-auto h-[36px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md overflow-hidden flex items-center border border-gray-300">
+                <div id="toggleBtn-${index}" class="absolute left-0 top-0 w-[36px] h-[36px] flex items-center justify-center cursor-pointer z-10">
+                  <i class="fas fa-search text-blue-600 text-sm"></i>
+                </div>
+                <div id="inputWrapper-${index}" class="ml-[36px] w-0 h-[36px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
+                  <input id="mysearch-${index}" type="text" placeholder="Buscar URL..." class="w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]"/>
+                </div>
+                <button id="clearBtn-${index}" 
+                      class="absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" 
+                      title="Limpiar búsqueda">
+                  <i class="fas fa-times text-lg leading-none"></i>
+                </button>
+              </div>
+            </h4>
+          </div>
+        </div>
+        
+        <div class="response-summary flex justify-end gap-4 items-center mb-4">
           ${responseSummary}
         </div>
       </div>
@@ -221,7 +224,7 @@
       <div class="logs-list space-y-2 mt-2 max-h-[60vh]">
         ${user.logs.length > 0
             ? user.logs.map(log => {
-              const truncatedUrl = truncate(log.url, 40);
+              const truncatedUrl = truncate(log.url, 55);
               const isHttps = /:(443|8443)$/.test(log.url);
               const protocol = isHttps ? 'https://' : 'http://';
               const fullUrl = log.url.startsWith('http') ? log.url : protocol + log.url;
