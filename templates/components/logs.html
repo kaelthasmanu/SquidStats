@@ -1,6 +1,6 @@
 <div class="users-dashboard max-w-[1200px] mx-auto p-8">
   <div class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4">
-    <h1 class="dashboard-title text-center text-primary mb-8 font-semibold text-[2.2rem] text-blue-500">Panel Actividad de Usuarios</h1>
+    <h1 class="dashboard-title text-center font-semibold text-[2.2rem] text-blue-500">Panel Actividad de Usuarios</h1>
     <div class="filters-container flex gap-4 items-center">
       <div class="date-filter max-w-xs mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative">
         <input type="date" id="date-filter"
@@ -10,7 +10,6 @@
       <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[250px] relative">
         <input type="text" id="username-search" placeholder="Buscar por usuario..."
           class="search-input w-full pl-4 pr-12 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
-        <!-- icono lupa -->
         <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
           <i class="fas fa-magnifying-glass text-2xl text-[#1A8A9D]"></i>
         </div>
@@ -36,18 +35,119 @@
         class="fas fa-angle-double-right"></i></button>
   </div>
 </div>
-</div>
-  <div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
-</div>
+
+<div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  // Funciones globales
+  function openLogsModal(index) {
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const overlay = document.getElementById('overlay');
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.classList.add('opacity-100');
+      }, 10);
+    }
+
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      setTimeout(() => {
+        overlay.classList.remove('opacity-0');
+        overlay.classList.add('opacity-100');
+      }, 10);
+    }
+  }
+
+  function closeLogsModal(index) {
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const overlay = document.getElementById('overlay');
+
+    if (modal) {
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }, 1000);
+    }
+
+    if (overlay) {
+      overlay.classList.remove('opacity-100');
+      overlay.classList.add('opacity-0');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, 1000);
+    }
+  }
+
+  function toggleResponseFilter(el, modalIndex) {
+    const isActive = el.dataset.active === "true";
+    el.dataset.active = isActive ? "false" : "true";
+
+    if (isActive) {
+      el.style.color = "#9CA3AF";
+    } else {
+      el.style.color = getComputedTailwindColor(el.dataset.color);
+    }
+
+    const modal = document.getElementById(`logs-modal-${modalIndex}`);
+    const entries = modal.querySelectorAll(".log-entry");
+    
+    entries.forEach(entry => {
+      const code = parseInt(entry.dataset.responseCode);
+      let type = 'unknown';
+      
+      if (code >= 100 && code <= 199) type = 'informational';
+      else if (code >= 200 && code <= 299) type = 'successful';
+      else if (code >= 300 && code <= 399) type = 'redirection';
+      else if (code >= 400 && code <= 499) type = 'clientError';
+      else if (code >= 500 && code <= 599) type = 'serverError';
+
+      entry.style.display = el.dataset.active === "true" && el.dataset.filterType === type ? '' : 'none';
+    });
+  }
+
+  function getComputedTailwindColor(className) {
+    const colorMap = {
+      'text-blue-500': '#3B82F6',
+      'text-green-500': '#22C55E',
+      'text-yellow-500': '#EAB308',
+      'text-red-500': '#EF4444',
+      'text-orange-400': '#FB923C',
+      'text-gray-500': '#6B7280'
+    };
+    return colorMap[className] || '#6B7280';
+  }
+
+  function filterLogs(index) {
+    const input = document.getElementById(`mysearch-${index}`);
+    const query = input.value.toLowerCase();
+    const modal = document.getElementById(`logs-modal-${index}`);
+    const entries = modal.querySelectorAll(".log-entry");
+    const noResults = modal.querySelector(".no-results");
+    
+    let visibleCount = 0;
+    
+    entries.forEach(entry => {
+      const urlText = entry.querySelector(".log-url")?.textContent.toLowerCase() || "";
+      const isVisible = urlText.includes(query);
+      
+      entry.style.display = isVisible ? '' : 'none';
+      if (isVisible) visibleCount++;
+    });
+    
+    noResults.style.display = visibleCount === 0 && query !== "" ? 'block' : 'none';
+  }
+
+  // Inicialización
+  document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById("username-search");
-    let userCards = [];
-    let filteredUsers = [];
     const usersContainer = document.getElementById("users-container");
     const modalsContainer = document.getElementById("modals-container");
-
     const prevBtn = document.getElementById("prev-page");
     const nextBtn = document.getElementById("next-page");
     const firstBtn = document.getElementById("first-page");
@@ -55,292 +155,10 @@
     const pageNumbers = document.getElementById("page-numbers");
     const dateFilter = document.getElementById("date-filter");
 
+    let userCards = [];
+    let filteredUsers = [];
     let currentPage = 1;
     const itemsPerPage = 15;
-
-    const today = new Date().toISOString().split('T')[0];
-    if (!dateFilter.value) {
-      dateFilter.value = today;
-    }
-
-    dateFilter.addEventListener("change", async (e) => {
-      const selectedDate = e.target.value;
-      if (!selectedDate) return;
-
-      try {
-    // Mostrar spinner de carga
-    usersContainer.innerHTML = `
-      <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
-        <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      </div>`;
-
-    const response = await fetch("/get-logs-by-date", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ date: selectedDate }),
-    });
-
-    if (!response.ok) throw new Error("Error fetching data");
-
-    const usersData = await response.json();
-    updateUsersData(usersData);
-  } catch (error) {
-    console.error("Error:", error);
-    usersContainer.innerHTML = '<div class="text-red-500 text-center p-4 col-span-full">Error al cargar los datos</div>';
-  }
-});
-
-
-    function updateUsersData(usersData) {
-        if (!usersData || usersData?.length === 0) {
-        usersContainer.innerHTML = '<div class="text-gray-500 text-center p-4 col-span-full">No se encontraron datos</div>';
-        return;
-      }
-      console.log(usersData);
-      const cardsHTML = usersData.map((user, index) => `
-    <div class="user-card group bg-[#f0f2f5] transition-[all] duration-[300ms] ease-[ease] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
-        <!-- Avatar con efectos completos -->
-        <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] relative z-[1]">
-          <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-[300ms] ease-linear z-0 group-hover:h-full"></div>
-          <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
-          <div class="avatar w-full h-full rounded-full bg-slate-200 flex items-center justify-center text-[2.5rem] text-slate-500 relative transition-all duration-[900ms] ease-in-out group-hover:shadow-[0_0_0_10px_#f7f5ec] group-hover:scale-[0.7] z-[2]">
-            <i class="fas fa-user"></i>
-          </div>
-        </div>
-        
-        <!-- Información de usuario -->
-        <div class="user-info mt-[-15px] mb-4px] px-[15px]">
-          <h3 class="username font-semibold text-[1.2rem] text-[#1369ce] mb-0">${user.username}</h3>
-          <h4 class="ip-address text-[0.9rem] text-gray-500">${user.ip}</h4>
-        </div>
-        
-        <!-- Botón de acción -->
-        <div class="card-action px-[15px] mt-[2px] relative z-[2]">
-          <button class="activity-button w-full bg-[#1369ce] text-white font-bold py-2 rounded-md cursor-pointer transition-all duration-300 text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5 shadow-md" onclick="event.stopPropagation(); openLogsModal(${index});">
-            ACTIVIDAD
-          </button>
-        </div>
-        
-        <!-- Footer -->
-        <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] z-[1]">
-          <li class="inline-block flex flex-col items-center">
-            <span class="label text-xs font-light uppercase tracking-wide">Solicitudes:</span>
-            <span class="value font-semibold">${user.total_requests}</span>
-          </li>
-          <li class="inline-block flex flex-col items-center">
-            <span class="label text-xs font-light uppercase tracking-wide">Datos:</span>
-            <span class="value font-semibold">${formatBytes(user.total_data)}</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  `).join('');
-
-      const modalsHTML = usersData.map((user, index) => {
-        // Conteo agrupado por rango de status
-        const responseCounts = {
-          informational: 0,   // 100–199
-          successful: 0,      // 200–299
-          redirection: 0,     // 300–399
-          clientError: 0,     // 400–499
-          serverError: 0,     // 500–599
-          unknown: 0          // Otros códigos
-        };
-
-        user.logs.forEach(log => {
-          const code = log.response;
-          if (code >= 100 && code <= 199) responseCounts.informational++;
-          else if (code >= 200 && code <= 299) responseCounts.successful++;
-          else if (code >= 300 && code <= 399) responseCounts.redirection++;
-          else if (code >= 400 && code <= 499) responseCounts.clientError++;
-          else if (code >= 500 && code <= 599) responseCounts.serverError++;
-          else responseCounts.unknown++;
-        });
-
-        // Definimos íconos y colores para cada rango
-        const responseGroups = {
-          informational: { icon: 'fa-info-circle', color: 'text-blue-500', label: 'Respuestas informativas (100–199)' },
-          successful: { icon: 'fa-circle-check', color: 'text-green-500', label: 'Respuestas exitosas (200–299)' },
-          redirection: { icon: 'fa-arrow-right', color: 'text-yellow-500', label: 'Mensajes de redirección (300–399)' },
-          clientError: { icon: 'fa-circle-xmark', color: 'text-red-500', label: 'Respuestas de error del cliente (400–499)' },
-          serverError: { icon: 'fa-triangle-exclamation', color: 'text-orange-400', label: 'Respuestas de error del servidor (500–599)' },
-          unknown: { icon: 'fa-question', color: 'text-gray-500', label: 'Otros' }
-        };
-
-        const responseSummary = Object.entries(responseCounts).map(([key, count]) => {
-          if (count === 0) return '';
-          const { icon, color, label } = responseGroups[key];
-          return `
-    <div class="filter-icon flex items-center gap-1 text-sm cursor-pointer transition-colors"
-         data-filter-type="${key}"
-         data-active="true"
-         data-color="${color}"
-         style="color: ${getComputedTailwindColor(color)}"
-         title="${label}"
-         onclick="toggleResponseFilter(this, ${index})">
-      <i class="fa-solid ${icon}"></i>
-      <span>${count}</span>
-    </div>`;
-        }).join('');
-
-
-
-        // Luego devuelves el HTML completo del modal, usando responseSummary
-        return `
-  <div class="logs-modal hidden fixed inset-0 bg-[var(--modal-bg)] z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
-    <div class="modal-content bg-white p-8 rounded-2xl w-[95%] max-w-[650px] max-h-[85vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
-      <!-- Botón de cerrar mejorado - más pequeño y dentro del modal -->
-      <button onclick="closeLogsModal(${index})" 
-              class="close-btn absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full z-50 shadow-md transform transition-all duration-300 hover:bg-red-600 hover:scale-110 hover:rotate-90 hover:shadow-lg"
-              title="Cerrar" aria-label="Cerrar">
-        <i class="fas fa-times text-base"></i>
-      </button>
-
-      <div class="flex flex-col"> 
-        <div class="flex justify-between items-center mb-2"> 
-          <div class="flex items-center gap-0 min-w-0"> 
-            <h4 class="logs-title text-base text-gray-500 mb-4 uppercase tracking-[1px] font-semibold whitespace-nowrap truncate flex items-center">
-              Actividad reciente - <span class="username-highlight font-semibold truncate max-w-[120px] text-[#1369ce]">${user.username}</span>
-              
-              <!-- Lupa directamente después del nombre -->
-              <div id="searchBox-${index}" class="ml-2 relative w-auto h-[36px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md overflow-hidden flex items-center border border-gray-300">
-                <div id="toggleBtn-${index}" class="absolute left-0 top-0 w-[36px] h-[36px] flex items-center justify-center cursor-pointer z-10">
-                  <i class="fas fa-search text-blue-600 text-sm"></i>
-                </div>
-                <div id="inputWrapper-${index}" class="ml-[36px] w-0 h-[36px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
-                  <input id="mysearch-${index}" type="text" placeholder="Buscar URL..." class="w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]"/>
-                </div>
-                <button id="clearBtn-${index}" 
-                      class="absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" 
-                      title="Limpiar búsqueda">
-                  <i class="fas fa-times text-lg leading-none"></i>
-                </button>
-              </div>
-            </h4>
-          </div>
-        </div>
-        
-        <div class="response-summary flex justify-end gap-4 items-center mb-4">
-          ${responseSummary}
-        </div>
-      </div>
-
-      <div class="logs-list space-y-2 mt-2 max-h-[60vh] overflow-y-auto flex flex-col gap-4">
-        ${user.logs.length > 0
-            ? user.logs.map(log => {
-              const truncatedUrl = truncate(log.url, 55);
-              const isHttps = /:(443|8443)$/.test(log.url);
-              const protocol = isHttps ? 'https://' : 'http://';
-              const fullUrl = log.url.startsWith('http') ? log.url : protocol + log.url;
-
-              const responseColors = {
-                100: 'bg-blue-400',
-                200: 'bg-green-500',
-                300: 'bg-yellow-400',
-                400: 'bg-red-500',
-                500: 'bg-orange-400',
-                0: 'bg-gray-400'
-              };
-
-              // Para badge, elige color según rango de código
-              let badgeClass = 'bg-gray-400';
-              if (log.response >= 100 && log.response <= 199) badgeClass = 'bg-blue-400';
-              else if (log.response >= 200 && log.response <= 299) badgeClass = 'bg-green-500';
-              else if (log.response >= 300 && log.response <= 399) badgeClass = 'bg-yellow-400';
-              else if (log.response >= 400 && log.response <= 499) badgeClass = 'bg-red-500';
-              else if (log.response >= 500 && log.response <= 599) badgeClass = 'bg-orange-400';
-
-              return `
-  <div class="log-entry grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 py-2 p-3 bg-custom-light rounded-custom transition-custom hover:shadow-md hover:translate-y-[-2px]">
-  <div class="log-details-grid min-w-0">
-    <!-- Línea superior -->
-    <div class="flex items-baseline gap-3">
-      <span class="log-url text-sm font-medium text-gray-800 truncate">${truncatedUrl}</span>
-    </div>
-      
-    <!-- Línea inferior -->
-  <div class="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-    <span class="response-badge ${badgeClass} inline-block px-2 py-[0.15rem] rounded-md text-[0.65rem] font-medium text-white">
-      ${log.response}
-    </span>
-      <span class="log-meta flex items-center gap-1">
-        <i class="fas fa-hashtag text-gray-400"></i>
-        ${log.request_count} reqs
-      </span>
-      <span class="log-meta flex items-center gap-1">
-        <i class="fas fa-database text-gray-400"></i>
-        ${formatBytes(log.data_transmitted)}
-      </span>
-    </div>
-  </div>
-  
-  <div class="flex items-center gap-2 flex-shrink-0">
-    <i class="fa-solid fa-up-right-from-square text-blue-600 hover:text-blue-800 cursor-pointer text-lg"
-       title="Abrir enlace"
-       onclick="window.open('${fullUrl}', '_blank')"></i>
-  </div>
-              </div>`;
-            }).join('')
-            : '<div class="no-logs text-gray-500">No hay actividad registrada</div>'
-          }
-      </div>
-    </div>
-  </div>`;
-      }).join('');
-
-
-
-      usersContainer.innerHTML = cardsHTML;
-      modalsContainer.innerHTML = modalsHTML;
-
-      usersData.forEach((user, index) => {
-        const toggleBtn = document.getElementById(`toggleBtn-${index}`);
-        const searchBox = document.getElementById(`searchBox-${index}`);
-        const inputWrapper = document.getElementById(`inputWrapper-${index}`);
-        const input = document.getElementById(`mysearch-${index}`);
-        const clearBtn = document.getElementById(`clearBtn-${index}`);
-
-        toggleBtn.addEventListener("click", () => {
-          const isExpanding = !inputWrapper.classList.contains("w-[180px]");
-
-          if (isExpanding) {
-            inputWrapper.classList.add("w-[180px]");
-            input.classList.remove("opacity-0");
-            clearBtn.classList.remove("opacity-0");
-            setTimeout(() => {
-              input.focus();
-            }, 300);
-          } else {
-            inputWrapper.classList.remove("w-[180px]");
-            input.classList.add("opacity-0");
-            clearBtn.classList.add("opacity-0");
-            input.value = "";
-            filterLogs(index);
-          }
-        });
-
-        clearBtn.addEventListener("click", () => {
-          input.value = "";
-          filterLogs(index);
-          input.focus();
-        });
-
-        input.addEventListener("input", () => {
-          filterLogs(index);
-        });
-      });
-
-      userCards = Array.from(document.querySelectorAll(".user-card"));
-      filteredUsers = [...userCards];
-
-      filterUsers();
-    }
-
 
     function truncate(str, n) {
       return str.length > n ? str.slice(0, n - 1) + "..." : str;
@@ -357,66 +175,270 @@
       return `${value.toFixed(2)} ${units[unitIndex]}`;
     }
 
+    function updateUsersData(usersData) {
+      if (!usersData || usersData.length === 0) {
+        usersContainer.innerHTML = '<div class="text-gray-500 text-center p-4 col-span-full">No se encontraron datos</div>';
+        return;
+      }
+
+      // Generar tarjetas de usuario
+      usersContainer.innerHTML = usersData.map((user, index) => `
+        <div class="user-card group bg-[#f0f2f5] transition-all duration-300 text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
+          <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] relative z-[1]">
+            <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-300 ease-linear z-0 group-hover:h-full"></div>
+            <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
+            <div class="avatar w-full h-full rounded-full bg-slate-200 flex items-center justify-center text-[2.5rem] text-slate-500 relative transition-all duration-900 ease-in-out group-hover:shadow-[0_0_0_10px_#f7f5ec] group-hover:scale-[0.7] z-[2]">
+              <i class="fas fa-user"></i>
+            </div>
+          </div>
+          
+          <div class="user-info mt-[-15px] mb-4 px-[15px]">
+            <h3 class="username font-semibold text-[1.2rem] text-[#1369ce] mb-0">${user.username}</h3>
+            <h4 class="ip-address text-[0.9rem] text-gray-500">${user.ip}</h4>
+          </div>
+          
+          <div class="card-action px-[15px] mt-[2px] relative z-[2]">
+            <button class="activity-button w-full bg-[#1369ce] text-white font-bold py-2 rounded-md cursor-pointer transition-all duration-300 text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5 shadow-md" 
+                    onclick="openLogsModal(${index});">
+              ACTIVIDAD
+            </button>
+          </div>
+          
+          <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] z-[1]">
+            <li class="inline-block flex flex-col items-center">
+              <span class="label text-xs font-light uppercase tracking-wide">Solicitudes:</span>
+              <span class="value font-semibold">${user.total_requests}</span>
+            </li>
+            <li class="inline-block flex flex-col items-center">
+              <span class="label text-xs font-light uppercase tracking-wide">Datos:</span>
+              <span class="value font-semibold">${formatBytes(user.total_data)}</span>
+            </li>
+          </ul>
+        </div>
+      `).join('');
+
+      // Generar modales
+      modalsContainer.innerHTML = usersData.map((user, index) => {
+        const responseCounts = {
+          informational: 0, successful: 0, redirection: 0,
+          clientError: 0, serverError: 0, unknown: 0
+        };
+
+        user.logs.forEach(log => {
+          const code = log.response;
+          if (code >= 100 && code <= 199) responseCounts.informational++;
+          else if (code >= 200 && code <= 299) responseCounts.successful++;
+          else if (code >= 300 && code <= 399) responseCounts.redirection++;
+          else if (code >= 400 && code <= 499) responseCounts.clientError++;
+          else if (code >= 500 && code <= 599) responseCounts.serverError++;
+          else responseCounts.unknown++;
+        });
+
+        const responseGroups = {
+          informational: { icon: 'fa-info-circle', color: 'text-blue-500', label: 'Respuestas informativas (100–199)' },
+          successful: { icon: 'fa-circle-check', color: 'text-green-500', label: 'Respuestas exitosas (200–299)' },
+          redirection: { icon: 'fa-arrow-right', color: 'text-yellow-500', label: 'Mensajes de redirección (300–399)' },
+          clientError: { icon: 'fa-circle-xmark', color: 'text-red-500', label: 'Respuestas de error del cliente (400–499)' },
+          serverError: { icon: 'fa-triangle-exclamation', color: 'text-orange-400', label: 'Respuestas de error del servidor (500–599)' },
+          unknown: { icon: 'fa-question', color: 'text-gray-500', label: 'Otros' }
+        };
+
+        const responseSummary = Object.entries(responseCounts).map(([key, count]) => {
+          if (count === 0) return '';
+          const { icon, color, label } = responseGroups[key];
+          return `
+            <div class="filter-icon flex items-center gap-1 text-sm cursor-pointer transition-colors"
+                 data-filter-type="${key}"
+                 data-active="true"
+                 data-color="${color}"
+                 style="color: ${getComputedTailwindColor(color)}"
+                 title="${label}"
+                 onclick="toggleResponseFilter(this, ${index})">
+              <i class="fa-solid ${icon}"></i>
+              <span>${count}</span>
+            </div>`;
+        }).join('');
+
+        return `
+          <div class="logs-modal hidden fixed inset-0 bg-black bg-opacity-50 z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
+            <div class="modal-content bg-white p-8 rounded-2xl w-[95%] max-w-[650px] max-h-[85vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
+              <button onclick="closeLogsModal(${index})" 
+                      class="close-btn absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full z-50 shadow-md transform transition-all duration-300 hover:bg-red-600 hover:scale-110 hover:rotate-90 hover:shadow-lg"
+                      title="Cerrar" aria-label="Cerrar">
+                <i class="fas fa-times text-base"></i>
+              </button>
+
+              <div class="flex flex-col"> 
+                <div class="flex justify-between items-center mb-2"> 
+                  <div class="flex items-center gap-0 min-w-0"> 
+                    <h4 class="logs-title text-base text-gray-500 mb-4 uppercase tracking-[1px] font-semibold whitespace-nowrap truncate flex items-center">
+                      Actividad reciente - <span class="username-highlight font-semibold truncate max-w-[120px] text-[#1369ce]">${user.username}</span>
+                      
+                      <div id="searchBox-${index}" class="ml-2 relative w-auto h-[36px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md overflow-hidden flex items-center border border-gray-300">
+                        <div id="toggleBtn-${index}" class="absolute left-0 top-0 w-[36px] h-[36px] flex items-center justify-center cursor-pointer z-10">
+                          <i class="fas fa-search text-blue-600 text-sm"></i>
+                        </div>
+                        <div id="inputWrapper-${index}" class="ml-[36px] w-0 h-[36px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
+                          <input id="mysearch-${index}" type="text" placeholder="Buscar URL..." class="w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]"/>
+                        </div>
+                        <button id="clearBtn-${index}" 
+                              class="absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" 
+                              title="Limpiar búsqueda">
+                          <i class="fas fa-times text-lg leading-none"></i>
+                        </button>
+                      </div>
+                    </h4>
+                  </div>
+                </div>
+                
+                <div class="response-summary flex justify-end gap-4 items-center mb-4">
+                  ${responseSummary}
+                </div>
+              </div>
+
+              <div class="logs-list mt-2 max-h-[60vh] overflow-y-auto">
+                ${user.logs.length > 0 ? `
+                  <div class="log-entries-container grid gap-3">
+                    ${user.logs.map(log => {
+                      const truncatedUrl = truncate(log.url, 55);
+                      const isHttps = /:(443|8443)$/.test(log.url);
+                      const protocol = isHttps ? 'https://' : 'http://';
+                      const fullUrl = log.url.startsWith('http') ? log.url : protocol + log.url;
+                      
+                      let badgeClass = 'bg-gray-400';
+                      if (log.response >= 100 && log.response <= 199) badgeClass = 'bg-blue-400';
+                      else if (log.response >= 200 && log.response <= 299) badgeClass = 'bg-green-500';
+                      else if (log.response >= 300 && log.response <= 399) badgeClass = 'bg-yellow-400';
+                      else if (log.response >= 400 && log.response <= 499) badgeClass = 'bg-red-500';
+                      else if (log.response >= 500 && log.response <= 599) badgeClass = 'bg-orange-400';
+
+                      return `
+                        <div class="log-entry relative group p-3 bg-white rounded-lg transition-all duration-300 ease-out shadow-md hover:shadow-2xl hover:-translate-y-1 hover:z-10" data-response-code="${log.response}">  
+                          <div class="wave-container absolute inset-0 overflow-hidden rounded-lg">
+                            <div class="wave absolute w-full h-full"></div>
+                          </div>
+            
+                          <div class="relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                            <div class="log-details-grid min-w-0">
+                              <div class="flex items-baseline gap-3">
+                                  <span class="log-url text-sm font-medium text-gray-800 truncate">${truncatedUrl}</span>
+                              </div>
+                
+                              <div class="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                                  <span class="response-badge ${badgeClass} inline-block px-2 py-[0.15rem] rounded-md text-[0.65rem] font-medium text-white">
+                                    ${log.response}
+                                  </span>
+                                <span class="log-meta flex items-center gap-1">
+                                  <i class="fas fa-hashtag text-gray-400"></i>
+                                  ${log.request_count} reqs
+                                </span>
+                                <span class="log-meta flex items-center gap-1">
+                                  <i class="fas fa-database text-gray-400"></i>
+                                  ${formatBytes(log.data_transmitted)}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                              <i class="fa-solid fa-up-right-from-square text-blue-600 hover:text-blue-800 cursor-pointer text-lg"
+                                 title="Abrir enlace"
+                                 onclick="window.open('${fullUrl}', '_blank')"></i>
+                            </div>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                ` : '<div class="no-logs text-gray-500 text-center py-8">No hay actividad registrada</div>'}
+                <div class="no-results hidden text-center py-8 text-gray-500">
+                  No se encontraron resultados
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Configurar eventos de búsqueda en modales
+      usersData.forEach((_, index) => {
+        const toggleBtn = document.getElementById(`toggleBtn-${index}`);
+        const inputWrapper = document.getElementById(`inputWrapper-${index}`);
+        const input = document.getElementById(`mysearch-${index}`);
+        const clearBtn = document.getElementById(`clearBtn-${index}`);
+
+        toggleBtn.addEventListener("click", () => {
+          const isExpanding = !inputWrapper.classList.contains("w-[180px]");
+
+          if (isExpanding) {
+            inputWrapper.classList.add("w-[180px]");
+            input.classList.remove("opacity-0");
+            clearBtn.classList.remove("opacity-0");
+            setTimeout(() => input.focus(), 300);
+          } else {
+            inputWrapper.classList.remove("w-[180px]");
+            input.classList.add("opacity-0");
+            clearBtn.classList.add("opacity-0");
+            input.value = "";
+            filterLogs(index);
+          }
+        });
+
+        clearBtn.addEventListener("click", () => {
+          input.value = "";
+          filterLogs(index);
+          input.focus();
+        });
+
+        input.addEventListener("input", () => filterLogs(index));
+      });
+
+      userCards = Array.from(document.querySelectorAll(".user-card"));
+      filteredUsers = [...userCards];
+      filterUsers();
+    }
+
+    function filterUsers() {
+      const searchValue = searchInput.value.toLowerCase();
+      filteredUsers = userCards.filter(card => {
+        return card.dataset.username.includes(searchValue);
+      });
+      renderPage(1);
+    }
+
     function renderPage(page = 1) {
       const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
       if (page < 1) page = 1;
       if (page > totalPages) page = totalPages;
       currentPage = page;
 
-      // Mostrar usuarios de esta página
+      // Mostrar usuarios de la página actual
       const start = (page - 1) * itemsPerPage;
       const end = start + itemsPerPage;
       userCards.forEach((card, index) => {
         card.style.display = (index >= start && index < end) ? "block" : "none";
       });
 
-      // Generar botones de número de página
+      // Generar números de página
       pageNumbers.innerHTML = "";
-
-      let startPage = Math.max(1, currentPage - 1);
-      let endPage = Math.min(totalPages, startPage + 2);
-
-      if (endPage - startPage < 2) {
-        startPage = Math.max(1, endPage - 2);
-      }
+      const startPage = Math.max(1, currentPage - 1);
+      const endPage = Math.min(totalPages, startPage + 2);
 
       for (let i = startPage; i <= endPage; i++) {
         const btn = document.createElement("button");
         btn.textContent = i;
-        btn.className = `pg-btn text-lg px-3 py-1 rounded-full shadow-md font-medium ${i === currentPage ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800 hover:bg-gray-300"
-          }`;
+        btn.className = `pg-btn text-lg px-3 py-1 rounded-full shadow-md font-medium ${i === currentPage ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800 hover:bg-gray-300"}`;
         btn.onclick = () => renderPage(i);
         pageNumbers.appendChild(btn);
       }
 
-      // Estado de los botones de navegación
+      // Actualizar estado de botones
       firstBtn.disabled = currentPage === 1;
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
       lastBtn.disabled = currentPage === totalPages;
-
-      const navBtns = [firstBtn, prevBtn, nextBtn, lastBtn];
-      navBtns.forEach(btn => {
-        if (btn.disabled) {
-          btn.classList.add("text-gray-400", "cursor-not-allowed");
-          btn.classList.remove("text-blue-500", "hover:text-blue-700");
-        } else {
-          btn.classList.remove("text-gray-400", "cursor-not-allowed");
-          btn.classList.add("text-blue-500", "hover:text-blue-700");
-        }
-      });
     }
 
-
-    function filterUsers() {
-      const searchValue = searchInput.value.toLowerCase();
-      filteredUsers = userCards.filter(card => {
-        const username = card.getAttribute("data-username");
-        return username.includes(searchValue);
-      });
-      renderPage(1);
-    }
-
+    // Event listeners
     searchInput.addEventListener("input", filterUsers);
     prevBtn.addEventListener("click", () => renderPage(currentPage - 1));
     nextBtn.addEventListener("click", () => renderPage(currentPage + 1));
@@ -425,131 +447,39 @@
       const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
       renderPage(totalPages);
     });
-    renderPage(1);
+
+    // Inicializar con fecha actual
+    const today = new Date().toISOString().split('T')[0];
+    if (!dateFilter.value) dateFilter.value = today;
+    
+    dateFilter.addEventListener("change", async (e) => {
+      const selectedDate = e.target.value;
+      if (!selectedDate) return;
+
+      try {
+        usersContainer.innerHTML = `
+          <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
+            <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>`;
+
+        const response = await fetch("/get-logs-by-date", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ date: selectedDate })
+        });
+
+        if (!response.ok) throw new Error("Error fetching data");
+        updateUsersData(await response.json());
+      } catch (error) {
+        console.error("Error:", error);
+        usersContainer.innerHTML = '<div class="text-red-500 text-center p-4 col-span-full">Error al cargar los datos</div>';
+      }
+    });
+
+    // Carga inicial
     dateFilter.dispatchEvent(new Event("change"));
   });
-
-                  function openLogsModal(index) {
-                    const modal = document.getElementById(`logs-modal-${index}`);
-                    const overlay = document.getElementById('overlay');
-
-                    if (modal) {
-                      modal.classList.remove('hidden');
-                      modal.classList.add('flex');
-
-                      // Forzar render con opacity-0 primero
-                      modal.classList.remove('opacity-100');
-                      modal.classList.add('opacity-0');
-
-                      requestAnimationFrame(() => {
-                        // Segundo frame: se fuerza la transición
-                        setTimeout(() => {
-                          modal.classList.remove('opacity-0');
-                          modal.classList.add('opacity-100');
-                        }, 10); // solo 10ms bastan para forzar el efecto
-                      });
-                    }
-
-                    if (overlay) {
-                      overlay.classList.remove('hidden');
-                      overlay.classList.remove('opacity-100');
-                      overlay.classList.add('opacity-0');
-
-                      requestAnimationFrame(() => {
-                        setTimeout(() => {
-                          overlay.classList.remove('opacity-0');
-                          overlay.classList.add('opacity-100');
-                        }, 10);
-                      });
-                    }
-                  }
-
-                  function toggleResponseFilter(el, modalIndex) {
-                    const isActive = el.dataset.active === "true";
-                    el.dataset.active = isActive ? "false" : "true";
-
-                    if (isActive) {
-                      el.style.color = "#9CA3AF"; // gray-400
-                    } else {
-                      const originalColor = el.dataset.color;
-                      el.style.color = getComputedTailwindColor(originalColor);
-                    }
-
-                    const modal = document.getElementById(`logs-modal-${modalIndex}`);
-                    const allFilters = modal.querySelectorAll(".filter-icon");
-                    const activeTypes = [];
-
-                    allFilters.forEach(f => {
-                      if (f.dataset.active === "true") {
-                        activeTypes.push(f.dataset.filterType);
-                      }
-                    });
-
-                    const entries = modal.querySelectorAll(".log-entry");
-                    entries.forEach(entry => {
-                      const badge = entry.querySelector(".response-badge");
-                      const code = parseInt(badge.textContent);
-
-                      let type = 'unknown';
-                      if (code >= 100 && code <= 199) type = 'informational';
-                      else if (code >= 200 && code <= 299) type = 'successful';
-                      else if (code >= 300 && code <= 399) type = 'redirection';
-                      else if (code >= 400 && code <= 499) type = 'clientError';
-                      else if (code >= 500 && code <= 599) type = 'serverError';
-
-                      entry.style.display = activeTypes.includes(type) ? '' : 'none';
-                    });
-                  }
-
-
-                  function closeLogsModal(index) {
-                      const modal = document.getElementById(`logs-modal-${index}`);
-                      const overlay = document.getElementById('overlay');
-
-                      if (modal) {
-                        modal.classList.remove('opacity-100');
-                        modal.classList.add('opacity-0');
-
-                        // Espera a que termine la animación antes de ocultar
-                        setTimeout(() => {
-                          modal.classList.add('hidden');
-                          modal.classList.remove('flex');
-                        }, 1000); // Debe coincidir con la duracion de la clase
-                      }
-
-                      if (overlay) {
-                        overlay.classList.remove('opacity-100');
-                        overlay.classList.add('opacity-0');
-                        setTimeout(() => {
-                          overlay.classList.add('hidden');
-                        }, 1000);
-                      }
-
-                    }
-
-                    function getComputedTailwindColor(className) {
-                      const colorMap = {
-                        'text-blue-500': '#3B82F6',
-                        'text-green-500': '#22C55E',
-                        'text-yellow-500': '#EAB308',
-                        'text-red-500': '#EF4444',
-                        'text-orange-400': '#FB923C',
-                        'text-gray-500': '#6B7280'
-                      };
-                      return colorMap[className] || '#6B7280';
-                    }
-
-                    function filterLogs(index) {
-                      const input = document.getElementById(`mysearch-${index}`);
-                      const query = input.value.toLowerCase();
-                      const modal = document.getElementById(`logs-modal-${index}`);
-                      const logEntries = modal.querySelectorAll(".log-entry");
-
-                      logEntries.forEach(entry => {
-                        const urlText = entry.querySelector(".log-url")?.textContent.toLowerCase() || "";
-                        entry.style.display = urlText.includes(query) ? "grid" : "none";
-                      });
-                    }
-
-
- </script>
+</script>
