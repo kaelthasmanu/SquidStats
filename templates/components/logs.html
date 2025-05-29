@@ -217,6 +217,19 @@
         </div>
       `).join('');
 
+          // Crear mensaje de no resultados (oculto inicialmente)
+      usersContainer.insertAdjacentHTML('beforeend', `
+        <div class="no-results-msg hidden col-span-full text-center py-12">
+            <i class="fas fa-user-slash text-4xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600">
+                No se encontraron usuarios
+            </h3>
+            <p class="text-gray-500 mt-2">
+                Intenta con otro término de búsqueda
+            </p>
+        </div>
+    `);
+
       // Generar modales
       modalsContainer.innerHTML = usersData.map((user, index) => {
         const responseCounts = {
@@ -398,44 +411,107 @@
     }
 
     function filterUsers() {
-      const searchValue = searchInput.value.toLowerCase();
+      // Obtener el valor de búsqueda y normalizarlo (minúsculas, sin espacios)
+      const searchValue = searchInput.value.toLowerCase().trim();
+
+      // Filtrar las tarjetas de usuario:
+      // - Si la búsqueda está vacía, mostrar todas las tarjetas
+      // - Si hay término de búsqueda, mostrar solo tarjetas que coincidan
       filteredUsers = userCards.filter(card => {
-        return card.dataset.username.includes(searchValue);
+        return searchValue === "" ||
+          card.dataset.username.includes(searchValue);
       });
+
+      // Actualizar el mensaje de "no hay resultados"
+      const noResultsMsg = document.querySelector('.no-results-msg');
+      if (noResultsMsg) {
+        // Mostrar mensaje solo si no hay resultados
+        noResultsMsg.style.display = filteredUsers.length === 0 ? 'block' : 'none';
+      }
+
+      // Reiniciar a la primera página con los nuevos resultados
       renderPage(1);
     }
 
     function renderPage(page = 1) {
+      // Calcular el número total de páginas
       const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+      // Asegurar que la página esté dentro del rango válido
       if (page < 1) page = 1;
       if (page > totalPages) page = totalPages;
       currentPage = page;
 
-      // Mostrar usuarios de la página actual
+      // 1. Ocultar todas las tarjetas primero
+      userCards.forEach(card => card.style.display = "none");
+
+      // 2. Manejar caso cuando no hay resultados
+      const noResultsMsg = document.querySelector('.no-results-msg');
+      if (filteredUsers.length === 0) {
+        // Si no existe el mensaje, crearlo
+        if (!noResultsMsg) {
+          usersContainer.innerHTML = `
+                <div class="no-results-msg col-span-full text-center py-12">
+                    <i class="fas fa-user-slash text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600">
+                        No se encontraron usuarios
+                    </h3>
+                    <p class="text-gray-500 mt-2">
+                        Intenta con otro término de búsqueda
+                    </p>
+                </div>
+            `;
+        } else {
+          // Si ya existe, mostrarlo
+          noResultsMsg.style.display = 'block';
+        }
+
+        // Deshabilitar todos los botones de paginación
+        pageNumbers.innerHTML = '';
+        firstBtn.disabled = true;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        lastBtn.disabled = true;
+
+        // Salir de la función ya que no hay nada más que mostrar
+        return;
+      } else {
+        // Si hay resultados, ocultar el mensaje de no resultados
+        if (noResultsMsg) {
+          noResultsMsg.style.display = 'none';
+        }
+      }
+
+      // 3. Mostrar usuarios de la página actual
       const start = (page - 1) * itemsPerPage;
       const end = start + itemsPerPage;
-      userCards.forEach((card, index) => {
-        card.style.display = (index >= start && index < end) ? "block" : "none";
-      });
+      const currentUsers = filteredUsers.slice(start, end);
 
-      // Generar números de página
+      // Hacer visibles solo las tarjetas de la página actual
+      currentUsers.forEach(card => card.style.display = "block");
+
+      // 4. Actualizar controles de paginación
       pageNumbers.innerHTML = "";
       const startPage = Math.max(1, currentPage - 1);
       const endPage = Math.min(totalPages, startPage + 2);
 
+      // Generar botones numéricos de paginación
       for (let i = startPage; i <= endPage; i++) {
         const btn = document.createElement("button");
         btn.textContent = i;
-        btn.className = `pg-btn text-lg px-3 py-1 rounded-full shadow-md font-medium ${i === currentPage ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800 hover:bg-gray-300"}`;
+        btn.className = `pg-btn text-lg px-3 py-1 rounded-full shadow-md font-medium ${i === currentPage
+            ? "bg-blue-500 text-white"  // Estilo para página activa
+            : "bg-gray-100 text-gray-800 hover:bg-gray-300"  // Estilo para páginas inactivas
+          }`;
         btn.onclick = () => renderPage(i);
         pageNumbers.appendChild(btn);
       }
 
-      // Actualizar estado de botones
-      firstBtn.disabled = currentPage === 1;
-      prevBtn.disabled = currentPage === 1;
-      nextBtn.disabled = currentPage === totalPages;
-      lastBtn.disabled = currentPage === totalPages;
+      // 5. Actualizar estado de los botones de navegación
+      firstBtn.disabled = currentPage === 1;      // Primera página
+      prevBtn.disabled = currentPage === 1;       // Página anterior
+      nextBtn.disabled = currentPage === totalPages; // Página siguiente
+      lastBtn.disabled = currentPage === totalPages; // Última página
     }
 
     // Event listeners
@@ -451,7 +527,7 @@
     // Inicializar con fecha actual
     const today = new Date().toISOString().split('T')[0];
     if (!dateFilter.value) dateFilter.value = today;
-    
+
     dateFilter.addEventListener("change", async (e) => {
       const selectedDate = e.target.value;
       if (!selectedDate) return;
