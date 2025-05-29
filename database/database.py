@@ -3,6 +3,11 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.ext.declarative import declared_attr
 import datetime, os
 import logging
+import pytz  # Importar pytz para manejo de zona horaria
+from sqlalchemy import text  # Importación necesaria para ejecutar SQL
+
+# Configura la zona horaria adecuada
+TIMEZONE = pytz.timezone('America/Havana')  # Ajusta según tu ubicación
 
 Base = declarative_base()
 
@@ -13,6 +18,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def get_table_suffix():
+    """Obtiene el sufijo de tabla con manejo de cambio de día"""
+    now = datetime.datetime.now(TIMEZONE)
+    
+    # Durante los primeros 5 minutos después de medianoche, usar el día anterior
+    if now.hour == 0 and now.minute < 5:
+        table_date = now - datetime.timedelta(days=1)
+        logger.info(f"Ventana de cambio de día. Usando fecha anterior: {table_date.strftime('%Y%m%d')}")
+    else:
+        table_date = now
+        
+    return table_date.strftime("%Y%m%d")
+
 class DailyBase(Base):
     """Clase base abstracta para tablas diarias"""
     __abstract__ = True
@@ -20,14 +38,13 @@ class DailyBase(Base):
     @declared_attr
     def __tablename__(cls):
         """Genera nombres de tabla dinámicos con sufijo de fecha"""
-        date_suffix = datetime.date.today().strftime("%Y%m%d")
-        return f"{cls.__name__.lower()}_{date_suffix}"
+        return f"{cls.__name__.lower()}_{get_table_suffix()}"
 
 class User(DailyBase):
     id = Column(Integer, primary_key=True)
     username = Column(String(255), nullable=False)
     ip = Column(String(15), nullable=False)
-    # NOTA: Las relaciones no funcionan bien con tablas dinámicas
+    created_at = Column(DateTime, default=datetime.datetime.now)
 
 class Log(DailyBase):
     id = Column(Integer, primary_key=True)
@@ -36,6 +53,7 @@ class Log(DailyBase):
     response = Column(Integer)
     request_count = Column(Integer, default=1)
     data_transmitted = Column(BigInteger, default=0)
+    created_at = Column(DateTime, default=datetime.datetime.now)
 
 class LogMetadata(Base):
     __tablename__ = "log_metadata"
@@ -71,25 +89,71 @@ def get_session():
     Session = sessionmaker(bind=engine)
     return Session()
 
+def table_exists(engine, table_name):
+    """Verifica si una tabla existe"""
+    with engine.connect() as conn:
+        return engine.dialect.has_table(conn, table_name)
+
 def create_dynamic_tables(engine):
     """Crea las tablas dinámicas si no existen"""
     # Crear tablas base primero
-    Base.metadata.create_all(engine, tables=[LogMetadata.__table__])
+    if not table_exists(engine, "log_metadata"):
+        LogMetadata.__table__.create(engine)
+        logger.info("Tabla de metadatos creada")
     
-    # Crear tablas dinámicas para el día actual
-    date_suffix = datetime.date.today().strftime("%Y%m%d")
-    user_table_name = f"user_{date_suffix}"
-    log_table_name = f"log_{date_suffix}"
-    
-    inspector = inspect(engine)
-    existing_tables = inspector.get_table_names()
+    # Obtener el sufijo para las tablas del día
+    table_suffix = get_table_suffix()
+    user_table_name = f"user_{table_suffix}"
+    log_table_name = f"log_{table_suffix}"
     
     # Crear tabla de usuarios si no existe
-    if user_table_name not in existing_tables:
+    if not table_exists(engine, user_table_name):
         logger.info(f"Creando tabla: {user_table_name}")
-        User.__table__.create(engine)
+        try:
+            # Usar text() para crear un objeto ejecutable
+            create_user_table_sql = text(f"""
+                CREATE TABLE IF NOT EXISTS `{user_table_name}` (
+                    id INTEGER NOT NULL AUTO_INCREMENT,
+                    username VARCHAR(255) NOT NULL,
+                    ip VARCHAR(15) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id)
+                )
+            """)
+            with engine.connect() as conn:
+                conn.execute(create_user_table_sql)
+                conn.commit()
+            logger.info(f"Tabla {user_table_name} creada exitosamente")
+        except Exception as e:
+            if "already exists" not in str(e):
+                logger.error(f"Error creando tabla {user_table_name}: {str(e)}")
+            else:
+                logger.warning(f"Tabla {user_table_name} ya existe")
     
     # Crear tabla de logs si no existe
-    if log_table_name not in existing_tables:
+    if not table_exists(engine, log_table_name):
         logger.info(f"Creando tabla: {log_table_name}")
-        Log.__table__.create(engine)
+        try:
+            create_log_table_sql = text(f"""
+                CREATE TABLE IF NOT EXISTS `{log_table_name}` (
+                    id INTEGER NOT NULL AUTO_INCREMENT,
+                    user_id INTEGER NOT NULL,
+                    url TEXT NOT NULL,
+                    response INTEGER NOT NULL,
+                    request_count INTEGER NOT NULL DEFAULT 1,
+                    data_transmitted BIGINT NOT NULL DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    INDEX idx_user_id (user_id),
+                    INDEX idx_created_at (created_at)
+                )
+            """)
+            with engine.connect() as conn:
+                conn.execute(create_log_table_sql)
+                conn.commit()
+            logger.info(f"Tabla {log_table_name} creada exitosamente")
+        except Exception as e:
+            if "already exists" not in str(e):
+                logger.error(f"Error creando tabla {log_table_name}: {str(e)}")
+            else:
+                logger.warning(f"Tabla {log_table_name} ya existe")

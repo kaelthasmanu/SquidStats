@@ -230,7 +230,7 @@
       <div class="flex flex-col"> 
         <div class="flex justify-between items-center mb-2"> 
           <div class="flex items-center gap-0 min-w-0"> 
-            <h4 class="logs-title text-lg font-semibold whitespace-nowrap truncate flex items-center">
+            <h4 class="logs-title text-base text-gray-500 mb-4 uppercase tracking-[1px] font-semibold whitespace-nowrap truncate flex items-center">
               Actividad reciente - <span class="username-highlight font-semibold truncate max-w-[120px] text-[#1369ce]">${user.username}</span>
               
               <!-- Lupa directamente después del nombre -->
@@ -256,7 +256,7 @@
         </div>
       </div>
 
-      <div class="logs-list space-y-2 mt-2 max-h-[60vh]">
+      <div class="logs-list space-y-2 mt-2 max-h-[60vh] overflow-y-auto flex flex-col gap-4">
         ${user.logs.length > 0
             ? user.logs.map(log => {
               const truncatedUrl = truncate(log.url, 55);
@@ -282,7 +282,7 @@
               else if (log.response >= 500 && log.response <= 599) badgeClass = 'bg-orange-400';
 
               return `
-<div class="log-entry grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 border-b border-gray-200 py-2">
+  <div class="log-entry grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 py-2 p-3 bg-custom-light rounded-custom transition-custom hover:shadow-md hover:translate-y-[-2px]">
   <div class="log-details-grid min-w-0">
     <!-- Línea superior -->
     <div class="flex items-baseline gap-3">
