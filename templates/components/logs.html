@@ -8,12 +8,18 @@
       </div>
 
       <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[250px] relative">
-        <input type="text" id="username-search" placeholder="Buscar por usuario..."
-          class="search-input w-full pl-4 pr-12 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
-        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-          <i class="fas fa-magnifying-glass text-2xl text-[#1A8A9D]"></i>
-        </div>
-      </div>
+    <input type="text" id="username-search" placeholder="Buscar por usuario..."
+        class="search-input w-full pl-4 pr-10 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
+    
+    <!-- Botón de limpiar búsqueda (NUEVO) -->
+    <button id="clear-search" class="absolute right-10 h-full flex items-center justify-center text-gray-400 hover:text-gray-700 hidden" title="Limpiar búsqueda">
+        <i class="fas fa-times"></i>
+    </button>
+    
+    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+        <i class="fas fa-magnifying-glass text-xl text-[#1A8A9D]"></i>
+    </div>
+</div>
     </div>
   </div>
 
@@ -154,6 +160,7 @@
     const lastBtn = document.getElementById("last-page");
     const pageNumbers = document.getElementById("page-numbers");
     const dateFilter = document.getElementById("date-filter");
+    const clearSearchBtn = document.getElementById("clear-search");
 
     let userCards = [];
     let filteredUsers = [];
@@ -410,9 +417,23 @@
       filterUsers();
     }
 
+    /**
+     * Función para filtrar usuarios por nombre
+     * 
+     * Esta función:
+     * 1. Obtiene el valor de búsqueda del campo de texto
+     * 2. Filtra las tarjetas de usuario que coinciden con el término de búsqueda
+     * 3. Actualiza el mensaje de "no hay resultados"
+     * 4. Muestra el botón de limpiar búsqueda si hay texto
+     * 5. Reinicia la paginación a la primera página
+     */
     function filterUsers() {
       // Obtener el valor de búsqueda y normalizarlo (minúsculas, sin espacios)
       const searchValue = searchInput.value.toLowerCase().trim();
+
+      // NUEVO: Mostrar u ocultar el botón de limpiar según si hay texto
+      // Si hay texto, mostramos el botón; si no, lo ocultamos
+      clearSearchBtn.style.display = searchValue ? 'flex' : 'none';
 
       // Filtrar las tarjetas de usuario:
       // - Si la búsqueda está vacía, mostrar todas las tarjetas
@@ -433,6 +454,20 @@
       renderPage(1);
     }
 
+    /**
+    * Función para renderizar una página específica de resultados
+    * 
+    * @param {number} page - Número de página a mostrar (por defecto: 1)
+    * 
+    * Esta función:
+    * 1. Calcula el número total de páginas
+    * 2. Asegura que la página esté dentro del rango válido
+    * 3. Oculta todas las tarjetas
+    * 4. Maneja el caso cuando no hay resultados
+    * 5. Muestra los usuarios de la página actual
+    * 6. Actualiza los controles de paginación
+    * 7. Actualiza el estado de los botones de navegación
+    */
     function renderPage(page = 1) {
       // Calcular el número total de páginas
       const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -513,6 +548,18 @@
       nextBtn.disabled = currentPage === totalPages; // Página siguiente
       lastBtn.disabled = currentPage === totalPages; // Última página
     }
+
+    // NUEVO: Event listener para el botón de limpiar búsqueda
+    clearSearchBtn.addEventListener("click", () => {
+      // Limpiar el campo de búsqueda
+      searchInput.value = "";
+
+      // Ocultar el botón de limpiar (porque ahora el campo está vacío)
+      clearSearchBtn.style.display = "none";
+
+      // Volver a filtrar para mostrar todos los usuarios (al estar vacío el campo, se mostrarán todos)
+      filterUsers();
+    });
 
     // Event listeners
     searchInput.addEventListener("input", filterUsers);
