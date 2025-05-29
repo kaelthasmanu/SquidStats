@@ -28,7 +28,18 @@ body {
 
 
 /* =================== User Cards =================== */
+/* NUEVO: Efecto de elevación en tarjetas de usuario */
+.user-card {
+  transition: all 0.3s ease; /* Transición suave para todas las propiedades */
+  transform: translateY(0); /* Posición inicial sin elevación */
+  z-index: 1; /* Orden z normal */
+}
 
+.user-card:hover {
+  transform: translateY(-8px); /* Eleva la tarjeta 8px hacia arriba */
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+  z-index: 10; /* Coloca la tarjeta elevada sobre las demás */
+}
 
 /* =================== Logs =================== */
 
@@ -79,7 +90,7 @@ body {
     font-style: italic;
 }
 
-/* =================== Pagination =================== */
+/* =================== Logs List =================== */
 .wave-container {
   position: absolute;
   top: 0;
