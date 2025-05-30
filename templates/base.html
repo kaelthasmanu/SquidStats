@@ -4,22 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page_title or 'Dashboard Squid' }}</title>
-
-    <!-- Favicon -->
+    
+    <!-- Favicon dinámico -->
     <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon">
 
+    <!-- Hojas de estilo -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"> <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ url_for('static', filename='navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}">
 </head>
 <body class="overflow-x-hidden overflow-auto">
+    <!-- Barra de navegación común -->
     {% include 'components/navbar.html' %}
 
     <main>
-        {% block content %}{% endblock %}
+        {% block content %}{% endblock %}  <!-- Contenido específico de cada página -->
     </main>
+    
+    <!-- Scripts de Flowbite (UI components) -->
     <script src="{{ url_for('static', filename='src/flowbite.min.js') }}"></script>
 </body>
 </html>

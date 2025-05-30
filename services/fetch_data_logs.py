@@ -1,100 +1,258 @@
+import re
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
-from sqlalchemy import inspect, text
+from typing import List, Dict, Any, Optional
+from sqlalchemy import inspect, text, create_engine
+from sqlalchemy.ext.automap import automap_base
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, date
+import logging
+
+# Configuración básica de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
 sys.path.append(str(project_root))
 
-from database.database import User, Log
+from database.database import get_session, get_engine
 
-def get_users_with_logs_optimized(db: Session) -> List[Dict[str, Any]]:
+# Patrones de validación para nombres de tabla y fechas
+TABLE_NAME_PATTERN = re.compile(r'^[a-z_]{3,20}$')
+DATE_SUFFIX_PATTERN = re.compile(r'^\d{8}$')
+
+def validate_table_name(table_name: str) -> bool:
+    """Valida que el nombre de tabla sea seguro"""
+    return bool(TABLE_NAME_PATTERN.match(table_name))
+
+def validate_date_suffix(date_suffix: str) -> bool:
+    """Valida que el sufijo de fecha tenga el formato correcto"""
+    return bool(DATE_SUFFIX_PATTERN.match(date_suffix))
+
+def sanitize_table_name(name: str) -> str:
+    """Elimina caracteres no seguros en nombres de tablas"""
+    return re.sub(r'[^a-z0-9_]', '', name.lower())
+
+def get_dynamic_model(db: Session, table_name: str, date_suffix: str):
+    """
+    Crea un modelo dinámico para una tabla específica con sufijo de fecha
+    
+    Args:
+        db: Sesión de base de datos
+        table_name: Nombre base de la tabla ('user' o 'log')
+        date_suffix: Sufijo de fecha en formato YYYYMMDD
+    
+    Returns:
+        Modelo SQLAlchemy para la tabla dinámica o None
+    """
+    # Validar parámetros
+    if not validate_table_name(table_name):
+        logger.error(f"Nombre de tabla inválido: {table_name}")
+        return None
+        
+    if not validate_date_suffix(date_suffix):
+        logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+        return None
+    
+    full_table_name = f"{table_name}_{date_suffix}"
+    
+    # Verificar si la tabla existe
     try:
-        users = db.query(User).filter(User.username != "-").all()
-
-        users_data = []
-        for user in users:
-            logs = db.query(Log).filter(Log.user_id == user.id).all()
-
-            total_requests = sum(log.request_count for log in logs)
-            total_data = sum(log.data_transmitted for log in logs)
-
-            user_dict = {
-                "user_id": user.id,
-                "username": user.username,
-                "ip": user.ip,
-                "logs": [{
-                    "url": log.url,
-                    "response": log.response,
-                    "request_count": log.request_count,
-                    "data_transmitted": log.data_transmitted
-                } for log in logs],
-                "total_requests": total_requests,
-                "total_data": total_data
-            }
-
-            users_data.append(user_dict)
-
-        return users_data
+        inspector = inspect(db.get_bind())
+        if not inspector.has_table(full_table_name):
+            logger.warning(f"Tabla {full_table_name} no encontrada")
+            return None
+        
+        # Crear modelo dinámico usando automap
+        Base = automap_base()
+        Base.prepare(autoload_with=db.get_bind())
+        
+        return getattr(Base.classes, full_table_name, None)
     except Exception as e:
-        print(f"Error en get_users_with_logs_optimized: {e}")
-        raise
+        logger.error(f"Error obteniendo modelo dinámico: {str(e)}", exc_info=True)
+        return None
+
+def get_users_with_logs_optimized(db: Session, date_suffix: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Obtiene usuarios y sus logs para la fecha actual o una fecha específica
+    
+    Args:
+        db: Sesión de base de datos
+        date_suffix: Sufijo de fecha en formato YYYYMMDD (opcional)
+    
+    Returns:
+        Lista de diccionarios con datos de usuarios y logs
+    """
+    try:
+        # Determinar sufijo de fecha
+        if not date_suffix:
+            date_suffix = datetime.now().strftime("%Y%m%d")
+        
+        # Validar sufijo de fecha
+        if not validate_date_suffix(date_suffix):
+            logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+            return []
+        
+        # Obtener modelos dinámicos
+        UserModel = get_dynamic_model(db, "user", date_suffix)
+        LogModel = get_dynamic_model(db, "log", date_suffix)
+        
+        if not UserModel or not LogModel:
+            logger.error(f"Tablas dinámicas no disponibles para la fecha {date_suffix}")
+            return []
+        
+        # Consulta optimizada con JOIN
+        query = db.query(
+            UserModel.id.label("user_id"),
+            UserModel.username,
+            UserModel.ip,
+            LogModel.url,
+            LogModel.response,
+            LogModel.request_count,
+            LogModel.data_transmitted
+        ).join(
+            LogModel, UserModel.id == LogModel.user_id
+        ).filter(
+            UserModel.username != "-"
+        )
+        
+        # Agrupar resultados por usuario
+        users_map = {}
+        for row in query:
+            user_id = row.user_id
+            
+            if user_id not in users_map:
+                users_map[user_id] = {
+                    "user_id": user_id,
+                    "username": row.username,
+                    "ip": row.ip,
+                    "logs": [],
+                    "total_requests": 0,
+                    "total_data": 0
+                }
+            
+            log_entry = {
+                "url": row.url,
+                "response": row.response,
+                "request_count": row.request_count,
+                "data_transmitted": row.data_transmitted
+            }
+            
+            users_map[user_id]["logs"].append(log_entry)
+            users_map[user_id]["total_requests"] += row.request_count
+            users_map[user_id]["total_data"] += row.data_transmitted
+        
+        return list(users_map.values())
+    except Exception as e:
+        logger.error(f"Error en get_users_with_logs_optimized: {str(e)}", exc_info=True)
+        return []
     finally:
         db.close()
 
+def get_users_with_logs_by_date(db: Session, date_suffix: str) -> List[Dict[str, Any]]:
+    """
+    Obtiene usuarios y sus logs para una fecha específica
+    
+    Args:
+        db: Sesión de base de datos
+        date_suffix: Sufijo de fecha en formato YYYYMMDD
+    
+    Returns:
+        Lista de diccionarios con datos de usuarios y logs
+    """
+    # Validar sufijo de fecha
+    if not validate_date_suffix(date_suffix):
+        logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+        return []
+    
+    return get_users_with_logs_optimized(db, date_suffix)
 
-def get_users_with_logs_by_date(db: Session, date_suffix: str):
+def get_users_with_logs_optimized_v2(db: Session, date_suffix: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Versión optimizada que usa consulta SQL parametrizada
+    
+    Args:
+        db: Sesión de base de datos
+        date_suffix: Sufijo de fecha en formato YYYYMMDD (opcional)
+    
+    Returns:
+        Lista de diccionarios con datos de usuarios y logs
+    """
     try:
-        users_table = f'users_{date_suffix}'
-        logs_table = f'logs_{date_suffix}'
-
-        inspector = inspect(db.get_bind())
-
-        if not inspector.has_table(users_table) or not inspector.has_table(logs_table):
+        # Determinar sufijo de fecha
+        if not date_suffix:
+            date_suffix = datetime.now().strftime("%Y%m%d")
+        
+        # Validar sufijo de fecha
+        if not validate_date_suffix(date_suffix):
+            logger.error(f"Sufijo de fecha inválido: {date_suffix}")
             return []
-
-        users = db.query(User). \
-            with_entities(
-            User.id,
-            User.username,
-            User.ip
-        ). \
-            from_statement(text(f'SELECT * FROM {users_table}')).all()
-
-        users_data = []
-        for user in users:
-            logs = db.query(Log). \
-                with_entities(
-                Log.url,
-                Log.response,
-                Log.request_count,
-                Log.data_transmitted
-            ). \
-                from_statement(text(f'SELECT * FROM {logs_table} WHERE user_id = :user_id')). \
-                params(user_id=user.id).all()
-
-
-            total_requests = sum(log.request_count for log in logs)
-            total_data = sum(log.data_transmitted for log in logs)
-
-            users_data.append({
-                "user_id": user.id,
-                "username": user.username,
-                "ip": user.ip,
-                "logs": [{
-                    "url": log.url,
-                    "response": log.response,
-                    "request_count": log.request_count,
-                    "data_transmitted": log.data_transmitted
-                } for log in logs],
-                "total_requests": total_requests,
-                "total_data": total_data
-            })
-
-        return users_data
+        
+        # Construir nombres de tablas sanitizados
+        user_table = sanitize_table_name(f"user_{date_suffix}")
+        log_table = sanitize_table_name(f"log_{date_suffix}")
+        
+        # Verificar existencia de tablas
+        inspector = inspect(db.get_bind())
+        if not inspector.has_table(user_table) or not inspector.has_table(log_table):
+            logger.warning(f"Tablas no encontradas para {date_suffix}")
+            return []
+        
+        # Consulta SQL parametrizada con valores seguros
+        sql = text("""
+            SELECT 
+                u.id AS user_id,
+                u.username,
+                u.ip,
+                l.url,
+                l.response,
+                l.request_count,
+                l.data_transmitted
+            FROM :user_table u
+            LEFT JOIN :log_table l ON u.id = l.user_id
+            WHERE u.username != '-'
+        """)
+        
+        # Ejecutar consulta con parámetros
+        result = db.execute(
+            sql, 
+            {"user_table": user_table, "log_table": log_table}
+        )
+        rows = result.fetchall()
+        
+        # Agrupar resultados por usuario
+        users_map = {}
+        for row in rows:
+            user_id = row.user_id
+            
+            if user_id not in users_map:
+                users_map[user_id] = {
+                    "user_id": user_id,
+                    "username": row.username,
+                    "ip": row.ip,
+                    "logs": [],
+                    "total_requests": 0,
+                    "total_data": 0
+                }
+            
+            if row.url:
+                log_entry = {
+                    "url": row.url,
+                    "response": row.response,
+                    "request_count": row.request_count,
+                    "data_transmitted": row.data_transmitted
+                }
+                users_map[user_id]["logs"].append(log_entry)
+                users_map[user_id]["total_requests"] += row.request_count
+                users_map[user_id]["total_data"] += row.data_transmitted
+        
+        return list(users_map.values())
     except Exception as e:
-        print(f"Error en get_users_with_logs_by_date: {e}")
-        raise
+        logger.error(f"Error en get_users_with_logs_optimized_v2: {str(e)}", exc_info=True)
+        return []
+    finally:
+        db.close()
