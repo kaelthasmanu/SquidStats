@@ -53,13 +53,45 @@ def parse_connection_block(block):
     return conn
 
 def group_by_user(connections):
-    """Agrupa conexiones por usuario con conteo eficiente"""
+    """
+    Agrupa conexiones por usuario con conteo eficiente
+    CAMBIO CLAVE: Manejo robusto de valores None
+    """
+    # Lista de identificadores para usuarios anónimos
+    ANONYMOUS_INDICATORS = {
+        None, "", "-", "Anónimo", "N/A", "anonymous", "Anonymous", 
+        "unknown", "guest", "none", "null"
+    }
+    
     grouped = defaultdict(list)
+    
     for connection in connections:
-        user = connection["username"]
-        # Filtrar usuarios inválidos directamente
-        if user in (None, "", "-", "Anónimo"):
-            user = "Anónimo"
+        user = connection.get("username")
+        
+        # Paso 1: Comprobar si el usuario es None
+        if user is None:
+            continue
+            
+        # Paso 2: Convertir a cadena si no es None
+        if not isinstance(user, str):
+            user = str(user)
+            
+        # Paso 3: Normalizar el nombre de usuario
+        user_normalized = user.strip().lower()
+        
+        # Paso 4: Comprobar si el usuario es anónimo
+        is_anonymous = (
+            not user_normalized or  # Cadena vacía
+            user_normalized in (indicator.lower() for indicator in ANONYMOUS_INDICATORS if indicator is not None) or
+            user_normalized.startswith("anon") or
+            "invitado" in user_normalized
+        )
+        
+        # Paso 5: Saltar conexiones anónimas
+        if is_anonymous:
+            continue
+       
+        # Agrupar conexión para el usuario válido
         grouped[user].append(connection)
     
     return grouped
