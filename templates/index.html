@@ -1,18 +1,21 @@
-
 {% extends 'base.html' %}
 
 {% block title %}Inicio | Dashboard Squid{% endblock %}
 
 {% block content %}
-
+    <!-- Contenedor dinámico para conexiones -->
     <div id="datos-conexiones">
-        {% include 'partials/conexiones.html' %}
+        {% include 'partials/conexiones.html' %}  <!-- Incluye plantilla parcial -->
     </div>
+    
     <script>
         async function refrescarConexiones() {
             try {
+                // Obtiene HTML actualizado del servidor
                 const response = await fetch('/actualizar-conexiones');
                 if (!response.ok) throw new Error("Respuesta no OK");
+                
+                // Reemplaza TODO el contenido del contenedor
                 const html = await response.text();
                 document.getElementById('datos-conexiones').innerHTML = html;
             } catch (error) {
@@ -20,8 +23,10 @@
             }
         }
 
+        // Actualiza cada 60 segundos (problema: no se limpia al cambiar página)
         setInterval(refrescarConexiones, 60000);
 
+        // Actualiza al cargar la página
         window.onload = refrescarConexiones;
     </script>
 {% endblock %}
