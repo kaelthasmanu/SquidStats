@@ -16,20 +16,39 @@ class DatabaseManager:
     def __init__(self, engine=None, session=None):
         self.engine = engine if engine is not None else get_engine()
         self.session = session if session is not None else get_session()
-        self._verify_tables()
+        self.verify_tables()
 
-    def _verify_tables(self):
-        inspector = inspect(self.engine)
-        current_tables = inspector.get_table_names()
-        required_tables = [LogMetadata.__tablename__] + list(get_table_names())
+    def verify_tables(self):
+        try:
+            users_table, logs_table, metadata_table = get_table_names()
+            required_tables = [users_table, logs_table, metadata_table]
 
-        missing_tables = [t for t in required_tables if t not in current_tables]
-        if missing_tables:
-            print(f"Creando tablas faltantes: {missing_tables}")
-            Base.metadata.create_all(self.engine)
+            inspector = inspect(self.engine)
+            existing_tables = set(inspector.get_table_names())
+
+            missing_tables = [t for t in required_tables if t not in existing_tables]
+
+            if missing_tables:
+                print(f"Creando tablas faltantes: {missing_tables}")
+
+                for table_name in missing_tables:
+                    if table_name == metadata_table:
+                        LogMetadata.__table__.create(self.engine, checkfirst=True)
+                    elif table_name == users_table:
+                        User.__table__.create(self.engine, checkfirst=True)
+                    elif table_name == logs_table:
+                        Log.__table__.create(self.engine, checkfirst=True)
+
+                return True
+
+            return False
+
+        except Exception as e:
+            print(f"Error al verificar tablas: {str(e)}")
+            raise
 
     def __enter__(self):
-        self._verify_tables()
+        self.verify_tables()
         return self.session
 
     def __exit__(self, exc_type, exc_val, exc_tb):
