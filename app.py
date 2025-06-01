@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, jsonify
-from database.database import get_session, get_dynamic_models
+from database.database import get_session
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
 from parsers.cache import fetch_squid_cache_stats
@@ -9,7 +9,7 @@ from parsers.log import process_logs
 from flask_apscheduler import APScheduler
 from services.fetch_data_logs import get_users_with_logs_optimized
 from dotenv import load_dotenv
-from services.get_reports import get_important_metrics, get_metrics_by_date_range
+from services.get_reports import get_important_metrics
 from utils.colors import color_map
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
@@ -30,21 +30,6 @@ scheduler = APScheduler()
 app.secret_key = os.urandom(24).hex()
 scheduler.init_app(app)
 scheduler.start()
-
-# Configuración para recargar plantillas automáticamente
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-
-# Configuración de headers para evitar caché
-@app.after_request
-def set_response_headers(response):
-    """
-    Configura headers HTTP para prevenir el caching en el cliente.
-    Esto asegura que los usuarios siempre vean la versión más reciente de las páginas.
-    """
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
 
 # Configure logging
 logging.basicConfig(
@@ -104,87 +89,42 @@ def cache_stats():
 
 @app.route('/logs')
 def logs():
-    db = None
     try:
         db = get_session()
         users_data = get_users_with_logs_optimized(db)
-        return render_template('logsView.html', users_data=users_data, page_icon='user.ico', page_title='Actividad usuarios')
+
+        return render_template('logsView.html', users_data=users_data, page_icon='user.ico', page_title='Actividad usuarios' )
     except Exception as e:
-        logger.error(f"Error en ruta /logs: {e}")
+        print(f"Error en ruta /logs: {e}")
         return render_template('error.html', message="Error retrieving logs"), 500
-    finally:
-        if db:
-            db.close()
 
-# CAMBIO IMPORTANTE EN LA RUTA DE REPORTES
-@app.route('/reports')
-def reports():
-    """
-    Página de reportes y estadísticas.
-    
-    Cambios clave:
-    1. Obtiene modelos dinámicos para la fecha actual
-    2. Usa estos modelos en get_important_metrics
-    3. Maneja correctamente el cierre de la sesión de BD
-    """
-    db = None
-    try:
-        db = get_session()
-        
-        # Obtener sufijo de fecha actual (formato YYYYMMDD)
-        current_date = datetime.now().strftime("%Y%m%d")
-        logger.info(f"Generando reportes para la fecha: {current_date}")
-        
-        # Obtener modelos dinámicos para hoy - CAMBIO CRÍTICO
-        UserModel, LogModel = get_dynamic_models(current_date)
-        
-        # Verificar que los modelos sean válidos
-        if UserModel is None or LogModel is None:
-            logger.error(f"No se pudieron obtener modelos para {current_date}")
-            return render_template('error.html', 
-                                  message="Error al cargar datos para reportes"), 500
-        
-        # Obtener métricas usando los modelos correctos - CAMBIO FUNDAMENTAL
-        metrics = get_important_metrics(db, UserModel, LogModel)
-        
-        # Verificar que se obtuvieron métricas
-        if not metrics:
-            logger.warning("No se obtuvieron métricas para los reportes")
-            return render_template('error.html', 
-                                  message="No hay datos disponibles para reportes"), 404
-        
-        # Procesamiento adicional para gráficas (se mantiene igual)
-        http_codes = metrics.get('http_response_distribution', [])
-        http_codes = sorted(http_codes, key=lambda x: x['count'], reverse=True)
-        main_codes = http_codes[:8]
-        other_codes = http_codes[8:]
+@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
+def init_scheduler():
+    """Initialize and start the background scheduler for log processing"""
+    log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
+    logger.info(f"Configurando scheduler para el archivo de log: {log_file}")
 
-        if other_codes:
-            other_count = sum(item['count'] for item in other_codes)
-            main_codes.append({'response_code': 'Otros', 'count': other_count})
+    if not os.path.exists(log_file):
+        logger.error(f"Archivo de log no encontrado: {log_file}")
+        return
+    else:
+        process_logs(log_file)
 
-        metrics['http_response_distribution_chart'] = {
-            'labels': [str(item['response_code']) for item in main_codes],
-            'data': [item['count'] for item in main_codes],
-            'colors': [color_map.get(str(code['response_code']), color_map['Otros']) for code in main_codes]
-        }
+@app.template_filter('divide')
+def divide_filter(value, divisor):
+    return value / divisor
 
-        logger.info("Reportes generados exitosamente")
-        return render_template('reports.html', 
-                              metrics=metrics, 
-                              page_icon='bar.ico', 
-                              page_title='Reportes y gráficas')
-    
-    except Exception as e:
-        logger.error(f"Error en ruta /reports: {str(e)}", exc_info=True)
-        return render_template('error.html', 
-                              message="Error interno generando reportes"), 500
-    finally:
-        # Cerrar sesión de BD siempre - BUENA PRÁCTICA
-        if db:
-            db.close()
+@app.template_filter('format_bytes')
+def format_bytes_filter(value):
+    value = int(value)
+    if value >= 1024**3:  # GB
+        return f"{(value / (1024**3)):.2f} GB"
+    elif value >= 1024**2:  # MB
+        return f"{(value / (1024**2)):.2f} MB"
+    elif value >= 1024:  # KB
+        return f"{(value / 1024):.2f} KB"
+    return f"{value} bytes"
 
-# Ruta para obtener logs por fecha (se mantiene igual)
 @app.route('/get-logs-by-date', methods=['POST'])
 def get_logs_by_date():
     db = None
@@ -194,19 +134,41 @@ def get_logs_by_date():
         date_suffix = selected_date.strftime('%Y%m%d')
 
         db = get_session()
+
         users_data = get_users_with_logs_by_date(db, date_suffix)
         return jsonify(users_data)
 
     except ValueError as ve:
         return jsonify({'error': 'Formato de fecha inválido'}), 400
     except Exception as e:
-        logger.error(f"Error en get-logs-by-date: {str(e)}")
+        print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
     finally:
         if db is not None:
             db.close()
 
-# Ruta de instalación (se mantiene igual)
+@app.route('/reports')
+def reports():
+    db = get_session()
+    metrics = get_important_metrics(db)
+
+    http_codes = metrics['http_response_distribution']
+    http_codes = sorted(metrics['http_response_distribution'], key=lambda x: x['count'], reverse=True)
+    main_codes = http_codes[:8]
+    other_codes = http_codes[8:]
+
+    if other_codes:
+        other_count = sum(item['count'] for item in other_codes)
+        main_codes.append({'response_code': 'Otros', 'count': other_count})
+
+    metrics['http_response_distribution_chart'] = {
+        'labels': [str(item['response_code']) for item in main_codes],
+        'data': [item['count'] for item in main_codes],
+        'colors': [color_map.get(str(code['response_code']), color_map['Otros']) for code in main_codes]
+    }
+
+    return render_template('reports.html', metrics=metrics, page_icon='bar.ico', page_title='Reportes y gráficas')
+
 @app.route('/install', methods=['POST'])
 def install_package():
     install = update_squid()
@@ -215,7 +177,6 @@ def install_package():
     else:
         return redirect('/')
 
-# Ruta de actualización (se mantiene igual)
 @app.route('/update', methods=['POST'])
 def update_web():
     install = updateSquidStats()
@@ -224,20 +185,48 @@ def update_web():
     else:
         return redirect('/')
 
-# Ruta de blacklist (se mantiene igual)
+'''
+@app.route('/blacklist', methods=['GET'])
+def check_blacklist():
+    db = None
+    db = get_session()
+    try:
+        blacklist = ["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]  # Ejemplo
+        resultados = find_blacklisted_sites(db, blacklist)
+
+        return render_template('blacklist.html',
+                               results=resultados,
+                               page_icon='shield-exclamation.ico',
+                               page_title='Registros de Blacklist')
+    except Exception as e:
+        logger.error(f"Error en check-blacklist: {str(e)}")
+        return jsonify({'error': 'Error interno del servidor'}), 500
+
+    finally:
+        if db is not None:
+            db.close()
+'''
+
+
 @app.route('/blacklist', methods=['GET'])
 def blacklist_logs():
     db = None
     try:
+        # Obtener parámetros de paginación
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
 
+        # Validar parámetros
         if page < 1 or per_page < 1 or per_page > 100:
             return render_template('error.html',
                                    message="Parámetros de paginación inválidos"), 400
 
         db = get_session()
+
+        # Obtener blacklist (podrías cargarla desde base de datos o config)
         blacklist = ["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]
+
+        # Obtener resultados paginados
         result_data = find_blacklisted_sites(db, blacklist, page, per_page)
 
         if 'error' in result_data:
@@ -256,99 +245,18 @@ def blacklist_logs():
     except ValueError:
         return render_template('error.html',
                                message="Parámetros inválidos"), 400
+
     except Exception as e:
         logger.error(f"Error en blacklist_logs: {str(e)}")
         return render_template('error.html',
                                message="Error interno del servidor"), 500
+
     finally:
         if db is not None:
             db.close()
 
-# Ruta para reportes por rango de fechas (se mantiene igual)
-@app.route('/reports-range', methods=['POST'])
-def reports_by_range():
-    """
-    Endpoint para generar reportes por rango de fechas.
-    Esta ruta no ha sido modificada ya que no es crítica para la solución actual.
-    """
-    try:
-        start_date = request.json.get('start_date')
-        end_date = request.json.get('end_date')
-        
-        if not start_date or not end_date:
-            return jsonify({'error': 'Fechas requeridas'}), 400
-            
-        db = get_session()
-        metrics = get_metrics_by_date_range(start_date, end_date, db)
-        return jsonify(metrics)
-        
-    except Exception as e:
-        logger.error(f"Error en reports-range: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-    finally:
-        if db:
-            db.close()
-
-# Scheduler para procesar logs (se mantiene igual)
-@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
-def init_scheduler():
-    """Initialize and start the background scheduler for log processing"""
-    log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
-    logger.info(f"Configurando scheduler para el archivo de log: {log_file}")
-
-    if not os.path.exists(log_file):
-        logger.error(f"Archivo de log no encontrado: {log_file}")
-        return
-    else:
-        process_logs(log_file)
-
-# Filtro template para formato de bytes (se mantiene igual)
-@app.template_filter('format_bytes')
-def format_bytes_filter(value):
-    value = int(value)
-    if value >= 1024**3:  # GB
-        return f"{(value / (1024**3)):.2f} GB"
-    elif value >= 1024**2:  # MB
-        return f"{(value / (1024**2)):.2f} MB"
-    elif value >= 1024:  # KB
-        return f"{(value / 1024):.2f} KB"
-    return f"{value} bytes"
-
-
-@app.template_filter('divide')
-def divide_filter(numerator, denominator, precision=2):
-    """
-    Filtro personalizado para realizar divisiones seguras en plantillas.
-    Evita errores de división por cero y maneja tipos incorrectos.
-    
-    Args:
-        numerator: Numerador (dividendo)
-        denominator: Denominador (divisor)
-        precision: Decimales deseados (default: 2)
-    
-    Returns:
-        Resultado de la división como float, o 0 si hay error.
-    """
-    try:
-        # Convertimos a float para manejar diferentes tipos de datos
-        num = float(numerator)
-        den = float(denominator)
-        
-        # Evitamos división por cero
-        if den == 0:
-            logger.warning("Intento de división por cero en plantilla")
-            return 0.0
-            
-        result = num / den
-        # Redondeamos a la precisión deseada
-        return round(result, precision)
-        
-    except (TypeError, ValueError) as e:
-        # Manejo de errores si los valores no son numéricos
-        logger.error(f"Error en filtro divide: {str(e)}")
-        return 0.0
-
 if __name__ == "__main__":
+
     # Execute app with Flask
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     app.run(debug=debug_mode, host='0.0.0.0', port=5000)

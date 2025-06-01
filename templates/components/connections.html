@@ -1,161 +1,111 @@
-{# Filtro para usuarios válidos (se mantiene igual) #}
-{% set valid_users = {} %}
-{% for user, connections in grouped_connections.items() %}
-    {% if user and user != "-" and user != "Anónimo" %}
-        {% set _ = valid_users.update({user: connections}) %}
-    {% endif %}
-{% endfor %}
+       {% set valid_users = {} %}
+        {% for user, connections in grouped_connections.items() %}
+            {% if user and user != "-" and user != "Anónimo" %}
+                {% set _ = valid_users.update({user: connections}) %}
+            {% endif %}
+        {% endfor %}
 
-{# Tarjetas de estadísticas con iconos Font Awesome #}
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    <!-- Tarjeta Usuarios Activos -->
-    <div class="bg-white p-4 rounded-lg shadow flex items-center">
-        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-            <i class="fas fa-users text-blue-500"></i>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <span class="stat-label">Usuarios Activos</span>
+                    <span class="stat-value">{{ valid_users|length }}</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔄</div>
+                <div class="stat-info">
+                    <span class="stat-label">Conexiones Totales</span>
+                    <span class="stat-value">
+                        {% set total = namespace(value=0) %}
+                        {% for connections in valid_users.values() %}
+                            {% set total.value = total.value + connections|length %}
+                        {% endfor %}
+                        {{ total.value }}
+                    </span>
+                </div>
+            </div>
         </div>
-        <div>
-            <p class="text-gray-500 text-sm">Usuarios Activos</p>
-            <p class="text-xl font-bold">{{ valid_users|length }}</p>
-        </div>
-    </div>
-    
-    <!-- Tarjeta Conexiones Totales -->
-    <div class="bg-white p-4 rounded-lg shadow flex items-center">
-        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
-            <i class="fas fa-exchange-alt text-green-500"></i>
-        </div>
-        <div>
-            <p class="text-gray-500 text-sm">Conexiones Totales</p>
-            <p class="text-xl font-bold">
-                {% set total = namespace(value=0) %}
-                {% for connections in valid_users.values() %}
-                    {% set total.value = total.value + connections|length %}
-                {% endfor %}
-                {{ total.value }}
-            </p>
-        </div>
-    </div>
-</div>
 
-{# Lista de usuarios y conexiones #}
-{% for user, connections in valid_users.items() %}
-<div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
-    <!-- Encabezado de usuario con iconos FA -->
-    <div class="p-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center mb-2 sm:mb-0">
-            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                <i class="fas fa-user text-blue-600"></i>
-            </div>
-            <h2 class="text-lg font-bold">{{ user }}</h2>
-        </div>
-        
-        <div class="flex flex-wrap gap-3">
-            <div class="flex items-center text-sm text-gray-600">
-                <i class="fas fa-link mr-1 text-blue-500"></i>
-                <span>{{ connections|length }} conexiones</span>
-            </div>
-            
-            {% set total_data = namespace(value=0) %}
-            {% set total_requests = namespace(value=0) %}
-            {% for connection in connections %}
-                {% if connection.fd_total != "N/A" %}
-                    {% set total_data.value = total_data.value + connection.fd_total %}
-                {% endif %}
-                {% set total_requests.value = total_requests.value + connection.nrequests %}
-            {% endfor %}
-            
-            <div class="flex items-center text-sm text-gray-600">
-                <i class="fas fa-database mr-1 text-green-500"></i>
-                <span>{{ (total_data.value / 1024 / 1024)|round(2) }} MB</span>
-            </div>
-            
-            <div class="flex items-center text-sm text-gray-600">
-                <i class="fas fa-bullhorn mr-1 text-purple-500"></i>
-                <span>{{ total_requests.value }} solicitudes</span>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Tabla de conexiones - Columna "Dir. Local" eliminada -->
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tiempo</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Método</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">URL</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Datos</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Delay Pool</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Solicitudes</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Dir. Remota</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                {% for connection in connections %}
-                <tr class="hover:bg-gray-50">
-                    <!-- Tiempo -->
-                    <td class="px-4 py-3 whitespace-nowrap text-sm">
-                        {% set seconds = connection.elapsed_time|float %}
-                        {% if seconds >= 3600 %}
-                            {{ "%.2f"|format(seconds/3600) }} horas
-                        {% elif seconds >= 60 %}
-                            {{ "%.2f"|format(seconds/60) }} min
-                        {% else %}
-                            {{ "%.2f"|format(seconds) }} seg
-                        {% endif %}
-                    </td>
-                    
-                    <!-- Método con estilos mejorados -->
-                    <td class="px-4 py-3 whitespace-nowrap">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold 
-                            {% if connection.logType|lower == 'get' %}bg-green-100 text-green-800
-                            {% elif connection.logType|lower == 'post' %}bg-blue-100 text-blue-800
-                            {% elif connection.logType|lower == 'connect' %}bg-yellow-100 text-yellow-800
-                            {% else %}bg-gray-100 text-gray-800{% endif %}">
-                            {{ connection.logType }}
-                        </span>
-                    </td>
-                    
-                    <!-- URL con truncado mejorado -->
-                    <td class="px-4 py-3 max-w-xs">
-                        <div class="truncate text-sm" title="{{ connection.uri }}">
-                            {{ connection.uri }}
-                        </div>
-                    </td>
-                    
-                    <!-- Datos -->
-                    <td class="px-4 py-3 whitespace-nowrap text-sm">
+        {% for user, connections in valid_users.items() %}
+        <div class="user-section">
+            <div class="user-header">
+                <h2>👤 {{ user }}</h2>
+                <div class="user-stats">
+                    <span class="connection-count">{{ connections|length }} conexiones</span>
+                    {% set total_data = namespace(value=0) %}
+                    {% set total_requests = namespace(value=0) %}
+                    {% for connection in connections %}
                         {% if connection.fd_total != "N/A" %}
-                            {{ (connection.fd_total / 1024 /1024)|round(2) }} MB
-                        {% else %}
-                            N/A
+                            {% set total_data.value = total_data.value + connection.fd_total %}
                         {% endif %}
-                    </td>
-                    
-                    <!-- Delay Pool con estilos -->
-                    <td class="px-4 py-3 whitespace-nowrap">
-                        {% if connection.delay_pool != "N/A" %}
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
-                                Pool {{ connection.delay_pool }}
-                            </span>
-                        {% else %}
-                            <span class="text-sm text-gray-500">N/A</span>
-                        {% endif %}
-                    </td>
-                    
-                    <!-- Solicitudes -->
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                        {{ connection.nrequests }}
-                    </td>
-                    
-                    <!-- Dir. Remota (única columna de IP) -->
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-mono">
-                        {{ connection.remote }}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endfor %}
+                        {% set total_requests.value = total_requests.value + connection.nrequests %}
+                    {% endfor %}
+                    <span class="data-usage">{{ (total_data.value / 1024 / 1024)|round(2) }} MB transferidos</span>
+                    <span class="total-requests">{{ total_requests.value }} solicitudes</span>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tiempo</th>
+                            <th>Método</th>
+                            <th>URL</th>
+                            <th>Datos</th>
+                            <th>Delay Pool</th>
+                            <th>Solicitudes</th>
+                            <th>Dir. Remota</th>
+                            <th>Dir. Local</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for connection in connections %}
+                        <tr>
+                            <td class="time-cell">
+                                {% set seconds = connection.elapsed_time|float %}
+                                {% if seconds >= 3600 %}
+                                    {{ "%.2f"|format(seconds/3600) }} horas
+                                {% elif seconds >= 60 %}
+                                    {{ "%.2f"|format(seconds/60) }} min
+                                {% else %}
+                                    {{ "%.2f"|format(seconds) }} seg
+                                {% endif %}
+                            </td>
+                            <td class="method-cell">
+                                <span class="method-badge {{ connection.logType|lower }}">
+                                    {{ connection.logType }}
+                                </span>
+                            </td>
+                            <td class="url-cell">
+                                <div class="url-content" title="{{ connection.uri }}">
+                                    {{ connection.uri }}
+                                </div>
+                            </td>
+                            <td class="data-cell">
+                                {% if connection.fd_total != "N/A" %}
+                                    {{ (connection.fd_total / 1024 /1024)|round(2) }} MB
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="pool-cell">
+                                {% if connection.delay_pool != "N/A" %}
+                                    <span class="pool-badge">Pool {{ connection.delay_pool }}</span>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="requests-cell">
+                                {{ connection.nrequests }}
+                            </td>
+                            <td class="ip-cell">{{ connection.remote }}</td>
+                            <td class="ip-cell">{{ connection.local }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}

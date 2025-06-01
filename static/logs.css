@@ -28,39 +28,55 @@ body {
 
 
 /* =================== User Cards =================== */
-/* NUEVO: Efecto de elevación en tarjetas de usuario */
-.user-card {
-  transition: all 0.3s ease; /* Transición suave para todas las propiedades */
-  transform: translateY(0); /* Posición inicial sin elevación */
-  z-index: 1; /* Orden z normal */
-}
 
-.user-card:hover {
-  transform: translateY(-8px); /* Eleva la tarjeta 8px hacia arriba */
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
-  z-index: 10; /* Coloca la tarjeta elevada sobre las demás */
-}
+    
 
 /* =================== Logs =================== */
+.logs-section {
+    padding: 1rem;
+}
 
-/* Estilos mejorados para la scrollbar */
+.logs-title {
+    font-size: 1rem;
+    color: var(--gray-color);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.logs-list {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .logs-list::-webkit-scrollbar {
-    width: 12px;
-    background-color: #F5F5F5;
+    width: 6px;
 }
-
 .logs-list::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background: #f1f1f1;
     border-radius: 10px;
-    background-color: #F5F5F5;
 }
-
 .logs-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
     border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
-    background-color: #555;
+}
+.logs-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
+.log-entry {
+    padding: 0.8rem;
+    background: var(--light-color);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.log-entry:hover {
+    background: var(--hover-bg);
+}
 
 .log-url {
     font-weight: 500;
@@ -90,57 +106,10 @@ body {
     font-style: italic;
 }
 
-/* =================== Logs List =================== */
-.wave-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 1;
-  pointer-events: none;
-}
+/* =================== Pagination =================== */
 
-.wave {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at center, 
-    transparent 0%, 
-    rgba(59, 130, 246, 0.1) 40%, 
-    transparent 70%
-  );
-  opacity: 0;
-  transform: scale(0.5);
-  transition: transform 0.6s ease-out, opacity 0.6s ease-out;
-}
 
-.log-entry:hover .wave {
-  opacity: 1;
-  transform: scale(2);
-}
 
-.log-entry {
-  min-height: 80px; /* Altura mínima para evitar deformaciones */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.hidden {
-  display: none;
-}
-
-.grid {
-  display: grid;
-}
-
-.log-entries-container {
-  grid-template-columns: 1fr;
-}
 
 /* =================== Logs Table =================== */
 .logs-table {
@@ -154,9 +123,12 @@ body {
     display: contents;
 }
 
-.log-row>div {
+.log-row > div {
     padding: 0.8em;
     background: #f8f9fa;
     border-radius: 6px;
     font-size: 0.9em;
 }
+
+
+
