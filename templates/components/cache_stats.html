@@ -1,129 +1,724 @@
-<section class="cache-stats">
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 max-w-[900px] mx-auto mt-10">
-
-            <!-- Flip Card: Entradas almacenadas -->
-            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
-                <div
-                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                    <!-- Front -->
-                    <div
-                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                        <i class="fas fa-database text-3xl text-blue-600 mb-2"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Entradas almacenadas</h3>
-                        <p class="text-xl text-blue-800">{{ cache_stats.store_entries }}</p>
-                    </div>
-                    <!-- Back -->
-                    <div
-                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                        <h3 class="text-xl font-bold mb-2">Entradas Almacenadas</h3>
-                        <p class="text-sm">Número de objetos actualmente en la caché de Squid.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Flip Card: Uso de capacidad -->
-            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
-                <div
-                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                    <!-- Front -->
-                    <div
-                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                        <i class="fas fa-chart-pie text-3xl text-blue-600 mb-2"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Uso de capacidad</h3>
-                        <p class="text-xl text-blue-800">{{ cache_stats.capacity_used }}%</p>
-                    </div>
-                    <!-- Back -->
-                    <div
-                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                        <h3 class="text-lg font-semibold mb-2">Uso de capacidad</h3>
-                        <p class="text-sm">Porcentaje del almacenamiento de caché en uso actualmente.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Flip Card: Espacio total en disco -->
-            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
-                <div
-                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                    <div
-                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                        <i class="fas fa-hdd text-3xl text-blue-600 mb-2"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Espacio total</h3>
-                        {% if (cache_stats.fs_space_total / 1024) < 1024 %} <p class="text-xl text-blue-800">{{
-                            (cache_stats.fs_space_total / 1024)|int }} MB</p>
-                            {% else %}
-                            <p class="text-xl text-blue-800">{{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }}
-                                GB</p>
-                            {% endif %}
-                    </div>
-                    <div
-                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                        <h3 class="text-lg font-semibold mb-2">Espacio total</h3>
-                        <p class="text-sm">Tamaño total del disco asignado a la caché de Squid.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Flip Card: Espacio usado en disco -->
-            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
-                <div
-                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                    <div
-                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                        <i class="fas fa-folder-open text-3xl text-blue-600 mb-2"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Espacio usado</h3>
-                        {% if (cache_stats.fs_space_used / 1024) < 1024 %} <p class="text-xl text-blue-800">{{
-                            (cache_stats.fs_space_used / 1024 )|int }} MB</p>
-                            {% else %}
-                            <p class="text-xl text-blue-800">{{ (cache_stats.fs_space_used / 1024 / 1024 )|round(2) }}
-                                GB</p>
-                            {% endif %}
-                    </div>
-                    <div
-                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                        <h3 class="text-lg font-semibold mb-2">Espacio usado</h3>
-                        <p class="text-sm">Cantidad de espacio de disco ya ocupado por objetos en caché.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Flip Card: Política de eliminación -->
-            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
-                <div
-                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                    <div
-                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                        <i class="fas fa-recycle text-3xl text-blue-600 mb-2"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Eliminación</h3>
-                        <p class="text-xl text-blue-800">{{ cache_stats.removal_policy }}</p>
-                    </div>
-                    <div
-                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                        <h3 class="text-lg font-semibold mb-2">Política de eliminación</h3>
-                        <p class="text-sm">Método que Squid usa para eliminar objetos antiguos de la caché.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Flip Card: Edad LRU -->
-            <div class="group w-64 h-48 [perspective:1000px] mx-auto">
-                <div
-                    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                    <div
-                        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                        <i class="fas fa-clock text-3xl text-blue-600 mb-2"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Edad LRU</h3>
-                        <p class="text-xl text-blue-800">{{ cache_stats.lru_age_days }} días</p>
-                    </div>
-                    <div
-                        class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                        <h3 class="text-lg font-semibold mb-2">Edad LRU</h3>
-                        <p class="text-sm">Tiempo desde que el objeto menos usado fue accedido por última vez.</p>
-                    </div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Sistema</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .circular-chart {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .circle-bg {
+            fill: none;
+        }
+        
+        .circle {
+            fill: none;
+            stroke-linecap: round;
+            animation: progress 1s ease-out forwards;
+        }
+        
+        @keyframes progress {
+            0% {
+                stroke-dasharray: 0 100;
+            }
+        }
+        
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .cache-stats .group:hover .relative {
+            transform: rotateY(180deg);
+        }
+        
+        .cache-stats .relative {
+            transition: transform 0.6s;
+        }
+        
+        .cache-stats .absolute {
+            backface-visibility: hidden;
+        }
+        
+        .main-tab-content {
+            display: none;
+        }
+        
+        .main-tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .main-tab-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #3b82f6;
+            animation: underline 0.3s ease;
+        }
+        
+        @keyframes underline {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Dashboard de Estadísticas del Sistema</h1>
+        
+        <!-- Pestañas principales -->
+        <div class="flex border-b mb-6">
+            <button id="dashboardTab" class="main-tab-btn active py-3 px-6 font-medium text-primary">
+                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard del Sistema
+            </button>
+            <button id="cacheTab" class="main-tab-btn py-3 px-6 font-medium text-gray-500 hover:text-primary">
+                <i class="fas fa-database mr-2"></i>Estadísticas de Caché
+            </button>
         </div>
-       
+        
+        <!-- Contenido del Dashboard del Sistema (activo por defecto) -->
+        <div id="dashboardContent" class="main-tab-content active">
+            <!-- Sección de estadísticas e información del sistema -->
+            <section class="mb-12">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Panel izquierdo: Estadísticas del sistema con anillos -->
+<div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="flex items-center mb-6">
+        <i class="fas fa-chart-pie text-2xl text-blue-600 mr-3"></i>
+        <h2 class="text-xl font-bold text-gray-800">Estadísticas del Sistema</h2>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Anillo de Uso de CPU -->
+    <div class="flex flex-col items-center">
+        <div class="relative w-36 h-36">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg"
+                    d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#eee"
+                    stroke-width="3.5"
+                />
+                <path class="circle"
+                    d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#ef4444"
+                    stroke-width="3.5"
+                    {% if system_info.cpu is mapping %}
+                        stroke-dasharray="{{ system_info.cpu.usage|replace('%','')|float }}, 100"
+                    {% else %}
+                        stroke-dasharray="0, 100"
+                    {% endif %}
+                />
+                <text x="18" y="21" class="percentage text-xs font-bold fill-gray-800" text-anchor="middle" dominant-baseline="middle">
+                    {% if system_info.cpu is mapping %}
+                        {{ system_info.cpu.usage }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </text>
+            </svg>
+        </div>
+        <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
+    </div>
+    
+    <!-- Anillo de Uso de RAM -->
+    <div class="flex flex-col items-center">
+        <div class="relative w-36 h-36">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg"
+                    d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#eee"
+                    stroke-width="3.5"
+                />
+                <path class="circle"
+                    d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#3b82f6"
+                    stroke-width="3.5"
+                    {% if system_info.ram is mapping %}
+                        stroke-dasharray="{{ system_info.ram.percent|replace('%','')|float }}, 100"
+                    {% else %}
+                        stroke-dasharray="0, 100"
+                    {% endif %}
+                />
+                <text x="18" y="21" class="percentage text-xs font-bold fill-gray-800" text-anchor="middle" dominant-baseline="middle">
+                    {% if system_info.ram is mapping %}
+                        {{ system_info.ram.percent }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </text>
+            </svg>
+        </div>
+        <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
+    </div>
+    
+    <!-- Anillo de Uso de Swap -->
+    <div class="flex flex-col items-center">
+        <div class="relative w-36 h-36">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg"
+                    d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#eee"
+                    stroke-width="3.5"
+                />
+                <path class="circle"
+                    d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#10b981"
+                    stroke-width="3.5"
+                    {% if system_info.swap is mapping %}
+                        stroke-dasharray="{{ system_info.swap.percent|replace('%','')|float }}, 100"
+                    {% else %}
+                        stroke-dasharray="0, 100"
+                    {% endif %}
+                />
+                <text x="18" y="21" class="percentage text-xs font-bold fill-gray-800" text-anchor="middle" dominant-baseline="middle">
+                    {% if system_info.swap is mapping %}
+                        {{ system_info.swap.percent }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </text>
+            </svg>
+        </div>
+        <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
+    </div>
+</div>
+</div>
+                    
+                    <!-- Panel derecho: Información del sistema -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-info-circle text-2xl text-blue-600 mr-3"></i>
+                            <h2 class="text-xl font-bold text-gray-800">Información del Sistema</h2>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-server text-gray-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-600">Nombre del Host</h3>
+                                    <p class="text-gray-800">server-prod-01</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fas fa-network-wired text-gray-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-600">Direcciones IP</h3>
+                                    <p class="text-gray-800">192.168.1.101<br>10.0.0.15</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fab fa-linux text-gray-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-600">Sistema Operativo</h3>
+                                    <p class="text-gray-800">Ubuntu 22.04 LTS</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-600">Tiempo Encendido</h3>
+                                    <p class="text-gray-800">15 días, 4:32:18</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fas fa-memory text-gray-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-600">Memoria</h3>
+                                    <p class="text-gray-800">16 GB (8.2 GB libres)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fas fa-exchange-alt text-gray-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-600">Memoria SWAP</h3>
+                                    <p class="text-gray-800">4 GB (3.3 GB libres)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fas fa-globe text-gray-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-600">Zona Horaria</h3>
+                                    <p class="text-gray-800">America/Santiago (UTC-4)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-600">Hora Local</h3>
+                                    <p class="text-gray-800">15:42:18 (03:42 PM)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Sección de gráficas con pestañas -->
+            <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
+                <div class="flex border-b mb-6">
+                    <button class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600">Uso de CPU</button>
+                    <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">Uso de RAM</button>
+                    <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">Uso de SWAP</button>
+                </div>
+                
+                <div class="tab-content active">
+                    <div class="h-80">
+                        <canvas id="cpuChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="tab-content hidden">
+                    <div class="h-80">
+                        <canvas id="ramChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="tab-content hidden">
+                    <div class="h-80">
+                        <canvas id="swapChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Contenido de Estadísticas de Caché (inicialmente oculto) -->
+        <div id="cacheContent" class="main-tab-content">
+            <section class="cache-stats">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
+                        <h2 class="text-2xl font-bold text-gray-800">Estadísticas de Caché</h2>
+                    </div>
+                    
+                    <div class="text-gray-600 mb-8 max-w-3xl">
+                        <p class="mb-4">Esta sección muestra información detallada sobre el estado y rendimiento de la caché del sistema.</p>
+                        <p>Puede monitorear el uso de disco, las políticas de eliminación y otros parámetros críticos para el rendimiento del sistema.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-[1000px] mx-auto">
+                        <!-- Flip Card: Entradas almacenadas -->
+                        <div class="group w-full h-48 [perspective:1000px]">
+                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                                <!-- Front -->
+                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                                    <i class="fas fa-database text-3xl text-blue-600 mb-2"></i>
+                                    <h3 class="text-lg font-semibold text-gray-800">Entradas almacenadas</h3>
+                                    <p class="text-xl text-blue-800">1,248</p>
+                                </div>
+                                <!-- Back -->
+                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                                    <h3 class="text-xl font-bold mb-2">Entradas Almacenadas</h3>
+                                    <p class="text-sm">Número de objetos actualmente en la caché de Squid.</p>
+                                </div>
+                            </div>
+                        </div>
 
-</section>
+                        <!-- Flip Card: Uso de capacidad -->
+                        <div class="group w-full h-48 [perspective:1000px]">
+                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                                <!-- Front -->
+                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                                    <i class="fas fa-chart-pie text-3xl text-blue-600 mb-2"></i>
+                                    <h3 class="text-lg font-semibold text-gray-800">Uso de capacidad</h3>
+                                    <p class="text-xl text-blue-800">72%</p>
+                                </div>
+                                <!-- Back -->
+                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                                    <h3 class="text-lg font-semibold mb-2">Uso de capacidad</h3>
+                                    <p class="text-sm">Porcentaje del almacenamiento de caché en uso actualmente.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flip Card: Espacio total en disco -->
+                        <div class="group w-full h-48 [perspective:1000px]">
+                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                                    <i class="fas fa-hdd text-3xl text-blue-600 mb-2"></i>
+                                    <h3 class="text-lg font-semibold text-gray-800">Espacio total</h3>
+                                    <p class="text-xl text-blue-800">24.5 GB</p>
+                                </div>
+                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                                    <h3 class="text-lg font-semibold mb-2">Espacio total</h3>
+                                    <p class="text-sm">Tamaño total del disco asignado a la caché de Squid.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flip Card: Espacio usado en disco -->
+                        <div class="group w-full h-48 [perspective:1000px]">
+                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                                    <i class="fas fa-folder-open text-3xl text-blue-600 mb-2"></i>
+                                    <h3 class="text-lg font-semibold text-gray-800">Espacio usado</h3>
+                                    <p class="text-xl text-blue-800">17.6 GB</p>
+                                </div>
+                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                                    <h3 class="text-lg font-semibold mb-2">Espacio usado</h3>
+                                    <p class="text-sm">Cantidad de espacio de disco ya ocupado por objetos en caché.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flip Card: Política de eliminación -->
+                        <div class="group w-full h-48 [perspective:1000px]">
+                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                                    <i class="fas fa-recycle text-3xl text-blue-600 mb-2"></i>
+                                    <h3 class="text-lg font-semibold text-gray-800">Eliminación</h3>
+                                    <p class="text-xl text-blue-800">LRU</p>
+                                </div>
+                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                                    <h3 class="text-lg font-semibold mb-2">Política de eliminación</h3>
+                                    <p class="text-sm">Método que Squid usa para eliminar objetos antiguos de la caché.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flip Card: Edad LRU -->
+                        <div class="group w-full h-48 [perspective:1000px]">
+                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+                                    <i class="fas fa-clock text-3xl text-blue-600 mb-2"></i>
+                                    <h3 class="text-lg font-semibold text-gray-800">Edad LRU</h3>
+                                    <p class="text-xl text-blue-800">12 días</p>
+                                </div>
+                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                                    <h3 class="text-lg font-semibold mb-2">Edad LRU</h3>
+                                    <p class="text-sm">Tiempo desde que el objeto menos usado fue accedido por última vez.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfica de uso de caché -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-chart-line text-2xl text-blue-600 mr-3"></i>
+                        <h2 class="text-xl font-bold text-gray-800">Historial de Uso de Caché</h2>
+                    </div>
+                    
+                    <div class="h-80">
+                        <canvas id="cacheUsageChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Registrar el plugin de datalabels
+        Chart.register(ChartDataLabels);
+        
+        // Función para manejar las pestañas principales
+        function openMainTab(tabName) {
+            // Ocultar todos los contenidos de pestañas
+            document.querySelectorAll('.main-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remover clase activa de todos los botones
+            document.querySelectorAll('.main-tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-primary', 'text-blue-600');
+                btn.classList.add('text-gray-500');
+            });
+            
+            // Mostrar la pestaña seleccionada
+            document.getElementById(tabName + 'Content').classList.add('active');
+            
+            // Activar el botón de la pestaña seleccionada
+            document.getElementById(tabName + 'Tab').classList.add('active', 'text-blue-600');
+            document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
+        }
+        
+        // Configurar eventos para las pestañas principales
+        document.getElementById('dashboardTab').addEventListener('click', () => openMainTab('dashboard'));
+        document.getElementById('cacheTab').addEventListener('click', () => openMainTab('cache'));
+        
+        // Función para manejar las pestañas internas
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remover clase activa de todos los botones
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active', 'text-blue-600', 'border-b-2', 'border-blue-600');
+                    btn.classList.add('text-gray-500');
+                });
+                
+                // Agregar clase activa al botón clickeado
+                button.classList.add('active', 'text-blue-600', 'border-b-2', 'border-blue-600');
+                button.classList.remove('text-gray-500');
+                
+                // Ocultar todos los contenidos de pestañas
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                    content.classList.remove('active');
+                });
+                
+                // Mostrar el contenido correspondiente
+                const tabIndex = Array.from(document.querySelectorAll('.tab-btn')).indexOf(button);
+                document.querySelectorAll('.tab-content')[tabIndex].classList.remove('hidden');
+                document.querySelectorAll('.tab-content')[tabIndex].classList.add('active');
+            });
+        });
+        
+        // Configuración de gráficos con Chart.js y datalabels
+        const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+        const cpuChart = new Chart(cpuCtx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                datasets: [{
+                    label: 'Uso de CPU (%)',
+                    data: [25, 40, 65, 45, 80, 60, 42],
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#ef4444'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => value + '%',
+                        color: '#ef4444',
+                        font: {
+                            weight: 'bold',
+                            size: 11
+                        }
+                    }
+                }
+            }
+        });
+        
+        const ramCtx = document.getElementById('ramChart').getContext('2d');
+        const ramChart = new Chart(ramCtx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                datasets: [{
+                    label: 'Uso de RAM (%)',
+                    data: [35, 45, 38, 42, 50, 48, 40],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#3b82f6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => value + '%',
+                        color: '#3b82f6',
+                        font: {
+                            weight: 'bold',
+                            size: 11
+                        }
+                    }
+                }
+            }
+        });
+        
+        const swapCtx = document.getElementById('swapChart').getContext('2d');
+        const swapChart = new Chart(swapCtx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                datasets: [{
+                    label: 'Uso de SWAP (%)',
+                    data: [10, 12, 8, 15, 18, 14, 10],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#10b981'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => value + '%',
+                        color: '#10b981',
+                        font: {
+                            weight: 'bold',
+                            size: 11
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Gráfico para la pestaña de caché
+        const cacheCtx = document.getElementById('cacheUsageChart').getContext('2d');
+        const cacheChart = new Chart(cacheCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                datasets: [
+                    {
+                        label: 'Espacio usado (GB)',
+                        data: [12.5, 13.2, 14.8, 15.6, 16.8, 17.3, 17.6],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Espacio libre (GB)',
+                        data: [12, 11.3, 9.7, 8.9, 7.7, 7.2, 6.9],
+                        backgroundColor: 'rgba(209, 213, 219, 0.7)',
+                        borderColor: 'rgba(156, 163, 175, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Gigabytes (GB)'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Uso de espacio de caché durante la última semana'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

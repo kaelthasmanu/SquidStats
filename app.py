@@ -16,6 +16,9 @@ from utils.updateSquidStats import updateSquidStats
 from datetime import datetime
 from services.fetch_data_logs import get_users_with_logs_by_date
 from services.blacklist_users import find_blacklisted_sites, find_blacklisted_sites_by_date
+from services.system_info import get_network_info, get_os_info, get_uptime, get_ram_info, get_swap_info, get_cpu_info, get_squid_version, get_timezone
+import socket
+import sys
 
 # set configuration values
 class Config:
@@ -91,17 +94,43 @@ def actualizar_conexiones():
 
 @app.route('/stats')
 def cache_stats():
-    """Page showing Squid cache statistics."""
+    """Page showing Statistics and System Information."""
     try:
+        # Obtener estadísticas de caché
         data = fetch_squid_cache_stats()
         stats_data = vars(data) if hasattr(data, '__dict__') else data
-        logger.info("Successfully fetched cache statistics")
-        return render_template('cacheView.html', cache_stats=stats_data, page_icon='statistics.ico', page_title='Estadísticas')
+        
+        # Obtener información completa del sistema
+        system_info = {
+            'hostname': socket.gethostname(),
+            'ips': get_network_info(),
+            'os': get_os_info(),
+            'uptime': get_uptime(),
+            'ram': get_ram_info(),
+            'swap': get_swap_info(),
+            'cpu': get_cpu_info(),
+            'python_version': sys.version.split()[0],
+            'squid_version': get_squid_version(),
+            'timezone': get_timezone(),
+            'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        logger.info("Successfully fetched cache statistics and system info")
+        return render_template(
+            'cacheView.html', 
+            cache_stats=stats_data,
+            system_info=system_info,
+            page_icon='statistics.ico', 
+            page_title='Estadísticas del Sistema'
+        )
 
     except Exception as e:
-        logger.error(f"Error fetching cache stats: {str(e)}")
-        return render_template('error.html', message="Error retrieving cache statistics"), 500
-
+        logger.error(f"Error in /stats: {str(e)}")
+        return render_template(
+            'error.html', 
+            message="Error retrieving cache statistics or system info"
+        ), 500
+    
 @app.route('/logs')
 def logs():
     db = None
