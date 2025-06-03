@@ -7,6 +7,12 @@ import datetime
 import re
 from flask import Flask, jsonify, Response
 import psutil
+import eventlet
+eventlet.monkey_patch()  # Parchado para eventlet, imprescindible para WebSocket con Flask-SocketIO
+
+from flask_socketio import SocketIO
+import threading
+import time
 
 # ==================================================
 # Funciones de obtención de datos
@@ -159,4 +165,3 @@ def get_timezone():
         return "Desconocido"
     except:
         return "Error al obtener"
-

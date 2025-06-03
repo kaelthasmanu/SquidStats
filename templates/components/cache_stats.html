@@ -1,3 +1,25 @@
+{% macro flip_card(icon, title, value, back_title, description, extra_html='') %}
+<div class="group w-full h-48 [perspective:1000px]">
+    <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+        <!-- Front -->
+        <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+            <i class="{{ icon }} text-3xl text-blue-600 mb-2"></i>
+            <h3 class="text-lg font-semibold text-gray-800">{{ title }}</h3>
+            {% if extra_html %}
+                {{ extra_html | safe }}
+            {% else %}
+                <p class="text-xl text-blue-800">{{ value }}</p>
+            {% endif %}
+        </div>
+        <!-- Back -->
+        <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+            <h3 class="text-lg font-semibold mb-2">{{ back_title }}</h3>
+            <p class="text-sm">{{ description }}</p>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,7 +29,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .circular-chart {
             display: block;
@@ -328,157 +349,133 @@
                     </div>
                 </div>
             </section>
-        </div>
-        
-        <!-- Contenido de Estadísticas de Caché (inicialmente oculto) -->
-        <div id="cacheContent" class="main-tab-content">
-            <section class="cache-stats">
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                    <div class="flex items-center mb-6">
-                        <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
-                        <h2 class="text-2xl font-bold text-gray-800">Estadísticas de Caché</h2>
-                    </div>
-                    
-                    <div class="text-gray-600 mb-8 max-w-3xl">
-                        <p class="mb-4">Esta sección muestra información detallada sobre el estado y rendimiento de la caché del sistema.</p>
-                        <p>Puede monitorear el uso de disco, las políticas de eliminación y otros parámetros críticos para el rendimiento del sistema.</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-[1000px] mx-auto">
-                        <!-- Flip Card: Entradas almacenadas -->
-                        <div class="group w-full h-48 [perspective:1000px]">
-                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                                <!-- Front -->
-                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                                    <i class="fas fa-database text-3xl text-blue-600 mb-2"></i>
-                                    <h3 class="text-lg font-semibold text-gray-800">Entradas almacenadas</h3>
-                                    <p class="text-xl text-blue-800">1,248</p>
-                                </div>
-                                <!-- Back -->
-                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                                    <h3 class="text-xl font-bold mb-2">Entradas Almacenadas</h3>
-                                    <p class="text-sm">Número de objetos actualmente en la caché de Squid.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Flip Card: Uso de capacidad -->
-                        <div class="group w-full h-48 [perspective:1000px]">
-                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                                <!-- Front -->
-                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                                    <i class="fas fa-chart-pie text-3xl text-blue-600 mb-2"></i>
-                                    <h3 class="text-lg font-semibold text-gray-800">Uso de capacidad</h3>
-                                    <p class="text-xl text-blue-800">72%</p>
-                                </div>
-                                <!-- Back -->
-                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                                    <h3 class="text-lg font-semibold mb-2">Uso de capacidad</h3>
-                                    <p class="text-sm">Porcentaje del almacenamiento de caché en uso actualmente.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Flip Card: Espacio total en disco -->
-                        <div class="group w-full h-48 [perspective:1000px]">
-                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                                    <i class="fas fa-hdd text-3xl text-blue-600 mb-2"></i>
-                                    <h3 class="text-lg font-semibold text-gray-800">Espacio total</h3>
-                                    <p class="text-xl text-blue-800">24.5 GB</p>
-                                </div>
-                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                                    <h3 class="text-lg font-semibold mb-2">Espacio total</h3>
-                                    <p class="text-sm">Tamaño total del disco asignado a la caché de Squid.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Flip Card: Espacio usado en disco -->
-                        <div class="group w-full h-48 [perspective:1000px]">
-                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                                    <i class="fas fa-folder-open text-3xl text-blue-600 mb-2"></i>
-                                    <h3 class="text-lg font-semibold text-gray-800">Espacio usado</h3>
-                                    <p class="text-xl text-blue-800">17.6 GB</p>
-                                </div>
-                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                                    <h3 class="text-lg font-semibold mb-2">Espacio usado</h3>
-                                    <p class="text-sm">Cantidad de espacio de disco ya ocupado por objetos en caché.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Flip Card: Política de eliminación -->
-                        <div class="group w-full h-48 [perspective:1000px]">
-                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                                    <i class="fas fa-recycle text-3xl text-blue-600 mb-2"></i>
-                                    <h3 class="text-lg font-semibold text-gray-800">Eliminación</h3>
-                                    <p class="text-xl text-blue-800">LRU</p>
-                                </div>
-                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                                    <h3 class="text-lg font-semibold mb-2">Política de eliminación</h3>
-                                    <p class="text-sm">Método que Squid usa para eliminar objetos antiguos de la caché.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Flip Card: Edad LRU -->
-                        <div class="group w-full h-48 [perspective:1000px]">
-                            <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                                <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-                                    <i class="fas fa-clock text-3xl text-blue-600 mb-2"></i>
-                                    <h3 class="text-lg font-semibold text-gray-800">Edad LRU</h3>
-                                    <p class="text-xl text-blue-800">12 días</p>
-                                </div>
-                                <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                                    <h3 class="text-lg font-semibold mb-2">Edad LRU</h3>
-                                    <p class="text-sm">Tiempo desde que el objeto menos usado fue accedido por última vez.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Gráfica de uso de caché -->
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <div class="flex items-center mb-6">
-                        <i class="fas fa-chart-line text-2xl text-blue-600 mr-3"></i>
-                        <h2 class="text-xl font-bold text-gray-800">Historial de Uso de Caché</h2>
-                    </div>
-                    
-                    <div class="h-80">
-                        <canvas id="cacheUsageChart"></canvas>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <script>
-        // Registrar el plugin de datalabels
-        Chart.register(ChartDataLabels);
-        
-        // Función para manejar las pestañas principales
-        function openMainTab(tabName) {
-            // Ocultar todos los contenidos de pestañas
-            document.querySelectorAll('.main-tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
+            </div>
             
-            // Remover clase activa de todos los botones
-            document.querySelectorAll('.main-tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'text-primary', 'text-blue-600');
-                btn.classList.add('text-gray-500');
-            });
+            <!-- Contenido de Estadísticas de Caché (inicialmente oculto) -->
+            <div id="cacheContent" class="main-tab-content">
+                <section class="cache-stats">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
+                            <h2 class="text-2xl font-bold text-gray-800">Estadísticas de Caché</h2>
+                        </div>
             
-            // Mostrar la pestaña seleccionada
-            document.getElementById(tabName + 'Content').classList.add('active');
+                        <div class="text-gray-600 mb-8 max-w-3xl">
+                            <p class="mb-4">Esta sección muestra información detallada sobre el estado y rendimiento de la caché del
+                                sistema.</p>
+                            <p>Puede monitorear el uso de disco, las políticas de eliminación y otros parámetros críticos para el
+                                rendimiento del sistema.</p>
+                        </div>
             
-            // Activar el botón de la pestaña seleccionada
-            document.getElementById(tabName + 'Tab').classList.add('active', 'text-blue-600');
-            document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-[1000px] mx-auto">
+                            <!-- Entradas almacenadas -->
+                            {{ flip_card(
+                            icon='fas fa-database',
+                            title='Entradas almacenadas',
+                            value=cache_stats.store_entries,
+                            back_title='Entradas Almacenadas',
+                            description='Número de objetos actualmente en la caché de Squid.'
+                            ) }}
+            
+                            <!-- Uso de capacidad -->
+                            {{ flip_card(
+                            icon='fas fa-chart-pie',
+                            title='Uso de capacidad',
+                            value=cache_stats.capacity_used,
+                            back_title='Uso de capacidad',
+                            description='Porcentaje del almacenamiento de caché en uso actualmente.'
+                            ) }}
+            
+                            <!-- Espacio total en disco -->
+                            {% set total_space_html %}
+                            {% if (cache_stats.fs_space_total / 1024) < 1024 %} <p class="text-xl text-blue-800">{{
+                                (cache_stats.fs_space_total / 1024)|int }} MB</p>
+                                {% else %}
+                                <p class="text-xl text-blue-800">{{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }} GB</p>
+                                {% endif %}
+                                {% endset %}
+                                {{ flip_card(
+                                icon='fas fa-hdd',
+                                title='Espacio total',
+                                back_title='Espacio total',
+                                description='Tamaño total del disco asignado a la caché de Squid.',
+                                extra_html=total_space_html
+                                ) }}
+            
+                                <!-- Espacio usado en disco -->
+                                {% set used_space_html %}
+                                {% if (cache_stats.fs_space_used / 1024) < 1024 %} <p class="text-xl text-blue-800">{{
+                                    (cache_stats.fs_space_used / 1024)|int }} MB</p>
+                                    {% else %}
+                                    <p class="text-xl text-blue-800">{{ (cache_stats.fs_space_used / 1024 / 1024)|round(2) }} GB</p>
+                                    {% endif %}
+                                    {% endset %}
+                                    {{ flip_card(
+                                    icon='fas fa-folder-open',
+                                    title='Espacio usado',
+                                    back_title='Espacio usado',
+                                    description='Cantidad de espacio de disco ya ocupado por objetos en caché.',
+                                    extra_html=used_space_html
+                                    ) }}
+            
+                                    <!-- Política de eliminación -->
+                                    {{ flip_card(
+                                    icon='fas fa-recycle',
+                                    title='Eliminación',
+                                    value=cache_stats.removal_policy,
+                                    back_title='Política de eliminación',
+                                    description='Método que Squid usa para eliminar objetos antiguos de la caché.'
+                                    ) }}
+            
+                                    <!-- Edad LRU -->
+                                    {{ flip_card(
+                                    icon='fas fa-clock',
+                                    title='Edad LRU',
+                                    value=cache_stats.lru_age_days ~ ' días',
+                                    back_title='Edad LRU',
+                                    description='Tiempo desde que el objeto menos usado fue accedido por última vez.'
+                                    ) }}
+                        </div>
+                    </div>
+            
+                    <!-- Gráfica de uso de caché -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-chart-line text-2xl text-blue-600 mr-3"></i>
+                            <h2 class="text-xl font-bold text-gray-800">Historial de Uso de Caché</h2>
+                        </div>
+            
+                        <div class="h-80">
+                            <canvas id="cacheUsageChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            </div>
+            
+            <script>
+                // Registrar el plugin de datalabels
+                Chart.register(ChartDataLabels);
+
+                // Función para manejar las pestañas principales
+                function openMainTab(tabName) {
+                    // Ocultar todos los contenidos de pestañas
+                    document.querySelectorAll('.main-tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    // Remover clase activa de todos los botones
+                    document.querySelectorAll('.main-tab-btn').forEach(btn => {
+                        btn.classList.remove('active', 'text-primary', 'text-blue-600');
+                        btn.classList.add('text-gray-500');
+                    });
+
+                    // Mostrar la pestaña seleccionada
+                    document.getElementById(tabName + 'Content').classList.add('active');
+
+                    // Activar el botón de la pestaña seleccionada
+                    document.getElementById(tabName + 'Tab').classList.add('active', 'text-blue-600');
+                    document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
         }
         
         // Configurar eventos para las pestañas principales
