@@ -762,7 +762,7 @@
             document.getElementById('uptime').textContent = systemInfo.uptime;
 
             // Actualizar hora local
-            document.getElementById('local-time').textContent = systemInfo.local_time;
+            document.getElementById('local-time').textContent = formatServerTime(systemInfo.local_time);
         }
 
         // Función para actualizar las flip cards
@@ -967,7 +967,24 @@
                 total: "{{ system_info.swap.total }}"
             }
         });
-    </script>
-</body>
 
-</html>
+                function formatServerTime(serverDateTime) {
+                    if (!serverDateTime) return '';
+                    const isoString = serverDateTime.replace(' ', 'T');
+                    const dateObj = new Date(isoString);
+
+                    if (isNaN(dateObj.getTime())) return serverDateTime;
+
+                    // Formato de 12 horas con AM/PM y segundos
+                    let hours = dateObj.getHours();
+                    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+                    const seconds = dateObj.getSeconds().toString().padStart(2, '0');
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12 || 12; // Convertir 0 a 12 para 12 AM
+
+                    return `${hours}:${minutes}:${seconds} ${ampm}`;
+                }
+            </script>
+            </body>
+            
+            </html>
