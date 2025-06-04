@@ -1,18 +1,21 @@
 {% macro flip_card(icon, title, value, back_title, description, extra_html='') %}
 <div class="group w-full h-48 [perspective:1000px]">
-    <div class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+    <div
+        class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
         <!-- Front -->
-        <div class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+        <div
+            class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
             <i class="{{ icon }} text-3xl text-blue-600 mb-2"></i>
             <h3 class="text-lg font-semibold text-gray-800">{{ title }}</h3>
             {% if extra_html %}
-                {{ extra_html | safe }}
+            {{ extra_html | safe }}
             {% else %}
-                <p class="text-xl text-blue-800">{{ value }}</p>
+            <p class="text-xl text-blue-800" data-stat="{{ title|replace(' ', '_')|lower }}">{{ value }}</p>
             {% endif %}
         </div>
         <!-- Back -->
-        <div class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
+        <div
+            class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
             <h3 class="text-lg font-semibold mb-2">{{ back_title }}</h3>
             <p class="text-sm">{{ description }}</p>
         </div>
@@ -22,74 +25,85 @@
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Sistema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Estilos base */
         .circular-chart {
             display: block;
             margin: 0 auto;
         }
-        
+
         .circle-bg {
             fill: none;
+            stroke: #eee;
+            stroke-width: 3.5;
         }
-        
+
         .circle {
             fill: none;
             stroke-linecap: round;
             animation: progress 1s ease-out forwards;
         }
-        
+
         @keyframes progress {
             0% {
                 stroke-dasharray: 0 100;
             }
         }
-        
+
         .tab-btn {
             transition: all 0.3s ease;
         }
-        
+
         .tab-btn:hover {
             background-color: #f1f5f9;
         }
-        
+
         .cache-stats .group:hover .relative {
             transform: rotateY(180deg);
         }
-        
+
         .cache-stats .relative {
             transition: transform 0.6s;
         }
-        
+
         .cache-stats .absolute {
             backface-visibility: hidden;
         }
-        
+
         .main-tab-content {
             display: none;
         }
-        
+
         .main-tab-content.active {
             display: block;
             animation: fadeIn 0.5s ease;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
-        
+
         .main-tab-btn {
             position: relative;
             overflow: hidden;
         }
-        
+
         .main-tab-btn.active::after {
             content: '';
             position: absolute;
@@ -100,388 +114,426 @@
             background-color: #3b82f6;
             animation: underline 0.3s ease;
         }
-        
+
         @keyframes underline {
-            from { transform: scaleX(0); }
-            to { transform: scaleX(1); }
+            from {
+                transform: scaleX(0);
+            }
+
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        /* Animación para cambios de valores */
+        .value-change {
+            animation: pulse 1s;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Estilos para textos dentro de los anillos */
+        .ring-info {
+            font-size: 0.7rem;
+            fill: #6b7280;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .ring-label {
+            font-size: 0.65rem;
+            fill: #6b7280;
+            text-anchor: middle;
+            dominant-baseline: hanging;
+        }
+
+        .ring-value {
+            font-size: 0.9rem;
+            font-weight: bold;
+            fill: #1f2937;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .ring-percent {
+            font-size: 0.5rem;
+            fill: #9ca3af;
+            text-anchor: middle;
+            dominant-baseline: central;
+            alignment-baseline: central;
+        }
+
+        /* Estilos para la gráfica de días */
+        .day-bar {
+            transition: all 0.5s ease;
+        }
+        
+        /* Estilos para los tspans */
+        tspan {
+            font-size: 0.7rem;
+            fill: #1f2937;
+        }
+
+        .cores {
+        background-color: #ef4444;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        }
+
+        .ram {
+        background-color: #3b82f6;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        }
+
+        .swap {
+        background-color: #10b981;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
         }
     </style>
-</head>
-<body class="bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Dashboard de Estadísticas del Sistema</h1>
-        
-        <!-- Pestañas principales -->
-        <div class="flex border-b mb-6">
-            <button id="dashboardTab" class="main-tab-btn active py-3 px-6 font-medium text-primary">
-                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard del Sistema
-            </button>
-            <button id="cacheTab" class="main-tab-btn py-3 px-6 font-medium text-gray-500 hover:text-primary">
-                <i class="fas fa-database mr-2"></i>Estadísticas de Caché
-            </button>
-        </div>
-        
+    </head>
+    
+    <body class="bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Dashboard de Estadísticas del Sistema</h1>
+    
+            <!-- Pestañas principales -->
+            <div class="flex border-b mb-6">
+                <button id="dashboardTab" class="main-tab-btn active py-3 px-6 font-medium text-blue-600">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard del Sistema
+                </button>
+                <button id="cacheTab" class="main-tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
+                    <i class="fas fa-database mr-2"></i>Estadísticas de Caché
+                </button></div>
+
         <!-- Contenido del Dashboard del Sistema (activo por defecto) -->
         <div id="dashboardContent" class="main-tab-content active">
             <!-- Sección de estadísticas e información del sistema -->
             <section class="mb-12">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Panel izquierdo: Estadísticas del sistema con anillos -->
-<div class="bg-white rounded-xl shadow-lg p-6">
-    <div class="flex items-center mb-6">
-        <i class="fas fa-chart-pie text-2xl text-blue-600 mr-3"></i>
-        <h2 class="text-xl font-bold text-gray-800">Estadísticas del Sistema</h2>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Anillo de Uso de CPU -->
-    <div class="flex flex-col items-center">
-        <div class="relative w-36 h-36">
-            <svg viewBox="0 0 36 36" class="circular-chart">
-                <path class="circle-bg"
-                    d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#eee"
-                    stroke-width="3.5"
-                />
-                <path class="circle"
-                    d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#ef4444"
-                    stroke-width="3.5"
-                    {% if system_info.cpu is mapping %}
-                        stroke-dasharray="{{ system_info.cpu.usage|replace('%','')|float }}, 100"
-                    {% else %}
-                        stroke-dasharray="0, 100"
-                    {% endif %}
-                />
-                <text x="18" y="21" class="percentage text-xs font-bold fill-gray-800" text-anchor="middle" dominant-baseline="middle">
-                    {% if system_info.cpu is mapping %}
-                        {{ system_info.cpu.usage }}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </text>
-            </svg>
-        </div>
-        <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
-    </div>
-    
-    <!-- Anillo de Uso de RAM -->
-    <div class="flex flex-col items-center">
-        <div class="relative w-36 h-36">
-            <svg viewBox="0 0 36 36" class="circular-chart">
-                <path class="circle-bg"
-                    d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#eee"
-                    stroke-width="3.5"
-                />
-                <path class="circle"
-                    d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#3b82f6"
-                    stroke-width="3.5"
-                    {% if system_info.ram is mapping %}
-                        stroke-dasharray="{{ system_info.ram.percent|replace('%','')|float }}, 100"
-                    {% else %}
-                        stroke-dasharray="0, 100"
-                    {% endif %}
-                />
-                <text x="18" y="21" class="percentage text-xs font-bold fill-gray-800" text-anchor="middle" dominant-baseline="middle">
-                    {% if system_info.ram is mapping %}
-                        {{ system_info.ram.percent }}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </text>
-            </svg>
-        </div>
-        <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
-    </div>
-    
-    <!-- Anillo de Uso de Swap -->
-    <div class="flex flex-col items-center">
-        <div class="relative w-36 h-36">
-            <svg viewBox="0 0 36 36" class="circular-chart">
-                <path class="circle-bg"
-                    d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#eee"
-                    stroke-width="3.5"
-                />
-                <path class="circle"
-                    d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#10b981"
-                    stroke-width="3.5"
-                    {% if system_info.swap is mapping %}
-                        stroke-dasharray="{{ system_info.swap.percent|replace('%','')|float }}, 100"
-                    {% else %}
-                        stroke-dasharray="0, 100"
-                    {% endif %}
-                />
-                <text x="18" y="21" class="percentage text-xs font-bold fill-gray-800" text-anchor="middle" dominant-baseline="middle">
-                    {% if system_info.swap is mapping %}
-                        {{ system_info.swap.percent }}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </text>
-            </svg>
-        </div>
-        <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
-    </div>
-</div>
-</div>
-                    
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-chart-pie text-2xl text-blue-600 mr-3"></i>
+                            <h2 class="text-xl font-bold text-gray-800">Estadísticas del Sistema</h2>
+                        </div>
+
+                        <!-- Contenedor de anillos - Centrado verticalmente -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center justify-center">
+                            <!-- Anillo de Uso de CPU con información de núcleos -->
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="relative w-36 h-36">
+                                    <svg viewBox="0 0 36 36" class="circular-chart">
+                                        <path class="circle-bg" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path id="cpu-ring" class="circle" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ef4444" stroke-width="3.5"
+                                            stroke-dasharray="0,100" />
+                                        <!-- Texto centrado verticalmente -->
+                                        <text id="cpu-value" x="18" y="18" class="ring-percent">0%</text>
+                                    </svg>
+                                </div>
+                                <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
+                                <!-- Nueva etiqueta con información de núcleos del CPU - Color del anillo -->
+                                <p class="cores text-sm mt-1">{{ system_info.cpu.physical_cores }} núcleos</p>
+                            </div>
+
+                            <!-- Anillo de Uso de RAM con información de RAM total -->
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="relative w-36 h-36">
+                                    <svg viewBox="0 0 36 36" class="circular-chart">
+                                        <path class="circle-bg" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path id="ram-ring" class="circle" d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3b82f6" stroke-width="3.5"
+                                            stroke-dasharray="0,100" />
+                                        <!-- Texto centrado verticalmente -->
+                                        <text id="ram-used" x="18" y="18" class="ring-percent" text-anchor="middle" dominant-baseline="middle">0G</text>
+                                    </svg>
+                                </div>
+                                <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
+                                <!-- Nueva etiqueta con información de RAM total - Color del anillo -->
+                                <p class="ram text-sm mt-1">{{ system_info.ram.total }}</p>
+                            </div>
+
+                            <!-- Anillo de Uso de Swap con información de swap total -->
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="relative w-36 h-36">
+                                    <svg viewBox="0 0 36 36" class="circular-chart">
+                                        <path class="circle-bg" d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                        <path id="swap-ring" class="circle" d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981"
+                                            stroke-width="3.5" stroke-dasharray="0,100" />
+                                        <text id="swap-used" x="18" y="18" class="ring-percent" text-anchor="middle" dominant-baseline="middle">0G</text>
+                                    </svg>
+                                </div>
+                                <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
+                                <!-- Nueva etiqueta con información de swap total - Color del anillo -->
+                                <p class="swap text-sm mt-1">{{ system_info.swap.total }}</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Panel derecho: Información del sistema -->
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <div class="flex items-center mb-6">
                             <i class="fas fa-info-circle text-2xl text-blue-600 mr-3"></i>
                             <h2 class="text-xl font-bold text-gray-800">Información del Sistema</h2>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="flex items-start">
                                 <i class="fas fa-server text-gray-500 mt-1 mr-3"></i>
                                 <div>
                                     <h3 class="text-sm font-semibold text-gray-600">Nombre del Host</h3>
-                                    <p class="text-gray-800">server-prod-01</p>
+                                    <p id="hostname" class="text-gray-800">{{ system_info.hostname }}</p>
                                 </div>
                             </div>
-                            
+
                             <div class="flex items-start">
                                 <i class="fas fa-network-wired text-gray-500 mt-1 mr-3"></i>
                                 <div>
                                     <h3 class="text-sm font-semibold text-gray-600">Direcciones IP</h3>
-                                    <p class="text-gray-800">192.168.1.101<br>10.0.0.15</p>
+                                    <p id="ip-addresses" class="text-gray-800">
+                                        {% for ip in system_info.ips %}
+                                        {{ ip.ip }}<br>
+                                        {% endfor %}
+                                    </p>
                                 </div>
                             </div>
-                            
+
                             <div class="flex items-start">
                                 <i class="fab fa-linux text-gray-500 mt-1 mr-3"></i>
                                 <div>
                                     <h3 class="text-sm font-semibold text-gray-600">Sistema Operativo</h3>
-                                    <p class="text-gray-800">Ubuntu 22.04 LTS</p>
+                                    <p id="os-info" class="text-gray-800">{{ system_info.os }}</p>
                                 </div>
                             </div>
-                            
+
                             <div class="flex items-start">
                                 <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
                                 <div>
                                     <h3 class="text-sm font-semibold text-gray-600">Tiempo Encendido</h3>
-                                    <p class="text-gray-800">15 días, 4:32:18</p>
+                                    <p id="uptime" class="text-gray-800">{{ system_info.uptime }}</p>
                                 </div>
                             </div>
-                            
-                            <div class="flex items-start">
-                                <i class="fas fa-memory text-gray-500 mt-1 mr-3"></i>
-                                <div>
-                                    <h3 class="text-sm font-semibold text-gray-600">Memoria</h3>
-                                    <p class="text-gray-800">16 GB (8.2 GB libres)</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <i class="fas fa-exchange-alt text-gray-500 mt-1 mr-3"></i>
-                                <div>
-                                    <h3 class="text-sm font-semibold text-gray-600">Memoria SWAP</h3>
-                                    <p class="text-gray-800">4 GB (3.3 GB libres)</p>
-                                </div>
-                            </div>
-                            
+
+                            <!-- Se eliminaron las secciones de memoria y swap como se solicitó -->
+                            <!-- Esta información ahora está en los anillos con las nuevas etiquetas -->
+
                             <div class="flex items-start">
                                 <i class="fas fa-globe text-gray-500 mt-1 mr-3"></i>
                                 <div>
                                     <h3 class="text-sm font-semibold text-gray-600">Zona Horaria</h3>
-                                    <p class="text-gray-800">America/Santiago (UTC-4)</p>
+                                    <p id="timezone" class="text-gray-800">{{ system_info.timezone }}</p>
                                 </div>
                             </div>
-                            
+
                             <div class="flex items-start">
                                 <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
                                 <div>
                                     <h3 class="text-sm font-semibold text-gray-600">Hora Local</h3>
-                                    <p class="text-gray-800">15:42:18 (03:42 PM)</p>
+                                    <p id="local-time" class="text-gray-800">{{ system_info.local_time }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
-            
+
             <!-- Sección de gráficas con pestañas -->
             <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
                 <div class="flex border-b mb-6">
-                    <button class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600">Uso de CPU</button>
+                    <button class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600">Uso de
+                        CPU</button>
                     <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">Uso de RAM</button>
                     <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">Uso de SWAP</button>
                 </div>
-                
+
                 <div class="tab-content active">
                     <div class="h-80">
                         <canvas id="cpuChart"></canvas>
                     </div>
                 </div>
-                
+
                 <div class="tab-content hidden">
                     <div class="h-80">
                         <canvas id="ramChart"></canvas>
                     </div>
                 </div>
-                
+
                 <div class="tab-content hidden">
                     <div class="h-80">
                         <canvas id="swapChart"></canvas>
                     </div>
                 </div>
             </section>
-            </div>
-            
-            <!-- Contenido de Estadísticas de Caché (inicialmente oculto) -->
-            <div id="cacheContent" class="main-tab-content">
-                <section class="cache-stats">
-                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                        <div class="flex items-center mb-6">
-                            <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
-                            <h2 class="text-2xl font-bold text-gray-800">Estadísticas de Caché</h2>
-                        </div>
-            
-                        <div class="text-gray-600 mb-8 max-w-3xl">
-                            <p class="mb-4">Esta sección muestra información detallada sobre el estado y rendimiento de la caché del
-                                sistema.</p>
-                            <p>Puede monitorear el uso de disco, las políticas de eliminación y otros parámetros críticos para el
-                                rendimiento del sistema.</p>
-                        </div>
-            
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-[1000px] mx-auto">
-                            <!-- Entradas almacenadas -->
+        </div>
+
+        <!-- Contenido de Estadísticas de Caché (inicialmente oculto) -->
+        <div id="cacheContent" class="main-tab-content">
+            <section class="cache-stats">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
+                        <h2 class="text-2xl font-bold text-gray-800">Estadísticas de Caché</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-[1000px] mx-auto">
+                        <!-- Entradas almacenadas -->
+                        {{ flip_card(
+                        icon='fas fa-database',
+                        title='Entradas almacenadas',
+                        value=cache_stats.store_entries,
+                        back_title='Entradas Almacenadas',
+                        description='Número de objetos actualmente en la caché de Squid.'
+                        ) }}
+
+                        <!-- Uso de capacidad -->
+                        {{ flip_card(
+                        icon='fas fa-chart-pie',
+                        title='Uso de capacidad',
+                        value=cache_stats.capacity_used,
+                        back_title='Uso de capacidad',
+                        description='Porcentaje del almacenamiento de caché en uso actualmente.'
+                        ) }}
+
+                        <!-- Espacio total en disco -->
+                        {% set total_space_html %}
+                        {% if (cache_stats.fs_space_total / 1024) < 1024 %} <p class="text-xl text-blue-800"
+                            data-stat="espacio_total">{{ (cache_stats.fs_space_total / 1024)|int }} MB</p>
+                            {% else %}
+                            <p class="text-xl text-blue-800" data-stat="espacio_total">{{ (cache_stats.fs_space_total /
+                                1024 / 1024)|round(2) }} GB</p>
+                            {% endif %}
+                            {% endset %}
                             {{ flip_card(
-                            icon='fas fa-database',
-                            title='Entradas almacenadas',
-                            value=cache_stats.store_entries,
-                            back_title='Entradas Almacenadas',
-                            description='Número de objetos actualmente en la caché de Squid.'
+                            icon='fas fa-hdd',
+                            title='Espacio total',
+                            back_title='Espacio total',
+                            description='Tamaño total del disco asignado a la caché de Squid.',
+                            extra_html=total_space_html
                             ) }}
-            
-                            <!-- Uso de capacidad -->
-                            {{ flip_card(
-                            icon='fas fa-chart-pie',
-                            title='Uso de capacidad',
-                            value=cache_stats.capacity_used,
-                            back_title='Uso de capacidad',
-                            description='Porcentaje del almacenamiento de caché en uso actualmente.'
-                            ) }}
-            
-                            <!-- Espacio total en disco -->
-                            {% set total_space_html %}
-                            {% if (cache_stats.fs_space_total / 1024) < 1024 %} <p class="text-xl text-blue-800">{{
-                                (cache_stats.fs_space_total / 1024)|int }} MB</p>
+
+                            <!-- Espacio usado en disco -->
+                            {% set used_space_html %}
+                            {% if (cache_stats.fs_space_used / 1024) < 1024 %} <p class="text-xl text-blue-800"
+                                data-stat="espacio_usado">{{ (cache_stats.fs_space_used / 1024)|int }} MB</p>
                                 {% else %}
-                                <p class="text-xl text-blue-800">{{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }} GB</p>
+                                <p class="text-xl text-blue-800" data-stat="espacio_usado">{{ (cache_stats.fs_space_used
+                                    / 1024 / 1024)|round(2) }} GB</p>
                                 {% endif %}
                                 {% endset %}
                                 {{ flip_card(
-                                icon='fas fa-hdd',
-                                title='Espacio total',
-                                back_title='Espacio total',
-                                description='Tamaño total del disco asignado a la caché de Squid.',
-                                extra_html=total_space_html
+                                icon='fas fa-folder-open',
+                                title='Espacio usado',
+                                back_title='Espacio usado',
+                                description='Cantidad de espacio de disco ya ocupado por objetos en caché.',
+                                extra_html=used_space_html
                                 ) }}
-            
-                                <!-- Espacio usado en disco -->
-                                {% set used_space_html %}
-                                {% if (cache_stats.fs_space_used / 1024) < 1024 %} <p class="text-xl text-blue-800">{{
-                                    (cache_stats.fs_space_used / 1024)|int }} MB</p>
-                                    {% else %}
-                                    <p class="text-xl text-blue-800">{{ (cache_stats.fs_space_used / 1024 / 1024)|round(2) }} GB</p>
-                                    {% endif %}
-                                    {% endset %}
-                                    {{ flip_card(
-                                    icon='fas fa-folder-open',
-                                    title='Espacio usado',
-                                    back_title='Espacio usado',
-                                    description='Cantidad de espacio de disco ya ocupado por objetos en caché.',
-                                    extra_html=used_space_html
-                                    ) }}
-            
-                                    <!-- Política de eliminación -->
-                                    {{ flip_card(
-                                    icon='fas fa-recycle',
-                                    title='Eliminación',
-                                    value=cache_stats.removal_policy,
-                                    back_title='Política de eliminación',
-                                    description='Método que Squid usa para eliminar objetos antiguos de la caché.'
-                                    ) }}
-            
-                                    <!-- Edad LRU -->
-                                    {{ flip_card(
-                                    icon='fas fa-clock',
-                                    title='Edad LRU',
-                                    value=cache_stats.lru_age_days ~ ' días',
-                                    back_title='Edad LRU',
-                                    description='Tiempo desde que el objeto menos usado fue accedido por última vez.'
-                                    ) }}
-                        </div>
+
+                                <!-- Política de eliminación -->
+                                {{ flip_card(
+                                icon='fas fa-recycle',
+                                title='Eliminación',
+                                value=cache_stats.removal_policy,
+                                back_title='Política de eliminación',
+                                description='Método que Squid usa para eliminar objetos antiguos de la caché.'
+                                ) }}
+
+                                <!-- Edad LRU -->
+                                {{ flip_card(
+                                icon='fas fa-clock',
+                                title='Edad LRU',
+                                value=cache_stats.lru_age_days ~ ' días',
+                                back_title='Edad LRU',
+                                description='Tiempo desde que el objeto menos usado fue accedido por última vez.'
+                                ) }}
                     </div>
-            
-                    <!-- Gráfica de uso de caché -->
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <div class="flex items-center mb-6">
-                            <i class="fas fa-chart-line text-2xl text-blue-600 mr-3"></i>
-                            <h2 class="text-xl font-bold text-gray-800">Historial de Uso de Caché</h2>
-                        </div>
-            
-                        <div class="h-80">
-                            <canvas id="cacheUsageChart"></canvas>
-                        </div>
+                </div>
+
+                <!-- Gráfica de uso de caché por días -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-chart-line text-2xl text-blue-600 mr-3"></i>
+                        <h2 class="text-xl font-bold text-gray-800">Historial de Uso de Caché (Últimos 7 días)</h2>
                     </div>
-                </section>
-            </div>
-            </div>
-            
-            <script>
-                // Registrar el plugin de datalabels
-                Chart.register(ChartDataLabels);
 
-                // Función para manejar las pestañas principales
-                function openMainTab(tabName) {
-                    // Ocultar todos los contenidos de pestañas
-                    document.querySelectorAll('.main-tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
+                    <div class="h-80">
+                        <canvas id="cacheUsageChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 
-                    // Remover clase activa de todos los botones
-                    document.querySelectorAll('.main-tab-btn').forEach(btn => {
-                        btn.classList.remove('active', 'text-primary', 'text-blue-600');
-                        btn.classList.add('text-gray-500');
-                    });
+    <script>
+        // Registrar el plugin de datalabels
+        Chart.register(ChartDataLabels);
 
-                    // Mostrar la pestaña seleccionada
-                    document.getElementById(tabName + 'Content').classList.add('active');
+        // Variables para almacenar datos en tiempo real
+        let systemDataHistory = {
+            cpu: [],
+            ram: [],
+            swap: [],
+            cache: []
+        };
 
-                    // Activar el botón de la pestaña seleccionada
-                    document.getElementById(tabName + 'Tab').classList.add('active', 'text-blue-600');
-                    document.getElementById(tabName + 'Tab').classList.remove('text-gray-500');
+        // Función para manejar las pestañas principales
+        function openMainTab(tabName) {
+            // Ocultar todos los contenidos de pestañas
+            document.querySelectorAll('.main-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remover clase activa de todos los botones
+            document.querySelectorAll('.main-tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-blue-600');
+                btn.classList.add('text-gray-500');
+            });
+
+            // Mostrar la pestaña seleccionada
+            document.getElementById(tabName + 'Content').classList.add('active');
+
+            // Activar el botón de la pestaña seleccionada
+            const tabBtn = document.getElementById(tabName + 'Tab');
+            tabBtn.classList.add('active', 'text-blue-600');
+            tabBtn.classList.remove('text-gray-500');
         }
-        
+
         // Configurar eventos para las pestañas principales
         document.getElementById('dashboardTab').addEventListener('click', () => openMainTab('dashboard'));
         document.getElementById('cacheTab').addEventListener('click', () => openMainTab('cache'));
-        
+
         // Función para manejar las pestañas internas
         document.querySelectorAll('.tab-btn').forEach(button => {
             button.addEventListener('click', () => {
@@ -490,38 +542,38 @@
                     btn.classList.remove('active', 'text-blue-600', 'border-b-2', 'border-blue-600');
                     btn.classList.add('text-gray-500');
                 });
-                
+
                 // Agregar clase activa al botón clickeado
                 button.classList.add('active', 'text-blue-600', 'border-b-2', 'border-blue-600');
                 button.classList.remove('text-gray-500');
-                
+
                 // Ocultar todos los contenidos de pestañas
                 document.querySelectorAll('.tab-content').forEach(content => {
                     content.classList.add('hidden');
                     content.classList.remove('active');
                 });
-                
+
                 // Mostrar el contenido correspondiente
                 const tabIndex = Array.from(document.querySelectorAll('.tab-btn')).indexOf(button);
                 document.querySelectorAll('.tab-content')[tabIndex].classList.remove('hidden');
                 document.querySelectorAll('.tab-content')[tabIndex].classList.add('active');
             });
         });
-        
+
         // Configuración de gráficos con Chart.js y datalabels
         const cpuCtx = document.getElementById('cpuChart').getContext('2d');
         const cpuChart = new Chart(cpuCtx, {
             type: 'line',
             data: {
-                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                labels: [],
                 datasets: [{
                     label: 'Uso de CPU (%)',
-                    data: [25, 40, 65, 45, 80, 60, 42],
+                    data: [],
                     borderColor: '#ef4444',
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     tension: 0.3,
                     fill: true,
-                    pointRadius: 6,
+                    pointRadius: 4,
                     pointBackgroundColor: '#ef4444'
                 }]
             },
@@ -547,32 +599,25 @@
                         display: false
                     },
                     datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        formatter: (value) => value + '%',
-                        color: '#ef4444',
-                        font: {
-                            weight: 'bold',
-                            size: 11
-                        }
+                        display: false
                     }
                 }
             }
         });
-        
+
         const ramCtx = document.getElementById('ramChart').getContext('2d');
         const ramChart = new Chart(ramCtx, {
             type: 'line',
             data: {
-                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                labels: [],
                 datasets: [{
                     label: 'Uso de RAM (%)',
-                    data: [35, 45, 38, 42, 50, 48, 40],
+                    data: [],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.3,
                     fill: true,
-                    pointRadius: 6,
+                    pointRadius: 4,
                     pointBackgroundColor: '#3b82f6'
                 }]
             },
@@ -598,32 +643,25 @@
                         display: false
                     },
                     datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        formatter: (value) => value + '%',
-                        color: '#3b82f6',
-                        font: {
-                            weight: 'bold',
-                            size: 11
-                        }
+                        display: false
                     }
                 }
             }
         });
-        
+
         const swapCtx = document.getElementById('swapChart').getContext('2d');
         const swapChart = new Chart(swapCtx, {
             type: 'line',
             data: {
-                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                labels: [],
                 datasets: [{
                     label: 'Uso de SWAP (%)',
-                    data: [10, 12, 8, 15, 18, 14, 10],
+                    data: [],
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.3,
                     fill: true,
-                    pointRadius: 6,
+                    pointRadius: 4,
                     pointBackgroundColor: '#10b981'
                 }]
             },
@@ -649,41 +687,224 @@
                         display: false
                     },
                     datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        formatter: (value) => value + '%',
-                        color: '#10b981',
-                        font: {
-                            weight: 'bold',
-                            size: 11
-                        }
+                        display: false
                     }
                 }
             }
         });
-        
-        // Gráfico para la pestaña de caché
+
+        // Función para formatear tamaños (G o M)
+        function formatSizeCompact(bytes) {
+            if (bytes >= 1024 * 1024 * 1024) {
+                return (bytes / (1024 * 1024 * 1024)).toFixed(1) + 'G';
+            } else if (bytes >= 1024 * 1024) {
+                return (bytes / (1024 * 1024)).toFixed(1) + 'M';
+            } else if (bytes >= 1024) {
+                return (bytes / 1024).toFixed(1) + 'K';
+            }
+            return bytes + 'B';
+        }
+
+        // Función para extraer valor y unidad de un string de tamaño
+        function parseSize(sizeStr) {
+            if (!sizeStr) return { value: 0, unit: 'B' };
+            const parts = sizeStr.split(' ');
+            if (parts.length < 2) return { value: parseFloat(sizeStr) || 0, unit: 'B' };
+            return {
+                value: parseFloat(parts[0]),
+                unit: parts[1].charAt(0) // 'G', 'M', 'K'
+            };
+        }
+
+        // Función para actualizar anillos con información adicional
+        function updateRings(systemInfo) {
+            // Actualizar anillo de CPU
+            const cpuPercent = parseFloat(systemInfo.cpu.usage.replace('%', ''));
+            document.getElementById('cpu-ring').setAttribute('stroke-dasharray', `${cpuPercent},100`);
+            document.getElementById('cpu-value').textContent = `${cpuPercent}%`;
+
+            // Obtener valores de RAM
+            const ramUsedInfo = parseSize(systemInfo.ram.used);
+            const ramUsedCompact = ramUsedInfo.value + ramUsedInfo.unit;
+            const ramPercent = parseFloat(systemInfo.ram.percent.replace('%', ''));
+
+            // Actualizar anillo de RAM 
+            document.getElementById('ram-ring').setAttribute('stroke-dasharray', `${ramPercent},100`);
+
+            // Actualizar texto centrado con RAM usada
+            document.getElementById('ram-used').textContent = ramUsedCompact;
+
+            // Actualizar anillo de SWAP
+            const swapPercent = parseFloat(systemInfo.swap.percent.replace('%', '') || '0');
+            document.getElementById('swap-ring').setAttribute('stroke-dasharray', `${swapPercent},100`);
+
+            // Obtener valores de SWAP  
+            const swapUsedInfo = parseSize(systemInfo.swap.used);
+            const swapUsedCompact = swapUsedInfo.value + swapUsedInfo.unit;
+
+            // Actualizar texto centrado con SWAP usada
+            document.getElementById('swap-used').textContent = swapUsedCompact;
+        }
+
+        // Función para actualizar la información del sistema
+        function updateSystemInfo(systemInfo) {
+            // Actualizar hostname
+            document.getElementById('hostname').textContent = systemInfo.hostname;
+
+            // Actualizar IPs
+            const ipList = systemInfo.ips.map(ip => ip.ip).join('<br>');
+            document.getElementById('ip-addresses').innerHTML = ipList;
+
+            // Actualizar OS
+            document.getElementById('os-info').textContent = systemInfo.os;
+
+            // Actualizar uptime
+            document.getElementById('uptime').textContent = systemInfo.uptime;
+
+            // Actualizar hora local
+            document.getElementById('local-time').textContent = systemInfo.local_time;
+        }
+
+        // Función para actualizar las flip cards
+        function updateCacheStats(cacheStats) {
+            // Entradas almacenadas
+            updateCard('entradas_almacenadas', cacheStats.store_entries);
+
+            // Uso de capacidad
+            updateCard('uso_de_capacidad', cacheStats.capacity_used);
+
+            // Espacio total
+            updateCard('espacio_total', cacheStats.fs_space_total, true);
+
+            // Espacio usado
+            updateCard('espacio_usado', cacheStats.fs_space_used, true);
+
+            // Política de eliminación
+            updateCard('eliminación', cacheStats.removal_policy);
+
+            // Edad LRU
+            updateCard('edad_lru', `${cacheStats.lru_age_days} días`);
+        }
+
+        // Función para actualizar una tarjeta específica
+        function updateCard(statId, value, isSize = false) {
+            const elements = document.querySelectorAll(`[data-stat="${statId}"]`);
+
+            if (elements.length === 0) return;
+
+            elements.forEach(element => {
+                const currentValue = element.textContent;
+
+                // Solo actualizar si el valor cambió
+                if (currentValue !== value.toString()) {
+                    // Aplicar animación de cambio
+                    element.classList.add('value-change');
+
+                    // Actualizar el valor
+                    if (isSize) {
+                        // Convertir bytes a MB o GB
+                        const bytes = parseFloat(value);
+                        if (bytes / (1024 * 1024) < 1) {
+                            element.textContent = `${Math.round(bytes / 1024)} MB`;
+                        } else {
+                            element.textContent = `${(bytes / (1024 * 1024)).toFixed(2)} GB`;
+                        }
+                    } else {
+                        element.textContent = value;
+                    }
+
+                    // Quitar la clase de animación después de completarse
+                    setTimeout(() => {
+                        element.classList.remove('value-change');
+                    }, 1000);
+                }
+            });
+        }
+
+        // Función para agregar un punto a una gráfica
+        function addChartData(chart, label, data) {
+            // Mantener un máximo de 20 puntos
+            if (chart.data.labels.length >= 20) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
+
+            chart.data.labels.push(label);
+            chart.data.datasets[0].data.push(data);
+            chart.update();
+        }
+
+        // Conectar a WebSocket
+        const socket = io();
+
+        // Manejar actualizaciones del sistema
+        socket.on('system_update', function (data) {
+            // Actualizar anillos con información adicional
+            updateRings(data.system_info);
+
+            // Actualizar información del sistema
+            updateSystemInfo(data.system_info);
+
+            // Actualizar estadísticas de caché
+            updateCacheStats(data.cache_stats);
+
+            // Obtener hora actual para etiquetas de gráficas
+            const now = new Date();
+            const timeLabel = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            // Agregar datos a las gráficas
+            addChartData(
+                cpuChart,
+                timeLabel,
+                parseFloat(data.system_info.cpu.usage.replace('%', ''))
+            );
+
+            addChartData(
+                ramChart,
+                timeLabel,
+                parseFloat(data.system_info.ram.percent.replace('%', ''))
+            );
+
+            addChartData(
+                swapChart,
+                timeLabel,
+                parseFloat(data.system_info.swap.percent.replace('%', ''))
+            );
+        });
+
+        // Inicializar gráficas con datos actuales
+        const now = new Date();
+        const timeLabel = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+        // CPU
+        addChartData(cpuChart, timeLabel, parseFloat("{{ system_info.cpu.usage|replace('%','') }}"));
+
+        // RAM
+        addChartData(ramChart, timeLabel, parseFloat("{{ system_info.ram.percent|replace('%','') }}"));
+
+        // SWAP
+        addChartData(swapChart, timeLabel, parseFloat("{{ system_info.swap.percent|replace('%','') }}"));
+
+        // Gráfico para la pestaña de caché (diario)
         const cacheCtx = document.getElementById('cacheUsageChart').getContext('2d');
+
+        // Generar datos de ejemplo para los últimos 7 días
+        const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const cacheData = days.map(() => Math.floor(Math.random() * 20) + 10);
+
         const cacheChart = new Chart(cacheCtx, {
             type: 'bar',
             data: {
-                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                datasets: [
-                    {
-                        label: 'Espacio usado (GB)',
-                        data: [12.5, 13.2, 14.8, 15.6, 16.8, 17.3, 17.6],
-                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Espacio libre (GB)',
-                        data: [12, 11.3, 9.7, 8.9, 7.7, 7.2, 6.9],
-                        backgroundColor: 'rgba(209, 213, 219, 0.7)',
-                        borderColor: 'rgba(156, 163, 175, 1)',
-                        borderWidth: 1
-                    }
-                ]
+                labels: days,
+                datasets: [{
+                    label: 'Espacio usado (GB)',
+                    data: cacheData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    barPercentage: 0.6
+                }]
             },
             options: {
                 responsive: true,
@@ -708,14 +929,45 @@
                 plugins: {
                     legend: {
                         position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded'
+                        }
                     },
-                    title: {
-                        display: true,
-                        text: 'Uso de espacio de caché durante la última semana'
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `Uso: ${context.parsed.y} GB`;
+                            }
+                        }
                     }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
                 }
+            }
+        });
+
+        // Inicializar anillos con datos actuales
+        updateRings({
+            cpu: {
+                usage: "{{ system_info.cpu.usage }}",
+                physical_cores: "{{ system_info.cpu.physical_cores }}",
+                current_freq: "{{ system_info.cpu.current_freq }}"
+            },
+            ram: {
+                percent: "{{ system_info.ram.percent }}",
+                used: "{{ system_info.ram.used }}",
+                total: "{{ system_info.ram.total }}"
+            },
+            swap: {
+                percent: "{{ system_info.swap.percent }}",
+                used: "{{ system_info.swap.used }}",
+                total: "{{ system_info.swap.total }}"
             }
         });
     </script>
 </body>
+
 </html>

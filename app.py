@@ -31,6 +31,8 @@ import socket
 import sys
 import os
 import logging
+import time
+from threading import Lock  # Importamos Lock para sincronización de hilos
 
 # ------------------- CONFIGURACIÓN -------------------
 class Config:
@@ -59,6 +61,79 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# ======================================================================
+# CAMBIO PRINCIPAL: Variables globales para datos en tiempo real
+# ======================================================================
+# Bloqueo para acceso seguro a las variables compartidas entre hilos
+realtime_data_lock = Lock()
+# Almacenamiento de las últimas estadísticas de caché
+realtime_cache_stats = {}
+# Almacenamiento de la última información del sistema
+realtime_system_info = {}
+
+# ======================================================================
+# CAMBIO PRINCIPAL: Hilo para actualización periódica de datos
+# ======================================================================
+def realtime_data_thread():
+    """Hilo que actualiza los datos del sistema y caché periódicamente y los envía a los clientes via WebSocket"""
+    global realtime_cache_stats, realtime_system_info
+    
+    while True:
+        try:
+            # Obtener estadísticas de caché de Squid
+            cache_data = fetch_squid_cache_stats()
+            cache_stats = vars(cache_data) if hasattr(cache_data, '__dict__') else cache_data
+            
+            # Obtener información del sistema
+            system_info = {
+                'hostname': socket.gethostname(),
+                'ips': get_network_info(),
+                'os': get_os_info(),
+                'uptime': get_uptime(),
+                'ram': get_ram_info(),
+                'swap': get_swap_info(),
+                'cpu': get_cpu_info(),
+                'python_version': sys.version.split()[0],
+                'squid_version': get_squid_version(),
+                'timezone': get_timezone(),
+                'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            # Actualizar las variables globales con bloqueo
+            with realtime_data_lock:
+                realtime_cache_stats = cache_stats
+                realtime_system_info = system_info
+            
+            # Emitir los datos actualizados a todos los clientes
+            socketio.emit('system_update', {
+                'cache_stats': cache_stats,
+                'system_info': system_info
+            })
+            
+            logger.info("Datos en tiempo real actualizados y emitidos")
+            
+        except Exception as e:
+            logger.error(f"Error en hilo de datos en tiempo real: {str(e)}")
+        
+        # Esperar 5 segundos antes de la próxima actualización
+        time.sleep(5)
+
+# ======================================================================
+# CAMBIO PRINCIPAL: Manejador de conexión WebSocket
+# ======================================================================
+@socketio.on('connect')
+def handle_connect():
+    """Manejador para cuando un cliente se conecta a través de WebSocket"""
+    logger.info(f"Cliente conectado: {request.sid}")
+    
+    # Enviar los datos actuales al cliente que se acaba de conectar
+    with realtime_data_lock:
+        if realtime_cache_stats and realtime_system_info:
+            emit('system_update', {
+                'cache_stats': realtime_cache_stats,
+                'system_info': realtime_system_info
+            })
 
 # ------------------- NO CACHÉ PARA RESPUESTAS -------------------
 @app.after_request
@@ -110,22 +185,29 @@ def actualizar_conexiones():
 @app.route('/stats')
 def cache_stats():
     try:
-        data = fetch_squid_cache_stats()
-        stats_data = vars(data) if hasattr(data, '__dict__') else data
-
-        system_info = {
-            'hostname': socket.gethostname(),
-            'ips': get_network_info(),
-            'os': get_os_info(),
-            'uptime': get_uptime(),
-            'ram': get_ram_info(),
-            'swap': get_swap_info(),
-            'cpu': get_cpu_info(),
-            'python_version': sys.version.split()[0],
-            'squid_version': get_squid_version(),
-            'timezone': get_timezone(),
-            'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+        # CAMBIO: Usamos las variables globales para obtener los datos más recientes
+        with realtime_data_lock:
+            stats_data = realtime_cache_stats if realtime_cache_stats else {}
+            system_info = realtime_system_info if realtime_system_info else {}
+        
+        # Si no hay datos en tiempo real, intentamos obtenerlos de forma síncrona
+        if not stats_data:
+            data = fetch_squid_cache_stats()
+            stats_data = vars(data) if hasattr(data, '__dict__') else data
+        if not system_info:
+            system_info = {
+                'hostname': socket.gethostname(),
+                'ips': get_network_info(),
+                'os': get_os_info(),
+                'uptime': get_uptime(),
+                'ram': get_ram_info(),
+                'swap': get_swap_info(),
+                'cpu': get_cpu_info(),
+                'python_version': sys.version.split()[0],
+                'squid_version': get_squid_version(),
+                'timezone': get_timezone(),
+                'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
 
         logger.info("Successfully fetched cache statistics and system info")
         return render_template(
@@ -264,6 +346,7 @@ def blacklist_logs():
 # ------------------- REPORTES POR RANGO -------------------
 @app.route('/reports-range', methods=['POST'])
 def reports_by_range():
+    db = None
     try:
         start_date = request.json.get('start_date')
         end_date = request.json.get('end_date')
@@ -319,5 +402,8 @@ def divide_filter(numerator, denominator, precision=2):
 
 # ------------------- EJECUCIÓN DE LA APLICACIÓN -------------------
 if __name__ == "__main__":
+    # CAMBIO PRINCIPAL: Iniciar el hilo de actualización de datos en tiempo real
+    socketio.start_background_task(realtime_data_thread)
+    
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     socketio.run(app, debug=debug_mode, host='0.0.0.0', port=5000)
