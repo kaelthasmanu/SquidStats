@@ -34,22 +34,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Estilos base */
-        .circular-chart {
-            display: block;
-            margin: 0 auto;
-        }
-
-        .circle-bg {
-            fill: none;
-            stroke: #eee;
-            stroke-width: 3.5;
-        }
 
         .circle {
-            fill: none;
             stroke-linecap: round;
             animation: progress 1s ease-out forwards;
         }
@@ -145,31 +133,7 @@
         }
 
         /* Estilos para textos dentro de los anillos */
-        .ring-info {
-            font-size: 0.7rem;
-            fill: #6b7280;
-            text-anchor: middle;
-            dominant-baseline: middle;
-        }
-
-        .ring-label {
-            font-size: 0.65rem;
-            fill: #6b7280;
-            text-anchor: middle;
-            dominant-baseline: hanging;
-        }
-
-        .ring-value {
-            font-size: 0.9rem;
-            font-weight: bold;
-            fill: #1f2937;
-            text-anchor: middle;
-            dominant-baseline: middle;
-        }
-
         .ring-percent {
-            font-size: 0.5rem;
-            fill: #9ca3af;
             text-anchor: middle;
             dominant-baseline: central;
             alignment-baseline: central;
@@ -180,38 +144,6 @@
             transition: all 0.5s ease;
         }
         
-        /* Estilos para los tspans */
-        tspan {
-            font-size: 0.7rem;
-            fill: #1f2937;
-        }
-
-        .cores {
-        background-color: #ef4444;
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        }
-
-        .ram {
-        background-color: #3b82f6;
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        }
-
-        .swap {
-        background-color: #10b981;
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        }
     </style>
     </head>
     
@@ -245,60 +177,60 @@
                             <!-- Anillo de Uso de CPU con información de núcleos -->
                             <div class="flex flex-col items-center justify-center">
                                 <div class="relative w-36 h-36">
-                                    <svg viewBox="0 0 36 36" class="circular-chart">
-                                        <path class="circle-bg" d="M18 2.0845
+                                    <svg viewBox="0 0 36 36" class="circular-chart block mx-auto">
+                                        <path class="circle-bg fill-none stroke-[#ffe5e5] stroke-[3.5]" d="M18 2.0845
                 a 15.9155 15.9155 0 0 1 0 31.831
                 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path id="cpu-ring" class="circle" d="M18 2.0845
+                                        <path id="cpu-ring" class="circle fill-none" d="M18 2.0845
                 a 15.9155 15.9155 0 0 1 0 31.831
                 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ef4444" stroke-width="3.5"
                                             stroke-dasharray="0,100" />
                                         <!-- Texto centrado verticalmente -->
-                                        <text id="cpu-value" x="18" y="18" class="ring-percent">0%</text>
+                                        <text id="cpu-value" x="18" y="18" class="ring-percent text-[0.5rem] fill-gray-500">0%</text>
                                     </svg>
                                 </div>
                                 <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
                                 <!-- Nueva etiqueta con información de núcleos del CPU - Color del anillo -->
-                                <p class="cores text-sm mt-1">{{ system_info.cpu.physical_cores }} núcleos</p>
+                                <p class="cores text-sm mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">{{ system_info.cpu.physical_cores }} núcleos</p>
                             </div>
 
                             <!-- Anillo de Uso de RAM con información de RAM total -->
                             <div class="flex flex-col items-center justify-center">
                                 <div class="relative w-36 h-36">
-                                    <svg viewBox="0 0 36 36" class="circular-chart">
-                                        <path class="circle-bg" d="M18 2.0845
+                                    <svg viewBox="0 0 36 36" class="circular-chart block mx-auto">
+                                        <path class="circle-bg fill-none stroke-[#dfedff] stroke-[3.5]" d="M18 2.0845
                 a 15.9155 15.9155 0 0 1 0 31.831
                 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path id="ram-ring" class="circle" d="M18 2.0845
+                                        <path id="ram-ring" class="circle fill-none" d="M18 2.0845
                 a 15.9155 15.9155 0 0 1 0 31.831
                 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3b82f6" stroke-width="3.5"
                                             stroke-dasharray="0,100" />
                                         <!-- Texto centrado verticalmente -->
-                                        <text id="ram-used" x="18" y="18" class="ring-percent" text-anchor="middle" dominant-baseline="middle">0G</text>
+                                        <text id="ram-used" x="18" y="18" class="ring-percent text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
                                     </svg>
                                 </div>
                                 <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
                                 <!-- Nueva etiqueta con información de RAM total - Color del anillo -->
-                                <p class="ram text-sm mt-1">{{ system_info.ram.total }}</p>
+                                <p class="ram text-sm mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">{{ system_info.ram.total }}</p>
                             </div>
 
                             <!-- Anillo de Uso de Swap con información de swap total -->
                             <div class="flex flex-col items-center justify-center">
                                 <div class="relative w-36 h-36">
-                                    <svg viewBox="0 0 36 36" class="circular-chart">
-                                        <path class="circle-bg" d="M18 2.0845
+                                    <svg viewBox="0 0 36 36" class="circular-chart block mx-auto">
+                                        <path class="circle-bg fill-none stroke-[#d3f9e8] stroke-[3.5]" d="M18 2.0845
                                             a 15.9155 15.9155 0 0 1 0 31.831
                                             a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path id="swap-ring" class="circle" d="M18 2.0845
+                                        <path id="swap-ring" class="circle fill-none" d="M18 2.0845
                                             a 15.9155 15.9155 0 0 1 0 31.831
                                             a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981"
                                             stroke-width="3.5" stroke-dasharray="0,100" />
-                                        <text id="swap-used" x="18" y="18" class="ring-percent" text-anchor="middle" dominant-baseline="middle">0G</text>
+                                        <text id="swap-used" x="18" y="18" class="ring-percent text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
                                     </svg>
                                 </div>
                                 <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
                                 <!-- Nueva etiqueta con información de swap total - Color del anillo -->
-                                <p class="swap text-sm mt-1">{{ system_info.swap.total }}</p>
+                                <p class="swap text-sm mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">{{ system_info.swap.total }}</p>
                             </div>
                         </div>
                     </div>
@@ -373,8 +305,7 @@
             <!-- Sección de gráficas con pestañas -->
             <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
                 <div class="flex border-b mb-6">
-                    <button class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600">Uso de
-                        CPU</button>
+                    <button class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600">Uso de CPU</button>
                     <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">Uso de RAM</button>
                     <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">Uso de SWAP</button>
                 </div>
