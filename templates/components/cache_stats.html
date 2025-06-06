@@ -30,13 +30,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Sistema</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
     <style>
         /* Estilos base */
-
         .circle {
             stroke-linecap: round;
             animation: progress 1s ease-out forwards;
@@ -455,6 +453,101 @@
         let maxRamBytes = 0;
         let maxSwapBytes = 0;
 
+        // Buffers para acumular datos cada 5 segundos
+        let cpuBuffer = [];
+        let ramBuffer = [];
+        let swapBuffer = [];
+
+        // Variables para almacenar datos por minuto
+        const historySize = 20; // 20 minutos de historial
+
+        // ==============================================
+        // CAMBIO 1: Inicializar datos con valores actuales
+        // ==============================================
+        let cpuMinuteData = [];
+        let ramMinuteData = [];
+        let swapMinuteData = [];
+        let minuteLabels = [];
+
+        // Función para cargar datos persistentes
+        function loadPersistentData() {
+            // Intentar cargar datos desde sessionStorage
+            const savedCpu = sessionStorage.getItem('cpuMinuteData');
+            const savedRam = sessionStorage.getItem('ramMinuteData');
+            const savedSwap = sessionStorage.getItem('swapMinuteData');
+            const savedLabels = sessionStorage.getItem('minuteLabels');
+
+            // Si hay datos guardados, usarlos
+            if (savedCpu && savedRam && savedSwap && savedLabels) {
+                cpuMinuteData = JSON.parse(savedCpu);
+                ramMinuteData = JSON.parse(savedRam);
+                swapMinuteData = JSON.parse(savedSwap);
+                minuteLabels = JSON.parse(savedLabels);
+
+                // Convertir todas las etiquetas al nuevo formato
+                minuteLabels = minuteLabels.map(label => {
+                    // Si ya está en formato 12h, mantenerlo
+                    if (label.includes('AM') || label.includes('PM')) return label;
+
+                    // Convertir formato 24h existente
+                    const [hora, minuto] = label.split(':');
+                    const horaNum = parseInt(hora, 10);
+                    const ampm = horaNum >= 12 ? 'PM' : 'AM';
+                    const hora12 = horaNum % 12 || 12;
+                    return `${hora12}:${minuto} ${ampm}`;
+                });
+            } else {
+                initializeWithCurrentValues();
+            }
+        }
+
+        // Función para inicializar con valores actuales
+        function initializeWithCurrentValues() {
+            // Obtener valores actuales del sistema
+            const initialCpu = parseFloat("{{ system_info.cpu.usage|replace('%','') }}");
+            const initialRam = sizeToBytes("{{ system_info.ram.used }}");
+            const initialSwap = sizeToBytes("{{ system_info.swap.used }}");
+
+            // Crear arrays con valores actuales
+            cpuMinuteData = Array(historySize).fill(initialCpu);
+            ramMinuteData = Array(historySize).fill(initialRam);
+            swapMinuteData = Array(historySize).fill(initialSwap);
+
+            // Inicializar etiquetas de tiempo
+            initializeMinuteLabels();
+        }
+
+        // Función para inicializar etiquetas de tiempo
+        function initializeMinuteLabels() {
+            const now = new Date();
+            minuteLabels = [];
+
+            for (let i = historySize - 1; i >= 0; i--) {
+                const time = new Date(now.getTime() - i * 60000);
+                minuteLabels.push(formatTime(time));
+            }
+        }
+
+        // Cargar datos persistentes al iniciar
+        loadPersistentData();
+
+        // Función para guardar datos persistentes
+        function savePersistentData() {
+            sessionStorage.setItem('cpuMinuteData', JSON.stringify(cpuMinuteData));
+            sessionStorage.setItem('ramMinuteData', JSON.stringify(ramMinuteData));
+            sessionStorage.setItem('swapMinuteData', JSON.stringify(swapMinuteData));
+            sessionStorage.setItem('minuteLabels', JSON.stringify(minuteLabels));
+        }
+
+        // Función para formatear hora HH:MM
+        function formatTime(date) {
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;  // Convertir 0 a 12
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
         // Función para manejar las pestañas principales
         function openMainTab(tabName) {
             // Ocultar todos los contenidos de pestañas
@@ -527,10 +620,10 @@
         const cpuChart = new Chart(cpuCtx, {
             type: 'line',
             data: {
-                labels: [],
+                labels: minuteLabels,
                 datasets: [{
                     label: 'Uso de CPU (%)',
-                    data: [],
+                    data: cpuMinuteData,
                     borderColor: '#ef4444',
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     tension: 0.3,
@@ -580,10 +673,10 @@
         const ramChart = new Chart(ramCtx, {
             type: 'line',
             data: {
-                labels: [],
+                labels: minuteLabels,
                 datasets: [{
                     label: 'RAM Usada',
-                    data: [],
+                    data: ramMinuteData,
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.3,
@@ -641,10 +734,10 @@
         const swapChart = new Chart(swapCtx, {
             type: 'line',
             data: {
-                labels: [],
+                labels: minuteLabels,
                 datasets: [{
                     label: 'Swap Usada',
-                    data: [],
+                    data: swapMinuteData,
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.3,
@@ -705,9 +798,9 @@
         // Actualizar gráficas con valores iniciales
         ramChart.options.scales.y.max = maxRamBytes;
         swapChart.options.scales.y.max = maxSwapBytes;
+        cpuChart.update();
         ramChart.update();
         swapChart.update();
-
 
         // Función para extraer valor y unidad de un string de tamaño
         function parseSize(sizeStr) {
@@ -780,7 +873,7 @@
             document.getElementById('uptime').textContent = systemInfo.uptime;
 
             // Actualizar hora local
-            document.getElementById('local-time').textContent = formatServerTime(systemInfo.local_time);
+            document.getElementById('local-time').textContent = formatTime(new Date());
         }
 
         // Función para actualizar las flip cards
@@ -839,17 +932,42 @@
             });
         }
 
-        // Función para agregar un punto a una gráfica
-        function addChartData(chart, label, data) {
-            // Mantener un máximo de 20 puntos
-            if (chart.data.labels.length >= 20) {
-                chart.data.labels.shift();
-                chart.data.datasets[0].data.shift();
-            }
+        // ==============================================
+        // CAMBIO 2: Función para agregar datos minuto a minuto
+        // con persistencia entre recargas
+        // ==============================================
+        function addMinuteData(cpu, ram, swap) {
+            // Desplazar todos los datos hacia la izquierda
+            cpuMinuteData.shift();
+            ramMinuteData.shift();
+            swapMinuteData.shift();
 
-            chart.data.labels.push(label);
-            chart.data.datasets[0].data.push(data);
-            chart.update();
+            // Agregar nuevos datos al final
+            cpuMinuteData.push(cpu);
+            ramMinuteData.push(ram);
+            swapMinuteData.push(swap);
+
+            // Actualizar etiquetas: desplazar y agregar nueva hora
+            minuteLabels.shift();
+            const now = new Date();
+            minuteLabels.push(formatTime(new Date()));
+
+            // Actualizar gráficas
+            cpuChart.data.labels = [...minuteLabels];
+            cpuChart.data.datasets[0].data = [...cpuMinuteData];
+
+            ramChart.data.labels = [...minuteLabels];
+            ramChart.data.datasets[0].data = [...ramMinuteData];
+
+            swapChart.data.labels = [...minuteLabels];
+            swapChart.data.datasets[0].data = [...swapMinuteData];
+
+            cpuChart.update();
+            ramChart.update();
+            swapChart.update();
+
+            // Guardar datos persistentes
+            savePersistentData();
         }
 
         // Conectar a WebSocket
@@ -866,107 +984,36 @@
             // Actualizar estadísticas de caché
             updateCacheStats(data.cache_stats);
 
-            // Obtener hora actual para etiquetas de gráficas
-            const now = new Date();
-            const timeLabel = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            // Obtener datos actuales
+            const cpuValue = parseFloat(data.system_info.cpu.usage.replace('%', ''));
+            const ramValue = sizeToBytes(data.system_info.ram.used);
+            const swapValue = sizeToBytes(data.system_info.swap.used);
 
-            // Agregar datos a las gráficas
-            addChartData(
-                cpuChart,
-                timeLabel,
-                parseFloat(data.system_info.cpu.usage.replace('%', ''))
-            );
+            // Agregar datos a los buffers
+            cpuBuffer.push(cpuValue);
+            ramBuffer.push(ramValue);
+            swapBuffer.push(swapValue);
 
-            // Cambio: Para RAM y SWAP usamos bytes en lugar de porcentaje
-            addChartData(
-                ramChart,
-                timeLabel,
-                sizeToBytes(data.system_info.ram.used)
-            );
+            // Cada 12 datos (60 segundos / 5 segundos) = 1 minuto
+            if (cpuBuffer.length >= 12) {
+                // Calcular promedio para CPU
+                const cpuAvg = cpuBuffer.reduce((a, b) => a + b, 0) / cpuBuffer.length;
 
-            addChartData(
-                swapChart,
-                timeLabel,
-                sizeToBytes(data.system_info.swap.used)
-            );
-        });
+                // Tomar el último valor para RAM y SWAP
+                const ramLast = ramBuffer[ramBuffer.length - 1];
+                const swapLast = swapBuffer[swapBuffer.length - 1];
 
-        // Inicializar gráficas con datos actuales
-        const now = new Date();
-        const timeLabel = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+                // Agregar datos a las gráficas minuto a minuto
+                addMinuteData(cpuAvg, ramLast, swapLast);
 
-        // CPU (se mantiene porcentaje)
-        addChartData(cpuChart, timeLabel, parseFloat("{{ system_info.cpu.usage|replace('%','') }}"));
-
-        // Cambio: RAM y SWAP usan bytes en lugar de porcentaje
-        addChartData(ramChart, timeLabel, sizeToBytes("{{ system_info.ram.used }}"));
-        addChartData(swapChart, timeLabel, sizeToBytes("{{ system_info.swap.used }}"));
-
-        // Gráfico para la pestaña de caché (diario)
-        const cacheCtx = document.getElementById('cacheUsageChart').getContext('2d');
-
-        // Generar datos de ejemplo para los últimos 7 días
-        const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-        const cacheData = days.map(() => Math.floor(Math.random() * 20) + 10);
-
-        const cacheChart = new Chart(cacheCtx, {
-            type: 'bar',
-            data: {
-                labels: days,
-                datasets: [{
-                    label: 'Espacio usado (GB)',
-                    data: cacheData,
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 1,
-                    borderRadius: 5,
-                    barPercentage: 0.6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Gigabytes (GB)'
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            pointStyle: 'rectRounded'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `Uso: ${context.parsed.y} GB`;
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    duration: 1000,
-                    easing: 'easeOutQuart'
-                }
+                // Reiniciar buffers
+                cpuBuffer = [];
+                ramBuffer = [];
+                swapBuffer = [];
             }
         });
 
-        // Inicializar anillos con datos actuales
+        // Actualizar anillos con datos actuales
         updateRings({
             cpu: {
                 usage: "{{ system_info.cpu.usage }}",
@@ -985,17 +1032,6 @@
             }
         });
 
-        function formatServerTime(serverDateTime) {
-            if (!serverDateTime) return '';
-            const [datePart, timePart] = serverDateTime.split(' ');
-            const [hours, minutes, seconds] = timePart.split(':');
-
-            // Formato más eficiente sin crear objetos Date
-            const hrs = ((+hours % 12) || 12).toString();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-
-            return `${hrs}:${minutes}:${seconds} ${ampm}`;
-        }
     </script>
 </body>
 
