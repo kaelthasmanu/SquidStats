@@ -143,22 +143,22 @@
         .day-bar {
             transition: all 0.5s ease;
         }
-        
     </style>
-    </head>
-    
-    <body class="bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 py-8">
-            <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Dashboard de Estadísticas del Sistema</h1>
-    
-            <!-- Pestañas principales -->
-            <div class="flex border-b mb-6">
-                <button id="dashboardTab" class="main-tab-btn active py-3 px-6 font-medium text-blue-600">
-                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard del Sistema
-                </button>
-                <button id="cacheTab" class="main-tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
-                    <i class="fas fa-database mr-2"></i>Estadísticas de Caché
-                </button></div>
+</head>
+
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Dashboard de Estadísticas del Sistema</h1>
+
+        <!-- Pestañas principales -->
+        <div class="flex border-b mb-6">
+            <button id="dashboardTab" class="main-tab-btn active py-3 px-6 font-medium text-blue-600">
+                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard del Sistema
+            </button>
+            <button id="cacheTab" class="main-tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
+                <i class="fas fa-database mr-2"></i>Estadísticas de Caché
+            </button>
+        </div>
 
         <!-- Contenido del Dashboard del Sistema (activo por defecto) -->
         <div id="dashboardContent" class="main-tab-content active">
@@ -186,12 +186,15 @@
                 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ef4444" stroke-width="3.5"
                                             stroke-dasharray="0,100" />
                                         <!-- Texto centrado verticalmente -->
-                                        <text id="cpu-value" x="18" y="18" class="ring-percent text-[0.5rem] fill-gray-500">0%</text>
+                                        <text id="cpu-value" x="18" y="18"
+                                            class="ring-percent text-[0.5rem] fill-gray-500">0%</text>
                                     </svg>
                                 </div>
                                 <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
                                 <!-- Nueva etiqueta con información de núcleos del CPU - Color del anillo -->
-                                <p class="cores text-sm mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">{{ system_info.cpu.physical_cores }} núcleos</p>
+                                <p
+                                    class="cores text-sm mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                    {{ system_info.cpu.physical_cores }} núcleos</p>
                             </div>
 
                             <!-- Anillo de Uso de RAM con información de RAM total -->
@@ -206,12 +209,16 @@
                 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3b82f6" stroke-width="3.5"
                                             stroke-dasharray="0,100" />
                                         <!-- Texto centrado verticalmente -->
-                                        <text id="ram-used" x="18" y="18" class="ring-percent text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
+                                        <text id="ram-used" x="18" y="18"
+                                            class="ring-percent text-[0.5rem] fill-gray-500" text-anchor="middle"
+                                            dominant-baseline="middle">0G</text>
                                     </svg>
                                 </div>
                                 <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
                                 <!-- Nueva etiqueta con información de RAM total - Color del anillo -->
-                                <p class="ram text-sm mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">{{ system_info.ram.total }}</p>
+                                <p
+                                    class="ram text-sm mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                    {{ system_info.ram.total }}</p>
                             </div>
 
                             <!-- Anillo de Uso de Swap con información de swap total -->
@@ -225,12 +232,16 @@
                                             a 15.9155 15.9155 0 0 1 0 31.831
                                             a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981"
                                             stroke-width="3.5" stroke-dasharray="0,100" />
-                                        <text id="swap-used" x="18" y="18" class="ring-percent text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
+                                        <text id="swap-used" x="18" y="18"
+                                            class="ring-percent text-[0.5rem] fill-gray-500" text-anchor="middle"
+                                            dominant-baseline="middle">0G</text>
                                     </svg>
                                 </div>
                                 <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
                                 <!-- Nueva etiqueta con información de swap total - Color del anillo -->
-                                <p class="swap text-sm mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">{{ system_info.swap.total }}</p>
+                                <p
+                                    class="swap text-sm mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                    {{ system_info.swap.total }}</p>
                             </div>
                         </div>
                     </div>
@@ -305,9 +316,10 @@
             <!-- Sección de gráficas con pestañas -->
             <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
                 <div class="flex border-b mb-6">
-                    <button class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600">Uso de CPU</button>
-                    <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">Uso de RAM</button>
-                    <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">Uso de SWAP</button>
+                    <button
+                        class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600">CPU</button>
+                    <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">RAM</button>
+                    <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600">SWAP</button>
                 </div>
 
                 <div class="tab-content active">
@@ -439,6 +451,10 @@
             cache: []
         };
 
+        // Variables para almacenar los valores máximos de RAM y Swap
+        let maxRamBytes = 0;
+        let maxSwapBytes = 0;
+
         // Función para manejar las pestañas principales
         function openMainTab(tabName) {
             // Ocultar todos los contenidos de pestañas
@@ -491,6 +507,21 @@
             });
         });
 
+        // Función para formatear tamaños 
+        function formatSizeCompact(bytes) {
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let unitIndex = 0;
+
+            while (bytes >= 1024 && unitIndex < units.length - 1) {
+                bytes /= 1024;
+                unitIndex++;
+            }
+
+            return unitIndex === 0
+                ? `${bytes} ${units[unitIndex]}`
+                : `${bytes.toFixed(1)} ${units[unitIndex]}`;
+        }
+
         // Configuración de gráficos con Chart.js y datalabels
         const cpuCtx = document.getElementById('cpuChart').getContext('2d');
         const cpuChart = new Chart(cpuCtx, {
@@ -515,8 +546,17 @@
                     y: {
                         beginAtZero: true,
                         max: 100,
+                        title: {
+                            display: true,
+                            text: 'Porcentaje (%)'
+                        },
                         grid: {
                             color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                return value;
+                            }
                         }
                     },
                     x: {
@@ -527,7 +567,7 @@
                 },
                 plugins: {
                     legend: {
-                        display: false
+                        display: true
                     },
                     datalabels: {
                         display: false
@@ -542,7 +582,7 @@
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Uso de RAM (%)',
+                    label: 'RAM Usada',
                     data: [],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -558,9 +598,18 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100,
+                        max: maxRamBytes,
+                        title: {
+                            display: true,
+                            text: 'Bytes'
+                        },
                         grid: {
                             color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                return formatSizeCompact(value);
+                            }
                         }
                     },
                     x: {
@@ -571,10 +620,18 @@
                 },
                 plugins: {
                     legend: {
-                        display: false
+                        display: true
                     },
                     datalabels: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return 'RAM Usada: ' + formatSizeCompact(context.raw)
+
+                            }
+                        }
                     }
                 }
             }
@@ -586,7 +643,7 @@
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Uso de SWAP (%)',
+                    label: 'Swap Usada',
                     data: [],
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -602,9 +659,18 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100,
+                        max: maxSwapBytes,
+                        title: {
+                            display: true,
+                            text: 'Bytes'
+                        },
                         grid: {
                             color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                return formatSizeCompact(value);
+                            }
                         }
                     },
                     x: {
@@ -615,26 +681,33 @@
                 },
                 plugins: {
                     legend: {
-                        display: false
+                        display: true
                     },
                     datalabels: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return 'SWAP Usada: ' + formatSizeCompact(context.raw)
+
+                            }
+                        }
                     }
                 }
             }
         });
 
-        // Función para formatear tamaños (G o M)
-        function formatSizeCompact(bytes) {
-            if (bytes >= 1024 * 1024 * 1024) {
-                return (bytes / (1024 * 1024 * 1024)).toFixed(1) + 'G';
-            } else if (bytes >= 1024 * 1024) {
-                return (bytes / (1024 * 1024)).toFixed(1) + 'M';
-            } else if (bytes >= 1024) {
-                return (bytes / 1024).toFixed(1) + 'K';
-            }
-            return bytes + 'B';
-        }
+        // Inicializar valores máximos con datos del backend
+        maxRamBytes = sizeToBytes("{{ system_info.ram.total }}");
+        maxSwapBytes = sizeToBytes("{{ system_info.swap.total }}");
+
+        // Actualizar gráficas con valores iniciales
+        ramChart.options.scales.y.max = maxRamBytes;
+        swapChart.options.scales.y.max = maxSwapBytes;
+        ramChart.update();
+        swapChart.update();
+
 
         // Función para extraer valor y unidad de un string de tamaño
         function parseSize(sizeStr) {
@@ -645,6 +718,20 @@
                 value: parseFloat(parts[0]),
                 unit: parts[1].charAt(0) // 'G', 'M', 'K'
             };
+        }
+
+        // Función para convertir tamaño a bytes
+        function sizeToBytes(sizeStr) {
+            const { value, unit } = parseSize(sizeStr);
+            let multiplier = 1;
+            if (unit === 'G') {
+                multiplier = 1024 * 1024 * 1024;
+            } else if (unit === 'M') {
+                multiplier = 1024 * 1024;
+            } else if (unit === 'K') {
+                multiplier = 1024;
+            }
+            return value * multiplier;
         }
 
         // Función para actualizar anillos con información adicional
@@ -790,16 +877,17 @@
                 parseFloat(data.system_info.cpu.usage.replace('%', ''))
             );
 
+            // Cambio: Para RAM y SWAP usamos bytes en lugar de porcentaje
             addChartData(
                 ramChart,
                 timeLabel,
-                parseFloat(data.system_info.ram.percent.replace('%', ''))
+                sizeToBytes(data.system_info.ram.used)
             );
 
             addChartData(
                 swapChart,
                 timeLabel,
-                parseFloat(data.system_info.swap.percent.replace('%', ''))
+                sizeToBytes(data.system_info.swap.used)
             );
         });
 
@@ -807,14 +895,12 @@
         const now = new Date();
         const timeLabel = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-        // CPU
+        // CPU (se mantiene porcentaje)
         addChartData(cpuChart, timeLabel, parseFloat("{{ system_info.cpu.usage|replace('%','') }}"));
 
-        // RAM
-        addChartData(ramChart, timeLabel, parseFloat("{{ system_info.ram.percent|replace('%','') }}"));
-
-        // SWAP
-        addChartData(swapChart, timeLabel, parseFloat("{{ system_info.swap.percent|replace('%','') }}"));
+        // Cambio: RAM y SWAP usan bytes en lugar de porcentaje
+        addChartData(ramChart, timeLabel, sizeToBytes("{{ system_info.ram.used }}"));
+        addChartData(swapChart, timeLabel, sizeToBytes("{{ system_info.swap.used }}"));
 
         // Gráfico para la pestaña de caché (diario)
         const cacheCtx = document.getElementById('cacheUsageChart').getContext('2d');
@@ -899,23 +985,18 @@
             }
         });
 
-                function formatServerTime(serverDateTime) {
-                    if (!serverDateTime) return '';
-                    const isoString = serverDateTime.replace(' ', 'T');
-                    const dateObj = new Date(isoString);
+        function formatServerTime(serverDateTime) {
+            if (!serverDateTime) return '';
+            const [datePart, timePart] = serverDateTime.split(' ');
+            const [hours, minutes, seconds] = timePart.split(':');
 
-                    if (isNaN(dateObj.getTime())) return serverDateTime;
+            // Formato más eficiente sin crear objetos Date
+            const hrs = ((+hours % 12) || 12).toString();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
 
-                    // Formato de 12 horas con AM/PM y segundos
-                    let hours = dateObj.getHours();
-                    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-                    const seconds = dateObj.getSeconds().toString().padStart(2, '0');
-                    const ampm = hours >= 12 ? 'PM' : 'AM';
-                    hours = hours % 12 || 12; // Convertir 0 a 12 para 12 AM
+            return `${hrs}:${minutes}:${seconds} ${ampm}`;
+        }
+    </script>
+</body>
 
-                    return `${hours}:${minutes}:${seconds} ${ampm}`;
-                }
-            </script>
-            </body>
-            
-            </html>
+</html>
