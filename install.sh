@@ -116,32 +116,32 @@ function updateOrCloneRepo() {
 
             if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
                 [ "$env_exists" = true ] && mv /tmp/.env.backup .env
-                echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
+                echo "? Repositorio actualizado exitosamente en la rama '$branch'"
                 return 0
             else
-                echo "❌ Error al actualizar el repositorio, se procederá a clonar de nuevo"
+                echo "? Error al actualizar el repositorio, se procederá a clonar de nuevo"
                 cd ..
                 rm -rf "$destino"
             fi
         else
-            echo "⚠️ El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
+            echo "?? El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
             rm -rf "$destino"
         fi
     fi
 
-    echo "📥 Clonando repositorio por primera vez desde la rama '$branch'..."
+    echo "?? Clonando repositorio por primera vez desde la rama '$branch'..."
     if git clone --branch "$branch" "$repo_url" "$destino"; then
         chown -R $USER:$USER "$destino"
-        echo "✅ Repositorio clonado exitosamente en $destino"
+        echo "? Repositorio clonado exitosamente en $destino"
 
         if [ "$env_exists" = true ] && [ -f /tmp/.env.backup ]; then
             mv /tmp/.env.backup "$destino/.env"
-            echo "🔁 Archivo .env restaurado"
+            echo "?? Archivo .env restaurado"
         fi
 
         return 0
     else
-        echo "❌ Error al clonar el repositorio"
+        echo "? Error al clonar el repositorio"
         return 1
     fi
 }
@@ -196,7 +196,6 @@ EOF
     fi
 }
 
-
 function createService() {
     local service_file="/etc/systemd/system/squidstats.service"
 
@@ -208,17 +207,18 @@ function createService() {
     echo "Creando servicio en $service_file..."
     cat > "$service_file" << EOF
 [Unit]
-Description=SquidStats
+Description=SquidStats Web Application
 After=network.target
 
 [Service]
 Type=simple
 User=root
 WorkingDirectory=/opt/squidstats
-ExecStart=/opt/squidstats/venv/bin/python /opt/squidstats/app.py
+ExecStart=/opt/squidstats/venv/bin/python3 /opt/squidstats/app.py
 Restart=always
 RestartSec=5
 EnvironmentFile=/opt/squidstats/.env
+Environment=PATH=/opt/squidstats/venv/bin:$PATH
 
 [Install]
 WantedBy=multi-user.target
@@ -257,11 +257,16 @@ function configureDatabase() {
                     continue
                 fi
 
-                validation_result=$(python3 /opt/SquidStats/utils/validateString.py "$conn_str" 2>&1)
+                validation_result=$(python3 /opt/squidstats/utils/validateString.py "$conn_str" 2>&1)
+                exit_code=$?
 
-                if [[ $? -eq 0 ]]; then
+                if [[ $exit_code -eq 0 ]]; then
                     sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=MARIADB|" "$env_file"
-                    sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$conn_str|" "$env_file"
+
+                    # validation_result tiene la cadena codificada, escapamos para sed
+                    escaped_conn_str=$(printf '%s\n' "$validation_result" | sed -e 's/[\/&]/\\&/g')
+                    sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$escaped_conn_str|" "$env_file"
+
                     ok "Configuración MariaDB actualizada!"
                     break
                 else
@@ -277,7 +282,6 @@ function configureDatabase() {
             ;;
     esac
 }
-
 
 function patchSquidConf() {
     local squid_conf=""
@@ -317,9 +321,7 @@ EOF
         echo 'access_log /var/log/squid/access.log detailed !manager' >> "$squid_conf"
         ok "access_log agregado con detailed !manager"
     fi
-
 }
-
 
 function main() {
     checkSudo
