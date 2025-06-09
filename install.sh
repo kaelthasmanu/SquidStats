@@ -147,7 +147,7 @@ function updateOrCloneRepo() {
 }
 
 function moveDB() {
-    local databaseSQlite="/opt/squidstats/logs.db"
+    local databaseSQlite="/opt/squidstats/squidstats.db"
     local env_file="/opt/squidstats/.env"
     local current_version=0
 
@@ -187,7 +187,7 @@ SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
 FLASK_DEBUG=True
 DATABASE_TYPE=SQLITE
-SQUID_LOG=/var/log/squid/squidstats.log
+SQUID_LOG=/var/log/squid/access.log
 DATABASE_STRING_CONNECTION=/opt/squidstats/squidstats.db
 REFRESH_INTERVAL=60
 EOF
