@@ -98,8 +98,9 @@ function checkSquidLog() {
 }
 
 function updateOrCloneRepo() {
-    local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
+    local repo_url="https://github.com/alexminator/SquidStats.git"
     local destino="/opt/squidstats"
+    local branch="inicio"
     local env_exists=false
 
     if [ -d "$destino" ]; then
@@ -110,29 +111,37 @@ function updateOrCloneRepo() {
             if [ -f ".env" ]; then
                 env_exists=true
                 echo ".env existente detectado, se preservará"
+                cp .env /tmp/.env.backup
             fi
 
-            if git pull; then
-                ok "Repositorio actualizado exitosamente"
+            if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
+                [ "$env_exists" = true ] && mv /tmp/.env.backup .env
+                echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
                 return 0
             else
-                error "Error al actualizar el repositorio, se procederá a clonar de nuevo"
+                echo "❌ Error al actualizar el repositorio, se procederá a clonar de nuevo"
                 cd ..
                 rm -rf "$destino"
             fi
         else
-            error "El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
+            echo "⚠️ El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
             rm -rf "$destino"
         fi
     fi
 
-    echo "Clonando repositorio por primera vez..."
-    if git clone "$repo_url" "$destino"; then
+    echo "📥 Clonando repositorio por primera vez desde la rama '$branch'..."
+    if git clone --branch "$branch" "$repo_url" "$destino"; then
         chown -R $USER:$USER "$destino"
-        ok "Repositorio clonado exitosamente en $destino"
+        echo "✅ Repositorio clonado exitosamente en $destino"
+
+        if [ "$env_exists" = true ] && [ -f /tmp/.env.backup ]; then
+            mv /tmp/.env.backup "$destino/.env"
+            echo "🔁 Archivo .env restaurado"
+        fi
+
         return 0
     else
-        error "Error al clonar el repositorio"
+        echo "❌ Error al clonar el repositorio"
         return 1
     fi
 }
