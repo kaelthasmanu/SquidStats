@@ -169,29 +169,24 @@ function createEnvFile() {
 
     if [ -f "$env_file" ]; then
         echo "El archivo .env ya existe en $env_file."
-
-        if grep -q "^DATABASE\s*=" "$env_file"; then
-            echo "Actualizando variable DATABASE a DATABASE_STRING_CONNECTION..."
-            sed -i 's/^DATABASE\(\s*=\s*\)\(.*\)/DATABASE_STRING_CONNECTION\1\2/' "$env_file"
-            ok "Variable actualizada correctamente."
-        fi
         return 0
     else
         echo "Creando archivo de configuración .env..."
         cat > "$env_file" << EOF
 VERSION=2
-SQUID_HOST = "127.0.0.1"
-SQUID_PORT = 3128
-FLASK_DEBUG = "True"
-DATABASE_TYPE="SQLITE"
-SQUID_LOG = "/var/log/squid/access.log"
-DATABASE_STRING_CONNECTION = "/opt/squidstats/"
-REFRESH_INTERVAL = 60
+SQUID_HOST=127.0.0.1
+SQUID_PORT=3128
+FLASK_DEBUG=True
+DATABASE_TYPE=SQLITE
+SQUID_LOG=/var/log/squid/squidstats.log
+DATABASE_STRING_CONNECTION=/opt/squidstats/squidstats.db
+REFRESH_INTERVAL=60
 EOF
         ok "Archivo .env creado correctamente en $env_file"
         return 0
     fi
 }
+
 
 function createService() {
     local service_file="/etc/systemd/system/squidstats.service"
@@ -233,11 +228,11 @@ function configureDatabase() {
     echo "Seleccione el tipo de base de datos:"
     echo "1) SQLite (por defecto)"
     echo "2) MariaDB (necesitas tener mariadb ejecutándose)"
-    
+
     while true; do
         read -p "Opción [1/2]: " choice
         case $choice in
-            1|"") break;;  
+            1|"") break;;
             2) break;;
             *) error "Opción inválida. Intente nuevamente.";;
         esac
@@ -256,10 +251,9 @@ function configureDatabase() {
                 validation_result=$(python3 /opt/SquidStats/utils/validateString.py "$conn_str" 2>&1)
 
                 if [[ $? -eq 0 ]]; then
-                    escaped_str=$(sed 's/[\/&|]/\\&/g' <<< "$validation_result")
-                    sed -i "s|^DATABASE_STRING_CONNECTION\s*=.*|DATABASE_STRING_CONNECTION = \"${escaped_str}\"|" "$env_file"
-                    sed -i "s|^DATABASE_TYPE\s*=.*|DATABASE_TYPE = MARIADB|" "$env_file"
-                    ok "Configuración MariaDB actualizada!\nCadena codificada: $validation_result"
+                    sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=MARIADB|" "$env_file"
+                    sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$conn_str|" "$env_file"
+                    ok "Configuración MariaDB actualizada!"
                     break
                 else
                     error "Error en la cadena:\n${validation_result#ERROR: }"
@@ -267,74 +261,56 @@ function configureDatabase() {
             done
             ;;
         *)
-            sqlite_path="/opt/squidstats/"
-            sed -i "s|^DATABASE_STRING_CONNECTION\s*=.*|DATABASE_STRING_CONNECTION = \"${sqlite_path}\"|" "$env_file"
-            sed -i "s|^DATABASE_TYPE\s*=.*|DATABASE_TYPE = SQLITE|" "$env_file"
+            sqlite_path="/opt/squidstats/squidstats.db"
+            sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=SQLITE|" "$env_file"
+            sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$sqlite_path|" "$env_file"
             ok "Configuración SQLite establecida!"
             ;;
     esac
 }
 
+
 function patchSquidConf() {
     local squid_conf=""
-    # Busca squid.conf en rutas típicas
+
     if [ -f "/etc/squid/squid.conf" ]; then
         squid_conf="/etc/squid/squid.conf"
     elif [ -f "/etc/squid3/squid.conf" ]; then
         squid_conf="/etc/squid3/squid.conf"
     else
-        error "Debe tener instalado un servidor proxy Squid. No se encontró squid.conf en /etc/squid/ ni /etc/squid3/"
+        error "Debe tener instalado un servidor proxy Squid. No se encontró squid.conf"
         return 1
     fi
 
-    # Backup antes de modificar
     cp "$squid_conf" "${squid_conf}.back"
     ok "Backup realizado: ${squid_conf}.back"
 
-    local logformat_line='logformat detailed \'
-    logformat_line+='
-  "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st'
-    local access_detailed='access_log /var/log/squid/access.log detailed'
-    local access_default='access_log /var/log/squid/defaultaccess.log'
+    # Añade logformat solo si no existe
+    if ! grep -q '^logformat[[:space:]]\+detailed' "$squid_conf"; then
+        cat << 'EOF' >> "$squid_conf"
 
-    # Busca si existe una línea access_log /var/log/squid/access.log (sin detailed)
-    if grep -q '^access_log[[:space:]]\+/var/log/squid/access\.log[[:space:]]*$' "$squid_conf"; then
-        # Si no existe logformat detailed, lo agrega encima de la línea access_log
-        if ! grep -q '^logformat detailed' "$squid_conf"; then
-            awk -v l1="$logformat_line" '
-                BEGIN{inserted=0}
-                /^access_log[[:space:]]+\/var\/log\/squid\/access\.log[[:space:]]*$/ && !inserted {
-                    print l1
-                    inserted=1
-                }
-                {print}
-            ' "$squid_conf" > "${squid_conf}.tmp" && mv "${squid_conf}.tmp" "$squid_conf"
-            ok "Se agregó logformat detailed encima de access_log /var/log/squid/access.log"
-        else
-            echo "logformat detailed ya existe, no se agrega de nuevo."
-        fi
-        # Modifica la línea access_log para agregar detailed al final y agrega defaultaccess.log debajo
-        awk -v l2="$access_default" '
-            {
-                if ($0 ~ /^access_log[[:space:]]+\/var\/log\/squid\/access\.log[[:space:]]*$/) {
-                    print $0 " detailed"
-                    print l2
-                } else {
-                    print
-                }
-            }
-        ' "$squid_conf" > "${squid_conf}.tmp" && mv "${squid_conf}.tmp" "$squid_conf"
-        ok "Se modificó access_log /var/log/squid/access.log para usar detailed y se agregó access_log defaultaccess.log debajo."
+logformat detailed %ts.%03tu %>a %ui %un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
+EOF
+        ok "Se agregó logformat detailed"
     else
-        # No existe access_log /var/log/squid/access.log, agrega todo al final
-        {
-            echo "$logformat_line"
-            echo "$access_detailed"
-            echo "$access_default"
-        } >> "$squid_conf"
-        ok "Se agregaron logformat detailed, access_log /var/log/squid/access.log detailed y access_log /var/log/squid/defaultaccess.log al final de $squid_conf"
+        echo "logformat detailed ya existe."
     fi
+
+    # Modificar access_log para asegurar que tenga detailed !manager
+    if grep -q '^access_log[[:space:]]\+/var/log/squid/access\.log' "$squid_conf"; then
+        sed -i '/^access_log[[:space:]]\+\/var\/log\/squid\/access\.log/{
+            s/detailed//g
+            s/!manager//g
+            s/$/ detailed !manager/
+        }' "$squid_conf"
+        ok "access_log actualizado con detailed !manager"
+    else
+        echo 'access_log /var/log/squid/access.log detailed !manager' >> "$squid_conf"
+        ok "access_log agregado con detailed !manager"
+    fi
+
 }
+
 
 function main() {
     checkSudo
