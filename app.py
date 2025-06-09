@@ -78,7 +78,7 @@ realtime_system_info = {}
 def realtime_data_thread():
     """Hilo que actualiza los datos del sistema y caché periódicamente y los envía a los clientes via WebSocket"""
     global realtime_cache_stats, realtime_system_info
-    
+
     while True:
         try:
             # Obtener estadísticas de caché de Squid
@@ -117,7 +117,7 @@ def realtime_data_thread():
             logger.error(f"Error en hilo de datos en tiempo real: {str(e)}")
         
         # Esperar 5 segundos antes de la próxima actualización
-        time.sleep(5)
+        eventlet.sleep(5)
 
 # ======================================================================
 # CAMBIO PRINCIPAL: Manejador de conexión WebSocket
@@ -129,11 +129,15 @@ def handle_connect():
     
     # Enviar los datos actuales al cliente que se acaba de conectar
     with realtime_data_lock:
-        if realtime_cache_stats and realtime_system_info:
-            emit('system_update', {
-                'cache_stats': realtime_cache_stats,
-                'system_info': realtime_system_info
-            })
+        cache_stats = realtime_cache_stats
+        system_info = realtime_system_info
+
+    # Ahora que las variables están definidas, puedes compararlas o usarlas
+    if cache_stats or system_info:  # solo si hay datos válidos
+        socketio.emit('system_update', {
+            'cache_stats': cache_stats,
+            'system_info': system_info
+        })
 
 # ------------------- NO CACHÉ PARA RESPUESTAS -------------------
 @app.after_request
