@@ -162,6 +162,19 @@ body {
     font-weight: 500;
 }
 
+.grouped-log-entry {
+  background-color: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.grouped-log-entry .wave {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+}
+
+.fa-layer-group {
+  color: #3b82f6;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     body {

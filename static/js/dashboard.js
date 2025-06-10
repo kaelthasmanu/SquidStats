@@ -1,166 +1,3 @@
-/**
- * Abre el modal de logs para un usuario específico
- * @param {number} index - Índice del usuario en el array de datos
- */
-function openLogsModal(index) {
-  const modal = document.getElementById(`logs-modal-${index}`);
-  const overlay = document.getElementById('overlay');
-
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    setTimeout(() => {
-      modal.classList.remove('opacity-0');
-      modal.classList.add('opacity-100');
-    }, 10);
-  }
-
-  if (overlay) {
-    overlay.classList.remove('hidden');
-    setTimeout(() => {
-      overlay.classList.remove('opacity-0');
-      overlay.classList.add('opacity-100');
-    }, 10);
-  }
-}
-
-/**
- * Cierra el modal de logs para un usuario específico
- * @param {number} index - Índice del usuario en el array de datos
- */
-function closeLogsModal(index) {
-  const modal = document.getElementById(`logs-modal-${index}`);
-  const overlay = document.getElementById('overlay');
-
-  if (modal) {
-    modal.classList.remove('opacity-100');
-    modal.classList.add('opacity-0');
-    setTimeout(() => {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }, 1000);
-  }
-
-  if (overlay) {
-    overlay.classList.remove('opacity-100');
-    overlay.classList.add('opacity-0');
-    setTimeout(() => {
-      overlay.classList.add('hidden');
-    }, 1000);
-  }
-}
-
-/**
- * Alterna el filtro de tipo de respuesta en el modal de logs
- * @param {HTMLElement} el - Elemento HTML que activó el filtro
- * @param {number} modalIndex - Índice del modal
- */
-function toggleResponseFilter(el, modalIndex) {
-  const isActive = el.dataset.active === "true";
-  el.dataset.active = isActive ? "false" : "true";
-
-  if (isActive) {
-    el.style.color = "#9CA3AF";
-  } else {
-    el.style.color = getComputedTailwindColor(el.dataset.color);
-  }
-
-  const modal = document.getElementById(`logs-modal-${modalIndex}`);
-  const entries = modal.querySelectorAll(".log-entry");
-  
-  entries.forEach(entry => {
-    const code = parseInt(entry.dataset.responseCode);
-    let type = 'unknown';
-    
-    if (code >= 100 && code <= 199) type = 'informational';
-    else if (code >= 200 && code <= 299) type = 'successful';
-    else if (code >= 300 && code <= 399) type = 'redirection';
-    else if (code >= 400 && code <= 499) type = 'clientError';
-    else if (code >= 500 && code <= 599) type = 'serverError';
-
-    entry.style.display = el.dataset.active === "true" && el.dataset.filterType === type ? '' : 'none';
-  });
-}
-
-/**
- * Filtra los logs dentro de un modal por URL
- * @param {number} index - Índice del modal
- */
-function filterLogs(index) {
-  const input = document.getElementById(`mysearch-${index}`);
-  const query = input.value.toLowerCase();
-  const modal = document.getElementById(`logs-modal-${index}`);
-  const entries = modal.querySelectorAll(".log-entry");
-  const noResults = modal.querySelector(".no-results");
-  
-  let visibleCount = 0;
-  
-  entries.forEach(entry => {
-    const urlText = entry.querySelector(".log-url")?.textContent.toLowerCase() || "";
-    const isVisible = urlText.includes(query);
-    
-    entry.style.display = isVisible ? '' : 'none';
-    if (isVisible) visibleCount++;
-  });
-  
-  noResults.style.display = visibleCount === 0 && query !== "" ? 'block' : 'none';
-}
-
-/**
- * =============================================
- * FUNCIONES DE UTILIDAD
- * =============================================
- */
-
-/**
- * Obtiene el valor hexadecimal de un color de Tailwind CSS
- * @param {string} className - Clase de Tailwind CSS (ej. 'text-blue-500')
- * @returns {string} Código hexadecimal del color
- */
-function getComputedTailwindColor(className) {
-  const colorMap = {
-    'text-blue-500': '#3B82F6',
-    'text-green-500': '#22C55E',
-    'text-yellow-500': '#EAB308',
-    'text-red-500': '#EF4444',
-    'text-orange-400': '#FB923C',
-    'text-gray-500': '#6B7280'
-  };
-  return colorMap[className] || '#6B7280';
-}
-
-/**
- * Acorta una cadena de texto añadiendo puntos suspensivos si supera la longitud máxima
- * @param {string} str - Texto a acortar
- * @param {number} n - Longitud máxima permitida
- * @returns {string} Texto acortado
- */
-function truncate(str, n) {
-  return str.length > n ? str.slice(0, n - 1) + "..." : str;
-}
-
-/**
- * Formatea bytes a una representación legible (KB, MB, GB)
- * @param {number} bytes - Cantidad de bytes
- * @returns {string} Representación formateada
- */
-function formatBytes(bytes) {
-  const units = ["B", "KB", "MB", "GB"];
-  let value = bytes;
-  let unitIndex = 0;
-  while (value >= 1024 && unitIndex < units.length - 1) {
-    value /= 1024;
-    unitIndex++;
-  }
-  return `${value.toFixed(2)} ${units[unitIndex]}`;
-}
-
-/**
- * =============================================
- * INICIALIZACIÓN Y FUNCIONES PRINCIPALES
- * =============================================
- */
-
 document.addEventListener("DOMContentLoaded", function() {
   // Referencias a elementos del DOM
   const searchInput = document.getElementById("username-search");
@@ -216,11 +53,11 @@ document.addEventListener("DOMContentLoaded", function() {
         <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] z-[1]">
           <li class="inline-block flex flex-col items-center">
             <span class="label text-xs font-light uppercase tracking-wide">Solicitudes:</span>
-            <span class="value font-semibold">${user.total_requests}</span>
+            <span class="value font-semib">${user.total_requests}</span>
           </li>
           <li class="inline-block flex flex-col items-center">
             <span class="label text-xs font-light uppercase tracking-wide">Datos:</span>
-            <span class="value font-semibold">${formatBytes(user.total_data)}</span>
+            <span class="value font-semib">${formatBytes(user.total_data)}</span>
           </li>
         </ul>
       </div>
@@ -239,9 +76,60 @@ document.addEventListener("DOMContentLoaded", function() {
       </div>
     `);
 
+    /**
+     * Función para agrupar logs por URL
+     * @param {Array} logs - Array de logs del usuario
+     * @returns {Array} Logs agrupados por URL con totales acumulados
+     */
+    function groupLogsByUrl(logs) {
+      const groups = {};
+      logs.forEach(log => {
+        if (!groups[log.url]) {
+          groups[log.url] = {
+            url: log.url,
+            responses: {}, // Para contar frecuencia de códigos de respuesta
+            total_requests: 0,
+            total_data: 0,
+            entryCount: 0 // Cuántas entradas originales se agruparon
+          };
+        }
+        const group = groups[log.url];
+        group.total_requests += log.request_count;
+        group.total_data += log.data_transmitted;
+        group.entryCount += 1;
+        
+        // Contar frecuencia de códigos de respuesta
+        if (group.responses[log.response]) {
+          group.responses[log.response] += log.request_count;
+        } else {
+          group.responses[log.response] = log.request_count;
+        }
+      });
+
+      return Object.values(groups).map(group => {
+        // Determinar el código de respuesta dominante (el más frecuente)
+        let dominantResponse = 0;
+        let maxCount = 0;
+        for (const [response, count] of Object.entries(group.responses)) {
+          if (count > maxCount) {
+            maxCount = count;
+            dominantResponse = parseInt(response);
+          }
+        }
+        
+        return {
+          url: group.url,
+          response: dominantResponse,
+          request_count: group.total_requests,
+          data_transmitted: group.total_data,
+          isGrouped: group.entryCount > 1 // Indica si es un grupo (más de una entrada original)
+        };
+      });
+    }
+
     // Generar modales para cada usuario
     modalsContainer.innerHTML = usersData.map((user, index) => {
-      // Contar los tipos de respuestas
+      // Contar los tipos de respuestas para los filtros
       const responseCounts = {
         informational: 0, successful: 0, redirection: 0,
         clientError: 0, serverError: 0, unknown: 0
@@ -284,6 +172,9 @@ document.addEventListener("DOMContentLoaded", function() {
           </div>`;
       }).join('');
 
+      // Agrupar logs por URL para mostrar en el modal
+      const groupedLogs = groupLogsByUrl(user.logs);
+      
       // Generar HTML del modal
       return `
         <div class="logs-modal hidden fixed inset-0 bg-black bg-opacity-50 z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
@@ -323,14 +214,15 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
 
             <div class="logs-list mt-2 max-h-[60vh] overflow-y-auto">
-              ${user.logs.length > 0 ? `
+              ${groupedLogs.length > 0 ? `
                 <div class="log-entries-container grid gap-3">
-                  ${user.logs.map(log => {
+                  ${groupedLogs.map(log => {
                     const truncatedUrl = truncate(log.url, 55);
                     const isHttps = /:(443|8443)$/.test(log.url);
                     const protocol = isHttps ? 'https://' : 'http://';
                     const fullUrl = log.url.startsWith('http') ? log.url : protocol + log.url;
                     
+                    // Determinar clase de badge según el código de respuesta
                     let badgeClass = 'bg-gray-400';
                     if (log.response >= 100 && log.response <= 199) badgeClass = 'bg-blue-400';
                     else if (log.response >= 200 && log.response <= 299) badgeClass = 'bg-green-500';
@@ -338,8 +230,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     else if (log.response >= 400 && log.response <= 499) badgeClass = 'bg-red-500';
                     else if (log.response >= 500 && log.response <= 599) badgeClass = 'bg-orange-400';
 
+                    // Clase CSS adicional para entradas agrupadas
+                    const groupClass = log.isGrouped ? 'grouped-log-entry' : '';
+                    const groupIcon = log.isGrouped ? 
+                      '<i class="fas fa-layer-group text-blue-500 ml-2 text-xs" title="Solicitudes agrupadas"></i>' : 
+                      '';
+
                     return `
-                      <div class="log-entry relative group p-3 bg-white rounded-lg transition-all duration-300 ease-out shadow-md hover:shadow-2xl hover:-translate-y-1 hover:z-10" data-response-code="${log.response}">  
+                      <div class="log-entry relative group p-3 bg-white rounded-lg transition-all duration-300 ease-out shadow-md hover:shadow-2xl hover:-translate-y-1 hover:z-10 ${groupClass}" 
+                           data-response-code="${log.response}">  
                         <div class="wave-container absolute inset-0 overflow-hidden rounded-lg">
                           <div class="wave absolute w-full h-full"></div>
                         </div>
@@ -347,7 +246,10 @@ document.addEventListener("DOMContentLoaded", function() {
                         <div class="relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                           <div class="log-details-grid min-w-0">
                             <div class="flex items-baseline gap-3">
-                                <span class="log-url text-sm font-medium text-gray-800 truncate">${truncatedUrl}</span>
+                                <span class="log-url text-sm font-medium text-gray-800 truncate">
+                                  ${truncatedUrl}
+                                </span>
+                                ${groupIcon}
                             </div>
               
                             <div class="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600">
@@ -405,17 +307,22 @@ document.addEventListener("DOMContentLoaded", function() {
           input.classList.add("opacity-0");
           clearBtn.classList.add("opacity-0");
           input.value = "";
-          filterLogs(index);
+          // SOLUCIÓN: Ahora usa la función unificada de filtrado
+          applyFiltersToModal(index);
         }
       });
 
       clearBtn.addEventListener("click", () => {
         input.value = "";
-        filterLogs(index);
+        // SOLUCIÓN: Ahora usa la función unificada de filtrado
+        applyFiltersToModal(index);
         input.focus();
       });
 
-      input.addEventListener("input", () => filterLogs(index));
+      input.addEventListener("input", () => {
+        // SOLUCIÓN: Ahora usa la función unificada de filtrado
+        applyFiltersToModal(index);
+      });
     });
 
     // Actualizar estado de las tarjetas
@@ -569,6 +476,186 @@ document.addEventListener("DOMContentLoaded", function() {
   // Carga inicial
   dateFilter.dispatchEvent(new Event("change"));
 });
+
+// =============================================
+// FUNCIONES AUXILIARES MODIFICADAS
+// =============================================
+
+/**
+ * Abre el modal de logs para un usuario específico
+ * @param {number} index - Índice del usuario en el array de datos
+ */
+function openLogsModal(index) {
+  const modal = document.getElementById(`logs-modal-${index}`);
+  const overlay = document.getElementById('overlay');
+
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+      modal.classList.remove('opacity-0');
+      modal.classList.add('opacity-100');
+    }, 10);
+  }
+
+  if (overlay) {
+    overlay.classList.remove('hidden');
+    setTimeout(() => {
+      overlay.classList.remove('opacity-0');
+      overlay.classList.add('opacity-100');
+    }, 10);
+  }
+}
+
+/**
+ * Cierra el modal de logs para un usuario específico
+ * @param {number} index - Índice del usuario en el array de datos
+ */
+function closeLogsModal(index) {
+  const modal = document.getElementById(`logs-modal-${index}`);
+  const overlay = document.getElementById('overlay');
+
+  if (modal) {
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }, 1000);
+  }
+
+  if (overlay) {
+    overlay.classList.remove('opacity-100');
+    overlay.classList.add('opacity-0');
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+    }, 1000);
+  }
+}
+
+/**
+ * SOLUCIÓN PRINCIPAL: 
+ * Aplica todos los filtros (respuesta y búsqueda) al modal de logs
+ * @param {number} modalIndex - Índice del modal a filtrar
+ */
+function applyFiltersToModal(modalIndex) {
+  const modal = document.getElementById(`logs-modal-${modalIndex}`);
+  const entries = modal.querySelectorAll(".log-entry");
+  const noResults = modal.querySelector(".no-results");
+  const input = document.getElementById(`mysearch-${modalIndex}`);
+  const query = input.value.toLowerCase();
+
+  // Obtener estados actuales de todos los filtros de respuesta
+  const filterButtons = modal.querySelectorAll('.response-summary .filter-icon');
+  const activeFilters = {};
+  filterButtons.forEach(btn => {
+    const type = btn.dataset.filterType;
+    activeFilters[type] = btn.dataset.active === "true";
+  });
+
+  let visibleCount = 0;
+  
+  entries.forEach(entry => {
+    const code = parseInt(entry.dataset.responseCode);
+    let type = 'unknown';
+    
+    // Determinar categoría de respuesta basado en el código HTTP
+    if (code >= 100 && code <= 199) type = 'informational';
+    else if (code >= 200 && code <= 299) type = 'successful';
+    else if (code >= 300 && code <= 399) type = 'redirection';
+    else if (code >= 400 && code <= 499) type = 'clientError';
+    else if (code >= 500 && code <= 599) type = 'serverError';
+
+    // Verificar ambos filtros: respuesta y búsqueda
+    const passesResponseFilter = activeFilters[type];
+    const urlText = entry.querySelector(".log-url")?.textContent.toLowerCase() || "";
+    const passesSearchFilter = query === "" || urlText.includes(query);
+    
+    // Mostrar solo si pasa ambos filtros
+    const isVisible = passesResponseFilter && passesSearchFilter;
+    entry.style.display = isVisible ? '' : 'none';
+    
+    if (isVisible) visibleCount++;
+  });
+  
+  // Mostrar mensaje "no resultados" solo cuando hay filtros activos y no hay coincidencias
+  noResults.style.display = visibleCount === 0 && 
+                            (query !== "" || Object.values(activeFilters).some(active => !active)) 
+                            ? 'block' : 'none';
+}
+
+/**
+ * Alterna el filtro de tipo de respuesta en el modal de logs
+ * @param {HTMLElement} el - Elemento HTML que activó el filtro
+ * @param {number} modalIndex - Índice del modal
+ */
+function toggleResponseFilter(el, modalIndex) {
+  // Toggle del estado activo
+  const isActive = el.dataset.active === "true";
+  el.dataset.active = isActive ? "false" : "true";
+
+  // Actualizar apariencia visual
+  if (isActive) {
+    el.style.color = "#9CA3AF"; // Color gris para inactivo
+  } else {
+    el.style.color = getComputedTailwindColor(el.dataset.color); // Color original
+  }
+
+  // SOLUCIÓN: Ahora aplica ambos tipos de filtros
+  applyFiltersToModal(modalIndex);
+}
+
+/**
+ * Filtra los logs dentro de un modal por URL
+ * @param {number} index - Índice del modal
+ */
+function filterLogs(index) {
+  // SOLUCIÓN: Ahora aplica ambos tipos de filtros
+  applyFiltersToModal(index);
+}
+
+/**
+ * Obtiene el valor hexadecimal de un color de Tailwind CSS
+ * @param {string} className - Clase de Tailwind CSS (ej. 'text-blue-500')
+ * @returns {string} Código hexadecimal del color
+ */
+function getComputedTailwindColor(className) {
+  const colorMap = {
+    'text-blue-500': '#3B82F6',
+    'text-green-500': '#22C55E',
+    'text-yellow-500': '#EAB308',
+    'text-red-500': '#EF4444',
+    'text-orange-400': '#FB923C',
+    'text-gray-500': '#6B7280'
+  };
+  return colorMap[className] || '#6B7280';
+}
+
+/**
+ * Acorta una cadena de texto añadiendo puntos suspensivos si supera la longitud máxima
+ * @param {string} str - Texto a acortar
+ * @param {number} n - Longitud máxima permitida
+ * @returns {string} Texto acortado
+ */
+function truncate(str, n) {
+  return str.length > n ? str.slice(0, n - 1) + "..." : str;
+}
+
+/**
+ * Formatea bytes a una representación legible (KB, MB, GB)
+ * @param {number} bytes - Cantidad de bytes
+ * @returns {string} Representación formateada
+ */
+function formatBytes(bytes) {
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex++;
+  }
+  return `${value.toFixed(2)} ${units[unitIndex]}`;
+}
 
 // Hacer funciones disponibles globalmente
 window.openLogsModal = openLogsModal;
