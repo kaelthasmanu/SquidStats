@@ -74,30 +74,49 @@ def get_file_inode(filepath):
 
 def parse_log_line(line):
     """
-    Parsea líneas de log de Squid usando regex para manejar espacios en URLs.
-    Formato esperado: timestamp elapsed host/ip code bytes method URL ...
+    Parsea una línea del log de Squid con formato delimitado por '|'
+    Formato esperado:
+    timestamp|client_ip|ident|username|[datetime]|method|url|HTTP/version|status_code|bytes|msg_type|server_ip|server_method|squid_status
     """
-    # Expresión regular mejorada para manejar espacios en URLs
-    pattern = r'(\d+\.\d+)\s+(\d+)\s+(\S+)\s+(?:\S+\s+){2}(\S+)\s+(\d{3})\s+(\d+)\s+(\S+)\s+(\S+://[^\s]+)'
-    match = re.match(pattern, line)
-    
-    if not match:
+
+    parts = line.strip().split('|')
+
+    # Validar número mínimo de campos esperados
+    if len(parts) < 14:
+        logger.warning(f"Línea ignorada (formato incompleto): {line.strip()}")
         return None
-        
-    # Extraer componentes
-    timestamp, elapsed, ip, username, status, size, method, url = match.groups()
-    
-    # Filtrar TCP_DENIED y métodos no GET
-    if "TCP_DENIED" in status or method != "GET":
+
+    try:
+        # Asignar los valores a variables con nombres claros
+        timestamp_str = parts[0]
+        client_ip = parts[1]
+        username = parts[3] if parts[3] != '-' else None
+        method = parts[5]
+        url = parts[6]
+        status_code = int(parts[8])
+        bytes_sent = int(parts[9])
+        squid_status = parts[13]
+
+        # Filtrar registros irrelevantes
+        if "TCP_DENIED" in squid_status:
+            return None
+
+        # Aquí puedes aplicar otros filtros si lo deseas (por método, por URL, etc.)
+        # Ejemplo: excluir métodos distintos de GET/CONNECT
+        if method not in ("GET", "CONNECT"):
+            return None
+
+        return {
+            'ip': client_ip,
+            'username': username or 'anonymous',
+            'url': url,
+            'response': status_code,
+            'data_transmitted': bytes_sent
+        }
+
+    except Exception as e:
+        logger.error(f"Error parseando línea: {line.strip()} - {e}")
         return None
-    
-    return {
-        'ip': ip,
-        'username': username,
-        'url': url,
-        'response': int(status),
-        'data_transmitted': int(size)
-    }
 
 def process_logs(log_file):
     """Procesa el archivo de logs y almacena datos en la base de datos"""
@@ -231,12 +250,21 @@ def process_logs(log_file):
                     if user_id is None:
                         if not commit_batch():
                             logger.error("Error crítico en commit batch. Abortando lote")
-                        
-                        # Obtener ID después del flush
-                        user_id = user_cache.get(user_key)
-                        if user_id is None:
+                            continue
+
+                        # 🔁 FIX: reconsultar desde la base de datos
+                        existing_user = session.query(User).filter_by(
+                            username=log_data['username'], 
+                            ip=log_data['ip']
+                        ).first()
+
+                        if existing_user:
+                            user_id = existing_user.id
+                            user_cache[user_key] = user_id
+                        else:
                             logger.error(f"Usuario no creado: {user_key}. Saltando línea")
                             continue
+
 
                     # Preparar log para inserción
                     logs_to_insert.append({
