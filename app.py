@@ -185,29 +185,6 @@ def update_web():
     else:
         return redirect('/')
 
-'''
-@app.route('/blacklist', methods=['GET'])
-def check_blacklist():
-    db = None
-    db = get_session()
-    try:
-        blacklist = ["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]  # Ejemplo
-        resultados = find_blacklisted_sites(db, blacklist)
-
-        return render_template('blacklist.html',
-                               results=resultados,
-                               page_icon='shield-exclamation.ico',
-                               page_title='Registros de Blacklist')
-    except Exception as e:
-        logger.error(f"Error en check-blacklist: {str(e)}")
-        return jsonify({'error': 'Error interno del servidor'}), 500
-
-    finally:
-        if db is not None:
-            db.close()
-'''
-
-
 @app.route('/blacklist', methods=['GET'])
 def blacklist_logs():
     db = None
@@ -223,8 +200,9 @@ def blacklist_logs():
 
         db = get_session()
 
-        # Obtener blacklist (podrías cargarla desde base de datos o config)
-        blacklist = ["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]
+        # Obtener blacklist desde variables de entorno
+        blacklist_env = os.getenv('BLACKLIST_DOMAINS')
+        blacklist = [domain.strip() for domain in blacklist_env.split(',') if domain.strip()]
 
         # Obtener resultados paginados
         result_data = find_blacklisted_sites(db, blacklist, page, per_page)

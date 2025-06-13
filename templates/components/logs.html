@@ -57,7 +57,9 @@
     let currentPage = 1;
     const itemsPerPage = 15;
 
-    const today = new Date().toISOString().split('T')[0];
+    // Versión alternativa más concisa:
+    const today = new Date().toLocaleDateString('en-CA'); // 'en-CA' produce formato YYYY-MM-DD
+    
     if (!dateFilter.value) {
       dateFilter.value = today;
     }

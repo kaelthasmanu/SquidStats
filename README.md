@@ -4,7 +4,10 @@
 </h1>
 
 <div align="center">
-  <!-- Banderas -->
+  <!-- Version Badge -->
+  <img src="https://img.shields.io/badge/Version-2.1.0-brightgreen?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktc3RhciIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNMi44NjYgMTQuODVjLS4wNzguNzI3LjI0NC45MT0uNzAzLjM1M0w4IDEwLjQ3M2w1LjQ5NCA0LjU3Yy43OC43Ny43MS0yNS4wMyAwIC0yNS4xNGwtMTEuMzIgMGMwIDEyLjU3IDEuMjYgMjQuMjggMS4zMiAyNS4xNHptMC0uMjYzYy0uMDQ2LjI0Ni0uMjI2LjQzNi0uNTI4LjQ5M2wtMi41NDIuNDc0LTEuODc0LTEuODQyUzEuNDcgNC42IDQuMzc0IDEuODgyYy41NjctLjUzMSAxLjIxLS44ODEgMS45MTctMS4wMjhsMTQuNjI0LS4wMDEgMS44NzQgMS44NDJjMi4zNDMgMi4zMDQgMi4xNzggNS4zNzYgMCA3LjQ5OC0uNTY3LjUzMS0xLjIxLjg4MS0xLjkxNyAxLjAyOGwtNy40NDMgMC0xLjM4LjU0Ni0uMjYzLjI2M3pNNC43NTYgMi4wNDZjLS4xMzYtLjI1Ni0uNDQ4LS40MS0uNzM3LS40MS0uNjEtLjEzNi0xLjE3LS4xOTYtMS42NDYtLjE5Ni0uNzQzIDAtMS40MTMuMTU2LTEuOTkyLjQ4MmwtMS4yNS4wNDEtLjg5Ni4xMDJ6Ii8+Cjwvc3ZnPgo=" alt="Version 2.1.0">
+  
+  <!-- Flags -->
   <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/README_es.md">
     <img height="20px" src="https://img.shields.io/badge/ES-flag.svg?color=555555&style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NTAgNTAwIj4NCjxwYXRoIGZpbGw9IiNjNjBiMWUiIGQ9Im0wLDBoNzUwdjUwMGgtNzUweiIvPg0KPHBhdGggZmlsbD0iI2ZmYzQwMCIgZD0ibTAsMTI1aDc1MHYyNTBoLTc1MHoiLz4NCjwvc3ZnPg0K">
   </a>
@@ -58,6 +61,14 @@
 
 *A modern tool for parsing and analyzing Squid logs, providing a sleek and user-friendly dashboard to visualize real-time connection data. This project helps network administrators monitor and manage Squid proxy connections effectively.*
 
+### 🆕 What's New in v2.1.0
+
+- **🛡️ Configurable Blacklist System**: Manage blocked domains via `.env` configuration
+- **🎨 Professional UI Redesign**: Modern navbar with gradients and responsive design
+- **⚙️ Enhanced Installer**: Multiple installation modes and interactive configuration
+- **🕐 Timezone Fix**: Corrected date display issues for accurate log viewing
+- **📊 Improved Navigation**: Added blacklist management section with intuitive interface
+
 **You can view the example [here](https://github.com/kaelthasmanu/SquidStats/tree/main/assets "Examples").**
 <div align="center">
   <img src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg" 
@@ -82,11 +93,13 @@
 
 - **_Real-time Log Parsing_**: Parses active Squid connections and displays detailed information.
 - **_User Monitoring_**: Identifies connections by username, URI, and log type.
+- **_🛡️ Blacklist Management_**: Configure and manage blocked domains dynamically via web interface.
 - **_Metrics Overview_**:
   - Total read and written data for each connection.
   - Number of requests per connection.
   - Delay pool usage.
 - **_Interactive Dashboard_**: Clean interface for easy data interpretation.
+- **_🎨 Modern UI_**: Professional design with responsive layout and intuitive navigation.
 - **_Squid Cache Statistics_**: 
   - Stored entries.
   - Used and free capacity
@@ -105,7 +118,36 @@
   - Total Transmitted Data
   - Total Request 
   - And More...
+- **_⚙️ Easy Configuration_**: Environment-based settings with automated installer.
 - **_And More_**
+
+## 🛡️ Blacklist Management
+
+SquidStats v2.1.0 introduces a powerful blacklist management system:
+
+### Features
+- **Web Interface**: Manage blocked domains directly from the `/blacklist` section
+- **Environment Configuration**: Configure domains in `.env` file for persistence
+- **Real-time Updates**: Changes apply after service restart
+- **Pagination Support**: Handle large blacklists efficiently
+
+### Configuration
+Edit the `.env` file to configure blocked domains:
+```bash
+BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
+```
+
+### Management Commands
+```bash
+# Reconfigure blacklist interactively
+sudo ./install.sh --configure-blacklist
+
+# Restart service after manual changes
+sudo systemctl restart squidstats.service
+
+# View current configuration
+grep BLACKLIST_DOMAINS /opt/squidstats/.env
+```
   
 <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 ---
@@ -130,20 +172,56 @@ apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev 
   access_log /var/log/squid/access.log detailed
 ```
 ### Installation Script
-1. Get Script With curl o wget:
-  ```bash
-   wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+
+> 🎉 **New in v2.1.0**: Enhanced installer with blacklist configuration and multiple options!
+
+#### Quick Installation
+1. Get Script with curl or wget:
+   ```bash
+   wget https://github.com/kaelthasmanu/SquidStats/releases/download/v2.1.0/install.sh
+   # or
+   curl -O https://raw.githubusercontent.com/kaelthasmanu/SquidStats/main/install.sh
    ``` 
 
-2. Add permission execution:
-  ```bash
+2. Add execution permission:
+   ```bash
    sudo chmod +x install.sh
    ```
 
 3. Execute the script:
-  ```bash
+   ```bash
    sudo ./install.sh
    ```
+
+#### Installation Options
+The installer now supports multiple modes:
+
+```bash
+# Full installation (interactive)
+sudo ./install.sh
+
+# Update existing installation
+sudo ./install.sh --update
+
+# Configure blacklist only
+sudo ./install.sh --configure-blacklist
+
+# Show help
+./install.sh --help
+```
+
+#### 🛡️ Blacklist Configuration
+During installation, you can configure which domains to block:
+
+- **Option 1**: Use default blacklist (facebook.com, twitter.com, instagram.com, etc.)
+- **Option 2**: Configure custom domains
+- **Option 3**: Skip blacklist configuration
+
+**Example custom configuration:**
+```bash
+# When prompted, enter domains separated by commas:
+facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
+```
 <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 ---
 ### Installation Manual
@@ -164,17 +242,18 @@ apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev 
     pip install -r /opt/squidstats/requirements.txt
   ```
 4. Create a .env file in the project root and add the following content:\
-  Note: for use MARIADB need your own database running
-  ```bash
-    VERSION=2
-    SQUID_HOST = "127.0.0.1"
-    SQUID_PORT = 3128
-    FLASK_DEBUG = "True"
-    DATABASE_TYPE="SQLITE"
-    SQUID_LOG = "/var/log/squid/access.log"
-    DATABASE_STRING_CONNECTION = "/opt/squidstats/"
-    REFRESH_INTERVAL = 60
-  ```
+   Note: for use MARIADB need your own database running
+   ```bash
+   VERSION=2
+   SQUID_HOST="127.0.0.1"
+   SQUID_PORT=3128
+   FLASK_DEBUG="True"
+   DATABASE_TYPE="SQLITE"
+   SQUID_LOG="/var/log/squid/access.log"
+   DATABASE_STRING_CONNECTION="/opt/squidstats/"
+   REFRESH_INTERVAL=60
+   BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
+   ```
 5. Run App with python or python3  🚀:
   ```bash
     python3 app.py
