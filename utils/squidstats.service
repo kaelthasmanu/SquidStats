@@ -5,11 +5,11 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/squidstats
-ExecStart=/opt/squidstats/venv/bin/python /opt/squidstats/app.py
+WorkingDirectory=/opt/SquidStats
+ExecStart=/opt/SquidStats/venv/bin/python /opt/SquidStats/app.py
 Restart=always
 RestartSec=5
-EnvironmentFile=/opt/squidstats/.env
+EnvironmentFile=/opt/SquidStats/.env
 
 [Install]
 WantedBy=multi-user.target
