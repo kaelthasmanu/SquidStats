@@ -607,16 +607,14 @@ function main() {
             ok "¡Instalación completada exitosamente!"
             echo -e "\n\033[1;42m=== INFORMACIÓN IMPORTANTE ===\033[0m"
             echo -e "• Acceso web: \033[1;37mhttp://$(hostname -I | awk '{print $1}'):5000\033[0m"
-            echo -e "• Usuario/Contraseña por defecto: \033[1;37madmin/admin\033[0m"
             echo -e "• Archivo de configuración: \033[1;37m/opt/squidstats/.env\033[0m"
             echo -e "• Logs del servicio: \033[1;37mjournalctl -u squidstats.service\033[0m"
             echo -e "• Estado del servicio: \033[1;37msystemctl status squidstats.service\033[0m"
             echo -e "\n\033[1;43m=== CONFIGURACIÓN DE BLACKLIST ===\033[0m"
-            echo -e "• Los dominios bloqueados se configuran en BLACKLIST_DOMAINS del archivo .env"
             echo -e "• Formato: BLACKLIST_DOMAINS=\"dominio1.com,dominio2.com,dominio3.com\""
             echo -e "• Reinicie el servicio después de cambios: \033[1;37msudo systemctl restart squidstats.service\033[0m"
-            echo -e "• Acceda a la sección '/blacklist' en la interfaz web para gestionar la lista"
-            echo -e "• Para reconfigurar solo la blacklist: \033[1;37msudo $0 --configure-blacklist\033[0m\n"
+            echo -e "• Acceda a la sección '/blacklist' en la interfaz web para ver la lista"
+            echo -e "• Para reconfigurar solo la blacklist: \033[1;37msudo $0 --configure-blacklist o edite el fichero .env\033[0m\n"
         else
             error "La instalación completó pero el servicio no se pudo iniciar. Verifique los logs con: journalctl -u squidstats.service"
         fi
