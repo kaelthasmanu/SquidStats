@@ -17,7 +17,6 @@ from datetime import datetime
 from services.fetch_data_logs import get_users_with_logs_by_date
 from services.blacklist_users import find_blacklisted_sites, find_blacklisted_sites_by_date
 
-# set configuration values
 class Config:
     SCHEDULER_API_ENABLED = True
 
