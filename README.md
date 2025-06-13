@@ -61,14 +61,6 @@
 
 *A modern tool for parsing and analyzing Squid logs, providing a sleek and user-friendly dashboard to visualize real-time connection data. This project helps network administrators monitor and manage Squid proxy connections effectively.*
 
-### 🆕 What's New in v2.1.0
-
-- **🛡️ Configurable Blacklist System**: Manage blocked domains via `.env` configuration
-- **🎨 Professional UI Redesign**: Modern navbar with gradients and responsive design
-- **⚙️ Enhanced Installer**: Multiple installation modes and interactive configuration
-- **🕐 Timezone Fix**: Corrected date display issues for accurate log viewing
-- **📊 Improved Navigation**: Added blacklist management section with intuitive interface
-
 **You can view the example [here](https://github.com/kaelthasmanu/SquidStats/tree/main/assets "Examples").**
 <div align="center">
   <img src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg" 
