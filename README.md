@@ -113,16 +113,6 @@
 - **_⚙️ Easy Configuration_**: Environment-based settings with automated installer.
 - **_And More_**
 
-## 🛡️ Blacklist Management
-
-SquidStats v2.1.0 introduces a powerful blacklist management system:
-
-### Features
-- **Web Interface**: Manage blocked domains directly from the `/blacklist` section
-- **Environment Configuration**: Configure domains in `.env` file for persistence
-- **Real-time Updates**: Changes apply after service restart
-- **Pagination Support**: Handle large blacklists efficiently
-
 ### Configuration
 Edit the `.env` file to configure blocked domains:
 ```bash
@@ -203,7 +193,7 @@ sudo ./install.sh --configure-blacklist
 ```
 
 #### 🛡️ Blacklist Configuration
-During installation, you can configure which domains to block:
+During installation, you can configure which domains notify like block:
 
 - **Option 1**: Use default blacklist (facebook.com, twitter.com, instagram.com, etc.)
 - **Option 2**: Configure custom domains
