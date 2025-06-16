@@ -185,28 +185,32 @@ document.addEventListener("DOMContentLoaded", function() {
               <i class="fas fa-times text-base"></i>
             </button>
 
-            <div class="flex flex-col"> 
-              <div class="flex justify-between items-center mb-2"> 
-                <div class="flex items-center gap-0 min-w-0"> 
-                  <h4 class="logs-title text-base text-gray-500 mb-4 uppercase tracking-[1px] font-semibold whitespace-nowrap truncate flex items-center">
-                    Actividad reciente - <span class="username-highlight font-semibold truncate max-w-[120px] text-[#1369ce]">${user.username}</span>
-                    
-                    <div id="searchBox-${index}" class="ml-2 relative w-auto h-[36px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md overflow-hidden flex items-center border border-gray-300">
-                      <div id="toggleBtn-${index}" class="absolute left-0 top-0 w-[36px] h-[36px] flex items-center justify-center cursor-pointer z-10">
-                        <i class="fas fa-search text-blue-600 text-sm"></i>
-                      </div>
-                      <div id="inputWrapper-${index}" class="ml-[36px] w-0 h-[36px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
-                        <input id="mysearch-${index}" type="text" placeholder="Buscar URL..." class="w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]"/>
-                      </div>
-                      <button id="clearBtn-${index}" 
-                            class="absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" 
-                            title="Limpiar búsqueda">
-                        <i class="fas fa-times text-lg leading-none"></i>
-                      </button>
-                    </div>
-                  </h4>
-                </div>
-              </div>
+<div class="flex flex-col">
+  <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center gap-2 min-w-0 flex-wrap">
+      <h4 class="logs-title text-base text-gray-500 uppercase tracking-[1px] font-semibold whitespace-nowrap">
+        Actividad reciente - 
+      </h4>
+      <div class="flex items-center gap-2">
+        <span class="username-highlight font-semibold truncate max-w-[120px] text-[#1369ce]">${user.username}</span>
+        
+        <!-- Contenedor de búsqueda al lado del nombre de usuario -->
+        <div id="searchBox-${index}" class="relative w-auto h-[38px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md flex items-center border border-gray-300">
+          <div id="toggleBtn-${index}" class="absolute left-0 top-0 w-[38px] h-[38px] flex items-center justify-center cursor-pointer z-10">
+            <i class="fas fa-search text-blue-600 text-sm"></i>
+          </div>
+          <div id="inputWrapper-${index}" class="ml-[38px] w-0 h-[38px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
+            <input id="mysearch-${index}" type="text" placeholder="Buscar URL..." class="w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]"/>
+          </div>
+          <button id="clearBtn-${index}" 
+                class="absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" 
+                title="Limpiar búsqueda">
+            <i class="fas fa-times text-lg leading-none"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
               
               <div class="response-summary flex justify-end gap-4 items-center mb-4">
                 ${responseSummary}
