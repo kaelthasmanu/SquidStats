@@ -230,7 +230,7 @@ def cache_stats():
 def logs():
     db = None
     try:
-        db = get_session()
+       with get_session() as db:
         users_data = get_users_with_logs_optimized(db)
         return render_template('logsView.html', users_data=users_data, page_icon='user.ico', page_title='Actividad usuarios')
     except Exception as e:
