@@ -14,7 +14,7 @@ from services.fetch_data_logs import get_users_logs, get_users_with_logs_by_date
 from services.blacklist_users import find_blacklisted_sites, find_blacklisted_sites_by_date
 from services.system_info import (
     get_network_info, get_os_info, get_uptime, get_ram_info,
-    get_swap_info, get_cpu_info, get_squid_version, get_timezone
+    get_swap_info, get_cpu_info, get_squid_version, get_timezone, get_network_stats
 )
 from services.get_reports import get_important_metrics, get_metrics_by_date_range
 from utils.colors import color_map
@@ -84,6 +84,9 @@ def realtime_data_thread():
                 'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             
+            # Obtener estadísticas de red
+            network_stats = get_network_stats()
+            
             # Actualizar las variables globales con bloqueo
             with realtime_data_lock:
                 realtime_cache_stats = cache_stats
@@ -92,7 +95,8 @@ def realtime_data_thread():
             # Emitir los datos actualizados a todos los clientes
             socketio.emit('system_update', {
                 'cache_stats': cache_stats,
-                'system_info': system_info
+                'system_info': system_info,
+                'network_stats': network_stats
             })
             
             #logger.info("Datos en tiempo real actualizados y emitidos")
@@ -117,9 +121,12 @@ def handle_connect():
 
     # Ahora que las variables están definidas, puedes compararlas o usarlas
     if cache_stats or system_info:  # solo si hay datos válidos
+        # Obtener estadísticas de red para el cliente recién conectado
+        network_stats = get_network_stats()
         socketio.emit('system_update', {
             'cache_stats': cache_stats,
-            'system_info': system_info
+            'system_info': system_info,
+            'network_stats': network_stats
         })
 
 @app.after_request
@@ -192,11 +199,15 @@ def cache_stats():
                 'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
 
+        # Obtener estadísticas de red
+        network_stats = get_network_stats()
+
         logger.info("Successfully fetched cache statistics and system info")
         return render_template(
             'cacheView.html',
             cache_stats=stats_data,
             system_info=system_info,
+            network_stats=network_stats,
             page_icon='statistics.ico',
             page_title='Estadísticas del Sistema'
         )

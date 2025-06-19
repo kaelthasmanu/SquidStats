@@ -149,6 +149,42 @@ def get_squid_version():
     except Exception as e:
         return f"Error: {str(e)}"
 
+def get_network_stats():
+    """Obtiene estadísticas de uso de red (ancho de banda)"""
+    try:
+        # Obtener estadísticas de red inicial
+        net_io_1 = psutil.net_io_counters()
+        time.sleep(1)  # Esperar 1 segundo para medir la diferencia
+        net_io_2 = psutil.net_io_counters()
+        
+        # Calcular la diferencia en bytes por segundo
+        bytes_sent_per_sec = net_io_2.bytes_sent - net_io_1.bytes_sent
+        bytes_recv_per_sec = net_io_2.bytes_recv - net_io_1.bytes_recv
+        
+        # Convertir a Mbps (Megabits por segundo)
+        # 1 byte = 8 bits, 1 Mb = 1,000,000 bits
+        up_mbps = round((bytes_sent_per_sec * 8) / 1_000_000, 2)
+        down_mbps = round((bytes_recv_per_sec * 8) / 1_000_000, 2)
+        
+        return {
+            'up_mbps': up_mbps,
+            'down_mbps': down_mbps,
+            'bytes_sent_total': net_io_2.bytes_sent,
+            'bytes_recv_total': net_io_2.bytes_recv,
+            'packets_sent': net_io_2.packets_sent,
+            'packets_recv': net_io_2.packets_recv
+        }
+    except Exception as e:
+        return {
+            'up_mbps': 0.0,
+            'down_mbps': 0.0,
+            'bytes_sent_total': 0,
+            'bytes_recv_total': 0,
+            'packets_sent': 0,
+            'packets_recv': 0,
+            'error': str(e)
+        }
+
 def get_timezone():
     """Obtiene la zona horaria del sistema"""
     try:
