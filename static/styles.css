@@ -162,109 +162,17 @@ body {
     font-weight: 500;
 }
 
-/* Table styles */
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    margin-top: 0.5rem;
+.grouped-log-entry {
+  background-color: #f0f9ff;
+  border-left: 4px solid #3b82f6;
 }
 
-.data-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 0.875rem;
+.grouped-log-entry .wave {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
 }
 
-.data-table th,
-.data-table td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--table-border);
-}
-
-.data-table th {
-    background-color: var(--table-header-bg);
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-}
-
-.data-table tr:nth-child(even) {
-    background-color: var(--table-stripe);
-}
-
-.data-table tr:hover {
-    background-color: #f3f4f6;
-}
-
-/* Table cell specific styles */
-.time-cell {
-    font-family: monospace;
-    white-space: nowrap;
-}
-
-.method-cell {
-    white-space: nowrap;
-}
-
-.url-cell {
-    max-width: 300px;
-}
-
-.url-content {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.data-cell {
-    font-family: monospace;
-    white-space: nowrap;
-    color: var(--success-color);
-    font-weight: 500;
-}
-
-.pool-cell {
-    white-space: nowrap;
-}
-
-.pool-badge {
-    background-color: var(--warning-color);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.requests-cell {
-    font-weight: 500;
-    color: var(--info-color);
-}
-
-.ip-cell {
-    font-family: monospace;
-    white-space: nowrap;
-}
-
-/* Method badges */
-.method-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-}
-
-.method-badge.tcp_tunnel {
-    background-color: #dbeafe;
-    color: #1e40af;
-}
-
-.method-badge.tcp_miss {
-    background-color: #fee2e2;
-    color: #991b1b;
+.fa-layer-group {
+  color: #3b82f6;
 }
 
 /* Responsive adjustments */
@@ -292,10 +200,5 @@ body {
 
     .user-stats {
         margin-top: 0.5rem;
-    }
-
-    .data-table th,
-    .data-table td {
-        padding: 0.5rem;
     }
 }

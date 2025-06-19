@@ -1,100 +1,284 @@
+import re
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
-from sqlalchemy import inspect, text
+from typing import List, Dict, Any, Optional
+from sqlalchemy import inspect, text, create_engine
+from sqlalchemy.ext.automap import automap_base
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, date
+import logging
+from sqlalchemy import func
+
+# Configuración básica de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
 sys.path.append(str(project_root))
 
-from database.database import User, Log
+from database.database import get_session, get_engine
 
-def get_users_with_logs_optimized(db: Session) -> List[Dict[str, Any]]:
+# Patrones de validación para nombres de tabla y fechas
+TABLE_NAME_PATTERN = re.compile(r'^[a-z_]{3,20}$')
+DATE_SUFFIX_PATTERN = re.compile(r'^\d{8}$')
+
+def validate_table_name(table_name: str) -> bool:
+    return bool(TABLE_NAME_PATTERN.match(table_name))
+
+def validate_date_suffix(date_suffix: str) -> bool:
+    return bool(DATE_SUFFIX_PATTERN.match(date_suffix))
+
+def sanitize_table_name(name: str) -> str:
+    return re.sub(r'[^a-z0-9_]', '', name.lower())
+
+def get_dynamic_model(db: Session, table_name: str, date_suffix: str):
+    # Validar parámetros
+    if not validate_table_name(table_name):
+        logger.error(f"Nombre de tabla inválido: {table_name}")
+        return None
+        
+    if not validate_date_suffix(date_suffix):
+        logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+        return None
+    
+    full_table_name = f"{table_name}_{date_suffix}"
+    
+    # Verificar si la tabla existe
     try:
-        users = db.query(User).filter(User.username != "-").all()
-
-        users_data = []
-        for user in users:
-            logs = db.query(Log).filter(Log.user_id == user.id).all()
-
-            total_requests = sum(log.request_count for log in logs)
-            total_data = sum(log.data_transmitted for log in logs)
-
-            user_dict = {
-                "user_id": user.id,
-                "username": user.username,
-                "ip": user.ip,
-                "logs": [{
-                    "url": log.url,
-                    "response": log.response,
-                    "request_count": log.request_count,
-                    "data_transmitted": log.data_transmitted
-                } for log in logs],
-                "total_requests": total_requests,
-                "total_data": total_data
-            }
-
-            users_data.append(user_dict)
-
-        return users_data
+        inspector = inspect(db.get_bind())
+        if not inspector.has_table(full_table_name):
+            logger.warning(f"Tabla {full_table_name} no encontrada")
+            return None
+        
+        # Crear modelo dinámico usando automap
+        Base = automap_base()
+        Base.prepare(autoload_with=db.get_bind())
+        
+        return getattr(Base.classes, full_table_name, None)
     except Exception as e:
-        print(f"Error en get_users_with_logs_optimized: {e}")
-        raise
+        logger.error(f"Error obteniendo modelo dinámico: {str(e)}", exc_info=True)
+        return None
+
+def get_users_logs(db: Session, date_suffix: Optional[str] = None, page: int = 1, per_page: int = 15) -> Dict[str, Any]:
+    try:
+        if not date_suffix:
+            date_suffix = datetime.now().strftime("%Y%m%d")
+        if not validate_date_suffix(date_suffix):
+            logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+            return {"users": [], "total": 0, "page": page, "per_page": per_page, "total_pages": 0}
+        
+        UserModel = get_dynamic_model(db, "user", date_suffix)
+        LogModel = get_dynamic_model(db, "log", date_suffix)
+        
+        if not UserModel or not LogModel:
+            logger.error(f"Tablas dinámicas no disponibles para la fecha {date_suffix}")
+            return {"users": [], "total": 0, "page": page, "per_page": per_page, "total_pages": 0}
+        
+        # Contar total de usuarios distintos
+        total = db.query(UserModel).filter(UserModel.username != "-").count()
+        
+        # Paginación
+        offset = (page - 1) * per_page
+        users_query = db.query(UserModel).filter(UserModel.username != "-").order_by(UserModel.id).offset(offset).limit(per_page)
+        users = users_query.all()
+        
+        users_map = {}
+        user_ids = [u.id for u in users]
+        
+        # Traer logs solo de los usuarios de la página
+        logs_query = db.query(
+            UserModel.id.label("user_id"),
+            UserModel.username,
+            UserModel.ip,
+            LogModel.url,
+            LogModel.response,
+            LogModel.request_count,
+            LogModel.data_transmitted
+        ).join(
+            LogModel, UserModel.id == LogModel.user_id
+        ).filter(
+            UserModel.id.in_(user_ids)
+        )
+        
+        for row in logs_query:
+            user_id = row.user_id
+            if user_id not in users_map:
+                users_map[user_id] = {
+                    "user_id": user_id,
+                    "username": row.username,
+                    "ip": row.ip,
+                    "logs": [],
+                    "total_requests": 0,
+                    "total_data": 0
+                }
+            log_entry = {
+                "url": row.url,
+                "response": row.response,
+                "request_count": row.request_count,
+                "data_transmitted": row.data_transmitted
+            }
+            users_map[user_id]["logs"].append(log_entry)
+            users_map[user_id]["total_requests"] += row.request_count
+            users_map[user_id]["total_data"] += row.data_transmitted
+        
+        total_pages = (total + per_page - 1) // per_page if per_page else 1
+        return {
+            "users": list(users_map.values()),
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": total_pages
+        }
+    except Exception as e:
+        logger.error(f"Error en get_users_logs paginado: {str(e)}", exc_info=True)
+        return {"users": [], "total": 0, "page": page, "per_page": per_page, "total_pages": 0}
     finally:
         db.close()
 
+def get_users_with_logs_by_date(db: Session, date_suffix: str) -> List[Dict[str, Any]]:
+    # Validar sufijo de fecha
+    if not validate_date_suffix(date_suffix):
+        logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+        return []
+    
+    return get_users_logs(db, date_suffix)
 
-def get_users_with_logs_by_date(db: Session, date_suffix: str):
+def get_metrics_for_date(selected_date: date):
+    session = get_session()
+    date_suffix = selected_date.strftime("%Y%m%d")
     try:
-        users_table = f'users_{date_suffix}'
-        logs_table = f'logs_{date_suffix}'
+        User, Log = get_dynamic_models(date_suffix)
+    except Exception:
+        # Si no existen tablas para esa fecha, devuelve métricas vacías
+        return {
+            "total_stats": {
+                "total_users": 0,
+                "total_log_entries": 0,
+                "total_data_transmitted": 0,
+                "total_requests": 0,
+            },
+            "top_users_by_activity": [],
+            "top_users_by_data_transferred": [],
+            "http_response_distribution_chart": {
+                "labels": [],
+                "data": [],
+                "colors": []
+            },
+            "top_pages": [],
+            "users_per_ip": []
+        }
 
-        inspector = inspect(db.get_bind())
+    # Total stats
+    total_users = session.query(func.count(User.id)).scalar() or 0
+    total_log_entries = session.query(func.count(Log.id)).scalar() or 0
+    total_data_transmitted = session.query(func.coalesce(func.sum(Log.data_transmitted), 0)).scalar() or 0
+    total_requests = session.query(func.coalesce(func.sum(Log.request_count), 0)).scalar() or 0
 
-        if not inspector.has_table(users_table) or not inspector.has_table(logs_table):
-            return []
+    # Top 20 users by activity
+    top_users_by_activity = (
+        session.query(User.username, func.sum(Log.request_count).label("total_visits"))
+        .join(Log, Log.user_id == User.id)
+        .group_by(User.username)
+        .order_by(func.sum(Log.request_count).desc())
+        .limit(20)
+        .all()
+    )
+    top_users_by_activity = [
+        {"username": u.username, "total_visits": u.total_visits} for u in top_users_by_activity
+    ]
 
-        users = db.query(User). \
-            with_entities(
-            User.id,
-            User.username,
-            User.ip
-        ). \
-            from_statement(text(f'SELECT * FROM {users_table}')).all()
+    # Top 20 users by data transferred
+    top_users_by_data_transferred = (
+        session.query(User.username, func.sum(Log.data_transmitted).label("total_data_bytes"))
+        .join(Log, Log.user_id == User.id)
+        .group_by(User.username)
+        .order_by(func.sum(Log.data_transmitted).desc())
+        .limit(20)
+        .all()
+    )
+    top_users_by_data_transferred = [
+        {"username": u.username, "total_data_bytes": u.total_data_bytes} for u in top_users_by_data_transferred
+    ]
 
-        users_data = []
-        for user in users:
-            logs = db.query(Log). \
-                with_entities(
-                Log.url,
-                Log.response,
-                Log.request_count,
-                Log.data_transmitted
-            ). \
-                from_statement(text(f'SELECT * FROM {logs_table} WHERE user_id = :user_id')). \
-                params(user_id=user.id).all()
+    # HTTP response distribution
+    http_codes = (
+        session.query(Log.response, func.count(Log.id))
+        .group_by(Log.response)
+        .all()
+    )
+    code_labels = [str(code) for code, _ in http_codes]
+    code_data = [count for _, count in http_codes]
+    code_colors = [
+        "#3B82F6" if 200 <= int(code) < 300 else
+        "#F59E0B" if 300 <= int(code) < 400 else
+        "#EF4444" if 400 <= int(code) < 500 else
+        "#8B5CF6" if 500 <= int(code) < 600 else
+        "#10B981"
+        for code in code_labels
+    ]
 
+    # Top 20 pages
+    top_pages = (
+        session.query(
+            Log.url,
+            func.sum(Log.request_count).label("total_requests"),
+            func.count(func.distinct(Log.user_id)).label("unique_visits"),
+            func.sum(Log.data_transmitted).label("total_data_bytes")
+        )
+        .group_by(Log.url)
+        .order_by(func.sum(Log.request_count).desc())
+        .limit(20)
+        .all()
+    )
+    top_pages = [
+        {
+            "url": p.url,
+            "total_requests": p.total_requests,
+            "unique_visits": p.unique_visits,
+            "total_data_bytes": p.total_data_bytes
+        }
+        for p in top_pages
+    ]
 
-            total_requests = sum(log.request_count for log in logs)
-            total_data = sum(log.data_transmitted for log in logs)
+    # IPs compartidas por múltiples usuarios
+    users_per_ip = (
+        session.query(
+            User.ip,
+            func.count(User.id).label("user_count"),
+            func.group_concat(User.username, ', ').label("usernames")
+        )
+        .group_by(User.ip)
+        .having(func.count(User.id) > 1)
+        .all()
+    )
+    users_per_ip = [
+        {
+            "ip": ip.ip,
+            "user_count": ip.user_count,
+            "usernames": ip.usernames
+        }
+        for ip in users_per_ip
+    ]
 
-            users_data.append({
-                "user_id": user.id,
-                "username": user.username,
-                "ip": user.ip,
-                "logs": [{
-                    "url": log.url,
-                    "response": log.response,
-                    "request_count": log.request_count,
-                    "data_transmitted": log.data_transmitted
-                } for log in logs],
-                "total_requests": total_requests,
-                "total_data": total_data
-            })
+    return {
+        "total_stats": {
+            "total_users": total_users,
+            "total_log_entries": total_log_entries,
+            "total_data_transmitted": total_data_transmitted,
+            "total_requests": total_requests,
+        },
+        "top_users_by_activity": top_users_by_activity,
+        "top_users_by_data_transferred": top_users_by_data_transferred,
+        "http_response_distribution_chart": {
+            "labels": code_labels,
+            "data": code_data,
+            "colors": code_colors
+        },
+        "top_pages": top_pages,
+        "users_per_ip": users_per_ip
+    }
 
-        return users_data
-    except Exception as e:
-        print(f"Error en get_users_with_logs_by_date: {e}")
-        raise

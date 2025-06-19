@@ -27,8 +27,9 @@ def find_blacklisted_sites(
 
     try:
         all_tables = inspector.get_table_names()
-        logs_tables = sorted(
-            [t for t in all_tables if t.startswith('logs_') and len(t) == 13],
+        # Cambiar logs_ por log_ y ajustar longitud
+        log_tables = sorted(
+            [t for t in all_tables if t.startswith('log_') and len(t) == 12],
             reverse=True
         )
 
@@ -36,7 +37,7 @@ def find_blacklisted_sites(
         remaining = per_page
         count_only = offset >= 1000
 
-        for log_table in logs_tables:
+        for log_table in log_tables:
             try:
                 date_str = log_table.split('_')[1]
                 log_date = datetime.strptime(date_str, "%Y%m%d").date()
@@ -44,7 +45,7 @@ def find_blacklisted_sites(
             except (IndexError, ValueError):
                 continue
 
-            user_table = f'users_{date_str}'
+            user_table = f'user_{date_str}'
             if user_table not in all_tables:
                 continue
 
@@ -91,8 +92,8 @@ def find_blacklisted_sites(
 
         if count_only:
             total_parts = []
-            for log_table in logs_tables:
-                user_table = log_table.replace('logs_', 'users_')
+            for log_table in log_tables:
+                user_table = log_table.replace('log_', 'user_')
                 like_conditions = " OR ".join([f"l.url LIKE '%{s}%'" for s in blacklist])
                 total_parts.append(
                     f"(SELECT COUNT(*) FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id WHERE {like_conditions})"
@@ -121,18 +122,18 @@ def find_blacklisted_sites_by_date(db: Session, blacklist: list, specific_date: 
 
     try:
         date_suffix = specific_date.strftime("%Y%m%d")
-        users_table = f'users_{date_suffix}'
-        logs_table = f'logs_{date_suffix}'
+        user_table = f'user_{date_suffix}'
+        log_table = f'log_{date_suffix}'
 
         inspector = inspect(db.get_bind())
-        if not inspector.has_table(users_table) or not inspector.has_table(logs_table):
+        if not inspector.has_table(user_table) or not inspector.has_table(log_table):
             return []
 
         like_conditions = ' OR '.join([f"l.url LIKE :pattern{i}" for i in range(len(blacklist))])
         query = text(f"""
             SELECT u.username, l.url 
-            FROM {logs_table} l
-            JOIN {users_table} u ON l.user_id = u.id
+            FROM {log_table} l
+            JOIN {user_table} u ON l.user_id = u.id
             WHERE {like_conditions}
         """)
 
