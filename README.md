@@ -54,11 +54,13 @@
 </details>
 
 <!-- ABOUT THE PROJECT -->
+
 ## About the Project
 
-*A modern tool for parsing and analyzing Squid logs, providing a sleek and user-friendly dashboard to visualize real-time connection data. This project helps network administrators monitor and manage Squid proxy connections effectively.*
+_A modern tool for parsing and analyzing Squid logs, providing a sleek and user-friendly dashboard to visualize real-time connection data. This project helps network administrators monitor and manage Squid proxy connections effectively._
 
 **You can view the example [here](https://github.com/kaelthasmanu/SquidStats/tree/main/assets "Examples").**
+
 <div align="center">
   <img src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/photo_2025-03-16_10-33-06.jpg" 
        alt="fig1" 
@@ -87,177 +89,253 @@
   - Number of requests per connection.
   - Delay pool usage.
 - **_Interactive Dashboard_**: Clean interface for easy data interpretation.
-- **_Squid Cache Statistics_**: 
+- **_Squid Cache Statistics_**:
   - Stored entries.
   - Used and free capacity
   - Maximum and current cache size
   - Disk space and inode usage
   - Age of cached objects
-- **_Logs Users_**: 
+- **_Logs Users_**:
   - User activity monitoring 👥
-  - Beautiful visualizations 📊 
-  - Advanced filtering & search 🔍 
+  - Beautiful visualizations 📊
+  - Advanced filtering & search 🔍
   - Paginated results 📄
-- **_Top Graphs_**: 
+- **_Top Graphs_**:
   - Top 20 Users Activity
   - Top 20 Users Data Usage
   - Total Users
   - Total Transmitted Data
-  - Total Request 
+  - Total Request
   - And More...
 - **_And More_**
-  
-<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
----
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
 <!-- GETTING STARTED -->
+
 ## Getting Started
+
 [![SquidStat](https://img.shields.io/badge/Web-Project-teal.svg?colorA=teal&colorB=red&style=for-the-badge)](https://github.com/kaelthasmanu/SquidStats/)
 
 **The entire installation process in more detail can be found [here](https://www.sysadminsdecuba.com/2025/04/squidstat-analizador-de-logs-de-squid-diferente-y-100-cubano/).**
 
 ### Prerequisites
+
 - Python 3.10+
 - Squid proxy server
 - `squidclient` installed on the server
-```bash 
+
+```bash
 apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev curl
 ```
+
 - ⚠️ !!Important ⚠️ For compatibility with user logs, use this format in /etc/squid/squid.conf:
-```bash 
+
+```bash
   logformat detailed \
   "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
-  
+
   access_log /var/log/squid/access.log detailed
 ```
+
 ### Installation Script
+
 1. Get Script With curl o wget:
-  ```bash
-   wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
-   ``` 
+
+```bash
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+```
 
 2. Add permission execution:
-  ```bash
-   sudo chmod +x install.sh
-   ```
+
+```bash
+ sudo chmod +x install.sh
+```
 
 3. Execute the script:
-  ```bash
-   sudo ./install.sh
-   ```
-<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
----
+
+```bash
+ sudo ./install.sh
+```
+
+#### Installation Options
+The installer now supports multiple modes:
+
+```bashAdd commentMore actions
+# Full installation (interactive)
+sudo ./install.sh
+
+# Update existing installation
+sudo ./install.sh --update
+
+# Configure blacklist only
+sudo ./install.sh --configure-blacklist
+
+# Show help
+./install.sh --help
+```
+
+#### 🛡️ Blacklist Configuration
+During installation, you can configure which domains notify like block:
+
+- **Option 1**: Use default blacklist (facebook.com, twitter.com, instagram.com, etc.)
+- **Option 2**: Configure custom domains
+- **Option 3**: Skip blacklist configuration
+
+**Example custom configuration:**
+```bash
+# When prompted, enter domains separated by commas:
+facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
+```
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
 ### Installation Manual
+
 1. Clone the repository:
    ```bash
    mkdir -p /opt/squidstats
    git clone https://github.com/kaelthasmanu/SquidStats.git /opt/squidstats
    ```
-2.  Creating a virtual environment (venv):
-  ```bash
-   cd /opt/squidstats/
-   python3 -m venv "/opt/squidstats/venv"
-   source venv/bin/activate
-   pip install --upgrade pip
-   ```
+2. Creating a virtual environment (venv):
+
+```bash
+ cd /opt/squidstats/
+ python3 -m venv "/opt/squidstats/venv"
+ source venv/bin/activate
+ pip install --upgrade pip
+```
+
 3. Install requeriments python with pip or pip3:
-  ```bash
-    pip install -r /opt/squidstats/requirements.txt
-  ```
+
+```bash
+  pip install -r /opt/squidstats/requirements.txt
+```
+
 4. Create a .env file in the project root and add the following content:\
-  Note: for use MARIADB need your own database running
-  ```bash
-    VERSION=2
-    SQUID_HOST = "127.0.0.1"
-    SQUID_PORT = 3128
-    FLASK_DEBUG = "True"
-    DATABASE_TYPE="SQLITE"
-    SQUID_LOG = "/var/log/squid/access.log"
-    DATABASE_STRING_CONNECTION = "/opt/squidstats/"
-    REFRESH_INTERVAL = 60
-  ```
-5. Run App with python or python3  🚀:
-  ```bash
-    python3 app.py
-  ```
+    Note: for use MARIADB need your own database running
+   ```bash
+   VERSION=2
+   SQUID_HOST="127.0.0.1"
+   SQUID_PORT=3128
+   FLASK_DEBUG="True"
+   DATABASE_TYPE="SQLITE"
+   SQUID_LOG="/var/log/squid/access.log"
+   DATABASE_STRING_CONNECTION="/opt/squidstats/"
+   REFRESH_INTERVAL=60
+   BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
+   ```
+5. Run App with python or python3 🚀:
+
+```bash
+  python3 app.py
+```
+
 6. With your preferred browser, visit the installation URL:
-  ```bash
-    http://ip/hostname:5000 
-  ```
+
+```bash
+  http://ip/hostname:5000
+```
+
 ### ⚠️ First Execution Alert ⚠️
+
 Warning: 🚨 The first execution may cause high CPU usage.
 
 ### Update project(web) with Script
 
 1. Get Script With curl o wget:
-  ```bash
-   wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
-   ``` 
+
+```bash
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+```
 
 2. Add permission execution:
-  ```bash
-   sudo chmod +x install.sh
-   ```
+
+```bash
+ sudo chmod +x install.sh
+```
 
 3. Execute the script with parameters update:
-  ```bash
-   sudo ./install.sh --update
-   ```
+
+```bash
+ sudo ./install.sh --update
+```
 
 🕒 Run on System Startup
 To ensure the application starts automatically when the system boots, add the following cron job:
+
 1. Open with a editor the file crontab
+
 ```bash
 nano /etc/crontab
 ```
+
 2. Add the following line to the crontab file(change path_app for your path):
+
 ```bash
 @reboot root nohup python3 path_app/app.py &
 ```
+
 3. Save
 
 Or can use service(daemon):
 
 1. Copy file service:
-  ```bash
-    cp ./utils/squidstats.service /etc/systemd/system/squidstats.service
-  ```
+
+```bash
+  cp ./utils/squidstats.service /etc/systemd/system/squidstats.service
+```
+
 2. Restart daemons:
-  ```bash
-    systemctl daemon-reload
-  ```
+
+```bash
+  systemctl daemon-reload
+```
+
 3. Enable service:
-  ```bash
-    systemctl enable squidstats.service
-  ```
+
+```bash
+  systemctl enable squidstats.service
+```
+
 3. Start service:
-  ```bash
-    systemctl start squidstats.service
-  ```
-<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
----
+
+```bash
+  systemctl start squidstats.service
+```
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
 ## Testing Information
+
 This software has been thoroughly tested and is compatible with Squid version 6.12 in Ubuntu 24.04 and Debian12. Please ensure your Squid installation matches this version or newer for optimal performance.
 
 ## To do
 
-*Make blah blah.*
+_Make blah blah._
 
 ## Contributing
+
 1. Fork the repository:
    ```bash
    git checkout -b feature-name
    ```
-2.Create a new branch for your feature or fix:
- ```bash
- git checkout -b feature-name
- ```
+   2.Create a new branch for your feature or fix:
+
+```bash
+git checkout -b feature-name
+```
+
 3.Commit your changes and push the branch:
-  ```bash
-  git push origin feature-name
-  ```
+
+```bash
+git push origin feature-name
+```
+
 4.Open a pull request.
 
 **Contributors**
+
 <table style="width:100%">
   <tr>
     <th><b>Kaelthas</b></th>
@@ -275,23 +353,25 @@ This software has been thoroughly tested and is compatible with Squid version 6.
 
 ## License
 
-*The SquidStats project is released under the <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/LICENSE.md">MIT</a> license.*
+_The SquidStats project is released under the <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/LICENSE.md">MIT</a> license._
 
 <!-- CONTACT -->
+
 ## Contact
-> **_Need help?_** 
-**_Feel free to contact me 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
+
+> **_Need help?_**
+> **_Feel free to contact me 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
 
 Project Link: ([SquidStats](https://github.com/kaelthasmanu/cucuota))
 
 ## Technologies Used
 
-  Backend: Python, Flask
-  Frontend: HTML, CSS
+Backend: Python, Flask
+Frontend: HTML, CSS
 
 ## Special thanks
-* _To the Cuban Sysadmins community._
-* _To everyone who gave me his help when I had doubts._
-  
-<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
----
+
+- _To the Cuban Sysadmins community._
+- _To everyone who gave me his help when I had doubts._
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
