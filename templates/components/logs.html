@@ -6,43 +6,78 @@
         <input type="date" id="date-filter"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12">
       </div>
-
       <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[250px] relative">
-    <input type="text" id="username-search" placeholder="Buscar por usuario..."
-        class="search-input w-full pl-4 pr-10 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
-    
-    <!-- Botón de limpiar búsqueda (NUEVO) -->
-    <button id="clear-search" class="absolute right-10 h-full flex items-center justify-center text-gray-400 hover:text-gray-700 hidden" title="Limpiar búsqueda">
-        <i class="fas fa-times"></i>
-    </button>
-    
-    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-        <i class="fas fa-magnifying-glass text-xl text-[#1A8A9D]"></i>
-    </div>
-</div>
+        <input type="text" id="username-search" placeholder="Buscar por usuario..."
+            class="search-input w-full pl-4 pr-10 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12">
+        <button id="clear-search" class="absolute right-10 h-full flex items-center justify-center text-gray-400 hover:text-gray-700 hidden" title="Limpiar búsqueda">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <i class="fas fa-magnifying-glass text-xl text-[#1A8A9D]"></i>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
-  <div id="modals-container"></div>
+  
   <div class="pagination-container flex justify-center items-center mt-12 gap-4">
-    <button id="first-page" aria-label="First page"
-      class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i
-        class="fas fa-angle-double-left"></i></button>
-    <button id="prev-page" aria-label="Previous page"
-      class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"
-      disabled><i class="fas fa-angle-left"></i></button>
+    <button id="first-page" aria-label="First page" class="pg-btn w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-double-left"></i></button>
+    <button id="prev-page" aria-label="Previous page" class="pg-btn w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none" disabled><i class="fas fa-angle-left"></i></button>
     <div class="pagination flex gap-1" id="page-numbers"></div>
-    <button id="next-page" aria-label="Next page"
-      class="pg-btn next w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i
-        class="fas fa-angle-right"></i></button>
-    <button id="last-page" aria-label="Last page"
-      class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i
-        class="fas fa-angle-double-right"></i></button>
+    <button id="next-page" aria-label="Next page" class="pg-btn w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-right"></i></button>
+    <button id="last-page" aria-label="Last page" class="pg-btn w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"><i class="fas fa-angle-double-right"></i></button>
   </div>
 </div>
 
-<div class="overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-1000 ease-in-out opacity-0" id="overlay"></div>
+<div class="overlay fixed inset-0 bg-black bg-opacity-50 z-[999] hidden transition-opacity duration-300 ease-in-out opacity-0" id="overlay"></div>
 
-<script src="static/js/dashboard.js"></script>
+<div id="generic-user-modal" class="logs-modal hidden fixed inset-0 bg-black bg-opacity-50 z-[1000] flex justify-center items-center transition-all duration-300 ease-in-out opacity-0 p-4">
+  <div class="modal-content bg-white p-6 sm:p-8 rounded-2xl w-[95%] max-w-[700px] max-h-[90vh] flex flex-col shadow-2xl relative">
+    
+    <button onclick="window.closeLogsModal()" class="close-btn absolute top-3 right-3 w-9 h-9 flex items-center justify-center bg-red-500 text-white rounded-full z-50 shadow-md transform transition-all duration-300 hover:bg-red-600 hover:scale-110 hover:rotate-90" title="Cerrar" aria-label="Cerrar">
+      <i class="fas fa-times text-lg"></i>
+    </button>
+    
+    <div class="flex-shrink-0">
+        <div class="flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                    <h4 class="logs-title text-base text-gray-500 uppercase tracking-[1px] font-semibold whitespace-nowrap">Actividad reciente -</h4>
+                    <div class="flex items-center gap-2">
+                        <span id="modal-username" class="username-highlight font-semibold truncate max-w-[120px] text-xl text-[#1369ce]"></span>
+                        <div id="modal-search-box" class="relative w-auto h-[38px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md flex items-center border border-gray-300">
+                            <div id="modal-toggle-btn" class="absolute left-0 top-0 w-[38px] h-[38px] flex items-center justify-center cursor-pointer z-10">
+                                <i class="fas fa-search text-blue-600 text-sm"></i>
+                            </div>
+                            <div id="modal-input-wrapper" class="ml-[38px] w-0 h-[38px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
+                                <input id="modal-search-input" type="text" placeholder="Buscar URL..." class="w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]"/>
+                            </div>
+                            <button id="modal-clear-btn" class="absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" title="Limpiar búsqueda">
+                                <i class="fas fa-times text-lg leading-none"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="modal-response-summary" class="response-summary flex justify-end gap-4 items-center mb-4">
+                </div>
+        </div>
+    </div>
+    
+    <div class="logs-list-wrapper flex-grow overflow-y-auto pr-2 -mr-2">
+      <div id="modal-logs-list" class="logs-list grid gap-3">
+          </div>
+    </div>
+    
+    <div id="modal-no-results" class="no-results hidden text-center py-8 text-gray-500">
+      <i class="fas fa-search-minus text-4xl text-gray-400 mb-4"></i>
+      <h3 class="text-xl font-semibold text-gray-600">No se encontraron resultados</h3>
+      <p class="text-gray-500 mt-2">Intenta con otros filtros o términos de búsqueda.</p>
+    </div>
+  </div>
+</div>
 
+<script src="{{ url_for('static', filename='js/utils.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/modal-handler.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/dashboard-main.js') }}" defer></script>

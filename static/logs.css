@@ -9,11 +9,6 @@
     --light-color: #f8f9fa;
     --dark-color: #212529;
     --gray-color: #6c757d;
-    --border-radius: 8px;
-    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
-    --modal-bg: rgba(0, 0, 0, 0.6);
-    --hover-bg: #e9ecef;
 }
 
 /* =================== Base =================== */
@@ -26,71 +21,30 @@ body {
     padding: 0;
 }
 
-
-/* =================== User Cards =================== */
-/* NUEVO: Efecto de elevación en tarjetas de usuario */
-.user-card {
-  transition: all 0.3s ease; /* Transición suave para todas las propiedades */
-  transform: translateY(0); /* Posición inicial sin elevación */
-  z-index: 1; /* Orden z normal */
-}
-
-.user-card:hover {
-  transform: translateY(-8px); /* Eleva la tarjeta 8px hacia arriba */
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
-  z-index: 10; /* Coloca la tarjeta elevada sobre las demás */
-}
-
-/* =================== Logs =================== */
-
-/* Estilos mejorados para la scrollbar */
+/* =================== Scrollbar (Se Mantiene) =================== */
+/* Estilos personalizados para la scrollbar del modal */
 .logs-list::-webkit-scrollbar {
-    width: 12px;
-    background-color: #F5F5F5;
+    width: 8px;
 }
 
 .logs-list::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background: #f1f1f1;
     border-radius: 10px;
-    background-color: #F5F5F5;
 }
 
 .logs-list::-webkit-scrollbar-thumb {
+    background: #888;
     border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
-    background-color: #555;
+}
+
+.logs-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 
-.log-url {
-    font-weight: 500;
-    margin-bottom: 0.3rem;
-    word-break: break-word;
-}
-
-.log-details {
-    display: flex;
-    align-items: center;
-    font-size: 0.8rem;
-    color: var(--gray-color);
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.log-meta::before {
-    content: "•";
-    margin-right: 0.3rem;
-    color: #ccc;
-}
-
-.no-logs {
-    text-align: center;
-    padding: 1rem;
-    color: var(--gray-color);
-    font-style: italic;
-}
-
-/* =================== Logs List =================== */
+/* =================== Animación Wave (Se Mantiene) =================== */
+/* Este efecto de hover en las entradas de log es complejo
+   y se mantiene en CSS para mayor claridad y funcionalidad. */
 .wave-container {
   position: absolute;
   top: 0;
@@ -100,6 +54,7 @@ body {
   overflow: hidden;
   z-index: 1;
   pointer-events: none;
+  border-radius: inherit; /* Hereda el borde redondeado del padre */
 }
 
 .wave {
@@ -120,43 +75,5 @@ body {
 
 .log-entry:hover .wave {
   opacity: 1;
-  transform: scale(2);
-}
-
-.log-entry {
-  min-height: 80px; /* Altura mínima para evitar deformaciones */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.hidden {
-  display: none;
-}
-
-.grid {
-  display: grid;
-}
-
-.log-entries-container {
-  grid-template-columns: 1fr;
-}
-
-/* =================== Logs Table =================== */
-.logs-table {
-    display: grid;
-    grid-template-columns: 1fr auto auto auto;
-    gap: 1em;
-    margin-top: 1em;
-}
-
-.log-row {
-    display: contents;
-}
-
-.log-row>div {
-    padding: 0.8em;
-    background: #f8f9fa;
-    border-radius: 6px;
-    font-size: 0.9em;
+  transform: scale(2.5);
 }
