@@ -191,7 +191,7 @@
                                 <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
                                 <!-- Nueva etiqueta con información de núcleos del CPU - Color del anillo -->
                                 <p
-                                    class="cores text-sm mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                    class="cores text-xs mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full font-medium">
                                     {{ system_info.cpu.physical_cores }} núcleos</p>
                             </div>
 
@@ -215,7 +215,7 @@
                                 <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
                                 <!-- Nueva etiqueta con información de RAM total - Color del anillo -->
                                 <p
-                                    class="ram text-sm mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                    class="ram text-xs mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">
                                     {{ system_info.ram.total }}</p>
                             </div>
 
@@ -238,7 +238,7 @@
                                 <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
                                 <!-- Nueva etiqueta con información de swap total - Color del anillo -->
                                 <p
-                                    class="swap text-sm mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                    class="swap text-xs mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium">
                                     {{ system_info.swap.total }}</p>
                             </div>
                         </div>
@@ -336,6 +336,18 @@
                     <div class="h-80">
                         <canvas id="swapChart"></canvas>
                     </div>
+                </div>
+            </section>
+
+            <!-- Sección de gráfica de red (ancho de banda) -->
+            <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
+                <div class="flex items-center mb-6">
+                    <i class="fas fa-network-chart text-2xl text-blue-600 mr-3"></i>
+                    <h2 class="text-xl font-bold text-gray-800">Estadísticas de Ancho de Banda</h2>
+                </div>
+
+                <div class="h-80">
+                    <canvas id="networkChart"></canvas>
                 </div>
             </section>
         </div>
@@ -441,110 +453,56 @@
         // Registrar el plugin de datalabels
         Chart.register(ChartDataLabels);
 
-        // Variables para almacenar datos en tiempo real
-        let systemDataHistory = {
-            cpu: [],
-            ram: [],
-            swap: [],
-            cache: []
+        // Variables globales optimizadas
+        let systemDataHistory = { cpu: [], ram: [], swap: [], cache: [], network_up: [], network_down: [] };
+        let maxRamBytes = 0, maxSwapBytes = 0;
+        let cpuBuffer = [], ramBuffer = [], swapBuffer = [], netUpBuffer = [], netDownBuffer = [];
+        const historySize = 20;
+        let minuteLabels = [], cpuMinuteData = [], ramMinuteData = [], swapMinuteData = [], networkUpMinuteData = [], networkDownMinuteData = [];
+
+        // Utilidades de persistencia optimizadas
+        const storage = {
+            get: (key, fallback) => {
+                const val = sessionStorage.getItem(key);
+                return val ? JSON.parse(val) : fallback;
+            },
+            set: (key, arr) => sessionStorage.setItem(key, JSON.stringify(arr)),
+            setAll: () => {
+                ['cpuMinuteData', 'ramMinuteData', 'swapMinuteData', 'networkUpMinuteData', 'networkDownMinuteData', 'minuteLabels']
+                    .forEach(key => storage.set(key, eval(key)));
+            }
         };
 
-        // Variables para almacenar los valores máximos de RAM y Swap
-        let maxRamBytes = 0;
-        let maxSwapBytes = 0;
-
-        // Buffers para acumular datos cada 5 segundos
-        let cpuBuffer = [];
-        let ramBuffer = [];
-        let swapBuffer = [];
-
-        // Variables para almacenar datos por minuto
-        const historySize = 20; // 20 minutos de historial
-
-        // ==============================================
-        // CAMBIO 1: Inicializar datos con valores actuales
-        // ==============================================
-        let cpuMinuteData = [];
-        let ramMinuteData = [];
-        let swapMinuteData = [];
-        let minuteLabels = [];
-
-        // Función para cargar datos persistentes
-        function loadPersistentData() {
-            // Intentar cargar datos desde sessionStorage
-            const savedCpu = sessionStorage.getItem('cpuMinuteData');
-            const savedRam = sessionStorage.getItem('ramMinuteData');
-            const savedSwap = sessionStorage.getItem('swapMinuteData');
-            const savedLabels = sessionStorage.getItem('minuteLabels');
-
-            // Si hay datos guardados, usarlos
-            if (savedCpu && savedRam && savedSwap && savedLabels) {
-                cpuMinuteData = JSON.parse(savedCpu);
-                ramMinuteData = JSON.parse(savedRam);
-                swapMinuteData = JSON.parse(savedSwap);
-                minuteLabels = JSON.parse(savedLabels);
-
-                // Convertir todas las etiquetas al nuevo formato
-                minuteLabels = minuteLabels.map(label => {
-                    // Si ya está en formato 12h, mantenerlo
-                    if (label.includes('AM') || label.includes('PM')) return label;
-
-                    // Convertir formato 24h existente
-                    const [hora, minuto] = label.split(':');
-                    const horaNum = parseInt(hora, 10);
-                    const ampm = horaNum >= 12 ? 'PM' : 'AM';
-                    const hora12 = horaNum % 12 || 12;
-                    return `${hora12}:${minuto} ${ampm}`;
-                });
-            } else {
-                initializeWithCurrentValues();
-            }
-        }
-
-        // Función para inicializar con valores actuales
-        function initializeWithCurrentValues() {
-            // Obtener valores actuales del sistema
+        // Inicialización optimizada
+        function initializeData() {
             const initialCpu = parseFloat("{{ system_info.cpu.usage|replace('%','') }}");
             const initialRam = sizeToBytes("{{ system_info.ram.used }}");
             const initialSwap = sizeToBytes("{{ system_info.swap.used }}");
+            const initialNetUp = parseFloat("{{ network_stats.up_mbps|default('0') }}");
+            const initialNetDown = parseFloat("{{ network_stats.down_mbps|default('0') }}");
 
-            // Crear arrays con valores actuales
-            cpuMinuteData = Array(historySize).fill(initialCpu);
-            ramMinuteData = Array(historySize).fill(initialRam);
-            swapMinuteData = Array(historySize).fill(initialSwap);
-
-            // Inicializar etiquetas de tiempo
-            initializeMinuteLabels();
+            cpuMinuteData = storage.get('cpuMinuteData', Array(historySize).fill(initialCpu));
+            ramMinuteData = storage.get('ramMinuteData', Array(historySize).fill(initialRam));
+            swapMinuteData = storage.get('swapMinuteData', Array(historySize).fill(initialSwap));
+            networkUpMinuteData = storage.get('networkUpMinuteData', Array(historySize).fill(initialNetUp));
+            networkDownMinuteData = storage.get('networkDownMinuteData', Array(historySize).fill(initialNetDown));
+            
+            minuteLabels = storage.get('minuteLabels', (() => {
+                const now = new Date();
+                return Array.from({ length: historySize }, (_, i) => {
+                    const t = new Date(now.getTime() - (historySize - 1 - i) * 60000);
+                    return formatTime(t);
+                });
+            })());
         }
+        initializeData();
 
-        // Función para inicializar etiquetas de tiempo
-        function initializeMinuteLabels() {
-            const now = new Date();
-            minuteLabels = [];
-
-            for (let i = historySize - 1; i >= 0; i--) {
-                const time = new Date(now.getTime() - i * 60000);
-                minuteLabels.push(formatTime(time));
-            }
-        }
-
-        // Cargar datos persistentes al iniciar
-        loadPersistentData();
-
-        // Función para guardar datos persistentes
-        function savePersistentData() {
-            sessionStorage.setItem('cpuMinuteData', JSON.stringify(cpuMinuteData));
-            sessionStorage.setItem('ramMinuteData', JSON.stringify(ramMinuteData));
-            sessionStorage.setItem('swapMinuteData', JSON.stringify(swapMinuteData));
-            sessionStorage.setItem('minuteLabels', JSON.stringify(minuteLabels));
-        }
-
-        // Función para formatear hora HH:MM
+        // Función para formatear hora en formato 12h
         function formatTime(date) {
             let hours = date.getHours();
             const minutes = date.getMinutes().toString().padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;  // Convertir 0 a 12
+            hours = hours % 12 || 12;
             return `${hours}:${minutes} ${ampm}`;
         }
 
@@ -721,8 +679,7 @@
                     tooltip: {
                         callbacks: {
                             label: function (context) {
-                                return 'RAM Usada: ' + formatSizeCompact(context.raw)
-
+                                return 'RAM Usada: ' + formatSizeCompact(context.raw);
                             }
                         }
                     }
@@ -782,12 +739,55 @@
                     tooltip: {
                         callbacks: {
                             label: function (context) {
-                                return 'SWAP Usada: ' + formatSizeCompact(context.raw)
-
+                                return 'SWAP Usada: ' + formatSizeCompact(context.raw);
                             }
                         }
                     }
                 }
+            }
+        });
+
+        // Gráfico de red (ancho de banda)
+        const networkCtx = document.getElementById('networkChart').getContext('2d');
+        const networkChart = new Chart(networkCtx, {
+            type: 'line',
+            data: {
+                labels: minuteLabels,
+                datasets: [
+                    {
+                        label: 'Subida (Mbps)',
+                        data: networkUpMinuteData,
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6,182,212,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#06b6d4'
+                    },
+                    {
+                        label: 'Bajada (Mbps)',
+                        data: networkDownMinuteData,
+                        borderColor: '#f59e42',
+                        backgroundColor: 'rgba(245,158,66,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#f59e42'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Mbps' },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    },
+                    x: { grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+                },
+                plugins: { legend: { display: true }, datalabels: { display: false } }
             }
         });
 
@@ -932,84 +932,75 @@
             });
         }
 
-        // ==============================================
-        // CAMBIO 2: Función para agregar datos minuto a minuto
-        // con persistencia entre recargas
-        // ==============================================
-        function addMinuteData(cpu, ram, swap) {
-            // Desplazar todos los datos hacia la izquierda
-            cpuMinuteData.shift();
-            ramMinuteData.shift();
-            swapMinuteData.shift();
+        // Función optimizada para agregar datos minuto a minuto
+        function addMinuteData(cpu, ram, swap, netUp, netDown) {
+            const dataArrays = [cpuMinuteData, ramMinuteData, swapMinuteData, networkUpMinuteData, networkDownMinuteData, minuteLabels];
+            const newValues = [cpu, ram, swap, netUp, netDown, formatTime(new Date())];
+            
+            // Actualizar todos los arrays eficientemente
+            dataArrays.forEach((arr, i) => {
+                arr.push(newValues[i]);
+                if (arr.length > historySize) arr.shift();
+            });
 
-            // Agregar nuevos datos al final
-            cpuMinuteData.push(cpu);
-            ramMinuteData.push(ram);
-            swapMinuteData.push(swap);
+            // Actualizar todos los gráficos
+            const charts = [cpuChart, ramChart, swapChart, networkChart];
+            const chartData = [
+                [cpuMinuteData],
+                [ramMinuteData], 
+                [swapMinuteData],
+                [networkUpMinuteData, networkDownMinuteData]
+            ];
 
-            // Actualizar etiquetas: desplazar y agregar nueva hora
-            minuteLabels.shift();
-            const now = new Date();
-            minuteLabels.push(formatTime(new Date()));
+            charts.forEach((chart, i) => {
+                chart.data.labels = [...minuteLabels];
+                if (i === 3) { // networkChart tiene 2 datasets
+                    chart.data.datasets[0].data = [...chartData[i][0]];
+                    chart.data.datasets[1].data = [...chartData[i][1]];
+                } else {
+                    chart.data.datasets[0].data = [...chartData[i][0]];
+                }
+                chart.update();
+            });
 
-            // Actualizar gráficas
-            cpuChart.data.labels = [...minuteLabels];
-            cpuChart.data.datasets[0].data = [...cpuMinuteData];
-
-            ramChart.data.labels = [...minuteLabels];
-            ramChart.data.datasets[0].data = [...ramMinuteData];
-
-            swapChart.data.labels = [...minuteLabels];
-            swapChart.data.datasets[0].data = [...swapMinuteData];
-
-            cpuChart.update();
-            ramChart.update();
-            swapChart.update();
-
-            // Guardar datos persistentes
-            savePersistentData();
+            storage.setAll();
         }
 
         // Conectar a WebSocket
         const socket = io();
 
-        // Manejar actualizaciones del sistema
+        // Manejo optimizado de actualizaciones del sistema
         socket.on('system_update', function (data) {
-            // Actualizar anillos con información adicional
             updateRings(data.system_info);
-
-            // Actualizar información del sistema
             updateSystemInfo(data.system_info);
-
-            // Actualizar estadísticas de caché
             updateCacheStats(data.cache_stats);
 
-            // Obtener datos actuales
-            const cpuValue = parseFloat(data.system_info.cpu.usage.replace('%', ''));
-            const ramValue = sizeToBytes(data.system_info.ram.used);
-            const swapValue = sizeToBytes(data.system_info.swap.used);
+            // Obtener y acumular datos
+            const newData = [
+                parseFloat(data.system_info.cpu.usage.replace('%', '')),
+                sizeToBytes(data.system_info.ram.used),
+                sizeToBytes(data.system_info.swap.used),
+                data.network_stats ? parseFloat(data.network_stats.up_mbps) : 0,
+                data.network_stats ? parseFloat(data.network_stats.down_mbps) : 0
+            ];
 
-            // Agregar datos a los buffers
-            cpuBuffer.push(cpuValue);
-            ramBuffer.push(ramValue);
-            swapBuffer.push(swapValue);
+            [cpuBuffer, ramBuffer, swapBuffer, netUpBuffer, netDownBuffer].forEach((buf, i) => {
+                buf.push(newData[i]);
+            });
 
-            // Cada 12 datos (60 segundos / 5 segundos) = 1 minuto
+            // Procesar cada minuto (12 muestras de 5 segundos)
             if (cpuBuffer.length >= 12) {
-                // Calcular promedio para CPU
-                const cpuAvg = cpuBuffer.reduce((a, b) => a + b, 0) / cpuBuffer.length;
-
-                // Tomar el último valor para RAM y SWAP
-                const ramLast = ramBuffer[ramBuffer.length - 1];
-                const swapLast = swapBuffer[swapBuffer.length - 1];
-
-                // Agregar datos a las gráficas minuto a minuto
-                addMinuteData(cpuAvg, ramLast, swapLast);
-
-                // Reiniciar buffers
-                cpuBuffer = [];
-                ramBuffer = [];
-                swapBuffer = [];
+                const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+                addMinuteData(
+                    avg(cpuBuffer), 
+                    ramBuffer.at(-1), 
+                    swapBuffer.at(-1), 
+                    avg(netUpBuffer), 
+                    avg(netDownBuffer)
+                );
+                
+                // Limpiar buffers
+                [cpuBuffer, ramBuffer, swapBuffer, netUpBuffer, netDownBuffer].forEach(buf => buf.length = 0);
             }
         });
 

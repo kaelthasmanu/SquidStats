@@ -1,11 +1,10 @@
 // ======================================================================
-// FICHERO: dashboard-main.js
-// Contiene la lógica principal de la página de actividad:
-// - Inicialización al cargar el DOM.
-// - Carga de datos por fecha.
-// - Renderizado de tarjetas de usuario.
-// - Búsqueda y paginación de las tarjetas.
-// Depende de utils.js y modal-handler.js
+// FICHERO: dashboard-main.js (CORREGIDO)
+//
+// CAMBIOS REALIZADOS:
+// - CORREGIDO: Se restauró el efecto de "salto" (elevación) en las tarjetas de usuario al pasar el cursor.
+//   Se han añadido clases de Tailwind (`transition-all`, `hover:-translate-y-2`, `hover:shadow-xl`, etc.)
+//   directamente en la plantilla de la tarjeta para lograr el efecto sin necesidad de CSS externo.
 // ======================================================================
 
 // Variables globales para esta página, accesibles por las funciones de este fichero.
@@ -39,8 +38,15 @@ document.addEventListener("DOMContentLoaded", function() {
       return;
     }
 
+    // ======================================================================
+    // CORRECCIÓN: Se añaden las clases de transición y hover a la div principal de la tarjeta.
+    // `transition-all duration-300 ease-out` -> Define la animación suave.
+    // `hover:-translate-y-2` -> Eleva la tarjeta 8px (0.5rem).
+    // `hover:shadow-xl` -> Aumenta la sombra para dar profundidad.
+    // `hover:z-10` -> Asegura que la tarjeta se muestre por encima de las demás.
+    // ======================================================================
     usersContainer.innerHTML = usersData.map((user, index) => `
-      <div class="user-card group bg-[#f0f2f5] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
+      <div class="user-card group bg-[#f0f2f5] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px] transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-xl hover:z-10" data-username="${user.username.toLowerCase()}">
         <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] relative z-[1]">
           <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-300 ease-linear z-0 group-hover:h-full"></div>
           <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
@@ -137,8 +143,10 @@ document.addEventListener("DOMContentLoaded", function() {
   lastBtn.addEventListener("click", () => renderPage(Math.ceil(filteredUsers.length / itemsPerPage)));
 
   const today = new Date().toISOString().split('T')[0];
-  dateFilter.value = today;
-  console.log("fecha actual: ", today);
+  if (!dateFilter.value) {
+    dateFilter.value = today;
+  }
+  
   dateFilter.addEventListener("change", async (e) => {
     const selectedDate = e.target.value;
     if (!selectedDate) return;
@@ -158,5 +166,8 @@ document.addEventListener("DOMContentLoaded", function() {
   
   dateFilter.dispatchEvent(new Event("change"));
 
-  initializeModalSearchBar();
-});6
+  // Llama a la inicialización del modal que ahora está en modal-handler.js
+  if (typeof initializeModalSearchBar === 'function') {
+    initializeModalSearchBar();
+  }
+});

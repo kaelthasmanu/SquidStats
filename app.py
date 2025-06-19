@@ -3,21 +3,21 @@ import eventlet
 eventlet.monkey_patch()
 
 # ------------------- IMPORTACIONES FLASK Y EXTENSIONES -------------------
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, render_template_string
 from flask_socketio import SocketIO, emit
 from flask_apscheduler import APScheduler
 
 # ------------------- UTILIDADES Y SERVICIOS PERSONALIZADOS -------------------
-from database.database import get_session, get_dynamic_models
+from database.database import create_dynamic_tables, get_engine, get_session, get_dynamic_models
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
 from parsers.cache import fetch_squid_cache_stats
 from parsers.log import process_logs
-from services.fetch_data_logs import get_users_with_logs_optimized, get_users_with_logs_by_date
+from services.fetch_data_logs import get_users_logs, get_users_with_logs_by_date
 from services.blacklist_users import find_blacklisted_sites, find_blacklisted_sites_by_date
 from services.system_info import (
     get_network_info, get_os_info, get_uptime, get_ram_info,
-    get_swap_info, get_cpu_info, get_squid_version, get_timezone
+    get_swap_info, get_cpu_info, get_squid_version, get_timezone, get_network_stats
 )
 from services.get_reports import get_important_metrics, get_metrics_by_date_range
 from utils.colors import color_map
@@ -32,7 +32,7 @@ import sys
 import os
 import logging
 import time
-from threading import Lock  # Importamos Lock para sincronización de hilos
+from threading import Lock
 
 # ------------------- CONFIGURACIÓN -------------------
 class Config:
@@ -47,7 +47,6 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = os.urandom(24).hex()
 
 # ------------------- INICIALIZACIÓN SOCKETIO -------------------
-# async_mode='eventlet' es obligatorio si usas eventlet.monkey_patch()
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # ------------------- SCHEDULER -------------------
@@ -63,17 +62,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ======================================================================
-# CAMBIO PRINCIPAL: Variables globales para datos en tiempo real
+# Variables globales para datos en tiempo real
 # ======================================================================
-# Bloqueo para acceso seguro a las variables compartidas entre hilos
 realtime_data_lock = Lock()
-# Almacenamiento de las últimas estadísticas de caché
 realtime_cache_stats = {}
-# Almacenamiento de la última información del sistema
 realtime_system_info = {}
 
 # ======================================================================
-# CAMBIO PRINCIPAL: Hilo para actualización periódica de datos
+# Hilo para actualización periódica de datos
 # ======================================================================
 def realtime_data_thread():
     """Hilo que actualiza los datos del sistema y caché periódicamente y los envía a los clientes via WebSocket"""
@@ -81,11 +77,9 @@ def realtime_data_thread():
 
     while True:
         try:
-            # Obtener estadísticas de caché de Squid
             cache_data = fetch_squid_cache_stats()
             cache_stats = vars(cache_data) if hasattr(cache_data, '__dict__') else cache_data
             
-            # Obtener información del sistema
             system_info = {
                 'hostname': socket.gethostname(),
                 'ips': get_network_info(),
@@ -99,13 +93,11 @@ def realtime_data_thread():
                 'timezone': get_timezone(),
                 'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-            
-            # Actualizar las variables globales con bloqueo
+
             with realtime_data_lock:
                 realtime_cache_stats = cache_stats
                 realtime_system_info = system_info
             
-            # Emitir los datos actualizados a todos los clientes
             socketio.emit('system_update', {
                 'cache_stats': cache_stats,
                 'system_info': system_info
@@ -116,28 +108,25 @@ def realtime_data_thread():
         except Exception as e:
             logger.error(f"Error en hilo de datos en tiempo real: {str(e)}")
         
-        # Esperar 5 segundos antes de la próxima actualización
         eventlet.sleep(5)
 
 # ======================================================================
-# CAMBIO PRINCIPAL: Manejador de conexión WebSocket
+# Manejador de conexión WebSocket
 # ======================================================================
 @socketio.on('connect')
 def handle_connect():
     """Manejador para cuando un cliente se conecta a través de WebSocket"""
     logger.info(f"Cliente conectado: {request.sid}")
     
-    # Enviar los datos actuales al cliente que se acaba de conectar
     with realtime_data_lock:
         cache_stats = realtime_cache_stats
         system_info = realtime_system_info
 
-    # Ahora que las variables están definidas, puedes compararlas o usarlas
-    if cache_stats or system_info:  # solo si hay datos válidos
+    if cache_stats or system_info:
         socketio.emit('system_update', {
             'cache_stats': cache_stats,
             'system_info': system_info
-        })
+        }, to=request.sid)
 
 # ------------------- NO CACHÉ PARA RESPUESTAS -------------------
 @app.after_request
@@ -189,35 +178,29 @@ def actualizar_conexiones():
 @app.route('/stats')
 def cache_stats():
     try:
-        # CAMBIO: Usamos las variables globales para obtener los datos más recientes
         with realtime_data_lock:
             stats_data = realtime_cache_stats if realtime_cache_stats else {}
             system_info = realtime_system_info if realtime_system_info else {}
         
-        # Si no hay datos en tiempo real, intentamos obtenerlos de forma síncrona
         if not stats_data:
             data = fetch_squid_cache_stats()
             stats_data = vars(data) if hasattr(data, '__dict__') else data
         if not system_info:
             system_info = {
-                'hostname': socket.gethostname(),
-                'ips': get_network_info(),
-                'os': get_os_info(),
-                'uptime': get_uptime(),
-                'ram': get_ram_info(),
-                'swap': get_swap_info(),
-                'cpu': get_cpu_info(),
+                'hostname': socket.gethostname(), 'ips': get_network_info(),
+                'os': get_os_info(), 'uptime': get_uptime(), 'ram': get_ram_info(),
+                'swap': get_swap_info(), 'cpu': get_cpu_info(),
                 'python_version': sys.version.split()[0],
-                'squid_version': get_squid_version(),
-                'timezone': get_timezone(),
+                'squid_version': get_squid_version(), 'timezone': get_timezone(),
                 'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-
+        network_stats = get_network_stats()
         logger.info("Successfully fetched cache statistics and system info")
         return render_template(
             'cacheView.html',
             cache_stats=stats_data,
             system_info=system_info,
+            network_stats=network_stats,
             page_icon='statistics.ico',
             page_title='Estadísticas del Sistema'
         )
@@ -228,17 +211,9 @@ def cache_stats():
 # ------------------- VISTA DE LOGS DE USUARIOS -------------------
 @app.route('/logs')
 def logs():
-    db = None
-    try:
-       with get_session() as db:
-        users_data = get_users_with_logs_optimized(db)
-        return render_template('logsView.html', users_data=users_data, page_icon='user.ico', page_title='Actividad usuarios')
-    except Exception as e:
-        logger.error(f"Error en ruta /logs: {e}")
-        return render_template('error.html', message="Error retrieving logs"), 500
-    finally:
-        if db:
-            db.close()
+    return render_template('logsView.html',
+                           page_icon='user.ico',
+                           page_title='Actividad usuarios')
 
 # ------------------- VISTA DE REPORTES -------------------
 @app.route('/reports')
@@ -286,13 +261,16 @@ def reports():
 def get_logs_by_date():
     db = None
     try:
-        date_str = request.json.get('date')
+        data = request.get_json()
+        date_str = data.get('date')
+        page = data.get('page', 1)
+        per_page = data.get('per_page', 15)
         selected_date = datetime.strptime(date_str, '%Y-%m-%d')
         date_suffix = selected_date.strftime('%Y%m%d')
 
         db = get_session()
-        users_data = get_users_with_logs_by_date(db, date_suffix)
-        return jsonify(users_data)
+        users_data = get_users_logs(db, date_suffix, page=page, per_page=per_page)
+        return jsonify(users_data["users"]) # Devuelve solo la lista de usuarios como antes
     except ValueError:
         return jsonify({'error': 'Formato de fecha inválido'}), 400
     except Exception as e:
@@ -315,23 +293,20 @@ def update_web():
     return redirect('/')
 
 # ------------------- VISTA DE REGISTROS BLOQUEADOS -------------------
-@app.route('/blacklist')
+@app.route('/blacklist', methods=['GET'])
 def blacklist_logs():
     db = None
     try:
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
-
         if page < 1 or per_page < 1 or per_page > 100:
             return render_template('error.html', message="Parámetros de paginación inválidos"), 400
-
         db = get_session()
-        blacklist = ["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]
+        blacklist_env = os.getenv('BLACKLIST_DOMAINS')
+        blacklist = [domain.strip() for domain in blacklist_env.split(',') if domain.strip()]
         result_data = find_blacklisted_sites(db, blacklist, page, per_page)
-
         if 'error' in result_data:
             return render_template('error.html', message=result_data['error']), 500
-
         return render_template(
             'blacklist.html',
             results=result_data['results'],
@@ -340,11 +315,13 @@ def blacklist_logs():
             page_icon='shield-exclamation.ico',
             page_title='Registros Bloqueados'
         )
+    except ValueError:
+        return render_template('error.html', message="Parámetros inválidos"), 400
     except Exception as e:
         logger.error(f"Error en blacklist_logs: {str(e)}")
         return render_template('error.html', message="Error interno del servidor"), 500
     finally:
-        if db:
+        if db is not None:
             db.close()
 
 # ------------------- REPORTES POR RANGO -------------------
@@ -354,10 +331,8 @@ def reports_by_range():
     try:
         start_date = request.json.get('start_date')
         end_date = request.json.get('end_date')
-
         if not start_date or not end_date:
             return jsonify({'error': 'Fechas requeridas'}), 400
-
         db = get_session()
         metrics = get_metrics_by_date_range(start_date, end_date, db)
         return jsonify(metrics)
@@ -403,11 +378,69 @@ def divide_filter(numerator, denominator, precision=2):
     except (TypeError, ValueError) as e:
         logger.error(f"Error en filtro divide: {str(e)}")
         return 0.0
+    
+def create_tables():
+    engine = get_engine()
+    create_dynamic_tables(engine)
+
+scheduler.add_job(id='create_tables_daily', func=create_tables, trigger='cron', hour=0, minute=0) 
+
+@app.route('/logs/fragment')
+def logs_fragment():
+    db = None
+    try:
+        db = get_session()
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 15, type=int)
+        users_data = get_users_logs(db, page=page, per_page=per_page)
+        if request.headers.get('Accept') == 'application/json':
+            return jsonify(users_data)
+        html = render_template('components/logs.html',
+            users_data=users_data['users'],
+            current_page=users_data['page'],
+            per_page=users_data['per_page'],
+            total_pages=users_data['total_pages'],
+            total=users_data['total']
+        )
+        return html
+    except Exception as e:
+        logger.error(f"Error en logs_fragment: {e}")
+        if request.headers.get('Accept') == 'application/json':
+            return jsonify({'users': [], 'total': 0, 'page': 1, 'per_page': 15, 'total_pages': 1}), 500
+        return "<div class='text-red-500 text-center p-4 col-span-full'>Error al cargar los datos</div>", 500
+    finally:
+        if db:
+            db.close()
+
+from flask import Blueprint, render_template, request
+from datetime import datetime, date
+from services.fetch_data_logs import get_metrics_for_date
+
+reports_bp = Blueprint('reports', __name__)
+
+@reports_bp.route('/dashboard')
+def dashboard():
+    date_str = request.args.get('date')
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = date.today()
+    else:
+        selected_date = date.today()
+
+    metrics = get_metrics_for_date(selected_date)
+
+    return render_template(
+        'components/graph_reports.html',
+        metrics=metrics,
+        selected_date=selected_date
+    )
+
+app.register_blueprint(reports_bp)
 
 # ------------------- EJECUCIÓN DE LA APLICACIÓN -------------------
 if __name__ == "__main__":
-    # CAMBIO PRINCIPAL: Iniciar el hilo de actualización de datos en tiempo real
     socketio.start_background_task(realtime_data_thread)
-    
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     socketio.run(app, debug=debug_mode, host='0.0.0.0', port=5000)
