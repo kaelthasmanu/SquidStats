@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> {# Contenedor más ancho #}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">
             <svg class="h-8 w-8 inline-block mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,12 +33,11 @@
             </div>
         </div>
 
-        {# NUEVA VISTA AGRUPADA POR USUARIO #}
         <div class="divide-y divide-gray-200">
             {% for user, items in results | groupby('usuario') %}
             {% set user_items = items | list %}
             <div class="user-group">
-                <div class="px-6 py-4 bg-white hover:bg-gray-50 transition-colors">
+                <div class="px-6 py-4 bg-white">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                         <div class="flex items-center mb-2 sm:mb-0">
                              <svg class="h-6 w-6 mr-3 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,19 +53,49 @@
                     </div>
                 </div>
 
-                <ul class="bg-gray-50/50 pl-10 pr-6 py-2 divide-y divide-gray-200 border-t border-gray-200">
-                    {% for item in user_items %}
-                    <li class="py-3 flex flex-col md:flex-row justify-between items-start md:items-center">
-                        <div class="flex items-center text-sm text-gray-700 mb-1 md:mb-0">
-                            <svg class="h-4 w-4 mr-3 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span class="font-mono break-all">{{ item.url }}</span>
-                        </div>
-                        <span class="text-xs text-gray-500 font-medium md:ml-4 flex-shrink-0">{{ item.fecha }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50/50">
+                    <div class="space-y-2">
+                        {# Bloque para agrupar manualmente por dominio principal #}
+                        {% set grouped_by_domain = {} %}
+                        {% for item in user_items %}
+                            {% set url_lower = item.url | lower %}
+                            {% set parent_domain = 'unknown' %}
+
+                            {% if 'facebook.com' in url_lower or 'fb.com' in url_lower %} {% set parent_domain = 'facebook.com' %}
+                            {% elif 'instagram.com' in url_lower %} {% set parent_domain = 'instagram.com' %}
+                            {% elif 'youtube.com' in url_lower or 'ytimg.com' in url_lower %} {% set parent_domain = 'youtube.com' %}
+                            {% elif 'twitter.com' in url_lower or 'x.com' in url_lower %} {% set parent_domain = 'twitter.com' %}
+                            {% elif 'tiktok.com' in url_lower %} {% set parent_domain = 'tiktok.com' %}
+                            {% elif 'whatsapp.com' in url_lower %} {% set parent_domain = 'whatsapp.com' %}
+                            {% elif 'netflix.com' in url_lower %} {% set parent_domain = 'netflix.com' %}
+                            {% else %}
+                                {% set domain_parts = item.url.split('/')[0].split('.') %}
+                                {% if domain_parts | length >= 2 %}
+                                    {% set parent_domain = domain_parts[-2] + '.' + domain_parts[-1] %}
+                                {% else %}
+                                    {% set parent_domain = item.url.split('/')[0] %}
+                                {% endif %}
+                            {% endif %}
+
+                            {% set current_items = grouped_by_domain.get(parent_domain, []) %}
+                            {% set _ = current_items.append(item) %}
+                            {% set _ = grouped_by_domain.update({parent_domain: current_items}) %}
+                        {% endfor %}
+
+                        {# Iterar sobre los dominios agrupados y mostrarlos en filas sin icono #}
+                        {% for domain, domain_items in grouped_by_domain.items() | sort %}
+                            {% set count = domain_items | length %}
+                            {% set all_urls = (domain_items | map(attribute='url') | unique | list) | join('\n') %}
+
+                            <div class="flex items-center p-2 bg-white rounded-md shadow-sm" title="URLs reales:\n{{ all_urls }}">
+                                <p class="flex-grow font-mono text-sm text-gray-800 truncate pr-4">{{ domain }}</p>
+                                <span class="flex-shrink-0 px-2.5 py-0.5 text-xs font-bold text-red-800 bg-red-100 rounded-full">
+                                    {{ count }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
             {% else %}
             <div class="px-6 py-12 text-center">
@@ -79,11 +108,10 @@
             {% endfor %}
         </div>
 
-        {# PAGINACIÓN (sin cambios) #}
         <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <div class="flex flex-col sm:flex-row justify-between items-center">
                 <span class="text-sm text-gray-600 mb-2 sm:mb-0">
-                    Mostrando {{ results|length }} grupos de usuarios en esta página.
+                    Mostrando {{ (results | groupby('usuario') | list) | length }} grupos de usuarios en esta página.
                 </span>
                 <div class="flex space-x-2">
                     <a href="{{ url_for('blacklist_logs', page=pagination.page-1, per_page=pagination.per_page) }}" 
@@ -104,7 +132,6 @@
 function updateQueryParam(param, value) {
     const url = new URL(window.location.href);
     url.searchParams.set(param, value);
-    // Vuelve a la primera página si se cambia el número de resultados por página
     url.searchParams.set('page', '1');
     return url.toString();
 }
