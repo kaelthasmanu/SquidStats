@@ -3,30 +3,106 @@
 {% block title %}Inicio | Dashboard Squid{% endblock %}
 
 {% block content %}
-    <!-- Contenedor dinámico para conexiones -->
-    <div id="datos-conexiones">
-        {% include 'partials/conexiones.html' %}  <!-- Incluye plantilla parcial -->
-    </div>
+
+    <div id="datos-conexiones" class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        {% include 'partials/conexiones.html' %}  </div>
     
     <script>
+        // --- LÓGICA DEL ACORDEÓN ---
+        // Estas funciones auxiliares nos ayudarán a no repetir código
+        function openAccordion(accordion) {
+            const content = accordion.querySelector('[data-accordion-content]');
+            const icon = accordion.querySelector('.fa-chevron-down');
+            if (content) content.classList.remove('hidden');
+            if (icon) icon.classList.add('rotate-180');
+        }
+
+        function closeAccordion(accordion) {
+            const content = accordion.querySelector('[data-accordion-content]');
+            const icon = accordion.querySelector('.fa-chevron-down');
+            if (content) content.classList.add('hidden');
+            if (icon) icon.classList.remove('rotate-180');
+        }
+
+        function inicializarAcordeonesIndividuales() {
+            const accordionGroup = document.getElementById('datos-conexiones');
+            if (!accordionGroup) return;
+
+            const accordions = accordionGroup.querySelectorAll('.user-accordion');
+
+            accordions.forEach((accordion) => {
+                const trigger = accordion.querySelector('[data-accordion-trigger]');
+                if (!trigger) return;
+
+                trigger.addEventListener('click', () => {
+                    const wasOpen = !accordion.querySelector('[data-accordion-content]').classList.contains('hidden');
+                    
+                    // Cierra todos los demás
+                    accordions.forEach(acc => {
+                        if (acc !== accordion) closeAccordion(acc);
+                    });
+                    
+                    // Abre o cierra el actual
+                    if (wasOpen) {
+                        closeAccordion(accordion);
+                    } else {
+                        openAccordion(accordion);
+                    }
+                });
+            });
+        }
+
+        // --- LÓGICA DE REFRESCO DE DATOS ---
         async function refrescarConexiones() {
             try {
-                // Obtiene HTML actualizado del servidor
                 const response = await fetch('/actualizar-conexiones');
                 if (!response.ok) throw new Error("Respuesta no OK");
                 
-                // Reemplaza TODO el contenido del contenedor
                 const html = await response.text();
-                document.getElementById('datos-conexiones').innerHTML = html;
+                const container = document.getElementById('datos-conexiones');
+                container.innerHTML = html;
+
+                // Vuelve a aplicar la lógica de clic a los nuevos elementos
+                inicializarAcordeonesIndividuales();
+
             } catch (error) {
                 console.error("Error al actualizar conexiones:", error);
             }
         }
 
-        // Actualiza cada 60 segundos (problema: no se limpia al cambiar página)
-        setInterval(refrescarConexiones, 60000);
+        // --- EJECUCIÓN AL CARGAR LA PÁGINA ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializa los acordeones que ya están presentes
+            inicializarAcordeonesIndividuales();
 
-        // Actualiza al cargar la página
-        window.onload = refrescarConexiones;
+            // *** SECCIÓN AÑADIDA PARA EL BOTÓN "EXPANDIR TODO" ***
+            const toggleAllButton = document.getElementById('toggle-all-button');
+            if (toggleAllButton) {
+                toggleAllButton.addEventListener('click', () => {
+                    const accordions = document.querySelectorAll('.user-accordion');
+                    if (accordions.length === 0) return;
+
+                    // Revisa si alguno está cerrado. Si es así, la acción será expandir todos.
+                    const shouldExpand = Array.from(accordions).some(acc => 
+                        acc.querySelector('[data-accordion-content]').classList.contains('hidden')
+                    );
+                    
+                    accordions.forEach(accordion => {
+                        if (shouldExpand) {
+                            openAccordion(accordion);
+                        } else {
+                            closeAccordion(accordion);
+                        }
+                    });
+
+                    // Actualiza el texto del botón
+                    toggleAllButton.textContent = shouldExpand ? 'Contraer Todo' : 'Expandir Todo';
+                });
+            }
+            // *** FIN DE LA SECCIÓN AÑADIDA ***
+
+            // Configura el refresco para que se ejecute cada 60 segundos
+            setInterval(refrescarConexiones, 60000);
+        });
     </script>
 {% endblock %}
