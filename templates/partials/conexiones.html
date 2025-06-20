@@ -1,4 +1,3 @@
-{# Filtro para usuarios válidos (se mantiene igual) #}
 {% set valid_users = {} %}
 {% for user, connections in grouped_connections.items() %}
     {% if user and user != "-" and user != "Anónimo" %}
@@ -8,7 +7,7 @@
 
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
 
-    {# Tarjetas de estadísticas centradas y más pequeñas #}
+    {# Tarjetas de estadísticas (sin cambios) #}
     <div class="flex justify-center mb-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
             <div class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5">
@@ -39,19 +38,19 @@
         </div>
     </div>
 
-    {# Botón para expandir/contraer todo #}
+    {# Botón para cambiar a la vista de Resumen #}
     <div class="flex justify-end mb-4">
         <button id="toggle-all-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
-            Expandir Todo
+            Ver Resumen
         </button>
     </div>
 
-    {# Lista de usuarios con funcionalidad de acordeón #}
+    {# Lista de usuarios (ya no es un acordeón) #}
     <div id="user-accordion-group">
     {% for user, connections in valid_users.items() %}
     <div class="user-accordion bg-white rounded-lg shadow-md mb-3 overflow-hidden">
-        {# Encabezado de usuario (botón para desplegar) #}
-        <button data-accordion-trigger class="w-full text-left p-4 border-b hover:bg-gray-50 focus:outline-none focus:bg-gray-100 transition duration-300 ease-in-out">
+        {# Encabezado de usuario (ya no es un botón para desplegar) #}
+        <div class="w-full text-left p-4 border-b bg-white">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center mb-3 sm:mb-0">
                     <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
@@ -61,6 +60,7 @@
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    {# ... Estadísticas del usuario (sin cambios) ... #}
                     <div class="flex items-center text-sm text-gray-600" title="Conexiones totales de este usuario">
                         <i class="fas fa-link mr-1.5 text-blue-500"></i>
                         <span>{{ connections|length }} conexiones</span>
@@ -84,17 +84,19 @@
                         <i class="fas fa-bullhorn mr-1.5 text-purple-500"></i>
                         <span>{{ total_requests.value }} solicitudes</span>
                     </div>
-                     <div class="w-6 text-center">
-                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    <div class="w-6 text-center">
+                        {# Icono ahora apunta hacia arriba por defecto (abierto) #}
+                        <i class="fas fa-chevron-down transition-transform duration-300 rotate-180"></i>
                     </div>
                 </div>
             </div>
-        </button>
+        </div>
         
-        {# Contenido colapsable (tabla de conexiones) - Oculto por defecto #}
-        <div data-accordion-content class="hidden">
+        {# Contenido (tabla de conexiones) - Visible por defecto #}
+        <div data-accordion-content>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
+                    {# ... Contenido de la tabla (sin cambios) ... #}
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tiempo</th>
@@ -150,4 +152,3 @@
     {% endfor %}
     </div>
 </div>
-

@@ -5,54 +5,51 @@
 {% block content %}
 
     <div id="datos-conexiones" class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        {% include 'partials/conexiones.html' %}  </div>
+        {% include 'partials/conexiones.html' %}
+    </div>
     
     <script>
-        // --- LÓGICA DEL ACORDEÓN ---
-        // Estas funciones auxiliares nos ayudarán a no repetir código
-        function openAccordion(accordion) {
-            const content = accordion.querySelector('[data-accordion-content]');
-            const icon = accordion.querySelector('.fa-chevron-down');
-            if (content) content.classList.remove('hidden');
-            if (icon) icon.classList.add('rotate-180');
+        // --- NUEVO: Variable para guardar el estado de la vista ---
+        // Se inicializa en 'true' porque la vista por defecto es detallada.
+        let isDetailedView = true;
+
+        // --- NUEVO: Función central para aplicar el estado a la vista ---
+        // Esta función lee la variable 'isDetailedView' y actualiza el DOM.
+        function applyViewState() {
+            const contents = document.querySelectorAll('[data-accordion-content]');
+            const icons = document.querySelectorAll('.user-accordion .fa-chevron-down');
+            const toggleAllButton = document.getElementById('toggle-all-button');
+
+            if (contents.length === 0 || !toggleAllButton) return;
+
+            if (isDetailedView) {
+                // Aplica la VISTA DETALLADA
+                contents.forEach(content => content.classList.remove('hidden'));
+                icons.forEach(icon => icon.classList.add('rotate-180'));
+                toggleAllButton.textContent = 'Ver Resumen';
+            } else {
+                // Aplica la VISTA DE RESUMEN
+                contents.forEach(content => content.classList.add('hidden'));
+                icons.forEach(icon => icon.classList.remove('rotate-180'));
+                toggleAllButton.textContent = 'Ver Detalles';
+            }
         }
 
-        function closeAccordion(accordion) {
-            const content = accordion.querySelector('[data-accordion-content]');
-            const icon = accordion.querySelector('.fa-chevron-down');
-            if (content) content.classList.add('hidden');
-            if (icon) icon.classList.remove('rotate-180');
-        }
+        // Función para configurar el botón. Ahora solo cambia el estado y llama a applyViewState.
+        function setupSummaryButton() {
+            const toggleAllButton = document.getElementById('toggle-all-button');
+            if (!toggleAllButton) return;
 
-        function inicializarAcordeonesIndividuales() {
-            const accordionGroup = document.getElementById('datos-conexiones');
-            if (!accordionGroup) return;
+            // Se usa cloneNode y replaceWith para evitar añadir múltiples listeners en cada refresco.
+            const newButton = toggleAllButton.cloneNode(true);
+            toggleAllButton.parentNode.replaceChild(newButton, toggleAllButton);
 
-            const accordions = accordionGroup.querySelectorAll('.user-accordion');
-
-            accordions.forEach((accordion) => {
-                const trigger = accordion.querySelector('[data-accordion-trigger]');
-                if (!trigger) return;
-
-                trigger.addEventListener('click', () => {
-                    const wasOpen = !accordion.querySelector('[data-accordion-content]').classList.contains('hidden');
-                    
-                    // Cierra todos los demás
-                    accordions.forEach(acc => {
-                        if (acc !== accordion) closeAccordion(acc);
-                    });
-                    
-                    // Abre o cierra el actual
-                    if (wasOpen) {
-                        closeAccordion(accordion);
-                    } else {
-                        openAccordion(accordion);
-                    }
-                });
+            newButton.addEventListener('click', () => {
+                isDetailedView = !isDetailedView; // Cambia el estado guardado
+                applyViewState(); // Aplica el nuevo estado a la vista
             });
         }
 
-        // --- LÓGICA DE REFRESCO DE DATOS ---
         async function refrescarConexiones() {
             try {
                 const response = await fetch('/actualizar-conexiones');
@@ -62,44 +59,21 @@
                 const container = document.getElementById('datos-conexiones');
                 container.innerHTML = html;
 
-                // Vuelve a aplicar la lógica de clic a los nuevos elementos
-                inicializarAcordeonesIndividuales();
+                // Vuelve a configurar el botón para el nuevo contenido
+                setupSummaryButton();
+
+                // --- ¡CAMBIO CLAVE! ---
+                // Después de refrescar, aplica el último estado que guardamos.
+                applyViewState();
 
             } catch (error) {
                 console.error("Error al actualizar conexiones:", error);
             }
         }
 
-        // --- EJECUCIÓN AL CARGAR LA PÁGINA ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Inicializa los acordeones que ya están presentes
-            inicializarAcordeonesIndividuales();
-
-            // *** SECCIÓN AÑADIDA PARA EL BOTÓN "EXPANDIR TODO" ***
-            const toggleAllButton = document.getElementById('toggle-all-button');
-            if (toggleAllButton) {
-                toggleAllButton.addEventListener('click', () => {
-                    const accordions = document.querySelectorAll('.user-accordion');
-                    if (accordions.length === 0) return;
-
-                    // Revisa si alguno está cerrado. Si es así, la acción será expandir todos.
-                    const shouldExpand = Array.from(accordions).some(acc => 
-                        acc.querySelector('[data-accordion-content]').classList.contains('hidden')
-                    );
-                    
-                    accordions.forEach(accordion => {
-                        if (shouldExpand) {
-                            openAccordion(accordion);
-                        } else {
-                            closeAccordion(accordion);
-                        }
-                    });
-
-                    // Actualiza el texto del botón
-                    toggleAllButton.textContent = shouldExpand ? 'Contraer Todo' : 'Expandir Todo';
-                });
-            }
-            // *** FIN DE LA SECCIÓN AÑADIDA ***
+            // Configura el botón de resumen cuando la página carga por primera vez
+            setupSummaryButton();
 
             // Configura el refresco para que se ejecute cada 60 segundos
             setInterval(refrescarConexiones, 60000);
