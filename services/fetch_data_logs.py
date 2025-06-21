@@ -20,7 +20,7 @@ current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
 sys.path.append(str(project_root))
 
-from database.database import get_session, get_engine
+from database.database import get_session, get_engine, get_dynamic_models
 
 # Patrones de validación para nombres de tabla y fechas
 TABLE_NAME_PATTERN = re.compile(r'^[a-z_]{3,20}$')
