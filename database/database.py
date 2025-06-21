@@ -57,6 +57,18 @@ class LogMetadata(Base):
     last_inode = Column(BigInteger, default=0)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
+class DeniedLog(Base):
+    __tablename__ = "denied_logs"
+    id = Column(Integer, primary_key=True)
+    username = Column(String(255), nullable=False)
+    ip = Column(String(15), nullable=False)
+    url = Column(Text, nullable=False)
+    method = Column(String(16), nullable=False)
+    status = Column(String(64), nullable=False)
+    response = Column(Integer, nullable=True)
+    data_transmitted = Column(BigInteger, default=0)
+    created_at = Column(DateTime, default=datetime.now)
+
 def get_database_url() -> str:
     db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
     conn_str = os.getenv("DATABASE_STRING_CONNECTION", "squidstats.db")
@@ -96,10 +108,12 @@ def table_exists(engine, table_name: str) -> bool:
 def create_dynamic_tables(engine):
     user_table, log_table = get_dynamic_table_names()
     metadata_table = LogMetadata.__tablename__
+    denied_table = DeniedLog.__tablename__
     for table_cls, table_name in [
         (User, user_table),
         (Log, log_table),
-        (LogMetadata, metadata_table)
+        (LogMetadata, metadata_table),
+        (DeniedLog, denied_table)
     ]:
         if not table_exists(engine, table_name):
             logger.info(f"Creando tabla: {table_name}")
