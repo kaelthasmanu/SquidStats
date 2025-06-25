@@ -154,7 +154,7 @@ function moveDB() {
     current_version=$(grep -E '^VERSION\s*=' "$env_file" | cut -d= -f2 | tr -dc '0-9' || echo 0)
 
     if ! grep -qE '^VERSION\s*=' "$env_file"; then
-      echo "VERSION=2" >> "$env_file"
+        echo "VERSION=2" >>"$env_file"
         echo "Eliminando base de datos antigua por actualización..."
         rm -rf "$databaseSQlite"
         ok "Base de datos antigua eliminada"
@@ -181,7 +181,7 @@ function createEnvFile() {
         return 0
     else
         echo "Creando archivo de configuración .env..."
-        cat > "$env_file" << EOF
+        cat >"$env_file" <<EOF
 VERSION=2
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
@@ -190,6 +190,7 @@ DATABASE_TYPE=SQLITE
 SQUID_LOG=/var/log/squid/access.log
 DATABASE_STRING_CONNECTION=/opt/SquidStats/squidstats.db
 REFRESH_INTERVAL=60
+BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
 EOF
         ok "Archivo .env creado correctamente en $env_file"
         return 0
@@ -205,7 +206,7 @@ function createService() {
     fi
 
     echo "Creando servicio en $service_file..."
-    cat > "$service_file" << EOF
+    cat >"$service_file" <<EOF
 [Unit]
 Description=SquidStats Web Application
 After=network.target
@@ -241,51 +242,50 @@ function configureDatabase() {
     while true; do
         read -p "Opción [1/2]: " choice
         case $choice in
-            1|"") break;;
-            2) break;;
-            *) error "Opción inválida. Intente nuevamente.";;
+        1 | "") break ;;
+        2) break ;;
+        *) error "Opción inválida. Intente nuevamente." ;;
         esac
     done
 
     case $choice in
-        2)
-            while true; do
-                read -p "Ingrese cadena de conexión (mysql+pymysql://user:clave@host:port/db): " conn_str
+    2)
+        while true; do
+            read -p "Ingrese cadena de conexión (mysql+pymysql://user:clave@host:port/db): " conn_str
 
-                if [[ "$conn_str" != mysql+pymysql://* ]]; then
-                    error "Formato inválido. Debe comenzar con: mysql+pymysql://"
-                    continue
-                fi
+            if [[ "$conn_str" != mysql+pymysql://* ]]; then
+                error "Formato inválido. Debe comenzar con: mysql+pymysql://"
+                continue
+            fi
 
-                validation_result=$(python3 /opt/SquidStats/utils/validateString.py "$conn_str" 2>&1)
-                exit_code=$?
+            validation_result=$(python3 /opt/SquidStats/utils/validateString.py "$conn_str" 2>&1)
+            exit_code=$?
 
-                if [[ $exit_code -eq 0 ]]; then
-                    sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=MARIADB|" "$env_file"
+            if [[ $exit_code -eq 0 ]]; then
+                sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=MARIADB|" "$env_file"
 
-                    # validation_result tiene la cadena codificada, escapamos para sed
-                    escaped_conn_str=$(printf '%s\n' "$validation_result" | sed -e 's/[\/&]/\\&/g')
-                    sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$escaped_conn_str|" "$env_file"
+                # validation_result tiene la cadena codificada, escapamos para sed
+                escaped_conn_str=$(printf '%s\n' "$validation_result" | sed -e 's/[\/&]/\\&/g')
+                sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$escaped_conn_str|" "$env_file"
 
-                    ok "Configuración MariaDB actualizada!"
-                    break
-                else
-                    error "Error en la cadena:\n${validation_result#ERROR: }"
-                fi
-            done
-            ;;
-        *)
-            sqlite_path="/opt/SquidStats/squidstats.db"
-            sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=SQLITE|" "$env_file"
-            sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$sqlite_path|" "$env_file"
-            ok "Configuración SQLite establecida!"
-            ;;
+                ok "Configuración MariaDB actualizada!"
+                break
+            else
+                error "Error en la cadena:\n${validation_result#ERROR: }"
+            fi
+        done
+        ;;
+    *)
+        sqlite_path="/opt/SquidStats/squidstats.db"
+        sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=SQLITE|" "$env_file"
+        sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$sqlite_path|" "$env_file"
+        ok "Configuración SQLite establecida!"
+        ;;
     esac
 }
 
-function patchSquidConf() {
+patchSquidConf() {
     local squid_conf=""
-
     if [ -f "/etc/squid/squid.conf" ]; then
         squid_conf="/etc/squid/squid.conf"
     elif [ -f "/etc/squid3/squid.conf" ]; then
@@ -295,13 +295,17 @@ function patchSquidConf() {
         return 1
     fi
 
-    cp "$squid_conf" "${squid_conf}.back"
-    ok "Backup realizado: ${squid_conf}.back"
+    # Backup solo si no existe
+    if [ ! -f "${squid_conf}.back" ]; then
+        cp "$squid_conf" "${squid_conf}.back"
+        ok "Backup realizado: ${squid_conf}.back"
+    else
+        echo "Backup previo ya existe: ${squid_conf}.back"
+    fi
 
-    # Añade logformat solo si no existe
+    # Añadir logformat detailed si no existe
     if ! grep -q '^logformat[[:space:]]\+detailed' "$squid_conf"; then
-        cat << 'EOF' >> "$squid_conf"
-
+        cat <<'EOF' >>"$squid_conf"
 logformat detailed %ts.%03tu %>a %ui %un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
 EOF
         ok "Se agregó logformat detailed"
@@ -309,7 +313,7 @@ EOF
         echo "logformat detailed ya existe."
     fi
 
-    # Modificar access_log para asegurar que tenga detailed !manager
+    # Asegurar access_log con detailed !manager
     if grep -q '^access_log[[:space:]]\+/var/log/squid/access\.log' "$squid_conf"; then
         sed -i '/^access_log[[:space:]]\+\/var\/log\/squid\/access\.log/{
             s/detailed//g
@@ -318,7 +322,7 @@ EOF
         }' "$squid_conf"
         ok "access_log actualizado con detailed !manager"
     else
-        echo 'access_log /var/log/squid/access.log detailed !manager' >> "$squid_conf"
+        echo 'access_log /var/log/squid/access.log detailed !manager' >>"$squid_conf"
         ok "access_log agregado con detailed !manager"
     fi
 }
@@ -326,39 +330,39 @@ EOF
 function main() {
     checkSudo
 
-     if [ "$1" = "--update" ]; then
-      echo "Actualizando Servicio..."
-      updateOrCloneRepo
-      systemctl restart squidstats.service
+    if [ "$1" = "--update" ]; then
+        echo "Actualizando Servicio..."
+        updateOrCloneRepo
+        systemctl restart squidstats.service
 
-      ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
+        ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     else
-      echo "Instalando aplicación web..."
-      checkPackages
-      updateOrCloneRepo
-      patchSquidConf
-      checkSquidLog
-      setupVenv
-      installDependencies
-      createEnvFile
-      configureDatabase
-      moveDB
-      createService
+        echo "Instalando aplicación web..."
+        checkPackages
+        updateOrCloneRepo
+        patchSquidConf
+        checkSquidLog
+        setupVenv
+        installDependencies
+        createEnvFile
+        configureDatabase
+        moveDB
+        createService
 
-      ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
+        ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     fi
 }
 
 case "$1" in
-    "--update")
-        main "$1"
-        ;;
-    "")
-        main
-        ;;
-    *)
-        echo "Parámetro no reconocido: $1"
-        echo "Uso: $0 --update"
-        exit 1
-        ;;
+"--update")
+    main "$1"
+    ;;
+"")
+    main
+    ;;
+*)
+    echo "Parámetro no reconocido: $1"
+    echo "Uso: $0 --update"
+    exit 1
+    ;;
 esac
