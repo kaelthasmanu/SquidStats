@@ -69,6 +69,16 @@ class DeniedLog(Base):
     data_transmitted = Column(BigInteger, default=0)
     created_at = Column(DateTime, default=datetime.now)
 
+class Metrics(Base):
+    __tablename__ = "metrics"
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.now)
+    cpu_usage = Column(Integer, nullable=False)
+    ram_usage_bytes = Column(BigInteger, nullable=False)
+    swap_usage_bytes = Column(BigInteger, nullable=False)
+    net_sent_bytes_sec = Column(BigInteger, nullable=False)
+    net_recv_bytes_sec = Column(BigInteger, nullable=False)
+
 def get_database_url() -> str:
     db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
     conn_str = os.getenv("DATABASE_STRING_CONNECTION", "squidstats.db")
@@ -109,11 +119,13 @@ def create_dynamic_tables(engine):
     user_table, log_table = get_dynamic_table_names()
     metadata_table = LogMetadata.__tablename__
     denied_table = DeniedLog.__tablename__
+    metrics_table = Metrics.__tablename__
     for table_cls, table_name in [
         (User, user_table),
         (Log, log_table),
         (LogMetadata, metadata_table),
-        (DeniedLog, denied_table)
+        (DeniedLog, denied_table),
+        (Metrics, metrics_table)
     ]:
         if not table_exists(engine, table_name):
             logger.info(f"Creando tabla: {table_name}")
