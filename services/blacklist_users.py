@@ -1,15 +1,15 @@
 import sys
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, text, func, or_
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from pathlib import Path
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
 sys.path.append(str(project_root))
 
-from database.database import get_session, User, Log, Base, LogMetadata, get_engine
+from database.database import get_session, User, Log, Base, LogMetadata, get_engine, get_dynamic_models
 
 from typing import Dict, Any
 
@@ -27,8 +27,9 @@ def find_blacklisted_sites(
 
     try:
         all_tables = inspector.get_table_names()
-        logs_tables = sorted(
-            [t for t in all_tables if t.startswith('logs_') and len(t) == 13],
+        # Cambiar logs_ por log_ y ajustar longitud
+        log_tables = sorted(
+            [t for t in all_tables if t.startswith('log_') and len(t) == 12],
             reverse=True
         )
 
@@ -36,7 +37,7 @@ def find_blacklisted_sites(
         remaining = per_page
         count_only = offset >= 1000
 
-        for log_table in logs_tables:
+        for log_table in log_tables:
             try:
                 date_str = log_table.split('_')[1]
                 log_date = datetime.strptime(date_str, "%Y%m%d").date()
@@ -44,39 +45,48 @@ def find_blacklisted_sites(
             except (IndexError, ValueError):
                 continue
 
-            user_table = f'users_{date_str}'
+            user_table = f'user_{date_str}'
             if user_table not in all_tables:
                 continue
 
-            like_conditions = ' OR '.join([f"l.url LIKE :pattern{i}" for i in range(len(blacklist))])
-            base_query = f"""
-                SELECT u.username, l.url 
-                FROM {log_table} l
-                JOIN {user_table} u ON l.user_id = u.id
-                WHERE {like_conditions}
-            """
+            # Obtener los modelos ORM dinámicos para esta fecha
+            try:
+                UserModel, LogModel = get_dynamic_models(date_str)
+            except Exception:
+                continue
 
+            # Crear condiciones OR para la blacklist usando ORM
+            blacklist_conditions = [
+                LogModel.url.like(f'%{site}%') for site in blacklist
+            ]
+            
             if not count_only:
-                count_query = text(f"SELECT COUNT(*) as total FROM ({base_query})")
-                count_params = {f'pattern{i}': f'%{site}%' for i, site in enumerate(blacklist)}
-                table_total = db.execute(count_query, count_params).scalar()
+                # Contar total usando ORM con join explícito
+                table_total = db.query(func.count(LogModel.id)).join(
+                    UserModel, LogModel.user_id == UserModel.id
+                ).filter(
+                    or_(*blacklist_conditions)
+                ).scalar()
+                
                 total_results += table_total
 
                 if offset >= table_total:
                     offset -= table_total
                     continue
 
-                query = text(f"{base_query} LIMIT :limit OFFSET :offset")
-                params = {
-                    **{f'pattern{i}': f'%{site}%' for i, site in enumerate(blacklist)},
-                    'limit': remaining,
-                    'offset': offset
-                }
+                # Consulta principal usando ORM con join explícito
+                query_results = db.query(
+                    UserModel.username,
+                    LogModel.url
+                ).join(
+                    UserModel, LogModel.user_id == UserModel.id
+                ).filter(
+                    or_(*blacklist_conditions)
+                ).offset(offset).limit(remaining).all()
 
-                result = db.execute(query, params)
                 offset = 0
 
-                for row in result:
+                for row in query_results:
                     results.append({
                         'fecha': formatted_date,
                         'usuario': row.username,
@@ -89,17 +99,27 @@ def find_blacklisted_sites(
             if remaining == 0:
                 break
 
+        # Si es count_only, calcular el total usando ORM
         if count_only:
-            total_parts = []
-            for log_table in logs_tables:
-                user_table = log_table.replace('logs_', 'users_')
-                like_conditions = " OR ".join([f"l.url LIKE '%{s}%'" for s in blacklist])
-                total_parts.append(
-                    f"(SELECT COUNT(*) FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id WHERE {like_conditions})"
-                )
-
-            total_query = " + ".join(total_parts)
-            total_results = db.execute(text(f"SELECT ({total_query})")).scalar()
+            total_results = 0
+            for log_table in log_tables:
+                try:
+                    date_str = log_table.split('_')[1]
+                    UserModel, LogModel = get_dynamic_models(date_str)
+                except Exception:
+                    continue
+                
+                blacklist_conditions = [
+                    LogModel.url.like(f'%{site}%') for site in blacklist
+                ]
+                
+                table_count = db.query(func.count(LogModel.id)).join(
+                    UserModel, LogModel.user_id == UserModel.id
+                ).filter(
+                    or_(*blacklist_conditions)
+                ).scalar()
+                
+                total_results += table_count
 
     except SQLAlchemyError as e:
         print(f"Error de base de datos: {e}")
@@ -121,27 +141,37 @@ def find_blacklisted_sites_by_date(db: Session, blacklist: list, specific_date: 
 
     try:
         date_suffix = specific_date.strftime("%Y%m%d")
-        users_table = f'users_{date_suffix}'
-        logs_table = f'logs_{date_suffix}'
+        user_table = f'user_{date_suffix}'
+        log_table = f'log_{date_suffix}'
 
+        # Verificar que las tablas existen
         inspector = inspect(db.get_bind())
-        if not inspector.has_table(users_table) or not inspector.has_table(logs_table):
+        if not inspector.has_table(user_table) or not inspector.has_table(log_table):
             return []
 
-        like_conditions = ' OR '.join([f"l.url LIKE :pattern{i}" for i in range(len(blacklist))])
-        query = text(f"""
-            SELECT u.username, l.url 
-            FROM {logs_table} l
-            JOIN {users_table} u ON l.user_id = u.id
-            WHERE {like_conditions}
-        """)
+        # Obtener modelos dinámicos
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+        except Exception:
+            return []
 
-        params = {f'pattern{i}': f'%{site}%' for i, site in enumerate(blacklist)}
+        # Crear condiciones OR para la blacklist usando ORM
+        blacklist_conditions = [
+            LogModel.url.like(f'%{site}%') for site in blacklist
+        ]
 
-        result = db.execute(query, params)
+        # Consulta usando ORM con join explícito
+        query_results = db.query(
+            UserModel.username,
+            LogModel.url
+        ).join(
+            UserModel, LogModel.user_id == UserModel.id
+        ).filter(
+            or_(*blacklist_conditions)
+        ).all()
 
         formatted_date = specific_date.strftime("%Y-%m-%d")
-        for row in result:
+        for row in query_results:
             results.append({
                 'fecha': formatted_date,
                 'usuario': row.username,

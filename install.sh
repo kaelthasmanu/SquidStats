@@ -16,7 +16,7 @@ function checkSudo() {
 }
 
 function setupVenv() {
-    local venv_dir="/opt/squidstats/venv"
+    local venv_dir="/opt/SquidStats/venv"
 
     if [ -d "$venv_dir" ]; then
         echo "Entorno virtual ya existe en $venv_dir"
@@ -36,7 +36,7 @@ function setupVenv() {
 }
 
 function installDependencies() {
-    local venv_dir="/opt/squidstats/venv"
+    local venv_dir="/opt/SquidStats/venv"
 
     if [ ! -d "$venv_dir" ]; then
         error "El entorno virtual no existe en $venv_dir"
@@ -47,7 +47,7 @@ function installDependencies() {
     source "$venv_dir/bin/activate"
 
     pip install --upgrade pip
-    pip install -r /opt/squidstats/requirements.txt
+    pip install -r /opt/SquidStats/requirements.txt
 
     if [ $? -ne 0 ]; then
         error "Error al instalar dependencias"
@@ -98,8 +98,9 @@ function checkSquidLog() {
 }
 
 function updateOrCloneRepo() {
-    local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local destino="/opt/squidstats"
+    local repo_url="https://github.com/alexminator/SquidStats.git"
+    local destino="/opt/SquidStats"
+    local branch="inicio"
     local env_exists=false
 
     if [ -d "$destino" ]; then
@@ -110,42 +111,50 @@ function updateOrCloneRepo() {
             if [ -f ".env" ]; then
                 env_exists=true
                 echo ".env existente detectado, se preservará"
+                cp .env /tmp/.env.backup
             fi
 
-            if git pull; then
-                ok "Repositorio actualizado exitosamente"
+            if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
+                [ "$env_exists" = true ] && mv /tmp/.env.backup .env
+                echo "? Repositorio actualizado exitosamente en la rama '$branch'"
                 return 0
             else
-                error "Error al actualizar el repositorio, se procederá a clonar de nuevo"
+                echo "? Error al actualizar el repositorio, se procederá a clonar de nuevo"
                 cd ..
                 rm -rf "$destino"
             fi
         else
-            error "El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
+            echo "?? El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
             rm -rf "$destino"
         fi
     fi
 
-    echo "Clonando repositorio por primera vez..."
-    if git clone "$repo_url" "$destino"; then
+    echo "?? Clonando repositorio por primera vez desde la rama '$branch'..."
+    if git clone --branch "$branch" "$repo_url" "$destino"; then
         chown -R $USER:$USER "$destino"
-        ok "Repositorio clonado exitosamente en $destino"
+        echo "? Repositorio clonado exitosamente en $destino"
+
+        if [ "$env_exists" = true ] && [ -f /tmp/.env.backup ]; then
+            mv /tmp/.env.backup "$destino/.env"
+            echo "?? Archivo .env restaurado"
+        fi
+
         return 0
     else
-        error "Error al clonar el repositorio"
+        echo "? Error al clonar el repositorio"
         return 1
     fi
 }
 
 function moveDB() {
-    local databaseSQlite="/opt/squidstats/logs.db"
-    local env_file="/opt/squidstats/.env"
+    local databaseSQlite="/opt/SquidStats/squidstats.db"
+    local env_file="/opt/SquidStats/.env"
     local current_version=0
 
     current_version=$(grep -E '^VERSION\s*=' "$env_file" | cut -d= -f2 | tr -dc '0-9' || echo 0)
 
     if ! grep -qE '^VERSION\s*=' "$env_file"; then
-      echo "VERSION=2" >> "$env_file"
+        echo "VERSION=2" >>"$env_file"
         echo "Eliminando base de datos antigua por actualización..."
         rm -rf "$databaseSQlite"
         ok "Base de datos antigua eliminada"
@@ -165,28 +174,23 @@ function moveDB() {
 }
 
 function createEnvFile() {
-    local env_file="/opt/squidstats/.env"
+    local env_file="/opt/SquidStats/.env"
 
     if [ -f "$env_file" ]; then
         echo "El archivo .env ya existe en $env_file."
-
-        if grep -q "^DATABASE\s*=" "$env_file"; then
-            echo "Actualizando variable DATABASE a DATABASE_STRING_CONNECTION..."
-            sed -i 's/^DATABASE\(\s*=\s*\)\(.*\)/DATABASE_STRING_CONNECTION\1\2/' "$env_file"
-            ok "Variable actualizada correctamente."
-        fi
         return 0
     else
         echo "Creando archivo de configuración .env..."
-        cat > "$env_file" << EOF
+        cat >"$env_file" <<EOF
 VERSION=2
-SQUID_HOST = "127.0.0.1"
-SQUID_PORT = 3128
-FLASK_DEBUG = "True"
-DATABASE_TYPE="SQLITE"
-SQUID_LOG = "/var/log/squid/access.log"
-DATABASE_STRING_CONNECTION = "/opt/squidstats/"
-REFRESH_INTERVAL = 60
+SQUID_HOST=127.0.0.1
+SQUID_PORT=3128
+FLASK_DEBUG=True
+DATABASE_TYPE=SQLITE
+SQUID_LOG=/var/log/squid/access.log
+DATABASE_STRING_CONNECTION=/opt/SquidStats/squidstats.db
+REFRESH_INTERVAL=60
+BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
 EOF
         ok "Archivo .env creado correctamente en $env_file"
         return 0
@@ -202,19 +206,20 @@ function createService() {
     fi
 
     echo "Creando servicio en $service_file..."
-    cat > "$service_file" << EOF
+    cat >"$service_file" <<EOF
 [Unit]
-Description=SquidStats
+Description=SquidStats Web Application
 After=network.target
 
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/squidstats
-ExecStart=/opt/squidstats/venv/bin/python /opt/squidstats/app.py
+WorkingDirectory=/opt/SquidStats
+ExecStart=/opt/SquidStats/venv/bin/python3 /opt/SquidStats/app.py
 Restart=always
 RestartSec=5
-EnvironmentFile=/opt/squidstats/.env
+EnvironmentFile=/opt/SquidStats/.env
+Environment=PATH=/opt/SquidStats/venv/bin:$PATH
 
 [Install]
 WantedBy=multi-user.target
@@ -227,151 +232,137 @@ EOF
 }
 
 function configureDatabase() {
-    local env_file="/opt/squidstats/.env"
+    local env_file="/opt/SquidStats/.env"
 
     echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
     echo "Seleccione el tipo de base de datos:"
     echo "1) SQLite (por defecto)"
     echo "2) MariaDB (necesitas tener mariadb ejecutándose)"
-    
+
     while true; do
         read -p "Opción [1/2]: " choice
         case $choice in
-            1|"") break;;  
-            2) break;;
-            *) error "Opción inválida. Intente nuevamente.";;
+        1 | "") break ;;
+        2) break ;;
+        *) error "Opción inválida. Intente nuevamente." ;;
         esac
     done
 
     case $choice in
-        2)
-            while true; do
-                read -p "Ingrese cadena de conexión (mysql+pymysql://user:clave@host:port/db): " conn_str
+    2)
+        while true; do
+            read -p "Ingrese cadena de conexión (mysql+pymysql://user:clave@host:port/db): " conn_str
 
-                if [[ "$conn_str" != mysql+pymysql://* ]]; then
-                    error "Formato inválido. Debe comenzar con: mysql+pymysql://"
-                    continue
-                fi
+            if [[ "$conn_str" != mysql+pymysql://* ]]; then
+                error "Formato inválido. Debe comenzar con: mysql+pymysql://"
+                continue
+            fi
 
-                validation_result=$(python3 /opt/SquidStats/utils/validateString.py "$conn_str" 2>&1)
+            validation_result=$(python3 /opt/SquidStats/utils/validateString.py "$conn_str" 2>&1)
+            exit_code=$?
 
-                if [[ $? -eq 0 ]]; then
-                    escaped_str=$(sed 's/[\/&|]/\\&/g' <<< "$validation_result")
-                    sed -i "s|^DATABASE_STRING_CONNECTION\s*=.*|DATABASE_STRING_CONNECTION = \"${escaped_str}\"|" "$env_file"
-                    sed -i "s|^DATABASE_TYPE\s*=.*|DATABASE_TYPE = MARIADB|" "$env_file"
-                    ok "Configuración MariaDB actualizada!\nCadena codificada: $validation_result"
-                    break
-                else
-                    error "Error en la cadena:\n${validation_result#ERROR: }"
-                fi
-            done
-            ;;
-        *)
-            sqlite_path="/opt/squidstats/"
-            sed -i "s|^DATABASE_STRING_CONNECTION\s*=.*|DATABASE_STRING_CONNECTION = \"${sqlite_path}\"|" "$env_file"
-            sed -i "s|^DATABASE_TYPE\s*=.*|DATABASE_TYPE = SQLITE|" "$env_file"
-            ok "Configuración SQLite establecida!"
-            ;;
+            if [[ $exit_code -eq 0 ]]; then
+                sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=MARIADB|" "$env_file"
+
+                # validation_result tiene la cadena codificada, escapamos para sed
+                escaped_conn_str=$(printf '%s\n' "$validation_result" | sed -e 's/[\/&]/\\&/g')
+                sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$escaped_conn_str|" "$env_file"
+
+                ok "Configuración MariaDB actualizada!"
+                break
+            else
+                error "Error en la cadena:\n${validation_result#ERROR: }"
+            fi
+        done
+        ;;
+    *)
+        sqlite_path="/opt/SquidStats/squidstats.db"
+        sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=SQLITE|" "$env_file"
+        sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$sqlite_path|" "$env_file"
+        ok "Configuración SQLite establecida!"
+        ;;
     esac
 }
 
-function patchSquidConf() {
+patchSquidConf() {
     local squid_conf=""
-    # Busca squid.conf en rutas típicas
     if [ -f "/etc/squid/squid.conf" ]; then
         squid_conf="/etc/squid/squid.conf"
     elif [ -f "/etc/squid3/squid.conf" ]; then
         squid_conf="/etc/squid3/squid.conf"
     else
-        error "Debe tener instalado un servidor proxy Squid. No se encontró squid.conf en /etc/squid/ ni /etc/squid3/"
+        error "Debe tener instalado un servidor proxy Squid. No se encontró squid.conf"
         return 1
     fi
 
-    # Backup antes de modificar
-    cp "$squid_conf" "${squid_conf}.back"
-    ok "Backup realizado: ${squid_conf}.back"
-
-    local logformat_line='logformat detailed \'
-    logformat_line+='
-  "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st'
-    local access_detailed='access_log /var/log/squid/access.log detailed'
-    local access_default='access_log /var/log/squid/defaultaccess.log'
-
-    # Busca si existe una línea access_log /var/log/squid/access.log (sin detailed)
-    if grep -q '^access_log[[:space:]]\+/var/log/squid/access\.log[[:space:]]*$' "$squid_conf"; then
-        # Si no existe logformat detailed, lo agrega encima de la línea access_log
-        if ! grep -q '^logformat detailed' "$squid_conf"; then
-            awk -v l1="$logformat_line" '
-                BEGIN{inserted=0}
-                /^access_log[[:space:]]+\/var\/log\/squid\/access\.log[[:space:]]*$/ && !inserted {
-                    print l1
-                    inserted=1
-                }
-                {print}
-            ' "$squid_conf" > "${squid_conf}.tmp" && mv "${squid_conf}.tmp" "$squid_conf"
-            ok "Se agregó logformat detailed encima de access_log /var/log/squid/access.log"
-        else
-            echo "logformat detailed ya existe, no se agrega de nuevo."
-        fi
-        # Modifica la línea access_log para agregar detailed al final y agrega defaultaccess.log debajo
-        awk -v l2="$access_default" '
-            {
-                if ($0 ~ /^access_log[[:space:]]+\/var\/log\/squid\/access\.log[[:space:]]*$/) {
-                    print $0 " detailed"
-                    print l2
-                } else {
-                    print
-                }
-            }
-        ' "$squid_conf" > "${squid_conf}.tmp" && mv "${squid_conf}.tmp" "$squid_conf"
-        ok "Se modificó access_log /var/log/squid/access.log para usar detailed y se agregó access_log defaultaccess.log debajo."
+    # Backup solo si no existe
+    if [ ! -f "${squid_conf}.back" ]; then
+        cp "$squid_conf" "${squid_conf}.back"
+        ok "Backup realizado: ${squid_conf}.back"
     else
-        # No existe access_log /var/log/squid/access.log, agrega todo al final
-        {
-            echo "$logformat_line"
-            echo "$access_detailed"
-            echo "$access_default"
-        } >> "$squid_conf"
-        ok "Se agregaron logformat detailed, access_log /var/log/squid/access.log detailed y access_log /var/log/squid/defaultaccess.log al final de $squid_conf"
+        echo "Backup previo ya existe: ${squid_conf}.back"
+    fi
+
+    # Añadir logformat detailed si no existe
+    if ! grep -q '^logformat[[:space:]]\+detailed' "$squid_conf"; then
+        cat <<'EOF' >>"$squid_conf"
+logformat detailed %ts.%03tu %>a %ui %un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
+EOF
+        ok "Se agregó logformat detailed"
+    else
+        echo "logformat detailed ya existe."
+    fi
+
+    # Asegurar access_log con detailed !manager
+    if grep -q '^access_log[[:space:]]\+/var/log/squid/access\.log' "$squid_conf"; then
+        sed -i '/^access_log[[:space:]]\+\/var\/log\/squid\/access\.log/{
+            s/detailed//g
+            s/!manager//g
+            s/$/ detailed !manager/
+        }' "$squid_conf"
+        ok "access_log actualizado con detailed !manager"
+    else
+        echo 'access_log /var/log/squid/access.log detailed !manager' >>"$squid_conf"
+        ok "access_log agregado con detailed !manager"
     fi
 }
 
 function main() {
     checkSudo
 
-     if [ "$1" = "--update" ]; then
-      echo "Actualizando Servicio..."
-      updateOrCloneRepo
-      systemctl restart squidstats.service
+    if [ "$1" = "--update" ]; then
+        echo "Actualizando Servicio..."
+        updateOrCloneRepo
+        systemctl restart squidstats.service
 
-      ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
+        ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     else
-      echo "Instalando aplicación web..."
-      checkPackages
-      updateOrCloneRepo
-      patchSquidConf
-      checkSquidLog
-      setupVenv
-      installDependencies
-      createEnvFile
-      configureDatabase
-      moveDB
-      createService
+        echo "Instalando aplicación web..."
+        checkPackages
+        updateOrCloneRepo
+        patchSquidConf
+        checkSquidLog
+        setupVenv
+        installDependencies
+        createEnvFile
+        configureDatabase
+        moveDB
+        createService
 
-      ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
+        ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     fi
 }
 
 case "$1" in
-    "--update")
-        main "$1"
-        ;;
-    "")
-        main
-        ;;
-    *)
-        echo "Parámetro no reconocido: $1"
-        echo "Uso: $0 --update"
-        exit 1
-        ;;
+"--update")
+    main "$1"
+    ;;
+"")
+    main
+    ;;
+*)
+    echo "Parámetro no reconocido: $1"
+    echo "Uso: $0 --update"
+    exit 1
+    ;;
 esac

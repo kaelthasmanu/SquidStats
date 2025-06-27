@@ -14,18 +14,6 @@ sys.path.append(str(project_root))
 from database.database import get_session, get_dynamic_models
 
 def get_important_metrics(db: Session, UserModel, LogModel):
-    """
-    Obtiene métricas importantes usando modelos específicos para la fecha actual
-    con relaciones ORM definidas para evitar problemas de join ambiguo.
-    
-    Args:
-        db: Sesión de base de datos
-        UserModel: Modelo dinámico de usuario para la fecha actual
-        LogModel: Modelo dinámico de log para la fecha actual
-    
-    Returns:
-        Diccionario con todas las métricas calculadas
-    """
     results = {}
     
     try:
@@ -147,18 +135,6 @@ def get_important_metrics(db: Session, UserModel, LogModel):
         return {}
 
 def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):
-    """
-    Obtiene métricas para un rango de fechas usando tablas dinámicas.
-    Esta función está diseñada para manejar múltiples tablas diarias.
-    
-    Args:
-        start_date: Fecha de inicio en formato YYYYMMDD
-        end_date: Fecha de fin en formato YYYYMMDD
-        db: Sesión de base de datos
-    
-    Returns:
-        Diccionario con métricas consolidadas de todo el rango
-    """
     results = {}
     
     try:
@@ -225,17 +201,6 @@ def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):
     return consolidated_results
 
 def has_table(db: Session, table_name: str) -> bool:
-    """
-    Verifica si una tabla existe en la base de datos
-    usando el inspector de SQLAlchemy para mayor eficiencia.
-    
-    Args:
-        db: Sesión de base de datos
-        table_name: Nombre de la tabla a verificar
-    
-    Returns:
-        True si la tabla existe, False en caso contrario
-    """
     try:
         # Usar el inspector para verificar existencia de tabla
         inspector = inspect(db.get_bind())
@@ -245,17 +210,6 @@ def has_table(db: Session, table_name: str) -> bool:
         return False
 
 def get_table_class(table_name: str, base) -> type:
-    """
-    Crea una clase de modelo dinámico para una tabla específica
-    con relaciones ORM para permitir joins automáticos.
-    
-    Args:
-        table_name: Nombre completo de la tabla
-        base: Clase base para los modelos ORM
-    
-    Returns:
-        Clase de modelo SQLAlchemy para la tabla
-    """
     class_dict = {'__tablename__': table_name}
 
     # Modelo para tablas de usuarios

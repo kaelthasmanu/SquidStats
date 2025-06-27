@@ -18,7 +18,6 @@ REGEX_MAP = {
 }
 
 def parse_raw_data(raw_data):
-    """Analiza datos crudos de Squid y retorna conexiones estructuradas"""
     connections = []
     blocks = raw_data.split("Connection:")[1:]  # Ignorar el primer vacío
     
@@ -33,7 +32,6 @@ def parse_raw_data(raw_data):
     return connections
 
 def parse_connection_block(block):
-    """Procesa un bloque individual de conexión"""
     conn = {}
     
     # Extraer campos simples
@@ -53,10 +51,6 @@ def parse_connection_block(block):
     return conn
 
 def group_by_user(connections):
-    """
-    Agrupa conexiones por usuario con conteo eficiente
-    CAMBIO CLAVE: Manejo robusto de valores None
-    """
     # Lista de identificadores para usuarios anónimos
     ANONYMOUS_INDICATORS = {
         None, "", "-", "Anónimo", "N/A", "anonymous", "Anonymous", 

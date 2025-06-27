@@ -6,10 +6,10 @@
     {% endif %}
 {% endfor %}
 
-{# Tarjetas de estadísticas con iconos Font Awesome #}
+{# Tarjetas de estadísticas con iconos Font Awesome y efectos hover #}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
     <!-- Tarjeta Usuarios Activos -->
-    <div class="bg-white p-4 rounded-lg shadow flex items-center">
+    <div class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5">
         <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
             <i class="fas fa-users text-blue-500"></i>
         </div>
@@ -20,7 +20,7 @@
     </div>
     
     <!-- Tarjeta Conexiones Totales -->
-    <div class="bg-white p-4 rounded-lg shadow flex items-center">
+    <div class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5">
         <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
             <i class="fas fa-exchange-alt text-green-500"></i>
         </div>
@@ -39,7 +39,8 @@
 
 {# Lista de usuarios y conexiones #}
 {% for user, connections in valid_users.items() %}
-<div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+<!-- Contenedor principal de usuario con efecto hover -->
+<div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg">
     <!-- Encabezado de usuario con iconos FA -->
     <div class="p-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center mb-2 sm:mb-0">
@@ -92,68 +93,82 @@
             </thead>
             <tbody class="divide-y divide-gray-200">
                 {% for connection in connections %}
-                <tr class="hover:bg-gray-50">
+                <!-- Fila con efecto hover y transición -->
+                <tr class="transition-colors duration-200 ease-in-out hover:bg-gray-50">
                     <!-- Tiempo -->
                     <td class="px-4 py-3 whitespace-nowrap text-sm">
                         {% set seconds = connection.elapsed_time|float %}
                         {% if seconds >= 3600 %}
-                            {{ "%.2f"|format(seconds/3600) }} horas
+                        {{ "%.2f"|format(seconds/3600) }} horas
                         {% elif seconds >= 60 %}
-                            {{ "%.2f"|format(seconds/60) }} min
+                        {{ "%.2f"|format(seconds/60) }} min
                         {% else %}
-                            {{ "%.2f"|format(seconds) }} seg
+                        {{ "%.2f"|format(seconds) }} seg
                         {% endif %}
-                    </td>
-                    
-                    <!-- Método con estilos mejorados -->
-                    <td class="px-4 py-3 whitespace-nowrap">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold 
-                            {% if connection.logType|lower == 'get' %}bg-green-100 text-green-800
-                            {% elif connection.logType|lower == 'post' %}bg-blue-100 text-blue-800
-                            {% elif connection.logType|lower == 'connect' %}bg-yellow-100 text-yellow-800
-                            {% else %}bg-gray-100 text-gray-800{% endif %}">
-                            {{ connection.logType }}
-                        </span>
-                    </td>
-                    
-                    <!-- URL con truncado mejorado -->
-                    <td class="px-4 py-3 max-w-xs">
-                        <div class="truncate text-sm" title="{{ connection.uri }}">
-                            {{ connection.uri }}
-                        </div>
-                    </td>
-                    
-                    <!-- Datos -->
-                    <td class="px-4 py-3 whitespace-nowrap text-sm">
-                        {% if connection.fd_total != "N/A" %}
+                        </td>
+                        
+                        <!-- Método HTTP con colores mejorados -->
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            {% set method = connection.logType|lower %}
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold transition-colors duration-200
+                                {% if method == 'connect' or method == 'tcp_tunnel' %}bg-green-100 text-green-800  {# CAMBIO: Connect ahora es verde #}
+                                {% elif method == 'get' %}bg-sky-100 text-sky-800  {# CAMBIO: Get ahora es azul cielo #}
+                                {% elif method == 'post' %}bg-indigo-100 text-indigo-800  {# CAMBIO: Post ahora es índigo #}
+                                {% elif method == 'put' %}bg-amber-100 text-amber-800  {# CAMBIO: Put ahora es ámbar #}
+                                {% elif method == 'delete' %}bg-red-100 text-red-800
+                                {% elif method == 'head' %}bg-purple-100 text-purple-800
+                                {% elif method == 'options' %}bg-cyan-100 text-cyan-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ connection.logType }}
+                            </span>
+                        </td>
+                        
+                        <!-- URL con truncado mejorado -->
+                        <td class="px-4 py-3 max-w-xs">
+                            <div class="truncate text-sm transition-colors duration-200 hover:text-blue-600" title="{{ connection.uri }}">
+                                {{ connection.uri }}
+                            </div>
+                        </td>
+                        
+                        <!-- Datos -->
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            {% if connection.fd_total != "N/A" %}
                             {{ (connection.fd_total / 1024 /1024)|round(2) }} MB
-                        {% else %}
+                            {% else %}
                             N/A
-                        {% endif %}
-                    </td>
-                    
-                    <!-- Delay Pool con estilos -->
-                    <td class="px-4 py-3 whitespace-nowrap">
-                        {% if connection.delay_pool != "N/A" %}
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Delay Pool con colores para 5 clases diferentes -->
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            {% if connection.delay_pool != "N/A" %}
+                            {% set pool = connection.delay_pool|string %}
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold transition-colors duration-200
+                                    {% if pool == '0' %}bg-sky-100 text-sky-800  
+                                    {% elif pool == '1' %}bg-indigo-100 text-indigo-800
+                                    {% elif pool == '2' %}bg-purple-100 text-purple-800
+                                    {% elif pool == '3' %}bg-pink-100 text-pink-800
+                                    {% elif pool == '4' %}bg-yellow-100 text-yellow-800
+                                    {% elif pool == '5' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
                                 Pool {{ connection.delay_pool }}
                             </span>
-                        {% else %}
+                            {% else %}
                             <span class="text-sm text-gray-500">N/A</span>
-                        {% endif %}
-                    </td>
-                    
-                    <!-- Solicitudes -->
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                        {{ connection.nrequests }}
-                    </td>
-                    
-                    <!-- Dir. Remota (única columna de IP) -->
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-mono">
-                        {{ connection.remote }}
-                    </td>
-                </tr>
-                {% endfor %}
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Solicitudes -->
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                            {{ connection.nrequests }}
+                        </td>
+                        
+                        <!-- Dir. Remota (única columna de IP) -->
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-mono transition-colors duration-200 hover:text-blue-600">
+                            {{ connection.remote }}
+                        </td>
+                        </tr>
+                        {% endfor %}
             </tbody>
         </table>
     </div>

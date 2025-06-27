@@ -1,89 +1,308 @@
-<nav class="navbar bg-white shadow-sm">
-    <ul class="navbar-menu flex items-center justify-between px-6 py-4">
-        <div class="flex space-x-4">
-            <!-- Items menú -->
-            <li><a href="/" class="hover:text-blue-600"><i class="fas fa-home"></i> Inicio</a></li>
-            <li><a href="/stats" class="hover:text-blue-600"><i class="fas fa-chart-bar"></i> Estadísticas de la Cache</a></li>
-            <li><a href="/logs" class="hover:text-blue-600"><i class="fas fa-user-friends"></i> Registro de Usuarios</a></li>
-            <li><a href="/reports" class="hover:text-blue-600"><i class="fa-solid fa-chart-simple"></i> Reportes y Gráficas</a></li>
-        </div>
+<nav class="navbar-professional">
+  <div class="navbar-container">
+    <!-- Brand/Logo Section -->
+    <div class="navbar-brand">
+      <i class="fas fa-chart-line brand-icon"></i>
+      <span class="brand-text">SquidStats</span>
+    </div>
 
-        <!-- Container Buttons -->
-        <div class="flex items-center gap-3" x-data="{ showSquidModal: false, showWebModal: false }">
-            <!-- Button Update Squid -->
-            <div>
-                <button
-                    @click="showSquidModal = true"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center space-x-2"
-                >
-                    <i class="fas fa-download mr-2"></i>
-                    Actualizar Squid
-                </button>
+    <!-- Navigation Links -->
+    <div class="navbar-nav">
+      <a
+        href="/"
+        class="nav-link"
+        data-tooltip="Panel principal con conexiones activas"
+      >
+        <i class="fas fa-home nav-icon"></i>
+        <span class="nav-text">Inicio</span>
+      </a>
+      <a
+        href="/stats"
+        class="nav-link"
+        data-tooltip="Estadísticas de rendimiento del cache"
+      >
+        <i class="fas fa-chart-bar nav-icon"></i>
+        <span class="nav-text">Estadísticas</span>
+      </a>
+      <a
+        href="/logs"
+        class="nav-link"
+        data-tooltip="Actividad y logs de usuarios"
+      >
+        <i class="fas fa-user-friends nav-icon"></i>
+        <span class="nav-text">Usuarios</span>
+      </a>
+      <a
+        href="/reports"
+        class="nav-link"
+        data-tooltip="Reportes y gráficas avanzadas"
+      >
+        <i class="fas fa-chart-simple nav-icon"></i>
+        <span class="nav-text">Reportes</span>
+      </a>
+      <a
+        href="/blacklist"
+        class="nav-link"
+        data-tooltip="Sitios bloqueados y actividad restringida"
+      >
+        <i class="fas fa-ban nav-icon"></i>
+        <span class="nav-text">Blacklist</span>
+      </a>
+    </div>
 
-                <!-- Modal Squid -->
-                <div x-show="showSquidModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style="display: none;">
-                    <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-                        <div class="flex items-center mb-4">
-                            <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mr-2"></i>
-                            <h3 class="text-lg font-semibold">Confirmar Actualización Squid</h3>
-                        </div>
-                        <p class="text-gray-600 mb-4">
-                            ¿Estás seguro de que deseas actualizar el servicio Squid?
-                            <ul class="list-disc list-inside text-gray-600 text-sm mb-4">
-                                <li>!!!Importante!!</li>
-                                <li>Guardar su configuración en caso de incompatibilidades</li>
-                            </ul>
-                        </p>
-                        <form method="POST" action="/install" class="flex justify-end space-x-3">
-                            <button type="button" @click="showSquidModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                                Cancelar
-                            </button>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                                Confirmar
-                            </button>
-                        </form>
-                    </div>
-                </div>
+    <!-- Action Buttons -->
+    <div
+      class="navbar-actions"
+      x-data="{ showSquidModal: false, showWebModal: false }"
+    >
+      <button
+        @click="showSquidModal = true"
+        class="action-btn action-btn-primary"
+        data-tooltip="Actualizar paquetes y configuración de Squid"
+      >
+        <i class="fas fa-sync-alt btn-icon"></i>
+        <span class="btn-text">Squid</span>
+      </button>
+
+      <button
+        @click="showWebModal = true"
+        class="action-btn action-btn-secondary"
+        data-tooltip="Actualizar aplicación web SquidStats"
+      >
+        <i class="fas fa-cloud-download-alt btn-icon"></i>
+        <span class="btn-text">Web</span>
+      </button>
+
+      <!-- Modal Squid -->
+      <div
+        x-show="showSquidModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform scale-90"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-90"
+        class="modal-overlay"
+        style="display: none"
+      >
+        <div class="modal-container">
+          <div class="modal-header">
+            <div class="modal-icon warning">
+              <i class="fas fa-exclamation-triangle"></i>
             </div>
-
-            <!-- Button Update Web -->
-            <div>
-                <button
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center space-x-2"
-                    @click="showWebModal = true"
-                >
-                    <i class="fas fa-download mr-2"></i>
-                    Actualizar Web
-                </button>
-
-                <!-- Modal Web -->
-                <div x-show="showWebModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style="display: none;">
-                    <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-                        <div class="flex items-center mb-4">
-                            <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mr-2"></i>
-                            <h3 class="text-lg font-semibold">Confirmar Actualización Web</h3>
-                        </div>
-                        <p class="text-gray-600 mb-4">
-                            ¿Estás seguro de que deseas actualizar el servicio Web?
-                            <ul class="list-disc list-inside text-gray-600 text-sm mb-4">
-                                <li>!!!Importante!!</li>
-                                <li>Guardar su configuración en caso de incompatibilidades</li>
-                            </ul>
-                        </p>
-                        <form method="POST" action="/update" class="flex justify-end space-x-3">
-                            <button type="button" @click="showWebModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                                Cancelar
-                            </button>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                                Confirmar
-                            </button>
-                        </form>
-                    </div>
-                </div>
+            <h3 class="modal-title">Confirmar Actualización de Squid</h3>
+          </div>
+          <div class="modal-body">
+            <p class="modal-description">
+              ¿Estás seguro de que deseas actualizar el servicio Squid?
+            </p>
+            <div class="modal-warning">
+              <i class="fas fa-info-circle"></i>
+              <div>
+                <strong>Importante:</strong>
+                <ul class="warning-list">
+                  <li>Guarda tu configuración antes de continuar</li>
+                  <li>El servicio se reiniciará automáticamente</li>
+                  <li>
+                    Puede haber incompatibilidades con versiones anteriores
+                  </li>
+                </ul>
+              </div>
             </div>
+          </div>
+          <form method="POST" action="/install" class="modal-actions">
+            <button
+              type="button"
+              @click="showSquidModal = false"
+              class="btn-cancel"
+            >
+              <i class="fas fa-times"></i>
+              Cancelar
+            </button>
+            <button type="submit" class="btn-confirm">
+              <i class="fas fa-check"></i>
+              Confirmar
+            </button>
+          </form>
         </div>
-    </ul>
+      </div>
+
+      <!-- Modal Web -->
+      <div
+        x-show="showWebModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform scale-90"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-90"
+        class="modal-overlay"
+        style="display: none"
+      >
+        <div class="modal-container">
+          <div class="modal-header">
+            <div class="modal-icon success">
+              <i class="fas fa-cloud-download-alt"></i>
+            </div>
+            <h3 class="modal-title">Confirmar Actualización Web</h3>
+          </div>
+          <div class="modal-body">
+            <p class="modal-description">
+              ¿Estás seguro de que deseas actualizar SquidStats?
+            </p>
+            <div class="modal-info">
+              <i class="fas fa-info-circle"></i>
+              <div>
+                <strong>Se actualizará:</strong>
+                <ul class="info-list">
+                  <li>Interfaz web y componentes</li>
+                  <li>Funcionalidades y reportes</li>
+                  <li>Correcciones de seguridad</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <form method="POST" action="/update" class="modal-actions">
+            <button
+              type="button"
+              @click="showWebModal = false"
+              class="btn-cancel"
+            >
+              <i class="fas fa-times"></i>
+              Cancelar
+            </button>
+            <button type="submit" class="btn-confirm">
+              <i class="fas fa-download"></i>
+              Actualizar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
-<script defer src="{{ url_for('static', filename='src/alpine.min.js') }}"></script>
+<script
+  defer
+  src="{{ url_for('static', filename='src/alpine.min.js') }}"
+></script>
+
+<script>
+  // Enhanced Navbar Functionality
+  document.addEventListener("DOMContentLoaded", function () {
+    // Highlight active navigation link
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    navLinks.forEach((link) => {
+      const href = link.getAttribute("href");
+      if (href === currentPath || (currentPath === "/" && href === "/")) {
+        link.classList.add("active");
+      }
+    });
+
+    // Enhanced tooltip positioning
+    const tooltipElements = document.querySelectorAll("[data-tooltip]");
+    tooltipElements.forEach((element) => {
+      element.addEventListener("mouseenter", function (e) {
+        const rect = e.target.getBoundingClientRect();
+        const tooltipWidth = e.target.getAttribute("data-tooltip").length * 8; // Approximate width
+
+        // Adjust tooltip position if it would go off-screen
+        if (rect.left + tooltipWidth > window.innerWidth) {
+          e.target.style.setProperty(
+            "--tooltip-transform",
+            "translateX(-100%)"
+          );
+        }
+      });
+    });
+
+    // Smooth scroll to top when clicking brand
+    const brand = document.querySelector(".navbar-brand");
+    if (brand) {
+      brand.addEventListener("click", function (e) {
+        e.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      });
+    }
+
+    // Add loading state to action buttons
+    const actionButtons = document.querySelectorAll(".action-btn");
+    actionButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const originalContent = this.innerHTML;
+        this.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> <span>Procesando...</span>';
+        this.disabled = true;
+
+        // Reset after 3 seconds (in case something goes wrong)
+        setTimeout(() => {
+          this.innerHTML = originalContent;
+          this.disabled = false;
+        }, 3000);
+      });
+    });
+
+    // Add keyboard navigation
+    document.addEventListener("keydown", function (e) {
+      if (e.altKey) {
+        switch (e.key) {
+          case "1":
+            e.preventDefault();
+            window.location.href = "/";
+            break;
+          case "2":
+            e.preventDefault();
+            window.location.href = "/stats";
+            break;
+          case "3":
+            e.preventDefault();
+            window.location.href = "/logs";
+            break;
+          case "4":
+            e.preventDefault();
+            window.location.href = "/reports";
+            break;
+          case "5":
+            e.preventDefault();
+            window.location.href = "/blacklist";
+            break;
+        }
+      }
+    });
+  });
+
+  // Close modals when clicking outside
+  document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("modal-overlay")) {
+      // Close any open modal
+      const modals = document.querySelectorAll("[x-show]");
+      modals.forEach((modal) => {
+        const alpineData = Alpine.$data(modal);
+        if (alpineData) {
+          alpineData.showSquidModal = false;
+          alpineData.showWebModal = false;
+        }
+      });
+    }
+  });
+
+  // Add escape key handling for modals
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      const modals = document.querySelectorAll("[x-show]");
+      modals.forEach((modal) => {
+        const alpineData = Alpine.$data(modal);
+        if (alpineData) {
+          alpineData.showSquidModal = false;
+          alpineData.showWebModal = false;
+        }
+      });
+    }
+  });
+</script>
