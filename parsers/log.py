@@ -60,6 +60,40 @@ class DatabaseManager:
 BATCH_SIZE = 500
 MAX_RETRIES = 3
 
+def find_last_parent_proxy(log_file: str, lines_to_check: int = 5000) -> str | None:
+    if not os.path.exists(log_file):
+        return None
+    
+    try:
+        with open(log_file, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            buffer = bytearray()
+            end_pos = f.tell()
+            line_count = 0
+            while line_count < lines_to_check + 1 and f.tell() > 0:
+                try:
+                    f.seek(-1, os.SEEK_CUR)
+                    char = f.read(1)
+                    if char == b'\n':
+                        line_count += 1
+                    f.seek(-1, os.SEEK_CUR)
+                except OSError:
+                    f.seek(0)
+                    break
+
+            last_lines_raw = f.read(end_pos - f.tell())
+        
+        last_lines = last_lines_raw.decode('utf-8', errors='replace').strip().splitlines()
+
+        for line in reversed(last_lines):
+            log_data = parse_log_line(line)
+            if log_data and log_data.get('parent_ip'):
+                return log_data['parent_ip']
+                
+    except Exception as e:
+        logger.error(f"Error leyendo las últimas líneas del log: {e}", exc_info=False)
+
+    return None
 
 def get_table_names():
     """Obtiene nombres de tablas con fecha actual"""

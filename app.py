@@ -9,7 +9,7 @@ from database.database import (
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
 from parsers.cache import fetch_squid_cache_stats
-from parsers.log import process_logs
+from parsers.log import process_logs, find_last_parent_proxy
 from services.fetch_data_logs import get_users_logs, get_users_with_logs_by_date
 from services.blacklist_users import find_blacklisted_sites, find_blacklisted_sites_by_date
 from services.system_info import (
@@ -33,6 +33,20 @@ class Config:
     SCHEDULER_API_ENABLED = True
 
 load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+parent_proxy_lock = Lock()
+
+g_parent_proxy_ip = find_last_parent_proxy(os.getenv("SQUID_LOG", "/var/log/squid/access.log"))
+if g_parent_proxy_ip:
+    logger.info(f"Proxy padre detectado con IP: {g_parent_proxy_ip}. Esta configuración se mantendrá fija.")
+else:
+    logger.info("No se detectó un proxy padre en los logs recientes. Asumiendo conexión directa.")
 
 # Initialize Flask application
 app = Flask(__name__, static_folder='./static')
@@ -60,10 +74,24 @@ def index():
         connections = parse_raw_data(raw_data)
         grouped_connections = group_by_user(connections)
 
+        with parent_proxy_lock:
+            parent_ip = g_parent_proxy_ip
+
+        squid_version = get_squid_version()
+        network_info = get_network_info()
+        squid_ip = "No disponible"
+        if isinstance(network_info, list) and network_info:
+            squid_ip = network_info[0].get('ip', 'No disponible')
+        
         return render_template(
             'index.html',
-            grouped_connections=grouped_connections, page_icon='favicon.ico', page_title='Inicio Dashboard')
-
+            grouped_connections=grouped_connections,
+            parent_proxy_ip=parent_ip,
+            squid_ip=squid_ip,
+            squid_version=squid_version,
+            page_icon='favicon.ico',
+            page_title='Inicio Dashboard'
+        )
     except Exception as e:
         logger.error(f"Unexpected error in index route: {str(e)}")
         return render_template('error.html', message="An unexpected error occurred"), 500
@@ -126,22 +154,23 @@ def format_bytes_filter(value):
 def get_logs_by_date():
     db = None
     try:
+        page_int = request.json.get('page')
+        page = request.args.get('page', page_int, type=int)
+        per_page = request.args.get('per_page', 15, type=int)
         date_str = request.json.get('date')
         selected_date = datetime.strptime(date_str, '%Y-%m-%d')
         date_suffix = selected_date.strftime('%Y%m%d')
 
         db = get_session()
-
-        users_data = get_users_with_logs_by_date(db, date_suffix)
+        users_data = get_users_logs(db, date_suffix, page=page, per_page=per_page)
         return jsonify(users_data)
-
-    except ValueError as ve:
+    except ValueError:
         return jsonify({'error': 'Formato de fecha inválido'}), 400
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error en get-logs-by-date: {str(e)}")
         return jsonify({'error': str(e)}), 500
     finally:
-        if db is not None:
+        if db:
             db.close()
 
 @app.route('/reports')
