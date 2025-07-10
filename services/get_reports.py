@@ -3,7 +3,7 @@ from sqlalchemy import func, desc
 from sqlalchemy.orm import Session
 import sys
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import timedelta
 from sqlalchemy import inspect, Column, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -11,7 +11,7 @@ current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
 sys.path.append(str(project_root))
 
-from database.database import get_session, get_dynamic_models
+from database.database import get_dynamic_models
 
 def get_important_metrics(db: Session, UserModel, LogModel):
     results = {}
@@ -109,7 +109,7 @@ def get_important_metrics(db: Session, UserModel, LogModel):
         )
         .group_by(UserModel.ip)
         .order_by(desc('user_count'))
-        .filter(UserModel.ip != None)
+        .filter(UserModel.ip is not None)
         .all())
 
         results['users_per_ip'] = [
@@ -134,9 +134,7 @@ def get_important_metrics(db: Session, UserModel, LogModel):
         print(f"Error en get_important_metrics: {str(e)}")
         return {}
 
-def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):
-    results = {}
-    
+def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):    
     try:
         # Convertir cadenas a objetos datetime
         start_dt = datetime.strptime(start_date, "%Y%m%d")

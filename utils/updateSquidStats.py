@@ -1,6 +1,4 @@
-import json
 import subprocess
-import platform
 
 def updateSquidStats():
     try:
@@ -10,7 +8,7 @@ def updateSquidStats():
         )
 
         if script_install.returncode != 0:
-            print(f'Error descargando el script de actualizacion', 'error')
+            print('Error descargando el script de actualizacion', 'error')
             return False
 
         subprocess.run(

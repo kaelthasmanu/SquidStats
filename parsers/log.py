@@ -1,21 +1,13 @@
 import sys
-import re
 from pathlib import Path
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 import logging
 import time
 import os
-
-current_dir = Path(__file__).resolve().parent
-project_root = current_dir.parent
-sys.path.append(str(project_root))
-
 from database.database import (
     Base,
     get_session,
-    User,
-    Log,
     LogMetadata,
     get_engine,
     table_exists,
@@ -23,6 +15,12 @@ from database.database import (
     get_dynamic_models,
     DeniedLog,
 )
+
+current_dir = Path(__file__).resolve().parent
+project_root = current_dir.parent
+sys.path.append(str(project_root))
+
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -67,7 +65,6 @@ def find_last_parent_proxy(log_file: str, lines_to_check: int = 5000) -> str | N
     try:
         with open(log_file, "rb") as f:
             f.seek(0, os.SEEK_END)
-            buffer = bytearray()
             end_pos = f.tell()
             line_count = 0
             while line_count < lines_to_check + 1 and f.tell() > 0:
@@ -196,7 +193,6 @@ def detect_log_format(log_file, sample_lines=10):
 
 
 def process_logs(log_file):
-    log_format = detect_log_format(log_file)
     if not os.path.exists(log_file):
         logger.error(f"Archivo no encontrado: {log_file}")
         return

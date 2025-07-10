@@ -1,22 +1,12 @@
 import os
-import sys
 import socket
 import platform
 import subprocess
-import datetime
 import re
-from flask import Flask, jsonify, Response
 import psutil
-import eventlet
-eventlet.monkey_patch()  # Parchado para eventlet, imprescindible para WebSocket con Flask-SocketIO
-
-from flask_socketio import SocketIO
-import threading
+import asyncio
 import time
 
-# ==================================================
-# Funciones de obtención de datos
-# ==================================================
 def get_network_info():
     """Obtiene información de red usando psutil"""
     ips = []
@@ -65,8 +55,8 @@ def get_uptime():
             hours = int((uptime_seconds % 86400) // 3600)
             minutes = int((uptime_seconds % 3600) // 60)
             return f"{days}d {hours}h {minutes}m"
-    except:
-        return "Desconocido"
+    except Exception as e:
+        return f"Error al obtener el tiempo de actividad: {str(e)}"
 
 def get_ram_info():
     """Obtiene información de memoria RAM usando psutil"""
@@ -105,9 +95,10 @@ def get_cpu_info():
             freq_current = cpu_freq.current
             freq_min = cpu_freq.min
             freq_max = cpu_freq.max
-        except:
+        except Exception as e:
             freq_current = freq_min = freq_max = "N/A"
-        
+            print(f"Error al obtener información de frecuencia de CPU: {str(e)}")
+
         cpu_times = psutil.cpu_times_percent(interval=0.5, percpu=False)
         return {
             'physical_cores': psutil.cpu_count(logical=False),
@@ -152,20 +143,22 @@ def get_squid_version():
 def get_network_stats():
     """Obtiene estadísticas de uso de red (ancho de banda)"""
     try:
-        # Obtener estadísticas de red inicial
         net_io_1 = psutil.net_io_counters()
-        time.sleep(1)  # Esperar 1 segundo para medir la diferencia
+        # Usar asyncio.sleep si se llama desde una función async, si no, usar time.sleep
+        try:
+            loop = asyncio.get_running_loop()
+            # Si hay un loop, usar asyncio.sleep
+            async def async_sleep():
+                await asyncio.sleep(1)
+            loop.run_until_complete(async_sleep())
+        except RuntimeError:
+            # Si no hay loop, usar time.sleep
+            time.sleep(1)
         net_io_2 = psutil.net_io_counters()
-        
-        # Calcular la diferencia en bytes por segundo
         bytes_sent_per_sec = net_io_2.bytes_sent - net_io_1.bytes_sent
         bytes_recv_per_sec = net_io_2.bytes_recv - net_io_1.bytes_recv
-        
-        # Convertir a Mbps (Megabits por segundo)
-        # 1 byte = 8 bits, 1 Mb = 1,000,000 bits
         up_mbps = round((bytes_sent_per_sec * 8) / 1_000_000, 2)
         down_mbps = round((bytes_recv_per_sec * 8) / 1_000_000, 2)
-        
         return {
             'up_mbps': up_mbps,
             'down_mbps': down_mbps,
@@ -199,5 +192,5 @@ def get_timezone():
         if match:
             return f"{match.group(1)} {match.group(2)}"
         return "Desconocido"
-    except:
-        return "Error al obtener"
+    except Exception as e:
+        return f"Error al obtener la zona horaria: {str(e)}"

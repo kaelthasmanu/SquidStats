@@ -1,22 +1,23 @@
-import eventlet
-eventlet.monkey_patch()
-from flask import Flask, render_template, request, redirect, jsonify, render_template_string
-from flask_socketio import SocketIO, emit
+from flask import Blueprint
+from datetime import date
+from services.fetch_data_logs import get_metrics_for_date
+from flask import Flask, render_template, request, redirect, jsonify
+from flask_socketio import SocketIO
 from flask_apscheduler import APScheduler
 from database.database import (
-    create_dynamic_tables, get_engine, get_session, get_dynamic_models
+    get_session, get_dynamic_models
 )
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
 from parsers.cache import fetch_squid_cache_stats
 from parsers.log import process_logs, find_last_parent_proxy
-from services.fetch_data_logs import get_users_logs, get_users_with_logs_by_date
-from services.blacklist_users import find_blacklisted_sites, find_blacklisted_sites_by_date
+from services.fetch_data_logs import get_users_logs
+from services.blacklist_users import find_blacklisted_sites
 from services.system_info import (
     get_network_info, get_os_info, get_uptime, get_ram_info,
     get_swap_info, get_cpu_info, get_squid_version, get_timezone, get_network_stats
 )
-from services.get_reports import get_important_metrics, get_metrics_by_date_range
+from services.get_reports import get_important_metrics
 from utils.colors import color_map
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
@@ -26,7 +27,6 @@ import socket
 import sys
 import os
 import logging
-import time
 from threading import Lock  # Importamos Lock para sincronización de hilos
 
 class Config:
@@ -135,9 +135,6 @@ def init_scheduler():
     else:
         process_logs(log_file)
 
-@app.template_filter('divide')
-def divide_filter(value, divisor):
-    return value / divisor
 
 @app.template_filter('format_bytes')
 def format_bytes_filter(value):
@@ -216,7 +213,7 @@ def reports():
 @app.route('/install', methods=['POST'])
 def install_package():
     install = update_squid()
-    if install == False:
+    if not install:
         return redirect('/')
     else:
         return redirect('/')
@@ -224,7 +221,7 @@ def install_package():
 @app.route('/update', methods=['POST'])
 def update_web():
     install = updateSquidStats()
-    if install == False:
+    if not install:
         return redirect('/')
     else:
         return redirect('/')
@@ -277,186 +274,134 @@ def blacklist_logs():
         if db is not None:
             db.close()
 
-if __name__ == "__main__":
 
-    # Execute app with Flask
-    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    # CAMBIO PRINCIPAL: Configurar SocketIO y variables globales para tiempo real
-    app.config["TEMPLATES_AUTO_RELOAD"] = True
-    
-    # async_mode='eventlet' es obligatorio si usas eventlet.monkey_patch()
-    socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+@app.template_filter('divide')
+def divide_filter(numerator, denominator, precision=2):
+    try:
+        num = float(numerator)
+        den = float(denominator)
+        if den == 0:
+            logger.warning("Intento de división por cero en plantilla")
+            return 0.0
+        return round(num / den, precision)
+    except (TypeError, ValueError) as e:
+        logger.error(f"Error en filtro divide: {str(e)}")
+        return 0.0
 
-    realtime_data_lock = Lock()
-    realtime_cache_stats = {}
-    realtime_system_info = {}
+reports_bp = Blueprint('reports', __name__)
 
-    def realtime_data_thread():
-        global realtime_cache_stats, realtime_system_info
+@reports_bp.route('/dashboard')
+def dashboard():
+    date_str = request.args.get('date')
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = date.today()
+    else:
+        selected_date = date.today()
 
-        while True:
-            try:
-                cache_data = fetch_squid_cache_stats()
-                cache_stats = vars(cache_data) if hasattr(cache_data, '__dict__') else cache_data
-                
-                system_info = {
-                    'hostname': socket.gethostname(),
-                    'ips': get_network_info(),
-                    'os': get_os_info(),
-                    'uptime': get_uptime(),
-                    'ram': get_ram_info(),
-                    'swap': get_swap_info(),
-                    'cpu': get_cpu_info(),
-                    'python_version': sys.version.split()[0],
-                    'squid_version': get_squid_version(),
-                    'timezone': get_timezone(),
-                    'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                }
-                
-                network_stats = get_network_stats()
-                
-                # Actualizar las variables globales con bloqueo
-                with realtime_data_lock:
-                    realtime_cache_stats = cache_stats
-                    realtime_system_info = system_info
-                
-                socketio.emit('system_update', {
-                    'cache_stats': cache_stats,
-                    'system_info': system_info,
-                    'network_stats': network_stats
-                })
-                
-            except Exception as e:
-                logger.error(f"Error en hilo de datos en tiempo real: {str(e)}")
-            
-            eventlet.sleep(5)
+    metrics = get_metrics_for_date(selected_date)
 
-    #Manejador de conexión WebSocket
-    @socketio.on('connect')
-    def handle_connect():
-        logger.info(f"Cliente conectado: {request.sid}")
-        
-        with realtime_data_lock:
-            cache_stats = realtime_cache_stats
-            system_info = realtime_system_info
+    return render_template(
+        'components/graph_reports.html',
+        metrics=metrics,
+        selected_date=selected_date
+    )
 
-        if cache_stats or system_info:  # solo si hay datos válidos
+app.register_blueprint(reports_bp)
+
+# Usar threading.Lock para sincronización
+realtime_data_lock = Lock()
+realtime_cache_stats = {}
+realtime_system_info = {}
+
+# SocketIO en modo threading
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+def realtime_data_thread():
+    global realtime_cache_stats, realtime_system_info
+    import time
+    while True:
+        try:
+            cache_data = fetch_squid_cache_stats()
+            cache_stats = vars(cache_data) if hasattr(cache_data, '__dict__') else cache_data
+            system_info = {
+                'hostname': socket.gethostname(),
+                'ips': get_network_info(),
+                'os': get_os_info(),
+                'uptime': get_uptime(),
+                'ram': get_ram_info(),
+                'swap': get_swap_info(),
+                'cpu': get_cpu_info(),
+                'python_version': sys.version.split()[0],
+                'squid_version': get_squid_version(),
+                'timezone': get_timezone(),
+                'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
             network_stats = get_network_stats()
+            with realtime_data_lock:
+                realtime_cache_stats = cache_stats
+                realtime_system_info = system_info
             socketio.emit('system_update', {
                 'cache_stats': cache_stats,
                 'system_info': system_info,
                 'network_stats': network_stats
             })
-
-    @app.after_request
-    def set_response_headers(response):
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response.headers['Pragma'] = 'no-cache'
-        response.headers['Expires'] = '0'
-        return response
-
-    # Actualizar la ruta /stats para usar datos en tiempo real
-    @app.route('/stats')
-    def cache_stats_realtime():
-        try:
-            with realtime_data_lock:
-                stats_data = realtime_cache_stats if realtime_cache_stats else {}
-                system_info_data = realtime_system_info if realtime_system_info else {}
-            
-            if not stats_data:
-                data = fetch_squid_cache_stats()
-                stats_data = vars(data) if hasattr(data, '__dict__') else data
-            
-            if not system_info_data:
-                system_info_data = {
-                    'hostname': socket.gethostname(), 
-                    'ips': get_network_info(),
-                    'os': get_os_info(), 
-                    'uptime': get_uptime(), 
-                    'ram': get_ram_info(),
-                    'swap': get_swap_info(), 
-                    'cpu': get_cpu_info(),
-                    'python_version': sys.version.split()[0],
-                    'squid_version': get_squid_version(), 
-                    'timezone': get_timezone(),
-                    'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                }
-            
-            network_stats = get_network_stats()
-            logger.info("Successfully fetched cache statistics and system info")
-            return render_template(
-                'cacheView.html',
-                cache_stats=stats_data,
-                system_info=system_info_data,
-                network_stats=network_stats,
-                page_icon='statistics.ico',
-                page_title='Estadísticas del Sistema'
-            )
         except Exception as e:
-            logger.error(f"Error in /stats: {str(e)}")
-            return render_template('error.html', message="Error retrieving cache statistics or system info"), 500
+            logger.error(f"Error en hilo de datos en tiempo real: {str(e)}")
+        time.sleep(5)
 
-    # Actualizar funciones de template
-    @app.template_filter('format_bytes')
-    def format_bytes_filter(value):
-        value = int(value)
-        if value >= 1024**3:
-            return f"{(value / (1024**3)):.2f} GB"
-        elif value >= 1024**2:
-            return f"{(value / (1024**2)):.2f} MB"
-        elif value >= 1024:
-            return f"{(value / 1024):.2f} KB"
-        return f"{value} bytes"
+@app.after_request
+def set_response_headers(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
-    @app.template_filter('divide')
-    def divide_filter(numerator, denominator, precision=2):
-        try:
-            num = float(numerator)
-            den = float(denominator)
-            if den == 0:
-                logger.warning("Intento de división por cero en plantilla")
-                return 0.0
-            return round(num / den, precision)
-        except (TypeError, ValueError) as e:
-            logger.error(f"Error en filtro divide: {str(e)}")
-            return 0.0
-
-    from flask import Blueprint
-    from datetime import date
-    from services.fetch_data_logs import get_metrics_for_date
-
-    reports_bp = Blueprint('reports', __name__)
-
-    @reports_bp.route('/dashboard')
-    def dashboard():
-        date_str = request.args.get('date')
-        if date_str:
-            try:
-                selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-            except ValueError:
-                selected_date = date.today()
-        else:
-            selected_date = date.today()
-
-        metrics = get_metrics_for_date(selected_date)
-
+# Actualizar la ruta /stats para usar datos en tiempo real
+@app.route('/stats')
+def cache_stats_realtime():
+    try:
+        with realtime_data_lock:
+            stats_data = realtime_cache_stats if realtime_cache_stats else {}
+            system_info_data = realtime_system_info if realtime_system_info else {}
+        
+        if not stats_data:
+            data = fetch_squid_cache_stats()
+            stats_data = vars(data) if hasattr(data, '__dict__') else data
+        
+        if not system_info_data:
+            system_info_data = {
+                'hostname': socket.gethostname(), 
+                'ips': get_network_info(),
+                'os': get_os_info(), 
+                'uptime': get_uptime(), 
+                'ram': get_ram_info(),
+                'swap': get_swap_info(), 
+                'cpu': get_cpu_info(),
+                'python_version': sys.version.split()[0],
+                'squid_version': get_squid_version(), 
+                'timezone': get_timezone(),
+                'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+        
+        network_stats = get_network_stats()
+        logger.info("Successfully fetched cache statistics and system info")
         return render_template(
-            'components/graph_reports.html',
-            metrics=metrics,
-            selected_date=selected_date
+            'cacheView.html',
+            cache_stats=stats_data,
+            system_info=system_info_data,
+            network_stats=network_stats,
+            page_icon='statistics.ico',
+            page_title='Estadísticas del Sistema'
         )
+    except Exception as e:
+        logger.error(f"Error in /stats: {str(e)}")
+        return render_template('error.html', message="Error retrieving cache statistics or system info"), 500
 
-    app.register_blueprint(reports_bp)
-
-    # Iniciar el hilo de actualización de datos en tiempo real
-    socketio.start_background_task(realtime_data_thread)
-    
-    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    socketio.run(app, debug=debug_mode, host='0.0.0.0', port=5000)
-
+# Iniciar el hilo de actualización de datos en tiempo real
 if __name__ == "__main__":
-    # CAMBIO PRINCIPAL: Iniciar el hilo de actualización de datos en tiempo real
     socketio.start_background_task(realtime_data_thread)
-    
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    socketio.run(app, debug=debug_mode, host='0.0.0.0', port=5000)
+    socketio.run(app, debug=debug_mode, host="0.0.0.0", port=5000)

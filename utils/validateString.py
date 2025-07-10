@@ -1,5 +1,4 @@
 import sys
-import re
 from urllib.parse import quote
 
 try:

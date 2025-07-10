@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .map(
         (user, index) => `
       <div class="user-card group bg-[#f0f2f5] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
-        <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] relative z-[1]">
+        <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] z-[1]">
           <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-300 ease-linear z-0 group-hover:h-full"></div>
           <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
           <div class="avatar w-full h-full rounded-full bg-slate-200 flex items-center justify-center text-[2.5rem] text-slate-500 relative transition-all duration-900 ease-in-out group-hover:shadow-[0_0_0_10px_#f7f5ec] group-hover:scale-[0.7] z-[2]">
@@ -120,11 +120,11 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         
         <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] z-[1]">
-          <li class="inline-block flex flex-col items-center">
+          <li class="flex flex-col items-center">
             <span class="label text-xs font-light uppercase tracking-wide">Solicitudes:</span>
             <span class="value font-semib">${user.total_requests}</span>
           </li>
-          <li class="inline-block flex flex-col items-center">
+          <li class="flex flex-col items-center">
             <span class="label text-xs font-light uppercase tracking-wide">Datos:</span>
             <span class="value font-semib">${formatBytes(
               user.total_data
@@ -279,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Generar HTML del modal
         return `
-        <div class="logs-modal hidden fixed inset-0 bg-black bg-opacity-50 z-[1000] flex justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
+        <div class="logs-modal hidden fixed inset-0 bg-black bg-opacity-50 z-[1000] justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-${index}">
           <div class="modal-content bg-white p-8 rounded-2xl w-[95%] max-w-[650px] max-h-[85vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
             <button onclick="window.closeLogsModal(${index})" 
                     class="close-btn absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full z-50 shadow-md transform transition-all duration-300 hover:bg-red-600 hover:scale-110 hover:rotate-90 hover:shadow-lg"
