@@ -13,45 +13,60 @@ def update_squid():
             print('Sistema operativo no compatible', 'error')
             return False
 
-        version_response = subprocess.run(
-            ['curl', '-s', 'https://api.github.com/repos/cuza/squid/releases/latest'],
-            capture_output=True, text=True
-        )
+        proxy_url = os.getenv("HTTP_PROXY", "")
+        env = os.environ.copy()
+        if proxy_url:
+            env["http_proxy"] = proxy_url
+            env["https_proxy"] = proxy_url
 
-        if version_response.returncode != 0:
-            print('Error obteniendo última versión', 'error')
+        version_info = subprocess.run(
+            ['wget', '-qO-', 'https://api.github.com/repos/cuza/squid/releases/latest'],
+            capture_output=True, text=True, env=env
+        )
+        if version_info.returncode != 0:
+            print('Error obteniendo información de versión', 'error')
             return False
 
         try:
-            latest_version = json.loads(version_response.stdout)['tag_name']
+            latest_version = json.loads(version_info.stdout)['tag_name']
         except (json.JSONDecodeError, KeyError):
             print('Error procesando versión', 'error')
             return False
 
-        # Create name package
         package_name = f"squid_{latest_version}-{os_id}-{codename}_amd64.deb"
         download_url = f"https://github.com/cuza/squid/releases/download/{latest_version}/{package_name}"
 
+        # Verificar y descargar el paquete
         check_package = subprocess.run(
             ['wget', '--spider', download_url],
-            capture_output=True, text=True
+            capture_output=True, text=True, env=env
         )
-
         if check_package.returncode != 0:
             print(f'Paquete no disponible para {os_id.capitalize()} {codename.capitalize()}', 'error')
             return False
 
-        download = subprocess.run(['wget', download_url, '-O', f'/tmp/{package_name}'])
-        subprocess.run(['apt', 'update'])
-
+        download = subprocess.run(
+            ['wget', download_url, '-O', f'/tmp/{package_name}'],
+            capture_output=True, text=True, env=env
+        )
         if download.returncode != 0:
             print('Error descargando el paquete', 'error')
             return False
 
+        # Configurar proxy para apt si es necesario
+        apt_env = env.copy()
+        if proxy_url:
+            apt_conf = '/etc/apt/apt.conf.d/95proxies'
+            with open(apt_conf, 'w') as f:
+                f.write(f'Acquire::http::Proxy "{proxy_url}";\n')
+                f.write(f'Acquire::https::Proxy "{proxy_url}";\n')
+
+        subprocess.run(['apt', 'update'], env=apt_env)
+
         install = subprocess.run(['dpkg', '-i', '--force-overwrite', f'/tmp/{package_name}'])
         if install.returncode != 0:
             print('Error instalando el paquete', 'error')
-            subprocess.run(['apt', 'install', '-f', '-y'])
+            subprocess.run(['apt', 'install', '-f', '-y'], env=apt_env)
 
         subprocess.run(['cp', f'{os.getcwd()}/./utils/squid', '/etc/init.d/'])
         subprocess.run(['chmod', '+x', '/etc/init.d/squid'])

@@ -17,11 +17,11 @@
 </head>
 <body class="overflow-x-hidden overflow-auto">
     <!-- Barra de navegación común -->
-    {% include 'components/navbar.html' %}
-
-    <main>
-        {% block content %}{% endblock %}  <!-- Contenido específico de cada página -->
-    </main>
+    <div class="relative">
+        {% include 'components/navbar.html' %}
+        <!-- Dropdown de notificaciones -->
+        <div class="absolute top-4 right-8 z-50">
+            <div class="relative inline-block text-left">
     
     <!-- Scripts de Flowbite (UI components) -->
     <script src="{{ url_for('static', filename='src/flowbite.min.js') }}"></script>

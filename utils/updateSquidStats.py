@@ -1,10 +1,17 @@
 import subprocess
+import os
 
 def updateSquidStats():
     try:
+        proxy_url = os.getenv("HTTP_PROXY", "")
+        env = os.environ.copy()
+        if proxy_url:
+            env["http_proxy"] = proxy_url
+            env["https_proxy"] = proxy_url
+
         script_install = subprocess.run(
-            ['wget', '-O' , '/tmp/install.sh', 'https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh'],
-            capture_output=True, text=True
+            ['wget', '-O' , '/tmp/install.sh', 'https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh'] + (['-e', f'http_proxy={proxy_url}'] if proxy_url else []),
+            capture_output=True, text=True, env=env
         )
 
         if script_install.returncode != 0:
@@ -14,7 +21,7 @@ def updateSquidStats():
         subprocess.run(
             ['chmod', '+x', '/tmp/install.sh']
         )
-        subprocess.run(['bash' , '/tmp/install.sh', '--update'])
+        subprocess.run(['bash' , '/tmp/install.sh', '--update'], env=env)
         return True
 
     except Exception as e:
