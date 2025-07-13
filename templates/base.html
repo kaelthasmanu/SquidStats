@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"> <!-- Font Awesome -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}">
 </head>
 <body class="overflow-x-hidden overflow-auto">
@@ -22,6 +21,12 @@
         <!-- Dropdown de notificaciones -->
         <div class="absolute top-4 right-8 z-50">
             <div class="relative inline-block text-left">
+            </div>
+        </div>
+        <main>
+            {% block content %}{% endblock %}  <!-- Contenido específico de cada página -->
+        </main>
+    </div>
     
     <!-- Scripts de Flowbite (UI components) -->
     <script src="{{ url_for('static', filename='src/flowbite.min.js') }}"></script>

@@ -1,11 +1,11 @@
 from flask import Blueprint
-from datetime import date
+from datetime import date, timezone
 from services.fetch_data_logs import get_metrics_for_date
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_socketio import SocketIO
 from flask_apscheduler import APScheduler
 from database.database import (
-    get_session, get_dynamic_models
+    get_session, get_dynamic_models, get_dynamic_metrics_model
 )
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
@@ -16,6 +16,17 @@ from services.blacklist_users import find_blacklisted_sites
 from services.system_info import (
     get_network_info, get_os_info, get_uptime, get_ram_info,
     get_swap_info, get_cpu_info, get_squid_version, get_timezone, get_network_stats
+)
+from services.auditoria_service import (
+    get_all_usernames,
+    get_user_activity_summary,
+    get_top_users_by_data,
+    find_denied_access,
+    find_by_keyword,
+    find_by_ip,
+    find_by_response_code,
+    find_social_media_activity,
+    get_daily_activity # <--- NUEVA IMPORTACIÓN
 )
 from services.get_reports import get_important_metrics
 from utils.colors import color_map
@@ -399,6 +410,121 @@ def cache_stats_realtime():
     except Exception as e:
         logger.error(f"Error in /stats: {str(e)}")
         return render_template('error.html', message="Error retrieving cache statistics or system info"), 500
+
+@app.route('/api/metrics/today')
+def get_today_metrics():
+    db = None
+    try:
+        date_suffix = datetime.now().strftime('%Y%m%d')
+        MetricsModel = get_dynamic_metrics_model(date_suffix)
+        
+        if not MetricsModel:
+            logger.warning(f"No se encontró el modelo de métricas para {date_suffix}")
+            return jsonify([])
+
+        db = get_session()
+        metrics = db.query(MetricsModel).order_by(MetricsModel.timestamp.asc()).all()
+
+        results = []
+        for m in metrics:
+            aware_timestamp = m.timestamp.replace(tzinfo=timezone.utc)
+            
+            results.append({
+                "timestamp": aware_timestamp.isoformat(),
+                "cpu_usage": m.cpu_usage,
+                "ram_usage_bytes": m.ram_usage_bytes,
+                "swap_usage_bytes": m.swap_usage_bytes,
+                "net_sent_bytes_sec": m.net_sent_bytes_sec,
+                "net_recv_bytes_sec": m.net_recv_bytes_sec,
+            })
+            
+        return jsonify(results)
+    except Exception as e:
+        logger.error(f"Error en API de métricas: {e}", exc_info=True)
+        return jsonify({"error": "No se pudieron obtener las métricas"}), 500
+    finally:
+        if db:
+            db.close()
+
+@app.route('/auditoria', methods=['GET'])
+def auditoria_logs():
+    return render_template(
+        'auditor.html',
+        page_icon='magnifying-glass.ico',
+        page_title='Centro de Auditoría'
+    )
+
+@app.route('/api/all-users', methods=['GET'])
+def api_get_all_users():
+    """Endpoint para obtener una lista de todos los usuarios para los filtros del frontend."""
+    db = get_session()
+    try:
+        users = get_all_usernames(db)
+        return jsonify(users)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+@app.route('/api/run-audit', methods=['POST'])
+def api_run_audit():
+    """Endpoint principal que ejecuta la auditoría solicitada desde el frontend."""
+    data = request.get_json()
+    audit_type = data.get('audit_type')
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
+    username = data.get('username')
+    keyword = data.get('keyword')
+    ip_address = data.get('ip_address')
+    response_code = data.get('response_code')
+    social_media_sites = data.get('social_media_sites')
+
+    db = get_session()
+    try:
+        if audit_type == 'user_summary':
+            if not username: 
+                return jsonify({"error": "Se requiere un nombre de usuario."}), 400
+            result = get_user_activity_summary(db, username, start_date, end_date)
+        elif audit_type == 'top_users_data':
+            result = get_top_users_by_data(db, start_date, end_date)
+        # --- INICIO DE LA MODIFICACIÓN ---
+        elif audit_type == 'daily_activity':
+            if not start_date: 
+                return jsonify({"error": "Se requiere una fecha de inicio."}), 400
+            if not end_date: 
+                return jsonify({"error": "Se requiere una fecha de fin."}), 400
+            result = get_daily_activity(db, start_date, username)
+        # --- FIN DE LA MODIFICACIÓN ---
+        elif audit_type == 'denied_access':
+            result = find_denied_access(db, start_date, end_date, username)
+        elif audit_type == 'keyword_search':
+            if not keyword: 
+                return jsonify({"error": "Se requiere una palabra clave."}), 400
+            result = find_by_keyword(db, start_date, end_date, keyword, username)
+        elif audit_type == 'social_media_activity':
+            if not social_media_sites: 
+                return jsonify({"error": "Debe seleccionar al menos una red social."}), 400
+            result = find_social_media_activity(db, start_date, end_date, social_media_sites, username)
+        elif audit_type == 'ip_activity':
+            if not ip_address: 
+                return jsonify({"error": "Se requiere una dirección IP."}), 400
+            result = find_by_ip(db, start_date, end_date, ip_address)
+        elif audit_type == 'response_code_search':
+            if not response_code: 
+                return jsonify({"error": "Se requiere un código de respuesta."}), 400
+            result = find_by_response_code(db, start_date, end_date, int(response_code), username)
+        else:
+            return jsonify({"error": "Tipo de auditoría no válido."}), 400
+        
+        return jsonify(result)
+
+    except Exception as e:
+        # Imprimir el error en el log del servidor para depuración
+        print(f"Error en la API de auditoría: {e}")
+        return jsonify({"error": "Ocurrió un error interno en el servidor."}), 500
+    finally:
+        db.close()
+
 
 # Iniciar el hilo de actualización de datos en tiempo real
 if __name__ == "__main__":
