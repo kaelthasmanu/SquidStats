@@ -164,9 +164,7 @@ def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):
     # Iterar por cada día en el rango
     current_dt = start_dt
     while current_dt <= end_dt:
-        date_suffix = current_dt.strftime("%Y%m%d")
-        print(f"Procesando fecha: {date_suffix}")
-        
+        date_suffix = current_dt.strftime("%Y%m%d")       
         try:
             # Obtener modelos dinámicos para esta fecha
             UserModel, LogModel = get_dynamic_models(date_suffix)

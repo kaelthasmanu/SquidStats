@@ -120,7 +120,6 @@ def parse_log_line(line):
 def parse_log_line_pipe_format(line):
     parts = line.strip().split("|")
     if len(parts) < 14:
-        logger.warning(f"Línea ignorada (formato incompleto): {line.strip()}")
         return None
     try:
         username = parts[3]
@@ -145,7 +144,6 @@ def parse_log_line_space_format(line):
     try:
         parts = line.split()
         if len(parts) < 11 or parts[3] == "-":
-            logger.warning(f"Línea ignorada (formato incompleto o username '-'): {line.strip()}")
             return None
         return {
             "ip": parts[1],
@@ -182,9 +180,6 @@ def detect_log_format(log_file, sample_lines=10):
                     space_count += 1
 
             format_detected = "pipe" if pipe_count > space_count else "space"
-            logger.info(
-                f"Formato detectado: {format_detected} (pipe: {pipe_count}, space: {space_count})"
-            )
             return format_detected
 
     except Exception as e:
@@ -231,7 +226,6 @@ def process_logs(log_file):
                 nonlocal inserted_logs, inserted_users, inserted_denied
                 retry_count = 0
                 user_table, log_table = get_dynamic_table_names()
-                logger.info(f"Guardando usuarios en la tabla: {user_table}, logs en la tabla: {log_table}, denied en denied_logs")
                 while retry_count < MAX_RETRIES:
                     try:
                         if new_users_to_insert:
@@ -247,11 +241,9 @@ def process_logs(log_file):
                             logs_to_insert.clear()
                         if denied_to_insert:
                             session.bulk_save_objects(denied_to_insert)
-                            logger.info(f"Enviando a denied_logs: {[d.__dict__ for d in denied_to_insert]}")
                             inserted_denied += len(denied_to_insert)
                             denied_to_insert.clear()
                         session.commit()
-                        logger.debug(f"Batch commit: {inserted_users} usuarios, {inserted_logs} logs, {inserted_denied} denied")
                         return True
                     except IntegrityError as e:
                         logger.warning(f"Error de integridad (reintento {retry_count+1}): {e}")
@@ -329,10 +321,6 @@ def process_logs(log_file):
                     if len(logs_to_insert) >= BATCH_SIZE:
                         if not commit_batch():
                             logger.error("Error en commit batch. Continuando con siguiente lote")
-            if new_users_to_insert or logs_to_insert or denied_to_insert:
-                if commit_batch():
-                    if denied_to_insert:
-                        logger.info(f"Batch denied_logs insertado exitosamente. Registros: {len(denied_to_insert)}")
             if not metadata:
                 metadata = LogMetadata()
                 session.add(metadata)

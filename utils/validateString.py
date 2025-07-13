@@ -40,8 +40,5 @@ try:
     if port_specified:
         encoded_conn += f':{port}'
     encoded_conn += f'/{db}'
-
-    print(encoded_conn)
-
 except Exception as e:
     sys.exit(f'ERROR: {e}')

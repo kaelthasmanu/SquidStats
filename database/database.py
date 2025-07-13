@@ -247,7 +247,3 @@ def get_dynamic_models(date_suffix: str):
 
     dynamic_model_cache[cache_key] = (DynamicUser, DynamicLog)
     return DynamicUser, DynamicLog
-
-def clear_dynamic_model_cache():
-    """Limpia el cache de modelos dinámicos."""
-    dynamic_model_cache.clear()

@@ -67,7 +67,6 @@ def get_users_logs(db: Session, date_suffix: Optional[str] = None, page: int = 1
     try:
         if not date_suffix:
             date_suffix = datetime.now().strftime("%Y%m%d")
-            logger.info(f"Usando sufijo de fecha por defecto: {date_suffix}")
         if not validate_date_suffix(date_suffix):
             logger.error(f"Sufijo de fecha inválido: {date_suffix}")
             return {"users": [], "total": 0, "page": page, "per_page": per_page, "total_pages": 0}
@@ -151,7 +150,6 @@ def get_users_with_logs_by_date(db: Session, date_suffix: str) -> List[Dict[str,
 def get_metrics_for_date(selected_date: date):
     session = get_session()
     date_suffix = selected_date.strftime("%Y%m%d")
-    logger.info(f"Obteniendo métricas para la fecha: {date_suffix}")
     try:
         User, Log = get_dynamic_models(date_suffix)
     except Exception:
