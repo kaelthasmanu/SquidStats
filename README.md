@@ -218,12 +218,13 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    VERSION=2
    SQUID_HOST="127.0.0.1"
    SQUID_PORT=3128
-   FLASK_DEBUG="True"
+   FLASK_DEBUG=True
    DATABASE_TYPE="SQLITE"
    SQUID_LOG="/var/log/squid/access.log"
-   DATABASE_STRING_CONNECTION="/opt/squidstats/"
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/"
    REFRESH_INTERVAL=60
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
+   HTTP_PROXY=""
    ```
 5. Run App with python or python3 🚀:
 
