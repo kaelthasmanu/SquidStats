@@ -26,7 +26,7 @@ from services.auditoria_service import (
     find_by_ip,
     find_by_response_code,
     find_social_media_activity,
-    get_daily_activity # <--- NUEVA IMPORTACIÓN
+    get_daily_activity 
 )
 from services.get_reports import get_important_metrics
 from utils.colors import color_map

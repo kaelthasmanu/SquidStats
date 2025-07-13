@@ -98,9 +98,9 @@ function checkSquidLog() {
 }
 
 function updateOrCloneRepo() {
-    local repo_url="https://github.com/alexminator/SquidStats.git"
+    local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
     local destino="/opt/SquidStats"
-    local branch="inicio"
+    local branch="main"
     local env_exists=false
 
     if [ -d "$destino" ]; then
