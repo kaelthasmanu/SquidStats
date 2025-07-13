@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"> <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}">
 </head>
-<body class="overflow-x-hidden overflow-auto">
+<body class="overflow-x-hidden overflow-auto" style="visibility: hidden;" onload="document.body.style.visibility='visible';">
     <!-- Barra de navegación común -->
     <div class="relative">
         {% include 'components/navbar.html' %}
