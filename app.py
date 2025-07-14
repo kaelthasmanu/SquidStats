@@ -530,4 +530,4 @@ def api_run_audit():
 if __name__ == "__main__":
     socketio.start_background_task(realtime_data_thread)
     debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    socketio.run(app, debug=debug_mode, host="0.0.0.0", port=5000)
+    socketio.run(app, debug=debug_mode, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True)
