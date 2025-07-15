@@ -3,11 +3,11 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 from sqlalchemy import inspect
 from sqlalchemy.ext.automap import automap_base
-import sys
-from pathlib import Path
 from datetime import datetime, date
 import logging
 from sqlalchemy import func
+from database.database import get_session, get_dynamic_models
+
 
 # Configuración básica de logging
 logging.basicConfig(
@@ -15,12 +15,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-current_dir = Path(__file__).resolve().parent
-project_root = current_dir.parent
-sys.path.append(str(project_root))
-
-from database.database import get_session, get_dynamic_models
 
 # Patrones de validación para nombres de tabla y fechas
 TABLE_NAME_PATTERN = re.compile(r'^[a-z_]{3,20}$')

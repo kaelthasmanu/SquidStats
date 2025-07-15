@@ -1,16 +1,9 @@
 import datetime
 from sqlalchemy import func, desc
 from sqlalchemy.orm import Session
-import sys
-from pathlib import Path
 from datetime import timedelta
 from sqlalchemy import inspect, Column, Integer, String
 from sqlalchemy.orm import relationship
-
-current_dir = Path(__file__).resolve().parent
-project_root = current_dir.parent
-sys.path.append(str(project_root))
-
 from database.database import get_dynamic_models
 
 def get_important_metrics(db: Session, UserModel, LogModel):

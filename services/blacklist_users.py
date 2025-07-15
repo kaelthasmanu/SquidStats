@@ -1,14 +1,7 @@
-import sys
 from sqlalchemy import inspect, func, or_
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
-from pathlib import Path
 from sqlalchemy.orm import Session
-
-current_dir = Path(__file__).resolve().parent
-project_root = current_dir.parent
-sys.path.append(str(project_root))
-
 from typing import Dict, Any
 from database.database import get_engine, get_dynamic_models
 

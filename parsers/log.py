@@ -1,5 +1,3 @@
-import sys
-from pathlib import Path
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 import logging
@@ -15,12 +13,6 @@ from database.database import (
     get_dynamic_models,
     DeniedLog,
 )
-
-current_dir = Path(__file__).resolve().parent
-project_root = current_dir.parent
-sys.path.append(str(project_root))
-
-
 
 logging.basicConfig(
     level=logging.INFO,
