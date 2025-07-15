@@ -343,7 +343,7 @@ def get_user_activity_summary(db: Session, username: str, start_str: str, end_st
         return {
             "total_requests": total_requests,
             "total_data_gb": round(total_data / (1024**3), 2),
-            "top_domains": [{"domain": d, "count": c} for d, c in sorted_domains[:5]],
+            "top_domains": [{"domain": d, "count": c} for d, c in sorted_domains[:15]],
             "response_summary": [{"code": code, "count": count} for code, count in sorted_responses],
         }
     except SQLAlchemyError as e:

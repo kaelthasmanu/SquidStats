@@ -1,214 +1,357 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-    /* Estilo para los "chips" de redes sociales */
-    .social-chip {
-        padding: 8px 16px;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        border: 1px solid #e5e7eb; /* gray-200 */
-        background-color: #f9fafb; /* gray-50 */
-        color: #374151; /* gray-700 */
-        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    }
-    .social-chip:hover {
-        border-color: #93c5fd; /* blue-300 */
-        background-color: #eff6ff; /* blue-50 */
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    }
-    .social-chip.selected {
-        background-color: #2563eb; /* blue-600 */
-        color: white;
-        border-color: #1d4ed8; /* blue-800 */
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    }
-    .social-chip.selected:hover {
-        background-color: #1d4ed8;
-    }
+  /* Estilo para los "chips" de redes sociales */
+  .social-chip {
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #e5e7eb; /* gray-200 */
+    background-color: #f9fafb; /* gray-50 */
+    color: #374151; /* gray-700 */
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+  .social-chip:hover {
+    border-color: #93c5fd; /* blue-300 */
+    background-color: #eff6ff; /* blue-50 */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+  .social-chip.selected {
+    background-color: #2563eb; /* blue-600 */
+    color: white;
+    border-color: #1d4ed8; /* blue-800 */
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+  .social-chip.selected:hover {
+    background-color: #1d4ed8;
+  }
 
-    /* Estilo para el tooltip de ayuda sobre los chips */
-    .tooltip {
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        margin-bottom: 8px;
-        background-color: #111827; /* gray-900 */
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        white-space: nowrap;
-        opacity: 0;
-        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        pointer-events: none; /* Para que no interfiera con el click */
-        transform-origin: bottom center;
-        transform: translateX(-50%) scale(0.95);
-    }
-    .group:hover .tooltip {
-        opacity: 1;
-        transform: translateX(-50%) scale(1);
-    }
+  /* Estilo para el tooltip de ayuda sobre los chips */
+  .tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    background-color: #111827; /* gray-900 */
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    pointer-events: none; /* Para que no interfiera con el click */
+    transform-origin: bottom center;
+    transform: translateX(-50%) scale(0.95);
+  }
+  .group:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
 </style>
 
-
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex items-center mb-6 border-b pb-4">
-        <i class="fas fa-magnifying-glass text-3xl text-blue-600 mr-4"></i>
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">Centro de Auditoría</h1>
-            <p class="text-gray-500 mt-1">Herramienta para el análisis de actividad y seguridad.</p>
-        </div>
+  <div class="flex items-center mb-6 border-b pb-4">
+    <i class="fas fa-magnifying-glass text-3xl text-blue-600 mr-4"></i>
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">Centro de Auditoría</h1>
+      <p class="text-gray-500 mt-1">
+        Herramienta para el análisis de actividad y seguridad.
+      </p>
     </div>
+  </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
-        <form id="audit-form" class="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6">
-            
-            <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2">
-                    <label for="audit-type" class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Auditoría</label>
-                    <select id="audit-type" name="audit_type" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
-                        <optgroup label="Actividad General">
-                            <option value="user_summary" data-requires="user">Resumen por Usuario</option>
-                            <option value="top_users_data">Top 10 Usuarios (Datos)</option>
-                            <option value="daily_activity" data-requires="user">Actividad Diaria</option>
-                        </optgroup>
-                        <optgroup label="Seguridad y Políticas">
-                            <option value="keyword_search" data-requires="user_optional,keyword">Búsqueda por Palabra Clave</option>
-                            <option value="social_media_activity" data-requires="user_optional,social_media">Actividad en Redes Sociales</option>
-                        </optgroup>
-                        <optgroup label="Auditoría Técnica">
-                            <option value="ip_activity" data-requires="ip">Actividad por Dirección IP</option>
-                            <option value="response_code_search" data-requires="user_optional,response_code">Análisis por Código de Respuesta</option>
-                        </optgroup>
-                    </select>
-                </div>
+  <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+    <form
+      id="audit-form"
+      class="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6"
+    >
+      <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="md:col-span-2">
+          <label
+            for="audit-type"
+            class="block text-sm font-semibold text-gray-700 mb-1"
+            >Tipo de Auditoría</label
+          >
+          <select
+            id="audit-type"
+            name="audit_type"
+            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
+          >
+            <optgroup label="Actividad General">
+              <option value="user_summary" data-requires="user">
+                Resumen por Usuario
+              </option>
+              <option value="top_users_data">Top 10 Usuarios (Datos)</option>
+              <option value="daily_activity" data-requires="user">
+                Actividad Diaria
+              </option>
+            </optgroup>
+            <optgroup label="Seguridad y Políticas">
+              <option
+                value="keyword_search"
+                data-requires="user_optional,keyword"
+              >
+                Búsqueda por Palabra Clave
+              </option>
+              <option
+                value="social_media_activity"
+                data-requires="user_optional,social_media"
+              >
+                Actividad en Redes Sociales
+              </option>
+            </optgroup>
+            <optgroup label="Auditoría Técnica">
+              <option value="ip_activity" data-requires="ip">
+                Actividad por Dirección IP
+              </option>
+              <option
+                value="response_code_search"
+                data-requires="user_optional,response_code"
+              >
+                Análisis por Código de Respuesta
+              </option>
+            </optgroup>
+          </select>
+        </div>
 
-                <div id="conditional-inputs" class="contents">
-                    <div id="user-filter-container" class="conditional-input">
-                        <label for="username-filter" class="block text-sm font-semibold text-gray-700 mb-1">Usuario</label>
-                        <select id="username-filter" name="username" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
-                            <option value="">-- Todos --</option>
-                        </select>
-                    </div>
-                    <div id="keyword-input-container" class="conditional-input">
-                        <label for="keyword-input" class="block text-sm font-semibold text-gray-700 mb-1">Palabra Clave</label>
-                        <input type="text" id="keyword-input" name="keyword" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-50" placeholder="Ej: juegos, descargas...">
-                    </div>
-                    <div id="ip-input-container" class="conditional-input">
-                        <label for="ip-input" class="block text-sm font-semibold text-gray-700 mb-1">Dirección IP</label>
-                        <input type="text" id="ip-input" name="ip_address" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-50" placeholder="Ej: 192.168.1.100">
-                    </div>
-                    <div id="social-media-input-container" class="conditional-input md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Redes Sociales</label>
-                        <div id="social-media-chips" class="flex flex-wrap gap-3">
-                            <div class="relative group">
-                                <button type="button" class="social-chip" data-value="Facebook">Facebook</button>
-                                <span class="tooltip">Selección múltiple</span>
-                            </div>
-                            <div class="relative group">
-                                <button type="button" class="social-chip" data-value="Instagram">Instagram</button>
-                                <span class="tooltip">Selección múltiple</span>
-                            </div>
-                            <div class="relative group">
-                                <button type="button" class="social-chip" data-value="YouTube">YouTube</button>
-                                <span class="tooltip">Selección múltiple</span>
-                            </div>
-                            <div class="relative group">
-                                <button type="button" class="social-chip" data-value="Twitter/X">Twitter/X</button>
-                                <span class="tooltip">Selección múltiple</span>
-                            </div>
-                            <div class="relative group">
-                                <button type="button" class="social-chip" data-value="WhatsApp">WhatsApp</button>
-                                <span class="tooltip">Selección múltiple</span>
-                            </div>
-                             <div class="relative group">
-                                <button type="button" class="social-chip" data-value="Telegram">Telegram</button>
-                                <span class="tooltip">Selección múltiple</span>
-                            </div>
-                            <div class="relative group">
-                                <button type="button" class="social-chip" data-value="Pinterest">Pinterest</button>
-                                <span class="tooltip">Selección múltiple</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="response-code-input-container" class="conditional-input">
-                        <label for="response-code-input" class="block text-sm font-semibold text-gray-700 mb-1">Código HTTP</label>
-                        <select id="response-code-input" name="response_code" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
-                            <option value="">-- Seleccione un código --</option>
-                            <optgroup label="Respuestas Exitosas (2xx)"><option value="200">200 OK</option></optgroup>
-                            <optgroup label="Redirecciones (3xx)"><option value="301">301 Moved Permanently</option><option value="302">302 Found</option><option value="304">304 Not Modified</option></optgroup>
-                            <optgroup label="Errores de Cliente (4xx)"><option value="400">400 Bad Request</option><option value="401">401 Unauthorized</option><option value="403">403 Forbidden</option><option value="404">404 Not Found</option></optgroup>
-                            <optgroup label="Errores de Servidor (5xx)"><option value="500">500 Internal Server Error</option><option value="502">502 Bad Gateway</option><option value="503">503 Service Unavailable</option><option value="504">504 Gateway Timeout</option></optgroup>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-1 bg-slate-50 border border-slate-200 rounded-lg p-4 h-fit">
-                 <h3 class="text-md font-semibold text-slate-800 mb-4 border-b pb-2">Fecha del Reporte</h3>
-                 <div class="space-y-4">
-                    <div id="start-date-container">
-                        <label for="start-date" class="block text-sm font-semibold text-gray-700 mb-1">Fecha</label>
-                        <input type="date" id="start-date" name="start_date" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
-                    </div>
-                    <div id="end-date-container">
-                        <label for="end-date" class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Fin</label>
-                        <input type="date" id="end-date" name="end_date" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
-                    </div>
-                 </div>
-            </div>
-
-            <div class="lg:col-span-3">
-                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl">
-                    <i class="fas fa-play mr-2"></i>
-                    Generar Reporte
+        <div id="conditional-inputs" class="contents">
+          <div id="user-filter-container" class="conditional-input">
+            <label
+              for="username-filter"
+              class="block text-sm font-semibold text-gray-700 mb-1"
+              >Usuario</label
+            >
+            <select
+              id="username-filter"
+              name="username"
+              class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
+            >
+              <option value="">-- Todos --</option>
+            </select>
+          </div>
+          <div id="keyword-input-container" class="conditional-input">
+            <label
+              for="keyword-input"
+              class="block text-sm font-semibold text-gray-700 mb-1"
+              >Palabra Clave</label
+            >
+            <input
+              type="text"
+              id="keyword-input"
+              name="keyword"
+              class="w-full border-gray-300 rounded-md shadow-sm bg-gray-50"
+              placeholder="Ej: juegos, descargas..."
+            />
+          </div>
+          <div id="ip-input-container" class="conditional-input">
+            <label
+              for="ip-input"
+              class="block text-sm font-semibold text-gray-700 mb-1"
+              >Dirección IP</label
+            >
+            <input
+              type="text"
+              id="ip-input"
+              name="ip_address"
+              class="w-full border-gray-300 rounded-md shadow-sm bg-gray-50"
+              placeholder="Ej: 192.168.1.100"
+            />
+          </div>
+          <div
+            id="social-media-input-container"
+            class="conditional-input md:col-span-2"
+          >
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Redes Sociales</label
+            >
+            <div id="social-media-chips" class="flex flex-wrap gap-3">
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="Facebook">
+                  Facebook
                 </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button
+                  type="button"
+                  class="social-chip"
+                  data-value="Instagram"
+                >
+                  Instagram
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="YouTube">
+                  YouTube
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button
+                  type="button"
+                  class="social-chip"
+                  data-value="Twitter/X"
+                >
+                  Twitter/X
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="WhatsApp">
+                  WhatsApp
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="Telegram">
+                  Telegram
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button
+                  type="button"
+                  class="social-chip"
+                  data-value="Pinterest"
+                >
+                  Pinterest
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
             </div>
-        </form>
-    </div>
-
-    <div id="audit-results-container" class="space-y-4">
-        <div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center">
-            <div class="text-center text-gray-500 py-10">
-                <i class="fas fa-clipboard-list text-5xl mb-4 text-gray-300"></i>
-                <h3 class="text-xl font-semibold">Seleccione los filtros y genere un reporte</h3>
-                <p class="mt-2">Los resultados de su auditoría aparecerán aquí.</p>
-            </div>
+          </div>
+          <div id="response-code-input-container" class="conditional-input">
+            <label
+              for="response-code-input"
+              class="block text-sm font-semibold text-gray-700 mb-1"
+              >Código HTTP</label
+            >
+            <select
+              id="response-code-input"
+              name="response_code"
+              class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
+            >
+              <option value="">-- Seleccione un código --</option>
+              <optgroup label="Respuestas Exitosas (2xx)">
+                <option value="200">200 OK</option>
+              </optgroup>
+              <optgroup label="Redirecciones (3xx)">
+                <option value="301">301 Moved Permanently</option>
+                <option value="302">302 Found</option>
+                <option value="304">304 Not Modified</option>
+              </optgroup>
+              <optgroup label="Errores de Cliente (4xx)">
+                <option value="400">400 Bad Request</option>
+                <option value="401">401 Unauthorized</option>
+                <option value="403">403 Forbidden</option>
+                <option value="404">404 Not Found</option>
+              </optgroup>
+              <optgroup label="Errores de Servidor (5xx)">
+                <option value="500">500 Internal Server Error</option>
+                <option value="502">502 Bad Gateway</option>
+                <option value="503">503 Service Unavailable</option>
+                <option value="504">504 Gateway Timeout</option>
+              </optgroup>
+            </select>
+          </div>
         </div>
+      </div>
+
+      <div
+        class="lg:col-span-1 bg-slate-50 border border-slate-200 rounded-lg p-4 h-fit"
+      >
+        <h3 class="text-md font-semibold text-slate-800 mb-4 border-b pb-2">
+          Fecha del Reporte
+        </h3>
+        <div class="space-y-4">
+          <div id="start-date-container">
+            <label
+              for="start-date"
+              class="block text-sm font-semibold text-gray-700 mb-1"
+              >Fecha</label
+            >
+            <input
+              type="date"
+              id="start-date"
+              name="start_date"
+              class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
+            />
+          </div>
+          <div id="end-date-container">
+            <label
+              for="end-date"
+              class="block text-sm font-semibold text-gray-700 mb-1"
+              >Fecha de Fin</label
+            >
+            <input
+              type="date"
+              id="end-date"
+              name="end_date"
+              class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3">
+        <button
+          type="submit"
+          class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl"
+        >
+          <i class="fas fa-play mr-2"></i>
+          Generar Reporte
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div id="audit-results-container" class="space-y-4">
+    <div
+      class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center"
+    >
+      <div class="text-center text-gray-500 py-10">
+        <i class="fas fa-clipboard-list text-5xl mb-4 text-gray-300"></i>
+        <h3 class="text-xl font-semibold">
+          Seleccione los filtros y genere un reporte
+        </h3>
+        <p class="mt-2">Los resultados de su auditoría aparecerán aquí.</p>
+      </div>
     </div>
+  </div>
 </div>
 
-
 <script>
-    function toggleDetails(header) {
-        const details = header.nextElementSibling;
-        const icon = header.querySelector('.toggle-icon');
-        
-        if (details.style.display === 'block') {
-            details.style.display = 'none';
-            icon.classList.remove('rotate-180');
-        } else {
-            details.style.display = 'block';
-            icon.classList.add('rotate-180');
-        }
-    }
+  function toggleDetails(header) {
+    const details = header.nextElementSibling;
+    const icon = header.querySelector(".toggle-icon");
 
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('audit-form');
-    const resultsContainer = document.getElementById('audit-results-container');
-    const auditTypeSelect = document.getElementById('audit-type');
-    const usernameSelect = document.getElementById('username-filter');
-    const startDateInput = document.getElementById('start-date');
-    const endDateInput = document.getElementById('end-date');
-    const startDateContainer = document.getElementById('start-date-container');
-    const endDateContainer = document.getElementById('end-date-container');
-    
+    if (details.style.display === "block") {
+      details.style.display = "none";
+      icon.classList.remove("rotate-180");
+    } else {
+      details.style.display = "block";
+      icon.classList.add("rotate-180");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("audit-form");
+    const resultsContainer = document.getElementById("audit-results-container");
+    const auditTypeSelect = document.getElementById("audit-type");
+    const usernameSelect = document.getElementById("username-filter");
+    const startDateInput = document.getElementById("start-date");
+    const endDateInput = document.getElementById("end-date");
+    const startDateContainer = document.getElementById("start-date-container");
+    const endDateContainer = document.getElementById("end-date-container");
+
     const defaultResultsHTML = `<div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center">
             <div class="text-center text-gray-500 py-10">
                 <i class="fas fa-clipboard-list text-5xl mb-4 text-gray-300"></i>
@@ -216,266 +359,311 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="mt-2">Los resultados de su auditoría aparecerán aquí.</p>
             </div>
         </div>`;
-    
+
     resultsContainer.innerHTML = defaultResultsHTML;
 
     const conditionalInputs = {
-        user: document.getElementById('user-filter-container'),
-        user_optional: document.getElementById('user-filter-container'),
-        keyword: document.getElementById('keyword-input-container'),
-        ip: document.getElementById('ip-input-container'),
-        response_code: document.getElementById('response-code-input-container'),
-        social_media: document.getElementById('social-media-input-container')
+      user: document.getElementById("user-filter-container"),
+      user_optional: document.getElementById("user-filter-container"),
+      keyword: document.getElementById("keyword-input-container"),
+      ip: document.getElementById("ip-input-container"),
+      response_code: document.getElementById("response-code-input-container"),
+      social_media: document.getElementById("social-media-input-container"),
     };
 
     const today = new Date();
-    startDateInput.value = today.toISOString().split('T')[0];
-    endDateInput.value = today.toISOString().split('T')[0];
+    startDateInput.value = today.toISOString().split("T")[0];
+    endDateInput.value = today.toISOString().split("T")[0];
 
-    fetch('/api/all-users')
-        .then(response => response.json())
-        .then(users => {
-            users.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user;
-                option.textContent = user;
-                usernameSelect.appendChild(option);
-            });
+    fetch("/api/all-users")
+      .then((response) => response.json())
+      .then((users) => {
+        users.forEach((user) => {
+          const option = document.createElement("option");
+          option.value = user;
+          option.textContent = user;
+          usernameSelect.appendChild(option);
         });
+      });
 
     function toggleConditionalInputs() {
-        resultsContainer.innerHTML = defaultResultsHTML;
-        Object.values(conditionalInputs).forEach(el => {
-            if (el) el.style.display = 'none';
-        });
-        
-        const selectedOption = auditTypeSelect.options[auditTypeSelect.selectedIndex];
-        const auditType = selectedOption.value;
-        const required = selectedOption.dataset.requires?.split(',') || [];
+      resultsContainer.innerHTML = defaultResultsHTML;
+      Object.values(conditionalInputs).forEach((el) => {
+        if (el) el.style.display = "none";
+      });
 
-        required.forEach(inputId => {
-            if (conditionalInputs[inputId]) {
-                conditionalInputs[inputId].style.display = 'block';
-            }
-        });
-        
-        const userSelectContainer = conditionalInputs.user;
-        const defaultUserOption = userSelectContainer.querySelector('select option[value=""]');
-        
-        if (auditType === 'daily_activity') {
-            endDateContainer.style.display = 'none';
-            startDateContainer.querySelector('label').textContent = 'Fecha';
-        } else {
-            endDateContainer.style.display = 'block';
-            startDateContainer.querySelector('label').textContent = 'Fecha de Inicio';
-        }
+      const selectedOption =
+        auditTypeSelect.options[auditTypeSelect.selectedIndex];
+      const auditType = selectedOption.value;
+      const required = selectedOption.dataset.requires?.split(",") || [];
 
-        if (auditType === 'user_summary' || auditType === 'daily_activity') {
-            defaultUserOption.textContent = '-- Seleccione un Usuario --';
-            defaultUserOption.disabled = true;
-            usernameSelect.value = '';
-        } else {
-            defaultUserOption.textContent = '-- Todos --';
-            const isOptional = required.includes('user_optional');
-            defaultUserOption.disabled = !isOptional;
+      required.forEach((inputId) => {
+        if (conditionalInputs[inputId]) {
+          conditionalInputs[inputId].style.display = "block";
         }
+      });
+
+      const userSelectContainer = conditionalInputs.user;
+      const defaultUserOption = userSelectContainer.querySelector(
+        'select option[value=""]'
+      );
+
+      if (auditType === "daily_activity") {
+        endDateContainer.style.display = "none";
+        startDateContainer.querySelector("label").textContent = "Fecha";
+      } else {
+        endDateContainer.style.display = "block";
+        startDateContainer.querySelector("label").textContent =
+          "Fecha de Inicio";
+      }
+
+      if (auditType === "user_summary" || auditType === "daily_activity") {
+        defaultUserOption.textContent = "-- Seleccione un Usuario --";
+        defaultUserOption.disabled = true;
+        usernameSelect.value = "";
+      } else {
+        defaultUserOption.textContent = "-- Todos --";
+        const isOptional = required.includes("user_optional");
+        defaultUserOption.disabled = !isOptional;
+      }
     }
 
-    auditTypeSelect.addEventListener('change', toggleConditionalInputs);
-    toggleConditionalInputs(); 
+    auditTypeSelect.addEventListener("change", toggleConditionalInputs);
+    toggleConditionalInputs();
 
-    const socialMediaChipsContainer = document.getElementById('social-media-chips');
-    socialMediaChipsContainer.addEventListener('click', function(event) {
-        if (event.target.classList.contains('social-chip')) {
-            event.target.classList.toggle('selected');
-        }
+    const socialMediaChipsContainer =
+      document.getElementById("social-media-chips");
+    socialMediaChipsContainer.addEventListener("click", function (event) {
+      if (event.target.classList.contains("social-chip")) {
+        event.target.classList.toggle("selected");
+      }
     });
 
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        const selectedChips = socialMediaChipsContainer.querySelectorAll('.social-chip.selected');
-        data.social_media_sites = Array.from(selectedChips).map(chip => chip.dataset.value);
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
 
-        const selectedOption = auditTypeSelect.options[auditTypeSelect.selectedIndex];
-        const requiredInputs = selectedOption.dataset.requires?.split(',') || [];
-        
-        if (requiredInputs.includes('user') && !data.username) {
-            alert('Por favor, seleccione un usuario.'); return;
-        }
-        if (requiredInputs.includes('keyword') && !data.keyword) {
-            alert('Por favor, ingrese una palabra clave.'); return;
-        }
-        if (requiredInputs.includes('ip') && !data.ip_address) {
-            alert('Por favor, ingrese una dirección IP.'); return;
-        }
-        if (requiredInputs.includes('response_code') && !data.response_code) {
-            alert('Por favor, ingrese un código de respuesta.'); return;
-        }
-        if (requiredInputs.includes('social_media') && data.social_media_sites.length === 0) {
-            alert('Por favor, seleccione al menos una red social.'); return;
-        }
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
 
-        resultsContainer.innerHTML = `
+      const selectedChips = socialMediaChipsContainer.querySelectorAll(
+        ".social-chip.selected"
+      );
+      data.social_media_sites = Array.from(selectedChips).map(
+        (chip) => chip.dataset.value
+      );
+
+      const selectedOption =
+        auditTypeSelect.options[auditTypeSelect.selectedIndex];
+      const requiredInputs = selectedOption.dataset.requires?.split(",") || [];
+
+      if (requiredInputs.includes("user") && !data.username) {
+        alert("Por favor, seleccione un usuario.");
+        return;
+      }
+      if (requiredInputs.includes("keyword") && !data.keyword) {
+        alert("Por favor, ingrese una palabra clave.");
+        return;
+      }
+      if (requiredInputs.includes("ip") && !data.ip_address) {
+        alert("Por favor, ingrese una dirección IP.");
+        return;
+      }
+      if (requiredInputs.includes("response_code") && !data.response_code) {
+        alert("Por favor, ingrese un código de respuesta.");
+        return;
+      }
+      if (
+        requiredInputs.includes("social_media") &&
+        data.social_media_sites.length === 0
+      ) {
+        alert("Por favor, seleccione al menos una red social.");
+        return;
+      }
+
+      resultsContainer.innerHTML = `
             <div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center">
                 <div class="text-center text-gray-500 py-10">
                     <i class="fas fa-spinner fa-spin text-5xl mb-4 text-blue-500"></i>
                     <h3 class="text-xl font-semibold">Generando reporte...</h3>
                 </div>
             </div>`;
-        
-        fetch('/api/run-audit', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
+
+      fetch("/api/run-audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          renderResults(data.audit_type, result, data);
         })
-        .then(response => response.json())
-        .then(result => {
-            renderResults(data.audit_type, result, data);
-        })
-        .catch(error => {
-            resultsContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><div class="text-center text-red-500 py-10"><strong>Error de red o del servidor:</strong> ${error}</div></div>`;
+        .catch((error) => {
+          resultsContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><div class="text-center text-red-500 py-10"><strong>Error de red o del servidor:</strong> ${error}</div></div>`;
         });
     });
 
     function renderResults(auditType, data, formData) {
-        let html = '';
-        if (data.error) {
-            html = `<div class="bg-white p-6 rounded-lg shadow-lg"><div class="text-center text-red-500 py-10"><strong>Error:</strong> ${data.error}</div></div>`;
-        } else {
-            if (auditType === 'user_summary') {
-                html = renderUserSummary(data);
-            } else if (auditType === 'top_users_data') {
-                html = renderTopUsers(data);
-            } 
-            // --- INICIO DE LA MODIFICACIÓN ---
-            else if (auditType === 'daily_activity') {
-                const user = formData.username;
-                const date = formData.start_date;
-                let title = `Distribución de Peticiones para '${user}' el ${date}`;
-                if (data.total_requests > 0) {
-                     html = `<div class="bg-white p-6 rounded-lg shadow-lg">
+      let html = "";
+      if (data.error) {
+        html = `<div class="bg-white p-6 rounded-lg shadow-lg"><div class="text-center text-red-500 py-10"><strong>Error:</strong> ${data.error}</div></div>`;
+      } else {
+        if (auditType === "user_summary") {
+          html = renderUserSummary(data);
+        } else if (auditType === "top_users_data") {
+          html = renderTopUsers(data);
+        }
+        // --- INICIO DE LA MODIFICACIÓN ---
+        else if (auditType === "daily_activity") {
+          const user = formData.username;
+          const date = formData.start_date;
+          let title = `Distribución de Peticiones para '${user}' el ${date}`;
+          if (data.total_requests > 0) {
+            html = `<div class="bg-white p-6 rounded-lg shadow-lg">
                                 <h2 class="text-2xl font-bold mb-2">${title}</h2>
                                 <p class="text-gray-600 mb-4">Total de Peticiones en el día: <span class="font-bold text-blue-600">${data.total_requests.toLocaleString()}</span></p>
                                 <canvas id="daily-activity-chart"></canvas>
                              </div>`;
-                } else {
-                     html = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">No se encontraron peticiones para la fecha y usuario seleccionado.</p></div>`;
-                }
-            }
-            // --- FIN DE LA MODIFICACIÓN ---
-            else if (['keyword_search', 'ip_activity', 'response_code_search', 'social_media_activity'].includes(auditType)) {
-                let title = '';
-                if (auditType === 'keyword_search') {
-                    const user = formData.username || 'Todos';
-                    title = `Resultados para la palabra clave "${formData.keyword}" para: ${user}`;
-                } else if (auditType === 'ip_activity') {
-                    title = `Resultados de Búsqueda para la IP: ${formData.ip_address}`;
-                } else if (auditType === 'response_code_search') {
-                    const user = formData.username || 'Todos';
-                    title = `Resultados por Código de Respuesta ${formData.response_code} para: ${user}`;
-                } else if (auditType === 'social_media_activity') {
-                    const user = formData.username || 'Todos';
-                    const sites = formData.social_media_sites.join(', ');
-                    title = `Actividad en Redes Sociales (${sites}) para: ${user}`;
-                }
-                html = renderNestedAccordionResults(title, data.results);
-            } else {
-                html = '<div class="bg-white p-6 rounded-lg shadow-lg"><p>Tipo de reporte no reconocido.</p></div>';
-            }
+          } else {
+            html = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">No se encontraron peticiones para la fecha y usuario seleccionado.</p></div>`;
+          }
         }
-
-        resultsContainer.innerHTML = html;
-
-        const dailyActivityChartCanvas = document.getElementById('daily-activity-chart');
-        if (dailyActivityChartCanvas && data.hourly_activity) {
-            renderDailyActivityChart(dailyActivityChartCanvas, data.hourly_activity);
+        // --- FIN DE LA MODIFICACIÓN ---
+        else if (
+          [
+            "keyword_search",
+            "ip_activity",
+            "response_code_search",
+            "social_media_activity",
+          ].includes(auditType)
+        ) {
+          let title = "";
+          if (auditType === "keyword_search") {
+            const user = formData.username || "Todos";
+            title = `Resultados para la palabra clave "${formData.keyword}" para: ${user}`;
+          } else if (auditType === "ip_activity") {
+            title = `Resultados de Búsqueda para la IP: ${formData.ip_address}`;
+          } else if (auditType === "response_code_search") {
+            const user = formData.username || "Todos";
+            title = `Resultados por Código de Respuesta ${formData.response_code} para: ${user}`;
+          } else if (auditType === "social_media_activity") {
+            const user = formData.username || "Todos";
+            const sites = formData.social_media_sites.join(", ");
+            title = `Actividad en Redes Sociales (${sites}) para: ${user}`;
+          }
+          html = renderNestedAccordionResults(title, data.results);
+        } else {
+          html =
+            '<div class="bg-white p-6 rounded-lg shadow-lg"><p>Tipo de reporte no reconocido.</p></div>';
         }
+      }
 
-        const domainChartCanvas = document.getElementById('domain-chart');
-        if (domainChartCanvas && data.top_domains) {
-            renderDomainChart(domainChartCanvas, data.top_domains);
-        }
+      resultsContainer.innerHTML = html;
 
-        const responseChartCanvas = document.getElementById('response-chart');
-        if (responseChartCanvas && data.response_summary) {
-            renderResponseChart(responseChartCanvas, data.response_summary);
-        }
+      const dailyActivityChartCanvas = document.getElementById(
+        "daily-activity-chart"
+      );
+      if (dailyActivityChartCanvas && data.hourly_activity) {
+        renderDailyActivityChart(
+          dailyActivityChartCanvas,
+          data.hourly_activity
+        );
+      }
+
+      const domainChartCanvas = document.getElementById("domain-chart");
+      if (domainChartCanvas && data.top_domains) {
+        renderDomainChart(domainChartCanvas, data.top_domains);
+      }
+
+      const responseChartCanvas = document.getElementById("response-chart");
+      if (responseChartCanvas && data.response_summary) {
+        renderResponseChart(responseChartCanvas, data.response_summary);
+      }
     }
-    
+
     function formatBytes(bytes, decimals = 2) {
-        if (!+bytes) return '0 Bytes';
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+      if (!+bytes) return "0 Bytes";
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
     }
 
     function formatTime(datetimeString) {
-        if (!datetimeString || typeof datetimeString !== 'string') {
-            return '--';
-        }
-        
-        try {
-            const parts = datetimeString.split(' ');
-            if (parts.length < 5) return '--'; 
-            const timePart = parts[4]; 
-            const [hoursStr, minutesStr, secondsStr] = timePart.split(':');
-            let hour = parseInt(hoursStr, 10);
-            if (isNaN(hour)) return '--';
-            const ampm = hour >= 12 ? 'PM' : 'AM';
-            hour = hour % 12;
-            hour = hour || 12;
-            const formattedHour = String(hour).padStart(2, '0');
-            return `${formattedHour}:${minutesStr}:${secondsStr} ${ampm}`;
-        } catch (error) {
-            console.error("Error crítico al formatear la hora:", error, "Input was:", datetimeString);
-            return '--';
-        }
+      if (!datetimeString || typeof datetimeString !== "string") {
+        return "--";
+      }
+
+      try {
+        const parts = datetimeString.split(" ");
+        if (parts.length < 5) return "--";
+        const timePart = parts[4];
+        const [hoursStr, minutesStr, secondsStr] = timePart.split(":");
+        let hour = parseInt(hoursStr, 10);
+        if (isNaN(hour)) return "--";
+        const ampm = hour >= 12 ? "PM" : "AM";
+        hour = hour % 12;
+        hour = hour || 12;
+        const formattedHour = String(hour).padStart(2, "0");
+        return `${formattedHour}:${minutesStr}:${secondsStr} ${ampm}`;
+      } catch (error) {
+        console.error(
+          "Error crítico al formatear la hora:",
+          error,
+          "Input was:",
+          datetimeString
+        );
+        return "--";
+      }
     }
 
     function renderNestedAccordionResults(title, results) {
-        if (!results || results.length === 0) {
-            return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">No se encontraron registros.</p></div>`;
-        }
-        
-        const usersData = {};
-        results.forEach(item => {
-            if (!usersData[item.username]) usersData[item.username] = {};
-            const dateStr = `${item.log_date.substring(0, 4)}-${item.log_date.substring(4, 6)}-${item.log_date.substring(6, 8)}`;
-            if (!usersData[item.username][dateStr]) {
-                usersData[item.username][dateStr] = { daily_requests: 0, daily_data: 0, activities: [] };
-            }
-            const dateGroup = usersData[item.username][dateStr];
-            dateGroup.activities.push(item);
-            dateGroup.daily_requests += Number(item.access_count) || 0;
-            dateGroup.daily_data += Number(item.total_data) || 0;
-        });
+      if (!results || results.length === 0) {
+        return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">No se encontraron registros.</p></div>`;
+      }
 
-        let html = `<h2 class="text-2xl font-bold mb-4">${title}</h2>`;
-        for (const username in usersData) {
-            const userDataByDate = usersData[username];
-            html += `
+      const usersData = {};
+      results.forEach((item) => {
+        if (!usersData[item.username]) usersData[item.username] = {};
+        const dateStr = `${item.log_date.substring(
+          0,
+          4
+        )}-${item.log_date.substring(4, 6)}-${item.log_date.substring(6, 8)}`;
+        if (!usersData[item.username][dateStr]) {
+          usersData[item.username][dateStr] = {
+            daily_requests: 0,
+            daily_data: 0,
+            activities: [],
+          };
+        }
+        const dateGroup = usersData[item.username][dateStr];
+        dateGroup.activities.push(item);
+        dateGroup.daily_requests += Number(item.access_count) || 0;
+        dateGroup.daily_data += Number(item.total_data) || 0;
+      });
+
+      let html = `<h2 class="text-2xl font-bold mb-4">${title}</h2>`;
+      for (const username in usersData) {
+        const userDataByDate = usersData[username];
+        html += `
                 <div class="border rounded-lg mb-3 shadow-md bg-white">
                     <div class="bg-gray-100 p-3 flex justify-between items-center cursor-pointer hover:bg-gray-200" onclick="toggleDetails(this)">
                         <h3 class="font-bold text-gray-800 flex items-center"><i class="fas fa-user mr-3 text-blue-600"></i>${username}</h3>
                         <i class="fas fa-chevron-down toggle-icon transition-transform"></i>
                     </div>
                     <div class="user-card-details border-t border-gray-200" style="display: none;">`;
-            
-            const sortedDates = Object.keys(userDataByDate).sort().reverse(); 
-            for (const date of sortedDates) {
-                const dateData = userDataByDate[date];
-                html += `<div class="border-b last:border-b-0">
+
+        const sortedDates = Object.keys(userDataByDate).sort().reverse();
+        for (const date of sortedDates) {
+          const dateData = userDataByDate[date];
+          html += `<div class="border-b last:border-b-0">
                             <div class="bg-blue-50 p-2 pl-6 flex justify-between items-center cursor-pointer hover:bg-blue-100" onclick="toggleDetails(this)">
                                 <h4 class="font-semibold text-blue-800"><i class="fas fa-calendar-alt mr-2"></i>${date}</h4>
                                 <div class="flex items-center space-x-4 text-sm">
                                     <span class="font-medium text-blue-700"><i class="fas fa-hashtag mr-1"></i>${dateData.daily_requests.toLocaleString()} Peticiones</span>
-                                    <span class="font-medium text-green-700"><i class="fas fa-database mr-1"></i>${formatBytes(dateData.daily_data)}</span>
+                                    <span class="font-medium text-green-700"><i class="fas fa-database mr-1"></i>${formatBytes(
+                                      dateData.daily_data
+                                    )}</span>
                                     <i class="fas fa-chevron-down toggle-icon transition-transform text-xs"></i>
                                 </div>
                             </div>
@@ -490,33 +678,59 @@ document.addEventListener('DOMContentLoaded', function() {
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">`;
-                const ensureProtocol = (url) => url.startsWith('http') ? url : `http://${url}`;
-                dateData.activities.forEach(activity => {
-                    html += `<tr class="hover:bg-gray-50">
-                                <td class="py-1 px-2 text-center font-mono text-xs">${formatTime(activity.last_seen)}</td>
+          const ensureProtocol = (url) =>
+            url.startsWith("http") ? url : `http://${url}`;
+          dateData.activities.forEach((activity) => {
+            html += `<tr class="hover:bg-gray-50">
+                                <td class="py-1 px-2 text-center font-mono text-xs">${formatTime(
+                                  activity.last_seen
+                                )}</td>
                                 <td class="py-1 px-2 truncate">
-                                    <a href="${ensureProtocol(activity.url)}" target="_blank" class="text-blue-600 hover:underline" title="${activity.url}">${activity.url}</a>
+                                    <a href="${ensureProtocol(
+                                      activity.url
+                                    )}" target="_blank" class="text-blue-600 hover:underline" title="${
+              activity.url
+            }">${activity.url}</a>
                                 </td>
-                                <td class="py-1 px-2 text-center">${activity.access_count}</td>
-                                <td class="py-1 px-2">${formatBytes(activity.total_data)}</td>
+                                <td class="py-1 px-2 text-center">${
+                                  activity.access_count
+                                }</td>
+                                <td class="py-1 px-2">${formatBytes(
+                                  activity.total_data
+                                )}</td>
                             </tr>`;
-                });
-                html += `</tbody></table></div></div>`;
-            }
-            html += `</div></div>`;
+          });
+          html += `</tbody></table></div></div>`;
         }
-        return html;
+        html += `</div></div>`;
+      }
+      return html;
     }
-    
-    function renderUserSummary(data) {
-        const topDomainsHtml = data.top_domains.map(d => `<li>${d.domain} <span class="font-bold">(${d.count} reqs)</span></li>`).join('');
-        const responseSummaryHtml = data.response_summary.slice(0, 5).map(r => `<li>${r.code}: <span class="font-bold">${r.count.toLocaleString()}</span></li>`).join('');
 
-        return `<div class="bg-white p-6 rounded-lg shadow-lg">
+    function renderUserSummary(data) {
+      const topDomainsHtml = data.top_domains
+        .map(
+          (d) =>
+            `<li>${d.domain} <span class="font-bold">(${d.count} reqs)</span></li>`
+        )
+        .join("");
+      const responseSummaryHtml = data.response_summary
+        .slice(0, 5)
+        .map(
+          (r) =>
+            `<li>${
+              r.code
+            }: <span class="font-bold">${r.count.toLocaleString()}</span></li>`
+        )
+        .join("");
+
+      return `<div class="bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-bold mb-4">Resumen de Actividad</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-blue-100 p-4 rounded-lg text-center"><div class="text-3xl font-bold">${data.total_requests.toLocaleString()}</div><div class="text-sm">Peticiones Totales</div></div>
-                <div class="bg-green-100 p-4 rounded-lg text-center"><div class="text-3xl font-bold">${data.total_data_gb}</div><div class="text-sm">GB Consumidos</div></div>
+                <div class="bg-green-100 p-4 rounded-lg text-center"><div class="text-3xl font-bold">${
+                  data.total_data_gb
+                }</div><div class="text-sm">GB Consumidos</div></div>
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <h4 class="font-semibold text-sm mb-1 text-center">Resumen de Respuestas</h4>
                     <ul class="text-xs space-y-1">${responseSummaryHtml}</ul>
@@ -524,7 +738,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h3 class="text-xl font-semibold mb-2">Top 5 Dominios Visitados</h3>
+                    <h3 class="text-xl font-semibold mb-2">Top 15 Dominios Visitados</h3>
                     <canvas id="domain-chart"></canvas>
                 </div>
                 <div>
@@ -535,95 +749,183 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderTopUsers(data) {
-        const rows = data.top_users.map((user, index) => `
+      const rows = data.top_users
+        .map(
+          (user, index) => `
             <tr class="hover:bg-gray-50">
                 <td class="p-3">${index + 1}</td>
                 <td class="p-3 font-medium">${user.username}</td>
-                <td class="p-3 font-mono">${user.total_data_gb.toFixed(2)} GB</td>
-            </tr>`).join('');
-        return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Top 10 Usuarios por Consumo de Datos</h2>
+                <td class="p-3 font-mono">${user.total_data_gb.toFixed(
+                  2
+                )} GB</td>
+            </tr>`
+        )
+        .join("");
+      return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Top 10 Usuarios por Consumo de Datos</h2>
             <table class="w-full text-left">
                 <thead class="bg-gray-100"><tr><th class="p-3">#</th><th class="p-3">Usuario</th><th class="p-3">Datos Consumidos</th></tr></thead>
                 <tbody class="divide-y">${rows}</tbody>
             </table></div>`;
     }
-    
+
     // --- INICIO DE LA MODIFICACIÓN ---
     function renderDailyActivityChart(canvas, hourlyData) {
-        const labels = Array.from({ length: 24 }, (_, i) => {
-            const hour = i % 12 === 0 ? 12 : i % 12;
-            const ampm = i < 12 ? 'AM' : 'PM';
-            return `${hour} ${ampm}`;
-        });
+      const labels = Array.from({ length: 24 }, (_, i) => {
+        const hour = i % 12 === 0 ? 12 : i % 12;
+        const ampm = i < 12 ? "AM" : "PM";
+        return `${hour} ${ampm}`;
+      });
 
-        new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Peticiones por Hora',
-                    data: hourlyData,
-                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                    borderColor: 'rgba(37, 99, 235, 1)',
-                    borderWidth: 1
-                }]
+      new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Peticiones por Hora",
+              data: hourlyData,
+              backgroundColor: "rgba(59, 130, 246, 0.5)",
+              borderColor: "rgba(37, 99, 235, 1)",
+              borderWidth: 1,
             },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        title: { display: true, text: 'Hora del Día' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Número de Peticiones' }
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              grid: { display: false },
+              title: { display: true, text: "Hora del Día" },
+            },
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: "Número de Peticiones" },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+          },
+        },
+      });
     }
     // --- FIN DE LA MODIFICACIÓN ---
 
     function renderDomainChart(canvas, domains) {
-        new Chart(canvas, {
-            type: 'pie',
-            data: {
-                labels: domains.map(d => d.domain),
-                datasets: [{
-                    label: 'Peticiones',
-                    data: domains.map(d => d.count),
-                    backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
-                }]
+      // Genera colores equidistantes en el espectro HSL
+      const generateColors = (count) =>
+        Array.from(
+          { length: count },
+          (_, i) => `hsl(${((i * 360) / count) % 360}, 70%, 50%)`
+        );
+
+      // Configuración del gráfico
+      const config = {
+        type: "pie",
+        data: {
+          labels: domains.map((d) => d.domain),
+          datasets: [
+            {
+              label: "Requests",
+              data: domains.map((d) => d.count),
+              backgroundColor: generateColors(domains.length),
             },
-            options: { responsive: true, plugins: { legend: { position: 'right' } } }
-        });
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                boxWidth: 12,
+                font: { size: 10 },
+                generateLabels: (chart) => {
+                  const { labels, datasets } = chart.data;
+                  if (!labels.length || !datasets.length) return [];
+
+                  return labels.map((label, i) => ({
+                    text: `${label} (${datasets[0].data[i]})`,
+                    fillStyle: datasets[0].backgroundColor[i],
+                    strokeStyle: datasets[0].backgroundColor[i],
+                    lineWidth: 0,
+                    index: i,
+                  }));
+                },
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const label = context.label || "";
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} (${percentage}%)`;
+                },
+              },
+            },
+          },
+        },
+      };
+
+      return new Chart(canvas, config);
     }
 
     function renderResponseChart(canvas, responses) {
-        const getResponseColor = (code) => {
-            if (code >= 500) return '#DC2626'; 
-            if (code >= 400) return '#F59E0B'; 
-            if (code >= 300) return '#3B82F6'; 
-            if (code >= 200) return '#10B981'; 
-            return '#6B7280'; 
-        };
+      // Mapeo de códigos de respuesta a colores
+      const getResponseColor = (code) => {
+        if (code >= 500) return '#DC2626'; // Error de servidor
+        if (code >= 400) return '#F59E0B'; // Error de cliente
+        if (code >= 300) return '#3B82F6'; // Redirección
+        if (code >= 200) return '#10B981'; // Éxito
+        return '#6B7280'; // Otros
+      };
 
-        new Chart(canvas, {
-            type: 'pie',
-            data: {
-                labels: responses.map(r => `Código ${r.code}`),
-                datasets: [{
-                    label: 'Cantidad',
-                    data: responses.map(r => r.count),
-                    backgroundColor: responses.map(r => getResponseColor(r.code)),
-                }]
+      // Configuración del gráfico
+      const config = {
+        type: "pie",
+        data: {
+          labels: responses.map((r) => `HTTP ${r.code}`),
+          datasets: [
+            {
+              label: "Respuestas",
+              data: responses.map((r) => r.count),
+              backgroundColor: responses.map((r) => getResponseColor(r.code)),
+              borderWidth: 1,
             },
-            options: { responsive: true, plugins: { legend: { position: 'right' } } }
-        });
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                font: {
+                  size: 12,
+                },
+                padding: 10,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const label = context.label.replace("HTTP ", "") || "";
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} (${percentage}%)`;
+                },
+              },
+            },
+          },
+        },
+      };
+
+      return new Chart(canvas, config);
     }
-});
+  });
 </script>
