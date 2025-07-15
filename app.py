@@ -39,6 +39,7 @@ import sys
 import os
 import logging
 from threading import Lock  # Importamos Lock para sincronización de hilos
+from utils.filters import register_filters
 
 class Config:
     SCHEDULER_API_ENABLED = True
@@ -66,6 +67,8 @@ scheduler = APScheduler()
 app.secret_key = os.urandom(24).hex()
 scheduler.init_app(app)
 scheduler.start()
+
+register_filters(app)
 
 # Configure logging
 logging.basicConfig(
@@ -145,18 +148,6 @@ def init_scheduler():
         return
     else:
         process_logs(log_file)
-
-
-@app.template_filter('format_bytes')
-def format_bytes_filter(value):
-    value = int(value)
-    if value >= 1024**3:  # GB
-        return f"{(value / (1024**3)):.2f} GB"
-    elif value >= 1024**2:  # MB
-        return f"{(value / (1024**2)):.2f} MB"
-    elif value >= 1024:  # KB
-        return f"{(value / 1024):.2f} KB"
-    return f"{value} bytes"
 
 @app.route('/get-logs-by-date', methods=['POST'])
 def get_logs_by_date():
@@ -285,19 +276,6 @@ def blacklist_logs():
         if db is not None:
             db.close()
 
-
-@app.template_filter('divide')
-def divide_filter(numerator, denominator, precision=2):
-    try:
-        num = float(numerator)
-        den = float(denominator)
-        if den == 0:
-            logger.warning("Intento de división por cero en plantilla")
-            return 0.0
-        return round(num / den, precision)
-    except (TypeError, ValueError) as e:
-        logger.error(f"Error en filtro divide: {str(e)}")
-        return 0.0
 
 reports_bp = Blueprint('reports', __name__)
 
