@@ -106,7 +106,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository_owner }}/squidstats
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
@@ -124,7 +124,7 @@ jobs:
 
       - name: Test Docker image
         run: |
-          docker run --rm -d --name squidstats-test -p 5000:5000 ghcr.io/${{ github.repository }}:latest
+          docker run --rm -d --name squidstats-test -p 5000:5000 ghcr.io/${{ github.repository_owner }}/squidstats:latest
           sleep 10
           if docker ps | grep -q squidstats-test; then
               echo "✅ Docker image runs successfully"
