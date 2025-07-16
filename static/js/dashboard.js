@@ -603,7 +603,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   
   const today = getLocalDateString();
-  console.log("Fecha actual:", today);
   if (!dateFilter.value) dateFilter.value = today;
 
   // Event listener para cambio de fecha

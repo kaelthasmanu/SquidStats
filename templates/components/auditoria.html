@@ -89,9 +89,9 @@
                 Resumen por Usuario
               </option>
               <option value="top_users_data">Top 10 Usuarios (Datos)</option>
-              <option value="daily_activity" data-requires="user">
+              <!-- <option value="daily_activity" data-requires="user">
                 Actividad Diaria
-              </option>
+              </option> -->
             </optgroup>
             <optgroup label="Seguridad y Políticas">
               <option
@@ -371,9 +371,17 @@
       social_media: document.getElementById("social-media-input-container"),
     };
 
-    const today = new Date();
-    startDateInput.value = today.toISOString().split("T")[0];
-    endDateInput.value = today.toISOString().split("T")[0];
+    const getLocalDateString = () => {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const todayString = getLocalDateString();
+    startDateInput.value = todayString;
+    endDateInput.value = todayString;
 
     fetch("/api/all-users")
       .then((response) => response.json())
