@@ -29,11 +29,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Sistema</title>
     <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}">
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <style>
         @keyframes progress { 0% { stroke-dasharray: 0 100; } }
         .circle-animation { animation: progress 1s ease-out forwards; }
