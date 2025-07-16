@@ -138,6 +138,61 @@ apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev 
   access_log /var/log/squid/access.log detailed
 ```
 
+#### 🔧 Cache Manager Configuration (Critical for SquidStats)
+
+**SquidStats requires proper Cache Manager configuration to function correctly.** Please follow the [official Squid Cache Manager documentation](https://wiki.squid-cache.org/Features/CacheManager/Index) for complete setup.
+
+**Essential Configuration Steps:**
+
+1. **Configure Cache Manager Access Controls** in `/etc/squid/squid.conf`:
+   ```bash
+   # Allow localhost access to cache manager
+   acl manager proto cache_object
+   acl localhost src 127.0.0.1/32 ::1
+   
+   # Basic cache manager access
+   http_access allow localhost manager
+   http_access deny manager
+   ```
+
+2. **Set Cache Manager Password** (optional but recommended):
+   ```bash
+   # Set password for administrative actions
+   cachemgr_passwd your_password_here shutdown
+   cachemgr_passwd your_password_here info stats/objects
+   ```
+
+3. **Configure Remote Access** (if SquidStats runs on different server):
+   ```bash
+   # Replace 192.168.1.100 with your SquidStats server IP
+   acl managerAdmin src 192.168.1.100
+   http_access allow managerAdmin manager
+   ```
+
+4. **Verify Cache Manager is Working**:
+   ```bash
+   # Test cache manager access
+   curl http://127.0.0.1:3128/squid-internal-mgr/menu
+   
+   # Or using squidclient
+   squidclient -h 127.0.0.1 -p 3128 mgr:info
+   ```
+
+**Why This Configuration is Critical:**
+
+- **Real-time Statistics**: SquidStats uses Cache Manager to retrieve live proxy statistics, active connections, and performance metrics
+- **Cache Information**: Provides data about cached objects, memory usage, disk utilization, and hit ratios
+- **Connection Monitoring**: Enables monitoring of active client connections and bandwidth usage
+- **Administrative Functions**: Allows SquidStats to perform cache management operations like cache refresh and statistics retrieval
+
+**⚠️ Security Note:** The Cache Manager provides sensitive information about your proxy server. Always restrict access to trusted IP addresses and consider using authentication for production environments.
+
+**Common Issues Without Proper Configuration:**
+- Empty or missing statistics in SquidStats dashboard
+- "Connection refused" errors when accessing cache data
+- Missing real-time connection information
+- Incomplete bandwidth and user activity reports
+
 ### Installation Script
 
 1. Get Script With curl o wget:

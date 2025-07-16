@@ -114,145 +114,272 @@
 **El proceso de instalación completo con más detalle se puede encontrar [aquí](https://www.sysadminsdecuba.com/2025/04/squidstat-analizador-de-logs-de-squid-diferente-y-100-cubano/).**
 
 ### Prerequisitos
+
 - Python 3.10+
 - Servidor proxy Squid 
 - `squidclient` instalado en su servidor
+
 ```bash 
 apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev curl
 ```
+
 - ⚠️ !!Importante ⚠️ Para compatibilidad con los registros de usuarios, utilice este formato en /etc/squid/squid.conf:
+
 ```bash 
   logformat detailed \
   "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
   
   access_log /var/log/squid/access.log detailed
 ```
+
+#### 🔧 Configuración del Cache Manager (Crítico para SquidStats)
+
+**SquidStats requiere una configuración adecuada del Cache Manager para funcionar correctamente.** Por favor siga la [documentación oficial del Cache Manager de Squid](https://wiki.squid-cache.org/Features/CacheManager/Index) para una configuración completa.
+
+**Pasos de Configuración Esenciales:**
+
+1. **Configurar Controles de Acceso al Cache Manager** en `/etc/squid/squid.conf`:
+   ```bash
+   # Permitir acceso localhost al cache manager
+   acl manager proto cache_object
+   acl localhost src 127.0.0.1/32 ::1
+   
+   # Acceso básico al cache manager
+   http_access allow localhost manager
+   http_access deny manager
+   ```
+
+2. **Establecer Contraseña del Cache Manager** (opcional pero recomendado):
+   ```bash
+   # Establecer contraseña para acciones administrativas
+   cachemgr_passwd tu_contraseña_aqui shutdown
+   cachemgr_passwd tu_contraseña_aqui info stats/objects
+   ```
+
+3. **Configurar Acceso Remoto** (si SquidStats se ejecuta en un servidor diferente):
+   ```bash
+   # Reemplazar 192.168.1.100 con la IP de su servidor SquidStats
+   acl managerAdmin src 192.168.1.100
+   http_access allow managerAdmin manager
+   ```
+
+4. **Verificar que el Cache Manager Funciona**:
+   ```bash
+   # Probar acceso al cache manager
+   curl http://127.0.0.1:3128/squid-internal-mgr/menu
+   
+   # O usando squidclient
+   squidclient -h 127.0.0.1 -p 3128 mgr:info
+   ```
+
+**Por qué Esta Configuración es Crítica:**
+
+- **Estadísticas en Tiempo Real**: SquidStats usa el Cache Manager para obtener estadísticas en vivo del proxy, conexiones activas y métricas de rendimiento
+- **Información de Caché**: Proporciona datos sobre objetos cacheados, uso de memoria, utilización de disco y ratios de aciertos
+- **Monitoreo de Conexiones**: Permite monitorear conexiones activas de clientes y uso de ancho de banda
+- **Funciones Administrativas**: Permite a SquidStats realizar operaciones de gestión de caché como actualización de caché y obtención de estadísticas
+
+**⚠️ Nota de Seguridad:** El Cache Manager proporciona información sensible sobre su servidor proxy. Siempre restrinja el acceso a direcciones IP confiables y considere usar autenticación para entornos de producción.
+
+**Problemas Comunes Sin Configuración Adecuada:**
+- Estadísticas vacías o faltantes en el dashboard de SquidStats
+- Errores de "Conexión rechazada" al acceder a datos de caché
+- Información de conexión en tiempo real faltante
+- Reportes incompletos de ancho de banda y actividad de usuarios
 ### Instalación con Script
+
 1. Obtener el script con curl o wget:
-  ```bash
-   wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
-   ``` 
+
+```bash
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+``` 
 
 2. Dar permisos de ejecución:
-  ```bash
-   sudo chmod +x install.sh
-   ```
 
-3. Correr el script:
-  ```bash
-   sudo ./install.sh
-   ```
+```bash
+ sudo chmod +x install.sh
+```
+
+3. Ejecutar el script:
+
+```bash
+ sudo ./install.sh
+```
+
+#### Opciones de Instalación
+El instalador ahora soporta múltiples modos:
+
+```bash
+# Instalación completa (interactiva)
+sudo ./install.sh
+
+# Actualizar instalación existente
+sudo ./install.sh --update
+
+# Configurar solo blacklist
+sudo ./install.sh --configure-blacklist
+
+# Mostrar ayuda
+./install.sh --help
+```
+
+#### 🛡️ Configuración de Blacklist
+Durante la instalación, puede configurar qué dominios notificar como bloqueados:
+
+- **Opción 1**: Usar blacklist predeterminada (facebook.com, twitter.com, instagram.com, etc.)
+- **Opción 2**: Configurar dominios personalizados
+- **Opción 3**: Omitir configuración de blacklist
+
+**Ejemplo de configuración personalizada:**
+```bash
+# Cuando se le solicite, ingrese dominios separados por comas:
+facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
+```
 <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 ---
 ### Instalación Manual
+
 1. Clonar el repositorio:
    ```bash
    mkdir -p /opt/squidstats
    git clone https://github.com/kaelthasmanu/SquidStats.git /opt/squidstats
    ```
-2.  Creación de un ambiente virtual (venv):
-  ```bash
-   cd /opt/squidstats/
-   python3 -m venv "/opt/squidstats/venv"
-   source venv/bin/activate
-   pip install --upgrade pip
-   ```
+
+2. Creación de un ambiente virtual (venv):
+
+```bash
+ cd /opt/squidstats/
+ python3 -m venv "/opt/squidstats/venv"
+ source venv/bin/activate
+ pip install --upgrade pip
+```
+
 3. Instalación de los requerimientos de python con pip o pip3:
-  ```bash
-    pip install -r /opt/squidstats/requirements.txt
-  ```
+
+```bash
+  pip install -r /opt/squidstats/requirements.txt
+```
+
 4. Crear un fichero .env en la raíz del proyecto y agregar lo siguiente:\
-  Nota: para usar MARIADB necesita tener corriendo su servidor de Bases de Datos.
-  ```bash
-    VERSION=2
-    SQUID_HOST = "127.0.0.1"
-    SQUID_PORT = 3128
-    FLASK_DEBUG = "True"
-    DATABASE_TYPE="SQLITE"
-    SQUID_LOG = "/var/log/squid/access.log"
-    DATABASE_STRING_CONNECTION = "/opt/squidstats/"
-    REFRESH_INTERVAL = 60
-  ```
-5. Corra la aplicacion con python o python3  🚀:
-  ```bash
-    python3 app.py
-  ```
+    Nota: para usar MARIADB necesita tener corriendo su servidor de Bases de Datos.
+   ```bash
+   VERSION=2
+   SQUID_HOST="127.0.0.1"
+   SQUID_PORT=3128
+   FLASK_DEBUG=True
+   DATABASE_TYPE="SQLITE"
+   SQUID_LOG="/var/log/squid/access.log"
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/"
+   REFRESH_INTERVAL=60
+   BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
+   HTTP_PROXY=""
+   ```
+
+5. Ejecutar la aplicación con python o python3 🚀:
+
+```bash
+  python3 app.py
+```
+
 6. En el navegador de su preferencia, visite el siguiente enlace:
-  ```bash
-    http://ip/hostname:5000 
-  ```
-### ⚠️ Alerta en la primera corrida ⚠️
+
+```bash
+  http://ip/hostname:5000 
+```
+### ⚠️ Alerta en la primera ejecución ⚠️
+
 Advertencia: 🚨 La primera vez que se ejecuta puede causar un alto uso de la CPU.
 
-### Actualizar la web con el script
+### Actualizar el proyecto (web) con Script
 
 1. Obtener el script con curl o wget:
-  ```bash
-   wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
-   ``` 
+
+```bash
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+``` 
 
 2. Dar permisos de ejecución:
-  ```bash
-   sudo chmod +x install.sh
-   ```
 
-3. Ejecute el script con el parámetro update:
-  ```bash
-   sudo ./install.sh --update
-   ```
+```bash
+ sudo chmod +x install.sh
+```
 
-🕒 Correrlo al inciar el sistema operativo
+3. Ejecutar el script con el parámetro update:
+
+```bash
+ sudo ./install.sh --update
+```
+
+🕒 **Ejecutar al iniciar el sistema operativo**
+
 Para garantizar que la aplicación se inicie automáticamente cuando se inicia el sistema, agregue el siguiente trabajo al cron:
+
 1. Abrir con un editor el fichero crontab
+
 ```bash
 nano /etc/crontab
 ```
-2. Añada la siguiente linea al fichero de crontab(cambia path_app por tu ruta):
+
+2. Añadir la siguiente línea al fichero de crontab (cambiar path_app por su ruta):
+
 ```bash
 @reboot root nohup python3 path_app/app.py &
 ```
-3. Save
 
-O podemos usar servicios(daemon):
+3. Guardar
 
-1. Copia el fichero de servicio:
-  ```bash
-    cp ./utils/squidstats.service /etc/systemd/system/squidstats.service
-  ```
-2. Reinicia daemons:
-  ```bash
-    systemctl daemon-reload
-  ```
-3. Actiba el servicio:
-  ```bash
-    systemctl enable squidstats.service
-  ```
-3. Inicia el servicio:
-  ```bash
-    systemctl start squidstats.service
-  ```
-<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
----
-## Información de prueba
-Este software ha sido probado exhaustivamente y es compatible con la versión 6.12 de Squid. Asegúrese de que su instalación de Squid sea compatible con esta versión o una posterior para un rendimiento óptimo.
+O puede usar servicios (daemon):
+
+1. Copiar el fichero de servicio:
+
+```bash
+  cp ./utils/squidstats.service /etc/systemd/system/squidstats.service
+```
+
+2. Reiniciar daemons:
+
+```bash
+  systemctl daemon-reload
+```
+
+3. Activar el servicio:
+
+```bash
+  systemctl enable squidstats.service
+```
+
+4. Iniciar el servicio:
+
+```bash
+  systemctl start squidstats.service
+```
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+## Información de Prueba
+
+Este software ha sido probado exhaustivamente y es compatible con la versión 6.12 de Squid en Ubuntu 24.04 y Debian 12. Por favor asegúrese de que su instalación de Squid sea compatible con esta versión o una posterior para un rendimiento óptimo.
 
 ## Por hacer
 *Make blah blah.*
 
 ## Colaboradores
-1. Clona el repositorio:
+
+1. Hacer fork del repositorio:
    ```bash
    git checkout -b feature-name
    ```
-2.Crea una nueva rama para tu función o corrección:
- ```bash
- git checkout -b feature-name
- ```
-3.Confirme sus cambios y envíe la rama:
-  ```bash
-  git push origin feature-name
-  ```
-4.Abrir una solicitud de extracción.
+
+2. Crear una nueva rama para tu función o corrección:
+   ```bash
+   git checkout -b feature-name
+   ```
+
+3. Confirmar sus cambios y enviar la rama:
+   ```bash
+   git push origin feature-name
+   ```
+
+4. Abrir una solicitud de extracción (pull request).
 
 **Colaboradores**
 <table style="width:100%">
@@ -276,19 +403,20 @@ Este software ha sido probado exhaustivamente y es compatible con la versión 6.
 
 <!-- CONTACT -->
 ## Contacto
-> **_Necesita ayuda?_** 
-**_Contácteme 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
 
-Enlace al proyecto: ([SquidStats](https://github.com/kaelthasmanu/cucuota))
+> **_¿Necesita ayuda?_** 
+> **_Contácteme 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
 
-## Tecnologías usadas
+Enlace del proyecto: ([SquidStats](https://github.com/kaelthasmanu/SquidStats))
 
-  Backend: Python, Flask
-  Frontend: HTML, CSS
+## Tecnologías Utilizadas
 
-## Agradecimientos 
-* _A la comunidad cubana de administradores de redes._
-* _A todo aquel que me brindo su ayuda cuando tenía dudas._
-  
-<a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
----
+Backend: Python, Flask  
+Frontend: HTML, CSS, JavaScript
+
+## Agradecimientos Especiales
+
+- _A la comunidad cubana de administradores de sistemas._
+- _A todos los que me brindaron su ayuda cuando tenía dudas._
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
