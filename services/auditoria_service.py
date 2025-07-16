@@ -112,7 +112,7 @@ def find_by_keyword(
 
     all_results = []
 
-    for log_table, user_table in tables:
+    for log_table in tables:
         date_suffix = log_table.split("_")[1]
         try:
             UserModel, LogModel = get_dynamic_models(date_suffix)
@@ -194,7 +194,7 @@ def find_social_media_activity(
 
     all_results = []
 
-    for log_table, user_table in tables:
+    for log_table in tables:
         date_suffix = log_table.split("_")[1]
         try:
             UserModel, LogModel = get_dynamic_models(date_suffix)
@@ -283,7 +283,7 @@ def find_by_ip(
 
     all_results = []
 
-    for log_table, user_table in tables:
+    for log_table in tables:
         date_suffix = log_table.split("_")[1]
         try:
             UserModel, LogModel = get_dynamic_models(date_suffix)
@@ -354,7 +354,7 @@ def find_by_response_code(
 
     all_results = []
 
-    for log_table, user_table in tables:
+    for log_table in tables:
         date_suffix = log_table.split("_")[1]
         try:
             UserModel, LogModel = get_dynamic_models(date_suffix)
@@ -511,7 +511,7 @@ def get_all_usernames(db: Session) -> list[str]:
             print(f"Error procesando tabla {table_name}: {e}")
             continue
 
-    return sorted(list(all_usernames))
+    return sorted(all_usernames)
 
 
 def get_user_activity_summary(
@@ -529,7 +529,7 @@ def get_user_activity_summary(
     domain_counts = defaultdict(int)
     response_counts = defaultdict(int)
 
-    for log_table, user_table in tables:
+    for log_table in tables:
         date_suffix = log_table.split("_")[1]
         try:
             UserModel, LogModel = get_dynamic_models(date_suffix)
@@ -606,7 +606,7 @@ def get_top_users_by_data(
 
     user_data = defaultdict(int)
 
-    for log_table, user_table in tables:
+    for log_table in tables:
         date_suffix = log_table.split("_")[1]
         try:
             UserModel, LogModel = get_dynamic_models(date_suffix)
@@ -655,7 +655,7 @@ def find_denied_access(
 
     all_results = []
 
-    for log_table, user_table in tables:
+    for log_table in tables:
         date_suffix = log_table.split("_")[1]
         try:
             UserModel, LogModel = get_dynamic_models(date_suffix)

@@ -113,13 +113,13 @@ def get_cpu_info():
             "total_cores": psutil.cpu_count(logical=True),
             "usage": f"{cpu_percent}%",
             "current_freq": f"{freq_current} MHz"
-            if isinstance(freq_current, (int, float))
+            if isinstance(freq_current, int | float)
             else freq_current,
             "min_freq": f"{freq_min} MHz"
-            if isinstance(freq_min, (int, float))
+            if isinstance(freq_min, int | float)
             else freq_min,
             "max_freq": f"{freq_max} MHz"
-            if isinstance(freq_max, (int, float))
+            if isinstance(freq_max, int | float)
             else freq_max,
             "user_time": f"{cpu_times.user}%",
             "system_time": f"{cpu_times.system}%",
@@ -134,8 +134,7 @@ def get_squid_version():
     try:
         result = subprocess.run(
             ["squid", "-v"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
             timeout=5,
         )
