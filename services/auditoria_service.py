@@ -1,10 +1,11 @@
 from venv import logger
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, func, or_, text
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from typing import Dict, Any, List, Tuple
 from collections import defaultdict
+from database.database import get_dynamic_models
 
 SOCIAL_MEDIA_DOMAINS = {
     'YouTube': [
@@ -53,26 +54,6 @@ def _get_tables_in_range(inspector, start_date: datetime, end_date: datetime) ->
         current_date += timedelta(days=1)
     return log_tables_in_range
 
-def _execute_union_query(db: Session, tables: List[Tuple[str, str]], where_clause: str, params: Dict, order_by: str) -> List[Any]:
-    select_clauses = []
-    for log_table, user_table in tables:
-        date_str = log_table.split('_')[1]
-        select_clauses.append(
-            f"SELECT u.username, u.ip, l.url, l.response, l.data_transmitted, l.created_at, '{date_str}' as log_date "
-            f"FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id"
-        )
-    
-    full_query_str = f"""
-        SELECT username, ip, url, response, data_transmitted, created_at, log_date
-        FROM ({ " UNION ALL ".join(select_clauses) }) as all_logs
-        WHERE {where_clause}
-        ORDER BY {order_by}
-    """
-    try:
-        return db.execute(text(full_query_str), params).fetchall()
-    except SQLAlchemyError as e:
-        print(f"Error en _execute_union_query: {e}")
-        raise
 
 def find_by_keyword(db: Session, start_str: str, end_str: str, keyword: str, username: str = None) -> Dict[str, Any]:
     start_date, end_date = datetime.strptime(start_str, '%Y-%m-%d'), datetime.strptime(end_str, '%Y-%m-%d')
@@ -81,33 +62,63 @@ def find_by_keyword(db: Session, start_str: str, end_str: str, keyword: str, use
     if not tables:
         return {"error": "No hay datos para las fechas seleccionadas."}
 
-    select_clauses = []
+    all_results = []
+    
     for log_table, user_table in tables:
-        date_str = log_table.split('_')[1]
-        select_clauses.append(
-            f"SELECT u.username, u.ip, l.url, l.data_transmitted, l.created_at, '{date_str}' as log_date "
-            f"FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id"
-        )
-
-    where_clause = "url LIKE :keyword"
-    params = {'keyword': f'%{keyword}%'}
-    if username:
-        where_clause += " AND username = :username"
-        params['username'] = username
-
-    full_query_str = f"""
-        SELECT log_date, username, ip, url, COUNT(*) as access_count, SUM(data_transmitted) as total_data, MAX(created_at) as last_seen
-        FROM ({ " UNION ALL ".join(select_clauses) }) as all_logs
-        WHERE {where_clause}
-        GROUP BY log_date, username, ip, url
-        ORDER BY username, log_date DESC, access_count DESC
-    """
-    try:
-        results = db.execute(text(full_query_str), params).fetchall()
-        return {"results": [dict(row._mapping) for row in results]}
-    except SQLAlchemyError as e:
-        print(f"Error en find_by_keyword: {e}")
-        raise
+        date_suffix = log_table.split('_')[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+                
+            # Crear query usando ORM
+            query = db.query(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.data_transmitted,
+                LogModel.created_at,
+                func.count(LogModel.id).label('access_count'),
+                func.sum(LogModel.data_transmitted).label('total_data'),
+                func.max(LogModel.created_at).label('last_seen')
+            ).join(
+                LogModel, LogModel.user_id == UserModel.id
+            ).filter(
+                LogModel.url.like(f'%{keyword}%')
+            )
+            
+            if username:
+                query = query.filter(UserModel.username == username)
+                
+            query = query.group_by(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.data_transmitted,
+                LogModel.created_at
+            )
+            
+            results = query.all()
+            
+            for row in results:
+                all_results.append({
+                    'log_date': date_suffix,
+                    'username': row.username,
+                    'ip': row.ip,
+                    'url': row.url,
+                    'access_count': row.access_count,
+                    'total_data': row.total_data,
+                    'last_seen': row.last_seen
+                })
+                
+        except Exception as e:
+            print(f"Error procesando tabla {log_table}: {e}")
+            continue
+    
+    # Ordenar resultados
+    all_results.sort(key=lambda x: (x['username'], x['log_date'], x['access_count']), reverse=True)
+    
+    return {"results": all_results}
 
 def find_social_media_activity(db: Session, start_str: str, end_str: str, sites: List[str], username: str = None) -> Dict[str, Any]:
     start_date, end_date = datetime.strptime(start_str, '%Y-%m-%d'), datetime.strptime(end_str, '%Y-%m-%d')
@@ -123,53 +134,75 @@ def find_social_media_activity(db: Session, start_str: str, end_str: str, sites:
     if not domain_list:
         return {"error": "No se especificaron dominios válidos para la búsqueda."}
 
-    like_conditions = []
-    params = {}
-    param_index = 0
-    for domain in domain_list:
-        condition_group = (
-            f"url LIKE :p{param_index}_sub_slash OR "
-            f"url LIKE :p{param_index}_sub_colon OR "
-            f"url LIKE :p{param_index}_sub_exact OR "
-            f"url LIKE :p{param_index}_proto_slash OR "
-            f"url LIKE :p{param_index}_proto_colon OR "
-            f"url LIKE :p{param_index}_proto_exact"
-        )
-        like_conditions.append(f"({condition_group})")
-        params[f'p{param_index}_sub_slash'] = f'%.{domain}/%'
-        params[f'p{param_index}_sub_colon'] = f'%.{domain}:%'
-        params[f'p{param_index}_sub_exact'] = f'%.{domain}'
-        params[f'p{param_index}_proto_slash'] = f'%//{domain}/%'
-        params[f'p{param_index}_proto_colon'] = f'%//{domain}:%'
-        params[f'p{param_index}_proto_exact'] = f'%//{domain}'
-        param_index += 1
-
-    where_clause = f"({' OR '.join(like_conditions)})"
-    if username:
-        where_clause += " AND username = :username"
-        params['username'] = username
-
-    select_clauses = []
-    for log_table, user_table in tables:
-        date_str = log_table.split('_')[1]
-        select_clauses.append(
-            f"SELECT u.username, u.ip, l.url, l.data_transmitted, l.created_at, '{date_str}' as log_date "
-            f"FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id"
-        )
+    all_results = []
     
-    full_query_str = f"""
-        SELECT log_date, username, ip, url, COUNT(*) as access_count, SUM(data_transmitted) as total_data, MAX(created_at) as last_seen
-        FROM ({ " UNION ALL ".join(select_clauses) }) as all_logs
-        WHERE {where_clause}
-        GROUP BY log_date, username, ip, url
-        ORDER BY username, log_date DESC, access_count DESC
-    """
-    try:
-        results = db.execute(text(full_query_str), params).fetchall()
-        return {"results": [dict(row._mapping) for row in results]}
-    except SQLAlchemyError as e:
-        print(f"Error en find_social_media_activity: {e}")
-        raise
+    for log_table, user_table in tables:
+        date_suffix = log_table.split('_')[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+                
+            # Crear condiciones OR para cada dominio usando ORM
+            domain_conditions = []
+            for domain in domain_list:
+                domain_conditions.extend([
+                    LogModel.url.like(f'%.{domain}/%'),
+                    LogModel.url.like(f'%.{domain}:%'),
+                    LogModel.url.like(f'%.{domain}'),
+                    LogModel.url.like(f'%//{domain}/%'),
+                    LogModel.url.like(f'%//{domain}:%'),
+                    LogModel.url.like(f'%//{domain}')
+                ])
+            
+            # Crear query usando ORM
+            query = db.query(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.data_transmitted,
+                LogModel.created_at,
+                func.count(LogModel.id).label('access_count'),
+                func.sum(LogModel.data_transmitted).label('total_data'),
+                func.max(LogModel.created_at).label('last_seen')
+            ).join(
+                LogModel, LogModel.user_id == UserModel.id
+            ).filter(
+                or_(*domain_conditions)
+            )
+            
+            if username:
+                query = query.filter(UserModel.username == username)
+                
+            query = query.group_by(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.data_transmitted,
+                LogModel.created_at
+            )
+            
+            results = query.all()
+            
+            for row in results:
+                all_results.append({
+                    'log_date': date_suffix,
+                    'username': row.username,
+                    'ip': row.ip,
+                    'url': row.url,
+                    'access_count': row.access_count,
+                    'total_data': row.total_data,
+                    'last_seen': row.last_seen
+                })
+                
+        except Exception as e:
+            print(f"Error procesando tabla {log_table}: {e}")
+            continue
+    
+    # Ordenar resultados
+    all_results.sort(key=lambda x: (x['username'], x['log_date'], x['access_count']), reverse=True)
+    
+    return {"results": all_results}
 
 def find_by_ip(db: Session, start_str: str, end_str: str, ip_address: str) -> Dict[str, Any]:
     start_date, end_date = datetime.strptime(start_str, '%Y-%m-%d'), datetime.strptime(end_str, '%Y-%m-%d')
@@ -178,28 +211,58 @@ def find_by_ip(db: Session, start_str: str, end_str: str, ip_address: str) -> Di
     if not tables: 
         return {"error": "No hay datos para las fechas seleccionadas."}
 
-    select_clauses = []
+    all_results = []
+    
     for log_table, user_table in tables:
-        date_str = log_table.split('_')[1]
-        select_clauses.append(
-            f"SELECT u.username, u.ip, l.url, l.data_transmitted, l.created_at, '{date_str}' as log_date "
-            f"FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id WHERE u.ip = :ip_address"
-        )
+        date_suffix = log_table.split('_')[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+                
+            # Crear query usando ORM
+            query = db.query(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.data_transmitted,
+                LogModel.created_at,
+                func.count(LogModel.id).label('access_count'),
+                func.sum(LogModel.data_transmitted).label('total_data'),
+                func.max(LogModel.created_at).label('last_seen')
+            ).join(
+                LogModel, LogModel.user_id == UserModel.id
+            ).filter(
+                UserModel.ip == ip_address
+            ).group_by(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.data_transmitted,
+                LogModel.created_at
+            )
+            
+            results = query.all()
+            
+            for row in results:
+                all_results.append({
+                    'log_date': date_suffix,
+                    'username': row.username,
+                    'ip': row.ip,
+                    'url': row.url,
+                    'access_count': row.access_count,
+                    'total_data': row.total_data,
+                    'last_seen': row.last_seen
+                })
+                
+        except Exception as e:
+            print(f"Error procesando tabla {log_table}: {e}")
+            continue
     
-    params = {'ip_address': ip_address}
+    # Ordenar resultados
+    all_results.sort(key=lambda x: (x['username'], x['log_date'], x['access_count']), reverse=True)
     
-    full_query_str = f"""
-        SELECT log_date, username, ip, url, COUNT(*) as access_count, SUM(data_transmitted) as total_data, MAX(created_at) as last_seen
-        FROM ({ " UNION ALL ".join(select_clauses) }) as all_logs
-        GROUP BY log_date, username, ip, url
-        ORDER BY username, log_date DESC, access_count DESC
-    """
-    try:
-        results = db.execute(text(full_query_str), params).fetchall()
-        return {"results": [dict(row._mapping) for row in results]}
-    except SQLAlchemyError as e:
-        print(f"Error en find_by_ip: {e}")
-        raise
+    return {"results": all_results}
 
 def find_by_response_code(db: Session, start_str: str, end_str: str, code: int, username: str = None) -> Dict[str, Any]:
     start_date, end_date = datetime.strptime(start_str, '%Y-%m-%d'), datetime.strptime(end_str, '%Y-%m-%d')
@@ -208,66 +271,96 @@ def find_by_response_code(db: Session, start_str: str, end_str: str, code: int, 
     if not tables: 
         return {"error": "No hay datos para las fechas seleccionadas."}
 
-    select_clauses = []
+    all_results = []
+    
     for log_table, user_table in tables:
-        date_str = log_table.split('_')[1]
-        select_clauses.append(
-            f"SELECT u.username, u.ip, l.url, l.data_transmitted, l.response, l.created_at, '{date_str}' as log_date "
-            f"FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id"
-        )
+        date_suffix = log_table.split('_')[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+                
+            # Crear query usando ORM
+            query = db.query(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.response,
+                LogModel.data_transmitted,
+                LogModel.created_at,
+                func.count(LogModel.id).label('access_count'),
+                func.sum(LogModel.data_transmitted).label('total_data'),
+                func.max(LogModel.created_at).label('last_seen')
+            ).join(
+                LogModel, LogModel.user_id == UserModel.id
+            ).filter(
+                LogModel.response == code
+            )
+            
+            if username:
+                query = query.filter(UserModel.username == username)
+                
+            query = query.group_by(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.response,
+                LogModel.data_transmitted,
+                LogModel.created_at
+            )
+            
+            results = query.all()
+            
+            for row in results:
+                all_results.append({
+                    'log_date': date_suffix,
+                    'username': row.username,
+                    'ip': row.ip,
+                    'url': row.url,
+                    'response': row.response,
+                    'access_count': row.access_count,
+                    'total_data': row.total_data,
+                    'last_seen': row.last_seen
+                })
+                
+        except Exception as e:
+            print(f"Error procesando tabla {log_table}: {e}")
+            continue
     
-    where_clause = "response = :code"
-    params = {'code': code}
-    if username:
-        where_clause += " AND username = :username"
-        params['username'] = username
+    # Ordenar resultados
+    all_results.sort(key=lambda x: (x['username'], x['log_date'], x['access_count']), reverse=True)
     
-    full_query_str = f"""
-        SELECT log_date, username, ip, url, response, COUNT(*) as access_count, SUM(data_transmitted) as total_data, MAX(created_at) as last_seen
-        FROM ({ " UNION ALL ".join(select_clauses) }) as all_logs
-        WHERE {where_clause}
-        GROUP BY log_date, username, ip, url, response
-        ORDER BY username, log_date DESC, access_count DESC
-    """
-    try:
-        results = db.execute(text(full_query_str), params).fetchall()
-        return {"results": [dict(row._mapping) for row in results]}
-    except SQLAlchemyError as e:
-        print(f"Error en find_by_response_code: {e}")
-        raise
+    return {"results": all_results}
 
-# --- INICIO DE LA MODIFICACIÓN ---
 def get_daily_activity(db: Session, date_str: str, username: str) -> Dict[str, Any]:
-    """Calcula el número de peticiones por hora para un usuario en un día específico."""
+    """Calcula el número de peticiones por hora para un usuario en un día específico usando ORM."""
     try:
         selected_date = datetime.strptime(date_str, '%Y-%m-%d')
     except ValueError:
         return {"error": "Formato de fecha inválido. Use YYYY-MM-DD."}
 
     date_suffix = selected_date.strftime("%Y%m%d")
-    log_table = f'log_{date_suffix}'
-    user_table = f'user_{date_suffix}'
-    
-    inspector = inspect(db.get_bind())
-    if not all(table in inspector.get_table_names() for table in [log_table, user_table]):
-        return {"total_requests": 0, "hourly_activity": []}
-
-    params = {'username': username}
-    
-    # Consulta para agrupar peticiones por hora del día para un usuario
-    query = text(f"""
-        SELECT
-            HOUR(l.created_at) as hour_of_day,
-            COUNT(*) as request_count
-        FROM {log_table} l
-        JOIN {user_table} u ON l.user_id = u.id
-        WHERE u.username = :username
-        GROUP BY hour_of_day
-        ORDER BY hour_of_day ASC
-    """)
     
     try:
-        results = db.execute(query, params).fetchall()
+        UserModel, LogModel = get_dynamic_models(date_suffix)
+        if UserModel is None or LogModel is None:
+            return {"total_requests": 0, "hourly_activity": [0] * 24}
+        
+        # Crear query usando ORM - compatible con SQLite y MySQL
+        query = db.query(
+            func.cast(func.strftime('%H', LogModel.created_at), text('INTEGER')).label('hour_of_day'),
+            func.count(LogModel.id).label('request_count')
+        ).join(
+            UserModel, LogModel.user_id == UserModel.id
+        ).filter(
+            UserModel.username == username
+        ).group_by(
+            func.cast(func.strftime('%H', LogModel.created_at), text('INTEGER'))
+        ).order_by(
+            func.cast(func.strftime('%H', LogModel.created_at), text('INTEGER'))
+        )
+        
+        results = query.all()
         
         # Prepara un array de 24 horas con 0 peticiones
         hourly_counts = [0] * 24
@@ -276,7 +369,7 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> Dict[str, A
         for row in results:
             hour = row.hour_of_day
             count = row.request_count
-            if 0 <= hour < 24:
+            if hour is not None and 0 <= hour < 24:
                 hourly_counts[hour] = count
                 total_requests += count
         
@@ -284,10 +377,13 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> Dict[str, A
             "total_requests": total_requests,
             "hourly_activity": hourly_counts
         }
+        
     except SQLAlchemyError as e:
         print(f"Error en get_daily_activity: {e}")
         return {"error": "Ocurrió un error en la base de datos al calcular la actividad diaria."}
-# --- FIN DE LA MODIFICACIÓN ---
+    except Exception as e:
+        print(f"Error general en get_daily_activity: {e}")
+        return {"error": "Ocurrió un error inesperado al calcular la actividad diaria."}
 
 def get_all_usernames(db: Session) -> List[str]:
     engine = db.get_bind()
@@ -296,15 +392,31 @@ def get_all_usernames(db: Session) -> List[str]:
     user_tables = [t for t in all_tables if t.startswith('user_') and len(t) == 13]
     if not user_tables:
         return []
-    union_query = " UNION ".join([f"SELECT username FROM {table}" for table in user_tables])
-    where_clause = "WHERE username IS NOT NULL AND username != '' AND username != '-'"
-    full_query = text(f"SELECT DISTINCT username FROM ({union_query}) as all_users {where_clause} ORDER BY username")
-    try:
-        result = db.execute(full_query).fetchall()
-        return [row[0] for row in result]
-    except SQLAlchemyError as e:
-        print(f"Error al obtener todos los usuarios: {e}")
-        return []
+    
+    all_usernames = set()
+    
+    for table_name in user_tables:
+        date_suffix = table_name.split('_')[1]
+        try:
+            UserModel, _ = get_dynamic_models(date_suffix)
+            if UserModel is None:
+                continue
+                
+            # Usar ORM para obtener usernames únicos
+            usernames = db.query(UserModel.username).filter(
+                UserModel.username.isnot(None),
+                UserModel.username != '',
+                UserModel.username != '-'
+            ).distinct().all()
+            
+            for username_row in usernames:
+                all_usernames.add(username_row.username)
+                
+        except Exception as e:
+            print(f"Error procesando tabla {table_name}: {e}")
+            continue
+    
+    return sorted(list(all_usernames))
 
 def get_user_activity_summary(db: Session, username: str, start_str: str, end_str: str) -> Dict[str, Any]:
     start_date = datetime.strptime(start_str, '%Y-%m-%d')
@@ -314,40 +426,60 @@ def get_user_activity_summary(db: Session, username: str, start_str: str, end_st
     if not tables:
         return {"error": "No hay datos para las fechas seleccionadas."}
 
-    select_clauses = []
+    total_requests = 0
+    total_data = 0
+    domain_counts = defaultdict(int)
+    response_counts = defaultdict(int)
+    
     for log_table, user_table in tables:
-        select_clauses.append(
-            f"SELECT l.url, l.data_transmitted, l.request_count, l.response FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id WHERE u.username = :username"
-        )
-    full_query = text(" UNION ALL ".join(select_clauses))
-    try:
-        results = db.execute(full_query, {'username': username}).fetchall()
-        if not results:
-            return {'total_requests': 0, 'total_data_gb': 0, 'top_domains': [], 'response_summary': []}
+        date_suffix = log_table.split('_')[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+                
+            # Usar ORM para obtener datos del usuario
+            results = db.query(
+                LogModel.url,
+                LogModel.data_transmitted,
+                LogModel.request_count,
+                LogModel.response
+            ).join(
+                UserModel, LogModel.user_id == UserModel.id
+            ).filter(
+                UserModel.username == username
+            ).all()
+            
+            for row in results:
+                total_requests += row.request_count
+                total_data += row.data_transmitted
+                
+                # Extraer dominio
+                try:
+                    domain = row.url.split('//')[-1].split('/')[0].split(':')[0]
+                    domain_counts[domain] += row.request_count
+                except Exception as e:
+                    logger.error(f"Error processing row in get_user_activity_summary: {e}")
+                    pass
+                    
+                response_counts[row.response] += row.request_count
+                
+        except Exception as e:
+            print(f"Error procesando tabla {log_table}: {e}")
+            continue
+    
+    if total_requests == 0:
+        return {'total_requests': 0, 'total_data_gb': 0, 'top_domains': [], 'response_summary': []}
 
-        total_requests = sum(r.request_count for r in results)
-        total_data = sum(r.data_transmitted for r in results)
-        domain_counts = defaultdict(int)
-        response_counts = defaultdict(int)
-        for row in results:
-            try:
-                domain = row.url.split('//')[-1].split('/')[0].split(':')[0]
-                domain_counts[domain] += row.request_count
-            except Exception as e:
-                logger.error(f"Error processing row in get_user_activity_summary: {e}")
-                pass
-            response_counts[row.response] += row.request_count
-
-        sorted_domains = sorted(domain_counts.items(), key=lambda item: item[1], reverse=True)
-        sorted_responses = sorted(response_counts.items(), key=lambda item: item[1], reverse=True)
-        return {
-            "total_requests": total_requests,
-            "total_data_gb": round(total_data / (1024**3), 2),
-            "top_domains": [{"domain": d, "count": c} for d, c in sorted_domains[:15]],
-            "response_summary": [{"code": code, "count": count} for code, count in sorted_responses],
-        }
-    except SQLAlchemyError as e:
-        return {"error": str(e)}
+    sorted_domains = sorted(domain_counts.items(), key=lambda item: item[1], reverse=True)
+    sorted_responses = sorted(response_counts.items(), key=lambda item: item[1], reverse=True)
+    
+    return {
+        "total_requests": total_requests,
+        "total_data_gb": round(total_data / (1024**3), 2),
+        "top_domains": [{"domain": d, "count": c} for d, c in sorted_domains[:15]],
+        "response_summary": [{"code": code, "count": count} for code, count in sorted_responses],
+    }
 
 def get_top_users_by_data(db: Session, start_str: str, end_str: str, limit: int = 10) -> Dict[str, Any]:
     start_date = datetime.strptime(start_str, '%Y-%m-%d')
@@ -357,27 +489,43 @@ def get_top_users_by_data(db: Session, start_str: str, end_str: str, limit: int 
     if not tables:
         return {"error": "No hay datos para las fechas seleccionadas."}
 
-    select_clauses = []
+    user_data = defaultdict(int)
+    
     for log_table, user_table in tables:
-        select_clauses.append(
-            f"SELECT u.username, l.data_transmitted FROM {log_table} l JOIN {user_table} u ON l.user_id = u.id WHERE u.username != '-'"
-        )
-    full_query = text(f"""
-        SELECT username, SUM(data_transmitted) as total_data
-        FROM ({ " UNION ALL ".join(select_clauses) }) as all_logs
-        GROUP BY username
-        ORDER BY total_data DESC
-        LIMIT :limit
-    """)
-    try:
-        results = db.execute(full_query, {'limit': limit}).fetchall()
-        top_users_list = [{
-            "username": r.username,
-            "total_data_gb": float(round((r.total_data or 0) / (1024**3), 2))
-        } for r in results]
-        return {"top_users": top_users_list}
-    except SQLAlchemyError as e:
-        return {"error": str(e)}
+        date_suffix = log_table.split('_')[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+                
+            # Usar ORM para obtener datos por usuario
+            results = db.query(
+                UserModel.username,
+                func.sum(LogModel.data_transmitted).label('total_data')
+            ).join(
+                LogModel, LogModel.user_id == UserModel.id
+            ).filter(
+                UserModel.username != '-'
+            ).group_by(
+                UserModel.username
+            ).all()
+            
+            for row in results:
+                user_data[row.username] += row.total_data or 0
+                
+        except Exception as e:
+            print(f"Error procesando tabla {log_table}: {e}")
+            continue
+    
+    # Ordenar y limitar resultados
+    sorted_users = sorted(user_data.items(), key=lambda x: x[1], reverse=True)[:limit]
+    
+    top_users_list = [{
+        "username": username,
+        "total_data_gb": float(round(total_data / (1024**3), 2))
+    } for username, total_data in sorted_users]
+    
+    return {"top_users": top_users_list}
 
 def find_denied_access(db: Session, start_str: str, end_str: str, username: str = None) -> Dict[str, Any]:
     start_date = datetime.strptime(start_str, '%Y-%m-%d')
@@ -387,10 +535,52 @@ def find_denied_access(db: Session, start_str: str, end_str: str, username: str 
     if not tables:
         return {"error": "No hay datos para las fechas seleccionadas."}
 
-    where_clause = "response = 403"
-    params = {}
-    if username:
-        where_clause += " AND username = :username"
-        params['username'] = username
-    results = _execute_union_query(db, tables, where_clause, params, "log_date DESC, username")
-    return {"results": [dict(row._mapping) for row in results]}
+    all_results = []
+    
+    for log_table, user_table in tables:
+        date_suffix = log_table.split('_')[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+                
+            # Crear query usando ORM
+            query = db.query(
+                UserModel.username,
+                UserModel.ip,
+                LogModel.url,
+                LogModel.response,
+                LogModel.data_transmitted,
+                LogModel.created_at
+            ).join(
+                LogModel, LogModel.user_id == UserModel.id
+            ).filter(
+                LogModel.response == 403
+            )
+            
+            if username:
+                query = query.filter(UserModel.username == username)
+                
+            query = query.order_by(LogModel.created_at.desc())
+            
+            results = query.all()
+            
+            for row in results:
+                all_results.append({
+                    'log_date': date_suffix,
+                    'username': row.username,
+                    'ip': row.ip,
+                    'url': row.url,
+                    'response': row.response,
+                    'data_transmitted': row.data_transmitted,
+                    'created_at': row.created_at
+                })
+                
+        except Exception as e:
+            print(f"Error procesando tabla {log_table}: {e}")
+            continue
+    
+    # Ordenar resultados
+    all_results.sort(key=lambda x: (x['log_date'], x['username']), reverse=True)
+    
+    return {"results": all_results}
