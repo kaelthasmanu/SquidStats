@@ -2,6 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def divide_filter(numerator, denominator, precision=2):
     try:
         num = float(numerator)
@@ -13,6 +14,7 @@ def divide_filter(numerator, denominator, precision=2):
     except (TypeError, ValueError) as e:
         logger.error(f"Error en filtro divide: {str(e)}")
         return 0.0
+
 
 def format_bytes_filter(value):
     try:
@@ -28,6 +30,7 @@ def format_bytes_filter(value):
         logger.error(f"Error en filtro format_bytes: {str(e)}")
         return "0 bytes"
 
+
 def register_filters(app):
-    app.template_filter('divide')(divide_filter)
-    app.template_filter('format_bytes')(format_bytes_filter)
+    app.template_filter("divide")(divide_filter)
+    app.template_filter("format_bytes")(format_bytes_filter)

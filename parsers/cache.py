@@ -1,6 +1,6 @@
-import socket
-import re
 import os
+import re
+import socket
 
 SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
 SQUID_PORT = int(os.getenv("SQUID_PORT", "3128"))
@@ -45,7 +45,9 @@ def parse_squid_cache_data(data):
     for key, pattern in patterns.items():
         match = re.search(pattern, data)
         if match:
-            stats[key] = match.group(1) if key != "current_swap_size" else float(match.group(1))
+            stats[key] = (
+                match.group(1) if key != "current_swap_size" else float(match.group(1))
+            )
 
     # Robustecer: asegurar que todas las claves esperadas existan, con valor 0 o None si no se encontraron
     defaults = {
@@ -71,7 +73,19 @@ def parse_squid_cache_data(data):
         if key not in stats or stats[key] is None:
             stats[key] = default
     # Convertir a int/float según corresponda
-    for key in ["store_entries", "max_swap_size", "fs_block_size", "first_level_dirs", "second_level_dirs", "filemap_bits_used", "filemap_bits_total", "fs_space_used", "fs_space_total", "fs_inodes_used", "fs_inodes_total"]:
+    for key in [
+        "store_entries",
+        "max_swap_size",
+        "fs_block_size",
+        "first_level_dirs",
+        "second_level_dirs",
+        "filemap_bits_used",
+        "filemap_bits_total",
+        "fs_space_used",
+        "fs_space_total",
+        "fs_inodes_used",
+        "fs_inodes_total",
+    ]:
         try:
             stats[key] = int(stats[key])
         except (ValueError, TypeError):

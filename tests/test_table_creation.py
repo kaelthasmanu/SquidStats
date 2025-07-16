@@ -1,14 +1,17 @@
-import sys
 import os
+import sys
 from pathlib import Path
 
 # add the parent directory to the system path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import unittest
+
 from sqlalchemy import inspect
+
 from database.database import Base, get_engine, get_table_names
 from parsers.log import DatabaseManager
+
 
 class TestTableCreation(unittest.TestCase):
     def setUp(self):
@@ -46,6 +49,6 @@ class TestTableCreation(unittest.TestCase):
         for table in table_names:
             self.assertIn(table, current_tables)
 
-if __name__ == '__main__':
-    unittest.main()
 
+if __name__ == "__main__":
+    unittest.main()

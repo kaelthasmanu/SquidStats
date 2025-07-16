@@ -1,0 +1,68 @@
+[tool.ruff]
+# Configuración de Ruff para SquidStats
+line-length = 88
+target-version = "py311"
+
+# Directorios a excluir
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "static",
+    "templates",
+]
+
+[tool.ruff.lint]
+# Seleccionar reglas a aplicar
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+
+# Ignorar reglas específicas
+ignore = [
+    "E501",  # line too long (manejado por line-length)
+    "B008",  # Do not perform function calls in argument defaults
+    "B904",  # Within an except clause, raise exceptions with raise ... from err
+    "C901",  # too complex
+]
+
+# Permitir arreglos automáticos
+fixable = ["ALL"]
+unfixable = []
+
+# Configuración por archivo
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Ignorar imports no usados en __init__.py
+"tests/**" = ["S101"]     # Permitir asserts en tests
+
+[tool.ruff.lint.isort]
+known-first-party = ["database", "services", "parsers", "utils"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
