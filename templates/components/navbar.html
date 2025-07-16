@@ -34,7 +34,7 @@
       </a>
     </div>
 
-    <!-- Notificaciones y Action Buttons -->
+     <!-- Notificaciones y Action Buttons -->
     <!-- <div class="flex items-center gap-3">
       <div class="relative" x-data="{ open: false }">
         <button
@@ -125,15 +125,140 @@
         </div>
       </div> -->
 
-      <!-- Botones de Acción -->
-      <button class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300">
+    <!-- Action Buttons -->
+    <div
+      class="flex items-center gap-3"
+      x-data="{ showSquidModal: false, showWebModal: false }"
+    >
+      <button
+        @click="showSquidModal = true"
+        class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300"
+        data-tooltip="Actualizar paquetes y configuración de Squid"
+      >
         <i class="fas fa-sync-alt"></i>
         <span>Squid</span>
       </button>
-      <button class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300">
+
+      <button
+        @click="showWebModal = true"
+        class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300"
+        data-tooltip="Actualizar aplicación web SquidStats"
+      >
         <i class="fas fa-cloud-download-alt"></i>
         <span>Web</span>
       </button>
+
+      <!-- Modal Squid -->
+      <div
+        x-show="showSquidModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform scale-90"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-90"
+        class="fixed inset-0 z-[1001] flex items-center justify-center bg-black bg-opacity-50"
+        style="display: none"
+      >
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+          <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 rounded-full">
+                <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+              </div>
+              <h3 class="text-xl font-bold text-white">Confirmar Actualización de Squid</h3>
+            </div>
+          </div>
+          <div class="px-6 py-4">
+            <p class="text-gray-700 mb-4">
+              ¿Estás seguro de que deseas actualizar el servicio Squid?
+            </p>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
+                <div>
+                  <strong class="text-blue-900">Importante:</strong>
+                  <ul class="text-blue-800 text-sm mt-1 space-y-1">
+                    <li>• Guarda tu configuración antes de continuar</li>
+                    <li>• El servicio se reiniciará automáticamente</li>
+                    <li>• Puede haber incompatibilidades con versiones anteriores</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <form method="POST" action="/install" class="flex justify-end gap-3 px-6 py-4 bg-gray-50">
+            <button
+              type="button"
+              @click="showSquidModal = false"
+              class="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+            >
+              <i class="fas fa-times"></i>
+              Cancelar
+            </button>
+            <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-600 transition-all duration-200">
+              <i class="fas fa-check"></i>
+              Confirmar
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal Web -->
+      <div
+        x-show="showWebModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform scale-90"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-90"
+        class="fixed inset-0 z-[1001] flex items-center justify-center bg-black bg-opacity-50"
+        style="display: none"
+      >
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 rounded-full">
+                <i class="fas fa-cloud-download-alt text-white text-lg"></i>
+              </div>
+              <h3 class="text-xl font-bold text-white">Confirmar Actualización Web</h3>
+            </div>
+          </div>
+          <div class="px-6 py-4">
+            <p class="text-gray-700 mb-4">
+              ¿Estás seguro de que deseas actualizar SquidStats?
+            </p>
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <i class="fas fa-info-circle text-green-600 mt-0.5"></i>
+                <div>
+                  <strong class="text-green-900">Se actualizará:</strong>
+                  <ul class="text-green-800 text-sm mt-1 space-y-1">
+                    <li>• Interfaz web y componentes</li>
+                    <li>• Funcionalidades y reportes</li>
+                    <li>• Correcciones de seguridad</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <form method="POST" action="/update" class="flex justify-end gap-3 px-6 py-4 bg-gray-50">
+            <button
+              type="button"
+              @click="showWebModal = false"
+              class="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+            >
+              <i class="fas fa-times"></i>
+              Cancelar
+            </button>
+            <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg hover:from-purple-700 hover:to-purple-600 transition-all duration-200">
+              <i class="fas fa-download"></i>
+              Actualizar
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -228,6 +353,10 @@
             e.preventDefault();
             window.location.href = "/blacklist";
             break;
+          case "6":
+            e.preventDefault();
+            window.location.href = "/auditoria";
+            break;
         }
       }
     });
@@ -235,14 +364,16 @@
 
   // Close modals when clicking outside
   document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("modal-overlay")) {
-      // Close any open modal
+    if (e.target.classList.contains("fixed") && e.target.classList.contains("inset-0")) {
+      // Close any open modal by clicking the overlay
       const modals = document.querySelectorAll("[x-show]");
       modals.forEach((modal) => {
-        const alpineData = Alpine.$data(modal);
-        if (alpineData) {
-          alpineData.showSquidModal = false;
-          alpineData.showWebModal = false;
+        if (modal.style.display !== "none") {
+          const alpineData = Alpine.$data(modal.closest("[x-data]"));
+          if (alpineData) {
+            alpineData.showSquidModal = false;
+            alpineData.showWebModal = false;
+          }
         }
       });
     }
@@ -253,10 +384,12 @@
     if (e.key === "Escape") {
       const modals = document.querySelectorAll("[x-show]");
       modals.forEach((modal) => {
-        const alpineData = Alpine.$data(modal);
-        if (alpineData) {
-          alpineData.showSquidModal = false;
-          alpineData.showWebModal = false;
+        if (modal.style.display !== "none") {
+          const alpineData = Alpine.$data(modal.closest("[x-data]"));
+          if (alpineData) {
+            alpineData.showSquidModal = false;
+            alpineData.showWebModal = false;
+          }
         }
       });
     }
