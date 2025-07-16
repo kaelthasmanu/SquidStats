@@ -93,7 +93,7 @@ def _get_tables_in_range(
         log_table = f"log_{date_suffix}"
         user_table = f"user_{date_suffix}"
         if log_table in all_db_tables and user_table in all_db_tables:
-            log_tables_in_range.append((log_table, user_table))
+            log_tables_in_range.append((log_table))
         current_date += timedelta(days=1)
     return log_tables_in_range
 
@@ -396,10 +396,10 @@ def find_by_response_code(
                 all_results.append(
                     {
                         "log_date": date_suffix,
-                        "username": row.username,
-                        "ip": row.ip,
-                        "url": row.url,
-                        "response": row.response,
+                        "username": row[0],
+                        "ip": row[1],
+                        "url": row[2],
+                        "response": row[3],
                         "access_count": row.access_count,
                         "total_data": row.total_data,
                         "last_seen": row.last_seen,
@@ -505,7 +505,7 @@ def get_all_usernames(db: Session) -> list[str]:
             )
 
             for username_row in usernames:
-                all_usernames.add(username_row.username)
+                all_usernames.add(username_row[0])
 
         except Exception as e:
             print(f"Error procesando tabla {table_name}: {e}")
@@ -550,20 +550,20 @@ def get_user_activity_summary(
             )
 
             for row in results:
-                total_requests += row.request_count
-                total_data += row.data_transmitted
+                total_requests += row[2]
+                total_data += row[1]
 
                 # Extraer dominio
                 try:
-                    domain = row.url.split("//")[-1].split("/")[0].split(":")[0]
-                    domain_counts[domain] += row.request_count
+                    domain = row[0].split("//")[-1].split("/")[0].split(":")[0]
+                    domain_counts[domain] += row[2]
                 except Exception as e:
                     logger.error(
                         f"Error processing row in get_user_activity_summary: {e}"
                     )
                     pass
 
-                response_counts[row.response] += row.request_count
+                response_counts[row[3]] += row[2]
 
         except Exception as e:
             print(f"Error procesando tabla {log_table}: {e}")
@@ -626,7 +626,7 @@ def get_top_users_by_data(
             )
 
             for row in results:
-                user_data[row.username] += row.total_data or 0
+                user_data[row[0]] += row.total_data or 0
 
         except Exception as e:
             print(f"Error procesando tabla {log_table}: {e}")
@@ -687,12 +687,12 @@ def find_denied_access(
                 all_results.append(
                     {
                         "log_date": date_suffix,
-                        "username": row.username,
-                        "ip": row.ip,
-                        "url": row.url,
-                        "response": row.response,
-                        "data_transmitted": row.data_transmitted,
-                        "created_at": row.created_at,
+                        "username": row[0],
+                        "ip": row[1],
+                        "url": row[2],
+                        "response": row[3],
+                        "data_transmitted": row[4],
+                        "created_at": row[5],
                     }
                 )
 
