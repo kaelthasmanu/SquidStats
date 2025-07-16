@@ -93,7 +93,7 @@ def _get_tables_in_range(
         log_table = f"log_{date_suffix}"
         user_table = f"user_{date_suffix}"
         if log_table in all_db_tables and user_table in all_db_tables:
-            log_tables_in_range.append((log_table))
+            log_tables_in_range.append(log_table)
         current_date += timedelta(days=1)
     return log_tables_in_range
 
