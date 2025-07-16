@@ -1,11 +1,11 @@
 from flask import Blueprint
-from datetime import date, timezone
+from datetime import date
 from services.fetch_data_logs import get_metrics_for_date
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_socketio import SocketIO
 from flask_apscheduler import APScheduler
 from database.database import (
-    get_session, get_dynamic_models, get_dynamic_metrics_model
+    get_session, get_dynamic_models
 )
 from parsers.connections import parse_raw_data, group_by_user
 from services.fetch_data import fetch_squid_data
@@ -29,6 +29,7 @@ from services.auditoria_service import (
     get_daily_activity 
 )
 from services.get_reports import get_important_metrics
+from services.metrics_service import MetricsService
 from utils.colors import color_map
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
@@ -148,6 +149,17 @@ def init_scheduler():
         return
     else:
         process_logs(log_file)
+
+@scheduler.task('interval', id='cleanup_metrics', hours=1, misfire_grace_time=3600)
+def cleanup_old_metrics():
+    try:
+        success = MetricsService.cleanup_old_metrics()
+        if success:
+            logger.info("Limpieza de métricas antiguas completada exitosamente")
+        else:
+            logger.warning("Error durante la limpieza de métricas antiguas")
+    except Exception as e:
+        logger.error(f"Error en tarea de limpieza de métricas: {e}")
 
 @app.route('/get-logs-by-date', methods=['POST'])
 def get_logs_by_date():
@@ -311,6 +323,8 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 def realtime_data_thread():
     global realtime_cache_stats, realtime_system_info
     import time
+    data_collection_counter = 0
+    
     while True:
         try:
             cache_data = fetch_squid_cache_stats()
@@ -326,9 +340,41 @@ def realtime_data_thread():
                 'python_version': sys.version.split()[0],
                 'squid_version': get_squid_version(),
                 'timezone': get_timezone(),
-                'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                'local_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'timestamp_utc': datetime.now().isoformat()
             }
             network_stats = get_network_stats()
+            
+            # Guardar métricas en la base de datos solo cada 60 segundos (cada 4 iteraciones)
+            data_collection_counter += 1
+            if data_collection_counter % 4 == 0:  # Solo cada 4 iteraciones (60 segundos)
+                ram_info = get_ram_info()
+                swap_info = get_swap_info()
+                cpu_info = get_cpu_info()
+                
+                # Convertir información de RAM y SWAP a bytes para guardar en BD
+                def size_to_bytes(size_str):
+                    if not size_str:
+                        return 0
+                    parts = size_str.strip().split()
+                    if len(parts) != 2:
+                        return 0
+                    value, unit = float(parts[0]), parts[1].upper()
+                    multipliers = {'B': 1, 'KB': 1024, 'MB': 1024**2, 'GB': 1024**3, 'TB': 1024**4}
+                    return int(value * multipliers.get(unit, 1))
+                
+                ram_bytes = size_to_bytes(ram_info.get('used', '0 B'))
+                swap_bytes = size_to_bytes(swap_info.get('used', '0 B'))
+                
+                # Guardar en base de datos
+                MetricsService.save_system_metrics(
+                    cpu_usage=cpu_info.get('usage', '0%'),
+                    ram_usage_bytes=ram_bytes,
+                    swap_usage_bytes=swap_bytes,
+                    net_sent_bytes_sec=network_stats.get('bytes_sent_per_sec', 0) if network_stats else 0,
+                    net_recv_bytes_sec=network_stats.get('bytes_recv_per_sec', 0) if network_stats else 0
+                )
+            
             with realtime_data_lock:
                 realtime_cache_stats = cache_stats
                 realtime_system_info = system_info
@@ -339,7 +385,7 @@ def realtime_data_thread():
             })
         except Exception as e:
             logger.error(f"Error en hilo de datos en tiempo real: {str(e)}")
-        time.sleep(5)
+        time.sleep(15)  # Actualizar cada 15 segundos en lugar de 5
 
 @app.after_request
 def set_response_headers(response):
@@ -391,38 +437,33 @@ def cache_stats_realtime():
 
 @app.route('/api/metrics/today')
 def get_today_metrics():
-    db = None
+    """Obtiene métricas del día actual usando el nuevo servicio"""
     try:
-        date_suffix = datetime.now().strftime('%Y%m%d')
-        MetricsModel = get_dynamic_metrics_model(date_suffix)
-        
-        if not MetricsModel:
-            logger.warning(f"No se encontró el modelo de métricas para {date_suffix}")
-            return jsonify([])
-
-        db = get_session()
-        metrics = db.query(MetricsModel).order_by(MetricsModel.timestamp.asc()).all()
-
-        results = []
-        for m in metrics:
-            aware_timestamp = m.timestamp.replace(tzinfo=timezone.utc)
-            
-            results.append({
-                "timestamp": aware_timestamp.isoformat(),
-                "cpu_usage": m.cpu_usage,
-                "ram_usage_bytes": m.ram_usage_bytes,
-                "swap_usage_bytes": m.swap_usage_bytes,
-                "net_sent_bytes_sec": m.net_sent_bytes_sec,
-                "net_recv_bytes_sec": m.net_recv_bytes_sec,
-            })
-            
+        results = MetricsService.get_metrics_today()
         return jsonify(results)
     except Exception as e:
-        logger.error(f"Error en API de métricas: {e}", exc_info=True)
-        return jsonify({"error": "No se pudieron obtener las métricas"}), 500
-    finally:
-        if db:
-            db.close()
+        logger.error(f"Error al obtener métricas del día: {e}")
+        return jsonify([])
+
+@app.route('/api/metrics/24hours')
+def get_24hours_metrics():
+    """Obtiene métricas de las últimas 24 horas"""
+    try:
+        results = MetricsService.get_metrics_last_24_hours()
+        return jsonify(results)
+    except Exception as e:
+        logger.error(f"Error al obtener métricas de 24 horas: {e}")
+        return jsonify([])
+
+@app.route('/api/metrics/latest')
+def get_latest_metric():
+    """Obtiene la métrica más reciente"""
+    try:
+        result = MetricsService.get_latest_metric()
+        return jsonify(result) if result else jsonify({})
+    except Exception as e:
+        logger.error(f"Error al obtener la métrica más reciente: {e}")
+        return jsonify({})
 
 @app.route('/auditoria', methods=['GET'])
 def auditoria_logs():

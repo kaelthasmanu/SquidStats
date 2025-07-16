@@ -70,15 +70,16 @@ class DeniedLog(Base):
     data_transmitted = Column(BigInteger, default=0)
     created_at = Column(DateTime, default=datetime.now)
 
-class Metrics(DailyBase):
-    __tablename__ = "metrics_base"
+class SystemMetrics(Base):
+    __tablename__ = "system_metrics"
     id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime, default=datetime.now, index=True)
-    cpu_usage = Column(Integer, nullable=False)
+    timestamp = Column(DateTime, default=datetime.now, nullable=False)
+    cpu_usage = Column(String(10), nullable=False)  # Ejemplo: "25.5%"
     ram_usage_bytes = Column(BigInteger, nullable=False)
     swap_usage_bytes = Column(BigInteger, nullable=False)
     net_sent_bytes_sec = Column(BigInteger, nullable=False)
     net_recv_bytes_sec = Column(BigInteger, nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
 
 def get_database_url() -> str:
     db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
@@ -116,20 +117,14 @@ def table_exists(engine, table_name: str) -> bool:
     inspector = inspect(engine)
     return inspector.has_table(table_name)
 
-def get_metrics_table_name(date_suffix: str = None) -> str:
-    """Devuelve el nombre de la tabla de métricas para un sufijo de fecha dado."""
-    if date_suffix is None:
-        date_suffix = get_table_suffix()
-    return f"metrics_{date_suffix}"
-
 def create_dynamic_tables(engine, date_suffix: str = None):
     """Crea las tablas principales y diarias si no existen."""
     LogMetadata.__table__.create(engine, checkfirst=True)
     DeniedLog.__table__.create(engine, checkfirst=True)
+    SystemMetrics.__table__.create(engine, checkfirst=True)  # Crear tabla de métricas del sistema
     
     # Si no se provee un sufijo, se usan las tablas del día actual.
     user_table_name, log_table_name = get_dynamic_table_names(date_suffix)
-    metrics_table_name = get_metrics_table_name(date_suffix)
     
     # Se genera un logger específico para la fecha, para evitar mensajes duplicados.
     creation_logger = logging.getLogger(f"TableCreation_{date_suffix or 'today'}")
@@ -140,8 +135,8 @@ def create_dynamic_tables(engine, date_suffix: str = None):
         handler.setFormatter(formatter)
         creation_logger.addHandler(handler)
 
-    if not table_exists(engine, user_table_name) or not table_exists(engine, log_table_name) or not table_exists(engine, metrics_table_name):
-        creation_logger.info(f"Creando tablas dinámicas para la fecha del sufijo '{date_suffix}': {user_table_name}, {log_table_name}, {metrics_table_name}")
+    if not table_exists(engine, user_table_name) or not table_exists(engine, log_table_name):
+        creation_logger.info(f"Creando tablas dinámicas para la fecha del sufijo '{date_suffix}': {user_table_name}, {log_table_name}")
         DynamicBase = declarative_base()
 
         class DynamicUser(DynamicBase):
@@ -160,16 +155,6 @@ def create_dynamic_tables(engine, date_suffix: str = None):
             request_count = Column(Integer, default=1)
             data_transmitted = Column(BigInteger, default=0)
             created_at = Column(DateTime, default=datetime.now)
-
-        class DynamicMetrics(DynamicBase):
-            __tablename__ = metrics_table_name
-            id = Column(Integer, primary_key=True)
-            timestamp = Column(DateTime, default=datetime.now, index=True)
-            cpu_usage = Column(Integer, nullable=False)
-            ram_usage_bytes = Column(BigInteger, nullable=False)
-            swap_usage_bytes = Column(BigInteger, nullable=False)
-            net_sent_bytes_sec = Column(BigInteger, nullable=False)
-            net_recv_bytes_sec = Column(BigInteger, nullable=False)
             
         DynamicBase.metadata.create_all(engine, checkfirst=True)
 
@@ -178,37 +163,6 @@ def get_dynamic_table_names(date_suffix: str = None) -> Tuple[str, str]:
     if date_suffix is None:
         date_suffix = get_table_suffix()
     return f"user_{date_suffix}", f"log_{date_suffix}"
-
-def get_dynamic_metrics_model(date_suffix: str):
-    """Devuelve el modelo dinámico de métricas para el sufijo de fecha dado."""
-    cache_key = f"metrics_{date_suffix}"
-    if cache_key in dynamic_model_cache:
-        return dynamic_model_cache[cache_key]
-
-    engine = get_engine()
-    metrics_table_name = get_metrics_table_name(date_suffix)
-
-    if not table_exists(engine, metrics_table_name):
-        logger.warning(f"La tabla de métricas '{metrics_table_name}' no existe. Intentando recrearla...")
-        create_dynamic_tables(engine, date_suffix=date_suffix)
-        if not table_exists(engine, metrics_table_name):
-             logger.error(f"No se pudo crear o encontrar la tabla de métricas: {metrics_table_name}")
-             return None
-
-    DynamicBase = declarative_base()
-    class DynamicMetrics(DynamicBase):
-        __tablename__ = metrics_table_name
-        __table_args__ = {'extend_existing': True}
-        id = Column(Integer, primary_key=True)
-        timestamp = Column(DateTime, default=datetime.now, index=True)
-        cpu_usage = Column(Integer, nullable=False)
-        ram_usage_bytes = Column(BigInteger, nullable=False)
-        swap_usage_bytes = Column(BigInteger, nullable=False)
-        net_sent_bytes_sec = Column(BigInteger, nullable=False)
-        net_recv_bytes_sec = Column(BigInteger, nullable=False)
-
-    dynamic_model_cache[cache_key] = DynamicMetrics
-    return DynamicMetrics
 
 def get_dynamic_models(date_suffix: str):
     """Devuelve modelos dinámicos de usuario y log para el sufijo de fecha dado."""

@@ -47,6 +47,10 @@
         @keyframes underline { from { transform: scaleX(0); } to { transform: scaleX(1); } }
         .value-change { animation: pulse 1s; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .time-range-btn { transition: all 0.3s ease; }
+        .time-range-btn.active { background-color: white; color: #2563eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+        .time-range-btn:not(.active) { background-color: transparent; color: #6b7280; }
+        .time-range-btn:not(.active):hover { color: #2563eb; }
     </style>
 </head>
 
@@ -129,6 +133,13 @@
             </section>
 
             <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">Gráficas del Sistema</h2>
+                    <div class="flex bg-gray-100 rounded-lg p-1">
+                        <button id="todayBtn" class="time-range-btn active px-4 py-2 rounded-md text-sm font-medium text-blue-600 bg-white shadow">Hoy</button>
+                        <button id="24hoursBtn" class="time-range-btn px-4 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-blue-600">24 Horas</button>
+                    </div>
+                </div>
                 <div class="flex border-b mb-6">
                     <button class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100">CPU</button>
                     <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100">RAM</button>
@@ -179,9 +190,19 @@
         Chart.register(ChartDataLabels);
 
         let maxRamBytes = 0, maxSwapBytes = 0;
-        const historySize = 720; 
+        const historySize = 240; // Reducido de 720 a 240 (4 horas de datos con intervalos de 1 minuto)
+        let liveDataCounter = 0; // Contador para manejar datos en vivo 
         
         // --- FUNCIONES ORIGINALES (COMPLETAS Y RESTAURADAS) ---
+        function getLocalTimeString() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            return `${hours}:${minutes} ${ampm}`;
+        }
+        
         function formatTime(date) {
             let hours = date.getHours();
             const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -235,15 +256,29 @@
         function updateCard(statId, value, isSize = false) { const element = document.querySelector(`[data-stat="${statId}"]`); if (!element) return; let formattedValue = value; if (isSize) { const bytes = parseFloat(value); formattedValue = (bytes / (1024 * 1024) < 1) ? `${Math.round(bytes / 1024)} MB` : `${(bytes / (1024 * 1024)).toFixed(2)} GB`; } if (element.textContent !== formattedValue.toString()) { element.textContent = formattedValue; element.classList.add('value-change'); setTimeout(() => element.classList.remove('value-change'), 1000); } }
         function updateCacheStats(stats) { updateCard('entradas_almacenadas', stats.store_entries); updateCard('uso_de_capacidad', stats.capacity_used); updateCard('espacio_total', stats.fs_space_total, true); updateCard('espacio_usado', stats.fs_space_used, true); updateCard('eliminación', stats.removal_policy); updateCard('edad_lru', `${stats.lru_age_days} días`); }
 
-        // --- AÑADIDO: Carga de datos históricos desde la API ---
-        function loadHistoricData() {
-            fetch('/api/metrics/today')
+        // --- AÑADIDO: Carga de datos históricos desde la API con sampling optimizado ---
+        function loadHistoricData(endpoint = '/api/metrics/24hours') {
+            fetch(endpoint)
                 .then(response => response.json())
                 .then(data => {
-                    if (!data || data.length === 0) { console.log("No hay historial de métricas para hoy."); return; }
+                    if (!data || data.length === 0) { 
+                        console.log(`No hay historial de métricas para el endpoint: ${endpoint}`); 
+                        return; 
+                    }
+                    
+                    // Implementar sampling inteligente para evitar sobrecarga
+                    let sampledData = data;
+                    if (data.length > 288) { // Si hay más de 288 puntos (4.8 horas con intervalos de 1 minuto)
+                        const sampleRate = Math.ceil(data.length / 288);
+                        sampledData = data.filter((_, index) => index % sampleRate === 0);
+                        console.log(`Aplicado sampling: ${data.length} → ${sampledData.length} puntos`);
+                    }
+                    
                     const labels = [], cpuData = [], ramData = [], swapData = [], netUpData = [], netDownData = [];
-                    data.forEach(metric => {
-                        labels.push(formatTime(new Date(metric.timestamp)));
+                    sampledData.forEach(metric => {
+                        // Crear fecha local desde el timestamp del servidor (ya incluye timezone)
+                        const localDate = new Date(metric.timestamp);
+                        labels.push(formatTime(localDate));
                         cpuData.push(parseFloat(metric.cpu_usage).toFixed(1));
                         ramData.push(metric.ram_usage_bytes);
                         swapData.push(metric.swap_usage_bytes);
@@ -266,34 +301,66 @@
                 .catch(error => console.error('Error al cargar historial de métricas:', error));
         }
 
+        // --- AÑADIDO: Funcionalidad para alternar entre vistas de tiempo ---
+        function setupTimeRangeButtons() {
+            const todayBtn = document.getElementById('todayBtn');
+            const hoursBtn = document.getElementById('24hoursBtn');
+            
+            todayBtn.addEventListener('click', () => {
+                setActiveTimeRange(todayBtn, hoursBtn);
+                loadHistoricData('/api/metrics/today');
+            });
+            
+            hoursBtn.addEventListener('click', () => {
+                setActiveTimeRange(hoursBtn, todayBtn);
+                loadHistoricData('/api/metrics/24hours');
+            });
+        }
+        
+        function setActiveTimeRange(activeBtn, inactiveBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.classList.remove('text-gray-500');
+            activeBtn.classList.add('text-blue-600', 'bg-white', 'shadow');
+            
+            inactiveBtn.classList.remove('active');
+            inactiveBtn.classList.add('text-gray-500');
+            inactiveBtn.classList.remove('text-blue-600', 'bg-white', 'shadow');
+        }
+
         const socket = io();
         socket.on('system_update', function (data) {
             updateRings(data.system_info);
             updateSystemInfo(data.system_info);
             updateCacheStats(data.cache_stats);
 
-            // --- MODIFICADO: Lógica para añadir datos en vivo a las gráficas ---
-            function appendLiveData(chart, label, newData) {
-                chart.data.labels.push(label);
-                chart.data.datasets.forEach((dataset, index) => {
-                    const dataPoint = Array.isArray(newData) ? newData[index] : newData;
-                    dataset.data.push(dataPoint);
-                });
-                while (chart.data.labels.length > historySize) {
-                    chart.data.labels.shift();
-                    chart.data.datasets.forEach(dataset => dataset.data.shift());
+            // Incrementar contador de datos en vivo
+            liveDataCounter++;
+            
+            // Solo actualizar gráficas cada 4 actualizaciones (1 minuto) para evitar sobrecarga
+            if (liveDataCounter % 4 === 0) {
+                // --- MODIFICADO: Lógica para añadir datos en vivo a las gráficas ---
+                function appendLiveData(chart, label, newData) {
+                    chart.data.labels.push(label);
+                    chart.data.datasets.forEach((dataset, index) => {
+                        const dataPoint = Array.isArray(newData) ? newData[index] : newData;
+                        dataset.data.push(dataPoint);
+                    });
+                    while (chart.data.labels.length > historySize) {
+                        chart.data.labels.shift();
+                        chart.data.datasets.forEach(dataset => dataset.data.shift());
+                    }
+                    chart.update('none');
                 }
-                chart.update('none');
-            }
 
-            // --- CORREGIDO: Se usa el timestamp del servidor para la etiqueta en vivo ---
-            const newLabel = formatTime(new Date(data.system_info.timestamp_utc));
+                // --- CORREGIDO: Se usa la hora local del cliente para la etiqueta en vivo ---
+                const newLabel = getLocalTimeString();
 
-            appendLiveData(cpuChart, newLabel, parseFloat(data.system_info.cpu.usage.replace('%','')));
-            appendLiveData(ramChart, newLabel, sizeToBytes(data.system_info.ram.used));
-            appendLiveData(swapChart, newLabel, sizeToBytes(data.system_info.swap.used));
-            if (data.network_stats) {
-                appendLiveData(networkChart, newLabel, [ data.network_stats.up_mbps, data.network_stats.down_mbps ]);
+                appendLiveData(cpuChart, newLabel, parseFloat(data.system_info.cpu.usage.replace('%','')));
+                appendLiveData(ramChart, newLabel, sizeToBytes(data.system_info.ram.used));
+                appendLiveData(swapChart, newLabel, sizeToBytes(data.system_info.swap.used));
+                if (data.network_stats) {
+                    appendLiveData(networkChart, newLabel, [ data.network_stats.up_mbps, data.network_stats.down_mbps ]);
+                }
             }
         });
 
@@ -307,7 +374,12 @@
                 ram: { used: "{{ system_info.ram.used }}", percent: "{{ system_info.ram.percent }}" },
                 swap: { used: "{{ system_info.swap.used }}", percent: "{{ system_info.swap.percent }}" }
             });
-            loadHistoricData();
+            
+            // Inicializar botones de rango de tiempo
+            setupTimeRangeButtons();
+            
+            // Cargar datos históricos (por defecto 24 horas)
+            loadHistoricData('/api/metrics/24hours');
         });
     </script>
 </body>

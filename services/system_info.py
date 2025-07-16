@@ -140,37 +140,57 @@ def get_squid_version():
     except Exception as e:
         return f"Error: {str(e)}"
 
+# Variables globales para el cálculo de estadísticas de red
+_last_net_io = None
+_last_net_time = None
+
 def get_network_stats():
     """Obtiene estadísticas de uso de red (ancho de banda)"""
+    global _last_net_io, _last_net_time
+    
     try:
-        net_io_1 = psutil.net_io_counters()
-        # Usar asyncio.sleep si se llama desde una función async, si no, usar time.sleep
-        try:
-            loop = asyncio.get_running_loop()
-            # Si hay un loop, usar asyncio.sleep
-            async def async_sleep():
-                await asyncio.sleep(1)
-            loop.run_until_complete(async_sleep())
-        except RuntimeError:
-            # Si no hay loop, usar time.sleep
+        current_time = time.time()
+        current_net_io = psutil.net_io_counters()
+        
+        # Si es la primera vez, inicializar y esperar 1 segundo
+        if _last_net_io is None:
+            _last_net_io = current_net_io
+            _last_net_time = current_time
             time.sleep(1)
-        net_io_2 = psutil.net_io_counters()
-        bytes_sent_per_sec = net_io_2.bytes_sent - net_io_1.bytes_sent
-        bytes_recv_per_sec = net_io_2.bytes_recv - net_io_1.bytes_recv
+            current_time = time.time()
+            current_net_io = psutil.net_io_counters()
+        
+        # Calcular tiempo transcurrido
+        time_diff = current_time - _last_net_time
+        
+        # Calcular bytes por segundo
+        bytes_sent_per_sec = int((current_net_io.bytes_sent - _last_net_io.bytes_sent) / time_diff)
+        bytes_recv_per_sec = int((current_net_io.bytes_recv - _last_net_io.bytes_recv) / time_diff)
+        
+        # Convertir a Mbps
         up_mbps = round((bytes_sent_per_sec * 8) / 1_000_000, 2)
         down_mbps = round((bytes_recv_per_sec * 8) / 1_000_000, 2)
+        
+        # Actualizar valores para la próxima medición
+        _last_net_io = current_net_io
+        _last_net_time = current_time
+        
         return {
             'up_mbps': up_mbps,
             'down_mbps': down_mbps,
-            'bytes_sent_total': net_io_2.bytes_sent,
-            'bytes_recv_total': net_io_2.bytes_recv,
-            'packets_sent': net_io_2.packets_sent,
-            'packets_recv': net_io_2.packets_recv
+            'bytes_sent_per_sec': bytes_sent_per_sec,
+            'bytes_recv_per_sec': bytes_recv_per_sec,
+            'bytes_sent_total': current_net_io.bytes_sent,
+            'bytes_recv_total': current_net_io.bytes_recv,
+            'packets_sent': current_net_io.packets_sent,
+            'packets_recv': current_net_io.packets_recv
         }
     except Exception as e:
         return {
             'up_mbps': 0.0,
             'down_mbps': 0.0,
+            'bytes_sent_per_sec': 0,
+            'bytes_recv_per_sec': 0,
             'bytes_sent_total': 0,
             'bytes_recv_total': 0,
             'packets_sent': 0,
