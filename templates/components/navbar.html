@@ -34,7 +34,7 @@
       </a>
     </div>
 
-     <!-- Notificaciones y Action Buttons -->
+    <!-- Notificaciones y Action Buttons -->
     <!-- <div class="flex items-center gap-3">
       <div class="relative" x-data="{ open: false }">
         <button
@@ -145,7 +145,7 @@
         data-tooltip="Actualizar aplicación web SquidStats"
       >
         <i class="fas fa-cloud-download-alt"></i>
-        <span>Web</span>
+        <span>ProbandoWeb</span>
       </button>
 
       <!-- Modal Squid -->
@@ -353,10 +353,6 @@
             e.preventDefault();
             window.location.href = "/blacklist";
             break;
-          case "6":
-            e.preventDefault();
-            window.location.href = "/auditoria";
-            break;
         }
       }
     });
@@ -364,16 +360,14 @@
 
   // Close modals when clicking outside
   document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("fixed") && e.target.classList.contains("inset-0")) {
-      // Close any open modal by clicking the overlay
+    if (e.target.classList.contains("modal-overlay")) {
+      // Close any open modal
       const modals = document.querySelectorAll("[x-show]");
       modals.forEach((modal) => {
-        if (modal.style.display !== "none") {
-          const alpineData = Alpine.$data(modal.closest("[x-data]"));
-          if (alpineData) {
-            alpineData.showSquidModal = false;
-            alpineData.showWebModal = false;
-          }
+        const alpineData = Alpine.$data(modal);
+        if (alpineData) {
+          alpineData.showSquidModal = false;
+          alpineData.showWebModal = false;
         }
       });
     }
@@ -384,12 +378,10 @@
     if (e.key === "Escape") {
       const modals = document.querySelectorAll("[x-show]");
       modals.forEach((modal) => {
-        if (modal.style.display !== "none") {
-          const alpineData = Alpine.$data(modal.closest("[x-data]"));
-          if (alpineData) {
-            alpineData.showSquidModal = false;
-            alpineData.showWebModal = false;
-          }
+        const alpineData = Alpine.$data(modal);
+        if (alpineData) {
+          alpineData.showSquidModal = false;
+          alpineData.showWebModal = false;
         }
       });
     }
