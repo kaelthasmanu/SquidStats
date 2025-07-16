@@ -198,7 +198,7 @@ apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev 
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/v1.0.0/install.sh
 ```
 
 2. Add permission execution:
