@@ -191,6 +191,7 @@ SQUID_LOG=/var/log/squid/access.log
 DATABASE_STRING_CONNECTION=/opt/SquidStats/squidstats.db
 REFRESH_INTERVAL=60
 BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
+HTTP_PROXY=""
 EOF
         ok "Archivo .env creado correctamente en $env_file"
         return 0
@@ -220,6 +221,16 @@ Restart=always
 RestartSec=5
 EnvironmentFile=/opt/SquidStats/.env
 Environment=PATH=/opt/SquidStats/venv/bin:$PATH
+
+# Resource limits
+MemoryLimit=2048M
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=squidstats
 
 [Install]
 WantedBy=multi-user.target
