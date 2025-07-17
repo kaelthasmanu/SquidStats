@@ -407,7 +407,7 @@ Este software ha sido probado exhaustivamente y es compatible con la versión 6.
 > **_¿Necesita ayuda?_** 
 > **_Contácteme 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
 
-Enlace del proyecto: ([SquidStats](https://github.com/kaelthasmanu/SquidStats))
+Proyecto relacionado: ([CuCuota](https://github.com/kaelthasmanu/cucuota))
 
 ## Tecnologías Utilizadas
 

@@ -418,7 +418,7 @@ _The SquidStats project is released under the <a href="https://github.com/kaelth
 > **_Need help?_**
 > **_Feel free to contact me 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
 
-Project Link: ([SquidStats](https://github.com/kaelthasmanu/cucuota))
+Related project: ([CuCuota](https://github.com/kaelthasmanu/cucuota))
 
 ## Technologies Used
 
