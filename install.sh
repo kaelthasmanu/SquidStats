@@ -338,6 +338,50 @@ EOF
     fi
 }
 
+function uninstallSquidStats() {
+    local destino="/opt/SquidStats"
+    local service_file="/etc/systemd/system/squidstats.service"
+
+    echo -e "\n\033[1;43mDESINSTALACIÓN DE SQUIDSTATS\033[0m"
+    echo "Esta operación eliminará completamente SquidStats del sistema."
+    echo "¿Está seguro de que desea continuar? (s/N)"
+
+    read -p "Respuesta: " confirm
+
+    if [[ ! "$confirm" =~ ^[sS]$ ]]; then
+        echo "Desinstalación cancelada."
+        return 0
+    fi
+
+    echo "Iniciando desinstalación..."
+
+    if [ -f "$service_file" ]; then
+        echo "Deteniendo servicio squidstats..."
+        systemctl stop squidstats.service 2>/dev/null || true
+
+        echo "Deshabilitando servicio squidstats..."
+        systemctl disable squidstats.service 2>/dev/null || true
+
+        echo "Eliminando archivo de servicio..."
+        rm -f "$service_file"
+
+        systemctl daemon-reload
+        ok "Servicio squidstats eliminado"
+    else
+        echo "Servicio squidstats no encontrado"
+    fi
+    
+    if [ -d "$destino" ]; then
+        echo "Eliminando directorio de instalación $destino..."
+        rm -rf "$destino"
+        ok "Directorio de instalación eliminado"
+    else
+        echo "Directorio de instalación no encontrado"
+    fi
+
+    ok "SquidStats ha sido desinstalado completamente del sistema"
+}
+
 function main() {
     checkSudo
 
@@ -347,6 +391,8 @@ function main() {
         systemctl restart squidstats.service
 
         ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
+    elif [ "$1" = "--uninstall" ]; then
+        uninstallSquidStats
     else
         echo "Instalando aplicación web..."
         checkPackages
@@ -368,12 +414,18 @@ case "$1" in
 "--update")
     main "$1"
     ;;
+"--uninstall")
+    main "$1"
+    ;;
 "")
     main
     ;;
 *)
     echo "Parámetro no reconocido: $1"
-    echo "Uso: $0 --update"
+    echo "Uso: $0 [--update|--uninstall]"
+    echo "  Sin parámetros: Instala SquidStats"
+    echo "  --update: Actualiza SquidStats existente"
+    echo "  --uninstall: Desinstala SquidStats completamente"
     exit 1
     ;;
 esac

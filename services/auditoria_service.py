@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from database.database import get_dynamic_models
 from utils.social_media import SOCIAL_MEDIA_DOMAINS
 
+
 def _get_tables_in_range(
     inspector, start_date: datetime, end_date: datetime
 ) -> list[tuple[str, str]]:
