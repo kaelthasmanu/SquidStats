@@ -7,6 +7,27 @@ SQUID_PORT = int(os.getenv("SQUID_PORT", "3128"))
 
 
 def fetch_squid_cache_stats():
+    default_stats = {
+        "store_entries": 0,
+        "max_swap_size": 0,
+        "current_swap_size": 0.0,
+        "capacity_used": 0.0,
+        "capacity_free": 100.0,  # 100% libre por defecto
+        "store_directory": "No disponible",
+        "fs_block_size": 4096,  # Tamaño típico de bloque
+        "first_level_dirs": 0,
+        "second_level_dirs": 0,
+        "filemap_bits_used": 0,
+        "filemap_bits_total": 0,
+        "fs_space_used": 0,
+        "fs_space_total": 0,
+        "fs_inodes_used": 0,
+        "fs_inodes_total": 0,
+        "removal_policy": "lru",  # Política por defecto
+        "lru_age_days": 0.0,
+        "error": None,  # Campo para indicar errores
+        "connection_status": "connected",  # Estado de conexión
+    }
     try:
         with socket.create_connection((SQUID_HOST, SQUID_PORT), timeout=5) as s:
             request = f"GET cache_object://{SQUID_HOST}/storedir HTTP/1.0\r\n\r\n"
@@ -15,9 +36,35 @@ def fetch_squid_cache_stats():
             while chunk := s.recv(4096):
                 response += chunk
         data = response.decode("utf-8")
-        return parse_squid_cache_data(data)
+        parsed_stats = parse_squid_cache_data(data)
+        if parsed_stats and not parsed_stats.get("error"):
+            default_stats.update(parsed_stats)
+            default_stats["connection_status"] = "connected"
+        else:
+            # Si hubo error en el parsing, mantener defaults pero indicar el error
+            default_stats["error"] = parsed_stats.get("error", "Error parsing data")
+            default_stats["connection_status"] = "connected_but_parse_error"
+        return default_stats
+    except TimeoutError:
+        default_stats["error"] = f"Timeout connecting to {SQUID_HOST}:{SQUID_PORT}"
+        default_stats["connection_status"] = "timeout"
+        return default_stats
+    except ConnectionRefusedError:
+        default_stats["error"] = f"Connection refused to {SQUID_HOST}:{SQUID_PORT}"
+        default_stats["connection_status"] = "connection_refused"
+        return default_stats
+    except socket.gaierror as e:
+        default_stats["error"] = f"DNS resolution error for {SQUID_HOST}: {str(e)}"
+        default_stats["connection_status"] = "dns_error"
+        return default_stats
+    except UnicodeDecodeError:
+        default_stats["error"] = "Error decoding response from Squid"
+        default_stats["connection_status"] = "decode_error"
+        return default_stats
     except Exception as e:
-        return {"Error": str(e)}
+        default_stats["error"] = f"Unexpected error: {str(e)}"
+        default_stats["connection_status"] = "unknown_error"
+        return default_stats
 
 
 def parse_squid_cache_data(data):
