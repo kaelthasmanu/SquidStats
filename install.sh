@@ -59,22 +59,22 @@ function installDependencies() {
     deactivate
     return 0
 }
-
+#  pthon3-pymysql delete from packages
 function checkPackages() {
-    local paquetes=("git" "python3" "python3-pip" "python3-venv" "python3-pymysql" "libmariadb-dev" "curl")
-    local faltantes=()
+    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl")
+    local missing=()
 
-    for pkg in "${paquetes[@]}"; do
+    for pkg in "${packages[@]}"; do
         if ! dpkg -l | grep -q "^ii  $pkg "; then
-            faltantes+=("$pkg")
+            missing+=("$pkg")
         fi
     done
 
-    if [ ${#faltantes[@]} -ne 0 ]; then
-        echo "Instalando paquetes faltantes: ${faltantes[*]}"
+    if [ ${#missing[@]} -ne 0 ]; then
+        echo "Instalando paquetes faltantes: ${missing[*]}"
         apt-get update
 
-        if ! apt-get install -y "${faltantes[@]}"; then
+        if ! apt-get install -y "${missing[@]}"; then
             error "ERROR: Compruebe la versión de su OS se recomienda Ubuntu20.04+ o Debian12+"
             exit 1
         fi
