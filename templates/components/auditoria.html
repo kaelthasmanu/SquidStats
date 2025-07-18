@@ -350,7 +350,7 @@
     "showMethod": "fadeIn",
     "hideMethod": "fadeOut"
   };
-  
+
   function toggleDetails(header) {
     const details = header.nextElementSibling;
     const icon = header.querySelector(".toggle-icon");
@@ -474,6 +474,20 @@
       }
     });
 
+    // Función para restaurar el botón de envío a su estado original
+    function restoreSubmitButton() {
+      const submitButton = form.querySelector('button[type="submit"]');
+      const buttonIcon = submitButton.querySelector('i');
+      
+      submitButton.disabled = false;
+      submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      submitButton.classList.add('hover:bg-blue-700', 'hover:shadow-xl');
+      
+      // Restaurar el icono y texto original
+      buttonIcon.className = 'fas fa-play mr-2';
+      submitButton.innerHTML = '<i class="fas fa-play mr-2"></i>Generar Reporte';
+    }
+
     form.addEventListener("submit", function (event) {
       event.preventDefault();
 
@@ -515,12 +529,31 @@
         return;
       }
 
-      toastr.info("Generando reporte, por favor espere...", "Procesando", {
+      /* toastr.info("Generando reporte, por favor espere...", "Procesando", {
         "timeOut": 0,
         "extendedTimeOut": 0,
         "tapToDismiss": false,
         "closeButton": false
-      });
+      }); */
+
+      // Deshabilitar el botón y cambiar su apariencia
+      const submitButton = form.querySelector('button[type="submit"]');
+      const buttonIcon = submitButton.querySelector('i');
+      const buttonText = submitButton.querySelector('span') || submitButton.lastChild;
+      
+      submitButton.disabled = true;
+      submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+      submitButton.classList.remove('hover:bg-blue-700', 'hover:shadow-xl');
+      
+      // Cambiar el icono a spinner
+      buttonIcon.className = 'fas fa-spinner fa-spin mr-2';
+      
+      // Cambiar el texto del botón
+      if (buttonText.nodeType === Node.TEXT_NODE) {
+        buttonText.textContent = 'Generando Reporte...';
+      } else {
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generando Reporte...';
+      }
 
       resultsContainer.innerHTML = `
             <div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center">
@@ -538,6 +571,7 @@
         .then((response) => response.json())
         .then((result) => {
           toastr.clear();
+          restoreSubmitButton();
           
           if (result.error) {
             toastr.error(result.error, "Error en la auditoría");
@@ -548,6 +582,8 @@
         })
         .catch((error) => {
           toastr.clear();
+          restoreSubmitButton();
+          
           toastr.error("Error de conexión con el servidor", "Error de red");
           resultsContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><div class="text-center text-red-500 py-10"><strong>Error de red o del servidor:</strong> ${error}</div></div>`;
         });
