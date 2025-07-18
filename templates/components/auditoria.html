@@ -1,4 +1,7 @@
 <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
 
 <style>
   /* Estilo para los "chips" de redes sociales */
@@ -329,6 +332,25 @@
 </div>
 
 <script>
+
+  toastr.options = {
+    "closeButton": false,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": false,
+    "positionClass": "toast-top-right",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+  };
+  
   function toggleDetails(header) {
     const details = header.nextElementSibling;
     const icon = header.querySelector(".toggle-icon");
@@ -392,6 +414,11 @@
           option.textContent = user;
           usernameSelect.appendChild(option);
         });
+        /* toastr.success(`${users.length} usuarios cargados`, "Usuarios disponibles", {
+          "timeOut": 2000 */
+      })
+      .catch((error) => {
+        toastr.error("Error al cargar la lista de usuarios", "Error de carga");
       });
 
     function toggleConditionalInputs() {
@@ -465,28 +492,35 @@
       const requiredInputs = selectedOption.dataset.requires?.split(",") || [];
 
       if (requiredInputs.includes("user") && !data.username) {
-        alert("Por favor, seleccione un usuario.");
+        toastr.error("Por favor, seleccione un usuario.", "Campo requerido");
         return;
       }
       if (requiredInputs.includes("keyword") && !data.keyword) {
-        alert("Por favor, ingrese una palabra clave.");
+        toastr.error("Por favor, ingrese una palabra clave.", "Campo requerido");
         return;
       }
       if (requiredInputs.includes("ip") && !data.ip_address) {
-        alert("Por favor, ingrese una dirección IP.");
+        toastr.error("Por favor, ingrese una dirección IP.", "Campo requerido");
         return;
       }
       if (requiredInputs.includes("response_code") && !data.response_code) {
-        alert("Por favor, ingrese un código de respuesta.");
+        toastr.error("Por favor, seleccione un código de respuesta.", "Campo requerido");
         return;
       }
       if (
         requiredInputs.includes("social_media") &&
         data.social_media_sites.length === 0
       ) {
-        alert("Por favor, seleccione al menos una red social.");
+        toastr.error("Por favor, seleccione al menos una red social.", "Campo requerido");
         return;
       }
+
+      toastr.info("Generando reporte, por favor espere...", "Procesando", {
+        "timeOut": 0,
+        "extendedTimeOut": 0,
+        "tapToDismiss": false,
+        "closeButton": false
+      });
 
       resultsContainer.innerHTML = `
             <div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center">
@@ -503,9 +537,18 @@
       })
         .then((response) => response.json())
         .then((result) => {
+          toastr.clear();
+          
+          if (result.error) {
+            toastr.error(result.error, "Error en la auditoría");
+          } else {
+            toastr.success("Reporte generado exitosamente", "Auditoría completada");
+          }
           renderResults(data.audit_type, result, data);
         })
         .catch((error) => {
+          toastr.clear();
+          toastr.error("Error de conexión con el servidor", "Error de red");
           resultsContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><div class="text-center text-red-500 py-10"><strong>Error de red o del servidor:</strong> ${error}</div></div>`;
         });
     });
