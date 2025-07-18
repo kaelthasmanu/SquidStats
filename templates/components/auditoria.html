@@ -131,10 +131,25 @@
               class="block text-sm font-semibold text-gray-700 mb-1"
               >Usuario</label
             >
+            <div class="relative">
+              <input
+                type="text"
+                id="user-search-input"
+                placeholder="Buscar usuario..."
+                class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 pr-8"
+                autocomplete="off"
+              />
+              <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+              <div id="user-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+                <div id="user-options-container">
+                  <!-- Las opciones se llenarán dinámicamente -->
+                </div>
+              </div>
+            </div>
             <select
               id="username-filter"
               name="username"
-              class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"
+              class="hidden"
             >
               <option value="">-- Todos --</option>
             </select>
@@ -405,15 +420,139 @@
     startDateInput.value = todayString;
     endDateInput.value = todayString;
 
+    // Variables para el buscador de usuarios
+    let allUsers = [];
+    let filteredUsers = [];
+    let selectedUserIndex = -1;
+    const userSearchInput = document.getElementById("user-search-input");
+    const userDropdown = document.getElementById("user-dropdown");
+    const userOptionsContainer = document.getElementById("user-options-container");
+    const usernameFilterSelect = document.getElementById("username-filter");
+
+    // Función para renderizar las opciones de usuarios
+    function renderUserOptions(users, searchTerm = "") {
+      userOptionsContainer.innerHTML = "";
+      
+      // Agregar opción "Todos" si no hay término de búsqueda
+      if (!searchTerm) {
+        const allOption = document.createElement("div");
+        allOption.className = "px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 border-b border-gray-100";
+        allOption.textContent = "-- Todos --";
+        allOption.dataset.value = "";
+        allOption.addEventListener("click", () => selectUser("", "-- Todos --"));
+        userOptionsContainer.appendChild(allOption);
+      }
+
+      users.forEach((user, index) => {
+        const option = document.createElement("div");
+        option.className = "px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700";
+        option.textContent = user;
+        option.dataset.value = user;
+        option.dataset.index = index;
+        option.addEventListener("click", () => selectUser(user, user));
+        
+        // Resaltar texto coincidente
+        if (searchTerm) {
+          const regex = new RegExp(`(${searchTerm})`, 'gi');
+          option.innerHTML = user.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+        }
+        
+        userOptionsContainer.appendChild(option);
+      });
+
+      if (users.length === 0 && searchTerm) {
+        const noResults = document.createElement("div");
+        noResults.className = "px-3 py-2 text-gray-500 italic";
+        noResults.textContent = "No se encontraron usuarios";
+        userOptionsContainer.appendChild(noResults);
+      }
+    }
+
+    // Función para seleccionar un usuario
+    function selectUser(value, displayText) {
+      userSearchInput.value = displayText;
+      usernameFilterSelect.value = value;
+      userDropdown.classList.add("hidden");
+      selectedUserIndex = -1;
+    }
+
+    // Función para filtrar usuarios
+    function filterUsers(searchTerm) {
+      if (!searchTerm) {
+        filteredUsers = [...allUsers];
+      } else {
+        filteredUsers = allUsers.filter(user => 
+          user.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+      renderUserOptions(filteredUsers, searchTerm);
+    }
+
+    // Event listeners para el buscador de usuarios
+    userSearchInput.addEventListener("input", function(e) {
+      const searchTerm = e.target.value;
+      filterUsers(searchTerm);
+      userDropdown.classList.remove("hidden");
+      selectedUserIndex = -1;
+    });
+
+    userSearchInput.addEventListener("focus", function() {
+      filterUsers(userSearchInput.value);
+      userDropdown.classList.remove("hidden");
+    });
+
+    userSearchInput.addEventListener("keydown", function(e) {
+      const options = userOptionsContainer.querySelectorAll("[data-value]");
+      
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        selectedUserIndex = Math.min(selectedUserIndex + 1, options.length - 1);
+        updateSelectedOption(options);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        selectedUserIndex = Math.max(selectedUserIndex - 1, -1);
+        updateSelectedOption(options);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (selectedUserIndex >= 0 && options[selectedUserIndex]) {
+          const selectedOption = options[selectedUserIndex];
+          selectUser(selectedOption.dataset.value, selectedOption.textContent);
+        }
+      } else if (e.key === "Escape") {
+        userDropdown.classList.add("hidden");
+        selectedUserIndex = -1;
+      }
+    });
+
+    function updateSelectedOption(options) {
+      options.forEach((option, index) => {
+        option.classList.toggle("bg-blue-100", index === selectedUserIndex);
+      });
+    }
+
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener("click", function(e) {
+      if (!userSearchInput.contains(e.target) && !userDropdown.contains(e.target)) {
+        userDropdown.classList.add("hidden");
+        selectedUserIndex = -1;
+      }
+    });
+
     fetch("/api/all-users")
       .then((response) => response.json())
       .then((users) => {
+        allUsers = users;
+        filteredUsers = [...users];
+        
+        // Llenar el select oculto para compatibilidad
         users.forEach((user) => {
           const option = document.createElement("option");
           option.value = user;
           option.textContent = user;
-          usernameSelect.appendChild(option);
+          usernameFilterSelect.appendChild(option);
         });
+        
+        renderUserOptions(filteredUsers);
         /* toastr.success(`${users.length} usuarios cargados`, "Usuarios disponibles", {
           "timeOut": 2000 */
       })
@@ -453,13 +592,15 @@
       }
 
       if (auditType === "user_summary" || auditType === "daily_activity") {
-        defaultUserOption.textContent = "-- Seleccione un Usuario --";
-        defaultUserOption.disabled = true;
-        usernameSelect.value = "";
+        userSearchInput.placeholder = "Seleccionar usuario...";
+        userSearchInput.value = "";
+        usernameFilterSelect.value = "";
+        userSearchInput.disabled = false;
       } else {
-        defaultUserOption.textContent = "-- Todos --";
-        const isOptional = required.includes("user_optional");
-        defaultUserOption.disabled = !isOptional;
+        userSearchInput.placeholder = "Buscar usuario... (Opcional)";
+        userSearchInput.value = "-- Todos --";
+        usernameFilterSelect.value = "";
+        userSearchInput.disabled = false;
       }
     }
 
@@ -505,7 +646,7 @@
         auditTypeSelect.options[auditTypeSelect.selectedIndex];
       const requiredInputs = selectedOption.dataset.requires?.split(",") || [];
 
-      if (requiredInputs.includes("user") && !data.username) {
+      if (requiredInputs.includes("user") && !usernameFilterSelect.value) {
         toastr.error("Por favor, seleccione un usuario.", "Campo requerido");
         return;
       }
@@ -599,7 +740,6 @@
         } else if (auditType === "top_users_data") {
           html = renderTopUsers(data);
         }
-        // --- INICIO DE LA MODIFICACIÓN ---
         else if (auditType === "daily_activity") {
           const user = formData.username;
           const date = formData.start_date;
@@ -614,7 +754,6 @@
             html = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">No se encontraron peticiones para la fecha y usuario seleccionado.</p></div>`;
           }
         }
-        // --- FIN DE LA MODIFICACIÓN ---
         else if (
           [
             "keyword_search",
@@ -855,7 +994,6 @@
             </table></div>`;
     }
 
-    // --- INICIO DE LA MODIFICACIÓN ---
     function renderDailyActivityChart(canvas, hourlyData) {
       const labels = Array.from({ length: 24 }, (_, i) => {
         const hour = i % 12 === 0 ? 12 : i % 12;
@@ -895,7 +1033,6 @@
         },
       });
     }
-    // --- FIN DE LA MODIFICACIÓN ---
 
     function renderDomainChart(canvas, domains) {
       // Genera colores equidistantes en el espectro HSL

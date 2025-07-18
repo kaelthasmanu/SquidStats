@@ -580,14 +580,12 @@ def api_run_audit():
             result = get_user_activity_summary(db, username, start_date, end_date)
         elif audit_type == "top_users_data":
             result = get_top_users_by_data(db, start_date, end_date)
-        # --- INICIO DE LA MODIFICACIÓN ---
         elif audit_type == "daily_activity":
             if not start_date:
                 return jsonify({"error": "Se requiere una fecha de inicio."}), 400
             if not end_date:
                 return jsonify({"error": "Se requiere una fecha de fin."}), 400
             result = get_daily_activity(db, start_date, username)
-        # --- FIN DE LA MODIFICACIÓN ---
         elif audit_type == "denied_access":
             result = find_denied_access(db, start_date, end_date, username)
         elif audit_type == "keyword_search":
