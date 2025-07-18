@@ -42,6 +42,7 @@
         <li><a href="#installation-script">Installation Script</a></li>
         <li><a href="#installation-manual">Installation Manual</a></li>
         <li><a href="#testing-information">Testing Information</a></li>
+        <li><a href="#uninstall-squidstats">Uninstall SquidStats</a></li>
       </ul>
     </li>
     <li><a href="#to-do">To do</a></li>
@@ -366,9 +367,83 @@ Or can use service(daemon):
 
 This software has been thoroughly tested and is compatible with Squid version 6.12 in Ubuntu 24.04 and Debian12. Please ensure your Squid installation matches this version or newer for optimal performance.
 
+## Uninstall SquidStats
+
+The installation script now includes a complete uninstall option that cleans all system components:
+
+### Using the Uninstall Script
+
+1. Get the installation script (if you don't have it):
+
+```bash
+wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
+chmod +x install.sh
+```
+
+2. Run the uninstallation:
+
+```bash
+sudo ./install.sh --uninstall
+```
+
+### What Does the Uninstall Do?
+
+The **COMPLETE** uninstallation performs the following actions:
+
+- **🛑 Stops and disables** the systemd service `squidstats.service`
+- **🗑️ Removes files** from the `/opt/squidstats` directory
+- **⚠️ Requires confirmation** from user before proceeding
+
+### Manual Uninstallation
+
+If you prefer to uninstall manually:
+
+```bash
+# Stop and disable service
+sudo systemctl stop squidstats.service
+sudo systemctl disable squidstats.service
+sudo rm -f /etc/systemd/system/squidstats.service
+sudo systemctl daemon-reload
+
+# Remove project files
+sudo rm -rf /opt/squidstats
+```
+
+### ⚠️ Important Note about Uninstallation
+
+- Uninstallation will **permanently delete** all SquidStats data and configurations
+- It's recommended to **backup** any custom configurations before uninstalling
+- Squid configuration will be restored from the automatic backup created during installation
+
 ## To do
 
-_Make blah blah._
+_Future functionalities and planned improvements._
+
+### Upcoming Features
+- **Advanced Audit Center** 🔍
+  - Keyword search in URLs
+  - Activity analysis by specific IP
+  - HTTP response code filters
+  - Social media monitoring
+  - Daily activity reports per user
+
+- **Interface Improvements** 🎨
+  - Customizable dashboards
+  - Dark/light themes
+  - Report export (PDF, Excel)
+  - Real-time notifications
+
+- **Security Features** 🔒
+  - User authentication
+  - Roles and permissions
+  - System audit logs
+  - Automated alerts
+
+- **Optimization and Performance** ⚡
+  - Enhanced data caching
+  - Historical log compression
+  - Complete RESTful API
+  - Multi-proxy support
 
 ## Contributing
 
@@ -422,8 +497,8 @@ Related project: ([CuCuota](https://github.com/kaelthasmanu/cucuota))
 
 ## Technologies Used
 
-Backend: Python, Flask
-Frontend: HTML, CSS
+Backend: Python, Flask  
+Frontend: HTML, CSS, JavaScript
 
 ## Special thanks
 

@@ -6,7 +6,67 @@
 <div align="center">
   <!-- Banderas -->
   <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/README_es.md">
-    <img height="20px" src="https://img.shields.io/badge/ES-flag.svg?color=555555&style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NTAgNTAwIj4NCjxwYXRoIGZpbGw9IiNjNjBiMWUiIGQ9Im0wLDBoNzUwdjUwMGgtNzUweiIvPg0KPHBhdGggZmlsbD0iI2ZmYzQwMCIgZD0ibTAsMTI1aDc1MHYyNTBoLTc1MHoiLz4NCjwvc3ZnPg0K">
+    <img3. Iniciar el servicio:
+
+```bash
+  systemctl start squidstats.service
+```
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+## Información de Prueba
+
+Este software ha sido probado exhaustivamente y es compatible con la versión 6.12 de Squid en Ubuntu 24.04 y Debian 12. Por favor asegúrese de que su instalación de Squid sea compatible con esta versión o una posterior para un rendimiento óptimo.
+
+## Desinstalar SquidStats
+
+El script de instalación ahora incluye una opción completa de desinstalación que limpia todos los componentes del sistema:
+
+### Usar el Script de Desinstalación
+
+1. Obtener el script de instalación (si no lo tiene):
+
+```bash
+wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
+chmod +x install.sh
+```
+
+2. Ejecutar la desinstalación:
+
+```bash
+sudo ./install.sh --uninstall
+```
+
+### ¿Qué Hace la Desinstalación?
+
+La desinstalación **COMPLETA** realiza las siguientes acciones:
+
+- **🛑 Detiene y deshabilita** el servicio systemd `squidstats.service`
+- **🗑️ Elimina archivos** del directorio `/opt/squidstats`
+- **⚠️ Requiere confirmación** del usuario antes de proceder
+
+### Desinstalación Manual
+
+Si prefiere desinstalar manualmente:
+
+```bash
+# Detener y deshabilitar el servicio
+sudo systemctl stop squidstats.service
+sudo systemctl disable squidstats.service
+sudo rm -f /etc/systemd/system/squidstats.service
+sudo systemctl daemon-reload
+
+# Eliminar archivos del proyecto
+sudo rm -rf /opt/squidstats
+```
+
+### ⚠️ Nota Important# Restaurar configuración de Squid (si existe backup)
+sudo cp /etc/squid/squid.conf.backup /etc/squid/squid.conf
+sudo systemctl restart squid
+e sobre Desinstalación
+
+- La desinstalación **eliminará permanentemente** todos los datos y configuraciones de SquidStats
+- Se recomienda **hacer backup** de cualquier configuración personalizada antes de desinstalar
+- La configuración de Squid se restaurará desde el backup automático creado durante la instalación0px" src="https://img.shields.io/badge/ES-flag.svg?color=555555&style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NTAgNTAwIj4NCjxwYXRoIGZpbGw9IiNjNjBiMWUiIGQ9Im0wLDBoNzUwdjUwMGgtNzUweiIvPg0KPHBhdGggZmlsbD0iI2ZmYzQwMCIgZD0ibTAsMTI1aDc1MHYyNTBoLTc1MHoiLz4NCjwvc3ZnPg0K">
   </a>
   <a href="https://github.com/kaelthasmanu/SquidStats/blob/master/README.md">
     <img height="20px" src="https://img.shields.io/badge/EN-flag.svg?color=555555&style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNjAgMzAiIGhlaWdodD0iNjAwIj4NCjxkZWZzPg0KPGNsaXBQYXRoIGlkPSJ0Ij4NCjxwYXRoIGQ9Im0zMCwxNWgzMHYxNXp2MTVoLTMwemgtMzB2LTE1enYtMTVoMzB6Ii8+DQo8L2NsaXBQYXRoPg0KPC9kZWZzPg0KPHBhdGggZmlsbD0iIzAwMjQ3ZCIgZD0ibTAsMHYzMGg2MHYtMzB6Ii8+DQo8cGF0aCBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNiIgZD0ibTAsMGw2MCwzMG0wLTMwbC02MCwzMCIvPg0KPHBhdGggc3Ryb2tlPSIjY2YxNDJiIiBzdHJva2Utd2lkdGg9IjQiIGQ9Im0wLDBsNjAsMzBtMC0zMGwtNjAsMzAiIGNsaXAtcGF0aD0idXJsKCN0KSIvPg0KPHBhdGggc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIiBkPSJtMzAsMHYzMG0tMzAtMTVoNjAiLz4NCjxwYXRoIHN0cm9rZT0iI2NmMTQyYiIgc3Ryb2tlLXdpZHRoPSI2IiBkPSJtMzAsMHYzMG0tMzAtMTVoNjAiLz4NCjwvc3ZnPg0K">
@@ -42,14 +102,15 @@
         <li><a href="#instalación-con-script">Instalación con Script</a></li>
         <li><a href="#instalación-manual">Instalación manual</a></li>
         <li><a href="#información-de-prueba">Información de prueba</a></li>
+        <li><a href="#desinstalar-squidstats">Desinstalar SquidStats</a></li>
       </ul>
     </li>
     <li><a href="#por-hacer">Por hacer</a></li>
     <li><a href="#colaboradores">Colaboradores</a></li>
     <li><a href="#licencia">Licencia</a></li>
     <li><a href="#contacto">Contacto</a></li>
-    <li><a href="#tecnologias-usadas">Tecnologías usadas</a></li>
-    <li><a href="#agradecimientos">Agradecimientos</a></li>
+    <li><a href="#tecnologias-utilizadas">Tecnologías utilizadas</a></li>
+    <li><a href="#agradecimientos-especiales">Agradecimientos especiales</a></li>
   </ol>
 </details>
 
@@ -191,7 +252,7 @@ apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev 
 1. Obtener el script con curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
 ``` 
 
 2. Dar permisos de ejecución:
@@ -295,7 +356,7 @@ Advertencia: 🚨 La primera vez que se ejecuta puede causar un alto uso de la C
 1. Obtener el script con curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
 ``` 
 
 2. Dar permisos de ejecución:
@@ -360,7 +421,34 @@ O puede usar servicios (daemon):
 Este software ha sido probado exhaustivamente y es compatible con la versión 6.12 de Squid en Ubuntu 24.04 y Debian 12. Por favor asegúrese de que su instalación de Squid sea compatible con esta versión o una posterior para un rendimiento óptimo.
 
 ## Por hacer
-*Make blah blah.*
+
+_Funcionalidades futuras y mejoras planeadas._
+
+### Próximas Características
+- **Centro de Auditoría Avanzado** 🔍
+  - Búsqueda por palabras clave en URLs
+  - Análisis de actividad por IP específica
+  - Filtros por códigos de respuesta HTTP
+  - Monitoreo de redes sociales
+  - Reportes de actividad diaria por usuario
+
+- **Mejoras en la Interfaz** 🎨
+  - Dashboards personalizables
+  - Temas oscuro/claro
+  - Exportación de reportes (PDF, Excel)
+  - Notificaciones en tiempo real
+
+- **Características de Seguridad** 🔒
+  - Autenticación de usuarios
+  - Roles y permisos
+  - Logs de auditoría del sistema
+  - Alertas automatizadas
+
+- **Optimización y Rendimiento** ⚡
+  - Caché de datos mejorado
+  - Compresión de logs históricos
+  - API RESTful completa
+  - Soporte para múltiples proxies
 
 ## Colaboradores
 
