@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Dashboard - Resumen del Sistema</h2>
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100">Total ACLs</p>
+                        <p class="text-3xl font-bold">{{ stats.total_acls }}</p>
+                    </div>
+                    <i class="fas fa-shield-alt text-4xl text-blue-200"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100">Delay Pools</p>
+                        <p class="text-3xl font-bold">{{ stats.total_delay_pools }}</p>
+                    </div>
+                    <i class="fas fa-tachometer-alt text-4xl text-green-200"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100">Reglas HTTP</p>
+                        <p class="text-3xl font-bold">{{ stats.total_http_rules }}</p>
+                    </div>
+                    <i class="fas fa-key text-4xl text-purple-200"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="/admin/config/edit" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-blue-500">
+                    <i class="fas fa-edit text-blue-500 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-800">Editar Configuración</h4>
+                    <p class="text-sm text-gray-600">Modificar archivo squid.conf</p>
+                </a>
+                
+                <a href="/admin/acls" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-green-500">
+                    <i class="fas fa-plus text-green-500 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-800">Agregar ACL</h4>
+                    <p class="text-sm text-gray-600">Crear nueva regla de acceso</p>
+                </a>
+                
+                <a href="/admin/view-logs" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-yellow-500">
+                    <i class="fas fa-file-alt text-yellow-500 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-800">Ver Logs</h4>
+                    <p class="text-sm text-gray-600">Revisar logs del sistema</p>
+                </a>
+                
+                <div class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-red-500 cursor-pointer" onclick="restartSquid()">
+                    <i class="fas fa-power-off text-red-500 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-800">Reiniciar Squid</h4>
+                    <p class="text-sm text-gray-600">Reiniciar el servicio</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="mt-8 bg-white border rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado del Sistema</h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-circle text-green-500 mr-3"></i>
+                        <span class="font-medium">Servicio Squid</span>
+                    </div>
+                    <span class="text-green-600 font-semibold">Activo</span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-database text-blue-500 mr-3"></i>
+                        <span class="font-medium">Configuración</span>
+                    </div>
+                    <span class="text-blue-600 font-semibold">Cargada</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

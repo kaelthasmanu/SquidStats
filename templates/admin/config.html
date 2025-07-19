@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-lg p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Configuración de Squid</h2>
+        <a href="{{ url_for('edit_config') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+            <i class="fas fa-edit mr-2"></i>Editar
+        </a>
+    </div>
+    
+    <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+        <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{{ config_content }}</pre>
+    </div>
+</div>
+{% endblock %}

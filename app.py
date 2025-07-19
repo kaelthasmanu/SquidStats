@@ -6,7 +6,16 @@ from datetime import date, datetime
 from threading import Lock  # Importamos Lock para sincronización de hilos
 
 from dotenv import load_dotenv
-from flask import Blueprint, Flask, jsonify, redirect, render_template, request
+from flask import (
+    Blueprint,
+    Flask,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
 
@@ -41,14 +50,20 @@ from services.system_info import (
     get_timezone,
     get_uptime,
 )
+from utils.admin import SquidConfigManager
 from utils.colors import color_map
 from utils.filters import register_filters
+from utils.size import size_to_bytes
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
 
 
 class Config:
     SCHEDULER_API_ENABLED = True
+
+
+# Instancia global del manager
+config_manager = SquidConfigManager()
 
 
 load_dotenv()
@@ -403,23 +418,6 @@ def realtime_data_thread():
                 swap_info = get_swap_info()
                 cpu_info = get_cpu_info()
 
-                # Convertir información de RAM y SWAP a bytes para guardar en BD
-                def size_to_bytes(size_str):
-                    if not size_str:
-                        return 0
-                    parts = size_str.strip().split()
-                    if len(parts) != 2:
-                        return 0
-                    value, unit = float(parts[0]), parts[1].upper()
-                    multipliers = {
-                        "B": 1,
-                        "KB": 1024,
-                        "MB": 1024**2,
-                        "GB": 1024**3,
-                        "TB": 1024**4,
-                    }
-                    return int(value * multipliers.get(unit, 1))
-
                 ram_bytes = size_to_bytes(ram_info.get("used", "0 B"))
                 swap_bytes = size_to_bytes(swap_info.get("used", "0 B"))
 
@@ -621,6 +619,116 @@ def api_run_audit():
         return jsonify({"error": "Ocurrió un error interno en el servidor."}), 500
     finally:
         db.close()
+
+@app.route('/admin')
+def admin_dashboard():
+    """Página principal con resumen de la configuración"""
+    acls = config_manager.get_acls()
+    delay_pools = config_manager.get_delay_pools()
+    http_access_rules = config_manager.get_http_access_rules()
+    stats = {
+        'total_acls': len(acls),
+        'total_delay_pools': len(delay_pools),
+        'total_http_rules': len(http_access_rules)
+    }
+    return render_template('admin/dashboardAdmin.html', stats=stats)
+
+@app.route('/config')
+def view_config():
+    """Ver configuración completa"""
+    return render_template('admin/config.html', config_content=config_manager.config_content)
+
+@app.route('/admin/config/edit', methods=['GET', 'POST'])
+def edit_config():
+    """Editar configuración completa"""
+    if request.method == 'POST':
+        new_content = request.form['config_content']
+        try:
+            config_manager.save_config(new_content)
+            flash('Configuración guardada exitosamente', 'success')
+            return redirect(url_for('view_config'))
+        except Exception as e:
+            flash(f'Error al guardar la configuración: {str(e)}', 'error')
+    return render_template('edit_config.html', config_content=config_manager.config_content)
+
+@app.route('/admin/acls')
+def manage_acls():
+    """Gestionar ACLs"""
+    acls = config_manager.get_acls()
+    return render_template('admin/acls.html', acls=acls)
+
+@app.route('/admin/acls/add', methods=['POST'])
+def add_acl():
+    """Agregar nueva ACL"""
+    name = request.form['name']
+    acl_type = request.form['type']
+    value = request.form['value']
+    new_acl = f"acl {name} {acl_type} {value}"
+    # Agregar la nueva ACL al final de la sección de ACLs
+    lines = config_manager.config_content.split('\n')
+    acl_section_end = -1
+    for i, line in enumerate(lines):
+        if line.strip().startswith('acl '):
+            acl_section_end = i
+    if acl_section_end != -1:
+        lines.insert(acl_section_end + 1, new_acl)
+    else:
+        lines.append(new_acl)
+    new_content = '\n'.join(lines)
+    config_manager.save_config(new_content)
+    flash('ACL agregada exitosamente', 'success')
+    return redirect(url_for('manage_acls'))
+
+@app.route('/admin/delay-pools')
+def manage_delay_pools():
+    """Gestionar Delay Pools"""
+    delay_pools = config_manager.get_delay_pools()
+    return render_template('admin/delay_pools.html', delay_pools=delay_pools)
+
+@app.route('/admin/http-access')
+def manage_http_access():
+    """Gestionar reglas de acceso HTTP"""
+    rules = config_manager.get_http_access_rules()
+    return render_template('admin/http_access.html', rules=rules)
+
+@app.route('/admin/view-logs')
+def view_logs():
+    """Ver logs de Squid"""
+    log_files = [
+        '/var/log/squid/access.log',
+        '/var/log/squid/cache.log'
+    ]
+    logs = {}
+    for log_file in log_files:
+        try:
+            with open(log_file) as f:
+                # Leer las últimas 100 líneas
+                lines = f.readlines()
+                logs[os.path.basename(log_file)] = lines[-100:]
+        except FileNotFoundError:
+            logs[os.path.basename(log_file)] = ['Log file not found']
+        except Exception as e:
+            logs[os.path.basename(log_file)] = [f'Error reading log: {str(e)}']
+
+    return render_template('admin/logs.html', logs=logs)
+
+@app.route('/admin/api/restart-squid', methods=['POST'])
+def restart_squid():
+    """Reiniciar servicio Squid"""
+    try:
+        os.system('systemctl restart squid')
+        return jsonify({'status': 'success', 'message': 'Squid reiniciado exitosamente'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/admin/api/reload-squid', methods=['POST'])
+def reload_squid():
+    """Recargar configuración de Squid"""
+    try:
+        os.system('systemctl reload squid')
+        return jsonify({'status': 'success', 'message': 'Configuración recargada exitosamente'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
 
 
 # Iniciar el hilo de actualización de datos en tiempo real

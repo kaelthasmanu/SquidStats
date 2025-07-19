@@ -1,15 +1,15 @@
 def size_to_bytes(size_str):
-    # Convierte '123 MB' o '1.2 GB' a bytes
-    size_str = str(size_str).strip().upper()
-    if size_str.endswith("GB"):
-        return int(float(size_str.replace("GB", "").strip()) * 1024**3)
-    elif size_str.endswith("MB"):
-        return int(float(size_str.replace("MB", "").strip()) * 1024**2)
-    elif size_str.endswith("KB"):
-        return int(float(size_str.replace("KB", "").strip()) * 1024)
-    elif size_str.endswith("BYTES"):
-        return int(float(size_str.replace("BYTES", "").strip()))
-    try:
-        return int(size_str)
-    except Exception:
+    if not size_str:
         return 0
+    parts = size_str.strip().split()
+    if len(parts) != 2:
+        return 0
+    value, unit = float(parts[0]), parts[1].upper()
+    multipliers = {
+        "B": 1,
+        "KB": 1024,
+        "MB": 1024**2,
+        "GB": 1024**3,
+        "TB": 1024**4,
+    }
+    return int(value * multipliers.get(unit, 1))
