@@ -620,84 +620,93 @@ def api_run_audit():
     finally:
         db.close()
 
-@app.route('/admin')
+
+@app.route("/admin")
 def admin_dashboard():
     """Página principal con resumen de la configuración"""
     acls = config_manager.get_acls()
     delay_pools = config_manager.get_delay_pools()
     http_access_rules = config_manager.get_http_access_rules()
     stats = {
-        'total_acls': len(acls),
-        'total_delay_pools': len(delay_pools),
-        'total_http_rules': len(http_access_rules)
+        "total_acls": len(acls),
+        "total_delay_pools": len(delay_pools),
+        "total_http_rules": len(http_access_rules),
     }
-    return render_template('admin/dashboardAdmin.html', stats=stats)
+    return render_template("admin/dashboardAdmin.html", stats=stats)
 
-@app.route('/config')
+
+@app.route("/config")
 def view_config():
     """Ver configuración completa"""
-    return render_template('admin/config.html', config_content=config_manager.config_content)
+    return render_template(
+        "admin/config.html", config_content=config_manager.config_content
+    )
 
-@app.route('/admin/config/edit', methods=['GET', 'POST'])
+
+@app.route("/admin/config/edit", methods=["GET", "POST"])
 def edit_config():
     """Editar configuración completa"""
-    if request.method == 'POST':
-        new_content = request.form['config_content']
+    if request.method == "POST":
+        new_content = request.form["config_content"]
         try:
             config_manager.save_config(new_content)
-            flash('Configuración guardada exitosamente', 'success')
-            return redirect(url_for('view_config'))
+            flash("Configuración guardada exitosamente", "success")
+            return redirect(url_for("view_config"))
         except Exception as e:
-            flash(f'Error al guardar la configuración: {str(e)}', 'error')
-    return render_template('edit_config.html', config_content=config_manager.config_content)
+            flash(f"Error al guardar la configuración: {str(e)}", "error")
+    return render_template(
+        "edit_config.html", config_content=config_manager.config_content
+    )
 
-@app.route('/admin/acls')
+
+@app.route("/admin/acls")
 def manage_acls():
     """Gestionar ACLs"""
     acls = config_manager.get_acls()
-    return render_template('admin/acls.html', acls=acls)
+    return render_template("admin/acls.html", acls=acls)
 
-@app.route('/admin/acls/add', methods=['POST'])
+
+@app.route("/admin/acls/add", methods=["POST"])
 def add_acl():
     """Agregar nueva ACL"""
-    name = request.form['name']
-    acl_type = request.form['type']
-    value = request.form['value']
+    name = request.form["name"]
+    acl_type = request.form["type"]
+    value = request.form["value"]
     new_acl = f"acl {name} {acl_type} {value}"
     # Agregar la nueva ACL al final de la sección de ACLs
-    lines = config_manager.config_content.split('\n')
+    lines = config_manager.config_content.split("\n")
     acl_section_end = -1
     for i, line in enumerate(lines):
-        if line.strip().startswith('acl '):
+        if line.strip().startswith("acl "):
             acl_section_end = i
     if acl_section_end != -1:
         lines.insert(acl_section_end + 1, new_acl)
     else:
         lines.append(new_acl)
-    new_content = '\n'.join(lines)
+    new_content = "\n".join(lines)
     config_manager.save_config(new_content)
-    flash('ACL agregada exitosamente', 'success')
-    return redirect(url_for('manage_acls'))
+    flash("ACL agregada exitosamente", "success")
+    return redirect(url_for("manage_acls"))
 
-@app.route('/admin/delay-pools')
+
+@app.route("/admin/delay-pools")
 def manage_delay_pools():
     """Gestionar Delay Pools"""
     delay_pools = config_manager.get_delay_pools()
-    return render_template('admin/delay_pools.html', delay_pools=delay_pools)
+    return render_template("admin/delay_pools.html", delay_pools=delay_pools)
 
-@app.route('/admin/http-access')
+
+@app.route("/admin/http-access")
 def manage_http_access():
     """Gestionar reglas de acceso HTTP"""
     rules = config_manager.get_http_access_rules()
-    return render_template('admin/http_access.html', rules=rules)
+    return render_template("admin/http_access.html", rules=rules)
 
-@app.route('/admin/view-logs')
+
+@app.route("/admin/view-logs")
 def view_logs():
     """Ver logs de Squid"""
-    log_files = [
-        '/var/log/squid/access.log',
-        '/var/log/squid/cache.log'
-    ]
+    log_files = ["/var/log/squid/access.log", "/var/log/squid/cache.log"]
     logs = {}
     for log_file in log_files:
         try:
@@ -706,29 +715,35 @@ def view_logs():
                 lines = f.readlines()
                 logs[os.path.basename(log_file)] = lines[-100:]
         except FileNotFoundError:
-            logs[os.path.basename(log_file)] = ['Log file not found']
+            logs[os.path.basename(log_file)] = ["Log file not found"]
         except Exception as e:
-            logs[os.path.basename(log_file)] = [f'Error reading log: {str(e)}']
+            logs[os.path.basename(log_file)] = [f"Error reading log: {str(e)}"]
 
-    return render_template('admin/logs.html', logs=logs)
+    return render_template("admin/logs.html", logs=logs)
 
-@app.route('/admin/api/restart-squid', methods=['POST'])
+
+@app.route("/admin/api/restart-squid", methods=["POST"])
 def restart_squid():
     """Reiniciar servicio Squid"""
     try:
-        os.system('systemctl restart squid')
-        return jsonify({'status': 'success', 'message': 'Squid reiniciado exitosamente'})
+        os.system("systemctl restart squid")
+        return jsonify(
+            {"status": "success", "message": "Squid reiniciado exitosamente"}
+        )
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
+        return jsonify({"status": "error", "message": str(e)})
 
-@app.route('/admin/api/reload-squid', methods=['POST'])
+
+@app.route("/admin/api/reload-squid", methods=["POST"])
 def reload_squid():
     """Recargar configuración de Squid"""
     try:
-        os.system('systemctl reload squid')
-        return jsonify({'status': 'success', 'message': 'Configuración recargada exitosamente'})
+        os.system("systemctl reload squid")
+        return jsonify(
+            {"status": "success", "message": "Configuración recargada exitosamente"}
+        )
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
+        return jsonify({"status": "error", "message": str(e)})
 
 
 # Iniciar el hilo de actualización de datos en tiempo real
