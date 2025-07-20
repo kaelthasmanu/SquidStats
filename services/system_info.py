@@ -220,7 +220,6 @@ def get_network_stats():
 
 
 def get_timezone():
-    """Obtiene la zona horaria del sistema"""
     try:
         if os.path.exists("/etc/timezone"):
             with open("/etc/timezone") as f:

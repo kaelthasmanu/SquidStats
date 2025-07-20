@@ -23,6 +23,7 @@ from database.database import get_dynamic_models, get_session
 from parsers.cache import fetch_squid_cache_stats
 from parsers.connections import group_by_user, parse_raw_data
 from parsers.log import find_last_parent_proxy, process_logs
+from parsers.squid_info import fetch_squid_info_stats
 from services.auditoria_service import (
     find_by_ip,
     find_by_keyword,
@@ -126,12 +127,16 @@ def index():
         if isinstance(network_info, list) and network_info:
             squid_ip = network_info[0].get("ip", "No disponible")
 
+        # Obtener estadísticas detalladas de Squid
+        squid_info_stats = fetch_squid_info_stats()
+
         return render_template(
             "index.html",
             grouped_connections=grouped_connections,
             parent_proxy_ip=parent_ip,
             squid_ip=squid_ip,
             squid_version=squid_version,
+            squid_info_stats=squid_info_stats,
             page_icon="favicon.ico",
             page_title="Inicio Dashboard",
         )

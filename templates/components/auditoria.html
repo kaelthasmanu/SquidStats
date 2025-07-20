@@ -1,5 +1,8 @@
 <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}">
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/toastr.min.css') }}"
+/>
 <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
 
@@ -139,18 +142,19 @@
                 class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 pr-8"
                 autocomplete="off"
               />
-              <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-              <div id="user-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+              <i
+                class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"
+              ></i>
+              <div
+                id="user-dropdown"
+                class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto hidden"
+              >
                 <div id="user-options-container">
                   <!-- Las opciones se llenarán dinámicamente -->
                 </div>
               </div>
             </div>
-            <select
-              id="username-filter"
-              name="username"
-              class="hidden"
-            >
+            <select id="username-filter" name="username" class="hidden">
               <option value="">-- Todos --</option>
             </select>
           </div>
@@ -347,23 +351,22 @@
 </div>
 
 <script>
-
   toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-right",
-    "preventDuplicates": true,
-    "onclick": null,
-    "showDuration": "300",
-    "hideDuration": "1000",
-    "timeOut": "5000",
-    "extendedTimeOut": "1000",
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
+    closeButton: false,
+    debug: false,
+    newestOnTop: true,
+    progressBar: false,
+    positionClass: "toast-top-right",
+    preventDuplicates: true,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "5000",
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
   };
 
   function toggleDetails(header) {
@@ -411,11 +414,11 @@
     const getLocalDateString = () => {
       const today = new Date();
       const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
     };
-    
+
     const todayString = getLocalDateString();
     startDateInput.value = todayString;
     endDateInput.value = todayString;
@@ -426,37 +429,46 @@
     let selectedUserIndex = -1;
     const userSearchInput = document.getElementById("user-search-input");
     const userDropdown = document.getElementById("user-dropdown");
-    const userOptionsContainer = document.getElementById("user-options-container");
+    const userOptionsContainer = document.getElementById(
+      "user-options-container"
+    );
     const usernameFilterSelect = document.getElementById("username-filter");
 
     // Función para renderizar las opciones de usuarios
     function renderUserOptions(users, searchTerm = "") {
       userOptionsContainer.innerHTML = "";
-      
+
       // Agregar opción "Todos" si no hay término de búsqueda
       if (!searchTerm) {
         const allOption = document.createElement("div");
-        allOption.className = "px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 border-b border-gray-100";
+        allOption.className =
+          "px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 border-b border-gray-100";
         allOption.textContent = "-- Todos --";
         allOption.dataset.value = "";
-        allOption.addEventListener("click", () => selectUser("", "-- Todos --"));
+        allOption.addEventListener("click", () =>
+          selectUser("", "-- Todos --")
+        );
         userOptionsContainer.appendChild(allOption);
       }
 
       users.forEach((user, index) => {
         const option = document.createElement("div");
-        option.className = "px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700";
+        option.className =
+          "px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700";
         option.textContent = user;
         option.dataset.value = user;
         option.dataset.index = index;
         option.addEventListener("click", () => selectUser(user, user));
-        
+
         // Resaltar texto coincidente
         if (searchTerm) {
-          const regex = new RegExp(`(${searchTerm})`, 'gi');
-          option.innerHTML = user.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+          const regex = new RegExp(`(${searchTerm})`, "gi");
+          option.innerHTML = user.replace(
+            regex,
+            '<mark class="bg-yellow-200">$1</mark>'
+          );
         }
-        
+
         userOptionsContainer.appendChild(option);
       });
 
@@ -481,7 +493,7 @@
       if (!searchTerm) {
         filteredUsers = [...allUsers];
       } else {
-        filteredUsers = allUsers.filter(user => 
+        filteredUsers = allUsers.filter((user) =>
           user.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
@@ -489,21 +501,21 @@
     }
 
     // Event listeners para el buscador de usuarios
-    userSearchInput.addEventListener("input", function(e) {
+    userSearchInput.addEventListener("input", function (e) {
       const searchTerm = e.target.value;
       filterUsers(searchTerm);
       userDropdown.classList.remove("hidden");
       selectedUserIndex = -1;
     });
 
-    userSearchInput.addEventListener("focus", function() {
+    userSearchInput.addEventListener("focus", function () {
       filterUsers(userSearchInput.value);
       userDropdown.classList.remove("hidden");
     });
 
-    userSearchInput.addEventListener("keydown", function(e) {
+    userSearchInput.addEventListener("keydown", function (e) {
       const options = userOptionsContainer.querySelectorAll("[data-value]");
-      
+
       if (e.key === "ArrowDown") {
         e.preventDefault();
         selectedUserIndex = Math.min(selectedUserIndex + 1, options.length - 1);
@@ -531,8 +543,11 @@
     }
 
     // Cerrar dropdown al hacer clic fuera
-    document.addEventListener("click", function(e) {
-      if (!userSearchInput.contains(e.target) && !userDropdown.contains(e.target)) {
+    document.addEventListener("click", function (e) {
+      if (
+        !userSearchInput.contains(e.target) &&
+        !userDropdown.contains(e.target)
+      ) {
         userDropdown.classList.add("hidden");
         selectedUserIndex = -1;
       }
@@ -543,7 +558,7 @@
       .then((users) => {
         allUsers = users;
         filteredUsers = [...users];
-        
+
         // Llenar el select oculto para compatibilidad
         users.forEach((user) => {
           const option = document.createElement("option");
@@ -551,7 +566,7 @@
           option.textContent = user;
           usernameFilterSelect.appendChild(option);
         });
-        
+
         renderUserOptions(filteredUsers);
         /* toastr.success(`${users.length} usuarios cargados`, "Usuarios disponibles", {
           "timeOut": 2000 */
@@ -618,15 +633,16 @@
     // Función para restaurar el botón de envío a su estado original
     function restoreSubmitButton() {
       const submitButton = form.querySelector('button[type="submit"]');
-      const buttonIcon = submitButton.querySelector('i');
-      
+      const buttonIcon = submitButton.querySelector("i");
+
       submitButton.disabled = false;
-      submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-      submitButton.classList.add('hover:bg-blue-700', 'hover:shadow-xl');
-      
+      submitButton.classList.remove("opacity-50", "cursor-not-allowed");
+      submitButton.classList.add("hover:bg-blue-700", "hover:shadow-xl");
+
       // Restaurar el icono y texto original
-      buttonIcon.className = 'fas fa-play mr-2';
-      submitButton.innerHTML = '<i class="fas fa-play mr-2"></i>Generar Reporte';
+      buttonIcon.className = "fas fa-play mr-2";
+      submitButton.innerHTML =
+        '<i class="fas fa-play mr-2"></i>Generar Reporte';
     }
 
     form.addEventListener("submit", function (event) {
@@ -651,7 +667,10 @@
         return;
       }
       if (requiredInputs.includes("keyword") && !data.keyword) {
-        toastr.error("Por favor, ingrese una palabra clave.", "Campo requerido");
+        toastr.error(
+          "Por favor, ingrese una palabra clave.",
+          "Campo requerido"
+        );
         return;
       }
       if (requiredInputs.includes("ip") && !data.ip_address) {
@@ -659,14 +678,20 @@
         return;
       }
       if (requiredInputs.includes("response_code") && !data.response_code) {
-        toastr.error("Por favor, seleccione un código de respuesta.", "Campo requerido");
+        toastr.error(
+          "Por favor, seleccione un código de respuesta.",
+          "Campo requerido"
+        );
         return;
       }
       if (
         requiredInputs.includes("social_media") &&
         data.social_media_sites.length === 0
       ) {
-        toastr.error("Por favor, seleccione al menos una red social.", "Campo requerido");
+        toastr.error(
+          "Por favor, seleccione al menos una red social.",
+          "Campo requerido"
+        );
         return;
       }
 
@@ -679,21 +704,23 @@
 
       // Deshabilitar el botón y cambiar su apariencia
       const submitButton = form.querySelector('button[type="submit"]');
-      const buttonIcon = submitButton.querySelector('i');
-      const buttonText = submitButton.querySelector('span') || submitButton.lastChild;
-      
+      const buttonIcon = submitButton.querySelector("i");
+      const buttonText =
+        submitButton.querySelector("span") || submitButton.lastChild;
+
       submitButton.disabled = true;
-      submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-      submitButton.classList.remove('hover:bg-blue-700', 'hover:shadow-xl');
-      
+      submitButton.classList.add("opacity-50", "cursor-not-allowed");
+      submitButton.classList.remove("hover:bg-blue-700", "hover:shadow-xl");
+
       // Cambiar el icono a spinner
-      buttonIcon.className = 'fas fa-spinner fa-spin mr-2';
-      
+      buttonIcon.className = "fas fa-spinner fa-spin mr-2";
+
       // Cambiar el texto del botón
       if (buttonText.nodeType === Node.TEXT_NODE) {
-        buttonText.textContent = 'Generando Reporte...';
+        buttonText.textContent = "Generando Reporte...";
       } else {
-        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generando Reporte...';
+        submitButton.innerHTML =
+          '<i class="fas fa-spinner fa-spin mr-2"></i>Generando Reporte...';
       }
 
       resultsContainer.innerHTML = `
@@ -713,18 +740,21 @@
         .then((result) => {
           toastr.clear();
           restoreSubmitButton();
-          
+
           if (result.error) {
             toastr.error(result.error, "Error en la auditoría");
           } else {
-            toastr.success("Reporte generado exitosamente", "Auditoría completada");
+            toastr.success(
+              "Reporte generado exitosamente",
+              "Auditoría completada"
+            );
           }
           renderResults(data.audit_type, result, data);
         })
         .catch((error) => {
           toastr.clear();
           restoreSubmitButton();
-          
+
           toastr.error("Error de conexión con el servidor", "Error de red");
           resultsContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><div class="text-center text-red-500 py-10"><strong>Error de red o del servidor:</strong> ${error}</div></div>`;
         });
@@ -739,8 +769,7 @@
           html = renderUserSummary(data);
         } else if (auditType === "top_users_data") {
           html = renderTopUsers(data);
-        }
-        else if (auditType === "daily_activity") {
+        } else if (auditType === "daily_activity") {
           const user = formData.username;
           const date = formData.start_date;
           let title = `Distribución de Peticiones para '${user}' el ${date}`;
@@ -753,8 +782,7 @@
           } else {
             html = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">No se encontraron peticiones para la fecha y usuario seleccionado.</p></div>`;
           }
-        }
-        else if (
+        } else if (
           [
             "keyword_search",
             "ip_activity",
@@ -1098,11 +1126,11 @@
     function renderResponseChart(canvas, responses) {
       // Mapeo de códigos de respuesta a colores
       const getResponseColor = (code) => {
-        if (code >= 500) return '#DC2626'; // Error de servidor
-        if (code >= 400) return '#F59E0B'; // Error de cliente
-        if (code >= 300) return '#3B82F6'; // Redirección
-        if (code >= 200) return '#10B981'; // Éxito
-        return '#6B7280'; // Otros
+        if (code >= 500) return "#DC2626"; // Error de servidor
+        if (code >= 400) return "#F59E0B"; // Error de cliente
+        if (code >= 300) return "#3B82F6"; // Redirección
+        if (code >= 200) return "#10B981"; // Éxito
+        return "#6B7280"; // Otros
       };
 
       // Configuración del gráfico
@@ -1131,7 +1159,7 @@
                 },
                 padding: 10,
                 usePointStyle: true,
-                pointStyle: 'circle'
+                pointStyle: "circle",
               },
             },
             tooltip: {

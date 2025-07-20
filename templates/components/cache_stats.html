@@ -1,386 +1,937 @@
-{% macro flip_card(icon, title, value, back_title, description, extra_html='') %}
+{% macro flip_card(icon, title, value, back_title, description, extra_html='')
+%}
 <div class="group w-full h-48 [perspective:1000px]">
+  <div
+    class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]"
+  >
     <div
-        class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-        <div
-            class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
-            <i class="{{ icon }} text-3xl text-blue-600 mb-2"></i>
-            <h3 class="text-lg font-semibold text-gray-800">{{ title }}</h3>
-            {% if extra_html %}
-            {{ extra_html | safe }}
-            {% else %}
-            <p class="text-xl text-blue-800" data-stat="{{ title|replace(' ', '_')|lower }}">{{ value }}</p>
-            {% endif %}
-        </div>
-        <div
-            class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]">
-            <h3 class="text-lg font-semibold mb-2">{{ back_title }}</h3>
-            <p class="text-sm">{{ description }}</p>
-        </div>
+      class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]"
+    >
+      <i class="{{ icon }} text-3xl text-blue-600 mb-2"></i>
+      <h3 class="text-lg font-semibold text-gray-800">{{ title }}</h3>
+      {% if extra_html %} {{ extra_html | safe }} {% else %}
+      <p
+        class="text-xl text-blue-800"
+        data-stat="{{ title|replace(' ', '_')|lower }}"
+      >
+        {{ value }}
+      </p>
+      {% endif %}
     </div>
+    <div
+      class="absolute inset-0 bg-blue-600 text-white rounded-xl px-4 py-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden]"
+    >
+      <h3 class="text-lg font-semibold mb-2">{{ back_title }}</h3>
+      <p class="text-sm">{{ description }}</p>
+    </div>
+  </div>
 </div>
 {% endmacro %}
 
 <!DOCTYPE html>
 <html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard de Sistema</title>
-    <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon">
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename=page_icon) }}"
+      type="image/x-icon"
+    />
     <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='all.min.css') }}"
+    />
     <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <style>
-        @keyframes progress { 0% { stroke-dasharray: 0 100; } }
-        .circle-animation { animation: progress 1s ease-out forwards; }
-        .main-tab-content, .tab-content { display: none; }
-        .main-tab-content.active, .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .main-tab-btn.active::after {
-            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-            background-color: #3b82f6; animation: underline 0.3s ease;
+      @keyframes progress {
+        0% {
+          stroke-dasharray: 0 100;
         }
-        @keyframes underline { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-        .value-change { animation: pulse 1s; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        .time-range-btn { transition: all 0.3s ease; }
-        .time-range-btn.active { background-color: white; color: #2563eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
-        .time-range-btn:not(.active) { background-color: transparent; color: #6b7280; }
-        .time-range-btn:not(.active):hover { color: #2563eb; }
+      }
+      .circle-animation {
+        animation: progress 1s ease-out forwards;
+      }
+      .main-tab-content,
+      .tab-content {
+        display: none;
+      }
+      .main-tab-content.active,
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .main-tab-btn.active::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #3b82f6;
+        animation: underline 0.3s ease;
+      }
+      @keyframes underline {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+      .value-change {
+        animation: pulse 1s;
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .time-range-btn {
+        transition: all 0.3s ease;
+      }
+      .time-range-btn.active {
+        background-color: white;
+        color: #2563eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .time-range-btn:not(.active) {
+        background-color: transparent;
+        color: #6b7280;
+      }
+      .time-range-btn:not(.active):hover {
+        color: #2563eb;
+      }
     </style>
-</head>
+  </head>
 
-<body class="bg-gray-50">
+  <body class="bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Dashboard de Estadísticas del Sistema</h1>
+      <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">
+        Dashboard de Estadísticas del Sistema
+      </h1>
 
-        <div class="flex border-b mb-6">
-            <button id="dashboardTab" class="main-tab-btn active relative overflow-hidden py-3 px-6 font-medium text-blue-600">
-                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard del Sistema
+      <div class="flex border-b mb-6">
+        <button
+          id="dashboardTab"
+          class="main-tab-btn active relative overflow-hidden py-3 px-6 font-medium text-blue-600"
+        >
+          <i class="fas fa-tachometer-alt mr-2"></i>Dashboard del Sistema
+        </button>
+        <button
+          id="cacheTab"
+          class="main-tab-btn relative overflow-hidden py-3 px-6 font-medium text-gray-500 hover:text-blue-600"
+        >
+          <i class="fas fa-database mr-2"></i>Estadísticas de Caché
+        </button>
+        <button
+          id="networkTab"
+          class="main-tab-btn relative overflow-hidden py-3 px-6 font-medium text-gray-500 hover:text-blue-600"
+        >
+          <i class="fas fa-network-wired mr-2"></i>Tráfico de Red
+        </button>
+      </div>
+
+      <div id="dashboardContent" class="main-tab-content active">
+        <section class="mb-12">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+              <div class="flex items-center mb-6">
+                <i class="fas fa-chart-pie text-2xl text-blue-600 mr-3"></i>
+                <h2 class="text-xl font-bold text-gray-800">
+                  Estadísticas del Sistema
+                </h2>
+              </div>
+              <div
+                class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center justify-center"
+              >
+                <div class="flex flex-col items-center justify-center">
+                  <div class="relative w-36 h-36">
+                    <svg viewBox="0 0 36 36" class="block mx-auto">
+                      <path
+                        class="fill-none stroke-red-100 stroke-[3.5]"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        id="cpu-ring"
+                        class="circle-animation fill-none stroke-linecap-round stroke-red-500 stroke-[3.5]"
+                        stroke-dasharray="0,100"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <text
+                        id="cpu-value"
+                        x="18"
+                        y="18"
+                        class="text-[0.5rem] fill-gray-500"
+                        text-anchor="middle"
+                        dominant-baseline="middle"
+                      >
+                        0%
+                      </text>
+                    </svg>
+                  </div>
+                  <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
+                  <p
+                    class="text-xs mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full font-medium"
+                  >
+                    {{ system_info.cpu.physical_cores }} núcleos
+                  </p>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                  <div class="relative w-36 h-36">
+                    <svg viewBox="0 0 36 36" class="block mx-auto">
+                      <path
+                        class="fill-none stroke-blue-100 stroke-[3.5]"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        id="ram-ring"
+                        class="circle-animation fill-none stroke-linecap-round stroke-blue-600 stroke-[3.5]"
+                        stroke-dasharray="0,100"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <text
+                        id="ram-used"
+                        x="18"
+                        y="18"
+                        class="text-[0.5rem] fill-gray-500"
+                        text-anchor="middle"
+                        dominant-baseline="middle"
+                      >
+                        0G
+                      </text>
+                    </svg>
+                  </div>
+                  <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
+                  <p
+                    class="text-xs mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium"
+                  >
+                    {{ system_info.ram.total }}
+                  </p>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                  <div class="relative w-36 h-36">
+                    <svg viewBox="0 0 36 36" class="block mx-auto">
+                      <path
+                        class="fill-none stroke-emerald-100 stroke-[3.5]"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        id="swap-ring"
+                        class="circle-animation fill-none stroke-linecap-round stroke-emerald-500 stroke-[3.5]"
+                        stroke-dasharray="0,100"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <text
+                        id="swap-used"
+                        x="18"
+                        y="18"
+                        class="text-[0.5rem] fill-gray-500"
+                        text-anchor="middle"
+                        dominant-baseline="middle"
+                      >
+                        0G
+                      </text>
+                    </svg>
+                  </div>
+                  <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
+                  <p
+                    class="text-xs mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium"
+                  >
+                    {{ system_info.swap.total }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+              <div class="flex items-center mb-6">
+                <i class="fas fa-info-circle text-2xl text-blue-600 mr-3"></i>
+                <h2 class="text-xl font-bold text-gray-800">
+                  Información del Sistema
+                </h2>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-start">
+                  <i class="fas fa-server text-gray-500 mt-1 mr-3"></i>
+                  <div>
+                    <h3 class="text-sm font-semibold text-gray-600">
+                      Nombre del Host
+                    </h3>
+                    <p id="hostname" class="text-gray-800">
+                      {{ system_info.hostname }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <i class="fas fa-network-wired text-gray-500 mt-1 mr-3"></i>
+                  <div>
+                    <h3 class="text-sm font-semibold text-gray-600">
+                      Direcciones IP
+                    </h3>
+                    <p id="ip-addresses" class="text-gray-800">
+                      {% for ip in system_info.ips %}{{ ip.ip }}<br />{% endfor
+                      %}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <i class="fab fa-linux text-gray-500 mt-1 mr-3"></i>
+                  <div>
+                    <h3 class="text-sm font-semibold text-gray-600">
+                      Sistema Operativo
+                    </h3>
+                    <p id="os-info" class="text-gray-800">
+                      {{ system_info.os }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
+                  <div>
+                    <h3 class="text-sm font-semibold text-gray-600">
+                      Tiempo Encendido
+                    </h3>
+                    <p id="uptime" class="text-gray-800">
+                      {{ system_info.uptime }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <i class="fas fa-globe text-gray-500 mt-1 mr-3"></i>
+                  <div>
+                    <h3 class="text-sm font-semibold text-gray-600">
+                      Zona Horaria
+                    </h3>
+                    <p id="timezone" class="text-gray-800">
+                      {{ system_info.timezone }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
+                  <div>
+                    <h3 class="text-sm font-semibold text-gray-600">
+                      Hora Local
+                    </h3>
+                    <p id="local-time" class="text-gray-800">
+                      {{ system_info.local_time }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-gray-800">
+              Gráficas del Sistema
+            </h2>
+            <div class="flex bg-gray-100 rounded-lg p-1">
+              <button
+                id="todayBtn"
+                class="time-range-btn active px-4 py-2 rounded-md text-sm font-medium text-blue-600 bg-white shadow"
+              >
+                Hoy
+              </button>
+              <button
+                id="24hoursBtn"
+                class="time-range-btn px-4 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-blue-600"
+              >
+                24 Horas
+              </button>
+            </div>
+          </div>
+          <div class="flex border-b mb-6">
+            <button
+              class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
+            >
+              CPU
             </button>
-            <button id="cacheTab" class="main-tab-btn relative overflow-hidden py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
-                <i class="fas fa-database mr-2"></i>Estadísticas de Caché
+            <button
+              class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
+            >
+              RAM
             </button>
-            <button id="networkTab" class="main-tab-btn relative overflow-hidden py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
-                <i class="fas fa-network-wired mr-2"></i>Tráfico de Red
+            <button
+              class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
+            >
+              SWAP
             </button>
-        </div>
+          </div>
+          <div class="tab-content active">
+            <div class="h-80"><canvas id="cpuChart"></canvas></div>
+          </div>
+          <div class="tab-content">
+            <div class="h-80"><canvas id="ramChart"></canvas></div>
+          </div>
+          <div class="tab-content">
+            <div class="h-80"><canvas id="swapChart"></canvas></div>
+          </div>
+        </section>
+      </div>
 
-        <div id="dashboardContent" class="main-tab-content active">
-            <section class="mb-12">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <div class="flex items-center mb-6">
-                            <i class="fas fa-chart-pie text-2xl text-blue-600 mr-3"></i>
-                            <h2 class="text-xl font-bold text-gray-800">Estadísticas del Sistema</h2>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center justify-center">
-                            <div class="flex flex-col items-center justify-center">
-                                <div class="relative w-36 h-36">
-                                    <svg viewBox="0 0 36 36" class="block mx-auto">
-                                        <path class="fill-none stroke-red-100 stroke-[3.5]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path id="cpu-ring" class="circle-animation fill-none stroke-linecap-round stroke-red-500 stroke-[3.5]" stroke-dasharray="0,100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <text id="cpu-value" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0%</text>
-                                    </svg>
-                                </div>
-                                <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
-                                <p class="text-xs mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full font-medium">{{ system_info.cpu.physical_cores }} núcleos</p>
-                            </div>
-                            <div class="flex flex-col items-center justify-center">
-                                <div class="relative w-36 h-36">
-                                    <svg viewBox="0 0 36 36" class="block mx-auto">
-                                        <path class="fill-none stroke-blue-100 stroke-[3.5]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path id="ram-ring" class="circle-animation fill-none stroke-linecap-round stroke-blue-600 stroke-[3.5]" stroke-dasharray="0,100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <text id="ram-used" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
-                                    </svg>
-                                </div>
-                                <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
-                                <p class="text-xs mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">{{ system_info.ram.total }}</p>
-                            </div>
-                            <div class="flex flex-col items-center justify-center">
-                                <div class="relative w-36 h-36">
-                                    <svg viewBox="0 0 36 36" class="block mx-auto">
-                                        <path class="fill-none stroke-emerald-100 stroke-[3.5]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <path id="swap-ring" class="circle-animation fill-none stroke-linecap-round stroke-emerald-500 stroke-[3.5]" stroke-dasharray="0,100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                        <text id="swap-used" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
-                                    </svg>
-                                </div>
-                                <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
-                                <p class="text-xs mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium">{{ system_info.swap.total }}</p>
-                            </div>
-                        </div>
-                    </div>
+      <div id="cacheContent" class="main-tab-content">
+        <section class="cache-stats">
+          <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center mb-6">
+              <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
+              <h2 class="text-2xl font-bold text-gray-800">
+                Estadísticas de Caché
+              </h2>
+            </div>
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-[1000px] mx-auto"
+            >
+              {{ flip_card(icon='fas fa-database', title='Entradas almacenadas',
+              value=cache_stats.store_entries, back_title='Entradas
+              Almacenadas', description='Número de objetos actualmente en la
+              caché de Squid.') }} {{ flip_card(icon='fas fa-chart-pie',
+              title='Uso de capacidad', value=cache_stats.capacity_used,
+              back_title='Uso de capacidad', description='Porcentaje del
+              almacenamiento de caché en uso actualmente.') }} {% if
+              cache_stats.fs_space_total and cache_stats.fs_space_total > 0 %}
+              {% set total_space_html %}{% if (cache_stats.fs_space_total /
+              1024) < 1024 %}
+              <p class="text-xl text-blue-800" data-stat="espacio_total">
+                {{ (cache_stats.fs_space_total / 1024)|int }} MB
+              </p>
+              {% else %}
+              <p class="text-xl text-blue-800" data-stat="espacio_total">
+                {{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }} GB
+              </p>
+              {% endif %}{% endset %} {{ flip_card(icon='fas fa-hdd',
+              title='Espacio total', back_title='Espacio total',
+              description='Tamaño total del disco asignado a la caché de
+              Squid.', extra_html=total_space_html) }} {% else %} {{
+              flip_card(icon='fas fa-hdd', title='Espacio total',
+              back_title='Espacio total', description='Tamaño total del disco
+              asignado a la caché de Squid.', extra_html='
+              <p class="text-xl text-red-600">No disponible</p>
+              ') }} {% endif %} {% set used_space_html %}{% if
+              (cache_stats.fs_space_used / 1024) < 1024 %}
+              <p class="text-xl text-blue-800" data-stat="espacio_usado">
+                {{ (cache_stats.fs_space_used / 1024)|int }} MB
+              </p>
+              {% else %}
+              <p class="text-xl text-blue-800" data-stat="espacio_usado">
+                {{ (cache_stats.fs_space_used / 1024 / 1024)|round(2) }} GB
+              </p>
+              {% endif %}{% endset %}{{ flip_card(icon='fas fa-folder-open',
+              title='Espacio usado', back_title='Espacio usado',
+              description='Cantidad de espacio de disco ya ocupado por objetos
+              en caché.', extra_html=used_space_html) }} {{ flip_card(icon='fas
+              fa-recycle', title='Eliminación',
+              value=cache_stats.removal_policy, back_title='Política de
+              eliminación', description='Método que Squid usa para eliminar
+              objetos antiguos de la caché.') }} {{ flip_card(icon='fas
+              fa-clock', title='Edad LRU', value=cache_stats.lru_age_days ~ '
+              días', back_title='Edad LRU', description='Tiempo desde que el
+              objeto menos usado fue accedido por última vez.') }}
+            </div>
+          </div>
+        </section>
+      </div>
 
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <div class="flex items-center mb-6">
-                            <i class="fas fa-info-circle text-2xl text-blue-600 mr-3"></i>
-                            <h2 class="text-xl font-bold text-gray-800">Información del Sistema</h2>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="flex items-start"><i class="fas fa-server text-gray-500 mt-1 mr-3"></i><div><h3 class="text-sm font-semibold text-gray-600">Nombre del Host</h3><p id="hostname" class="text-gray-800">{{ system_info.hostname }}</p></div></div>
-                            <div class="flex items-start"><i class="fas fa-network-wired text-gray-500 mt-1 mr-3"></i><div><h3 class="text-sm font-semibold text-gray-600">Direcciones IP</h3><p id="ip-addresses" class="text-gray-800">{% for ip in system_info.ips %}{{ ip.ip }}<br>{% endfor %}</p></div></div>
-                            <div class="flex items-start"><i class="fab fa-linux text-gray-500 mt-1 mr-3"></i><div><h3 class="text-sm font-semibold text-gray-600">Sistema Operativo</h3><p id="os-info" class="text-gray-800">{{ system_info.os }}</p></div></div>
-                            <div class="flex items-start"><i class="fas fa-clock text-gray-500 mt-1 mr-3"></i><div><h3 class="text-sm font-semibold text-gray-600">Tiempo Encendido</h3><p id="uptime" class="text-gray-800">{{ system_info.uptime }}</p></div></div>
-                            <div class="flex items-start"><i class="fas fa-globe text-gray-500 mt-1 mr-3"></i><div><h3 class="text-sm font-semibold text-gray-600">Zona Horaria</h3><p id="timezone" class="text-gray-800">{{ system_info.timezone }}</p></div></div>
-                            <div class="flex items-start"><i class="fas fa-clock text-gray-500 mt-1 mr-3"></i><div><h3 class="text-sm font-semibold text-gray-600">Hora Local</h3><p id="local-time" class="text-gray-800">{{ system_info.local_time }}</p></div></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-gray-800">Gráficas del Sistema</h2>
-                    <div class="flex bg-gray-100 rounded-lg p-1">
-                        <button id="todayBtn" class="time-range-btn active px-4 py-2 rounded-md text-sm font-medium text-blue-600 bg-white shadow">Hoy</button>
-                        <button id="24hoursBtn" class="time-range-btn px-4 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-blue-600">24 Horas</button>
-                    </div>
-                </div>
-                <div class="flex border-b mb-6">
-                    <button class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100">CPU</button>
-                    <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100">RAM</button>
-                    <button class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100">SWAP</button>
-                </div>
-                <div class="tab-content active"><div class="h-80"><canvas id="cpuChart"></canvas></div></div>
-                <div class="tab-content"><div class="h-80"><canvas id="ramChart"></canvas></div></div>
-                <div class="tab-content"><div class="h-80"><canvas id="swapChart"></canvas></div></div>
-            </section>
-        </div>
-
-        <div id="cacheContent" class="main-tab-content">
-            <section class="cache-stats">
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                    <div class="flex items-center mb-6">
-                        <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
-                        <h2 class="text-2xl font-bold text-gray-800">Estadísticas de Caché</h2>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-[1000px] mx-auto">
-                        {{ flip_card(icon='fas fa-database', title='Entradas almacenadas', value=cache_stats.store_entries, back_title='Entradas Almacenadas', description='Número de objetos actualmente en la caché de Squid.') }}
-                        {{ flip_card(icon='fas fa-chart-pie', title='Uso de capacidad', value=cache_stats.capacity_used, back_title='Uso de capacidad', description='Porcentaje del almacenamiento de caché en uso actualmente.') }}
-                        {% if cache_stats.fs_space_total and cache_stats.fs_space_total > 0 %}
-                            {% set total_space_html %}{% if (cache_stats.fs_space_total / 1024) < 1024 %}<p class="text-xl text-blue-800" data-stat="espacio_total">{{ (cache_stats.fs_space_total / 1024)|int }} MB</p>{% else %}<p class="text-xl text-blue-800" data-stat="espacio_total">{{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }} GB</p>{% endif %}{% endset %}
-                            {{ flip_card(icon='fas fa-hdd', title='Espacio total', back_title='Espacio total', description='Tamaño total del disco asignado a la caché de Squid.', extra_html=total_space_html) }}
-                        {% else %}
-                            {{ flip_card(icon='fas fa-hdd', title='Espacio total', back_title='Espacio total', description='Tamaño total del disco asignado a la caché de Squid.', extra_html='<p class="text-xl text-red-600">No disponible</p>') }}
-                        {% endif %}
-                        {% set used_space_html %}{% if (cache_stats.fs_space_used / 1024) < 1024 %}<p class="text-xl text-blue-800" data-stat="espacio_usado">{{ (cache_stats.fs_space_used / 1024)|int }} MB</p>{% else %}<p class="text-xl text-blue-800" data-stat="espacio_usado">{{ (cache_stats.fs_space_used / 1024 / 1024)|round(2) }} GB</p>{% endif %}{% endset %}{{ flip_card(icon='fas fa-folder-open', title='Espacio usado', back_title='Espacio usado', description='Cantidad de espacio de disco ya ocupado por objetos en caché.', extra_html=used_space_html) }}
-                        {{ flip_card(icon='fas fa-recycle', title='Eliminación', value=cache_stats.removal_policy, back_title='Política de eliminación', description='Método que Squid usa para eliminar objetos antiguos de la caché.') }}
-                        {{ flip_card(icon='fas fa-clock', title='Edad LRU', value=cache_stats.lru_age_days ~ ' días', back_title='Edad LRU', description='Tiempo desde que el objeto menos usado fue accedido por última vez.') }}
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <div id="networkContent" class="main-tab-content">
-            <section class="bg-white rounded-xl shadow-lg p-6">
-                <div class="flex items-center mb-6">
-                    <i class="fas fa-network-wired text-2xl text-blue-600 mr-3"></i>
-                    <h2 class="text-xl font-bold text-gray-800">Tráfico de Red</h2>
-                </div>
-                <div class="h-80"><canvas id="networkChart"></canvas></div>
-            </section>
-        </div>
+      <div id="networkContent" class="main-tab-content">
+        <section class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center mb-6">
+            <i class="fas fa-network-wired text-2xl text-blue-600 mr-3"></i>
+            <h2 class="text-xl font-bold text-gray-800">Tráfico de Red</h2>
+          </div>
+          <div class="h-80"><canvas id="networkChart"></canvas></div>
+        </section>
+      </div>
     </div>
 
     <script>
-        Chart.register(ChartDataLabels);
+      Chart.register(ChartDataLabels);
 
-        let maxRamBytes = 0, maxSwapBytes = 0;
-        const historySize = 240; // Reducido de 720 a 240 (4 horas de datos con intervalos de 1 minuto)
-        let liveDataCounter = 0; // Contador para manejar datos en vivo 
-        
-        // --- FUNCIONES ORIGINALES (COMPLETAS Y RESTAURADAS) ---
-        function getLocalTimeString() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            return `${hours}:${minutes} ${ampm}`;
-        }
-        
-        function formatTime(date) {
-            let hours = date.getHours();
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            return `${hours}:${minutes} ${ampm}`;
-        }
-        function openMainTab(tabName) {
-            document.querySelectorAll('.main-tab-content').forEach(content => content.classList.remove('active'));
-            document.querySelectorAll('.main-tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'text-blue-600');
-                btn.classList.add('text-gray-500');
-            });
-            document.getElementById(tabName + 'Content').classList.add('active');
-            const tabBtn = document.getElementById(tabName + 'Tab');
-            tabBtn.classList.add('active', 'text-blue-600');
-            tabBtn.classList.remove('text-gray-500');
-        }
-        document.getElementById('dashboardTab').addEventListener('click', () => openMainTab('dashboard'));
-        document.getElementById('cacheTab').addEventListener('click', () => openMainTab('cache'));
-        document.getElementById('networkTab').addEventListener('click', () => openMainTab('network'));
-        document.querySelectorAll('.tab-btn').forEach((button, index) => {
-            button.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(btn => {
-                    btn.classList.remove('active', 'text-blue-600', 'border-b-2', 'border-blue-600');
-                    btn.classList.add('text-gray-500');
-                });
-                button.classList.add('active', 'text-blue-600', 'border-b-2', 'border-blue-600');
-                button.classList.remove('text-gray-500');
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                document.querySelectorAll('.tab-content')[index].classList.add('active');
-            });
+      let maxRamBytes = 0,
+        maxSwapBytes = 0;
+      const historySize = 240; // Reducido de 720 a 240 (4 horas de datos con intervalos de 1 minuto)
+      let liveDataCounter = 0; // Contador para manejar datos en vivo
+
+      // --- FUNCIONES ORIGINALES (COMPLETAS Y RESTAURADAS) ---
+      function getLocalTimeString() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${ampm}`;
+      }
+
+      function formatTime(date) {
+        let hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${ampm}`;
+      }
+      function openMainTab(tabName) {
+        document
+          .querySelectorAll(".main-tab-content")
+          .forEach((content) => content.classList.remove("active"));
+        document.querySelectorAll(".main-tab-btn").forEach((btn) => {
+          btn.classList.remove("active", "text-blue-600");
+          btn.classList.add("text-gray-500");
         });
-        const chartOptions = {
-            responsive: true, maintainAspectRatio: false, tension: 0.3, fill: true, pointRadius: 2,
-            scales: {
-                x: { grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-                y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+        document.getElementById(tabName + "Content").classList.add("active");
+        const tabBtn = document.getElementById(tabName + "Tab");
+        tabBtn.classList.add("active", "text-blue-600");
+        tabBtn.classList.remove("text-gray-500");
+      }
+      document
+        .getElementById("dashboardTab")
+        .addEventListener("click", () => openMainTab("dashboard"));
+      document
+        .getElementById("cacheTab")
+        .addEventListener("click", () => openMainTab("cache"));
+      document
+        .getElementById("networkTab")
+        .addEventListener("click", () => openMainTab("network"));
+      document.querySelectorAll(".tab-btn").forEach((button, index) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tab-btn").forEach((btn) => {
+            btn.classList.remove(
+              "active",
+              "text-blue-600",
+              "border-b-2",
+              "border-blue-600"
+            );
+            btn.classList.add("text-gray-500");
+          });
+          button.classList.add(
+            "active",
+            "text-blue-600",
+            "border-b-2",
+            "border-blue-600"
+          );
+          button.classList.remove("text-gray-500");
+          document
+            .querySelectorAll(".tab-content")
+            .forEach((content) => content.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-content")
+            [index].classList.add("active");
+        });
+      });
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        tension: 0.3,
+        fill: true,
+        pointRadius: 2,
+        scales: {
+          x: { grid: { color: "rgba(0, 0, 0, 0.05)" } },
+          y: { beginAtZero: true, grid: { color: "rgba(0, 0, 0, 0.05)" } },
+        },
+        plugins: { legend: { display: true }, datalabels: { display: false } },
+      };
+      const cpuChart = new Chart("cpuChart", {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Uso de CPU (%)",
+              data: [],
+              borderColor: "#ef4444",
+              backgroundColor: "rgba(239, 68, 68, 0.1)",
+              pointBackgroundColor: "#ef4444",
             },
-            plugins: { legend: { display: true }, datalabels: { display: false } }
+          ],
+        },
+        options: {
+          ...chartOptions,
+          scales: {
+            ...chartOptions.scales,
+            y: {
+              ...chartOptions.scales.y,
+              max: 100,
+              title: { display: true, text: "%" },
+            },
+          },
+        },
+      });
+      const ramChart = new Chart("ramChart", {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "RAM Usada",
+              data: [],
+              borderColor: "#3b82f6",
+              backgroundColor: "rgba(59, 130, 246, 0.1)",
+              pointBackgroundColor: "#3b82f6",
+            },
+          ],
+        },
+        options: {
+          ...chartOptions,
+          scales: {
+            ...chartOptions.scales,
+            y: {
+              ...chartOptions.scales.y,
+              title: { display: true, text: "Bytes" },
+              ticks: { callback: formatSizeCompact },
+            },
+          },
+          plugins: {
+            ...chartOptions.plugins,
+            tooltip: {
+              callbacks: {
+                label: (ctx) => "RAM Usada: " + formatSizeCompact(ctx.raw),
+              },
+            },
+          },
+        },
+      });
+      const swapChart = new Chart("swapChart", {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Swap Usada",
+              data: [],
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              pointBackgroundColor: "#10b981",
+            },
+          ],
+        },
+        options: {
+          ...chartOptions,
+          scales: {
+            ...chartOptions.scales,
+            y: {
+              ...chartOptions.scales.y,
+              title: { display: true, text: "Bytes" },
+              ticks: { callback: formatSizeCompact },
+            },
+          },
+          plugins: {
+            ...chartOptions.plugins,
+            tooltip: {
+              callbacks: {
+                label: (ctx) => "SWAP Usada: " + formatSizeCompact(ctx.raw),
+              },
+            },
+          },
+        },
+      });
+      const networkChart = new Chart("networkChart", {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Subida (Mbps)",
+              data: [],
+              borderColor: "#06b6d4",
+              backgroundColor: "rgba(6,182,212,0.1)",
+              pointBackgroundColor: "#06b6d4",
+            },
+            {
+              label: "Bajada (Mbps)",
+              data: [],
+              borderColor: "#f59e42",
+              backgroundColor: "rgba(245,158,66,0.1)",
+              pointBackgroundColor: "#f59e42",
+            },
+          ],
+        },
+        options: {
+          ...chartOptions,
+          scales: {
+            ...chartOptions.scales,
+            y: {
+              ...chartOptions.scales.y,
+              title: { display: true, text: "Mbps" },
+            },
+          },
+        },
+      });
+      function formatSizeCompact(bytes) {
+        if (bytes === 0) return "0 B";
+        const units = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return `${parseFloat(
+          (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)
+        )} ${units[i]}`;
+      }
+      function parseSize(sizeStr) {
+        if (!sizeStr) return { value: 0, unit: "B" };
+        const parts = sizeStr.trim().split(" ");
+        return {
+          value: parseFloat(parts[0]) || 0,
+          unit: parts.length > 1 ? parts[1].charAt(0) : "B",
         };
-        const cpuChart = new Chart('cpuChart', { type: 'line', data: { labels: [], datasets: [{ label: 'Uso de CPU (%)', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', pointBackgroundColor: '#ef4444' }] }, options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, max: 100, title: { display: true, text: '%' } } } } });
-        const ramChart = new Chart('ramChart', { type: 'line', data: { labels: [], datasets: [{ label: 'RAM Usada', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', pointBackgroundColor: '#3b82f6' }] }, options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, title: { display: true, text: 'Bytes' }, ticks: { callback: formatSizeCompact } } }, plugins: { ...chartOptions.plugins, tooltip: { callbacks: { label: ctx => 'RAM Usada: ' + formatSizeCompact(ctx.raw) } } } } });
-        const swapChart = new Chart('swapChart', { type: 'line', data: { labels: [], datasets: [{ label: 'Swap Usada', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', pointBackgroundColor: '#10b981' }] }, options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, title: { display: true, text: 'Bytes' }, ticks: { callback: formatSizeCompact } } }, plugins: { ...chartOptions.plugins, tooltip: { callbacks: { label: ctx => 'SWAP Usada: ' + formatSizeCompact(ctx.raw) } } } } });
-        const networkChart = new Chart('networkChart', { type: 'line', data: { labels: [], datasets: [ { label: 'Subida (Mbps)', data: [], borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.1)', pointBackgroundColor: '#06b6d4' }, { label: 'Bajada (Mbps)', data: [], borderColor: '#f59e42', backgroundColor: 'rgba(245,158,66,0.1)', pointBackgroundColor: '#f59e42' }] }, options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, title: { display: true, text: 'Mbps' } } } } });
-        function formatSizeCompact(bytes) { if (bytes === 0) return '0 B'; const units = ['B', 'KB', 'MB', 'GB']; const i = Math.floor(Math.log(bytes) / Math.log(1024)); return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1))} ${units[i]}`; }
-        function parseSize(sizeStr) { if (!sizeStr) return { value: 0, unit: 'B' }; const parts = sizeStr.trim().split(' '); return { value: parseFloat(parts[0]) || 0, unit: parts.length > 1 ? parts[1].charAt(0) : 'B' }; }
-        function sizeToBytes(sizeStr) { const { value, unit } = parseSize(sizeStr); const multipliers = { 'G': 1024 * 1024 * 1024, 'M': 1024 * 1024, 'K': 1024 }; return value * (multipliers[unit] || 1); }
-        function updateRings(info) { const cpuPercent = parseFloat(info.cpu.usage.replace('%', '')); document.getElementById('cpu-ring').setAttribute('stroke-dasharray', `${cpuPercent},100`); document.getElementById('cpu-value').textContent = `${cpuPercent.toFixed(1)}%`; const ramUsedInfo = parseSize(info.ram.used); document.getElementById('ram-used').textContent = `${ramUsedInfo.value.toFixed(1)}${ramUsedInfo.unit}`; document.getElementById('ram-ring').setAttribute('stroke-dasharray', `${parseFloat(info.ram.percent.replace('%', ''))},100`); const swapUsedInfo = parseSize(info.swap.used); document.getElementById('swap-used').textContent = `${swapUsedInfo.value.toFixed(1)}${swapUsedInfo.unit}`; document.getElementById('swap-ring').setAttribute('stroke-dasharray', `${parseFloat(info.swap.percent.replace('%', '') || 0)},100`); }
-        function updateSystemInfo(info) { document.getElementById('hostname').textContent = info.hostname; document.getElementById('ip-addresses').innerHTML = info.ips.map(ip => ip.ip).join('<br>'); document.getElementById('os-info').textContent = info.os; document.getElementById('uptime').textContent = info.uptime; document.getElementById('local-time').textContent = info.local_time; }
-        function updateCard(statId, value, isSize = false) { const element = document.querySelector(`[data-stat="${statId}"]`); if (!element) return; let formattedValue = value; if (isSize) { const bytes = parseFloat(value); formattedValue = (bytes / (1024 * 1024) < 1) ? `${Math.round(bytes / 1024)} MB` : `${(bytes / (1024 * 1024)).toFixed(2)} GB`; } if (element.textContent !== formattedValue.toString()) { element.textContent = formattedValue; element.classList.add('value-change'); setTimeout(() => element.classList.remove('value-change'), 1000); } }
-        function updateCacheStats(stats) { updateCard('entradas_almacenadas', stats.store_entries); updateCard('uso_de_capacidad', stats.capacity_used); updateCard('espacio_total', stats.fs_space_total, true); updateCard('espacio_usado', stats.fs_space_used, true); updateCard('eliminación', stats.removal_policy); updateCard('edad_lru', `${stats.lru_age_days} días`); }
-
-        // --- AÑADIDO: Carga de datos históricos desde la API con sampling optimizado ---
-        function loadHistoricData(endpoint = '/api/metrics/24hours') {
-            fetch(endpoint)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data || data.length === 0) { 
-                        console.log(`No hay historial de métricas para el endpoint: ${endpoint}`); 
-                        return; 
-                    }
-                    
-                    // Implementar sampling inteligente para evitar sobrecarga
-                    let sampledData = data;
-                    if (data.length > 288) { // Si hay más de 288 puntos (4.8 horas con intervalos de 1 minuto)
-                        const sampleRate = Math.ceil(data.length / 288);
-                        sampledData = data.filter((_, index) => index % sampleRate === 0);
-                        console.log(`Aplicado sampling: ${data.length} → ${sampledData.length} puntos`);
-                    }
-                    
-                    const labels = [], cpuData = [], ramData = [], swapData = [], netUpData = [], netDownData = [];
-                    sampledData.forEach(metric => {
-                        // Crear fecha local desde el timestamp del servidor (ya incluye timezone)
-                        const localDate = new Date(metric.timestamp);
-                        labels.push(formatTime(localDate));
-                        cpuData.push(parseFloat(metric.cpu_usage).toFixed(1));
-                        ramData.push(metric.ram_usage_bytes);
-                        swapData.push(metric.swap_usage_bytes);
-                        netUpData.push(((metric.net_sent_bytes_sec * 8) / 1000000).toFixed(2));
-                        netDownData.push(((metric.net_recv_bytes_sec * 8) / 1000000).toFixed(2));
-                    });
-                    const charts = [cpuChart, ramChart, swapChart, networkChart];
-                    const chartData = [cpuData, ramData, swapData, [netUpData, netDownData]];
-                    charts.forEach((chart, chartIndex) => {
-                        chart.data.labels = [...labels];
-                        if (chartIndex === 3) {
-                            chart.data.datasets[0].data = chartData[chartIndex][0];
-                            chart.data.datasets[1].data = chartData[chartIndex][1];
-                        } else {
-                            chart.data.datasets[0].data = chartData[chartIndex];
-                        }
-                        chart.update();
-                    });
-                })
-                .catch(error => console.error('Error al cargar historial de métricas:', error));
+      }
+      function sizeToBytes(sizeStr) {
+        const { value, unit } = parseSize(sizeStr);
+        const multipliers = { G: 1024 * 1024 * 1024, M: 1024 * 1024, K: 1024 };
+        return value * (multipliers[unit] || 1);
+      }
+      function updateRings(info) {
+        const cpuPercent = parseFloat(info.cpu.usage.replace("%", ""));
+        document
+          .getElementById("cpu-ring")
+          .setAttribute("stroke-dasharray", `${cpuPercent},100`);
+        document.getElementById(
+          "cpu-value"
+        ).textContent = `${cpuPercent.toFixed(1)}%`;
+        const ramUsedInfo = parseSize(info.ram.used);
+        document.getElementById(
+          "ram-used"
+        ).textContent = `${ramUsedInfo.value.toFixed(1)}${ramUsedInfo.unit}`;
+        document
+          .getElementById("ram-ring")
+          .setAttribute(
+            "stroke-dasharray",
+            `${parseFloat(info.ram.percent.replace("%", ""))},100`
+          );
+        const swapUsedInfo = parseSize(info.swap.used);
+        document.getElementById(
+          "swap-used"
+        ).textContent = `${swapUsedInfo.value.toFixed(1)}${swapUsedInfo.unit}`;
+        document
+          .getElementById("swap-ring")
+          .setAttribute(
+            "stroke-dasharray",
+            `${parseFloat(info.swap.percent.replace("%", "") || 0)},100`
+          );
+      }
+      function updateSystemInfo(info) {
+        document.getElementById("hostname").textContent = info.hostname;
+        document.getElementById("ip-addresses").innerHTML = info.ips
+          .map((ip) => ip.ip)
+          .join("<br>");
+        document.getElementById("os-info").textContent = info.os;
+        document.getElementById("uptime").textContent = info.uptime;
+        document.getElementById("local-time").textContent = info.local_time;
+      }
+      function updateCard(statId, value, isSize = false) {
+        const element = document.querySelector(`[data-stat="${statId}"]`);
+        if (!element) return;
+        let formattedValue = value;
+        if (isSize) {
+          const bytes = parseFloat(value);
+          formattedValue =
+            bytes / (1024 * 1024) < 1
+              ? `${Math.round(bytes / 1024)} MB`
+              : `${(bytes / (1024 * 1024)).toFixed(2)} GB`;
         }
-
-        // --- AÑADIDO: Funcionalidad para alternar entre vistas de tiempo ---
-        function setupTimeRangeButtons() {
-            const todayBtn = document.getElementById('todayBtn');
-            const hoursBtn = document.getElementById('24hoursBtn');
-            
-            todayBtn.addEventListener('click', () => {
-                setActiveTimeRange(todayBtn, hoursBtn);
-                loadHistoricData('/api/metrics/today');
-            });
-            
-            hoursBtn.addEventListener('click', () => {
-                setActiveTimeRange(hoursBtn, todayBtn);
-                loadHistoricData('/api/metrics/24hours');
-            });
+        if (element.textContent !== formattedValue.toString()) {
+          element.textContent = formattedValue;
+          element.classList.add("value-change");
+          setTimeout(() => element.classList.remove("value-change"), 1000);
         }
-        
-        function setActiveTimeRange(activeBtn, inactiveBtn) {
-            activeBtn.classList.add('active');
-            activeBtn.classList.remove('text-gray-500');
-            activeBtn.classList.add('text-blue-600', 'bg-white', 'shadow');
-            
-            inactiveBtn.classList.remove('active');
-            inactiveBtn.classList.add('text-gray-500');
-            inactiveBtn.classList.remove('text-blue-600', 'bg-white', 'shadow');
-        }
+      }
+      function updateCacheStats(stats) {
+        updateCard("entradas_almacenadas", stats.store_entries);
+        updateCard("uso_de_capacidad", stats.capacity_used);
+        updateCard("espacio_total", stats.fs_space_total, true);
+        updateCard("espacio_usado", stats.fs_space_used, true);
+        updateCard("eliminación", stats.removal_policy);
+        updateCard("edad_lru", `${stats.lru_age_days} días`);
+      }
 
-        const socket = io();
-        socket.on('system_update', function (data) {
-            updateRings(data.system_info);
-            updateSystemInfo(data.system_info);
-            updateCacheStats(data.cache_stats);
-
-            // Incrementar contador de datos en vivo
-            liveDataCounter++;
-            
-            // Solo actualizar gráficas cada 4 actualizaciones (1 minuto) para evitar sobrecarga
-            if (liveDataCounter % 4 === 0) {
-                // --- MODIFICADO: Lógica para añadir datos en vivo a las gráficas ---
-                function appendLiveData(chart, label, newData) {
-                    chart.data.labels.push(label);
-                    chart.data.datasets.forEach((dataset, index) => {
-                        const dataPoint = Array.isArray(newData) ? newData[index] : newData;
-                        dataset.data.push(dataPoint);
-                    });
-                    while (chart.data.labels.length > historySize) {
-                        chart.data.labels.shift();
-                        chart.data.datasets.forEach(dataset => dataset.data.shift());
-                    }
-                    chart.update('none');
-                }
-
-                // --- CORREGIDO: Se usa la hora local del cliente para la etiqueta en vivo ---
-                const newLabel = getLocalTimeString();
-
-                appendLiveData(cpuChart, newLabel, parseFloat(data.system_info.cpu.usage.replace('%','')));
-                appendLiveData(ramChart, newLabel, sizeToBytes(data.system_info.ram.used));
-                appendLiveData(swapChart, newLabel, sizeToBytes(data.system_info.swap.used));
-                if (data.network_stats) {
-                    appendLiveData(networkChart, newLabel, [ data.network_stats.up_mbps, data.network_stats.down_mbps ]);
-                }
+      // --- AÑADIDO: Carga de datos históricos desde la API con sampling optimizado ---
+      function loadHistoricData(endpoint = "/api/metrics/24hours") {
+        fetch(endpoint)
+          .then((response) => response.json())
+          .then((data) => {
+            if (!data || data.length === 0) {
+              console.log(
+                `No hay historial de métricas para el endpoint: ${endpoint}`
+              );
+              return;
             }
+
+            // Implementar sampling inteligente para evitar sobrecarga
+            let sampledData = data;
+            if (data.length > 288) {
+              // Si hay más de 288 puntos (4.8 horas con intervalos de 1 minuto)
+              const sampleRate = Math.ceil(data.length / 288);
+              sampledData = data.filter((_, index) => index % sampleRate === 0);
+              console.log(
+                `Aplicado sampling: ${data.length} → ${sampledData.length} puntos`
+              );
+            }
+
+            const labels = [],
+              cpuData = [],
+              ramData = [],
+              swapData = [],
+              netUpData = [],
+              netDownData = [];
+            sampledData.forEach((metric) => {
+              // Crear fecha local desde el timestamp del servidor (ya incluye timezone)
+              const localDate = new Date(metric.timestamp);
+              labels.push(formatTime(localDate));
+              cpuData.push(parseFloat(metric.cpu_usage).toFixed(1));
+              ramData.push(metric.ram_usage_bytes);
+              swapData.push(metric.swap_usage_bytes);
+              netUpData.push(
+                ((metric.net_sent_bytes_sec * 8) / 1000000).toFixed(2)
+              );
+              netDownData.push(
+                ((metric.net_recv_bytes_sec * 8) / 1000000).toFixed(2)
+              );
+            });
+            const charts = [cpuChart, ramChart, swapChart, networkChart];
+            const chartData = [
+              cpuData,
+              ramData,
+              swapData,
+              [netUpData, netDownData],
+            ];
+            charts.forEach((chart, chartIndex) => {
+              chart.data.labels = [...labels];
+              if (chartIndex === 3) {
+                chart.data.datasets[0].data = chartData[chartIndex][0];
+                chart.data.datasets[1].data = chartData[chartIndex][1];
+              } else {
+                chart.data.datasets[0].data = chartData[chartIndex];
+              }
+              chart.update();
+            });
+          })
+          .catch((error) =>
+            console.error("Error al cargar historial de métricas:", error)
+          );
+      }
+
+      // --- AÑADIDO: Funcionalidad para alternar entre vistas de tiempo ---
+      function setupTimeRangeButtons() {
+        const todayBtn = document.getElementById("todayBtn");
+        const hoursBtn = document.getElementById("24hoursBtn");
+
+        todayBtn.addEventListener("click", () => {
+          setActiveTimeRange(todayBtn, hoursBtn);
+          loadHistoricData("/api/metrics/today");
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            maxRamBytes = sizeToBytes("{{ system_info.ram.total }}");
-            maxSwapBytes = sizeToBytes("{{ system_info.swap.total }}");
-            ramChart.options.scales.y.max = maxRamBytes;
-            swapChart.options.scales.y.max = maxSwapBytes;
-            updateRings({
-                cpu: { usage: "{{ system_info.cpu.usage }}", percent: "{{ system_info.cpu.usage }}" },
-                ram: { used: "{{ system_info.ram.used }}", percent: "{{ system_info.ram.percent }}" },
-                swap: { used: "{{ system_info.swap.used }}", percent: "{{ system_info.swap.percent }}" }
-            });
-            
-            // Inicializar botones de rango de tiempo
-            setupTimeRangeButtons();
-            
-            // Cargar datos históricos (por defecto 24 horas)
-            loadHistoricData('/api/metrics/24hours');
+        hoursBtn.addEventListener("click", () => {
+          setActiveTimeRange(hoursBtn, todayBtn);
+          loadHistoricData("/api/metrics/24hours");
         });
+      }
+
+      function setActiveTimeRange(activeBtn, inactiveBtn) {
+        activeBtn.classList.add("active");
+        activeBtn.classList.remove("text-gray-500");
+        activeBtn.classList.add("text-blue-600", "bg-white", "shadow");
+
+        inactiveBtn.classList.remove("active");
+        inactiveBtn.classList.add("text-gray-500");
+        inactiveBtn.classList.remove("text-blue-600", "bg-white", "shadow");
+      }
+
+      const socket = io();
+      socket.on("system_update", function (data) {
+        updateRings(data.system_info);
+        updateSystemInfo(data.system_info);
+        updateCacheStats(data.cache_stats);
+
+        // Incrementar contador de datos en vivo
+        liveDataCounter++;
+
+        // Solo actualizar gráficas cada 4 actualizaciones (1 minuto) para evitar sobrecarga
+        if (liveDataCounter % 4 === 0) {
+          // --- MODIFICADO: Lógica para añadir datos en vivo a las gráficas ---
+          function appendLiveData(chart, label, newData) {
+            chart.data.labels.push(label);
+            chart.data.datasets.forEach((dataset, index) => {
+              const dataPoint = Array.isArray(newData)
+                ? newData[index]
+                : newData;
+              dataset.data.push(dataPoint);
+            });
+            while (chart.data.labels.length > historySize) {
+              chart.data.labels.shift();
+              chart.data.datasets.forEach((dataset) => dataset.data.shift());
+            }
+            chart.update("none");
+          }
+
+          // --- CORREGIDO: Se usa la hora local del cliente para la etiqueta en vivo ---
+          const newLabel = getLocalTimeString();
+
+          appendLiveData(
+            cpuChart,
+            newLabel,
+            parseFloat(data.system_info.cpu.usage.replace("%", ""))
+          );
+          appendLiveData(
+            ramChart,
+            newLabel,
+            sizeToBytes(data.system_info.ram.used)
+          );
+          appendLiveData(
+            swapChart,
+            newLabel,
+            sizeToBytes(data.system_info.swap.used)
+          );
+          if (data.network_stats) {
+            appendLiveData(networkChart, newLabel, [
+              data.network_stats.up_mbps,
+              data.network_stats.down_mbps,
+            ]);
+          }
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        maxRamBytes = sizeToBytes("{{ system_info.ram.total }}");
+        maxSwapBytes = sizeToBytes("{{ system_info.swap.total }}");
+        ramChart.options.scales.y.max = maxRamBytes;
+        swapChart.options.scales.y.max = maxSwapBytes;
+        updateRings({
+          cpu: {
+            usage: "{{ system_info.cpu.usage }}",
+            percent: "{{ system_info.cpu.usage }}",
+          },
+          ram: {
+            used: "{{ system_info.ram.used }}",
+            percent: "{{ system_info.ram.percent }}",
+          },
+          swap: {
+            used: "{{ system_info.swap.used }}",
+            percent: "{{ system_info.swap.percent }}",
+          },
+        });
+
+        // Inicializar botones de rango de tiempo
+        setupTimeRangeButtons();
+
+        // Cargar datos históricos (por defecto 24 horas)
+        loadHistoricData("/api/metrics/24hours");
+      });
     </script>
-</body>
+  </body>
 </html>

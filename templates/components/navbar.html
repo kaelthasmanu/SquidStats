@@ -1,34 +1,67 @@
-<nav class="sticky top-0 z-[1000] bg-gradient-to-br from-blue-800 to-blue-900 shadow-lg border-b border-white/10 backdrop-blur-md">
-  <div class="max-w-[1200px] mx-auto flex items-center justify-between px-6 py-3 h-[60px]">
+<nav
+  class="sticky top-0 z-[1000] bg-gradient-to-br from-blue-800 to-blue-900 shadow-lg border-b border-white/10 backdrop-blur-md"
+>
+  <div
+    class="max-w-[1200px] mx-auto flex items-center justify-between px-6 py-3 h-[60px]"
+  >
     <!-- Brand/Logo Section -->
-    <div class="flex items-center gap-3 font-bold text-xl text-white no-underline">
+    <div
+      class="flex items-center gap-3 font-bold text-xl text-white no-underline"
+    >
       <i class="fas fa-chart-line text-blue-300 text-2xl"></i>
-      <span class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-300">SquidStats</span>
+      <span
+        class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-300"
+        >SquidStats</span
+      >
     </div>
 
     <!-- Navigation Links -->
     <div class="flex items-center gap-2">
-      <a href="/" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Panel principal con conexiones activas">
+      <a
+        href="/"
+        class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5"
+        data-tooltip="Panel principal con conexiones activas"
+      >
         <i class="fas fa-home text-base"></i>
         <span class="font-medium">Inicio</span>
       </a>
-      <a href="/stats" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Estadísticas de rendimiento del cache">
+      <a
+        href="/stats"
+        class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5"
+        data-tooltip="Estadísticas de rendimiento del cache"
+      >
         <i class="fas fa-chart-bar text-base"></i>
         <span class="font-medium">Estadísticas</span>
       </a>
-      <a href="/logs" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Actividad y logs de usuarios">
+      <a
+        href="/logs"
+        class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5"
+        data-tooltip="Actividad y logs de usuarios"
+      >
         <i class="fas fa-user-friends text-base"></i>
         <span class="font-medium">Usuarios</span>
       </a>
-      <a href="/reports" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Reportes y gráficas avanzadas">
+      <a
+        href="/reports"
+        class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5"
+        data-tooltip="Reportes y gráficas avanzadas"
+      >
         <i class="fas fa-chart-simple text-base"></i>
         <span class="font-medium">Reportes</span>
       </a>
-      <a href="/blacklist" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Sitios bloqueados y actividad restringida">
+      <a
+        href="/blacklist"
+        class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5"
+        data-tooltip="Sitios bloqueados y actividad restringida"
+      >
         <i class="fas fa-ban text-base"></i>
         <span class="font-medium">Blacklist</span>
       </a>
-      <a href="/auditoria" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Auditoría de actividad por usuario y fecha">
+      <a
+        href="/auditoria"
+        class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5"
+        data-tooltip="Auditoría de actividad por usuario y fecha"
+      >
         <i class="fas fa-magnifying-glass text-base"></i>
         <span class="font-medium">Auditoría</span>
       </a>
@@ -77,7 +110,13 @@
               <span
                 class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-600 mr-3"
               >
-                <i class="fas fa-info-circle"></i>
+                <Información del Sistema:
+✅ Hostname del servidor
+✅ Sistema operativo
+✅ Tiempo de actividad del sistema
+✅ Uso de memoria RAM y Swap
+✅ Información de CPU
+✅ Zona horaria y hora locali class="fas fa-info-circle"></i>
               </span>
               <div class="flex-1">
                 <p class="text-sm text-gray-700">
@@ -160,13 +199,19 @@
         class="fixed inset-0 z-[1001] flex items-center justify-center bg-black bg-opacity-50"
         style="display: none"
       >
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+        <div
+          class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden"
+        >
           <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4">
             <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 rounded-full">
+              <div
+                class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 rounded-full"
+              >
                 <i class="fas fa-exclamation-triangle text-white text-lg"></i>
               </div>
-              <h3 class="text-xl font-bold text-white">Confirmar Actualización de Squid</h3>
+              <h3 class="text-xl font-bold text-white">
+                Confirmar Actualización de Squid
+              </h3>
             </div>
           </div>
           <div class="px-6 py-4">
@@ -181,13 +226,19 @@
                   <ul class="text-blue-800 text-sm mt-1 space-y-1">
                     <li>• Guarda tu configuración antes de continuar</li>
                     <li>• El servicio se reiniciará automáticamente</li>
-                    <li>• Puede haber incompatibilidades con versiones anteriores</li>
+                    <li>
+                      • Puede haber incompatibilidades con versiones anteriores
+                    </li>
                   </ul>
                 </div>
               </div>
             </div>
           </div>
-          <form method="POST" action="/install" class="flex justify-end gap-3 px-6 py-4 bg-gray-50">
+          <form
+            method="POST"
+            action="/install"
+            class="flex justify-end gap-3 px-6 py-4 bg-gray-50"
+          >
             <button
               type="button"
               @click="showSquidModal = false"
@@ -196,7 +247,10 @@
               <i class="fas fa-times"></i>
               Cancelar
             </button>
-            <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-600 transition-all duration-200">
+            <button
+              type="submit"
+              class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-600 transition-all duration-200"
+            >
               <i class="fas fa-check"></i>
               Confirmar
             </button>
@@ -216,13 +270,19 @@
         class="fixed inset-0 z-[1001] flex items-center justify-center bg-black bg-opacity-50"
         style="display: none"
       >
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+        <div
+          class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden"
+        >
           <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
             <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 rounded-full">
+              <div
+                class="flex items-center justify-center w-10 h-10 bg-white bg-opacity-20 rounded-full"
+              >
                 <i class="fas fa-cloud-download-alt text-white text-lg"></i>
               </div>
-              <h3 class="text-xl font-bold text-white">Confirmar Actualización Web</h3>
+              <h3 class="text-xl font-bold text-white">
+                Confirmar Actualización Web
+              </h3>
             </div>
           </div>
           <div class="px-6 py-4">
@@ -243,7 +303,11 @@
               </div>
             </div>
           </div>
-          <form method="POST" action="/update" class="flex justify-end gap-3 px-6 py-4 bg-gray-50">
+          <form
+            method="POST"
+            action="/update"
+            class="flex justify-end gap-3 px-6 py-4 bg-gray-50"
+          >
             <button
               type="button"
               @click="showWebModal = false"
@@ -252,7 +316,10 @@
               <i class="fas fa-times"></i>
               Cancelar
             </button>
-            <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg hover:from-purple-700 hover:to-purple-600 transition-all duration-200">
+            <button
+              type="submit"
+              class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg hover:from-purple-700 hover:to-purple-600 transition-all duration-200"
+            >
               <i class="fas fa-download"></i>
               Actualizar
             </button>
