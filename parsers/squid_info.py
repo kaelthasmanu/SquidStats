@@ -172,24 +172,3 @@ def fetch_squid_info_stats():
         default_stats["connection_status"] = "connected_but_parse_error"
         return default_stats
 
-
-if __name__ == "__main__":
-    info = fetch_squid_info_stats()
-    if info["error"]:
-        print("Error:", info["error"])
-        print("Status :", info["connection_status"])
-    else:
-        print(f"En {info['elapsed_hours']} horas:")
-        print(" - Clients:", info["clients"])
-        print(" - HTTP requests:", info["requests_received"])
-        print(" - Avg req/min:", info["avg_requests_per_minute"])
-        print("\nMedian Service Times (5m / 60m):")
-        for k, v in info["median_service_times"].items():
-            if k.endswith("_5m"):
-                base = k[:-3]
-                print(
-                    f"   {base:<20} : {v:>7} / {info['median_service_times'][base + '_60m']}"
-                )
-        print("\nResource Usage:")
-        for k, v in info["resource_usage"].items():
-            print(f"   {k:<20} : {v}")
