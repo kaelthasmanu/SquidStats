@@ -171,4 +171,3 @@ def fetch_squid_info_stats():
         default_stats["error"] = f"Parsing error: {e}"
         default_stats["connection_status"] = "connected_but_parse_error"
         return default_stats
-
