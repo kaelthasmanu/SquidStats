@@ -11,16 +11,16 @@ files = {
 # Patrones por categoría
 patterns = {
     "acls.conf": [
-        re.compile(r'^\s*acl\b'),
+        re.compile(r"^\s*acl\b"),
     ],
     "delay_pools.conf": [
-        re.compile(r'^\s*delay_(pools|class|parameters|access)\b'),
+        re.compile(r"^\s*delay_(pools|class|parameters|access)\b"),
     ],
     "auth.conf": [
-        re.compile(r'^\s*auth_param\b'),
-        re.compile(r'^\s*authenticate_ip_ttl\b'),
-        re.compile(r'^\s*acl\b.*\bproxy_auth\b'),
-    ]
+        re.compile(r"^\s*auth_param\b"),
+        re.compile(r"^\s*authenticate_ip_ttl\b"),
+        re.compile(r"^\s*acl\b.*\bproxy_auth\b"),
+    ],
 }
 
 with open(input_file) as f:

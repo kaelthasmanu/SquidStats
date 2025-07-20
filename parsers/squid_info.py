@@ -11,16 +11,21 @@ SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
 SQUID_PORT = int(os.getenv("SQUID_PORT", "3128"))
 
 _SQUID_DATE_FMT = "%a, %d %b %Y %H:%M:%S %Z"
+
+
 def _parse_squid_date(line: str) -> datetime:
     stamp = line.split(":", 1)[1].strip()
     return datetime.strptime(stamp, _SQUID_DATE_FMT).replace(tzinfo=UTC)
+
 
 def _re_float(key: str, text: str, default=0.0):
     m = re.search(rf"{re.escape(key)}\s*:\s*([0-9.]+)", text)
     return float(m.group(1)) if m else default
 
+
 def _re_int(key: str, text: str, default=0):
     return int(_re_float(key, text, default))
+
 
 def fetch_squid_info_stats():
     default_stats = {
@@ -81,8 +86,12 @@ def fetch_squid_info_stats():
         return default_stats
 
     try:
-        start_line = next(line for line in data.splitlines() if line.startswith("Start Time:"))
-        current_line = next(line for line in data.splitlines() if line.startswith("Current Time:"))
+        start_line = next(
+            line for line in data.splitlines() if line.startswith("Start Time:")
+        )
+        current_line = next(
+            line for line in data.splitlines() if line.startswith("Current Time:")
+        )
         start_dt = _parse_squid_date(start_line)
         current_dt = _parse_squid_date(current_line)
         elapsed = current_dt - start_dt
@@ -92,39 +101,25 @@ def fetch_squid_info_stats():
         requests = _re_int("Number of HTTP requests received", data)
         avg_rpm = _re_float("Average HTTP requests per minute since start", data)
 
-        m = re.search(
-            r"HTTP Requests \(All\):\s+([\d.]+)\s+([\d.]+)", data
-        )
+        m = re.search(r"HTTP Requests \(All\):\s+([\d.]+)\s+([\d.]+)", data)
         http_5m, http_60m = (float(x) for x in m.groups()) if m else (0, 0)
 
-        m = re.search(
-            r"Cache Misses:\s+([\d.]+)\s+([\d.]+)", data
-        )
+        m = re.search(r"Cache Misses:\s+([\d.]+)\s+([\d.]+)", data)
         miss_5m, miss_60m = (float(x) for x in m.groups()) if m else (0, 0)
 
-        m = re.search(
-            r"Cache Hits:\s+([\d.]+)\s+([\d.]+)", data
-        )
+        m = re.search(r"Cache Hits:\s+([\d.]+)\s+([\d.]+)", data)
         hit_5m, hit_60m = (float(x) for x in m.groups()) if m else (0, 0)
 
-        m = re.search(
-            r"Near Hits:\s+([\d.]+)\s+([\d.]+)", data
-        )
+        m = re.search(r"Near Hits:\s+([\d.]+)\s+([\d.]+)", data)
         near_5m, near_60m = (float(x) for x in m.groups()) if m else (0, 0)
 
-        m = re.search(
-            r"Not-Modified Replies:\s+([\d.]+)\s+([\d.]+)", data
-        )
+        m = re.search(r"Not-Modified Replies:\s+([\d.]+)\s+([\d.]+)", data)
         nmod_5m, nmod_60m = (float(x) for x in m.groups()) if m else (0, 0)
 
-        m = re.search(
-            r"DNS Lookups:\s+([\d.]+)\s+([\d.]+)", data
-        )
+        m = re.search(r"DNS Lookups:\s+([\d.]+)\s+([\d.]+)", data)
         dns_5m, dns_60m = (float(x) for x in m.groups()) if m else (0, 0)
 
-        m = re.search(
-            r"ICP Queries:\s+([\d.]+)\s+([\d.]+)", data
-        )
+        m = re.search(r"ICP Queries:\s+([\d.]+)\s+([\d.]+)", data)
         icp_5m, icp_60m = (float(x) for x in m.groups()) if m else (0, 0)
 
         up_time = _re_float("UP Time", data)
@@ -177,6 +172,7 @@ def fetch_squid_info_stats():
         default_stats["connection_status"] = "connected_but_parse_error"
         return default_stats
 
+
 if __name__ == "__main__":
     info = fetch_squid_info_stats()
     if info["error"]:
@@ -191,7 +187,9 @@ if __name__ == "__main__":
         for k, v in info["median_service_times"].items():
             if k.endswith("_5m"):
                 base = k[:-3]
-                print(f"   {base:<20} : {v:>7} / {info['median_service_times'][base+'_60m']}")
+                print(
+                    f"   {base:<20} : {v:>7} / {info['median_service_times'][base + '_60m']}"
+                )
         print("\nResource Usage:")
         for k, v in info["resource_usage"].items():
             print(f"   {k:<20} : {v}")
