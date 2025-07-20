@@ -1,6 +1,10 @@
 import os
 import socket
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
 SQUID_PORT = int(os.getenv("SQUID_PORT", 3128))
 

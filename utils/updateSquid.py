@@ -3,6 +3,10 @@ import os
 import platform
 import subprocess
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def update_squid():
     try:
