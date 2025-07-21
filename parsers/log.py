@@ -151,9 +151,7 @@ def parse_log_line_space_format(line):
             "is_denied": "TCP_DENIED" in line,
         }
     except (IndexError, ValueError) as e:
-        logger.error(
-            f"Error parsing line with space format: {line.strip()} - {e}"
-        )
+        logger.error(f"Error parsing line with space format: {line.strip()} - {e}")
         return None
 
 
