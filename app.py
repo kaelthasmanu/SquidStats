@@ -147,6 +147,7 @@ def index():
         ), 500
 
 
+
 @app.route("/actualizar-conexiones")
 def actualizar_conexiones():
     try:
@@ -157,8 +158,25 @@ def actualizar_conexiones():
 
         connections = parse_raw_data(raw_data)
         grouped_connections = group_by_user(connections)
+
+        with parent_proxy_lock:
+            parent_ip = g_parent_proxy_ip
+
+        squid_version = get_squid_version()
+        network_info = get_network_info()
+        squid_ip = "No disponible"
+        if isinstance(network_info, list) and network_info:
+            squid_ip = network_info[0].get("ip", "No disponible")
+
+        squid_info_stats = fetch_squid_info_stats()
+
         return render_template(
-            "partials/conexiones.html", grouped_connections=grouped_connections
+            "partials/conexiones.html",
+            grouped_connections=grouped_connections,
+            parent_proxy_ip=parent_ip,
+            squid_ip=squid_ip,
+            squid_version=squid_version,
+            squid_info_stats=squid_info_stats,
         )
 
     except Exception as e:
