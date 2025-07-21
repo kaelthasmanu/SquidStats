@@ -6,7 +6,8 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
   {# Tarjetas de estadísticas #}
   <div class="flex justify-center mb-8">
     <div
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full max-w-full"
+      class="flex flex-wrap justify-center gap-4 w-full pb-2"
+      style="scrollbar-width: none;"
     >
       {# --- MODIFICADO: Tarjeta de información del Servidor Squid --- #}
       <div
@@ -25,8 +26,8 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
         </div>
       </div>
 
-      {# --- MODIFICADO: Tarjeta de estado del Proxy Padre --- #} {% if
-      parent_proxy_ip %} {# Estado Con Padre #}
+      {% if parent_proxy_ip %} 
+      {# Estado Con Padre #}
       <div
         class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5"
       >
@@ -54,7 +55,8 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
           <p class="text-2xl font-bold">Conexión Directa</p>
         </div>
       </div>
-      {% endif %} {# Tarjeta de Usuarios Activos #}
+      {% endif %} 
+      {# Tarjeta de Usuarios Activos #}
       <div
         class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5"
       >
@@ -105,8 +107,9 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
           </p>
         </div>
       </div>
-      {% endif %} {# Nueva Tarjeta: Clientes Conectados a Squid #} {% if
-      squid_info_stats and squid_info_stats.clients %}
+      {% endif %} 
+      {# Nueva Tarjeta: Clientes Conectados a Squid #} 
+      <!-- {% if squid_info_stats and squid_info_stats.clients %}
       <div
         class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5"
       >
@@ -120,8 +123,9 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
           <p class="text-2xl font-bold">{{ squid_info_stats.clients }}</p>
         </div>
       </div>
-      {% endif %} {# Nueva Tarjeta: Peticiones HTTP Totales #} {% if
-      squid_info_stats and squid_info_stats.requests_received %}
+      {% endif %} --> 
+      {# Nueva Tarjeta: Peticiones HTTP Totales #} 
+      {% if squid_info_stats and squid_info_stats.requests_received %}
       <div
         class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5"
       >
@@ -131,9 +135,9 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
           <i class="fas fa-globe text-red-500 text-xl"></i>
         </div>
         <div>
-          <p class="text-gray-500 text-sm">Peticiones HTTP</p>
+          <p class="text-gray-500 text-sm">Total de Peticiones HTTP</p>
           <p class="text-2xl font-bold">
-            {{ "{:,}"|format(squid_info_stats.requests_received) }}
+            {{ squid_info_stats.requests_received | int }}
           </p>
         </div>
       </div>
@@ -148,7 +152,7 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
           <i class="fas fa-chart-line text-teal-500 text-xl"></i>
         </div>
         <div>
-          <p class="text-gray-500 text-sm">Pet./Min Promedio</p>
+          <p class="text-gray-500 text-sm">Peticiones/Min Promedio</p>
           <p class="text-2xl font-bold">
             {{ squid_info_stats.avg_requests_per_minute|round(1) }}
           </p>
