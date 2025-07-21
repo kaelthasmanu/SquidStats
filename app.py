@@ -9,12 +9,10 @@ from dotenv import load_dotenv
 from flask import (
     Blueprint,
     Flask,
-    flash,
     jsonify,
     redirect,
     render_template,
     request,
-    url_for,
 )
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
@@ -51,7 +49,8 @@ from services.system_info import (
     get_timezone,
     get_uptime,
 )
-from utils.admin import SquidConfigManager
+
+# from utils.admin import SquidConfigManager
 from utils.colors import color_map
 from utils.filters import register_filters
 from utils.size import size_to_bytes
@@ -64,7 +63,7 @@ class Config:
 
 
 # Instancia global del manager
-config_manager = SquidConfigManager()
+# config_manager = SquidConfigManager()
 
 
 load_dotenv()
@@ -673,7 +672,7 @@ def api_run_audit():
         db.close()
 
 
-@app.route("/admin")
+""" @app.route("/admin")
 def admin_dashboard():
     acls = config_manager.get_acls()
     delay_pools = config_manager.get_delay_pools()
@@ -746,6 +745,7 @@ def manage_delay_pools():
 def manage_http_access():
     rules = config_manager.get_http_access_rules()
     return render_template("admin/http_access.html", rules=rules)
+ """
 
 
 @app.route("/admin/view-logs")
