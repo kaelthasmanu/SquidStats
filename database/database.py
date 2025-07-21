@@ -113,10 +113,10 @@ def get_database_url() -> str:
         ):
             return conn_str
         raise ValueError(
-            "Para MySQL/MariaDB, especifique el string de conexión completo en DATABASE_STRING_CONNECTION"
+            "DATABASE_STRING_CONNECTION must start with 'mysql://' or 'mariadb://'."
         )
     else:
-        raise ValueError(f"Tipo de base de datos no soportado: {db_type}")
+        raise ValueError(f"Database type not supported: {db_type}")
 
 
 def get_engine():
@@ -143,7 +143,6 @@ def table_exists(engine, table_name: str) -> bool:
 
 
 def create_dynamic_tables(engine, date_suffix: str = None):
-    """Crea las tablas principales y diarias si no existen."""
     LogMetadata.__table__.create(engine, checkfirst=True)
     DeniedLog.__table__.create(engine, checkfirst=True)
     SystemMetrics.__table__.create(
@@ -154,7 +153,7 @@ def create_dynamic_tables(engine, date_suffix: str = None):
     user_table_name, log_table_name = get_dynamic_table_names(date_suffix)
 
     # Se genera un logger específico para la fecha, para evitar mensajes duplicados.
-    creation_logger = logging.getLogger(f"TableCreation_{date_suffix or 'today'}")
+    creation_logger = logging.getLogger(f"CreateTable_{date_suffix or 'today'}")
     creation_logger.propagate = False  # Evita que el log suba al logger raíz
     if not creation_logger.handlers:
         handler = logging.StreamHandler()
@@ -168,7 +167,7 @@ def create_dynamic_tables(engine, date_suffix: str = None):
         engine, log_table_name
     ):
         creation_logger.info(
-            f"Creando tablas dinámicas para la fecha del sufijo '{date_suffix}': {user_table_name}, {log_table_name}"
+            f"Creating dynamic tables for date suffix '{date_suffix}': {user_table_name}, {log_table_name}"
         )
         DynamicBase = declarative_base()
 
@@ -193,14 +192,12 @@ def create_dynamic_tables(engine, date_suffix: str = None):
 
 
 def get_dynamic_table_names(date_suffix: str = None) -> tuple[str, str]:
-    """Devuelve los nombres de las tablas de usuario y log para un sufijo de fecha dado."""
     if date_suffix is None:
         date_suffix = get_table_suffix()
     return f"user_{date_suffix}", f"log_{date_suffix}"
 
 
 def get_dynamic_models(date_suffix: str):
-    """Devuelve modelos dinámicos de usuario y log para el sufijo de fecha dado."""
     cache_key = f"user_log_{date_suffix}"
     if cache_key in dynamic_model_cache:
         return dynamic_model_cache[cache_key]
@@ -212,14 +209,14 @@ def get_dynamic_models(date_suffix: str):
         engine, log_table_name
     ):
         logger.warning(
-            f"Las tablas de usuario/log para el sufijo '{date_suffix}' no existen. Intentando recrearlas..."
+            f"User/log tables for date suffix '{date_suffix}' do not exist. Attempting to recreate..."
         )
         create_dynamic_tables(engine, date_suffix=date_suffix)
         if not table_exists(engine, user_table_name) or not table_exists(
             engine, log_table_name
         ):
             logger.error(
-                f"No se pudieron crear o encontrar las tablas de usuario/log para el sufijo '{date_suffix}'."
+                f"User/log tables for date suffix '{date_suffix}' could not be created or found."
             )
             return None, None
 

@@ -33,16 +33,15 @@ class DatabaseManager:
         return self.session
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Maneja commit/rollback y cierre de sesión automático"""
         try:
             if exc_type is None:
                 self.session.commit()
-                logger.info("Commit exitoso")
+                logger.info("Commit successful")
             else:
                 self.session.rollback()
-                logger.error(f"Rollback por error: {exc_val}")
+                logger.error(f"Rollback due to error: {exc_val}")
         except SQLAlchemyError as e:
-            logger.error(f"Error durante commit/rollback: {e}")
+            logger.error(f"Error during commit/rollback: {e}")
             self.session.rollback()
         finally:
             self.session.close()
@@ -85,26 +84,24 @@ def find_last_parent_proxy(log_file: str, lines_to_check: int = 5000) -> str | N
                 return log_data["parent_ip"]
 
     except Exception as e:
-        logger.error(f"Error leyendo las últimas líneas del log: {e}", exc_info=False)
+        logger.error(f"Error reading last lines of log: {e}", exc_info=False)
 
     return None
 
 
 def get_table_names():
-    """Obtiene nombres de tablas con fecha actual"""
     today = datetime.now().strftime("%Y%m%d")
     return f"user_{today}", f"log_{today}", "log_metadata"
 
 
 def get_file_inode(filepath):
-    """Obtiene el inode del archivo para detectar rotaciones"""
     try:
         return os.stat(filepath).st_ino
     except FileNotFoundError:
-        logger.error(f"Archivo no encontrado: {filepath}")
+        logger.error(f"File not found: {filepath}")
         raise
     except Exception as e:
-        logger.error(f"Error accediendo archivo: {e}")
+        logger.error(f"Error accessing file: {e}")
         raise
 
 
@@ -134,7 +131,7 @@ def parse_log_line_pipe_format(line):
             "is_denied": "TCP_DENIED" in parts[13],
         }
     except Exception as e:
-        logger.error(f"Error parseando línea con formato pipe: {line.strip()} - {e}")
+        logger.error(f"Error parsing line with pipe format: {line.strip()} - {e}")
         return None
 
 
@@ -155,7 +152,7 @@ def parse_log_line_space_format(line):
         }
     except (IndexError, ValueError) as e:
         logger.error(
-            f"Error parseando línea con formato espacios: {line.strip()} - {e}"
+            f"Error parsing line with space format: {line.strip()} - {e}"
         )
         return None
 
@@ -183,25 +180,25 @@ def detect_log_format(log_file, sample_lines=10):
             return format_detected
 
     except Exception as e:
-        logger.warning(f"Error detectando formato, usando detección por línea: {e}")
+        logger.warning(f"Error detecting format, using line detection: {e}")
         return "auto"  # Fallback a detección automática por línea
 
 
 def process_logs(log_file):
     if not os.path.exists(log_file):
-        logger.error(f"Archivo no encontrado: {log_file}")
+        logger.error(f"File not found: {log_file}")
         return
     engine = get_engine()
     user_table, log_table = get_dynamic_table_names()
     if not (table_exists(engine, user_table) and table_exists(engine, log_table)):
         logger.warning(
-            f"Tablas dinámicas para la fecha actual no existen: {user_table}, {log_table}. Se crearán las tablas y se procesará el log."
+            f"User/log tables for date suffix '{datetime.now().strftime('%Y%m%d')}' do not exist. Attempting to recreate..."
         )
         try:
             Base.metadata.create_all(engine, checkfirst=True)
-            logger.info("Tablas creadas exitosamente.")
+            logger.info("Tables created successfully.")
         except Exception as e:
-            logger.error(f"Error al crear las tablas dinámicas: {e}")
+            logger.error(f"Error creating dynamic tables: {e}")
             return
     try:
         current_inode = get_file_inode(log_file)
@@ -214,15 +211,15 @@ def process_logs(log_file):
             if metadata:
                 if metadata.last_inode != current_inode:
                     logger.info(
-                        f"Rotación detectada (inodo: {metadata.last_inode} -> {current_inode})"
+                        f"Inode changed: {metadata.last_inode} -> {current_inode}. Resetting position."
                     )
                     last_position = 0
                 elif file_size < last_position:
                     logger.warning(
-                        f"Archivo truncado (tamaño: {file_size} < posición: {last_position})"
+                        f"File truncated (size: {file_size} < position: {last_position})"
                     )
                     last_position = 0
-            logger.info(f"Leyendo desde posición: {last_position}")
+            logger.info(f"Reading from position: {last_position}")
             user_cache = {}
             logs_to_insert, new_users_to_insert, denied_to_insert = [], [], []
             processed_lines = inserted_logs = inserted_users = inserted_denied = 0
@@ -253,7 +250,7 @@ def process_logs(log_file):
                         return True
                     except IntegrityError as e:
                         logger.warning(
-                            f"Error de integridad (reintento {retry_count + 1}): {e}"
+                            f"Integrity error (retry {retry_count + 1}): {e}"
                         )
                         session.rollback()
                         retry_count += 1
@@ -263,7 +260,7 @@ def process_logs(log_file):
                                 if key in user_cache:
                                     del user_cache[key]
                     except SQLAlchemyError as e:
-                        logger.error(f"Error de base de datos: {e}")
+                        logger.error(f"Database error: {e}")
                         session.rollback()
                         break
                 return False
@@ -292,11 +289,11 @@ def process_logs(log_file):
                         if len(denied_to_insert) >= BATCH_SIZE:
                             if commit_batch():
                                 logger.info(
-                                    f"Batch denied_logs insertado exitosamente. Registros: {BATCH_SIZE}"
+                                    f"Batch denied_logs inserted successfully. Records: {BATCH_SIZE}"
                                 )
                             else:
                                 logger.error(
-                                    "Error en commit batch denied. Continuando con siguiente lote"
+                                    "Error committing denied batch. Continuing with next batch"
                                 )
                         continue
                     user_key = (log_data["username"], log_data["ip"])
@@ -320,7 +317,7 @@ def process_logs(log_file):
                     if user_id is None:
                         if not commit_batch():
                             logger.error(
-                                "Error crítico en commit batch. Abortando lote"
+                                "Critical error committing batch. Aborting batch"
                             )
                             continue
                         existing_user = (
@@ -349,7 +346,7 @@ def process_logs(log_file):
                     if len(logs_to_insert) >= BATCH_SIZE:
                         if not commit_batch():
                             logger.error(
-                                "Error en commit batch. Continuando con siguiente lote"
+                                "Error committing batch. Continuing with next batch"
                             )
             if not metadata:
                 metadata = LogMetadata()
@@ -359,13 +356,13 @@ def process_logs(log_file):
             metadata.last_processed = datetime.now()
             session.commit()
             elapsed = time.time() - start_time
-            logger.info(f"Procesamiento completado. Líneas: {processed_lines}")
+            logger.info(f"Processing completed. Lines: {processed_lines}")
             logger.info(
-                f"Logs insertados: {inserted_logs}, Usuarios nuevos: {inserted_users}, Denied: {inserted_denied}"
+                f"Logs inserted: {inserted_logs}, New users: {inserted_users}, Denied: {inserted_denied}"
             )
             logger.info(
-                f"Tiempo: {elapsed:.2f}s, Velocidad: {processed_lines / elapsed:.2f} lps"
+                f"Time: {elapsed:.2f}s, Speed: {processed_lines / elapsed:.2f} lps"
             )
     except Exception as e:
-        logger.critical(f"Error crítico en process_logs: {e}", exc_info=True)
+        logger.critical(f"Critical error in process_logs: {e}", exc_info=True)
         raise

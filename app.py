@@ -3,7 +3,7 @@ import os
 import socket
 import sys
 from datetime import date, datetime
-from threading import Lock  # Importamos Lock para sincronización de hilos
+from threading import Lock
 
 from dotenv import load_dotenv
 from flask import (
@@ -80,13 +80,9 @@ g_parent_proxy_ip = find_last_parent_proxy(
     os.getenv("SQUID_LOG", "/var/log/squid/access.log")
 )
 if g_parent_proxy_ip:
-    logger.info(
-        f"Proxy padre detectado con IP: {g_parent_proxy_ip}. Esta configuración se mantendrá fija."
-    )
+    logger.info(f"Proxy parent detect with IP: {g_parent_proxy_ip}.")
 else:
-    logger.info(
-        "No se detectó un proxy padre en los logs recientes. Asumiendo conexión directa."
-    )
+    logger.info("No proxy parent detected in recent logs. Assuming direct connection.")
 
 # Initialize Flask application
 app = Flask(__name__, static_folder="./static")
@@ -123,9 +119,9 @@ def index():
 
         squid_version = get_squid_version()
         network_info = get_network_info()
-        squid_ip = "No disponible"
+        squid_ip = "Not found"
         if isinstance(network_info, list) and network_info:
-            squid_ip = network_info[0].get("ip", "No disponible")
+            squid_ip = network_info[0].get("ip", "Not found")
 
         # Obtener estadísticas detalladas de Squid
         squid_info_stats = fetch_squid_info_stats()
@@ -202,12 +198,11 @@ def logs():
 
 @scheduler.task("interval", id="do_job_1", seconds=30, misfire_grace_time=900)
 def init_scheduler():
-    """Initialize and start the background scheduler for log processing"""
     log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
-    logger.info(f"Configurando scheduler para el archivo de log: {log_file}")
+    logger.info(f"Scheduler for file log: {log_file}")
 
     if not os.path.exists(log_file):
-        logger.error(f"Archivo de log no encontrado: {log_file}")
+        logger.error(f"Log file not found: {log_file}")
         return
     else:
         process_logs(log_file)
@@ -218,11 +213,11 @@ def cleanup_old_metrics():
     try:
         success = MetricsService.cleanup_old_metrics()
         if success:
-            logger.info("Limpieza de métricas antiguas completada exitosamente")
+            logger.info("Cleanup of old metrics completed successfully")
         else:
-            logger.warning("Error durante la limpieza de métricas antiguas")
+            logger.warning("Error during cleanup of old metrics")
     except Exception as e:
-        logger.error(f"Error en tarea de limpieza de métricas: {e}")
+        logger.error(f"Error in metrics cleanup task: {e}")
 
 
 @app.route("/get-logs-by-date", methods=["POST"])
@@ -240,7 +235,7 @@ def get_logs_by_date():
         users_data = get_users_logs(db, date_suffix, page=page, per_page=per_page)
         return jsonify(users_data)
     except ValueError:
-        return jsonify({"error": "Formato de fecha inválido"}), 400
+        return jsonify({"error": "Invalid date format"}), 400
     except Exception as e:
         logger.error(f"Error en get-logs-by-date: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -255,19 +250,19 @@ def reports():
     try:
         db = get_session()
         current_date = datetime.now().strftime("%Y%m%d")
-        logger.info(f"Generando reportes para la fecha: {current_date}")
+        logger.info(f"Generating reports for date: {current_date}")
         UserModel, LogModel = get_dynamic_models(current_date)
 
         if not UserModel or not LogModel:
             return render_template(
-                "error.html", message="Error al cargar datos para reportes"
+                "error.html", message="Error loading data for reports"
             ), 500
 
         metrics = get_important_metrics(db, UserModel, LogModel)
 
         if not metrics:
             return render_template(
-                "error.html", message="No hay datos disponibles para reportes"
+                "error.html", message="No data available for reports"
             ), 404
 
         http_codes = metrics.get("http_response_distribution", [])
@@ -333,7 +328,7 @@ def blacklist_logs():
         # Validar parámetros
         if page < 1 or per_page < 1 or per_page > 100:
             return render_template(
-                "error.html", message="Parámetros de paginación inválidos"
+                "error.html", message="Invalid pagination parameters"
             ), 400
 
         db = get_session()
@@ -360,11 +355,11 @@ def blacklist_logs():
         )
 
     except ValueError:
-        return render_template("error.html", message="Parámetros inválidos"), 400
+        return render_template("error.html", message="Invalid parameters"), 400
 
     except Exception as e:
-        logger.error(f"Error en blacklist_logs: {str(e)}")
-        return render_template("error.html", message="Error interno del servidor"), 500
+        logger.error(f"Error in blacklist_logs: {str(e)}")
+        return render_template("error.html", message="Internal server error"), 500
 
     finally:
         if db is not None:
@@ -423,7 +418,7 @@ def realtime_data_thread():
                 None,
                 "",
             ):
-                logger.error(f"get_network_info() devolvió un error: {network_info}")
+                logger.error(f"get_network_info() returned an error: {network_info}")
                 network_info = []
 
             # Validar ram_info
@@ -433,7 +428,7 @@ def realtime_data_thread():
                 None,
                 "",
             ):
-                logger.error(f"get_ram_info() devolvió un error: {ram_info}")
+                logger.error(f"get_ram_info() returned an error: {ram_info}")
                 ram_info = {"used": "0 B"}
 
             # Validar swap_info
@@ -443,7 +438,7 @@ def realtime_data_thread():
                 None,
                 "",
             ):
-                logger.error(f"get_swap_info() devolvió un error: {swap_info}")
+                logger.error(f"get_swap_info() returned an error: {swap_info}")
                 swap_info = {"used": "0 B"}
 
             # Validar cpu_info
@@ -463,7 +458,7 @@ def realtime_data_thread():
                 None,
                 "",
             ):
-                logger.error(f"get_network_stats() devolvió un error: {network_stats}")
+                logger.error(f"get_network_stats() returned an error: {network_stats}")
                 network_stats = {}
 
             system_info = {
@@ -508,7 +503,7 @@ def realtime_data_thread():
                 },
             )
         except Exception as e:
-            logger.error(f"Error en hilo de datos en tiempo real: {str(e)}")
+            logger.error(f"Error in real-time data thread: {str(e)}")
         time.sleep(15)  # Actualizar cada 15 segundos en lugar de 5
 
 
@@ -566,34 +561,31 @@ def cache_stats_realtime():
 
 @app.route("/api/metrics/today")
 def get_today_metrics():
-    """Obtiene métricas del día actual usando el nuevo servicio"""
     try:
         results = MetricsService.get_metrics_today()
         return jsonify(results)
     except Exception as e:
-        logger.error(f"Error al obtener métricas del día: {e}")
+        logger.error(f"Error retrieving today's metrics: {e}")
         return jsonify([])
 
 
 @app.route("/api/metrics/24hours")
 def get_24hours_metrics():
-    """Obtiene métricas de las últimas 24 horas"""
     try:
         results = MetricsService.get_metrics_last_24_hours()
         return jsonify(results)
     except Exception as e:
-        logger.error(f"Error al obtener métricas de 24 horas: {e}")
+        logger.error(f"Error retrieving 24 hours metrics: {e}")
         return jsonify([])
 
 
 @app.route("/api/metrics/latest")
 def get_latest_metric():
-    """Obtiene la métrica más reciente"""
     try:
         result = MetricsService.get_latest_metric()
         return jsonify(result) if result else jsonify({})
     except Exception as e:
-        logger.error(f"Error al obtener la métrica más reciente: {e}")
+        logger.error(f"Error retrieving latest metric: {e}")
         return jsonify({})
 
 
@@ -608,7 +600,6 @@ def auditoria_logs():
 
 @app.route("/api/all-users", methods=["GET"])
 def api_get_all_users():
-    """Endpoint para obtener una lista de todos los usuarios para los filtros del frontend."""
     db = get_session()
     try:
         users = get_all_usernames(db)
@@ -621,7 +612,6 @@ def api_get_all_users():
 
 @app.route("/api/run-audit", methods=["POST"])
 def api_run_audit():
-    """Endpoint principal que ejecuta la auditoría solicitada desde el frontend."""
     data = request.get_json()
     audit_type = data.get("audit_type")
     start_date = data.get("start_date")
@@ -636,56 +626,55 @@ def api_run_audit():
     try:
         if audit_type == "user_summary":
             if not username:
-                return jsonify({"error": "Se requiere un nombre de usuario."}), 400
+                return jsonify({"error": "Username is required."}), 400
             result = get_user_activity_summary(db, username, start_date, end_date)
         elif audit_type == "top_users_data":
             result = get_top_users_by_data(db, start_date, end_date)
         elif audit_type == "daily_activity":
             if not start_date:
-                return jsonify({"error": "Se requiere una fecha de inicio."}), 400
+                return jsonify({"error": "Start date is required."}), 400
             if not end_date:
-                return jsonify({"error": "Se requiere una fecha de fin."}), 400
+                return jsonify({"error": "End date is required."}), 400
             result = get_daily_activity(db, start_date, username)
         elif audit_type == "denied_access":
             result = find_denied_access(db, start_date, end_date, username)
         elif audit_type == "keyword_search":
             if not keyword:
-                return jsonify({"error": "Se requiere una palabra clave."}), 400
+                return jsonify({"error": "Keyword is required."}), 400
             result = find_by_keyword(db, start_date, end_date, keyword, username)
         elif audit_type == "social_media_activity":
             if not social_media_sites:
                 return jsonify(
-                    {"error": "Debe seleccionar al menos una red social."}
+                    {"error": "At least one social media site must be selected."}
                 ), 400
             result = find_social_media_activity(
                 db, start_date, end_date, social_media_sites, username
             )
         elif audit_type == "ip_activity":
             if not ip_address:
-                return jsonify({"error": "Se requiere una dirección IP."}), 400
+                return jsonify({"error": "IP address is required."}), 400
             result = find_by_ip(db, start_date, end_date, ip_address)
         elif audit_type == "response_code_search":
             if not response_code:
-                return jsonify({"error": "Se requiere un código de respuesta."}), 400
+                return jsonify({"error": "Response code is required."}), 400
             result = find_by_response_code(
                 db, start_date, end_date, int(response_code), username
             )
         else:
-            return jsonify({"error": "Tipo de auditoría no válido."}), 400
+            return jsonify({"error": "Invalid audit type."}), 400
 
         return jsonify(result)
 
     except Exception as e:
         # Imprimir el error en el log del servidor para depuración
         print(f"Error en la API de auditoría: {e}")
-        return jsonify({"error": "Ocurrió un error interno en el servidor."}), 500
+        return jsonify({"error": "Internal server error"}), 500
     finally:
         db.close()
 
 
 @app.route("/admin")
 def admin_dashboard():
-    """Página principal con resumen de la configuración"""
     acls = config_manager.get_acls()
     delay_pools = config_manager.get_delay_pools()
     http_access_rules = config_manager.get_http_access_rules()
@@ -699,7 +688,6 @@ def admin_dashboard():
 
 @app.route("/config")
 def view_config():
-    """Ver configuración completa"""
     return render_template(
         "admin/config.html", config_content=config_manager.config_content
     )
@@ -707,15 +695,14 @@ def view_config():
 
 @app.route("/admin/config/edit", methods=["GET", "POST"])
 def edit_config():
-    """Editar configuración completa"""
     if request.method == "POST":
         new_content = request.form["config_content"]
         try:
             config_manager.save_config(new_content)
-            flash("Configuración guardada exitosamente", "success")
+            flash("Configuration saved successfully", "success")
             return redirect(url_for("view_config"))
         except Exception as e:
-            flash(f"Error al guardar la configuración: {str(e)}", "error")
+            flash(f"Error saving configuration: {str(e)}", "error")
     return render_template(
         "edit_config.html", config_content=config_manager.config_content
     )
@@ -723,14 +710,12 @@ def edit_config():
 
 @app.route("/admin/acls")
 def manage_acls():
-    """Gestionar ACLs"""
     acls = config_manager.get_acls()
     return render_template("admin/acls.html", acls=acls)
 
 
 @app.route("/admin/acls/add", methods=["POST"])
 def add_acl():
-    """Agregar nueva ACL"""
     name = request.form["name"]
     acl_type = request.form["type"]
     value = request.form["value"]
@@ -753,21 +738,18 @@ def add_acl():
 
 @app.route("/admin/delay-pools")
 def manage_delay_pools():
-    """Gestionar Delay Pools"""
     delay_pools = config_manager.get_delay_pools()
     return render_template("admin/delay_pools.html", delay_pools=delay_pools)
 
 
 @app.route("/admin/http-access")
 def manage_http_access():
-    """Gestionar reglas de acceso HTTP"""
     rules = config_manager.get_http_access_rules()
     return render_template("admin/http_access.html", rules=rules)
 
 
 @app.route("/admin/view-logs")
 def view_logs():
-    """Ver logs de Squid"""
     log_files = ["/var/log/squid/access.log", "/var/log/squid/cache.log"]
     logs = {}
     for log_file in log_files:
@@ -789,9 +771,7 @@ def restart_squid():
     """Reiniciar servicio Squid"""
     try:
         os.system("systemctl restart squid")
-        return jsonify(
-            {"status": "success", "message": "Squid reiniciado exitosamente"}
-        )
+        return jsonify({"status": "success", "message": "Squid restarted successfully"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
@@ -802,7 +782,7 @@ def reload_squid():
     try:
         os.system("systemctl reload squid")
         return jsonify(
-            {"status": "success", "message": "Configuración recargada exitosamente"}
+            {"status": "success", "message": "Configuration reloaded successfully"}
         )
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})

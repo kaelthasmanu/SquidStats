@@ -80,7 +80,7 @@ def group_by_user(connections):
         "null",
     }
 
-    grouped = defaultdict(lambda: {"client_ip": "No disponible", "connections": []})
+    grouped = defaultdict(lambda: {"client_ip": "Not found", "connections": []})
 
     for connection in connections:
         user = connection.get("username")
@@ -99,7 +99,7 @@ def group_by_user(connections):
             continue
 
         if not grouped[user]["connections"]:
-            grouped[user]["client_ip"] = connection.get("client_ip", "No disponible")
+            grouped[user]["client_ip"] = connection.get("client_ip", "Not found")
 
         grouped[user]["connections"].append(connection)
 
