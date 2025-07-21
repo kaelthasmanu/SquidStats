@@ -1,7 +1,8 @@
+
 import os
 import re
 import socket
-from datetime import UTC, datetime
+from datetime import datetime
 
 from dotenv import load_dotenv
 
@@ -15,7 +16,7 @@ _SQUID_DATE_FMT = "%a, %d %b %Y %H:%M:%S %Z"
 
 def _parse_squid_date(line: str) -> datetime:
     stamp = line.split(":", 1)[1].strip()
-    return datetime.strptime(stamp, _SQUID_DATE_FMT).replace(tzinfo=UTC)
+    return datetime.strptime(stamp, _SQUID_DATE_FMT)
 
 
 def _re_float(key: str, text: str, default=0.0):
