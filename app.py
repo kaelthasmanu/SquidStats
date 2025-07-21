@@ -147,7 +147,6 @@ def index():
         ), 500
 
 
-
 @app.route("/actualizar-conexiones")
 def actualizar_conexiones():
     try:
@@ -416,31 +415,75 @@ def realtime_data_thread():
             cache_stats = (
                 vars(cache_data) if hasattr(cache_data, "__dict__") else cache_data
             )
+
+            # Validar network_info
+            network_info = get_network_info()
+            if not isinstance(network_info, list | dict) or network_info in (
+                "No disponible",
+                None,
+                "",
+            ):
+                logger.error(f"get_network_info() devolvió un error: {network_info}")
+                network_info = []
+
+            # Validar ram_info
+            ram_info = get_ram_info()
+            if not isinstance(ram_info, dict) or ram_info in (
+                "No disponible",
+                None,
+                "",
+            ):
+                logger.error(f"get_ram_info() devolvió un error: {ram_info}")
+                ram_info = {"used": "0 B"}
+
+            # Validar swap_info
+            swap_info = get_swap_info()
+            if not isinstance(swap_info, dict) or swap_info in (
+                "No disponible",
+                None,
+                "",
+            ):
+                logger.error(f"get_swap_info() devolvió un error: {swap_info}")
+                swap_info = {"used": "0 B"}
+
+            # Validar cpu_info
+            cpu_info = get_cpu_info()
+            if not isinstance(cpu_info, dict) or cpu_info in (
+                "No disponible",
+                None,
+                "",
+            ):
+                logger.error(f"get_cpu_info() devolvió un error: {cpu_info}")
+                cpu_info = {"usage": "0%"}
+
+            # Validar network_stats
+            network_stats = get_network_stats()
+            if not isinstance(network_stats, dict) or network_stats in (
+                "No disponible",
+                None,
+                "",
+            ):
+                logger.error(f"get_network_stats() devolvió un error: {network_stats}")
+                network_stats = {}
+
             system_info = {
                 "hostname": socket.gethostname(),
-                "ips": get_network_info(),
+                "ips": network_info,
                 "os": get_os_info(),
                 "uptime": get_uptime(),
-                "ram": get_ram_info(),
-                "swap": get_swap_info(),
-                "cpu": get_cpu_info(),
+                "ram": ram_info,
+                "swap": swap_info,
+                "cpu": cpu_info,
                 "python_version": sys.version.split()[0],
                 "squid_version": get_squid_version(),
                 "timezone": get_timezone(),
                 "local_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "timestamp_utc": datetime.now().isoformat(),
             }
-            network_stats = get_network_stats()
 
             # Guardar métricas en la base de datos solo cada 60 segundos (cada 4 iteraciones)
             data_collection_counter += 1
-            if (
-                data_collection_counter % 4 == 0
-            ):  # Solo cada 4 iteraciones (60 segundos)
-                ram_info = get_ram_info()
-                swap_info = get_swap_info()
-                cpu_info = get_cpu_info()
-
+            if data_collection_counter % 4 == 0:
                 ram_bytes = size_to_bytes(ram_info.get("used", "0 B"))
                 swap_bytes = size_to_bytes(swap_info.get("used", "0 B"))
 
@@ -449,12 +492,8 @@ def realtime_data_thread():
                     cpu_usage=cpu_info.get("usage", "0%"),
                     ram_usage_bytes=ram_bytes,
                     swap_usage_bytes=swap_bytes,
-                    net_sent_bytes_sec=network_stats.get("bytes_sent_per_sec", 0)
-                    if network_stats
-                    else 0,
-                    net_recv_bytes_sec=network_stats.get("bytes_recv_per_sec", 0)
-                    if network_stats
-                    else 0,
+                    net_sent_bytes_sec=network_stats.get("bytes_sent_per_sec", 0),
+                    net_recv_bytes_sec=network_stats.get("bytes_recv_per_sec", 0),
                 )
 
             with realtime_data_lock:
