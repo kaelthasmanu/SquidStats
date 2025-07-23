@@ -43,7 +43,8 @@ def find_blacklisted_sites(
             # Obtener los modelos ORM dinámicos para esta fecha
             try:
                 UserModel, LogModel = get_dynamic_models(date_str)
-            except Exception:
+            except Exception as e:
+                print(f"Error obteniendo modelos dinámicos para {date_str}: {e}")
                 continue
 
             # Crear condiciones OR para la blacklist usando ORM
@@ -100,7 +101,8 @@ def find_blacklisted_sites(
                 try:
                     date_str = log_table.split("_")[1]
                     UserModel, LogModel = get_dynamic_models(date_str)
-                except Exception:
+                except Exception as e:
+                    print(f"Error obteniendo modelos dinámicos para {date_str}: {e}")
                     continue
 
                 blacklist_conditions = [

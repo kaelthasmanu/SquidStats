@@ -2,6 +2,7 @@ import json
 import os
 import platform
 import subprocess
+import tempfile
 
 from dotenv import load_dotenv
 
@@ -56,8 +57,10 @@ def update_squid():
             )
             return False
 
-        download = subprocess.run(
-            ["wget", download_url, "-O", f"/tmp/{package_name}"],
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{package_name}") as tmp_pkg:
+            package_path = tmp_pkg.name
+            download = subprocess.run(
+                ["wget", download_url, "-O", package_path],
             capture_output=True,
             text=True,
             env=env,
@@ -77,7 +80,7 @@ def update_squid():
         subprocess.run(["apt", "update"], env=apt_env)
 
         install = subprocess.run(
-            ["dpkg", "-i", "--force-overwrite", f"/tmp/{package_name}"]
+            ["dpkg", "-i", "--force-overwrite", package_path]
         )
         if install.returncode != 0:
             print("Error instalando el paquete", "error")
@@ -87,7 +90,7 @@ def update_squid():
         subprocess.run(["chmod", "+x", "/etc/init.d/squid"])
         subprocess.run(["systemctl", "daemon-reload"])
 
-        subprocess.run(["rm", "-f", f"/tmp/{package_name}"])
+        os.unlink(package_path)
         squid_check = subprocess.run(["squid", "-v"], capture_output=True, text=True)
 
         if squid_check.returncode != 0:
