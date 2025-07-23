@@ -7,3 +7,4 @@ psutil==7.0.0
 eventlet
 flask_socketio
 pytz
+requests
