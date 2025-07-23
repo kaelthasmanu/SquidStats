@@ -1,8 +1,8 @@
 import os
 import subprocess
 import tempfile
-import requests
 
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,21 +16,20 @@ def updateSquidStats():
             env["http_proxy"] = proxy_url
             env["https_proxy"] = proxy_url
 
-        with tempfile.NamedTemporaryFile(delete=False, mode="w+b", suffix=".sh") as tmp_script:
+        with tempfile.NamedTemporaryFile(
+            delete=False, mode="w+b", suffix=".sh"
+        ) as tmp_script:
             tmp_script_path = tmp_script.name
 
         # Descarga el script usando requests y proxy si está definido
         proxies = None
         if proxy_url:
-            proxies = {
-                "http": proxy_url,
-                "https": proxy_url
-            }
+            proxies = {"http": proxy_url, "https": proxy_url}
         try:
             response = requests.get(
                 "https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh",
                 proxies=proxies,
-                timeout=30
+                timeout=30,
             )
             response.raise_for_status()
             tmp_script.write(response.content)

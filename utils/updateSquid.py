@@ -57,14 +57,16 @@ def update_squid():
             )
             return False
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{package_name}") as tmp_pkg:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=f"_{package_name}"
+        ) as tmp_pkg:
             package_path = tmp_pkg.name
             download = subprocess.run(
                 ["wget", download_url, "-O", package_path],
-            capture_output=True,
-            text=True,
-            env=env,
-        )
+                capture_output=True,
+                text=True,
+                env=env,
+            )
         if download.returncode != 0:
             print("Error descargando el paquete", "error")
             return False
@@ -79,9 +81,7 @@ def update_squid():
 
         subprocess.run(["apt", "update"], env=apt_env)
 
-        install = subprocess.run(
-            ["dpkg", "-i", "--force-overwrite", package_path]
-        )
+        install = subprocess.run(["dpkg", "-i", "--force-overwrite", package_path])
         if install.returncode != 0:
             print("Error instalando el paquete", "error")
             subprocess.run(["apt", "install", "-f", "-y"], env=apt_env)
