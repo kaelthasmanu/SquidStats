@@ -106,6 +106,8 @@ def get_file_inode(filepath):
 
 
 def parse_log_line(line):
+    if "cache_object://" in line:
+        return None
     if "|" in line:
         return parse_log_line_pipe_format(line)
     parts = line.split()
