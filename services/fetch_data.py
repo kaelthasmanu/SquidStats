@@ -19,6 +19,7 @@ def fetch_squid_data():
             response = b""
             while chunk := s.recv(4096):
                 response += chunk
+        print(response.decode("utf-8"))  # Debugging line
         return response.decode("utf-8")
     except Exception as e:
         return str(e)

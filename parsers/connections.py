@@ -84,23 +84,25 @@ def group_by_user(connections):
 
     for connection in connections:
         user = connection.get("username")
-
-        if user is None:
-            continue
         if not isinstance(user, str):
-            user = str(user)
-        user_normalized = user.strip().lower()
+            user = str(user) if user is not None else ""
+        user_normalized = user.strip().lower() if user else ""
+        if user_normalized == "n/a":
+            continue
         is_anonymous = not user_normalized or user_normalized in (
             indicator.lower()
             for indicator in ANONYMOUS_INDICATORS
             if indicator is not None
         )
-        if is_anonymous:
-            continue
-
-        if not grouped[user]["connections"]:
-            grouped[user]["client_ip"] = connection.get("client_ip", "Not found")
-
-        grouped[user]["connections"].append(connection)
-
+        if not is_anonymous:
+            key = user
+            client_ip = connection.get("client_ip", "Not found")
+        else:
+            raw_ip = connection.get("client_ip", "Not found")
+            ip_only = raw_ip.split(":")[0] if ":" in raw_ip else raw_ip
+            key = ip_only
+            client_ip = ip_only
+        if not grouped[key]["connections"]:
+            grouped[key]["client_ip"] = client_ip
+        grouped[key]["connections"].append(connection)
     return dict(grouped)

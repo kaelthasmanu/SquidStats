@@ -108,8 +108,25 @@ def get_file_inode(filepath):
 def parse_log_line(line):
     if "|" in line:
         return parse_log_line_pipe_format(line)
-    else:
-        return parse_log_line_space_format(line)
+    parts = line.split()
+    # Formato clásico de Squid: timestamp elapsed ip code/status bytes method url rfc931 peerstatus/peerhost type
+    if len(parts) >= 10 and parts[5] in ("CONNECT", "GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"):
+        try:
+            return {
+                "ip": parts[2],
+                "username": parts[2] if parts[2] != "-" else None,
+                "url": parts[6],
+                "response": int(parts[3].split("/")[-1]) if "/" in parts[3] and parts[3].split("/")[-1].isdigit() else 0,
+                "data_transmitted": int(parts[4]) if parts[4].isdigit() else 0,
+                "method": parts[5],
+                "status": parts[3],
+                "is_denied": "TCP_DENIED" in parts[3],
+            }
+        except Exception as e:
+            logger.error(f"Error parsing classic squid log line: {line.strip()} - {e}")
+            return None
+    # Si no es clásico, intenta el formato space
+    return parse_log_line_space_format(line)
 
 
 def parse_log_line_pipe_format(line):
