@@ -421,16 +421,9 @@ sudo rm -rf /opt/squidstats
 _Future functionalities and planned improvements._
 
 ### Upcoming Features
-- **Advanced Audit Center** 🔍
-  - Keyword search in URLs
-  - Activity analysis by specific IP
-  - HTTP response code filters
-  - Social media monitoring
-  - Daily activity reports per user
 
 - **Interface Improvements** 🎨
   - Customizable dashboards
-  - Dark/light themes
   - Report export (PDF, Excel)
   - Real-time notifications
 
