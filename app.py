@@ -9,10 +9,12 @@ from dotenv import load_dotenv
 from flask import (
     Blueprint,
     Flask,
+    flash,
     jsonify,
     redirect,
     render_template,
     request,
+    url_for,
 )
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
@@ -49,8 +51,7 @@ from services.system_info import (
     get_timezone,
     get_uptime,
 )
-
-# from utils.admin import SquidConfigManager
+from utils.admin import SquidConfigManager
 from utils.colors import color_map
 from utils.filters import register_filters
 from utils.size import size_to_bytes
@@ -63,7 +64,7 @@ class Config:
 
 
 # Instancia global del manager
-# config_manager = SquidConfigManager()
+config_manager = SquidConfigManager()
 
 
 load_dotenv()
@@ -672,7 +673,7 @@ def api_run_audit():
         db.close()
 
 
-""" @app.route("/admin")
+@app.route("/admin")
 def admin_dashboard():
     acls = config_manager.get_acls()
     delay_pools = config_manager.get_delay_pools()
@@ -685,7 +686,7 @@ def admin_dashboard():
     return render_template("admin/dashboardAdmin.html", stats=stats)
 
 
-@app.route("/config")
+@app.route("/admin/config")
 def view_config():
     return render_template(
         "admin/config.html", config_content=config_manager.config_content
@@ -703,7 +704,7 @@ def edit_config():
         except Exception as e:
             flash(f"Error saving configuration: {str(e)}", "error")
     return render_template(
-        "edit_config.html", config_content=config_manager.config_content
+        "admin/edit_config.html", config_content=config_manager.config_content
     )
 
 
@@ -735,6 +736,77 @@ def add_acl():
     return redirect(url_for("manage_acls"))
 
 
+@app.route("/admin/acls/edit", methods=["POST"])
+def edit_acl():
+    acl_id = request.form["id"]  # Este será el índice de la ACL
+    new_name = request.form["name"]
+    new_type = request.form["type"]
+    new_value = request.form["value"]
+
+    try:
+        acl_index = int(acl_id)
+        acls = config_manager.get_acls()
+
+        if 0 <= acl_index < len(acls):
+            new_acl_line = f"acl {new_name} {new_type} {new_value}"
+
+            # Reemplazar la línea en el contenido
+            lines = config_manager.config_content.split("\n")
+            acl_count = 0
+            for i, line in enumerate(lines):
+                if line.strip().startswith("acl ") and not line.strip().startswith("#"):
+                    if acl_count == acl_index:
+                        lines[i] = new_acl_line
+                        break
+                    acl_count += 1
+
+            new_content = "\n".join(lines)
+            config_manager.save_config(new_content)
+            flash("ACL actualizada exitosamente", "success")
+        else:
+            flash("ACL no encontrada", "error")
+    except (ValueError, IndexError):
+        flash("Error al actualizar la ACL", "error")
+
+    return redirect(url_for("manage_acls"))
+
+
+@app.route("/admin/acls/delete", methods=["POST"])
+def delete_acl():
+    acl_id = request.form["id"]  # Este será el índice de la ACL
+
+    try:
+        acl_index = int(acl_id)
+        acls = config_manager.get_acls()
+
+        if 0 <= acl_index < len(acls):
+            acl_to_delete = acls[acl_index]
+
+            # Remover la línea del contenido
+            lines = config_manager.config_content.split("\n")
+            new_lines = []
+            acl_count = 0
+
+            for line in lines:
+                if line.strip().startswith("acl ") and not line.strip().startswith("#"):
+                    if acl_count == acl_index:
+                        # Saltar esta línea (eliminarla)
+                        acl_count += 1
+                        continue
+                    acl_count += 1
+                new_lines.append(line)
+
+            new_content = "\n".join(new_lines)
+            config_manager.save_config(new_content)
+            flash(f"ACL '{acl_to_delete['name']}' eliminada exitosamente", "success")
+        else:
+            flash("ACL no encontrada", "error")
+    except (ValueError, IndexError):
+        flash("Error al eliminar la ACL", "error")
+
+    return redirect(url_for("manage_acls"))
+
+
 @app.route("/admin/delay-pools")
 def manage_delay_pools():
     delay_pools = config_manager.get_delay_pools()
@@ -745,7 +817,6 @@ def manage_delay_pools():
 def manage_http_access():
     rules = config_manager.get_http_access_rules()
     return render_template("admin/http_access.html", rules=rules)
- """
 
 
 @app.route("/admin/view-logs")

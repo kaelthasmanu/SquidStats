@@ -46,6 +46,43 @@
             </form>
         </div>
 
+        <!-- Edit ACL Form -->
+        <div id="editAclForm" class="hidden bg-yellow-50 p-6 rounded-lg mb-6">
+            <h3 class="text-lg font-semibold mb-4">Editar ACL</h3>
+            <form method="POST" action="/admin/acls/edit" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="hidden" id="editAclId" name="id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre:</label>
+                    <input type="text" id="editName" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo:</label>
+                    <select id="editType" name="type" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="src">src (IP origen)</option>
+                        <option value="dst">dst (IP destino)</option>
+                        <option value="dstdomain">dstdomain (Dominio destino)</option>
+                        <option value="port">port (Puerto)</option>
+                        <option value="time">time (Tiempo)</option>
+                        <option value="method">method (Método HTTP)</option>
+                        <option value="proxy_auth">proxy_auth (Autenticación)</option>
+                        <option value="maxconn">maxconn (Conexiones máximas)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Valor:</label>
+                    <input type="text" id="editValue" name="value" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="md:col-span-3 flex space-x-4">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-save mr-2"></i>Actualizar ACL
+                    </button>
+                    <button type="button" onclick="toggleEditForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <!-- ACLs List -->
         <div class="overflow-x-auto">
             <table class="w-full table-auto">
@@ -68,10 +105,10 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{{ acl.value }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button class="text-blue-600 hover:text-blue-900 mr-3">
+                            <button onclick="editAcl('{{ acl.id }}', '{{ acl.name }}', '{{ acl.type }}', '{{ acl.value }}')" class="text-blue-600 hover:text-blue-900 mr-3" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="text-red-600 hover:text-red-900">
+                            <button onclick="deleteAcl('{{ acl.id }}', '{{ acl.name }}')" class="text-red-600 hover:text-red-900" title="Eliminar">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -86,7 +123,66 @@
 <script>
 function toggleAddForm() {
     const form = document.getElementById('addAclForm');
+    const editForm = document.getElementById('editAclForm');
+    
+    // Ocultar formulario de edición si está visible
+    if (!editForm.classList.contains('hidden')) {
+        editForm.classList.add('hidden');
+    }
+    
     form.classList.toggle('hidden');
+}
+
+function toggleEditForm() {
+    const form = document.getElementById('editAclForm');
+    const addForm = document.getElementById('addAclForm');
+    
+    // Ocultar formulario de agregar si está visible
+    if (!addForm.classList.contains('hidden')) {
+        addForm.classList.add('hidden');
+    }
+    
+    form.classList.toggle('hidden');
+}
+
+function editAcl(id, name, type, value) {
+    // Llenar los campos del formulario de edición
+    document.getElementById('editAclId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editType').value = type;
+    document.getElementById('editValue').value = value;
+    
+    // Mostrar el formulario de edición
+    const editForm = document.getElementById('editAclForm');
+    const addForm = document.getElementById('addAclForm');
+    
+    // Ocultar formulario de agregar si está visible
+    if (!addForm.classList.contains('hidden')) {
+        addForm.classList.add('hidden');
+    }
+    
+    editForm.classList.remove('hidden');
+    
+    // Hacer scroll hacia el formulario
+    editForm.scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteAcl(id, name) {
+    if (confirm(`¿Estás seguro de que quieres eliminar la ACL "${name}"?`)) {
+        // Crear un formulario dinámico para enviar la solicitud DELETE
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/acls/delete';
+        
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = id;
+        
+        form.appendChild(idInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 </script>
 {% endblock %}

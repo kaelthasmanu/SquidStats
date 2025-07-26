@@ -3,9 +3,9 @@ import shutil
 from datetime import datetime
 
 # Configuración para Squid
-SQUID_CONFIG_PATH = "/etc/squid/squid.conf"
-BACKUP_DIR = "/etc/squid/backups"
-ACL_FILES_DIR = "/etc/squid/acls"
+SQUID_CONFIG_PATH = "/home/manuel/Desktop/config/squid.conf"
+BACKUP_DIR = "/home/manuel/Desktop/config/backups"
+ACL_FILES_DIR = "/home/manuel/Desktop/config/acls"
 
 
 class SquidConfigManager:
@@ -43,6 +43,7 @@ class SquidConfigManager:
         """Extraer ACLs del archivo de configuración"""
         acls = []
         lines = self.config_content.split("\n")
+        acl_index = 0
         for line in lines:
             line = line.strip()
             if line.startswith("acl ") and not line.startswith("#"):
@@ -53,12 +54,14 @@ class SquidConfigManager:
                     acl_value = " ".join(parts[3:]) if len(parts) > 3 else ""
                     acls.append(
                         {
+                            "id": acl_index,
                             "name": acl_name,
                             "type": acl_type,
                             "value": acl_value,
                             "full_line": line,
                         }
                     )
+                    acl_index += 1
         return acls
 
     def get_delay_pools(self):
