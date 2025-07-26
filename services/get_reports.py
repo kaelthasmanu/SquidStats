@@ -132,21 +132,21 @@ def get_important_metrics(db: Session, UserModel, LogModel):
         return results
 
     except Exception as e:
-        # Registrar error pero retornar estructura vacía
-        print(f"Error en get_important_metrics: {str(e)}")
+        # Log error but return empty structure
+        print(f"Error in get_important_metrics: {str(e)}")
         return {}
 
 
 def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):
     try:
-        # Convertir cadenas a objetos datetime
+        # Convert string to datetime objects
         start_dt = datetime.strptime(start_date, "%Y%m%d")
         end_dt = datetime.strptime(end_date, "%Y%m%d")
     except ValueError:
-        raise ValueError("Las fechas deben estar en formato YYYYMMDD")
+        raise ValueError("Dates must be in YYYYMMDD format")
 
     if end_dt < start_dt:
-        raise ValueError("La fecha de fin no puede ser anterior a la fecha de inicio")
+        raise ValueError("End date cannot be earlier than start date")
 
     # Preparar contenedores para resultados consolidados
     consolidated_results = {
@@ -176,7 +176,7 @@ def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):
             if not has_table(db, UserModel.__tablename__) or not has_table(
                 db, LogModel.__tablename__
             ):
-                print(f"Tablas no encontradas para {date_suffix}, saltando...")
+                print(f"Tables not found for {date_suffix}, skipping...")
                 current_dt += timedelta(days=1)
                 continue
 
@@ -204,7 +204,7 @@ def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):
 
             current_dt += timedelta(days=1)
         except Exception as e:
-            print(f"Error procesando {date_suffix}: {str(e)}")
+            print(f"Error processing {date_suffix}: {str(e)}")
             current_dt += timedelta(days=1)
 
     return consolidated_results
@@ -216,7 +216,7 @@ def has_table(db: Session, table_name: str) -> bool:
         inspector = inspect(db.get_bind())
         return inspector.has_table(table_name)
     except Exception as e:
-        print(f"Error verificando tabla {table_name}: {str(e)}")
+        print(f"Error checking table {table_name}: {str(e)}")
         return False
 
 

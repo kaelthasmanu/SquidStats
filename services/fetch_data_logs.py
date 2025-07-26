@@ -35,29 +35,29 @@ def sanitize_table_name(name: str) -> str:
 def get_dynamic_model(db: Session, table_name: str, date_suffix: str):
     # Validar parámetros
     if not validate_table_name(table_name):
-        logger.error(f"Nombre de tabla inválido: {table_name}")
+        logger.error(f"Invalid table name: {table_name}")
         return None
 
     if not validate_date_suffix(date_suffix):
-        logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+        logger.error(f"Invalid date suffix: {date_suffix}")
         return None
 
     full_table_name = f"{table_name}_{date_suffix}"
 
-    # Verificar si la tabla existe
+    # Check if the table exists
     try:
         inspector = inspect(db.get_bind())
         if not inspector.has_table(full_table_name):
-            logger.warning(f"Tabla {full_table_name} no encontrada")
+            logger.warning(f"Table {full_table_name} not found")
             return None
 
-        # Crear modelo dinámico usando automap
+        # Create dynamic model using automap
         Base = automap_base()
         Base.prepare(autoload_with=db.get_bind())
 
         return getattr(Base.classes, full_table_name, None)
     except Exception as e:
-        logger.error(f"Error obteniendo modelo dinámico: {str(e)}", exc_info=True)
+        logger.error(f"Error getting dynamic model: {str(e)}", exc_info=True)
         return None
 
 
@@ -68,7 +68,7 @@ def get_users_logs(
         if not date_suffix:
             date_suffix = datetime.now().strftime("%Y%m%d")
         if not validate_date_suffix(date_suffix):
-            logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+            logger.error(f"Invalid date suffix: {date_suffix}")
             return {
                 "users": [],
                 "total": 0,
@@ -81,7 +81,7 @@ def get_users_logs(
         LogModel = get_dynamic_model(db, "log", date_suffix)
 
         if not UserModel or not LogModel:
-            logger.error(f"Tablas dinámicas no disponibles para la fecha {date_suffix}")
+            logger.error(f"Dynamic tables not available for date {date_suffix}")
             return {
                 "users": [],
                 "total": 0,
@@ -152,7 +152,7 @@ def get_users_logs(
             "total_pages": total_pages,
         }
     except Exception as e:
-        logger.error(f"Error en get_users_logs paginado: {str(e)}", exc_info=True)
+        logger.error(f"Error in paginated get_users_logs: {str(e)}", exc_info=True)
         return {
             "users": [],
             "total": 0,
@@ -167,7 +167,7 @@ def get_users_logs(
 def get_users_with_logs_by_date(db: Session, date_suffix: str) -> list[dict[str, Any]]:
     # Validar sufijo de fecha
     if not validate_date_suffix(date_suffix):
-        logger.error(f"Sufijo de fecha inválido: {date_suffix}")
+        logger.error(f"Invalid date suffix: {date_suffix}")
         return []
 
     return get_users_logs(db, date_suffix)

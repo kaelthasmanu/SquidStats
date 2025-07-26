@@ -18,7 +18,6 @@ load_dotenv()
 
 
 def create_app():
-    """Create and configure the Flask application."""
     app = Flask(__name__, static_folder="./static")
     app.config.from_object(Config())
 
@@ -48,8 +47,6 @@ def create_app():
 
 
 def setup_scheduler_tasks(scheduler):
-    """Configure scheduler tasks."""
-
     @scheduler.task("interval", id="do_job_1", seconds=30, misfire_grace_time=900)
     def init_scheduler():
         log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
@@ -74,7 +71,6 @@ def setup_scheduler_tasks(scheduler):
 
 
 def main():
-    """Main application entry point."""
     # Create Flask app and scheduler
     app, scheduler = create_app()
 

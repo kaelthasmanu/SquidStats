@@ -8,11 +8,11 @@ def divide_filter(numerator, denominator, precision=2):
         num = float(numerator)
         den = float(denominator)
         if den == 0:
-            logger.warning("Intento de división por cero en plantilla")
+            logger.warning("Division by zero attempt in template")
             return 0.0
         return round(num / den, precision)
     except (TypeError, ValueError) as e:
-        logger.error(f"Error en filtro divide: {str(e)}")
+        logger.error(f"Error in divide filter: {str(e)}")
         return 0.0
 
 
@@ -27,7 +27,7 @@ def format_bytes_filter(value):
             return f"{(value / 1024):.2f} KB"
         return f"{value} bytes"
     except (TypeError, ValueError) as e:
-        logger.error(f"Error en filtro format_bytes: {str(e)}")
+        logger.error(f"Error in format_bytes filter: {str(e)}")
         return "0 bytes"
 
 

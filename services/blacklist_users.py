@@ -44,7 +44,7 @@ def find_blacklisted_sites(
             try:
                 UserModel, LogModel = get_dynamic_models(date_str)
             except Exception as e:
-                print(f"Error obteniendo modelos dinámicos para {date_str}: {e}")
+                print(f"Error getting dynamic models for {date_str}: {e}")
                 continue
 
             # Crear condiciones OR para la blacklist usando ORM
@@ -102,7 +102,7 @@ def find_blacklisted_sites(
                     date_str = log_table.split("_")[1]
                     UserModel, LogModel = get_dynamic_models(date_str)
                 except Exception as e:
-                    print(f"Error obteniendo modelos dinámicos para {date_str}: {e}")
+                    print(f"Error getting dynamic models for {date_str}: {e}")
                     continue
 
                 blacklist_conditions = [
@@ -119,7 +119,7 @@ def find_blacklisted_sites(
                 total_results += table_count
 
     except SQLAlchemyError as e:
-        print(f"Error de base de datos: {e}")
+        print(f"Database error: {e}")
         return {"error": str(e)}
 
     return {
@@ -172,6 +172,6 @@ def find_blacklisted_sites_by_date(
             )
 
     except SQLAlchemyError as e:
-        print(f"Error de base de datos: {e}")
+        print(f"Database error: {e}")
 
     return results

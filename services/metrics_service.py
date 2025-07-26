@@ -39,11 +39,11 @@ class MetricsService:
             # Limpiar métricas antiguas (más de 24 horas)
             MetricsService.cleanup_old_metrics()
 
-            logger.info("Métricas del sistema guardadas correctamente")
+            logger.info("System metrics saved successfully")
             return True
 
         except Exception as e:
-            logger.error(f"Error al guardar métricas del sistema: {e}")
+            logger.error(f"Error saving system metrics: {e}")
             if session:
                 session.rollback()
                 session.close()
@@ -90,11 +90,11 @@ class MetricsService:
                     }
                 )
 
-            logger.info(f"Recuperadas {len(result)} métricas de las últimas 24 horas")
+            logger.info(f"Retrieved {len(result)} metrics from the last 24 hours")
             return result
 
         except Exception as e:
-            logger.error(f"Error al obtener métricas de las últimas 24 horas: {e}")
+            logger.error(f"Error getting metrics from the last 24 hours: {e}")
             if session:
                 session.close()
             return []
@@ -142,11 +142,11 @@ class MetricsService:
                     }
                 )
 
-            logger.info(f"Recuperadas {len(result)} métricas del día actual")
+            logger.info(f"Retrieved {len(result)} metrics from today")
             return result
 
         except Exception as e:
-            logger.error(f"Error al obtener métricas del día actual: {e}")
+            logger.error(f"Error getting today's metrics: {e}")
             if session:
                 session.close()
             return []
@@ -171,12 +171,12 @@ class MetricsService:
             session.close()
 
             if deleted_count > 0:
-                logger.info(f"Eliminadas {deleted_count} métricas antiguas")
+                logger.info(f"Deleted {deleted_count} old metrics")
 
             return True
 
         except Exception as e:
-            logger.error(f"Error al limpiar métricas antiguas: {e}")
+            logger.error(f"Error cleaning old metrics: {e}")
             if session:
                 session.rollback()
                 session.close()
@@ -218,7 +218,7 @@ class MetricsService:
             return None
 
         except Exception as e:
-            logger.error(f"Error al obtener la métrica más reciente: {e}")
+            logger.error(f"Error getting latest metric: {e}")
             if session:
                 session.close()
             return None

@@ -37,7 +37,7 @@ def find_by_keyword(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No hay datos para las fechas seleccionadas."}
+        return {"error": "No data for the selected dates."}
 
     all_results = []
 
@@ -91,7 +91,7 @@ def find_by_keyword(
                 )
 
         except Exception as e:
-            print(f"Error procesando tabla {log_table}: {e}")
+            print(f"Error processing table {log_table}: {e}")
             continue
 
     # Ordenar resultados
@@ -112,14 +112,14 @@ def find_social_media_activity(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No hay datos para las fechas seleccionadas."}
+        return {"error": "No data for the selected dates."}
 
     domain_list = []
     for site_name in sites:
         if site_name in SOCIAL_MEDIA_DOMAINS:
             domain_list.extend(SOCIAL_MEDIA_DOMAINS[site_name])
     if not domain_list:
-        return {"error": "No se especificaron dominios válidos para la búsqueda."}
+        return {"error": "No valid domains specified for search."}
 
     all_results = []
 
@@ -187,7 +187,7 @@ def find_social_media_activity(
                 )
 
         except Exception as e:
-            print(f"Error procesando tabla {log_table}: {e}")
+            print(f"Error processing table {log_table}: {e}")
             continue
 
     # Ordenar resultados
@@ -208,7 +208,7 @@ def find_by_ip(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No hay datos para las fechas seleccionadas."}
+        return {"error": "No data for the selected dates."}
 
     all_results = []
 
@@ -258,7 +258,7 @@ def find_by_ip(
                 )
 
         except Exception as e:
-            print(f"Error procesando tabla {log_table}: {e}")
+            print(f"Error processing table {log_table}: {e}")
             continue
 
     # Ordenar resultados
@@ -279,7 +279,7 @@ def find_by_response_code(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No hay datos para las fechas seleccionadas."}
+        return {"error": "No data for the selected dates."}
 
     all_results = []
 
@@ -336,7 +336,7 @@ def find_by_response_code(
                 )
 
         except Exception as e:
-            print(f"Error procesando tabla {log_table}: {e}")
+            print(f"Error processing table {log_table}: {e}")
             continue
 
     # Ordenar resultados
@@ -352,7 +352,7 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, A
     try:
         selected_date = datetime.strptime(date_str, "%Y-%m-%d")
     except ValueError:
-        return {"error": "Formato de fecha inválido. Use YYYY-MM-DD."}
+        return {"error": "Invalid date format. Use YYYY-MM-DD."}
 
     date_suffix = selected_date.strftime("%Y%m%d")
 
@@ -395,13 +395,13 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, A
         return {"total_requests": total_requests, "hourly_activity": hourly_counts}
 
     except SQLAlchemyError as e:
-        print(f"Error en get_daily_activity: {e}")
+        print(f"Database error in get_daily_activity: {e}")
         return {
-            "error": "Ocurrió un error en la base de datos al calcular la actividad diaria."
+            "error": "A database error occurred while calculating daily activity."
         }
     except Exception as e:
-        print(f"Error general en get_daily_activity: {e}")
-        return {"error": "Ocurrió un error inesperado al calcular la actividad diaria."}
+        print(f"General error in get_daily_activity: {e}")
+        return {"error": "An unexpected error occurred while calculating daily activity."}
 
 
 def get_all_usernames(db: Session) -> list[str]:
@@ -437,7 +437,7 @@ def get_all_usernames(db: Session) -> list[str]:
                 all_usernames.add(username_row[0])
 
         except Exception as e:
-            print(f"Error procesando tabla {table_name}: {e}")
+            print(f"Error processing table {table_name}: {e}")
             continue
 
     return sorted(all_usernames)
@@ -451,7 +451,7 @@ def get_user_activity_summary(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No hay datos para las fechas seleccionadas."}
+        return {"error": "No data for the selected dates."}
 
     total_requests = 0
     total_data = 0
@@ -495,7 +495,7 @@ def get_user_activity_summary(
                 response_counts[row[3]] += row[2]
 
         except Exception as e:
-            print(f"Error procesando tabla {log_table}: {e}")
+            print(f"Error processing table {log_table}: {e}")
             continue
 
     if total_requests == 0:
@@ -531,7 +531,7 @@ def get_top_users_by_data(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No hay datos para las fechas seleccionadas."}
+        return {"error": "No data for the selected dates."}
 
     user_data = defaultdict(int)
 
@@ -558,7 +558,7 @@ def get_top_users_by_data(
                 user_data[row[0]] += row.total_data or 0
 
         except Exception as e:
-            print(f"Error procesando tabla {log_table}: {e}")
+            print(f"Error processing table {log_table}: {e}")
             continue
 
     # Ordenar y limitar resultados
@@ -580,7 +580,7 @@ def find_denied_access(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No hay datos para las fechas seleccionadas."}
+        return {"error": "No data for the selected dates."}
 
     all_results = []
 
@@ -626,7 +626,7 @@ def find_denied_access(
                 )
 
         except Exception as e:
-            print(f"Error procesando tabla {log_table}: {e}")
+            print(f"Error processing table {log_table}: {e}")
             continue
 
     # Ordenar resultados

@@ -9,7 +9,6 @@ import psutil
 
 
 def get_network_info():
-    """Obtiene información de red usando psutil"""
     ips = []
     try:
         net_info = psutil.net_if_addrs()
@@ -29,11 +28,10 @@ def get_network_info():
     except Exception as e:
         return f"Error: {str(e)}"
 
-    return ips if ips else "No disponible"
+    return ips if ips else "Not available"
 
 
 def get_os_info():
-    """Obtiene información del sistema operativo de manera confiable"""
     try:
         with open("/etc/os-release") as f:
             os_data = {}
@@ -43,7 +41,7 @@ def get_os_info():
                     os_data[key] = value.strip('"')
 
         os_name = os_data.get(
-            "PRETTY_NAME", os_data.get("NAME", os_data.get("ID", "Linux Desconocido"))
+            "PRETTY_NAME", os_data.get("NAME", os_data.get("ID", "Unknown Linux"))
         )
 
         return f"{os_name} ({platform.machine()})"
@@ -52,7 +50,6 @@ def get_os_info():
 
 
 def get_uptime():
-    """Obtiene tiempo de actividad del sistema"""
     try:
         with open("/proc/uptime") as f:
             uptime_seconds = float(f.readline().split()[0])
@@ -61,11 +58,10 @@ def get_uptime():
             minutes = int((uptime_seconds % 3600) // 60)
             return f"{days}d {hours}h {minutes}m"
     except Exception as e:
-        return f"Error al obtener el tiempo de actividad: {str(e)}"
+        return f"Error getting uptime: {str(e)}"
 
 
 def get_ram_info():
-    """Obtiene información de memoria RAM usando psutil"""
     try:
         ram = psutil.virtual_memory()
         return {
@@ -79,7 +75,6 @@ def get_ram_info():
 
 
 def get_swap_info():
-    """Obtiene información de memoria swap usando psutil"""
     try:
         swap = psutil.swap_memory()
         if swap.total > 0:
@@ -89,13 +84,12 @@ def get_swap_info():
                 "free": f"{swap.free / (1024**3):.2f} GB",
                 "percent": f"{swap.percent}%",
             }
-        return "No disponible"
+        return "Not available"
     except Exception as e:
         return f"Error: {str(e)}"
 
 
 def get_cpu_info():
-    """Obtiene información de la CPU usando psutil"""
     try:
         cpu_percent = psutil.cpu_percent(interval=0.5)
         try:
@@ -105,7 +99,7 @@ def get_cpu_info():
             freq_max = cpu_freq.max
         except Exception as e:
             freq_current = freq_min = freq_max = "N/A"
-            print(f"Error al obtener información de frecuencia de CPU: {str(e)}")
+            print(f"Error getting CPU frequency info: {str(e)}")
 
         cpu_times = psutil.cpu_times_percent(interval=0.5, percpu=False)
         return {
@@ -130,7 +124,6 @@ def get_cpu_info():
 
 
 def get_squid_version():
-    """Obtiene la versión de Squid de manera robusta"""
     try:
         result = subprocess.run(
             ["squid", "-v"],
@@ -148,9 +141,9 @@ def get_squid_version():
             match = re.search(pattern, output)
             if match:
                 return match.group(1)
-        return "Instalado (versión no detectada)"
+        return "Installed (version not detected)"
     except FileNotFoundError:
-        return "No instalado"
+        return "Not installed"
     except Exception as e:
         return f"Error: {str(e)}"
 
@@ -231,6 +224,6 @@ def get_timezone():
         match = re.search(r"Time zone: (\S+)\s+(\S+/\S+)", result.stdout)
         if match:
             return f"{match.group(1)} {match.group(2)}"
-        return "Desconocido"
+        return "Unknown"
     except Exception as e:
-        return f"Error al obtener la zona horaria: {str(e)}"
+        return f"Error getting timezone: {str(e)}"

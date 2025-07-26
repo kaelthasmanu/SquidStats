@@ -27,16 +27,16 @@ patterns = {
 
 def extract_squid_config(input_file):
     if not os.path.exists(input_file):
-        print(f"Error: El archivo {input_file} no existe.")
+        print(f"Error: File {input_file} does not exist.")
         return
     try:
         with open(input_file) as f:
             lines = f.readlines()
     except PermissionError:
-        print(f"Error: No se tienen permisos para leer {input_file}")
+        print(f"Error: No permission to read {input_file}")
         return
     except Exception as e:
-        print(f"Error al leer el archivo {input_file}: {e}")
+        print(f"Error reading file {input_file}: {e}")
         return
         lines = f.readlines()
 
@@ -54,7 +54,7 @@ def extract_squid_config(input_file):
         with open(filename, "w") as f:
             f.writelines(content)
 
-    print("Extracción completada. Archivos generados:")
+    print("Extraction completed. Files generated:")
     for f in files:
         print(f" - {f}")
 
