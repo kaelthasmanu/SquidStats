@@ -1,6 +1,7 @@
 import re
+import os
 
-input_file = "/home/manuel/Desktop/config/squid.conf"
+input_file = "/home/manuel/Desktop/squid.conf"
 
 files = {
     "acls.conf": [],
@@ -23,10 +24,19 @@ patterns = {
     ],
 }
 
-
-def extract_squid_config():
-    """Extract Squid configuration into separate files."""
-    with open(input_file) as f:
+def extract_squid_config(input_file):
+    if not os.path.exists(input_file):
+        print(f"Error: El archivo {input_file} no existe.")
+        return
+    try:
+        with open(input_file) as f:
+            lines = f.readlines()
+    except PermissionError:
+        print(f"Error: No se tienen permisos para leer {input_file}")
+        return
+    except Exception as e:
+        print(f"Error al leer el archivo {input_file}: {e}")
+        return
         lines = f.readlines()
 
     for line in lines:
