@@ -27,17 +27,13 @@ def validate_paths():
     if not os.path.exists(BACKUP_DIR):
         errors.append(f"Backup directory not found: {BACKUP_DIR}")
     elif not os.access(BACKUP_DIR, os.W_OK):
-        errors.append(
-            f"No write permissions in backup directory: {BACKUP_DIR}"
-        )
+        errors.append(f"No write permissions in backup directory: {BACKUP_DIR}")
 
     # Verificar directorio de ACLs
     if not os.path.exists(ACL_FILES_DIR):
         errors.append(f"ACL directory not found: {ACL_FILES_DIR}")
     elif not os.access(ACL_FILES_DIR, os.W_OK):
-        errors.append(
-            f"No write permissions in ACL directory: {ACL_FILES_DIR}"
-        )
+        errors.append(f"No write permissions in ACL directory: {ACL_FILES_DIR}")
 
     return errors
 
@@ -106,9 +102,7 @@ class SquidConfigManager:
             # Intentar crear backup antes de guardar
             backup_created = self.create_backup()
             if not backup_created:
-                logger.warning(
-                    "Could not create backup, but continuing with save..."
-                )
+                logger.warning("Could not create backup, but continuing with save...")
 
             # Guardar nueva configuración
             with open(self.config_path, "w", encoding="utf-8") as f:
@@ -141,9 +135,7 @@ class SquidConfigManager:
 
             # Verificar permisos de escritura
             if not os.access(BACKUP_DIR, os.W_OK):
-                logger.error(
-                    f"No write permissions in backup directory: {BACKUP_DIR}"
-                )
+                logger.error(f"No write permissions in backup directory: {BACKUP_DIR}")
                 return False
 
             # Verificar que el archivo fuente existe
@@ -273,9 +265,7 @@ class SquidConfigManager:
                     )
                     continue
 
-            logger.debug(
-                f"Found {len(delay_pools)} delay pool configurations"
-            )
+            logger.debug(f"Found {len(delay_pools)} delay pool configurations")
             return delay_pools
 
         except Exception as e:

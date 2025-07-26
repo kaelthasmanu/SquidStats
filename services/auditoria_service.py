@@ -396,12 +396,12 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, A
 
     except SQLAlchemyError as e:
         print(f"Database error in get_daily_activity: {e}")
-        return {
-            "error": "A database error occurred while calculating daily activity."
-        }
+        return {"error": "A database error occurred while calculating daily activity."}
     except Exception as e:
         print(f"General error in get_daily_activity: {e}")
-        return {"error": "An unexpected error occurred while calculating daily activity."}
+        return {
+            "error": "An unexpected error occurred while calculating daily activity."
+        }
 
 
 def get_all_usernames(db: Session) -> list[str]:
