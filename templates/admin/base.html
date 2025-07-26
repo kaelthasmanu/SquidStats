@@ -34,24 +34,22 @@
         <aside class="w-64 bg-white shadow-lg min-h-screen">
             <nav class="mt-8">
                 <div class="px-4 space-y-2">
-                    <a href="{{ url_for('index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                                        <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-home mr-3"></i>Dashboard
                     </a>
-                    <a href="{{ url_for('view_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-file-code mr-3"></i>Configuración
+                    <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <i class="fas fa-cog mr-3"></i>Configuración
                     </a>
-                    <a href="{{ url_for('manage_acls') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-shield-alt mr-3"></i>ACLs
                     </a>
-                    <a href="{{ url_for('manage_delay_pools') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-tachometer-alt mr-3"></i>Delay Pools
+                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <i class="fas fa-clock mr-3"></i>Delay Pools
                     </a>
-                    <a href="{{ url_for('manage_http_access') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-key mr-3"></i>Acceso HTTP
+                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <i class="fas fa-key mr-3"></i>HTTP Access
                     </a>
-                    <a href="{{ url_for('view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-file-alt mr-3"></i>Logs
-                    </a>
+                    <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                 </div>
             </nav>
         </aside>

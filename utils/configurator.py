@@ -1,6 +1,6 @@
 import re
 
-input_file = "squid.conf"
+input_file = "/home/manuel/Desktop/config/squid.conf"
 
 files = {
     "acls.conf": [],
@@ -23,23 +23,30 @@ patterns = {
     ],
 }
 
-with open(input_file) as f:
-    lines = f.readlines()
 
-for line in lines:
-    stripped = line.strip()
-    if not stripped or stripped.startswith("#"):
-        continue
+def extract_squid_config():
+    """Extract Squid configuration into separate files."""
+    with open(input_file) as f:
+        lines = f.readlines()
 
-    for file, regex_list in patterns.items():
-        if any(regex.search(stripped) for regex in regex_list):
-            files[file].append(line)
-            break
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
 
-for filename, content in files.items():
-    with open(filename, "w") as f:
-        f.writelines(content)
+        for file, regex_list in patterns.items():
+            if any(regex.search(stripped) for regex in regex_list):
+                files[file].append(line)
+                break
 
-print("Extracción completada. Archivos generados:")
-for f in files:
-    print(f" - {f}")
+    for filename, content in files.items():
+        with open(filename, "w") as f:
+            f.writelines(content)
+
+    print("Extracción completada. Archivos generados:")
+    for f in files:
+        print(f" - {f}")
+
+
+if __name__ == "__main__":
+    extract_squid_config()
