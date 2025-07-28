@@ -1,15 +1,15 @@
 import logging
 import os
-import shutil
-from datetime import datetime
+
+from dotenv import load_dotenv
 
 # Configurar logging para este módulo
 logger = logging.getLogger(__name__)
 
-# Configuración para Squid
-SQUID_CONFIG_PATH = "/home/manuel/Desktop/config"
-BACKUP_DIR = "/home/manuel/Desktop/config/backups"
-ACL_FILES_DIR = "/home/manuel/Desktop/config/acls"
+load_dotenv()
+
+SQUID_CONFIG_PATH = os.getenv("SQUID_CONFIG_PATH", "/etc/squid/squid.conf")
+ACL_FILES_DIR = os.getenv("ACL_FILES_DIR", "/etc/squid/acls")
 
 
 def validate_paths():
@@ -24,10 +24,10 @@ def validate_paths():
         errors.append(f"No write permissions for: {SQUID_CONFIG_PATH}")
 
     # Verificar directorio de backups
-    if not os.path.exists(BACKUP_DIR):
+    """ if not os.path.exists(BACKUP_DIR):
         errors.append(f"Backup directory not found: {BACKUP_DIR}")
     elif not os.access(BACKUP_DIR, os.W_OK):
-        errors.append(f"No write permissions in backup directory: {BACKUP_DIR}")
+        errors.append(f"No write permissions in backup directory: {BACKUP_DIR}") """
 
     # Verificar directorio de ACLs
     if not os.path.exists(ACL_FILES_DIR):
@@ -127,7 +127,7 @@ class SquidConfigManager:
             logger.error("Cannot create backup: invalid environment")
             return False
 
-        try:
+        """ try:
             # Verificar que el directorio de backup existe
             if not os.path.exists(BACKUP_DIR):
                 logger.error(f"Backup directory does not exist: {BACKUP_DIR}")
@@ -160,7 +160,7 @@ class SquidConfigManager:
             return False
         except Exception as e:
             logger.error(f"Unexpected error creating backup: {e}")
-            return False
+            return False """
 
     def get_acls(self):
         if not self.is_valid:
@@ -313,6 +313,6 @@ class SquidConfigManager:
             "errors": self.errors,
             "config_loaded": bool(self.config_content),
             "config_path": self.config_path,
-            "backup_dir": BACKUP_DIR,
+            # "backup_dir": BACKUP_DIR,
             "acl_files_dir": ACL_FILES_DIR,
         }
