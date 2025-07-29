@@ -8,12 +8,13 @@ REGEX_MAP = {
     "logType": re.compile(r"logType (.+)"),
     "start": re.compile(r"start ([\d.]+)"),
     "elapsed_time": re.compile(r"start .*?\(([\d.]+) seconds ago\)"),
-    "client_ip": re.compile(r"remote: ([\d.]+:\d+)"),  # IP del cliente
-    "proxy_local_ip": re.compile(r"local: ([\d.]+:\d+)"),  # IP del proxy
+    "client_ip": re.compile(r"remote: ([\d.]+:\d+)"),
+    "proxy_local_ip": re.compile(r"local: ([\d.]+:\d+)"),
     "fd_read": re.compile(r"read (\d+)"),
     "fd_wrote": re.compile(r"wrote (\d+)"),
     "nrequests": re.compile(r"nrequests: (\d+)"),
     "delay_pool": re.compile(r"delay_pool (\d+)"),
+    "out_size": re.compile(r"out\.size (\d+)"),
 }
 
 
@@ -26,7 +27,6 @@ def parse_raw_data(raw_data):
             connection = parse_connection_block(block)
             connections.append(connection)
         except Exception as e:
-            # Imprime un error pero permite que el script continúe
             print(f"Error parseando bloque: {e}\n{block[:100]}...")
 
     return connections
@@ -36,7 +36,14 @@ def parse_connection_block(block):
     conn = {}
 
     for key, regex in REGEX_MAP.items():
-        if key not in ["fd_read", "fd_wrote", "nrequests", "delay_pool", "fd_total"]:
+        if key not in [
+            "fd_read",
+            "fd_wrote",
+            "nrequests",
+            "delay_pool",
+            "fd_total",
+            "out_size",
+        ]:
             match = regex.search(block)
             conn[key] = match.group(1) if match else "N/A"
 
@@ -62,6 +69,21 @@ def parse_connection_block(block):
         if REGEX_MAP["delay_pool"].search(block)
         else "N/A"
     )
+
+    out_size_match = REGEX_MAP["out_size"].search(block)
+    conn["out_size"] = int(out_size_match.group(1)) if out_size_match else 0
+
+    elapsed_match = REGEX_MAP["elapsed_time"].search(block)
+    elapsed_time = float(elapsed_match.group(1)) if elapsed_match else 0
+    conn["elapsed_time"] = elapsed_time
+
+    if conn["out_size"] > 0 and elapsed_time > 0:
+        conn["bandwidth_bps"] = round((conn["out_size"] * 8) / elapsed_time, 2)
+        conn["bandwidth_kbps"] = round(conn["bandwidth_bps"] / 1000, 2)
+    else:
+        conn["bandwidth_bps"] = 0
+        conn["bandwidth_kbps"] = 0
+
     return conn
 
 
@@ -87,13 +109,16 @@ def group_by_user(connections):
         if not isinstance(user, str):
             user = str(user) if user is not None else ""
         user_normalized = user.strip().lower() if user else ""
+
         if user_normalized == "n/a":
             continue
+
         is_anonymous = not user_normalized or user_normalized in (
             indicator.lower()
             for indicator in ANONYMOUS_INDICATORS
             if indicator is not None
         )
+
         if not is_anonymous:
             key = user
             client_ip = connection.get("client_ip", "Not found")
@@ -102,7 +127,9 @@ def group_by_user(connections):
             ip_only = raw_ip.split(":")[0] if ":" in raw_ip else raw_ip
             key = ip_only
             client_ip = ip_only
+
         if not grouped[key]["connections"]:
             grouped[key]["client_ip"] = client_ip
         grouped[key]["connections"].append(connection)
+
     return dict(grouped)

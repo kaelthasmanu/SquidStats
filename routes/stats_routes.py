@@ -5,6 +5,7 @@ from threading import Lock
 
 from flask import Blueprint, render_template
 
+# from services.icap_service import fetch_cicap_stats
 from config import logger
 from parsers.cache import fetch_squid_cache_stats
 from services.metrics_service import MetricsService
@@ -70,6 +71,18 @@ def cache_stats_realtime():
         return render_template(
             "error.html", message="Error retrieving cache statistics or system info"
         ), 500
+
+
+""" @stats_bp.route("/print_icap_service")
+def print_icap_service():
+    try:
+        print(fetch_cicap_stats())
+        print("--- END OF ICAP SERVICE MODULE ---")
+        return "ICAP service module content printed to console.", 200
+    except Exception as e:
+        print(f"Error printing icap_service.py: {e}")
+        return f"Error printing icap_service.py: {e}", 500
+ """
 
 
 def realtime_data_thread(socketio):
