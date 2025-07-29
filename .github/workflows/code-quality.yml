@@ -163,6 +163,11 @@ jobs:
         with:
           python-version: "3.11"
           cache: 'pip'
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libicapapi-dev python3-dev
 
       - name: Install dependencies
         run: |
@@ -201,6 +206,11 @@ jobs:
         with:
           python-version: "3.11"
           cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libicapapi-dev python3-dev
 
       - name: Install dependencies
         run: |
