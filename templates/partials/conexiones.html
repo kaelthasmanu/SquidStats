@@ -23,6 +23,7 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
       class="flex flex-wrap justify-center gap-4 w-full pb-2"
       style="scrollbar-width: none;"
     >
+
       {# --- MODIFICADO: Tarjeta de información del Servidor Squid --- #}
       <div
         class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5"
@@ -37,6 +38,31 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
             Servidor Squid (v{{ squid_version }})
           </p>
           <p class="text-2xl font-bold">{{ squid_ip }}</p>
+        </div>
+      </div>
+
+      {# Tarjeta de Bandwidth Total de Todos los Usuarios #}
+      <div
+        class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5"
+      >
+        <div
+          class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center mr-4 flex-shrink-0"
+        >
+          <i class="fas fa-tachometer-alt text-teal-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-gray-500 text-sm">Total Bandwidth</p>
+          <p class="text-2xl font-bold">
+            {% set total_bw = namespace(value=0) %}
+            {% for user_data in valid_users.values() %}
+              {% for connection in user_data.connections %}
+                {% if connection.bandwidth_kbps is defined %}
+                  {% set total_bw.value = total_bw.value + (connection.bandwidth_kbps|float) %}
+                {% endif %}
+              {% endfor %}
+            {% endfor %}
+            {{ format_bandwidth(total_bw.value) }}
+          </p>
         </div>
       </div>
 
