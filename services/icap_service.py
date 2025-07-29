@@ -1,4 +1,4 @@
-import os
+""" import os
 import tempfile
 
 import icapclient
@@ -8,9 +8,6 @@ ICAP_PORT = int(os.getenv("ICAP_PORT", 1344))
 
 
 def scan_file_with_icap(file_storage):
-    """
-    file_storage: werkzeug FileStorage (request.files["file"])
-    """
     if file_storage.filename == "":
         return {"error": "No selected file"}, 400
 
@@ -46,3 +43,4 @@ def scan_file_with_icap(file_storage):
             os.remove(temp_path)
         except Exception:
             pass
+ """

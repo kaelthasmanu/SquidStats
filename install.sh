@@ -386,8 +386,13 @@ function main() {
     checkSudo
 
     if [ "$1" = "--update" ]; then
+        echo "Verificando paquetes instalados..."
+        checkPackages
+        echo "Verificando Dependecias de python..."
+        installDependencies
         echo "Actualizando Servicio..."
         updateOrCloneRepo
+        echo "Reiniciando Servicio..."
         systemctl restart squidstats.service
 
         ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
