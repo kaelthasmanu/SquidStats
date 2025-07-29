@@ -1,36 +1,48 @@
 import os
-import socket
+import tempfile
 
-from dotenv import load_dotenv
-
-load_dotenv()
+import icapclient
 
 ICAP_HOST = os.getenv("ICAP_HOST", os.getenv("SQUID_HOST"))
 ICAP_PORT = int(os.getenv("ICAP_PORT", 1344))
 
 
-def fetch_cicap_stats(host="10.34.8.15", port=1344):
-    http_req = "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"
+def scan_file_with_icap(file_storage):
+    """
+    file_storage: werkzeug FileStorage (request.files["file"])
+    """
+    if file_storage.filename == "":
+        return {"error": "No selected file"}, 400
 
-    # Construimos la solicitud ICAP completa
-    icap_req = (
-        f"REQMOD icap://{host}:{port}/info?view=text ICAP/1.0\r\n"
-        f"Host: {host}\r\n"
-        f"Allow: 204\r\n"
-        f"Encapsulated: req-hdr=0, null-body={len(http_req)}\r\n"
-        "\r\n"
-        f"{http_req}"
-    )
+    # Save file to a temporary location
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        file_storage.save(tmp.name)
+        temp_path = tmp.name
 
     try:
-        with socket.create_connection((host, port), timeout=5) as s:
-            s.sendall(icap_req.encode())
-            resp = b""
-            while True:
-                chunk = s.recv(4096)
-                if not chunk:
-                    break
-                resp += chunk
-        return resp.decode("utf-8", errors="ignore")
+        conn = icapclient.ICAPConnection(ICAP_HOST, port=ICAP_PORT)
+        conn.request("REQMOD", temp_path, service="avscan")
+        resp = conn.getresponse()
+        icap_status = resp.icap_status
+        icap_reason = resp.icap_reason
+        icap_headers = dict(resp.icap_headers)
+        infection = resp.get_icap_header("x-infection-found")
+        http_resp_line = getattr(resp, "http_resp_line", None)
+        conn.close()
+
+        result = {
+            "icap_status": icap_status,
+            "icap_reason": icap_reason,
+            "icap_headers": icap_headers,
+            "http_resp_line": http_resp_line,
+            "virus_found": infection is not None,
+            "infection_details": infection,
+        }
+        return result, 200
     except Exception as e:
-        return f"Error connecting to ICAP server: {e}"
+        return {"error": f"Error scanning file with ICAP: {e}"}, 500
+    finally:
+        try:
+            os.remove(temp_path)
+        except Exception:
+            pass

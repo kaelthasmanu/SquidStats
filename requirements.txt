@@ -8,3 +8,4 @@ eventlet
 flask_socketio
 pytz
 requests
+icapclient3

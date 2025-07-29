@@ -3,9 +3,9 @@ import sys
 from datetime import datetime
 from threading import Lock
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template  # , request, jsonify
 
-# from services.icap_service import fetch_cicap_stats
+# from services.icap_service import scan_file_with_icap
 from config import logger
 from parsers.cache import fetch_squid_cache_stats
 from services.metrics_service import MetricsService
@@ -73,16 +73,13 @@ def cache_stats_realtime():
         ), 500
 
 
-""" @stats_bp.route("/print_icap_service")
+""" @stats_bp.route("/print_icap_service", methods=["POST"])
 def print_icap_service():
-    try:
-        print(fetch_cicap_stats())
-        print("--- END OF ICAP SERVICE MODULE ---")
-        return "ICAP service module content printed to console.", 200
-    except Exception as e:
-        print(f"Error printing icap_service.py: {e}")
-        return f"Error printing icap_service.py: {e}", 500
- """
+    if "file" not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    result, status = scan_file_with_icap(request.files["file"])
+    return jsonify(result), status """
 
 
 def realtime_data_thread(socketio):

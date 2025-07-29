@@ -30,7 +30,7 @@ function setupVenv() {
         error "Error al crear el entorno virtual"
         return 1
     fi
-
+build-essential libssl-dev libicapapi-dev python3-dev
     ok "Entorno virtual creado correctamente"
     return 0
 }
@@ -61,7 +61,7 @@ function installDependencies() {
 }
 #  pthon3-pymysql delete from packages
 function checkPackages() {
-    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl")
+    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "libicapapi-dev" "python3-dev")
     local missing=()
 
     for pkg in "${packages[@]}"; do
