@@ -1,4 +1,4 @@
-""" import os
+"""import os
 import tempfile
 
 import icapclient
@@ -43,4 +43,4 @@ def scan_file_with_icap(file_storage):
             os.remove(temp_path)
         except Exception:
             pass
- """
+"""
