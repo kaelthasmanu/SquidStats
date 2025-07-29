@@ -11,6 +11,7 @@
     {% endif %}
   {% else %}0 kbps{% endif %}
 {% endmacro %}
+
 {% set valid_users = {} %} {% for user, user_data in grouped_connections.items()
 %} {% if user and user != "-" and user != "Anónimo" %} {% set _ =
 valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
@@ -245,13 +246,7 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
             <div class="flex items-center text-sm text-gray-600" title="Total de velocidad del usuario">
               <i class="fas fa-tachometer-alt mr-1.5 text-teal-500"></i>
               <span>
-                {% if user_bw.value >= 1000000 %}
-                  {{ (user_bw.value / 1000000)|round(2) }} Gbps
-                {% elif user_bw.value >= 1000 %}
-                  {{ (user_bw.value / 1000)|round(2) }} Mbps
-                {% else %}
-                  {{ user_bw.value|round(2) }} Kbps
-                {% endif %}
+                {{ format_bandwidth(user_bw.value) }}
               </span>
             </div>
 
