@@ -1,3 +1,16 @@
+{# Macro para formatear bandwidth #}
+{% macro format_bandwidth(bw_value) %}
+  {% if bw_value is defined %}
+    {% set bw = bw_value|float %}
+    {% if bw >= 1000000 %}
+      {{ (bw / 1000000)|round(2) }} Gbps
+    {% elif bw >= 1000 %}
+      {{ (bw / 1000)|round(2) }} Mbps
+    {% else %}
+      {{ bw|round(2) }} Kbps
+    {% endif %}
+  {% else %}0 kbps{% endif %}
+{% endmacro %}
 {% set valid_users = {} %} {% for user, user_data in grouped_connections.items()
 %} {% if user and user != "-" and user != "Anónimo" %} {% set _ =
 valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
@@ -108,22 +121,6 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
         </div>
       </div>
       {% endif %} 
-      {# Nueva Tarjeta: Clientes Conectados a Squid #} 
-      <!-- {% if squid_info_stats and squid_info_stats.clients %}
-      <div
-        class="bg-white p-4 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5"
-      >
-        <div
-          class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mr-4 flex-shrink-0"
-        >
-          <i class="fas fa-user-friends text-orange-500 text-xl"></i>
-        </div>
-        <div>
-          <p class="text-gray-500 text-sm">Clientes Squid</p>
-          <p class="text-2xl font-bold">{{ squid_info_stats.clients }}</p>
-        </div>
-      </div>
-      {% endif %} --> 
       {# Nueva Tarjeta: Peticiones HTTP Totales #} 
       {% if squid_info_stats and squid_info_stats.requests_received %}
       <div
@@ -239,8 +236,6 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
               <i class="fas fa-link mr-1.5 text-blue-500"></i>
               <span>{{ connections|length }} conexiones</span>
             </div>
-
-            {# Total de velocidad del usuario #}
             {% set user_bw = namespace(value=0) %}
             {% for connection in connections %}
               {% if connection.bandwidth_kbps is defined %}
@@ -255,7 +250,7 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
                 {% elif user_bw.value >= 1000 %}
                   {{ (user_bw.value / 1000)|round(2) }} Mbps
                 {% else %}
-                  {{ user_bw.value|round(2) }} kbps
+                  {{ user_bw.value|round(2) }} Kbps
                 {% endif %}
               </span>
             </div>
@@ -370,16 +365,7 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
                   1024 / 1024)|round(2) }} MB {% else %}N/A{% endif %}
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm">
-                  {% if connection.bandwidth_kbps is defined %}
-                    {% set bw = connection.bandwidth_kbps|float %}
-                    {% if bw >= 1000000 %}
-                      {{ (bw / 1000000)|round(2) }} Gbps
-                    {% elif bw >= 1000 %}
-                      {{ (bw / 1000)|round(2) }} Mbps
-                    {% else %}
-                      {{ bw|round(2) }} kbps
-                    {% endif %}
-                  {% else %}0 kbps{% endif %}
+                  {{ format_bandwidth(connection.bandwidth_kbps) }}
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
                   {% if connection.delay_pool != "N/A" %} {% set pool =
