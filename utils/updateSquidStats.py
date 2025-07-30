@@ -27,7 +27,7 @@ def updateSquidStats():
             proxies = {"http": proxy_url, "https": proxy_url}
         try:
             response = requests.get(
-                "https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh",
+                "https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh",
                 proxies=proxies,
                 timeout=30,
             )
