@@ -282,6 +282,8 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    REFRESH_INTERVAL=60
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
    HTTP_PROXY=""
+   SQUID_CONFIG_PATH=/home/manuel/Desktop/config/squid.conf
+   ACL_FILES_DIR=/home/manuel/Desktop/config/acls
    ```
 5. Run App with python or python3 🚀:
 
