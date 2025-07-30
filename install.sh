@@ -15,25 +15,6 @@ function checkSudo() {
     fi
 }
 
-function setupVenv() {
-    local venv_dir="/opt/SquidStats/venv"
-
-    if [ -d "$venv_dir" ]; then
-        echo "Entorno virtual ya existe en $venv_dir"
-        return 0
-    fi
-
-    echo "Creando entorno virtual Python en $venv_dir"
-    python3 -m venv "$venv_dir"
-
-    if [ $? -ne 0 ]; then
-        error "Error al crear el entorno virtual"
-        return 1
-    fi
-    ok "Entorno virtual creado correctamente"
-    return 0
-}
-
 function installDependencies() {
     local venv_dir="/opt/SquidStats/venv"
 
@@ -434,7 +415,6 @@ function main() {
         updateOrCloneRepo
         patchSquidConf
         checkSquidLog
-        setupVenv
         installDependencies
         createEnvFile
         configureDatabase
