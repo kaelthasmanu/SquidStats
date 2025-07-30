@@ -464,27 +464,3 @@ case "$1" in
     exit 1
     ;;
 esac
-
-
-[Unit]
-Description=SquidStats
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/SquidStats
-ExecStart=/usr/bin/python3 /opt/SquidStats/app.py
-
-# Variables cr  ticas para Socket.IO
-Environment=FLASK_APP=app.py
-Environment=FLASK_ENV=production
-EnvironmentFile=/opt/SquidStats/.env
-
-# Socket.IO funciona mejor con estas opciones:
-Restart=always
-RestartSec=5
-KillMode=process
-
-[Install]
-WantedBy=multi-user.target
