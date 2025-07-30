@@ -30,7 +30,6 @@ function setupVenv() {
         error "Error al crear el entorno virtual"
         return 1
     fi
-build-essential libssl-dev libicapapi-dev python3-dev
     ok "Entorno virtual creado correctamente"
     return 0
 }
@@ -192,6 +191,8 @@ DATABASE_STRING_CONNECTION=/opt/SquidStats/squidstats.db
 REFRESH_INTERVAL=60
 BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
 HTTP_PROXY=""
+SQUID_CONFIG_PATH=/etc/squid/squid.conf
+ACL_FILES_DIR=/etc/squid/config/acls
 EOF
         ok "Archivo .env creado correctamente en $env_file"
         return 0
