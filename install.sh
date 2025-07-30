@@ -38,8 +38,15 @@ function installDependencies() {
     local venv_dir="/opt/SquidStats/venv"
 
     if [ ! -d "$venv_dir" ]; then
-        error "El entorno virtual no existe en $venv_dir"
-        return 1
+        echo "El entorno virtual no existe en $venv_dir, creándolo..."
+        python3 -m venv "$venv_dir"
+        
+        if [ $? -ne 0 ]; then
+            error "Error al crear el entorno virtual en $venv_dir"
+            return 1
+        fi
+        
+        ok "Entorno virtual creado correctamente en $venv_dir"
     fi
 
     echo "Activando entorno virtual y instalando dependencias..."
@@ -457,3 +464,27 @@ case "$1" in
     exit 1
     ;;
 esac
+
+
+[Unit]
+Description=SquidStats
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/SquidStats
+ExecStart=/usr/bin/python3 /opt/SquidStats/app.py
+
+# Variables cr  ticas para Socket.IO
+Environment=FLASK_APP=app.py
+Environment=FLASK_ENV=production
+EnvironmentFile=/opt/SquidStats/.env
+
+# Socket.IO funciona mejor con estas opciones:
+Restart=always
+RestartSec=5
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
