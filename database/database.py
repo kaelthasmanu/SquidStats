@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from datetime import date, datetime
 from typing import Any
 from urllib.parse import urlparse
@@ -50,7 +51,7 @@ class User(DailyBase):
     __tablename__ = "user_base"
     id = Column(Integer, primary_key=True)
     username = Column(String(255), nullable=False)
-    ip = Column(String(15), nullable=False)
+    ip = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.now)
 
 
@@ -77,10 +78,10 @@ class DeniedLog(Base):
     __tablename__ = "denied_logs"
     id = Column(Integer, primary_key=True)
     username = Column(String(255), nullable=False)
-    ip = Column(String(15), nullable=False)
+    ip = Column(String(255), nullable=False)
     url = Column(Text, nullable=False)
-    method = Column(String(16), nullable=False)
-    status = Column(String(64), nullable=False)
+    method = Column(String(255), nullable=False)
+    status = Column(String(255), nullable=False)
     response = Column(Integer, nullable=True)
     data_transmitted = Column(BigInteger, default=0)
     created_at = Column(DateTime, default=datetime.now)
@@ -90,7 +91,7 @@ class SystemMetrics(Base):
     __tablename__ = "system_metrics"
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.now, nullable=False)
-    cpu_usage = Column(String(10), nullable=False)  # Ejemplo: "25.5%"
+    cpu_usage = Column(String(255), nullable=False)  # Ejemplo: "25.5%"
     ram_usage_bytes = Column(BigInteger, nullable=False)
     swap_usage_bytes = Column(BigInteger, nullable=False)
     net_sent_bytes_sec = Column(BigInteger, nullable=False)
@@ -302,7 +303,7 @@ def create_dynamic_tables(engine, date_suffix: str = None):
             __tablename__ = user_table_name
             id = Column(Integer, primary_key=True)
             username = Column(String(255), nullable=False)
-            ip = Column(String(15), nullable=False)
+            ip = Column(String(255), nullable=False)
             created_at = Column(DateTime, default=datetime.now)
 
         class DynamicLog(DynamicBase):
@@ -353,7 +354,7 @@ def get_dynamic_models(date_suffix: str):
         __tablename__ = user_table_name
         id = Column(Integer, primary_key=True, autoincrement=True)
         username = Column(String(255), nullable=False)
-        ip = Column(String(15), nullable=False)
+        ip = Column(String(255), nullable=False)
         created_at = Column(DateTime, default=datetime.now)
 
     class DynamicLog(DynamicBase):
@@ -371,12 +372,6 @@ def get_dynamic_models(date_suffix: str):
 
 
 def get_concat_function(column, separator=", "):
-    """
-    Devuelve la función de concatenación apropiada según el tipo de base de datos.
-    MySQL/MariaDB: GROUP_CONCAT
-    PostgreSQL: STRING_AGG
-    SQLite: GROUP_CONCAT
-    """
     db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
 
     if db_type in ("POSTGRESQL", "POSTGRES"):
@@ -390,3 +385,206 @@ def get_concat_function(column, separator=", "):
         else:
             # Separador por defecto
             return func.group_concat(column)
+
+
+def migrate_database():
+    engine = get_engine()
+    db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
+    inspector = inspect(engine)
+    original_level = logger.level
+    logger.setLevel(logging.DEBUG)
+    try:
+        with engine.connect() as conn:
+            # Define expected schema for all tables
+            expected_schemas = {
+                "user_base": {
+                    "username": {"type": "VARCHAR(255)", "nullable": False},
+                    "ip": {"type": "VARCHAR(255)", "nullable": False},
+                },
+                "log_base": {"url": {"type": "TEXT", "nullable": False}},
+                "denied_logs": {
+                    "username": {"type": "VARCHAR(255)", "nullable": False},
+                    "ip": {"type": "VARCHAR(255)", "nullable": False},
+                    "url": {"type": "TEXT", "nullable": False},
+                    "method": {"type": "VARCHAR(255)", "nullable": False},
+                    "status": {"type": "VARCHAR(255)", "nullable": False},
+                },
+                "system_metrics": {
+                    "cpu_usage": {"type": "VARCHAR(255)", "nullable": False}
+                },
+            }
+            for table_name, expected_columns in expected_schemas.items():
+                if not inspector.has_table(table_name):
+                    logger.info(f"Table {table_name} doesn't exist, skipping migration")
+                    continue
+                logger.info(f"Checking schema for table: {table_name}")
+                current_columns = inspector.get_columns(table_name)
+                for column_name, expected_spec in expected_columns.items():
+                    # Find current column info
+                    current_column = next(
+                        (col for col in current_columns if col["name"] == column_name),
+                        None,
+                    )
+                    if not current_column:
+                        logger.warning(
+                            f"Column {column_name} not found in {table_name}"
+                        )
+                        continue
+                    logger.info(
+                        f"Checking {table_name}.{column_name}: current type = {current_column['type']}"
+                    )
+                    # Check if migration is needed
+                    needs_migration = _column_needs_migration(
+                        current_column, expected_spec, db_type
+                    )
+                    if needs_migration:
+                        logger.info(
+                            f"Migrating {table_name}.{column_name} to {expected_spec['type']}"
+                        )
+                        _migrate_column(
+                            conn, table_name, column_name, expected_spec, db_type
+                        )
+                    else:
+                        logger.info(
+                            f"No migration needed for {table_name}.{column_name}"
+                        )
+            # Also check dynamic tables (user_YYYYMMDD, log_YYYYMMDD)
+            _migrate_dynamic_tables(conn, inspector, db_type)
+            conn.commit()
+            logger.info("Database migration completed successfully")
+    except Exception as e:
+        logger.warning(
+            f"Migration warning (this might be expected if already migrated): {e}"
+        )
+    finally:
+        logger.setLevel(original_level)
+
+
+def _column_needs_migration(current_column, expected_spec, db_type):
+    """Check if a column needs migration based on current vs expected schema"""
+    current_type = str(current_column["type"]).upper()
+    expected_type = expected_spec["type"].upper()
+    logger.debug(
+        f"Checking migration: current='{current_type}' vs expected='{expected_type}'"
+    )
+    # Normalize type representations across different databases
+    if db_type in ("MYSQL", "MARIADB"):
+        # MySQL type mapping
+        if "VARCHAR(255)" in expected_type and (
+            "VARCHAR" in current_type or "CHAR" in current_type
+        ):
+            # Extract current length
+            import re
+
+            match = re.search(r"VARCHAR\((\d+)\)", current_type)
+            if match:
+                current_length = int(match.group(1))
+                logger.debug(
+                    f"MySQL VARCHAR: current length={current_length}, expected=255"
+                )
+                return current_length != 255  # Changed from < to != for exact match
+            else:
+                # If no length found, assume it needs migration
+                return True
+        elif "TEXT" in expected_type and "TEXT" not in current_type:
+            return True
+    elif db_type in ("POSTGRESQL", "POSTGRES"):
+        # PostgreSQL type mapping
+        if "VARCHAR(255)" in expected_type:
+            if "CHARACTER VARYING" in current_type or "VARCHAR" in current_type:
+                import re
+
+                match = re.search(
+                    r"(?:CHARACTER VARYING|VARCHAR)\((\d+)\)", current_type
+                )
+                if match:
+                    current_length = int(match.group(1))
+                    logger.debug(
+                        f"PostgreSQL VARCHAR: current length={current_length}, expected=255"
+                    )
+                    return current_length != 255  # Changed from < to != for exact match
+                # If no length specified, it might need migration
+                return "(" not in current_type
+            else:
+                # Different type entirely, needs migration
+                return True
+        elif "TEXT" in expected_type and "TEXT" not in current_type:
+            return True
+    elif db_type == "SQLITE":
+        # SQLite is more flexible with types, but let's still check for obvious differences
+        if "VARCHAR(255)" in expected_type and (
+            "VARCHAR" in current_type or "CHAR" in current_type
+        ):
+            import re
+
+            match = re.search(r"VARCHAR\((\d+)\)", current_type)
+            if match:
+                current_length = int(match.group(1))
+                logger.debug(
+                    f"SQLite VARCHAR: current length={current_length}, expected=255"
+                )
+                return current_length != 255
+        # For SQLite, generally don't migrate unless there's a significant type difference
+        return False
+    return False
+
+
+def _migrate_column(conn, table_name, column_name, expected_spec, db_type):
+    """Migrate a specific column to the expected specification"""
+    try:
+        if db_type in ("MYSQL", "MARIADB"):
+            nullable_clause = "" if expected_spec["nullable"] else "NOT NULL"
+            sql = f"ALTER TABLE {table_name} MODIFY COLUMN {column_name} {expected_spec['type']} {nullable_clause}"
+            conn.execute(text(sql))
+            logger.info(
+                f"Migrated {table_name}.{column_name} to {expected_spec['type']}"
+            )
+        elif db_type in ("POSTGRESQL", "POSTGRES"):
+            sql = f"ALTER TABLE {table_name} ALTER COLUMN {column_name} TYPE {expected_spec['type']}"
+            conn.execute(text(sql))
+            logger.info(
+                f"Migrated {table_name}.{column_name} to {expected_spec['type']}"
+            )
+        elif db_type == "SQLITE":
+            logger.info(
+                f"SQLite migration skipped for {table_name}.{column_name} (flexible typing)"
+            )
+    except Exception as e:
+        logger.error(f"Failed to migrate {table_name}.{column_name}: {e}")
+
+
+def _migrate_dynamic_tables(conn, inspector, db_type):
+    """Check and migrate dynamic tables (user_YYYYMMDD, log_YYYYMMDD)"""
+    # Get all table names that match the dynamic pattern
+    all_tables = inspector.get_table_names()
+    user_tables = [t for t in all_tables if re.match(r"user_\d{8}$", t)]
+    logger.info(f"Found {len(user_tables)} dynamic user tables: {user_tables}")
+    # Define expected schema for dynamic tables
+    user_schema = {
+        "username": {"type": "VARCHAR(255)", "nullable": False},
+        "ip": {
+            "type": "VARCHAR(255)",
+            "nullable": False,
+        },  # Changed from VARCHAR(15) to VARCHAR(255)
+    }
+    # Migrate user tables
+    for table_name in user_tables:
+        logger.info(f"Checking dynamic table: {table_name}")
+        current_columns = inspector.get_columns(table_name)
+        for column_name, expected_spec in user_schema.items():
+            current_column = next(
+                (col for col in current_columns if col["name"] == column_name), None
+            )
+            if current_column:
+                logger.info(
+                    f"Checking {table_name}.{column_name}: current type = {current_column['type']}"
+                )
+                if _column_needs_migration(current_column, expected_spec, db_type):
+                    logger.info(
+                        f"Migrating dynamic table {table_name}.{column_name} to {expected_spec['type']}"
+                    )
+                    _migrate_column(
+                        conn, table_name, column_name, expected_spec, db_type
+                    )
+                else:
+                    logger.info(f"No migration needed for {table_name}.{column_name}")

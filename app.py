@@ -6,6 +6,7 @@ from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
 
 from config import Config, logger
+from database.database import migrate_database
 from parsers.log import process_logs
 from routes import register_routes
 from routes.main_routes import initialize_proxy_detection
@@ -18,6 +19,15 @@ load_dotenv()
 
 
 def create_app():
+    # Run database migration at startup
+    logger.info("Running database migration at startup...")
+    try:
+        migrate_database()
+        logger.info("Database migration completed successfully")
+    except Exception as e:
+        logger.error(f"Database migration failed: {e}")
+        # Continue anyway - the app might still work with existing schema
+
     app = Flask(__name__, static_folder="./static")
     app.config.from_object(Config())
 
