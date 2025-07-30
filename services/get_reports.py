@@ -4,7 +4,7 @@ from datetime import timedelta
 from sqlalchemy import Column, Integer, String, desc, func, inspect
 from sqlalchemy.orm import Session, relationship
 
-from database.database import get_dynamic_models
+from database.database import get_concat_function, get_dynamic_models
 
 
 def get_important_metrics(db: Session, UserModel, LogModel):
@@ -102,7 +102,7 @@ def get_important_metrics(db: Session, UserModel, LogModel):
             db.query(
                 UserModel.ip,
                 func.count(UserModel.id).label("user_count"),
-                func.group_concat(UserModel.username).label("usernames"),
+                get_concat_function(UserModel.username).label("usernames"),
             )
             .group_by(UserModel.ip)
             .order_by(desc("user_count"))

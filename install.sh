@@ -61,7 +61,7 @@ function installDependencies() {
 }
 #  pthon3-pymysql delete from packages
 function checkPackages() {
-    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "libicapapi-dev" "python3-dev")
+    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "libicapapi-dev" "python3-dev" "libpq-dev")
     local missing=()
 
     for pkg in "${packages[@]}"; do

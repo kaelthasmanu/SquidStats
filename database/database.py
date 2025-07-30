@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import date, datetime
 from typing import Any
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 from sqlalchemy import (
@@ -12,7 +13,9 @@ from sqlalchemy import (
     String,
     Text,
     create_engine,
+    func,
     inspect,
+    text,
 )
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -20,7 +23,6 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 # Cargar variables de entorno desde .env
 load_dotenv()
 
-# Configurar logging para seguimiento
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
@@ -115,14 +117,143 @@ def get_database_url() -> str:
         raise ValueError(
             "DATABASE_STRING_CONNECTION must start with 'mysql://' or 'mariadb://'."
         )
+    elif db_type in ("POSTGRESQL", "POSTGRES"):
+        # Ejemplo: postgresql://user:password@host:port/dbname
+        # o postgresql+psycopg2://user:password@host:port/dbname
+        if (
+            conn_str.startswith("postgresql://")
+            or conn_str.startswith("postgres://")
+            or conn_str.startswith("postgresql+psycopg2://")
+            or conn_str.startswith("postgresql+psycopg://")
+        ):
+            return conn_str
+        raise ValueError(
+            "DATABASE_STRING_CONNECTION must start with 'postgresql://', 'postgres://', 'postgresql+psycopg2://', or 'postgresql+psycopg://'."
+        )
     else:
         raise ValueError(f"Database type not supported: {db_type}")
+
+
+def create_database_if_not_exists():
+    db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
+    if db_type == "SQLITE":
+        # SQLite crea el archivo automáticamente, no necesitamos hacer nada
+        logger.info("SQLite database will be created automatically if it doesn't exist")
+        return
+    elif db_type in ("MYSQL", "MARIADB"):
+        try:
+            conn_str = os.getenv("DATABASE_STRING_CONNECTION", "")
+            parsed_url = urlparse(conn_str)
+
+            database_name = parsed_url.path.lstrip("/")
+
+            if not database_name:
+                logger.warning("No database name found in connection string")
+                return
+
+            server_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"
+
+            server_engine = create_engine(server_url, echo=False)
+
+            with server_engine.connect() as conn:
+                # Verificar si la base de datos existe
+                result = conn.execute(
+                    text(
+                        f"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{database_name}'"
+                    )
+                )
+
+                if not result.fetchone():
+                    conn.execute(
+                        text(
+                            f"CREATE DATABASE IF NOT EXISTS `{database_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+                        )
+                    )
+                    conn.commit()
+                    logger.info(f"Database '{database_name}' created successfully")
+                else:
+                    logger.info(f"Database '{database_name}' already exists")
+
+            server_engine.dispose()
+
+        except Exception as e:
+            logger.error(f"Error creating MySQL/MariaDB database: {e}")
+            raise
+    elif db_type in ("POSTGRESQL", "POSTGRES"):
+        try:
+            conn_str = os.getenv("DATABASE_STRING_CONNECTION", "")
+            parsed_url = urlparse(conn_str)
+
+            database_name = parsed_url.path.lstrip("/")
+
+            if not database_name:
+                logger.warning("No database name found in PostgreSQL connection string")
+                return
+
+            # Crear URL para conectarse a la base de datos 'postgres' (default)
+            server_url = f"{parsed_url.scheme}://{parsed_url.netloc}/postgres"
+
+            # Crear engine con autocommit para evitar transacciones automáticas
+            server_engine = create_engine(
+                server_url, echo=False, isolation_level="AUTOCOMMIT"
+            )
+
+            try:
+                with server_engine.connect() as conn:
+                    # Verificar si la base de datos existe
+                    result = conn.execute(
+                        text(
+                            f"SELECT 1 FROM pg_database WHERE datname = '{database_name}'"
+                        )
+                    )
+
+                    if not result.fetchone():
+                        # La base de datos no existe, crearla
+                        # Usar una versión más simple que sea compatible con la mayoría de configuraciones
+                        try:
+                            # Primero intentar con template0 para evitar problemas de collation
+                            conn.execute(
+                                text(
+                                    f"CREATE DATABASE \"{database_name}\" WITH ENCODING = 'UTF8' TEMPLATE = template0"
+                                )
+                            )
+                            logger.info(
+                                f"PostgreSQL database '{database_name}' created successfully with template0"
+                            )
+                        except Exception:
+                            # Si falla con template0, intentar sin especificar collation
+                            try:
+                                conn.execute(
+                                    text(
+                                        f"CREATE DATABASE \"{database_name}\" WITH ENCODING = 'UTF8'"
+                                    )
+                                )
+                                logger.info(
+                                    f"PostgreSQL database '{database_name}' created successfully without collation"
+                                )
+                            except Exception:
+                                # Como último recurso, crear la base de datos sin especificar encoding
+                                conn.execute(text(f'CREATE DATABASE "{database_name}"'))
+                                logger.info(
+                                    f"PostgreSQL database '{database_name}' created successfully with default settings"
+                                )
+                    else:
+                        logger.info(
+                            f"PostgreSQL database '{database_name}' already exists"
+                        )
+            finally:
+                server_engine.dispose()
+
+        except Exception as e:
+            logger.error(f"Error creating PostgreSQL database: {e}")
+            raise
 
 
 def get_engine():
     global _engine
     if _engine is not None:
         return _engine
+    create_database_if_not_exists()
     db_url = get_database_url()
     _engine = create_engine(db_url, echo=False, future=True)
     return _engine
@@ -145,14 +276,10 @@ def table_exists(engine, table_name: str) -> bool:
 def create_dynamic_tables(engine, date_suffix: str = None):
     LogMetadata.__table__.create(engine, checkfirst=True)
     DeniedLog.__table__.create(engine, checkfirst=True)
-    SystemMetrics.__table__.create(
-        engine, checkfirst=True
-    )  # Crear tabla de métricas del sistema
+    SystemMetrics.__table__.create(engine, checkfirst=True)
 
-    # Si no se provee un sufijo, se usan las tablas del día actual.
     user_table_name, log_table_name = get_dynamic_table_names(date_suffix)
 
-    # Se genera un logger específico para la fecha, para evitar mensajes duplicados.
     creation_logger = logging.getLogger(f"CreateTable_{date_suffix or 'today'}")
     creation_logger.propagate = False  # Evita que el log suba al logger raíz
     if not creation_logger.handlers:
@@ -241,3 +368,25 @@ def get_dynamic_models(date_suffix: str):
 
     dynamic_model_cache[cache_key] = (DynamicUser, DynamicLog)
     return DynamicUser, DynamicLog
+
+
+def get_concat_function(column, separator=", "):
+    """
+    Devuelve la función de concatenación apropiada según el tipo de base de datos.
+    MySQL/MariaDB: GROUP_CONCAT
+    PostgreSQL: STRING_AGG
+    SQLite: GROUP_CONCAT
+    """
+    db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
+
+    if db_type in ("POSTGRESQL", "POSTGRES"):
+        # PostgreSQL usa STRING_AGG
+        return func.string_agg(column, separator)
+    else:
+        # MySQL, MariaDB y SQLite usan GROUP_CONCAT
+        if separator != ", ":
+            # Si hay separador personalizado, usarlo
+            return func.group_concat(column, separator)
+        else:
+            # Separador por defecto
+            return func.group_concat(column)

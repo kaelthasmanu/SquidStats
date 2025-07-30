@@ -7,7 +7,7 @@ from sqlalchemy import func, inspect
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 
-from database.database import get_dynamic_models, get_session
+from database.database import get_concat_function, get_dynamic_models, get_session
 
 # Configuración básica de logging
 logging.basicConfig(
@@ -285,7 +285,7 @@ def get_metrics_for_date(selected_date: date):
         session.query(
             User.ip,
             func.count(User.id).label("user_count"),
-            func.group_concat(User.username, ", ").label("usernames"),
+            get_concat_function(User.username, ", ").label("usernames"),
         )
         .group_by(User.ip)
         .having(func.count(User.id) > 1)
