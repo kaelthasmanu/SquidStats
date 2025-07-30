@@ -101,6 +101,7 @@ function updateOrCloneRepo() {
     local destino="/opt/SquidStats"
     local branch="main"
     local env_exists=false
+    local db_exists=false
 
     if [ -d "$destino" ]; then
         echo "El directorio $destino ya existe, intentando actualizar con git pull..."
@@ -113,34 +114,55 @@ function updateOrCloneRepo() {
                 cp .env /tmp/.env.backup
             fi
 
+            local db_files=(*.db)
+            if [ -e "${db_files[0]}" ]; then
+                db_exists=true
+                echo "Archivos .db detectados, se preservarán"
+                mkdir -p /tmp/db_backup
+                cp *.db /tmp/db_backup/
+            fi
+
             if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
                 [ "$env_exists" = true ] && mv /tmp/.env.backup .env
-                echo "? Repositorio actualizado exitosamente en la rama '$branch'"
+                
+                if [ "$db_exists" = true ]; then
+                    mv /tmp/db_backup/*.db . 2>/dev/null || true
+                    rm -rf /tmp/db_backup
+                    echo "📊 Archivos .db restaurados"
+                fi
+                
+                echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
                 return 0
             else
-                echo "? Error al actualizar el repositorio, se procederá a clonar de nuevo"
+                echo "❌ Error al actualizar el repositorio, se procederá a clonar de nuevo"
                 cd ..
                 rm -rf "$destino"
             fi
         else
-            echo "?? El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
+            echo "⚠️ El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
             rm -rf "$destino"
         fi
     fi
 
-    echo "?? Clonando repositorio por primera vez desde la rama '$branch'..."
+    echo "🔄 Clonando repositorio por primera vez desde la rama '$branch'..."
     if git clone --branch "$branch" "$repo_url" "$destino"; then
         chown -R $USER:$USER "$destino"
-        echo "? Repositorio clonado exitosamente en $destino"
+        echo "✅ Repositorio clonado exitosamente en $destino"
 
         if [ "$env_exists" = true ] && [ -f /tmp/.env.backup ]; then
             mv /tmp/.env.backup "$destino/.env"
-            echo "?? Archivo .env restaurado"
+            echo "⚙️ Archivo .env restaurado"
+        fi
+
+        if [ "$db_exists" = true ] && [ -d /tmp/db_backup ]; then
+            mv /tmp/db_backup/*.db "$destino/" 2>/dev/null || true
+            rm -rf /tmp/db_backup
+            echo "📊 Archivos .db restaurados"
         fi
 
         return 0
     else
-        echo "? Error al clonar el repositorio"
+        echo "❌ Error al clonar el repositorio"
         return 1
     fi
 }
