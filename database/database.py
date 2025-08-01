@@ -461,7 +461,6 @@ def migrate_database():
 
 
 def _column_needs_migration(current_column, expected_spec, db_type):
-    """Check if a column needs migration based on current vs expected schema"""
     current_type = str(current_column["type"]).upper()
     expected_type = expected_spec["type"].upper()
     logger.debug(
@@ -530,7 +529,6 @@ def _column_needs_migration(current_column, expected_spec, db_type):
 
 
 def _migrate_column(conn, table_name, column_name, expected_spec, db_type):
-    """Migrate a specific column to the expected specification"""
     try:
         if db_type in ("MYSQL", "MARIADB"):
             nullable_clause = "" if expected_spec["nullable"] else "NOT NULL"
@@ -554,7 +552,6 @@ def _migrate_column(conn, table_name, column_name, expected_spec, db_type):
 
 
 def _migrate_dynamic_tables(conn, inspector, db_type):
-    """Check and migrate dynamic tables (user_YYYYMMDD, log_YYYYMMDD)"""
     # Get all table names that match the dynamic pattern
     all_tables = inspector.get_table_names()
     user_tables = [t for t in all_tables if re.match(r"user_\d{8}$", t)]
@@ -565,7 +562,7 @@ def _migrate_dynamic_tables(conn, inspector, db_type):
         "ip": {
             "type": "VARCHAR(255)",
             "nullable": False,
-        },  # Changed from VARCHAR(15) to VARCHAR(255)
+        },
     }
     # Migrate user tables
     for table_name in user_tables:

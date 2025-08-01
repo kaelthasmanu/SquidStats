@@ -95,6 +95,7 @@
                 Resumen por Usuario
               </option>
               <option value="top_users_data">Top 10 Usuarios (Datos)</option>
+              <option value="top_urls_data">Top 15 URLs (Datos)</option>
               <!-- <option value="daily_activity" data-requires="user">
                 Actividad Diaria
               </option> -->
@@ -769,6 +770,8 @@
           html = renderUserSummary(data);
         } else if (auditType === "top_users_data") {
           html = renderTopUsers(data);
+        } else if (auditType === "top_urls_data") {
+          html = renderTopUrls(data);
         } else if (auditType === "daily_activity") {
           const user = formData.username;
           const date = formData.start_date;
@@ -1020,6 +1023,38 @@
                 <thead class="bg-gray-100"><tr><th class="p-3">#</th><th class="p-3">Usuario</th><th class="p-3">Datos Consumidos</th></tr></thead>
                 <tbody class="divide-y">${rows}</tbody>
             </table></div>`;
+    }
+
+    function renderTopUrls(data) {
+      const rows = data.top_urls
+        .map(
+          (url, index) => `
+            <tr class="hover:bg-gray-50">
+                <td class="p-3">${index + 1}</td>
+                <td class="p-3 font-medium">
+                    <a href="${url.url.startsWith('http') ? url.url : 'http://' + url.url}" target="_blank" 
+                       class="text-blue-600 hover:underline break-all" 
+                       title="${url.url}">
+                        ${url.url.length > 60 ? url.url.substring(0, 60) + '...' : url.url}
+                    </a>
+                </td>
+                <td class="p-3 font-mono">${url.total_data_gb.toFixed(2)} GB</td>
+            </tr>`
+        )
+        .join("");
+      return `<div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-4">Top 15 URLs por Consumo de Datos</h2>
+            <table class="w-full text-left">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-3">#</th>
+                        <th class="p-3">URL</th>
+                        <th class="p-3">Datos Consumidos</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">${rows}</tbody>
+            </table>
+        </div>`;
     }
 
     function renderDailyActivityChart(canvas, hourlyData) {

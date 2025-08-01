@@ -348,7 +348,6 @@ def find_by_response_code(
 
 
 def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, Any]:
-    """Calcula el número de peticiones por hora para un usuario en un día específico usando ORM."""
     try:
         selected_date = datetime.strptime(date_str, "%Y-%m-%d")
     except ValueError:
@@ -541,8 +540,6 @@ def get_top_users_by_data(
             UserModel, LogModel = get_dynamic_models(date_suffix)
             if UserModel is None or LogModel is None:
                 continue
-
-            # Usar ORM para obtener datos por usuario
             results = (
                 db.query(
                     UserModel.username,
@@ -570,6 +567,51 @@ def get_top_users_by_data(
     ]
 
     return {"top_users": top_users_list}
+
+
+def get_top_urls_by_data(
+    db: Session, start_str: str, end_str: str, limit: int = 15
+) -> dict[str, Any]:
+    start_date = datetime.strptime(start_str, "%Y-%m-%d")
+    end_date = datetime.strptime(end_str, "%Y-%m-%d")
+    inspector = inspect(db.get_bind())
+    tables = _get_tables_in_range(inspector, start_date, end_date)
+    if not tables:
+        return {"error": "No data for the selected dates."}
+
+    url_data = defaultdict(int)
+
+    for log_table in tables:
+        date_suffix = log_table.split("_")[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+            results = (
+                db.query(
+                    LogModel.url,
+                    func.sum(LogModel.data_transmitted).label("total_data"),
+                )
+                .group_by(LogModel.url)
+                .all()
+            )
+
+            for row in results:
+                url_data[row[0]] += row.total_data or 0
+
+        except Exception as e:
+            print(f"Error processing table {log_table}: {e}")
+            continue
+
+    # Ordenar y limitar resultados
+    sorted_urls = sorted(url_data.items(), key=lambda x: x[1], reverse=True)[:limit]
+
+    top_urls_list = [
+        {"url": url, "total_data_gb": float(round(total_data / (1024**3), 2))}
+        for url, total_data in sorted_urls
+    ]
+
+    return {"top_urls": top_urls_list}
 
 
 def find_denied_access(
