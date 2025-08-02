@@ -1,7 +1,9 @@
+import os
 from threading import Lock
 
-from flask import Blueprint, render_template
+from flask import Blueprint, redirect, render_template
 
+from config import logger
 from parsers.connections import group_by_user, parse_raw_data
 from parsers.log import find_last_parent_proxy
 from parsers.squid_info import fetch_squid_info_stats
@@ -17,9 +19,6 @@ g_parent_proxy_ip = None
 
 def initialize_proxy_detection():
     global g_parent_proxy_ip
-    import os
-
-    from config import logger
 
     g_parent_proxy_ip = find_last_parent_proxy(
         os.getenv("SQUID_LOG", "/var/log/squid/access.log")
@@ -35,8 +34,6 @@ def initialize_proxy_detection():
 @main_bp.route("/")
 def index():
     try:
-        from config import logger
-
         raw_data = fetch_squid_data()
         if "Error" in raw_data:
             logger.error(f"Failed to fetch Squid data: {raw_data}")
@@ -63,8 +60,6 @@ def index():
             page_title="Inicio Dashboard",
         )
     except Exception as e:
-        from config import logger
-
         logger.error(f"Unexpected error in index route: {str(e)}")
         return render_template(
             "error.html", message="An unexpected error occurred"
@@ -74,8 +69,6 @@ def index():
 @main_bp.route("/actualizar-conexiones")
 def actualizar_conexiones():
     try:
-        from config import logger
-
         raw_data = fetch_squid_data()
         if "Error" in raw_data:
             logger.error(f"Failed to fetch Squid data: {raw_data}")
@@ -93,29 +86,22 @@ def actualizar_conexiones():
             "partials/conexiones.html",
             grouped_connections=grouped_connections,
             parent_proxy_ip=parent_ip,
-            # squid_ip=squid_ip,
-            # squid_version=,
+            squid_version=connections[0].get("squid_version", "No disponible"),
             squid_info_stats=squid_info_stats,
         )
 
     except Exception as e:
-        from config import logger
-
         logger.error(f"Unexpected error in /actualizar-conexiones route: {str(e)}")
         return "Error interno", 500
 
 
 @main_bp.route("/install", methods=["POST"])
 def install_package():
-    from flask import redirect
-
     updateSquidStats()
     return redirect("/")
 
 
 @main_bp.route("/update", methods=["POST"])
 def update_web():
-    from flask import redirect
-
     updateSquidStats()
     return redirect("/")
