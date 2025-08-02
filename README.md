@@ -157,21 +157,14 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
    http_access deny manager
    ```
 
-2. **Set Cache Manager Password** (optional but recommended):
-   ```bash
-   # Set password for administrative actions
-   cachemgr_passwd your_password_here shutdown
-   cachemgr_passwd your_password_here info stats/objects
-   ```
-
-3. **Configure Remote Access** (if SquidStats runs on different server):
+2. **Configure Remote Access** (if SquidStats runs on different server):
    ```bash
    # Replace 192.168.1.100 with your SquidStats server IP
    acl managerAdmin src 192.168.1.100
    http_access allow managerAdmin manager
    ```
 
-4. **Verify Cache Manager is Working**:
+3. **Verify Cache Manager is Working**:
    ```bash
    # Test cache manager access
    curl http://127.0.0.1:3128/squid-internal-mgr/menu
@@ -322,23 +315,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
 ```
 
 🕒 Run on System Startup
-To ensure the application starts automatically when the system boots, add the following cron job:
-
-1. Open with a editor the file crontab
-
-```bash
-nano /etc/crontab
-```
-
-2. Add the following line to the crontab file(change path_app for your path):
-
-```bash
-@reboot root nohup python3 path_app/app.py &
-```
-
-3. Save
-
-Or can use service(daemon):
+To ensure the application starts automatically when the system boot :
 
 1. Copy file service:
 
@@ -431,7 +408,6 @@ _Future functionalities and planned improvements._
 
 - **Security Features** 🔒
   - User authentication
-  - Roles and permissions
   - System audit logs
   - Automated alerts
 
