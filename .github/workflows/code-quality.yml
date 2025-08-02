@@ -74,7 +74,6 @@ jobs:
               from services.system_info import get_cpu_info, get_ram_info, get_network_stats
               from parsers.log import parse_log_line, process_logs
               from services.metrics_service import MetricsService
-              print('✅ Core imports work correctly')
           except Exception as e:
               print(f'❌ Core import error: {e}')
               sys.exit(1)
@@ -83,7 +82,6 @@ jobs:
           try:
               from services.auditoria_service import get_all_usernames
               from services.blacklist_users import find_blacklisted_sites
-              print('✅ Optional imports work correctly')
           except Exception as e:
               print(f'⚠️ Optional import warning: {e}')
               # No exit here, just warning
@@ -185,7 +183,6 @@ jobs:
               from database.database import get_engine, create_dynamic_tables
               engine = get_engine()
               create_dynamic_tables(engine)
-              print('✅ Database creation test passed')
           except Exception as e:
               print(f'❌ Database test error: {e}')
               sys.exit(1)
@@ -228,7 +225,6 @@ jobs:
               try:
                   with open(yaml_file, 'r') as f:
                       yaml.safe_load(f)
-                  print(f'✅ {yaml_file} is valid')
               except yaml.YAMLError as e:
                   print(f'❌ {yaml_file} is invalid: {e}')
                   exit(1)
@@ -250,7 +246,6 @@ jobs:
               try:
                   with open(json_file, 'r') as f:
                       json.load(f)
-                  print(f'✅ {json_file} is valid')
               except json.JSONDecodeError as e:
                   print(f'❌ {json_file} is invalid: {e}')
                   exit(1)

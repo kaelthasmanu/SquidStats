@@ -15,16 +15,28 @@ REGEX_MAP = {
     "nrequests": re.compile(r"nrequests: (\d+)"),
     "delay_pool": re.compile(r"delay_pool (\d+)"),
     "out_size": re.compile(r"out\.size (\d+)"),
+    "squid_version": re.compile(r"Server: squid/([\d.]+)"),
+    "via_squid": re.compile(r"Via: [\d.]+ ([^(]+) \(squid/([\d.]+)\)"),
 }
 
 
 def parse_raw_data(raw_data):
+    header = raw_data.split("Connection:")[0]  # Parte del encabezado HTTP
     connections = []
     blocks = raw_data.split("Connection:")[1:]
 
+    squid_version = "N/A"
+    squid_version_match = REGEX_MAP["squid_version"].search(header)
+    if squid_version_match:
+        squid_version = squid_version_match.group(1)
+    else:
+        via_match = REGEX_MAP["via_squid"].search(header)
+        if via_match:
+            squid_version = via_match.group(2)
+
     for block in blocks:
         try:
-            connection = parse_connection_block(block)
+            connection = parse_connection_block(block, squid_version)
             connections.append(connection)
         except Exception as e:
             print(f"Error parseando bloque: {e}\n{block[:100]}...")
@@ -32,7 +44,7 @@ def parse_raw_data(raw_data):
     return connections
 
 
-def parse_connection_block(block):
+def parse_connection_block(block, squid_version):
     conn = {}
 
     for key, regex in REGEX_MAP.items():
@@ -43,6 +55,9 @@ def parse_connection_block(block):
             "delay_pool",
             "fd_total",
             "out_size",
+            "squid_version",
+            "squid_host",
+            "via_squid",
         ]:
             match = regex.search(block)
             conn[key] = match.group(1) if match else "N/A"
@@ -58,7 +73,6 @@ def parse_connection_block(block):
         else 0
     )
     conn["fd_total"] = conn["fd_read"] + conn["fd_wrote"]
-
     conn["nrequests"] = (
         int(REGEX_MAP["nrequests"].search(block).group(1))
         if REGEX_MAP["nrequests"].search(block)
@@ -69,9 +83,11 @@ def parse_connection_block(block):
         if REGEX_MAP["delay_pool"].search(block)
         else "N/A"
     )
-
     out_size_match = REGEX_MAP["out_size"].search(block)
     conn["out_size"] = int(out_size_match.group(1)) if out_size_match else 0
+
+    # Usa la versión de squid ya obtenida
+    conn["squid_version"] = squid_version
 
     elapsed_match = REGEX_MAP["elapsed_time"].search(block)
     elapsed_time = float(elapsed_match.group(1)) if elapsed_match else 0

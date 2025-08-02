@@ -7,6 +7,10 @@ import time
 
 import psutil
 
+# Variables globales para el cálculo de estadísticas de red
+_last_net_io = None
+_last_net_time = None
+
 
 def get_network_info():
     ips = []
@@ -123,7 +127,7 @@ def get_cpu_info():
         return f"Error: {str(e)}"
 
 
-def get_squid_version():
+r""" def get_squid_version():
     try:
         result = subprocess.run(
             ["squid", "-v"],
@@ -145,12 +149,7 @@ def get_squid_version():
     except FileNotFoundError:
         return "Not installed"
     except Exception as e:
-        return f"Error: {str(e)}"
-
-
-# Variables globales para el cálculo de estadísticas de red
-_last_net_io = None
-_last_net_time = None
+        return f"Error: {str(e)}" """
 
 
 def get_network_stats():

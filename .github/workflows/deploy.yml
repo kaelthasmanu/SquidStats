@@ -69,7 +69,6 @@ jobs:
               from database.database import get_engine, create_dynamic_tables
               engine = get_engine()
               create_dynamic_tables(engine)
-              print('✅ Database connection test passed')
           except Exception as e:
               print(f'❌ Database connection test failed: {e}')
               sys.exit(1)

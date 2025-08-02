@@ -6,7 +6,6 @@ from parsers.connections import group_by_user, parse_raw_data
 from parsers.log import find_last_parent_proxy
 from parsers.squid_info import fetch_squid_info_stats
 from services.fetch_data import fetch_squid_data
-from services.system_info import get_network_info, get_squid_version
 from utils.updateSquidStats import updateSquidStats
 
 main_bp = Blueprint("main", __name__)
@@ -51,12 +50,6 @@ def index():
         with parent_proxy_lock:
             parent_ip = g_parent_proxy_ip
 
-        squid_version = get_squid_version()
-        network_info = get_network_info()
-        squid_ip = "Not found"
-        if isinstance(network_info, list) and network_info:
-            squid_ip = network_info[0].get("ip", "Not found")
-
         # Obtener estadísticas detalladas de Squid
         squid_info_stats = fetch_squid_info_stats()
 
@@ -64,8 +57,7 @@ def index():
             "index.html",
             grouped_connections=grouped_connections,
             parent_proxy_ip=parent_ip,
-            squid_ip=squid_ip,
-            squid_version=squid_version,
+            squid_version=connections[0].get("squid_version", "No disponible"),
             squid_info_stats=squid_info_stats,
             page_icon="favicon.ico",
             page_title="Inicio Dashboard",
@@ -95,20 +87,14 @@ def actualizar_conexiones():
         with parent_proxy_lock:
             parent_ip = g_parent_proxy_ip
 
-        squid_version = get_squid_version()
-        network_info = get_network_info()
-        squid_ip = "No disponible"
-        if isinstance(network_info, list) and network_info:
-            squid_ip = network_info[0].get("ip", "No disponible")
-
         squid_info_stats = fetch_squid_info_stats()
 
         return render_template(
             "partials/conexiones.html",
             grouped_connections=grouped_connections,
             parent_proxy_ip=parent_ip,
-            squid_ip=squid_ip,
-            squid_version=squid_version,
+            # squid_ip=squid_ip,
+            # squid_version=,
             squid_info_stats=squid_info_stats,
         )
 

@@ -63,7 +63,6 @@ jobs:
           try:
               from app import app
               from database.database import get_engine, create_dynamic_tables
-              print('✅ Basic imports successful')
           except Exception as e:
               print(f'❌ Import error: {e}')
               sys.exit(1)
