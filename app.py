@@ -12,6 +12,10 @@ from routes import register_routes
 from routes.main_routes import initialize_proxy_detection
 from routes.stats_routes import realtime_data_thread
 from services.metrics_service import MetricsService
+from services.notifications import (
+    has_remote_commits_with_messages,
+    set_commit_notifications,
+)
 from utils.filters import register_filters
 
 # Load environment variables
@@ -57,6 +61,14 @@ def create_app():
 
 
 def setup_scheduler_tasks(scheduler):
+    @scheduler.task(
+        "interval", id="check_notifications", minutes=30, misfire_grace_time=1800
+    )
+    def check_notifications_task():
+        repo_path = os.path.dirname(os.path.abspath(__file__))
+        has_updates, messages = has_remote_commits_with_messages(repo_path)
+        set_commit_notifications(has_updates, messages)
+
     @scheduler.task("interval", id="do_job_1", seconds=30, misfire_grace_time=900)
     def init_scheduler():
         log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")

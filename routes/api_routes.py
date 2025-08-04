@@ -15,6 +15,7 @@ from services.auditoria_service import (
     get_user_activity_summary,
 )
 from services.metrics_service import MetricsService
+from services.notifications import get_commit_notifications
 
 api_bp = Blueprint("api", __name__)
 
@@ -123,3 +124,9 @@ def api_run_audit():
         return jsonify({"error": "Internal server error"}), 500
     finally:
         db.close()
+
+
+# API para notificaciones del sistema
+@api_bp.route("/notifications", methods=["GET"])
+def api_get_notifications():
+    return jsonify(get_commit_notifications())

@@ -68,11 +68,11 @@
     </div>
 
     <!-- Notificaciones y Action Buttons -->
-    <!-- <div class="flex items-center gap-3">
+     <div class="flex items-center gap-3">
       <div class="relative" x-data="{ open: false }">
         <button
           @click="open = !open"
-          class="relative inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 shadow-sm hover:shadow-md hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-200 group"
+          class="relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 shadow-sm hover:shadow-md hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-200 group"
           aria-label="Notificaciones"
         >
           <i class="fas fa-bell text-slate-600 group-hover:text-blue-600 transition-colors duration-200"></i>
@@ -162,7 +162,7 @@
             >
           </div>
         </div>
-      </div> -->
+      </div> 
 
     <!-- Action Buttons -->
     <div
@@ -337,92 +337,54 @@
 ></script>
 
 <script>
+
   // Enhanced Navbar Functionality
   document.addEventListener("DOMContentLoaded", function () {
-    // Highlight active navigation link
-    const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll(".nav-link");
+    // ...existing code...
 
-    navLinks.forEach((link) => {
-      const href = link.getAttribute("href");
-      if (href === currentPath || (currentPath === "/" && href === "/")) {
-        link.classList.add("active");
-      }
-    });
-
-    // Enhanced tooltip positioning
-    const tooltipElements = document.querySelectorAll("[data-tooltip]");
-    tooltipElements.forEach((element) => {
-      element.addEventListener("mouseenter", function (e) {
-        const rect = e.target.getBoundingClientRect();
-        const tooltipWidth = e.target.getAttribute("data-tooltip").length * 8; // Approximate width
-
-        // Adjust tooltip position if it would go off-screen
-        if (rect.left + tooltipWidth > window.innerWidth) {
-          e.target.style.setProperty(
-            "--tooltip-transform",
-            "translateX(-100%)"
-          );
-        }
-      });
-    });
-
-    // Smooth scroll to top when clicking brand
-    const brand = document.querySelector(".navbar-brand");
-    if (brand) {
-      brand.addEventListener("click", function (e) {
-        e.preventDefault();
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
+    // Notificaciones dinámicas desde la API
+    function renderNotifications(data) {
+      const ul = document.querySelector(".max-h-72.overflow-y-auto");
+      if (!ul) return;
+      ul.innerHTML = "";
+      if (data.has_updates && data.commits.length > 0) {
+        data.commits.forEach((msg, idx) => {
+          ul.innerHTML += `
+            <li class="px-4 py-3 flex items-start hover:bg-gray-50 cursor-pointer">
+              <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-yellow-100 text-yellow-600 mr-3">
+                <i class="fas fa-bell"></i>
+              </span>
+              <div class="flex-1">
+                <p class="text-sm text-gray-700">${msg}</p>
+                <span class="text-xs text-gray-400">Actualización de código</span>
+              </div>
+            </li>
+          `;
         });
-      });
+      } else {
+        ul.innerHTML = `<li class='px-4 py-3 text-gray-500 text-center'>No hay notificaciones nuevas</li>`;
+      }
     }
 
-    // Add loading state to action buttons
-    const actionButtons = document.querySelectorAll(".action-btn");
-    actionButtons.forEach((button) => {
-      button.addEventListener("click", function () {
-        const originalContent = this.innerHTML;
-        this.innerHTML =
-          '<i class="fas fa-spinner fa-spin"></i> <span>Procesando...</span>';
-        this.disabled = true;
+    function fetchNotifications() {
+      fetch("/api/notifications")
+        .then((res) => res.json())
+        .then((data) => {
+          renderNotifications(data);
+          // Actualizar contador
+          const badge = document.querySelector(".fa-bell").parentElement.querySelector(".absolute");
+          if (badge) {
+            badge.textContent = data.has_updates ? data.commits.length : "0";
+          }
+        })
+        .catch(() => {});
+    }
 
-        // Reset after 3 seconds (in case something goes wrong)
-        setTimeout(() => {
-          this.innerHTML = originalContent;
-          this.disabled = false;
-        }, 3000);
-      });
-    });
+    // Llamar al cargar y cada 5 minutos
+    fetchNotifications();
+    setInterval(fetchNotifications, 5 * 60 * 1000);
 
-    // Add keyboard navigation
-    document.addEventListener("keydown", function (e) {
-      if (e.altKey) {
-        switch (e.key) {
-          case "1":
-            e.preventDefault();
-            window.location.href = "/";
-            break;
-          case "2":
-            e.preventDefault();
-            window.location.href = "/stats";
-            break;
-          case "3":
-            e.preventDefault();
-            window.location.href = "/logs";
-            break;
-          case "4":
-            e.preventDefault();
-            window.location.href = "/reports";
-            break;
-          case "5":
-            e.preventDefault();
-            window.location.href = "/blacklist";
-            break;
-        }
-      }
-    });
+    // ...existing code...
   });
 
   // Close modals when clicking outside
