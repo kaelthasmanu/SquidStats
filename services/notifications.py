@@ -19,12 +19,20 @@ def has_remote_commits_with_messages(
     if not os.path.isdir(os.path.join(repo_path, ".git")):
         raise ValueError(f"No es un repositorio Git válido: {repo_path}")
     try:
+        # Configurar proxy si existe la variable de entorno
+        env = os.environ.copy()
+        http_proxy = env.get("HTTP_PROXY", "")
+        if http_proxy:
+            env["http_proxy"] = http_proxy
+            env["https_proxy"] = http_proxy
+
         subprocess.run(
             ["git", "fetch"],
             cwd=repo_path,
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            env=env,
         )
         result = subprocess.run(
             [
@@ -38,6 +46,7 @@ def has_remote_commits_with_messages(
             capture_output=True,
             text=True,
             check=True,
+            env=env,
         )
         ahead_behind = result.stdout.strip().split()
         remote_ahead = int(ahead_behind[0])
@@ -49,6 +58,7 @@ def has_remote_commits_with_messages(
                 capture_output=True,
                 text=True,
                 check=True,
+                env=env,
             )
             commit_messages = (
                 log_result.stdout.strip().split("\n")
