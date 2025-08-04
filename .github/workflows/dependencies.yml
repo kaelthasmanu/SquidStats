@@ -38,8 +38,8 @@ jobs:
           # Backup current requirements
           cp requirements.txt requirements.txt.bak
           
-          # Update requirements
-          pip-compile --upgrade requirements.in || pip-compile --upgrade --generate-hashes requirements.txt
+          # Update requirements (simple upgrade)
+          pip install --upgrade -r requirements.txt
           
           # Check if there are changes
           if ! diff -q requirements.txt requirements.txt.bak > /dev/null; then
