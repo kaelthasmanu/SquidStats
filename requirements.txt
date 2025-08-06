@@ -1,7 +1,7 @@
 Flask==3.1.1
-SQLAlchemy==2.0.39
+SQLAlchemy==2.0.42
 flask_apscheduler==1.13.1
-python-dotenv==1.0.1
+python-dotenv==1.1.1
 pymysql==1.1.1
 psycopg2-binary
 psutil==7.0.0
