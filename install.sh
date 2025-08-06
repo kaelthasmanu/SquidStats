@@ -10,7 +10,7 @@ function ok() {
 
 function checkSudo() {
     if [ "$EUID" -ne 0 ]; then
-        error "ERROR: Este script debe ejecutarse con privilegios de superusuario.\nPor favor, ejecútelo con: sudo $0"
+        error "ERROR: Este script debe ejecutarse con privilegios de superusuario.\nPor favor, ejecútelo con el usuario: root $0"
         exit 1
     fi
 }
