@@ -90,7 +90,9 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
             squid_info_stats = {}
 
         squid_version = (
-            connections[0].get("squid_version", "No disponible") if connections else "No disponible"
+            connections[0].get("squid_version", "No disponible")
+            if connections
+            else "No disponible"
         )
 
         context: dict[str, Any] = {
