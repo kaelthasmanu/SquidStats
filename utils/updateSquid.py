@@ -11,6 +11,23 @@ load_dotenv()
 
 def update_squid():
     try:
+        pre_check = subprocess.run(["squid", "-v"], capture_output=True, text=True)
+        squid_instalado = pre_check.returncode == 0
+    except FileNotFoundError:
+        squid_instalado = False
+        print(
+            "El binario de Squid no se encontró en el sistema (aún no instalado)",
+            "info",
+        )
+
+    if squid_instalado:
+        print("Squid ya está instalado:", pre_check.stdout.strip(), "info")
+        # Si quieres que la función termine aquí si ya está instalado, descomenta la siguiente línea:
+        # return True
+        # Si quieres que continúe con la actualización, deja comentado lo anterior.
+    else:
+        print("Squid no está instalado o no se detectó instalación previa", "info")
+    try:
         os_info = platform.freedesktop_os_release()
         os_id = os_info.get("ID", "").lower()
         codename = os_info.get(
@@ -99,7 +116,6 @@ def update_squid():
 
         print(f"Actualización a {latest_version} completada exitosamente", "success")
         return True
-
     except Exception as e:
         print(f"Error crítico: {str(e)}", "error")
         return False

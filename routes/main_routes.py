@@ -10,6 +10,7 @@ from parsers.connections import group_by_user, parse_raw_data
 from parsers.log import find_last_parent_proxy
 from parsers.squid_info import fetch_squid_info_stats
 from services.fetch_data import fetch_squid_data
+from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
 
 main_bp = Blueprint("main", __name__)
@@ -141,11 +142,11 @@ def actualizar_conexiones():
 def install_package():
     ok = False
     try:
-        ok = updateSquidStats()
+        ok = update_squid()
         if ok:
             logger.info("Actualización de SquidStats (install) completada exitosamente")
         else:
-            logger.warning("updateSquidStats() retornó False en /install")
+            logger.warning("update_squid() retornó False en /install")
     except Exception:
         logger.exception("Error ejecutando actualización en /install")
     # Podríamos agregar un query param para feedback
