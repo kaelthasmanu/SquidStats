@@ -3,7 +3,6 @@ import os
 
 from dotenv import load_dotenv
 
-# Configurar logging para este módulo
 logger = logging.getLogger(__name__)
 
 load_dotenv()
@@ -15,7 +14,6 @@ ACL_FILES_DIR = os.getenv("ACL_FILES_DIR", "/etc/squid/acls")
 def validate_paths():
     errors = []
 
-    # Verificar archivo de configuración
     if not os.path.exists(SQUID_CONFIG_PATH):
         errors.append(f"Configuration file not found: {SQUID_CONFIG_PATH}")
     elif not os.access(SQUID_CONFIG_PATH, os.R_OK):
@@ -23,13 +21,11 @@ def validate_paths():
     elif not os.access(SQUID_CONFIG_PATH, os.W_OK):
         errors.append(f"No write permissions for: {SQUID_CONFIG_PATH}")
 
-    # Verificar directorio de backups
     """ if not os.path.exists(BACKUP_DIR):
         errors.append(f"Backup directory not found: {BACKUP_DIR}")
     elif not os.access(BACKUP_DIR, os.W_OK):
         errors.append(f"No write permissions in backup directory: {BACKUP_DIR}") """
 
-    # Verificar directorio de ACLs
     if not os.path.exists(ACL_FILES_DIR):
         errors.append(f"ACL directory not found: {ACL_FILES_DIR}")
     elif not os.access(ACL_FILES_DIR, os.W_OK):
@@ -45,10 +41,8 @@ class SquidConfigManager:
         self.is_valid = False
         self.errors = []
 
-        # Validar entorno antes de cargar
         self._validate_environment()
 
-        # Solo cargar si no hay errores críticos
         if self.is_valid:
             self.load_config()
 
@@ -99,12 +93,10 @@ class SquidConfigManager:
             return False
 
         try:
-            # Intentar crear backup antes de guardar
             backup_created = self.create_backup()
             if not backup_created:
                 logger.warning("Could not create backup, but continuing with save...")
 
-            # Guardar nueva configuración
             with open(self.config_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
@@ -128,22 +120,18 @@ class SquidConfigManager:
             return False
 
         """ try:
-            # Verificar que el directorio de backup existe
             if not os.path.exists(BACKUP_DIR):
                 logger.error(f"Backup directory does not exist: {BACKUP_DIR}")
                 return False
 
-            # Verificar permisos de escritura
             if not os.access(BACKUP_DIR, os.W_OK):
                 logger.error(f"No write permissions in backup directory: {BACKUP_DIR}")
                 return False
 
-            # Verificar que el archivo fuente existe
             if not os.path.exists(self.config_path):
                 logger.warning("No configuration file exists to backup")
                 return False
 
-            # Crear backup con timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             backup_filename = f"squid.conf.backup_{timestamp}"
             backup_path = os.path.join(BACKUP_DIR, backup_filename)

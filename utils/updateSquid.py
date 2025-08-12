@@ -22,9 +22,6 @@ def update_squid():
 
     if squid_instalado:
         print("Squid ya está instalado:", pre_check.stdout.strip(), "info")
-        # Si quieres que la función termine aquí si ya está instalado, descomenta la siguiente línea:
-        # return True
-        # Si quieres que continúe con la actualización, deja comentado lo anterior.
     else:
         print("Squid no está instalado o no se detectó instalación previa", "info")
     try:
@@ -63,7 +60,6 @@ def update_squid():
         package_name = f"squid_{latest_version}-{os_id}-{codename}_amd64.deb"
         download_url = f"https://github.com/cuza/squid/releases/download/{latest_version}/{package_name}"
 
-        # Verificar y descargar el paquete
         check_package = subprocess.run(
             ["wget", "--spider", download_url], capture_output=True, text=True, env=env
         )
@@ -88,7 +84,6 @@ def update_squid():
             print("Error descargando el paquete", "error")
             return False
 
-        # Configurar proxy para apt si es necesario
         apt_env = env.copy()
         if proxy_url:
             apt_conf = "/etc/apt/apt.conf.d/95proxies"
