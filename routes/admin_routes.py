@@ -20,7 +20,8 @@ def admin_dashboard():
         "total_delay_pools": len(delay_pools),
         "total_http_rules": len(http_access_rules),
     }
-    return render_template("admin/dashboardAdmin.html", stats=stats)
+    status = config_manager.get_status()
+    return render_template("admin/dashboardAdmin.html", stats=stats, status=status)
 
 
 @admin_bp.route("/config")

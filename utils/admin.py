@@ -14,22 +14,42 @@ ACL_FILES_DIR = os.getenv("ACL_FILES_DIR", "/etc/squid/acls")
 def validate_paths():
     errors = []
 
-    if not os.path.exists(SQUID_CONFIG_PATH):
-        errors.append(f"Configuration file not found: {SQUID_CONFIG_PATH}")
-    elif not os.access(SQUID_CONFIG_PATH, os.R_OK):
-        errors.append(f"No read permissions for: {SQUID_CONFIG_PATH}")
-    elif not os.access(SQUID_CONFIG_PATH, os.W_OK):
-        errors.append(f"No write permissions for: {SQUID_CONFIG_PATH}")
+    cfg = os.path.abspath(os.path.expanduser(SQUID_CONFIG_PATH))
 
-    """ if not os.path.exists(BACKUP_DIR):
-        errors.append(f"Backup directory not found: {BACKUP_DIR}")
-    elif not os.access(BACKUP_DIR, os.W_OK):
-        errors.append(f"No write permissions in backup directory: {BACKUP_DIR}") """
+    if os.path.isdir(cfg):
+        squid_conf = os.path.join(cfg, "squid.conf")
+        if not os.path.exists(squid_conf):
+            errors.append(f"'squid.conf' not found in directory: {cfg}")
+        else:
+            if not os.path.isfile(squid_conf):
+                errors.append(f"Found but not a regular file: {squid_conf}")
+            else:
+                if not os.access(squid_conf, os.R_OK):
+                    errors.append(f"No read permissions for: {squid_conf}")
+                if not os.access(squid_conf, os.W_OK):
+                    errors.append(f"No write permissions for: {squid_conf}")
+    else:
+        squid_conf = cfg
+        if not os.path.exists(squid_conf):
+            errors.append(f"Configuration file not found: {squid_conf}")
+        else:
+            if not os.path.isfile(squid_conf):
+                errors.append(f"Not a regular file: {squid_conf}")
+            if os.path.basename(squid_conf) != "squid.conf":
+                errors.append(f"Expected file named 'squid.conf', got: {os.path.basename(squid_conf)}")
+            if os.path.isfile(squid_conf):
+                if not os.access(squid_conf, os.R_OK):
+                    errors.append(f"No read permissions for: {squid_conf}")
+                if not os.access(squid_conf, os.W_OK):
+                    errors.append(f"No write permissions for: {squid_conf}")
 
-    if not os.path.exists(ACL_FILES_DIR):
-        errors.append(f"ACL directory not found: {ACL_FILES_DIR}")
-    elif not os.access(ACL_FILES_DIR, os.W_OK):
-        errors.append(f"No write permissions in ACL directory: {ACL_FILES_DIR}")
+    acl_dir = os.path.abspath(os.path.expanduser(ACL_FILES_DIR))
+    if not os.path.exists(acl_dir):
+        errors.append(f"ACL directory not found: {acl_dir}")
+    elif not os.path.isdir(acl_dir):
+        errors.append(f"ACL path is not a directory: {acl_dir}")
+    elif not os.access(acl_dir, os.W_OK):
+        errors.append(f"No write permissions in ACL directory: {acl_dir}")
 
     return errors
 
