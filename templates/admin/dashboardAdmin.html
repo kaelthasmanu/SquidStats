@@ -13,7 +13,6 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-blue-100">Total ACLs</p>
-                        {# Mostrar errores relevantes en lugar del número si existen #}
                         {% if status.errors %}
                             {% set ns = namespace(shown=False) %}
                             <div class="space-y-1">
@@ -150,7 +149,11 @@
                         <i class="fas fa-database text-blue-500 mr-3"></i>
                         <span class="font-medium">Configuración</span>
                     </div>
-                    <span class="text-blue-600 font-semibold">Cargada</span>
+                    {% if status.errors %}
+                        <span class="text-red-600 font-semibold">No cargada</span>
+                    {% else %}
+                        <span class="text-blue-600 font-semibold">Cargada</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
