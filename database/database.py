@@ -333,16 +333,16 @@ def get_dynamic_models(date_suffix: str):
     engine = get_engine()
     user_table_name, log_table_name = get_dynamic_table_names(date_suffix)
 
-    if not table_exists(engine, user_table_name) or not table_exists(
-        engine, log_table_name
-    ):
+    user_exists = table_exists(engine, user_table_name)
+    log_exists = table_exists(engine, log_table_name)
+    if not user_exists or not log_exists:
         logger.warning(
             f"User/log tables for date suffix '{date_suffix}' do not exist. Attempting to recreate..."
         )
         create_dynamic_tables(engine, date_suffix=date_suffix)
-        if not table_exists(engine, user_table_name) or not table_exists(
-            engine, log_table_name
-        ):
+        user_exists = table_exists(engine, user_table_name)
+        log_exists = table_exists(engine, log_table_name)
+        if not user_exists or not log_exists:
             logger.error(
                 f"User/log tables for date suffix '{date_suffix}' could not be created or found."
             )
