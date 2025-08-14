@@ -36,7 +36,9 @@ def validate_paths():
             if not os.path.isfile(squid_conf):
                 errors.append(f"Not a regular file: {squid_conf}")
             if os.path.basename(squid_conf) != "squid.conf":
-                errors.append(f"Expected file named 'squid.conf', got: {os.path.basename(squid_conf)}")
+                errors.append(
+                    f"Expected file named 'squid.conf', got: {os.path.basename(squid_conf)}"
+                )
             if os.path.isfile(squid_conf):
                 if not os.access(squid_conf, os.R_OK):
                     errors.append(f"No read permissions for: {squid_conf}")
