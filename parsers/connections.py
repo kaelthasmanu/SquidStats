@@ -8,44 +8,78 @@ REGEX_MAP = {
     "logType": re.compile(r"logType (.+)"),
     "start": re.compile(r"start ([\d.]+)"),
     "elapsed_time": re.compile(r"start .*?\(([\d.]+) seconds ago\)"),
-    "client_ip": re.compile(r"remote: ([\d.]+:\d+)"),
-    "proxy_local_ip": re.compile(r"local: ([\d.]+:\d+)"),
+    "client_ip": re.compile(r"remote:\s+([\[\]a-fA-F0-9:\.]+:\d+)"),
+    "proxy_local_ip": re.compile(r"local:\s+([\[\]a-fA-F0-9:\.]+:\d+)"),
     "fd_read": re.compile(r"read (\d+)"),
     "fd_wrote": re.compile(r"wrote (\d+)"),
     "nrequests": re.compile(r"nrequests: (\d+)"),
     "delay_pool": re.compile(r"delay_pool (\d+)"),
     "out_size": re.compile(r"out\.size (\d+)"),
-    "squid_version": re.compile(r"Server: squid/([\d.]+)"),
-    "via_squid": re.compile(r"Via: [\d.]+ ([^(]+) \(squid/([\d.]+)\)"),
+    "squid_version": re.compile(r"Server:\s*squid/([^\s]+)"),
+    "via_squid": re.compile(r"Via:.*\(squid/([^\)]+)\)"),
+    "kid_open": re.compile(r"^\s*by\s+(kid\d+)\s*\{"),
+    "kid_close": re.compile(r"^\s*\}\s+by\s+(kid\d+)\s*$"),
 }
 
 
-def parse_raw_data(raw_data):
-    header = raw_data.split("Connection:")[0]  # Parte del encabezado HTTP
-    connections = []
-    blocks = raw_data.split("Connection:")[1:]
+def parse_raw_data(raw_data: str):
+    if not raw_data:
+        return []
+
+    first_idx = raw_data.find("Connection:")
+    header = raw_data[:first_idx] if first_idx != -1 else raw_data
+    body = raw_data[first_idx:] if first_idx != -1 else ""
 
     squid_version = "N/A"
-    squid_version_match = REGEX_MAP["squid_version"].search(header)
-    if squid_version_match:
-        squid_version = squid_version_match.group(1)
+    m = REGEX_MAP["squid_version"].search(header)
+    if m:
+        squid_version = m.group(1)
     else:
-        via_match = REGEX_MAP["via_squid"].search(header)
-        if via_match:
-            squid_version = via_match.group(2)
+        vm = REGEX_MAP["via_squid"].search(header)
+        if vm:
+            squid_version = vm.group(1)
 
-    for block in blocks:
+    connections = []
+    current_kid = None
+    current_block_lines = None
+
+    lines = body.splitlines()
+    for line in lines:
+        if REGEX_MAP["kid_open"].match(line):
+            current_kid = REGEX_MAP["kid_open"].match(line).group(1)
+            continue
+        if REGEX_MAP["kid_close"].match(line):
+            current_kid = None
+            continue
+
+        if line.lstrip().startswith("Connection:"):
+            if current_block_lines is not None:
+                block_text = "\n".join(current_block_lines)
+                try:
+                    conn = parse_connection_block(
+                        block_text, squid_version, kid=current_kid
+                    )
+                    connections.append(conn)
+                except Exception as e:
+                    print(f"Error parseando bloque: {e}\n{block_text[:120]}...")
+            current_block_lines = [line]
+        else:
+            if current_block_lines is not None:
+                current_block_lines.append(line)
+
+    if current_block_lines is not None:
+        block_text = "\n".join(current_block_lines)
         try:
-            connection = parse_connection_block(block, squid_version)
-            connections.append(connection)
+            conn = parse_connection_block(block_text, squid_version, kid=current_kid)
+            connections.append(conn)
         except Exception as e:
-            print(f"Error parseando bloque: {e}\n{block[:100]}...")
+            print(f"Error parseando bloque: {e}\n{block_text[:120]}...")
 
     return connections
 
 
-def parse_connection_block(block, squid_version):
-    conn = {}
+def parse_connection_block(block: str, squid_version: str, kid: str | None = None):
+    conn: dict = {}
 
     for key, regex in REGEX_MAP.items():
         if key not in [
@@ -86,8 +120,9 @@ def parse_connection_block(block, squid_version):
     out_size_match = REGEX_MAP["out_size"].search(block)
     conn["out_size"] = int(out_size_match.group(1)) if out_size_match else 0
 
-    # Usa la versión de squid ya obtenida
     conn["squid_version"] = squid_version
+    if kid:
+        conn["kid"] = kid
 
     elapsed_match = REGEX_MAP["elapsed_time"].search(block)
     elapsed_time = float(elapsed_match.group(1)) if elapsed_match else 0
