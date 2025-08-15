@@ -35,7 +35,6 @@ def initialize_proxy_detection():
 
 
 def _build_error_page(message: str, status: int = 500, details: str | None = None):
-    """Helper to render a standardized error page."""
     if details:
         logger.debug(f"Error details: {details}")
     return (
@@ -49,10 +48,6 @@ def _build_error_page(message: str, status: int = 500, details: str | None = Non
 
 
 def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | None]:
-    """
-    Build context for the dashboard.
-    Returns (context_dict, error_response) where only one will be not None.
-    """
     t0 = time.time()
     try:
         raw_data = fetch_squid_data()
@@ -124,9 +119,7 @@ def index():
 def actualizar_conexiones():
     context, error_response = _get_dashboard_context()
     if error_response:
-        # Para la petición parcial devolvemos solo texto simple o el fragmento de error
         return ("Error interno al refrescar conexiones", error_response[1])
-    # Reutilizamos mismo contexto pero plantilla parcial
     return render_template(
         "partials/conexiones.html",
         grouped_connections=context["grouped_connections"],
@@ -149,7 +142,6 @@ def install_package():
             logger.warning("update_squid() retornó False en /install")
     except Exception:
         logger.exception("Error ejecutando actualización en /install")
-    # Podríamos agregar un query param para feedback
     return redirect(f"/?install_status={'ok' if ok else 'fail'}")
 
 

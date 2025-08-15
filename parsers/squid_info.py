@@ -1,3 +1,4 @@
+import base64
 import os
 import re
 import socket
@@ -9,6 +10,8 @@ load_dotenv()
 
 SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
 SQUID_PORT = int(os.getenv("SQUID_PORT", "3128"))
+SQUID_MGR_USER = os.getenv("SQUID_MGR_USER")
+SQUID_MGR_PASS = os.getenv("SQUID_MGR_PASS")
 
 _SQUID_DATE_FMT = "%a, %d %b %Y %H:%M:%S %Z"
 
@@ -25,6 +28,25 @@ def _re_float(key: str, text: str, default=0.0):
 
 def _re_int(key: str, text: str, default=0):
     return int(_re_float(key, text, default))
+
+
+def _format_host_header(host: str, port: int) -> str:
+    # Bracket IPv6 literals
+    if ":" in host and not host.startswith("["):
+        return f"[{host}]:{port}"
+    return f"{host}:{port}"
+
+
+def _send_http_request(host: str, port: int, request: str, timeout: float = 5.0) -> str:
+    with socket.create_connection((host, port), timeout=timeout) as s:
+        s.sendall(request.encode("utf-8"))
+        response = b""
+        while True:
+            chunk = s.recv(4096)
+            if not chunk:
+                break
+            response += chunk
+    return response.decode("utf-8", errors="replace")
 
 
 def fetch_squid_info_stats():
@@ -65,15 +87,43 @@ def fetch_squid_info_stats():
     }
 
     try:
-        with socket.create_connection((SQUID_HOST, SQUID_PORT), timeout=5) as s:
-            request = f"GET cache_object://{SQUID_HOST}/info HTTP/1.0\r\n\r\n"
-            s.sendall(request.encode())
-            response = b""
-            while chunk := s.recv(4096):
-                response += chunk
-        data = response.decode("utf-8")
+        host_header = _format_host_header(SQUID_HOST, int(SQUID_PORT))
+        headers = [
+            f"Host: {host_header}",
+            "User-Agent: SquidStats/1.0",
+            "Accept: */*",
+            "Connection: close",
+        ]
+        if SQUID_MGR_USER and SQUID_MGR_PASS:
+            token = base64.b64encode(
+                f"{SQUID_MGR_USER}:{SQUID_MGR_PASS}".encode()
+            ).decode()
+            headers.append(f"Authorization: Basic {token}")
+
+        modern_req = (
+            "GET /squid-internal-mgr/info HTTP/1.1\r\n"
+            + "\r\n".join(headers)
+            + "\r\n\r\n"
+        )
+        response_text = _send_http_request(
+            SQUID_HOST, int(SQUID_PORT), modern_req, timeout=5.0
+        )
+
+        first_line = response_text.splitlines()[0] if response_text else ""
+        if " 400 " in first_line or "Bad Request" in response_text:
+            legacy_req = (
+                f"GET cache_object://{SQUID_HOST}/info HTTP/1.0\r\n"
+                f"Host: {host_header}\r\n"
+                "User-Agent: SquidStats/1.0\r\n"
+                "Accept: */*\r\n\r\n"
+            )
+            response_text = _send_http_request(
+                SQUID_HOST, int(SQUID_PORT), legacy_req, timeout=5.0
+            )
+
+        parts = response_text.split("\r\n\r\n", 1)
+        data = parts[1] if len(parts) > 1 else response_text
     except Exception as e:
-        # Replicar la misma lógica de errores que en el ejemplo
         default_stats["error"] = str(e)
         if isinstance(e, TimeoutError):
             default_stats["connection_status"] = "timeout"
