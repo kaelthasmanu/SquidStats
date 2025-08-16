@@ -125,17 +125,21 @@ def parse_log_line(line):
         return parse_log_line_pipe_format(line)
     parts = line.split()
     # Formato clásico de Squid: timestamp elapsed ip code/status bytes method url rfc931 peerstatus/peerhost type
-    if len(parts) >= 10 and (len(parts) > 5 and parts[5] in (
-        "CONNECT",
-        "GET",
-        "POST",
-        "HEAD",
-        "PUT",
-        "DELETE",
-        "OPTIONS",
-        "TRACE",
-        "PATCH",
-    )):
+    if len(parts) >= 10 and (
+        len(parts) > 5
+        and parts[5]
+        in (
+            "CONNECT",
+            "GET",
+            "POST",
+            "HEAD",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+            "TRACE",
+            "PATCH",
+        )
+    ):
         try:
             return {
                 "ip": parts[2],
