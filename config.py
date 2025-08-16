@@ -26,3 +26,6 @@ class Config:
 
     # Flask settings
     DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+
+    # Log parsing mode: 'DETAILED' (current behavior) or 'DEFAULT' (classic Squid format)
+    LOG_FORMAT = os.getenv("LOG_FORMAT", "DETAILED").upper()
