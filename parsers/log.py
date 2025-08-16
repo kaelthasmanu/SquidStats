@@ -48,11 +48,11 @@ class DatabaseManager:
             self.session.close()
 
 
-# Constantes para campos y batch
+# Constants for fields and batch
 BATCH_SIZE = 500
 MAX_RETRIES = 3
 
-# Modo de parseo de logs controlado por .env LOG_FORMAT: 'DETAILED' o 'DEFAULT'
+# Log parsing mode controlled by .env LOG_FORMAT: 'DETAILED' or 'DEFAULT'
 LOG_FORMAT = getattr(Config, "LOG_FORMAT", "DETAILED").upper()
 
 
@@ -110,21 +110,16 @@ def get_file_inode(filepath):
 
 
 def parse_log_line(line):
-    """Parse a log line based on configured LOG_FORMAT.
-
-    - DETAILED: mantiene el comportamiento actual (pipe/space/autodetección clásica)
-    - DEFAULT: usa un parser fijo del formato clásico de Squid
-    """
     if LOG_FORMAT == "DEFAULT":
         return parse_log_line_default(line)
 
-    # DETAILED (comportamiento actual)
+    # DETAILED (current behavior)
     if "cache_object://" in line:
         return None
     if "|" in line:
         return parse_log_line_pipe_format(line)
     parts = line.split()
-    # Formato clásico de Squid: timestamp elapsed ip code/status bytes method url rfc931 peerstatus/peerhost type
+    # Classic Squid format: timestamp elapsed ip code/status bytes method url rfc931 peerstatus/peerhost type
     if len(parts) >= 10 and (
         len(parts) > 5
         and parts[5]
@@ -143,7 +138,7 @@ def parse_log_line(line):
         try:
             return {
                 "ip": parts[2],
-                # Mantener comportamiento actual: si '-', dejar None
+                # Keep current behavior: if '-', set None
                 "username": parts[2] if parts[2] != "-" else None,
                 "url": parts[6],
                 "response": int(parts[3].split("/")[-1])
@@ -157,24 +152,18 @@ def parse_log_line(line):
         except Exception as e:
             logger.error(f"Error parsing classic squid log line: {line.strip()} - {e}")
             return None
-    # Si no es clásico, intenta el formato space
+    # If not classic, try the space format
     return parse_log_line_space_format(line)
 
 
 def parse_log_line_default(line: str):
-    """Parser del formato por defecto de Squid (access.log nativo).
-
-    Ejemplo:
-    ts elapsed ip status bytes method url user hierarchy type
-    1755283778.165 1 172.17.0.1 TCP_MISS/200 11185 GET http://... - HIER_NONE/- text/plain
-    """
     try:
         parts = line.split()
-        # Debe tener al menos: 10 campos; evitamos líneas internas de cache_object
+        # Must have at least 10 fields; skip internal cache_object lines
         if len(parts) < 7:
             return None
-        # Localiza URL (puede contener espacios sólo en casos raros, asumimos estándar)
-        # En el formato típico, url está en parts[6]
+        # Locate URL (may contain spaces only in rare cases; assume standard)
+        # In the typical format, url is at parts[6]
         url = parts[6] if len(parts) > 6 else None
         if not url or "cache_object://" in url:
             return None
@@ -183,7 +172,7 @@ def parse_log_line_default(line: str):
         status = parts[3] if len(parts) > 3 else ""
         bytes_str = parts[4] if len(parts) > 4 else "0"
         method = parts[5] if len(parts) > 5 else ""
-        # Campo user suele ir en parts[7]; si es '-', usamos la IP como username
+        # User field is usually at parts[7]; if '-', use IP as username
         user_field = parts[7] if len(parts) > 7 else "-"
         username = user_field if user_field != "-" else (ip or "-")
 
@@ -264,11 +253,9 @@ def detect_log_format(log_file, sample_lines=10):
 
                 if (
                     "|" in line and line.count("|") > 5
-                ):  # Formato pipe típicamente tiene muchos |
+                ):  # Pipe format typically has many |
                     pipe_count += 1
-                elif (
-                    len(line.split()) > 10
-                ):  # Formato space típicamente tiene muchos campos
+                elif len(line.split()) > 10:  # Space format typically has many fields
                     space_count += 1
 
             format_detected = "pipe" if pipe_count > space_count else "space"
@@ -276,7 +263,7 @@ def detect_log_format(log_file, sample_lines=10):
 
     except Exception as e:
         logger.warning(f"Error detecting format, using line detection: {e}")
-        return "auto"  # Fallback a detección automática por línea
+        return "auto"  # Fallback to automatic per-line detection
 
 
 def process_logs(log_file):
