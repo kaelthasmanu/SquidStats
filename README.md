@@ -394,18 +394,12 @@ sudo rm -rf /opt/squidstats
 
 - Uninstallation will **permanently delete** all SquidStats data and configurations
 - It's recommended to **backup** any custom configurations before uninstalling
-- Squid configuration will be restored from the automatic backup created during installation
-
-## To do
-
-_Future functionalities and planned improvements._
 
 ### Upcoming Features
 
 - **Interface Improvements** 🎨
   - Customizable dashboards
   - Report export (PDF, Excel)
-  - Real-time notifications
 
 - **Security Features** 🔒
   - User authentication
@@ -415,7 +409,6 @@ _Future functionalities and planned improvements._
 - **Optimization and Performance** ⚡
   - Enhanced data caching
   - Historical log compression
-  - Complete RESTful API
   - Multi-proxy support
 
 ## Contributing

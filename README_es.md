@@ -755,18 +755,12 @@ sudo rm -rf /opt/squidstats
 
 - La desinstalación **eliminará permanentemente** todos los datos y configuraciones de SquidStats
 - Se recomienda **hacer backup** de cualquier configuración personalizada antes de desinstalar
-- La configuración de Squid se restaurará desde el backup automático creado durante la instalación
-
-## Por hacer
-
-_Funcionalidades futuras y mejoras planificadas._
 
 ### Características Próximas
 
 - **Mejoras de Interfaz** 🎨
   - Paneles personalizables
   - Exportación de reportes (PDF, Excel)
-  - Notificaciones en tiempo real
 
 - **Características de Seguridad** 🔒
   - Autenticación de usuarios
@@ -776,7 +770,6 @@ _Funcionalidades futuras y mejoras planificadas._
 - **Optimización y Rendimiento** ⚡
   - Cache de datos mejorado
   - Compresión de logs históricos
-  - API RESTful completa
   - Soporte multi-proxy
 
 ## Contribuir
