@@ -194,7 +194,7 @@ function createEnvFile() {
 VERSION=2
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
-LOG_FORMAT=detailed
+LOG_FORMAT=DETAILED
 FLASK_DEBUG=True
 DATABASE_TYPE=SQLITE
 SQUID_LOG=/var/log/squid/access.log
@@ -414,7 +414,7 @@ function main() {
         echo "Instalando aplicación web..."
         checkPackages
         updateOrCloneRepo
-        patchSquidConf
+        #patchSquidConf
         checkSquidLog
         installDependencies
         createEnvFile
