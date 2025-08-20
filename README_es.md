@@ -131,7 +131,7 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
 
 > **Nota:** Si tu proxy Squid **no usa autenticación de usuario** (es decir, no usas login o contraseña para clientes), puedes mantener el **formato de log por defecto** que viene con Squid. El formato detallado de abajo solo es requerido para compatibilidad completa con reportes basados en usuarios.
 
-- ⚠️ !!Importante ⚠️ Para compatibilidad con logs de usuarios, usa este formato en /etc/squid/squid.conf:
+- ⚠️ !!Importante solo funciona antes de la version 7.1 ⚠️ Para compatibilidad con logs de usuarios, usa este formato en /etc/squid/squid.conf:
 
 ```bash
   logformat detailed \
