@@ -307,49 +307,6 @@ function configureDatabase() {
     esac
 }
 
-patchSquidConf() {
-    local squid_conf=""
-    if [ -f "/etc/squid/squid.conf" ]; then
-        squid_conf="/etc/squid/squid.conf"
-    elif [ -f "/etc/squid3/squid.conf" ]; then
-        squid_conf="/etc/squid3/squid.conf"
-    else
-        error "Debe tener instalado un servidor proxy Squid. No se encontró squid.conf"
-        return 1
-    fi
-
-    # Backup solo si no existe
-    if [ ! -f "${squid_conf}.back" ]; then
-        cp "$squid_conf" "${squid_conf}.back"
-        ok "Backup realizado: ${squid_conf}.back"
-    else
-        echo "Backup previo ya existe: ${squid_conf}.back"
-    fi
-
-    # Añadir logformat detailed si no existe
-    if ! grep -q '^logformat[[:space:]]\+detailed' "$squid_conf"; then
-        cat <<'EOF' >>"$squid_conf"
-logformat detailed %ts.%03tu %>a %ui %un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
-EOF
-        ok "Se agregó logformat detailed"
-    else
-        echo "logformat detailed ya existe."
-    fi
-
-    # Asegurar access_log con detailed !manager
-    if grep -q '^access_log[[:space:]]\+/var/log/squid/access\.log' "$squid_conf"; then
-        sed -i '/^access_log[[:space:]]\+\/var\/log\/squid\/access\.log/{
-            s/detailed//g
-            s/!manager//g
-            s/$/ detailed !manager/
-        }' "$squid_conf"
-        ok "access_log actualizado con detailed !manager"
-    else
-        echo 'access_log /var/log/squid/access.log detailed !manager' >>"$squid_conf"
-        ok "access_log agregado con detailed !manager"
-    fi
-}
-
 function uninstallSquidStats() {
     local destino="/opt/SquidStats"
     local service_file="/etc/systemd/system/squidstats.service"
@@ -414,7 +371,6 @@ function main() {
         echo "Instalando aplicación web..."
         checkPackages
         updateOrCloneRepo
-        #patchSquidConf
         checkSquidLog
         installDependencies
         createEnvFile
