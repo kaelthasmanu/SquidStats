@@ -1,4 +1,4 @@
-FROM python:3.13.5-slim-bullseye
+FROM python:3.13.7-slim-trixie
 WORKDIR /app
 COPY requirements.txt ./
 RUN apt-get update && \
