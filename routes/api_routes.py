@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 
 from config import logger
 from database.database import get_session
@@ -57,7 +57,16 @@ def api_get_all_users():
         users = get_all_usernames(db)
         return jsonify(users)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.exception("Error retrieving all users")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+
+        resp = {"error": "Internal server error"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
     finally:
         db.close()
 

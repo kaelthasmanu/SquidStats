@@ -1,7 +1,17 @@
 import os
 
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
+from config import logger
 from utils.admin import SquidConfigManager
 
 admin_bp = Blueprint("admin", __name__)
@@ -40,7 +50,17 @@ def edit_config():
             flash("Configuration saved successfully", "success")
             return redirect(url_for("admin.view_config"))
         except Exception as e:
-            flash(f"Error saving configuration: {str(e)}", "error")
+            # Log full exception; avoid showing raw exception text to users
+            logger.exception("Error saving configuration")
+            try:
+                show_details = bool(current_app.debug)
+            except RuntimeError:
+                show_details = False
+
+            if show_details:
+                flash(f"Error saving configuration: {str(e)}", "error")
+            else:
+                flash("Error saving configuration", "error")
     return render_template(
         "admin/edit_config.html", config_content=config_manager.config_content
     )
@@ -172,7 +192,17 @@ def view_logs():
         except FileNotFoundError:
             logs[os.path.basename(log_file)] = ["Log file not found"]
         except Exception as e:
-            logs[os.path.basename(log_file)] = [f"Error reading log: {str(e)}"]
+            # Log the exception with traceback on the server
+            logger.exception("Error reading log file %s", log_file)
+            try:
+                show_details = bool(current_app.debug)
+            except RuntimeError:
+                show_details = False
+
+            if show_details:
+                logs[os.path.basename(log_file)] = [f"Error reading log: {str(e)}"]
+            else:
+                logs[os.path.basename(log_file)] = ["Error reading log"]
 
     return render_template("admin/logs.html", logs=logs)
 
@@ -183,7 +213,16 @@ def restart_squid():
         os.system("systemctl restart squid")
         return jsonify({"status": "success", "message": "Squid restarted successfully"})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        logger.exception("Error restarting squid")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+
+        resp = {"status": "error", "message": "Internal server error"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
 
 
 @admin_bp.route("/api/reload-squid", methods=["POST"])
@@ -194,4 +233,13 @@ def reload_squid():
             {"status": "success", "message": "Configuration reloaded successfully"}
         )
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        logger.exception("Error reloading squid configuration")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+
+        resp = {"status": "error", "message": "Internal server error"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
