@@ -3,7 +3,7 @@ import time
 from threading import Lock
 from typing import Any
 
-from flask import Blueprint, redirect, render_template
+from flask import Blueprint, current_app, redirect, render_template
 
 from config import logger
 from parsers.connections import group_by_user, parse_raw_data
@@ -36,12 +36,19 @@ def initialize_proxy_detection():
 
 def _build_error_page(message: str, status: int = 500, details: str | None = None):
     if details:
-        logger.debug(f"Error details: {details}")
+        logger.debug("Error details (server-only): %s", details)
+
+    try:
+        show_details = bool(current_app.debug)
+    except RuntimeError:
+        # No app context: be conservative and do not show details
+        show_details = False
+
     return (
         render_template(
             "error.html",
             message=message,
-            details=details if os.getenv("FLASK_DEBUG") else None,
+            details=details if show_details else None,
         ),
         status,
     )
@@ -119,7 +126,8 @@ def index():
 def actualizar_conexiones():
     context, error_response = _get_dashboard_context()
     if error_response:
-        return ("Error interno al refrescar conexiones", error_response[1])
+        return error_response
+
     return render_template(
         "partials/conexiones.html",
         grouped_connections=context["grouped_connections"],
