@@ -5,7 +5,7 @@ from typing import Any
 
 from flask import Blueprint, current_app, redirect, render_template
 
-from config import logger
+from config import Config, logger
 from parsers.connections import group_by_user, parse_raw_data
 from parsers.log import find_last_parent_proxy
 from parsers.squid_info import fetch_squid_info_stats
@@ -14,6 +14,13 @@ from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
 
 main_bp = Blueprint("main", __name__)
+
+
+@main_bp.app_context_processor
+def inject_app_version():
+    version = getattr(Config, "VERSION", None) or os.getenv("VERSION", "-")
+    return {"app_version": version}
+
 
 # Global variables
 parent_proxy_lock = Lock()
