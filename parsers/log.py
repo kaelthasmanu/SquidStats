@@ -110,14 +110,19 @@ def get_file_inode(filepath):
 
 
 def parse_log_line(line):
+    # Universal ignore for specific squid error entries (apply regardless of LOG_FORMAT)
+    try:
+        line_lower = line.lower() if isinstance(line, str) else ""
+        if "error:transaction-end-before-headers" in line_lower:
+            return None
+    except Exception:
+        pass
+
     if LOG_FORMAT == "DEFAULT":
         return parse_log_line_default(line)
 
     # DETAILED (current behavior)
-    if (
-        "cache_object://" in line
-        or "error:transaction-end-before-headers" in line.lower()
-    ):
+    if "cache_object://" in line:
         return None
     if "|" in line:
         return parse_log_line_pipe_format(line)
