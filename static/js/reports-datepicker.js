@@ -43,14 +43,50 @@
     }
 
     btn.disabled = true;
-    btn.innerHTML = `
-      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      Cargando...
-    `;
-    window.location.href = `/reports/date/${dateVal}`;
+    // Remove any existing children to prepare for spinner+label
+    while (btn.firstChild) btn.removeChild(btn.firstChild);
+
+    // Create spinner via DOM API (safe, not using innerHTML)
+    const svgns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgns, "svg");
+    svg.setAttribute("class", "animate-spin -ml-1 mr-2 h-4 w-4 text-white");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("viewBox", "0 0 24 24");
+
+    const circle = document.createElementNS(svgns, "circle");
+    circle.setAttribute("class", "opacity-25");
+    circle.setAttribute("cx", "12");
+    circle.setAttribute("cy", "12");
+    circle.setAttribute("r", "10");
+    circle.setAttribute("stroke", "currentColor");
+    circle.setAttribute("stroke-width", "4");
+
+    const path = document.createElementNS(svgns, "path");
+    path.setAttribute("class", "opacity-75");
+    path.setAttribute("fill", "currentColor");
+    path.setAttribute(
+      "d",
+      "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    );
+
+    svg.appendChild(circle);
+    svg.appendChild(path);
+    btn.appendChild(svg);
+    btn.appendChild(document.createTextNode(" Cargando..."));
+
+    // Validate dateVal format (YYYY-MM-DD) before navigation to avoid unexpected input
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateVal)) {
+      // invalid date format: show visual error and reset button
+      btn.disabled = false;
+      input.classList.add("ring-2", "ring-red-500", "border-red-500");
+      setTimeout(() => input.classList.remove("ring-2", "ring-red-500", "border-red-500"), 1500);
+      return;
+    }
+
+    // Use encodeURIComponent for safety even if format is validated
+    const safeDate = encodeURIComponent(dateVal);
+    window.location.href = `/reports/date/${safeDate}`;
   }
 
   function setup() {
