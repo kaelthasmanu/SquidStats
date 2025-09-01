@@ -114,7 +114,10 @@ def parse_log_line(line):
         return parse_log_line_default(line)
 
     # DETAILED (current behavior)
-    if "cache_object://" in line:
+    if (
+        "cache_object://" in line
+        or "error:transaction-end-before-headers" in line.lower()
+    ):
         return None
     if "|" in line:
         return parse_log_line_pipe_format(line)
