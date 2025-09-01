@@ -113,7 +113,10 @@ def parse_log_line(line):
     # Universal ignore for specific squid error entries (apply regardless of LOG_FORMAT)
     try:
         line_lower = line.lower() if isinstance(line, str) else ""
-        if "error:transaction-end-before-headers" in line_lower:
+        if (
+            "error:transaction-end-before-headers" in line_lower
+            or "error:invalid-request" in line_lower
+        ):
             return None
     except Exception:
         pass
