@@ -36,11 +36,14 @@ def get_logs_by_date():
         page = request.args.get("page", page_int, type=int)
         per_page = request.args.get("per_page", 15, type=int)
         date_str = request.json.get("date")
+        search = request.json.get("search")
         selected_date = datetime.strptime(date_str, "%Y-%m-%d")
         date_suffix = selected_date.strftime("%Y%m%d")
 
         db = get_session()
-        users_data = get_users_logs(db, date_suffix, page=page, per_page=per_page)
+        users_data = get_users_logs(
+            db, date_suffix, page=page, per_page=per_page, search=search
+        )
         return jsonify(users_data)
     except ValueError:
         return jsonify({"error": "Invalid date format"}), 400

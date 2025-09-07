@@ -62,7 +62,11 @@ def get_dynamic_model(db: Session, table_name: str, date_suffix: str):
 
 
 def get_users_logs(
-    db: Session, date_suffix: str | None = None, page: int = 1, per_page: int = 15
+    db: Session,
+    date_suffix: str | None = None,
+    page: int = 1,
+    per_page: int = 15,
+    search: str | None = None,
 ) -> dict[str, Any]:
     try:
         if not date_suffix:
@@ -90,18 +94,18 @@ def get_users_logs(
                 "total_pages": 0,
             }
 
-        # Contar total de usuarios distintos
-        total = db.query(UserModel).filter(UserModel.username != "-").count()
+        # Contar total de usuarios distintos (con filtro opcional de búsqueda)
+        base_filter = [UserModel.username != "-"]
+        if search:
+            search_lc = f"%{search.lower()}%"
+            base_filter.append(func.lower(UserModel.username).like(search_lc))
+        total = db.query(UserModel).filter(*base_filter).count()
 
         # Paginación
         offset = (page - 1) * per_page
-        users_query = (
-            db.query(UserModel)
-            .filter(UserModel.username != "-")
-            .order_by(UserModel.id)
-            .offset(offset)
-            .limit(per_page)
-        )
+        users_query = db.query(UserModel).filter(*base_filter).order_by(UserModel.id)
+        if per_page:
+            users_query = users_query.offset(offset).limit(per_page)
         users = users_query.all()
 
         users_map = {}
