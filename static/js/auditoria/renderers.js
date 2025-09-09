@@ -51,6 +51,16 @@
     return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Top 15 URLs por Consumo de Datos</h2><table class="w-full text-left"><thead class="bg-gray-100"><tr><th class="p-3">#</th><th class="p-3">URL</th><th class="p-3">Datos Consumidos</th></tr></thead><tbody class="divide-y">${rows}</tbody></table></div>`;
   }
 
+  function renderTopUsersRequests(data){
+    const rows = data.top_users_requests.map((user,i)=>`<tr class="hover:bg-gray-50"><td class="p-3">${i+1}</td><td class="p-3 font-medium">${user.username}</td><td class="p-3 font-mono">${user.total_requests.toLocaleString()}</td></tr>`).join('');
+    return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Top 10 Usuarios por Peticiones</h2><table class="w-full text-left"><thead class="bg-gray-100"><tr><th class="p-3">#</th><th class="p-3">Usuario</th><th class="p-3">Peticiones</th></tr></thead><tbody class="divide-y">${rows}</tbody></table></div>`;
+  }
+
+  function renderTopIpsData(data){
+    const rows = data.top_ips.map((ip,i)=>`<tr class="hover:bg-gray-50"><td class="p-3">${i+1}</td><td class="p-3 font-mono">${ip.ip}</td><td class="p-3 font-mono">${ip.total_data_gb.toFixed(2)} GB</td></tr>`).join('');
+    return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Top 10 IPs por Consumo de Datos</h2><table class="w-full text-left"><thead class="bg-gray-100"><tr><th class="p-3">#</th><th class="p-3">IP</th><th class="p-3">Datos Consumidos</th></tr></thead><tbody class="divide-y">${rows}</tbody></table></div>`;
+  }
+
   function renderDailyActivityChart(canvas, hourlyData){
     const labels = Array.from({length:24},(_,i)=>{ const hour = i % 12 === 0 ? 12 : i % 12; const ampm = i < 12 ? 'AM' : 'PM'; return `${hour} ${ampm}`; });
     new Chart(canvas, {
@@ -174,6 +184,8 @@
     renderUserSummary,
     renderTopUsers,
     renderTopUrls,
+  renderTopUsersRequests,
+  renderTopIpsData,
     renderDailyActivityChart,
     renderDomainChart,
     renderResponseChart

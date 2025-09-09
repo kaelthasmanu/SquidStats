@@ -10,8 +10,10 @@ from services.auditoria_service import (
     find_social_media_activity,
     get_all_usernames,
     get_daily_activity,
+    get_top_ips_by_data,
     get_top_urls_by_data,
     get_top_users_by_data,
+    get_top_users_by_requests,
     get_user_activity_summary,
 )
 from services.metrics_service import MetricsService
@@ -93,6 +95,10 @@ def api_run_audit():
             result = get_top_users_by_data(db, start_date, end_date)
         elif audit_type == "top_urls_data":
             result = get_top_urls_by_data(db, start_date, end_date)
+        elif audit_type == "top_users_requests":
+            result = get_top_users_by_requests(db, start_date, end_date)
+        elif audit_type == "top_ips_data":
+            result = get_top_ips_by_data(db, start_date, end_date)
         elif audit_type == "daily_activity":
             if not start_date:
                 return jsonify({"error": "Start date is required."}), 400

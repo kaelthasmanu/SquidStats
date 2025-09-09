@@ -569,6 +569,50 @@ def get_top_users_by_data(
     return {"top_users": top_users_list}
 
 
+def get_top_users_by_requests(
+    db: Session, start_str: str, end_str: str, limit: int = 10
+) -> dict[str, Any]:
+    """Aggregate top users by total request_count across the date range."""
+    start_date = datetime.strptime(start_str, "%Y-%m-%d")
+    end_date = datetime.strptime(end_str, "%Y-%m-%d")
+    inspector = inspect(db.get_bind())
+    tables = _get_tables_in_range(inspector, start_date, end_date)
+    if not tables:
+        return {"error": "No data for the selected dates."}
+
+    user_reqs: defaultdict[str, int] = defaultdict(int)
+
+    for log_table in tables:
+        date_suffix = log_table.split("_")[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+            results = (
+                db.query(
+                    UserModel.username,
+                    func.sum(LogModel.request_count).label("total_reqs"),
+                )
+                .join(LogModel, LogModel.user_id == UserModel.id)
+                .filter(UserModel.username != "-")
+                .group_by(UserModel.username)
+                .all()
+            )
+            for row in results:
+                user_reqs[row[0]] += row.total_reqs or 0
+        except Exception as e:
+            print(f"Error processing table {log_table}: {e}")
+            continue
+
+    sorted_users = sorted(user_reqs.items(), key=lambda x: x[1], reverse=True)[:limit]
+    return {
+        "top_users_requests": [
+            {"username": username, "total_requests": int(total_reqs)}
+            for username, total_reqs in sorted_users
+        ]
+    }
+
+
 def get_top_urls_by_data(
     db: Session, start_str: str, end_str: str, limit: int = 15
 ) -> dict[str, Any]:
@@ -612,6 +656,52 @@ def get_top_urls_by_data(
     ]
 
     return {"top_urls": top_urls_list}
+
+
+def get_top_ips_by_data(
+    db: Session, start_str: str, end_str: str, limit: int = 10
+) -> dict[str, Any]:
+    """Aggregate total data transmitted grouped by IP across the date range."""
+    start_date = datetime.strptime(start_str, "%Y-%m-%d")
+    end_date = datetime.strptime(end_str, "%Y-%m-%d")
+    inspector = inspect(db.get_bind())
+    tables = _get_tables_in_range(inspector, start_date, end_date)
+    if not tables:
+        return {"error": "No data for the selected dates."}
+
+    ip_data: defaultdict[str, int] = defaultdict(int)
+
+    for log_table in tables:
+        date_suffix = log_table.split("_")[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+            results = (
+                db.query(
+                    UserModel.ip,
+                    func.sum(LogModel.data_transmitted).label("total_data"),
+                )
+                .join(LogModel, LogModel.user_id == UserModel.id)
+                .group_by(UserModel.ip)
+                .all()
+            )
+            for row in results:
+                ip_data[row[0]] += row.total_data or 0
+        except Exception as e:
+            print(f"Error processing table {log_table}: {e}")
+            continue
+
+    sorted_ips = sorted(ip_data.items(), key=lambda x: x[1], reverse=True)[:limit]
+    return {
+        "top_ips": [
+            {
+                "ip": ip,
+                "total_data_gb": float(round(total_data / (1024**3), 2)),
+            }
+            for ip, total_data in sorted_ips
+        ]
+    }
 
 
 def find_denied_access(

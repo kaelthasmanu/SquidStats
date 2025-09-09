@@ -53,6 +53,8 @@
       if (auditType === 'user_summary') html = window.__AUD_RENDERERS__.renderUserSummary(data);
       else if (auditType === 'top_users_data') html = window.__AUD_RENDERERS__.renderTopUsers(data);
       else if (auditType === 'top_urls_data') html = window.__AUD_RENDERERS__.renderTopUrls(data);
+  else if (auditType === 'top_users_requests') html = window.__AUD_RENDERERS__.renderTopUsersRequests(data);
+  else if (auditType === 'top_ips_data') html = window.__AUD_RENDERERS__.renderTopIpsData(data);
       else if (auditType === 'daily_activity') {
         const user = formData.username;
         const date = formData.start_date;
