@@ -759,7 +759,6 @@ sudo rm -rf /opt/squidstats
 ### Características Próximas
 
 - **Mejoras de Interfaz** 🎨
-  - Paneles personalizables
   - Exportación de reportes (PDF, Excel)
 
 - **Características de Seguridad** 🔒
