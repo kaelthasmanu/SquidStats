@@ -138,7 +138,6 @@ def fetch_squid_cache_stats():
                         data = body_bytes.decode("utf-8", errors="replace")
                 else:
                     data = body_bytes.decode("utf-8", errors="replace")
-                snippet = data[:4000]
                 http_status = None
                 try:
                     parts_status = first_line.split()
