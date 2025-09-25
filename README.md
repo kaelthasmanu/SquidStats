@@ -279,6 +279,95 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    SQUID_CONFIG_PATH=/home/manuel/Desktop/config/squid.conf
    ACL_FILES_DIR=/home/manuel/Desktop/config/acls
    ```
+  
+  ### Forwarding Squid logs from a remote Squid host (important)
+
+  If you install SquidStats on a different machine than the Squid proxy (i.e. Squid is not local
+  on the SquidStats server), you must ensure that the Squid access log (/var/log/squid/access.log)
+  is available on the SquidStats server. The recommended and reliable way to do this is to forward
+  Squid's log entries via syslog (rsyslog or syslog-ng) from the proxy host to the SquidStats host.
+
+  Below are example configurations for both sending (on the Squid proxy host) and receiving
+  (on the SquidStats server). Adjust IP addresses, ports and file paths to your environment.
+
+  NOTE: forwarding logs avoids copying files and ensures live updates for the dashboard.
+
+  - Using rsyslog (proxy = 192.168.1.10, squidstats = 192.168.1.20)
+
+    On the Squid proxy (send): edit `/etc/rsyslog.d/30-squid.conf` and add:
+
+    ```conf
+    # rsyslog - forward squid access log lines to remote host
+    # create a local file watch (imfile) to read Squid access.log
+    module(load="imfile" PollingInterval="10")
+    input(type="imfile"
+          File="/var/log/squid/access.log"
+          Tag="squid_access:"
+          Severity="info"
+          Facility="local0")
+
+    # forward to remote syslog collector
+    *.* @@192.168.1.20:514
+    ```
+
+    On the SquidStats server (receive): enable UDP/TCP syslog reception and store to file.
+    Example `/etc/rsyslog.d/10-remote.conf`:
+
+    ```conf
+    # rsyslog - accept remote logs
+    module(load="imudp")
+    input(type="imudp" port="514")
+
+    # store squid forwarded logs
+    if $programname == 'squid_access' or $syslogtag contains 'squid_access' then {
+        /var/log/remote/squid/access.log
+        stop
+    }
+    ```
+
+    Create the directory and set permissions:
+    ```bash
+    sudo mkdir -p /var/log/remote/squid
+    sudo chown syslog:adm /var/log/remote/squid
+    sudo systemctl restart rsyslog
+    ```
+
+  - Using syslog-ng (proxy send):
+
+    Edit `/etc/syslog-ng/conf.d/squid-forward.conf` on the proxy host:
+
+    ```conf
+    source s_squid { file("/var/log/squid/access.log" follow-freq(1)); };
+    destination d_remote { tcp("192.168.1.20" port(514)); };
+    log { source(s_squid); destination(d_remote); };
+    ```
+
+    On the SquidStats server (receive) with syslog-ng, accept and write to disk:
+
+    ```conf
+    source s_network { tcp(port(514)); }; 
+    destination d_squid { file("/var/log/remote/squid/access.log"); }; 
+    filter f_squid { program("squid_access") or match("^\d+\.\d+\.\d+\.\d+ .*squid" type("regexp")); };
+    log { source(s_network); filter(f_squid); destination(d_squid); }; 
+    ```
+
+  - Firewall and permissions
+
+    - Open port 514 (or the port you choose) on the SquidStats server and allow the proxy host to connect.
+    - Use TCP if you care about delivery guarantees; UDP is faster but lossy.
+    - Ensure the syslog daemon user can write to the destination directory (`/var/log/remote/squid`).
+
+  - Update `SQUID_HOST` in `.env`
+
+    - If you forward logs, set `SQUID_HOST` in the SquidStats `.env` to the IP of the original Squid host
+      or keep it as `127.0.0.1` if SquidStats will process them as local files (i.e., they are written
+      under `/var/log/remote/squid/access.log` locally).
+
+  Examples & notes
+
+  - This approach is preferred over mounting remote filesystems or using scp/rsync cron jobs because
+    it provides near real-time updates and is resilient to log rotation when configured correctly.
+
 5. Run App with python or python3 🚀:
 
 ```bash
