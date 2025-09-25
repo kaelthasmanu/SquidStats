@@ -623,6 +623,98 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
    HTTP_PROXY=""
    ```
+  
+    ### Reenviar logs de Squid desde un host proxy remoto (importante)
+
+    Si instalas SquidStats en una máquina diferente a la del proxy Squid (es decir, Squid no está
+    instalado en el servidor donde corre SquidStats), debes asegurarte de que el fichero de logs de
+    Squid (`/var/log/squid/access.log`) esté disponible en el servidor de SquidStats. La forma
+    recomendada y confiable es reenviar las entradas del log mediante syslog (rsyslog o syslog-ng)
+    desde el host proxy hacia el host que ejecuta SquidStats.
+
+    A continuación tienes ejemplos de configuración para el envío (en el proxy) y la recepción
+    (en el servidor de SquidStats). Ajusta las IPs, puertos y rutas según tu entorno.
+
+    NOTA: el reenvío por syslog evita copiar archivos periódicamente y garantiza actualizaciones en
+    casi tiempo real para el panel.
+
+    - Usando rsyslog (proxy = 192.168.1.10, squidstats = 192.168.1.20)
+
+      En el proxy Squid (enviar): crea o edita `/etc/rsyslog.d/30-squid.conf` y agrega:
+
+      ```conf
+      # rsyslog - reenviar líneas del access.log de squid al host remoto
+      module(load="imfile" PollingInterval="10")
+      input(type="imfile"
+            File="/var/log/squid/access.log"
+            Tag="squid_access:"
+            Severity="info"
+            Facility="local0")
+
+      # reenviar al colector remoto (usa TCP con @@ para mayor fiabilidad)
+      *.* @@192.168.1.20:514
+      ```
+
+      En el servidor SquidStats (recibir): habilita la recepción syslog y guarda en fichero.
+      Ejemplo `/etc/rsyslog.d/10-remote.conf`:
+
+      ```conf
+      # rsyslog - aceptar logs remotos
+      module(load="imudp")
+      input(type="imudp" port="514")
+
+      # almacenar logs reenviados de squid
+      if $programname == 'squid_access' or $syslogtag contains 'squid_access' then {
+          /var/log/remote/squid/access.log
+          stop
+      }
+      ```
+
+      Crear el directorio y ajustar permisos:
+      ```bash
+      sudo mkdir -p /var/log/remote/squid
+      sudo chown syslog:adm /var/log/remote/squid
+      sudo systemctl restart rsyslog
+      ```
+
+    - Usando syslog-ng (proxy enviar):
+
+      Edita `/etc/syslog-ng/conf.d/squid-forward.conf` en el host proxy:
+
+      ```conf
+      source s_squid { file("/var/log/squid/access.log" follow-freq(1)); };
+      destination d_remote { tcp("192.168.1.20" port(514)); };
+      log { source(s_squid); destination(d_remote); };
+      ```
+
+      En el servidor SquidStats (recibir) con syslog-ng, aceptar y escribir a disco:
+
+      ```conf
+      source s_network { tcp(port(514)); }; 
+      destination d_squid { file("/var/log/remote/squid/access.log"); }; 
+      filter f_squid { program("squid_access") or match("^\d+\.\d+\.\d+\.\d+ .*squid" type("regexp")); };
+      log { source(s_network); filter(f_squid); destination(d_squid); }; 
+      ```
+
+    - Firewall y permisos
+
+      - Abre el puerto 514 (o el puerto que elijas) en el servidor SquidStats y permite conexión desde
+        el host proxy.
+      - Usa TCP si te interesa garantía de entrega; UDP es más rápido pero puede perder paquetes.
+      - Asegúrate de que el usuario del demonio syslog pueda escribir en el directorio destino
+        (`/var/log/remote/squid`).
+
+    - Actualiza `SQUID_HOST` en `.env`
+
+      - Si reenvías logs, establece `SQUID_HOST` en el `.env` de SquidStats a la IP del proxy original
+        (o mantenlo en `127.0.0.1` si los logs se escriben localmente en `/var/log/remote/squid/access.log`).
+
+    - Notas y recomendaciones
+
+      - Esta estrategia es preferible a montar sistemas de archivos remotos o usar scp/rsync periódicos
+        porque ofrece actualizaciones casi en tiempo real y maneja rotación de logs adecuadamente si
+        se configura el `imfile`/`follow` correctamente.
+
 
 5. Ejecutar la aplicación con python o python3 🚀:
 
