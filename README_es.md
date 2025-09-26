@@ -300,7 +300,7 @@ Advertencia: 🚨 La primera ejecución puede causar alto uso de CPU.
 1. Obtener el Script con curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.0/install.sh
 ```
 
 2. Agregar permisos de ejecución:
