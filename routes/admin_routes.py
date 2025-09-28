@@ -181,7 +181,10 @@ def manage_http_access():
 
 @admin_bp.route("/view-logs")
 def view_logs():
-    log_files = ["/var/log/squid/access.log", "/var/log/squid/cache.log"]
+    log_files = [
+        os.getenv("SQUID_LOG", "/var/log/squid/access.log"),
+        os.getenv("SQUID_CACHE_LOG", "/var/log/squid/cache.log")
+    ]
     logs = {}
     for log_file in log_files:
         try:
