@@ -21,6 +21,7 @@ pip-log.txt
 .Trashes
 ehthumbs.db
 Thumbs.db
+.ruff_cache
 
 # IDE
 .vscode
