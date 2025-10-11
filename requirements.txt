@@ -10,3 +10,4 @@ flask_socketio
 pytz
 requests
 icapclient3
+uvicorn
