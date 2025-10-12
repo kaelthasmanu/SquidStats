@@ -86,71 +86,63 @@ function checkSquidLog() {
 
 function updateOrCloneRepo() {
     local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local destino="/opt/SquidStats"
+    local destinos=("/opt/SquidStats" "/usr/share/squidstats")
     local branch="main"
     local env_exists=false
     local db_exists=false
+    local found_dir=""
 
-    if [ -d "$destino" ]; then
-        echo "El directorio $destino ya existe, intentando actualizar con git pull..."
-        cd "$destino"
-
-        if [ -d ".git" ]; then
-            if [ -f ".env" ]; then
-                env_exists=true
-                echo ".env existente detectado, se preservará"
-                cp .env /tmp/.env.backup
-            fi
-
-            local db_files=(*.db)
-            if [ -e "${db_files[0]}" ]; then
-                db_exists=true
-                echo "Archivos .db detectados, se preservarán"
-                mkdir -p /tmp/db_backup
-                cp *.db /tmp/db_backup/
-            fi
-
-            if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
-                [ "$env_exists" = true ] && mv /tmp/.env.backup .env
-                
-                if [ "$db_exists" = true ]; then
-                    mv /tmp/db_backup/*.db . 2>/dev/null || true
-                    rm -rf /tmp/db_backup
-                    echo "📊 Archivos .db restaurados"
-                fi
-                
-                echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
-                return 0
-            else
-                echo "❌ Error al actualizar el repositorio, se procederá a clonar de nuevo"
-                cd ..
-                rm -rf "$destino"
-            fi
-        else
-            echo "⚠️ El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
-            rm -rf "$destino"
+    for dir in "${destinos[@]}"; do
+        if [ -d "$dir" ]; then
+            found_dir="$dir"
+            break
         fi
+    done
+
+    if [ -z "$found_dir" ]; then
+        echo "❌ No se encontró ninguna instalación de SquidStats en /opt/SquidStats ni /usr/share/squidstats. Abortando actualización."
+        return 1
     fi
 
-    echo "🔄 Clonando repositorio por primera vez desde la rama '$branch'..."
-    if git clone --branch "$branch" "$repo_url" "$destino"; then
-        chown -R $USER:$USER "$destino"
-        echo "✅ Repositorio clonado exitosamente en $destino"
+    if [ "$found_dir" = "/usr/share/squidstats" ]; then
+        echo "ℹ️ Instalación detectada en /usr/share/squidstats. Esta versión fue instalada desde un .deb y no puede actualizarse con git."
+        echo "Por favor, use el gestor de paquetes (apt/dpkg) para actualizar."
+        return 1
+    fi
 
-        if [ "$env_exists" = true ] && [ -f /tmp/.env.backup ]; then
-            mv /tmp/.env.backup "$destino/.env"
-            echo "⚙️ Archivo .env restaurado"
+    echo "El directorio $found_dir ya existe, intentando actualizar con git pull..."
+    cd "$found_dir"
+
+    if [ -d ".git" ]; then
+        if [ -f ".env" ]; then
+            env_exists=true
+            echo ".env existente detectado, se preservará"
+            cp .env /tmp/.env.backup
         fi
 
-        if [ "$db_exists" = true ] && [ -d /tmp/db_backup ]; then
-            mv /tmp/db_backup/*.db "$destino/" 2>/dev/null || true
-            rm -rf /tmp/db_backup
-            echo "📊 Archivos .db restaurados"
+        local db_files=(*.db)
+        if [ -e "${db_files[0]}" ]; then
+            db_exists=true
+            echo "Archivos .db detectados, se preservarán"
+            mkdir -p /tmp/db_backup
+            cp *.db /tmp/db_backup/
         fi
 
-        return 0
+        if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
+            [ "$env_exists" = true ] && mv /tmp/.env.backup .env
+            if [ "$db_exists" = true ]; then
+                mv /tmp/db_backup/*.db . 2>/dev/null || true
+                rm -rf /tmp/db_backup
+                echo "📊 Archivos .db restaurados"
+            fi
+            echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
+            return 0
+        else
+            echo "❌ Error al actualizar el repositorio."
+            return 1
+        fi
     else
-        echo "❌ Error al clonar el repositorio"
+        echo "⚠️ El directorio $found_dir existe pero no es un repositorio git. No se puede actualizar automáticamente."
         return 1
     fi
 }
