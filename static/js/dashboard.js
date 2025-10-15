@@ -28,18 +28,25 @@ document.addEventListener("DOMContentLoaded", function () {
   let totalPages = 1;
   let totalUsers = 0;
 
+  // Identificador incremental para cada petición: ayuda a ignorar respuestas antiguas
+  let lastRequestId = 0;
   async function fetchUsersPage(selectedDate, page, searchTerm = "") {
+    const thisRequestId = ++lastRequestId;
     try {
       const data = await fetchUsersPageApi(selectedDate, page, searchTerm || undefined);
+      // Si ya llegó una petición más reciente, ignoramos esta respuesta
+      if (thisRequestId < lastRequestId) return;
       updateUsersData(data.users);
       totalPages = data.total_pages;
       totalUsers = data.total;
       currentPage = data.page;
       renderPaginationControls(currentPage, totalPages, selectedDate);
     } catch (error) {
+      if (thisRequestId < lastRequestId) return;
       console.error("Error:", error);
       usersContainer.innerHTML =
         '<div class="text-red-500 text-center p-4 col-span-full">Error al cargar los datos</div>';
+      hideLoading();
     }
   }
 
@@ -63,16 +70,10 @@ document.addEventListener("DOMContentLoaded", function () {
           "pg-btn px-3 py-1 rounded " +
           (i === page ? "bg-blue-600 text-white" : "bg-white text-blue-600");
         btn.disabled = i === page;
-        btn.onclick = () => {
-          usersContainer.innerHTML = `
-            <div class=\"loading-spinner flex justify-center items-center h-64 w-full col-span-full\">
-              <svg class=\"animate-spin h-12 w-12 text-blue-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\">
-                <circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle>
-                <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path>
-              </svg>
-            </div>`;
-          fetchUsersPage(selectedDate, i, (searchInput?.value || '').trim());
-        };
+            btn.onclick = () => {
+              showLoading();
+              fetchUsersPage(selectedDate, i, (searchInput?.value || "").trim());
+            };
         pageNumbers.appendChild(btn);
       }
     }
@@ -82,6 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!usersData || usersData.length === 0) {
       usersContainer.innerHTML =
         '<div class="text-gray-500 text-center p-4 col-span-full">No se encontraron datos</div>';
+      hideLoading();
       return;
     }
 
@@ -198,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
   userCards = Array.from(document.querySelectorAll(".user-card"));
   filteredUsers = [...userCards];
   renderPage(1);
+  hideLoading();
   }
 
   async function filterUsers() {
@@ -206,13 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Fetch server-side para buscar en TODOS los usuarios de la fecha
     const selectedDate = dateFilter.value;
-    usersContainer.innerHTML = `
-      <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
-        <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      </div>`;
+    showLoading();
     await fetchUsersPage(selectedDate, 1, searchValue);
 
     // Actualiza la paginación con el nuevo total
@@ -287,10 +284,28 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Event listeners
+  // Utilities: centralizar spinner
+  function showLoading() {
+    if (!usersContainer) return;
+    usersContainer.innerHTML = `
+      <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
+        <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>`;
+  }
+
+  function hideLoading() {
+    // placeholder: updateUsersData reemplaza el contenido cuando hay datos.
+    // Si se desea mantener un estado de loading separado, aquí se puede implementar.
+  }
+
   if (clearSearchBtn) {
     clearSearchBtn.addEventListener("click", () => {
       searchInput.value = "";
       clearSearchBtn.style.display = "none";
+      if (searchDebounceTimeout) clearTimeout(searchDebounceTimeout);
       filterUsers();
     });
   }
@@ -309,52 +324,28 @@ document.addEventListener("DOMContentLoaded", function () {
     prevBtn.addEventListener("click", () => {
       if (currentPage > 1) {
         const selectedDate = dateFilter.value;
-        usersContainer.innerHTML = `
-          <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
-            <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>`;
-  fetchUsersPage(selectedDate, currentPage - 1, (searchInput?.value || '').trim());
+        showLoading();
+        fetchUsersPage(selectedDate, currentPage - 1, (searchInput?.value || '').trim());
       }
     });
   if (nextBtn)
     nextBtn &&
       nextBtn.addEventListener("click", () => {
-        if (currentPage < totalPages) {
-          const selectedDate = dateFilter.value;
-          usersContainer.innerHTML = `
-            <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
-              <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </div>`;
-          fetchUsersPage(selectedDate, currentPage + 1, (searchInput?.value || '').trim());
-        }
+          if (currentPage < totalPages) {
+            const selectedDate = dateFilter.value;
+            showLoading();
+            fetchUsersPage(selectedDate, currentPage + 1, (searchInput?.value || '').trim());
+          }
       });
   if (firstBtn)
     firstBtn.addEventListener("click", () => {
-      usersContainer.innerHTML = `
-        <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
-          <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>`;
-  fetchUsersPage(dateFilter.value, 1, (searchInput?.value || '').trim());
+      showLoading();
+      fetchUsersPage(dateFilter.value, 1, (searchInput?.value || '').trim());
     });
   if (lastBtn)
     lastBtn.addEventListener("click", () => {
-      usersContainer.innerHTML = `
-        <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
-          <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>`;
-  fetchUsersPage(dateFilter.value, totalPages, (searchInput?.value || '').trim());
+      showLoading();
+      fetchUsersPage(dateFilter.value, totalPages, (searchInput?.value || '').trim());
     });
 
   
@@ -368,16 +359,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       // Mostrar spinner de carga
-      usersContainer.innerHTML = `
-        <div class="loading-spinner flex justify-center items-center h-64 w-full col-span-full">
-          <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>`;
+      showLoading();
 
       // Obtener datos del servidor
-  await fetchUsersPage(selectedDate, page, (searchInput?.value || '').trim());
+      await fetchUsersPage(selectedDate, page, (searchInput?.value || '').trim());
     } catch (error) {
       console.error("Error:", error);
       usersContainer.innerHTML =

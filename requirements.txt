@@ -9,5 +9,5 @@ eventlet
 flask_socketio
 pytz
 requests
-icapclient3
+#icapclient3
 uvicorn
