@@ -295,7 +295,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  if (searchInput) searchInput.addEventListener("input", filterUsers);
+  // Debounce for input search
+  let searchDebounceTimeout;
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      if (searchDebounceTimeout) clearTimeout(searchDebounceTimeout);
+      searchDebounceTimeout = setTimeout(() => {
+        filterUsers();
+      }, 2000); // 2 segundos
+    });
+  }
   if (prevBtn)
     prevBtn.addEventListener("click", () => {
       if (currentPage > 1) {
