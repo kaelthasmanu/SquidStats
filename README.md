@@ -279,6 +279,8 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    HTTP_PROXY=""
    SQUID_CONFIG_PATH=/home/manuel/Desktop/config/squid.conf
    ACL_FILES_DIR=/home/manuel/Desktop/config/acls
+   LISTEN_HOST=127.0.0.1
+   LISTEN_PORT=8080
    ```
   
   ### Forwarding Squid logs from a remote Squid host (important)
