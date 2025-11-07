@@ -75,7 +75,15 @@ def parse_raw_data(raw_data: str):
         except Exception as e:
             print(f"Error parseando bloque: {e}\n{block_text[:120]}...")
 
-    return connections
+    filtered = [
+        c for c in connections
+        if not (
+            isinstance(c.get("uri"), str)
+            and "squid-internal-mgr/active_requests" in c.get("uri")
+        )
+    ]
+
+    return filtered
 
 
 def parse_connection_block(block: str, squid_version: str, kid: str | None = None):
