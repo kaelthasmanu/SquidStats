@@ -416,3 +416,38 @@ valid_users.update({user: user_data}) %} {% endif %} {% endfor %}
     {% endfor %}
   </div>
 </div>
+
+function sortAndDisplayUsers() {
+    const userAccordionGroup = document.getElementById('user-accordion-group');
+    if (!userAccordionGroup) return;
+
+    const usersData = {{ valid_users | tojson }};
+    
+    const usersArray = Object.entries(usersData);
+    const sortedUsers = usersArray.sort((a, b) => {
+        const bwA = calculateUserBandwidth(a[1].connections);
+        const bwB = calculateUserBandwidth(b[1].connections);
+        return bwB - bwA; // Orden descendente
+    });
+
+    userAccordionGroup.innerHTML = '';
+
+    sortedUsers.forEach(([user, userData]) => {
+        userAccordionGroup.innerHTML += createUserHTML(user, userData);
+    });
+
+    initializeAccordions();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    sortAndDisplayUsers();
+});
+
+if (typeof updateConnections === 'function') {
+    const originalUpdateConnections = updateConnections;
+    updateConnections = function() {
+        originalUpdateConnections();
+        setTimeout(sortAndDisplayUsers, 100); // Esperar a que se renderice el nuevo contenido
+    };
+}
+</script>
