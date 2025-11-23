@@ -37,7 +37,7 @@ def create_app():
     app.config.from_object(Config())
 
     # Initialize CSRF protection
-    csrf = CSRFProtect(app)
+    CSRFProtect(app)
 
     # Initialize extensions
     scheduler = APScheduler()
