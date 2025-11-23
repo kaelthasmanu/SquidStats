@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 class Config:
     SCHEDULER_API_ENABLED = True
-    SECRET_KEY = os.urandom(24).hex()
+    SECRET_KEY = os.getenv("SECRET_KEY") or os.urandom(24).hex()
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = None  # CSRF tokens don't expire
 
     # Database settings
     DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///squidstats.db")

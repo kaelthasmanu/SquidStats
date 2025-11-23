@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Administrador Squid Proxy{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -75,9 +76,19 @@
     </div>
 
     <script>
+        // Get CSRF token from meta tag
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
         async function reloadSquid() {
             try {
-                const response = await fetch('/api/reload-squid', { method: 'POST' });
+                const response = await fetch('/api/reload-squid', { 
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                });
                 const data = await response.json();
                 
                 if (data.status === 'success') {
@@ -93,7 +104,12 @@
         async function restartSquid() {
             if (confirm('¿Está seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio.')) {
                 try {
-                    const response = await fetch('/api/restart-squid', { method: 'POST' });
+                    const response = await fetch('/api/restart-squid', { 
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        }
+                    });
                     const data = await response.json();
                     
                     if (data.status === 'success') {

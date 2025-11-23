@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
+from flask_wtf.csrf import CSRFProtect
 
 from config import Config, logger
 from database.database import migrate_database
@@ -34,6 +35,9 @@ def create_app():
 
     app = Flask(__name__, static_folder="./static")
     app.config.from_object(Config())
+
+    # Initialize CSRF protection
+    csrf = CSRFProtect(app)
 
     # Initialize extensions
     scheduler = APScheduler()

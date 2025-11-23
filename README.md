@@ -266,6 +266,7 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
     Note: for use MARIADB need your own database running
    ```bash
    VERSION=2
+   SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
    SQUID_HOST="127.0.0.1"
    SQUID_PORT=3128
    LOG_FORMAT=DETAILED

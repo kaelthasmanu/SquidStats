@@ -107,8 +107,16 @@
       submitButton.classList.remove('hover:bg-blue-700','hover:shadow-xl');
       buttonIcon.className = 'fas fa-spinner fa-spin mr-2';
       submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generando Reporte...';
-      els.resultsContainer.innerHTML = `<div class=\"bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center\"><div class=\"text-center text-gray-500 py-10\"><i class=\"fas fa-spinner fa-spin text-5xl mb-4 text-blue-500\"></i><h3 class=\"text-xl font-semibold\">Generando reporte...</h3></div></div>`;
-      fetch('/api/run-audit', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) })
+      els.resultsContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center"><div class="text-center text-gray-500 py-10"><i class="fas fa-spinner fa-spin text-5xl mb-4 text-blue-500"></i><h3 class="text-xl font-semibold">Generando reporte...</h3></div></div>`;
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      fetch('/api/run-audit', { 
+        method:'POST', 
+        headers:{
+          'Content-Type':'application/json',
+          'X-CSRFToken': csrfToken
+        }, 
+        body: JSON.stringify(data) 
+      })
         .then(r=>r.json())
         .then(result=>{
           toastr.clear(); restoreSubmitButton();
