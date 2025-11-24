@@ -5,17 +5,18 @@ from flask import Flask
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
 from flask_wtf.csrf import CSRFProtect
-
 from config import Config, logger
 from database.database import migrate_database
 from parsers.log import process_logs
 from routes import register_routes
-from routes.main_routes import initialize_proxy_detection
+# from routes.main_routes import initialize_proxy_detection
 from routes.stats_routes import realtime_data_thread
 from services.metrics_service import MetricsService
 from services.notifications import (
     has_remote_commits_with_messages,
     set_commit_notifications,
+    set_socketio_instance,  # Nueva importación
+    start_notification_monitor,  # Nueva importación
 )
 from utils.filters import register_filters
 
@@ -51,7 +52,7 @@ def create_app():
     register_routes(app)
 
     # Initialize proxy detection
-    initialize_proxy_detection()
+#    initialize_proxy_detection()
 
     # Configure response headers
     @app.after_request
@@ -105,6 +106,12 @@ def main():
 
     # Initialize SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+
+    # Configurar Socket.IO en el módulo de notificaciones
+    set_socketio_instance(socketio)
+
+    # Iniciar el monitor de notificaciones
+    start_notification_monitor()
 
     # Start real-time data collection thread
     socketio.start_background_task(realtime_data_thread, socketio)
