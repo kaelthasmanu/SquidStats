@@ -22,6 +22,8 @@ def logs():
             users_data=users_data,
             page_icon="user.ico",
             page_title="Actividad usuarios",
+            icon="fas fa-user-friends",
+            subtitle="Texto descriptivo aqui",
         )
     except Exception as e:
         logger.error(f"Error en ruta /logs: {e}")
@@ -100,6 +102,8 @@ def blacklist_logs():
             current_page=page,
             page_icon="shield-exclamation.ico",
             page_title="Registros Bloqueados",
+            icon="fas fa-ban",
+            subtitle="Texto descriptivo aqui",
         )
 
     except ValueError:

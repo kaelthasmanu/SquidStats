@@ -3,11 +3,10 @@ import time
 from threading import Lock
 from typing import Any
 
-from flask import Blueprint, current_app, redirect, render_template
+from flask import Blueprint, current_app, redirect, render_template, request
 
 from config import Config, logger
 from parsers.connections import group_by_user, parse_raw_data
-from parsers.log import find_last_parent_proxy
 from parsers.squid_info import fetch_squid_info_stats
 from services.fetch_data import fetch_squid_data
 from utils.updateSquid import update_squid
@@ -16,32 +15,29 @@ from utils.updateSquidStats import updateSquidStats
 main_bp = Blueprint("main", __name__)
 
 
+def filter_valid_users(grouped_connections):
+    """
+    Filtra usuarios válidos eliminando usuarios anónimos y vacíos
+    Esta función centraliza la lógica de filtrado que antes estaba en el template
+    """
+    valid_users = {}
+    for user, user_data in grouped_connections.items():
+        if user and user != "-" and user != "Anónimo":
+            valid_users[user] = user_data
+    return valid_users
+
+
 @main_bp.app_context_processor
 def inject_app_version():
+    """Inyecta la versión de la aplicación en todos los templates"""
     version = getattr(Config, "VERSION", None) or os.getenv("VERSION", "-")
     return {"app_version": version}
 
 
-# Global variables
-parent_proxy_lock = Lock()
-g_parent_proxy_ip = None
-
-
-def initialize_proxy_detection():
-    global g_parent_proxy_ip
-
-    g_parent_proxy_ip = find_last_parent_proxy(
-        os.getenv("SQUID_LOG", "/var/log/squid/access.log")
-    )
-    if g_parent_proxy_ip:
-        logger.info(f"Proxy parent detect with IP: {g_parent_proxy_ip}.")
-    else:
-        logger.info(
-            "No proxy parent detected in recent logs. Assuming direct connection."
-        )
-
-
 def _build_error_page(message: str, status: int = 500, details: str | None = None):
+    """
+    Construye una página de error estandarizada
+    """
     if details:
         logger.debug("Error details (server-only): %s", details)
 
@@ -62,6 +58,10 @@ def _build_error_page(message: str, status: int = 500, details: str | None = Non
 
 
 def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | None]:
+    """
+    Obtiene y procesa el contexto para el dashboard
+    Retorna: (context_dict, error_response) - solo uno será no None
+    """
     t0 = time.time()
     try:
         raw_data = fetch_squid_data()
@@ -90,8 +90,8 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
             logger.exception("Error agrupando conexiones por usuario")
             grouped_connections = {}
 
-        with parent_proxy_lock:
-            parent_ip = g_parent_proxy_ip
+        # FILTRADO CENTRALIZADO: Generar usuarios válidos aquí en lugar del template
+        valid_users = filter_valid_users(grouped_connections)
 
         try:
             squid_info_stats = fetch_squid_info_stats()
@@ -107,7 +107,7 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
 
         context: dict[str, Any] = {
             "grouped_connections": grouped_connections,
-            "parent_proxy_ip": parent_ip,
+            "valid_users": valid_users,
             "squid_version": squid_version,
             "squid_info_stats": squid_info_stats,
             "page_icon": "favicon.ico",
@@ -123,31 +123,44 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
 
 @main_bp.route("/")
 def index():
+    """
+    Ruta unificada para el dashboard
+    
+    CAMBIO PRINCIPAL: 
+    - Ahora maneja tanto la carga completa de la página como las actualizaciones parciales
+    - Elimina la necesidad de la ruta separada /actualizar-conexiones
+    
+    Detección de tipo de petición:
+    - Petición normal: Devuelve index.html completo
+    - Petición parcial (param partial=true): Devuelve solo el contenido de conexiones
+    """
+    
+    # CAMBIO: Detectar si es una petición para contenido parcial
+    is_partial_request = request.args.get('partial') == 'true'
+    
     context, error_response = _get_dashboard_context()
     if error_response:
         return error_response
+    
+    # CAMBIO: Si es petición parcial, devolver solo el template de conexiones
+    if is_partial_request:
+        return render_template(
+            "partials/conexiones.html",
+            grouped_connections=context["grouped_connections"],
+            valid_users=context["valid_users"],
+            squid_version=context["squid_version"],
+            squid_info_stats=context["squid_info_stats"],
+            build_time_ms=context["build_time_ms"],
+            connection_count=context["connection_count"],
+        )
+    
+    # Petición normal: devolver la página completa
     return render_template("index.html", **context)
-
-
-@main_bp.route("/actualizar-conexiones")
-def actualizar_conexiones():
-    context, error_response = _get_dashboard_context()
-    if error_response:
-        return error_response
-
-    return render_template(
-        "partials/conexiones.html",
-        grouped_connections=context["grouped_connections"],
-        parent_proxy_ip=context["parent_proxy_ip"],
-        squid_version=context["squid_version"],
-        squid_info_stats=context["squid_info_stats"],
-        build_time_ms=context["build_time_ms"],
-        connection_count=context["connection_count"],
-    )
 
 
 @main_bp.route("/install", methods=["POST"])
 def install_package():
+    """Ruta para instalar/actualizar paquetes de Squid"""
     ok = False
     try:
         ok = update_squid()
@@ -162,6 +175,7 @@ def install_package():
 
 @main_bp.route("/update", methods=["POST"])
 def update_web():
+    """Ruta para actualizar la aplicación web"""
     ok = False
     try:
         ok = updateSquidStats()

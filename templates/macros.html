@@ -1,0 +1,13 @@
+{# templates/macros.html #}
+{% macro format_bandwidth(bw_value) %}
+  {% if bw_value is defined %}
+    {% set bw = bw_value|float %}
+    {% if bw >= 1000000 %}
+      {{ (bw / 1000000)|round(2) }} Gbps
+    {% elif bw >= 1000 %}
+      {{ (bw / 1000)|round(2) }} Mbps
+    {% else %}
+      {{ bw|round(2) }} Kbps
+    {% endif %}
+  {% else %}0 kbps{% endif %}
+{% endmacro %}

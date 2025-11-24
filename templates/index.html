@@ -1,6 +1,16 @@
-{% extends 'base.html' %} {% block title %}Inicio | Dashboard Squid{% endblock
-%} {% block content %}
+{% extends 'layouts/base.html' %} 
 
+{% from 'macros.html' import format_bandwidth %}  {# CAMBIO: Importar desde macros #}
+
+{% set valid_users = {} %} 
+{% for user, user_data in grouped_connections.items()%} 
+  {% if user and user != "-" and user != "Anónimo" %} 
+    {% set _ = valid_users.update({user: user_data}) %} 
+  {% endif %} 
+{% endfor %}
+{% block title %}{% endblock title %}
+
+{% block content %}
 <div class="flex flex-wrap items-center gap-3 mb-4 bg-white/70 dark:bg-gray-800/60 px-3 py-2 rounded-md border border-gray-200 shadow-sm text-sm max-w-full">
   <label for="refresh-interval" class="text-gray-700 dark:text-gray-200 font-medium select-none">⏱️</label>
   <div class="flex items-center gap-1">
@@ -14,159 +24,161 @@
   <button id="set-interval-btn" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium transition text-xs">Aplicar</button>
   <span id="persist-status" class="text-[11px] text-gray-400 ml-auto pr-1 opacity-0 transition-opacity"></span>
 </div>
-
 <div id="datos-conexiones" class="max-w-7xl mx-auto sm:px-6 lg:px-8">
   {% include 'partials/conexiones.html' %}
 </div>
+{% endblock %}
 
-<script>
-  let isDetailedView = true;
 
-  function applyViewState() {
-    const contents = document.querySelectorAll("[data-accordion-content]");
-    const icons = document.querySelectorAll(".user-accordion .fa-chevron-down");
-    const toggleAllButton = document.getElementById("toggle-all-button");
+{% block scripts %}
+  <script>
+    let isDetailedView = true;
 
-    if (contents.length === 0 || !toggleAllButton) return;
+    function applyViewState() {
+      const contents = document.querySelectorAll("[data-accordion-content]");
+      const icons = document.querySelectorAll(".user-accordion .fa-chevron-down");
+      const toggleAllButton = document.getElementById("toggle-all-button");
 
-    if (isDetailedView) {
-      contents.forEach((content) => content.classList.remove("hidden"));
-      icons.forEach((icon) => icon.classList.add("rotate-180"));
-      toggleAllButton.textContent = "Ver Resumen";
-    } else {
-      contents.forEach((content) => content.classList.add("hidden"));
-      icons.forEach((icon) => icon.classList.remove("rotate-180"));
-      toggleAllButton.textContent = "Ver Detalles";
+      if (contents.length === 0 || !toggleAllButton) return;
+
+      if (isDetailedView) {
+        contents.forEach((content) => content.classList.remove("hidden"));
+        icons.forEach((icon) => icon.classList.add("rotate-180"));
+        toggleAllButton.textContent = "Ver Resumen";
+      } else {
+        contents.forEach((content) => content.classList.add("hidden"));
+        icons.forEach((icon) => icon.classList.remove("rotate-180"));
+        toggleAllButton.textContent = "Ver Detalles";
+      }
     }
-  }
 
-  function setupSummaryButton() {
-    const toggleAllButton = document.getElementById("toggle-all-button");
-    if (!toggleAllButton) return;
+    function setupSummaryButton() {
+      const toggleAllButton = document.getElementById("toggle-all-button");
+      if (!toggleAllButton) return;
 
+      const newButton = toggleAllButton.cloneNode(true);
+      toggleAllButton.parentNode.replaceChild(newButton, toggleAllButton);
 
-    const newButton = toggleAllButton.cloneNode(true);
-    toggleAllButton.parentNode.replaceChild(newButton, toggleAllButton);
+      newButton.addEventListener("click", () => {
+        isDetailedView = !isDetailedView; 
+        applyViewState(); 
+      });
+    }
 
-    newButton.addEventListener("click", () => {
-      isDetailedView = !isDetailedView; 
-      applyViewState(); 
-    });
-  }
+    async function refrescarConexiones() {
+      try {
+        // CAMBIO: Usar la ruta principal con parámetro partial en lugar de ruta separada
+        const response = await fetch("/?partial=true");
+        if (!response.ok) throw new Error("Respuesta no OK");
 
-  async function refrescarConexiones() {
-    try {
-      const response = await fetch("/actualizar-conexiones");
-      if (!response.ok) throw new Error("Respuesta no OK");
+        const html = await response.text();
+        const container = document.getElementById("datos-conexiones");
+        container.innerHTML = html;
 
-      const html = await response.text();
-      const container = document.getElementById("datos-conexiones");
-      container.innerHTML = html;
+        setupSummaryButton();
+        applyViewState();
+      } catch (error) {
+        console.error("Error al actualizar conexiones:", error);
+      }
+    }
+
+    const REFRESH_KEY = 'squidstats.refreshIntervalSec';
+    const VIEW_KEY = 'squidstats.viewMode';
+    let refreshInterval = 60000; // ms
+    let refreshTimer = null;
+    let countdownTimer = null;
+    let secondsLeft = 0;
+
+    function safeGet(key) {
+      try { return localStorage.getItem(key); } catch { return null; }
+    }
+    function safeSet(key, val) {
+      try { localStorage.setItem(key, val); persistStatus('Guardado'); } catch { persistStatus('No se pudo guardar'); }
+    }
+    function persistStatus(msg) {
+      const el = document.getElementById('persist-status');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove('opacity-0');
+      setTimeout(() => { el.classList.add('opacity-0'); }, 1600);
+    }
+
+    function getRefreshIntervalFromStorage() {
+      const stored = safeGet(REFRESH_KEY);
+      const val = parseInt(stored);
+      return (!isNaN(val) && val >= 5) ? val : 60;
+    }
+    function setRefreshIntervalToStorage(val) { safeSet(REFRESH_KEY, String(val)); }
+
+    function restoreViewState() {
+      const stored = safeGet(VIEW_KEY);
+      if (stored === 'summary') isDetailedView = false;
+    }
+    function saveViewState() { safeSet(VIEW_KEY, isDetailedView ? 'detailed' : 'summary'); }
+
+    const originalApplyViewState = applyViewState;
+    applyViewState = function() { 
+      originalApplyViewState();
+      saveViewState();
+    };
+
+    function startRefreshTimer() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      if (countdownTimer) clearInterval(countdownTimer);
+      secondsLeft = refreshInterval / 1000;
+      updateCountdown();
+      refreshTimer = setInterval(() => {
+        refrescarConexiones();
+        secondsLeft = refreshInterval / 1000; // reset
+      }, refreshInterval);
+      countdownTimer = setInterval(() => {
+        secondsLeft -= 1;
+        if (secondsLeft < 0) secondsLeft = refreshInterval / 1000;
+        updateCountdown();
+      }, 1000);
+    }
+
+    function updateCountdown() {
+      const el = document.getElementById('next-refresh');
+      if (!el) return;
+      el.textContent = secondsLeft + 's';
+    }
+
+    function applyNewInterval(valSec) {
+      refreshInterval = valSec * 1000;
+      setRefreshIntervalToStorage(valSec);
+      startRefreshTimer();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const storedRaw = safeGet(REFRESH_KEY);
+      const intervalValue = getRefreshIntervalFromStorage();
+      document.getElementById('refresh-interval').value = intervalValue;
+      refreshInterval = intervalValue * 1000;
+      if (storedRaw === null) {
+        setRefreshIntervalToStorage(intervalValue);
+        console.debug('[SquidStats] Intervalo por defecto almacenado:', intervalValue, 's');
+      }
+      restoreViewState();
 
       setupSummaryButton();
-
       applyViewState();
-    } catch (error) {
-      console.error("Error al actualizar conexiones:", error);
-    }
-  }
+      startRefreshTimer();
 
-  const REFRESH_KEY = 'squidstats.refreshIntervalSec';
-  const VIEW_KEY = 'squidstats.viewMode';
-  let refreshInterval = 60000; // ms
-  let refreshTimer = null;
-  let countdownTimer = null;
-  let secondsLeft = 0;
-
-  function safeGet(key) {
-    try { return localStorage.getItem(key); } catch { return null; }
-  }
-  function safeSet(key, val) {
-    try { localStorage.setItem(key, val); persistStatus('Guardado'); } catch { persistStatus('No se pudo guardar'); }
-  }
-  function persistStatus(msg) {
-    const el = document.getElementById('persist-status');
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.remove('opacity-0');
-    setTimeout(() => { el.classList.add('opacity-0'); }, 1600);
-  }
-
-  function getRefreshIntervalFromStorage() {
-    const stored = safeGet(REFRESH_KEY);
-    const val = parseInt(stored);
-    return (!isNaN(val) && val >= 5) ? val : 60;
-  }
-  function setRefreshIntervalToStorage(val) { safeSet(REFRESH_KEY, String(val)); }
-
-  function restoreViewState() {
-    const stored = safeGet(VIEW_KEY);
-    if (stored === 'summary') isDetailedView = false;
-  }
-  function saveViewState() { safeSet(VIEW_KEY, isDetailedView ? 'detailed' : 'summary'); }
-
-  const originalApplyViewState = applyViewState;
-  applyViewState = function() { 
-    originalApplyViewState();
-    saveViewState();
-  };
-
-  function startRefreshTimer() {
-    if (refreshTimer) clearInterval(refreshTimer);
-    if (countdownTimer) clearInterval(countdownTimer);
-    secondsLeft = refreshInterval / 1000;
-    updateCountdown();
-    refreshTimer = setInterval(() => {
-      refrescarConexiones();
-      secondsLeft = refreshInterval / 1000; // reset
-    }, refreshInterval);
-    countdownTimer = setInterval(() => {
-      secondsLeft -= 1;
-      if (secondsLeft < 0) secondsLeft = refreshInterval / 1000;
-      updateCountdown();
-    }, 1000);
-  }
-
-  function updateCountdown() {
-    const el = document.getElementById('next-refresh');
-    if (!el) return;
-    el.textContent = secondsLeft + 's';
-  }
-
-  function applyNewInterval(valSec) {
-    refreshInterval = valSec * 1000;
-    setRefreshIntervalToStorage(valSec);
-    startRefreshTimer();
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const storedRaw = safeGet(REFRESH_KEY);
-    const intervalValue = getRefreshIntervalFromStorage();
-    document.getElementById('refresh-interval').value = intervalValue;
-    refreshInterval = intervalValue * 1000;
-    if (storedRaw === null) {
-      setRefreshIntervalToStorage(intervalValue);
-      console.debug('[SquidStats] Intervalo por defecto almacenado:', intervalValue, 's');
-    }
-    restoreViewState();
-
-    setupSummaryButton();
-    applyViewState();
-    startRefreshTimer();
-
-    const intervalInput = document.getElementById('refresh-interval');
-    document.getElementById('set-interval-btn').addEventListener('click', () => {
-      const val = parseInt(intervalInput.value);
-      if (!isNaN(val) && val >= 5) {
-        applyNewInterval(val);
-      } else {
-        intervalInput.value = getRefreshIntervalFromStorage();
-      }
+      const intervalInput = document.getElementById('refresh-interval');
+      document.getElementById('set-interval-btn').addEventListener('click', () => {
+        const val = parseInt(intervalInput.value);
+        if (!isNaN(val) && val >= 5) {
+          applyNewInterval(val);
+        } else {
+          intervalInput.value = getRefreshIntervalFromStorage();
+        }
+      });
+      intervalInput.addEventListener('change', () => {
+        const val = parseInt(intervalInput.value);
+        if (!isNaN(val) && val >= 5) applyNewInterval(val);
+      });
     });
-    intervalInput.addEventListener('change', () => {
-      const val = parseInt(intervalInput.value);
-      if (!isNaN(val) && val >= 5) applyNewInterval(val);
-    });
-  });
-</script>
-{% endblock %}
+  </script>
+{% endblock scripts %}
+

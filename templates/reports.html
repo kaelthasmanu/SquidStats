@@ -1,9 +1,310 @@
 
-{% extends 'base.html' %}
-
-{% block title %}Reportes | Dashboard Squid{% endblock %}
+{% extends 'layouts/base.html' %}
+{% block styles %}
+    <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
+{% endblock styles %}
 
 {% block content %}
-    {% include 'components/graph_reports.html' %}
-
+    {% include 'partials/graph_reports.html' %}
 {% endblock %}
+
+{% block scripts %}
+    <script type="application/json" id="chart-data">
+      {
+        "usersActivity": {
+          "labels": {{ metrics.top_users_by_activity | map(attribute='username') | list | tojson | safe }},
+          "data": {{ metrics.top_users_by_activity | map(attribute='total_visits') | list | tojson | safe }}
+        },
+        "usersData": {
+          "labels": {{ metrics.top_users_by_data_transferred | map(attribute='username') | list | tojson | safe }},
+          "data": {{ metrics.top_users_by_data_transferred | map(attribute='total_data_bytes') | map('divide', 1048576) | list | tojson | safe }}
+        },
+        "httpCodes": {
+          "labels": {{ metrics.http_response_distribution_chart.labels | tojson | safe }},
+          "data": {{ metrics.http_response_distribution_chart.data | tojson | safe }},
+          "colors": {{ metrics.http_response_distribution_chart.colors | tojson | safe }}
+        }
+      }
+    </script>
+
+    <script>
+      // Chart.js configuration
+      document.addEventListener("DOMContentLoaded", function () {
+        // Load data from JSON script tag
+        const chartDataElement = document.getElementById("chart-data");
+        const chartData = JSON.parse(chartDataElement.textContent);
+
+        const chartColors = [
+          "#3B82F6",
+          "#10B981",
+          "#F59E0B",
+          "#EF4444",
+          "#8B5CF6",
+          "#EC4899",
+          "#14B8A6",
+          "#F97316",
+          "#64748B",
+          "#84CC16",
+          "#06B6D4",
+          "#D946EF",
+          "#F43F5E",
+          "#0EA5E9",
+          "#22C55E",
+          "#EAB308",
+          "#F43F5E",
+          "#8B5CF6",
+          "#EC4899",
+          "#14B8A6",
+        ];
+
+        // Helper function to get text color based on theme
+        function getTextColor() {
+          return document.documentElement.classList.contains("dark")
+            ? "#d1d5db"
+            : "#374151";
+        }
+
+        // Helper function to get border color based on theme
+        function getBorderColor() {
+          return document.documentElement.classList.contains("dark")
+            ? "#374151"
+            : "#fff";
+        }
+
+        // Users Activity Chart
+        const usersActivityCtx = document.getElementById("usersActivityChart");
+        if (usersActivityCtx && chartData.usersActivity) {
+          new Chart(usersActivityCtx.getContext("2d"), {
+            type: "bar",
+            data: {
+              labels: chartData.usersActivity.labels,
+              datasets: [
+                {
+                  label: "Visitas",
+                  data: chartData.usersActivity.data,
+                  backgroundColor: chartColors.slice(
+                    0,
+                    chartData.usersActivity.data.length
+                  ),
+                  borderColor: chartColors
+                    .slice(0, chartData.usersActivity.data.length)
+                    .map((color) => color + "DD"),
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: { mode: "index", intersect: false },
+                datalabels: { display: false },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: { display: true, text: "Número de Visitas" },
+                  ticks: { color: getTextColor() },
+                },
+                x: {
+                  ticks: {
+                    autoSkip: false,
+                    color: getTextColor(),
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        // Users Data Chart
+        const usersDataCtx = document.getElementById("usersDataChart");
+        if (usersDataCtx && chartData.usersData) {
+          new Chart(usersDataCtx.getContext("2d"), {
+            type: "bar",
+            data: {
+              labels: chartData.usersData.labels,
+              datasets: [
+                {
+                  label: "Datos (MB)",
+                  data: chartData.usersData.data,
+                  backgroundColor: chartColors.slice(
+                    0,
+                    chartData.usersData.data.length
+                  ),
+                  borderColor: chartColors
+                    .slice(0, chartData.usersData.data.length)
+                    .map((color) => color + "DD"),
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  mode: "index",
+                  intersect: false,
+                  callbacks: {
+                    label: function (context) {
+                      return (
+                        context.dataset.label +
+                        ": " +
+                        context.raw.toFixed(2) +
+                        " MB"
+                      );
+                    },
+                  },
+                },
+                datalabels: { display: false },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: { display: true, text: "Datos Transmitidos (MB)" },
+                  ticks: { color: getTextColor() },
+                },
+                x: {
+                  ticks: {
+                    autoSkip: false,
+                    color: getTextColor(),
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        // HTTP Codes Chart
+        const httpCodesCtx = document.getElementById("httpCodesChart");
+        if (httpCodesCtx && chartData.httpCodes) {
+          new Chart(httpCodesCtx.getContext("2d"), {
+            type: "pie",
+            data: {
+              labels: chartData.httpCodes.labels,
+              datasets: [
+                {
+                  data: chartData.httpCodes.data,
+                  backgroundColor: chartData.httpCodes.colors,
+                  borderColor: getBorderColor(),
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "right",
+                  labels: {
+                    font: { size: 12 },
+                    color: getTextColor(),
+                  },
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const total = context.dataset.data.reduce(function (
+                        a,
+                        b
+                      ) {
+                        return a + b;
+                      },
+                      0);
+                      const percentage = ((context.raw / total) * 100).toFixed(
+                        1
+                      );
+                      return (
+                        context.label +
+                        ": " +
+                        context.raw +
+                        " (" +
+                        percentage +
+                        "%)"
+                      );
+                    },
+                  },
+                },
+                datalabels: {
+                  formatter: function (value, ctx) {
+                    const total = ctx.chart.data.datasets[0].data.reduce(
+                      function (a, b) {
+                        return a + b;
+                      },
+                      0
+                    );
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return percentage > 3 ? percentage + "%" : "";
+                  },
+                  color: "#fff",
+                  font: {
+                    weight: "bold",
+                    size: 12,
+                  },
+                },
+              },
+            },
+            plugins: [ChartDataLabels],
+          });
+        }
+
+        // Update chart colors when dark mode changes
+        const observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            if (
+              mutation.type === "attributes" &&
+              mutation.attributeName === "class"
+            ) {
+              // Re-render charts with new colors when dark mode changes
+              setTimeout(function () {
+                Chart.helpers.each(Chart.instances, function (instance) {
+                  // Update scale colors
+                  if (
+                    instance.config.options &&
+                    instance.config.options.scales
+                  ) {
+                    const textColor = getTextColor();
+                    if (
+                      instance.config.options.scales.y &&
+                      instance.config.options.scales.y.ticks
+                    ) {
+                      instance.config.options.scales.y.ticks.color = textColor;
+                    }
+                    if (
+                      instance.config.options.scales.x &&
+                      instance.config.options.scales.x.ticks
+                    ) {
+                      instance.config.options.scales.x.ticks.color = textColor;
+                    }
+                  }
+                  // Update legend colors
+                  if (
+                    instance.config.options &&
+                    instance.config.options.plugins &&
+                    instance.config.options.plugins.legend &&
+                    instance.config.options.plugins.legend.labels
+                  ) {
+                    instance.config.options.plugins.legend.labels.color =
+                      getTextColor();
+                  }
+                  instance.update();
+                });
+              }, 100);
+            }
+          });
+        });
+
+        observer.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+      });
+    </script>
+    <script src="{{ url_for('static', filename='js/reports-datepicker.js') }}"></script>
+{% endblock scripts %}

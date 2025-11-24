@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ page_title or 'Dashboard Squid' }}</title>
+
+    <!-- Favicon dinámico -->
+    <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon"/>
+
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}"/>
+    <!-- Estilos específicos de cada página -->
+    {% block styles %}{% endblock styles %}
+  </head>
+  <body class="overflow-x-hidden overflow-auto" style="visibility: hidden" onload="document.body.style.visibility='visible';">
+    <!-- Barra de navegación común -->
+    <div class="relative">
+      {% include 'components/navbar.html' %}
+      <!-- Contenido principal con padding para el navbar -->
+      <main class="min-h-screen pt-10 lg:pt-10 pb-20">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+          {% block title %}
+            <div class="flex items-center mb-6 border-b pb-4">
+              <i class="{{icon}} text-3xl text-blue-600 mr-4"></i> <!-- agregar icon al contexto para mostrar el icono dinamicamente -->
+              <div>
+                  <h1 class="text-3xl font-bold text-gray-800">{{page_title}}</h1>  <!-- usando page_title del contexto para mostrar el titulo dinamicamente puedes hacer lo mismo con el icono(icon) y el subtitulo(subtitle) -->
+                  <p class="text-gray-500 mt-1">
+                    {{subtitle}} <!-- agregar subtitle al contexto para mostrarlo dinamicamente -->
+                  </p>
+              </div>
+            </div>
+          {% endblock title %}
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+    </div>
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+    <!-- Socket.IO -->
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <!-- Scripts de Flowbite (UI components) -->
+    <script src="{{ url_for('static', filename='src/flowbite.min.js') }}"></script>
+    <!-- Scripts específicos de cada página -->
+    {% block scripts %}{% endblock scripts %}
+  </body>
+</html>

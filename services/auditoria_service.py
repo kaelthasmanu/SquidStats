@@ -26,7 +26,6 @@ def _get_tables_in_range(
         current_date += timedelta(days=1)
     return log_tables_in_range
 
-
 def find_by_keyword(
     db: Session, start_str: str, end_str: str, keyword: str, username: str = None
 ) -> dict[str, Any]:
@@ -100,7 +99,6 @@ def find_by_keyword(
     )
 
     return {"results": all_results}
-
 
 def find_social_media_activity(
     db: Session, start_str: str, end_str: str, sites: list[str], username: str = None
@@ -197,7 +195,6 @@ def find_social_media_activity(
 
     return {"results": all_results}
 
-
 def find_by_ip(
     db: Session, start_str: str, end_str: str, ip_address: str
 ) -> dict[str, Any]:
@@ -267,7 +264,6 @@ def find_by_ip(
     )
 
     return {"results": all_results}
-
 
 def find_by_response_code(
     db: Session, start_str: str, end_str: str, code: int, username: str = None
@@ -346,7 +342,6 @@ def find_by_response_code(
 
     return {"results": all_results}
 
-
 def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, Any]:
     try:
         selected_date = datetime.strptime(date_str, "%Y-%m-%d")
@@ -402,7 +397,6 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, A
             "error": "An unexpected error occurred while calculating daily activity."
         }
 
-
 def get_all_usernames(db: Session) -> list[str]:
     engine = db.get_bind()
     inspector = inspect(engine)
@@ -440,7 +434,6 @@ def get_all_usernames(db: Session) -> list[str]:
             continue
 
     return sorted(all_usernames)
-
 
 def get_user_activity_summary(
     db: Session, username: str, start_str: str, end_str: str
@@ -521,7 +514,6 @@ def get_user_activity_summary(
         ],
     }
 
-
 def get_top_users_by_data(
     db: Session, start_str: str, end_str: str, limit: int = 10
 ) -> dict[str, Any]:
@@ -568,7 +560,6 @@ def get_top_users_by_data(
 
     return {"top_users": top_users_list}
 
-
 def get_top_users_by_requests(
     db: Session, start_str: str, end_str: str, limit: int = 10
 ) -> dict[str, Any]:
@@ -611,7 +602,6 @@ def get_top_users_by_requests(
             for username, total_reqs in sorted_users
         ]
     }
-
 
 def get_top_urls_by_data(
     db: Session, start_str: str, end_str: str, limit: int = 15
@@ -657,7 +647,6 @@ def get_top_urls_by_data(
 
     return {"top_urls": top_urls_list}
 
-
 def get_top_ips_by_data(
     db: Session, start_str: str, end_str: str, limit: int = 10
 ) -> dict[str, Any]:
@@ -702,7 +691,6 @@ def get_top_ips_by_data(
             for ip, total_data in sorted_ips
         ]
     }
-
 
 def find_denied_access(
     db: Session, start_str: str, end_str: str, username: str = None
@@ -765,3 +753,152 @@ def find_denied_access(
     all_results.sort(key=lambda x: (x["log_date"], x["username"]), reverse=True)
 
     return {"results": all_results}
+
+def find_suspicious_activity(db, threshold=50, hours=1):
+    """
+    Encuentra IPs con actividad sospechosa (muchos requests en poco tiempo)
+    Retorna: lista de tuplas [(ip, count), ...]
+    """
+    from sqlalchemy import text
+    from datetime import datetime, timedelta
+    
+    try:
+        since_time = datetime.now() - timedelta(hours=hours)
+        
+        query = text("""
+            SELECT ip_address, COUNT(*) as request_count
+            FROM logs 
+            WHERE timestamp >= :since_time
+            GROUP BY ip_address
+            HAVING request_count > :threshold
+            ORDER BY request_count DESC
+            LIMIT 10
+        """)
+        
+        result = db.execute(query, {
+            'since_time': since_time,
+            'threshold': threshold
+        })
+        
+        return [(row[0], row[1]) for row in result]
+        
+    except Exception as e:
+        print(f"Error finding suspicious activity: {e}")
+        return []
+
+def get_active_users_count(db, hours=1):
+    """
+    Cuenta usuarios únicos activos en las últimas N horas
+    Retorna: número de usuarios únicos
+    """
+    from sqlalchemy import text
+    from datetime import datetime, timedelta
+    
+    try:
+        since_time = datetime.now() - timedelta(hours=hours)
+        
+        query = text("""
+            SELECT COUNT(DISTINCT username)
+            FROM logs
+            WHERE timestamp >= :since_time 
+            AND username IS NOT NULL 
+            AND username != ''
+        """)
+        
+        result = db.execute(query, {'since_time': since_time})
+        return result.scalar() or 0
+        
+    except Exception as e:
+        print(f"Error counting active users: {e}")
+        return 0
+
+def get_high_usage_users(db, hours=24, limit=5, threshold_mb=500):
+    """
+    Obtiene usuarios con mayor consumo de datos
+    Retorna: lista de tuplas [(username, usage_mb), ...]
+    """
+    from sqlalchemy import text
+    from datetime import datetime, timedelta
+    
+    try:
+        since_time = datetime.now() - timedelta(hours=hours)
+        
+        query = text("""
+            SELECT 
+                username,
+                SUM(bytes_sent) / (1024 * 1024) as usage_mb
+            FROM logs
+            WHERE timestamp >= :since_time
+            AND username IS NOT NULL 
+            AND username != ''
+            GROUP BY username
+            HAVING usage_mb > :threshold_mb
+            ORDER BY usage_mb DESC
+            LIMIT :limit
+        """)
+        
+        result = db.execute(query, {
+            'since_time': since_time,
+            'threshold_mb': threshold_mb,
+            'limit': limit
+        })
+        
+        return [(row[0], float(row[1])) for row in result]
+        
+    except Exception as e:
+        print(f"Error getting high usage users: {e}")
+        return []
+
+def get_failed_auth_attempts(db, hours=1, threshold=10):
+    """
+    Obtiene intentos de autenticación fallidos
+    Retorna: número de intentos fallidos
+    """
+    from sqlalchemy import text
+    from datetime import datetime, timedelta
+    
+    try:
+        since_time = datetime.now() - timedelta(hours=hours)
+        
+        query = text("""
+            SELECT COUNT(*) as failed_count
+            FROM logs
+            WHERE timestamp >= :since_time
+            AND response_code IN ('407', '401', '403')
+        """)
+        
+        result = db.execute(query, {'since_time': since_time})
+        count = result.scalar() or 0
+        
+        return count
+        
+    except Exception as e:
+        print(f"Error getting failed auth attempts: {e}")
+        return 0
+
+def get_denied_requests(db, hours=1, threshold=5):
+    """
+    Obtiene requests denegados
+    Retorna: número de requests denegados
+    """
+    from sqlalchemy import text
+    from datetime import datetime, timedelta
+    
+    try:
+        since_time = datetime.now() - timedelta(hours=hours)
+        
+        query = text("""
+            SELECT COUNT(*) as denied_count
+            FROM logs
+            WHERE timestamp >= :since_time
+            AND response_code = '403'
+        """)
+        
+        result = db.execute(query, {'since_time': since_time})
+        count = result.scalar() or 0
+        
+        return count
+        
+    except Exception as e:
+        print(f"Error getting denied requests: {e}")
+        return 0
