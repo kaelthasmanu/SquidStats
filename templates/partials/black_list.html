@@ -1,17 +1,8 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">
-            <svg class="h-8 w-8 inline-block mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-            </svg>
-            Actividad en Sitios Bloqueados
-        </h1>
-        
-        <div class="bg-gray-100 px-4 py-2 rounded-lg shadow-sm">
-            <span class="text-sm font-medium text-gray-600">
-                Página {{ pagination.page }} de {{ pagination.total_pages }}
-            </span>
-        </div>
+    <div class="bg-gray-100 px-4 py-2 rounded-lg shadow-sm">
+        <span class="text-sm font-medium text-gray-600">
+            Página {{ pagination.page }} de {{ pagination.total_pages }}
+        </span>
     </div>
 
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -127,12 +118,3 @@
         </div>
     </div>
 </div>
-
-<script>
-function updateQueryParam(param, value) {
-    const url = new URL(window.location.href);
-    url.searchParams.set(param, value);
-    url.searchParams.set('page', '1');
-    return url.toString();
-}
-</script>
