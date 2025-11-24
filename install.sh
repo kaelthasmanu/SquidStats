@@ -89,7 +89,6 @@ function updateOrCloneRepo() {
     local destinos=("/opt/SquidStats" "/usr/share/squidstats")
     local branch="main"
     local env_exists=false
-    local db_exists=false
     local found_dir=""
 
     for dir in "${destinos[@]}"; do
@@ -120,21 +119,8 @@ function updateOrCloneRepo() {
             cp .env /tmp/.env.backup
         fi
 
-        local db_files=(*.db)
-        if [ -e "${db_files[0]}" ]; then
-            db_exists=true
-            echo "Archivos .db detectados, se preservarán"
-            mkdir -p /tmp/db_backup
-            cp *.db /tmp/db_backup/
-        fi
-
         if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
             [ "$env_exists" = true ] && mv /tmp/.env.backup .env
-            if [ "$db_exists" = true ]; then
-                mv /tmp/db_backup/*.db . 2>/dev/null || true
-                rm -rf /tmp/db_backup
-                echo "📊 Archivos .db restaurados"
-            fi
             echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
             return 0
         else
@@ -145,33 +131,6 @@ function updateOrCloneRepo() {
         echo "⚠️ El directorio $found_dir existe pero no es un repositorio git. No se puede actualizar automáticamente."
         return 1
     fi
-}
-
-function moveDB() {
-    local databaseSQlite="/opt/SquidStats/squidstats.db"
-    local env_file="/opt/SquidStats/.env"
-    local current_version=0
-
-    current_version=$(grep -E '^VERSION\s*=' "$env_file" | cut -d= -f2 | tr -dc '0-9' || echo 0)
-
-    if ! grep -qE '^VERSION\s*=' "$env_file"; then
-        echo "VERSION=2" >>"$env_file"
-        echo "Eliminando base de datos antigua por actualización..."
-        rm -rf "$databaseSQlite"
-        ok "Base de datos antigua eliminada"
-    else
-        echo "Base de datos no requiere actualización"
-    fi
-
-    if [ -f "$databaseSQlite" ] && [ "$current_version" -lt 2 ]; then
-        echo "Eliminando base de datos antigua por actualización..."
-        rm -rf "$databaseSQlite"
-        ok "Base de datos antigua eliminada"
-    else
-        echo "Base de datos no requiere actualización"
-    fi
-
-    return 0
 }
 
 function createEnvFile() {
@@ -367,7 +326,6 @@ function main() {
         installDependencies
         createEnvFile
         configureDatabase
-        moveDB
         createService
 
         ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
