@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-lg p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Reglas de Acceso HTTP</h2>
+    
+    <div class="space-y-3">
+        {% for rule in rules %}
+        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0">
+                    {% if 'allow' in rule %}
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                            ALLOW
+                        </span>
+                    {% else %}
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                            DENY
+                        </span>
+                    {% endif %}
+                </div>
+                <code class="text-sm text-gray-700">{{ rule }}</code>
+            </div>
+            <div class="flex space-x-2">
+                <button class="text-blue-600 hover:text-blue-900">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="text-red-600 hover:text-red-900">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

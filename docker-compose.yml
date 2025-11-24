@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  squidstats:
+    build: .
+    container_name: squidstats_app
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /home/manuel/Downloads/logs:/logs
+    restart: unless-stopped

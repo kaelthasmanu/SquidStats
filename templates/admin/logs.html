@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    {% for log_name, log_lines in logs.items() %}
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">{{ log_name }}</h2>
+        
+        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto max-h-96 overflow-y-auto">
+            <pre class="text-green-400 text-sm font-mono">{% for line in log_lines %}{{ line }}{% endfor %}</pre>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

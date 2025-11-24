@@ -42,6 +42,7 @@
         <li><a href="#installation-script">Installation Script</a></li>
         <li><a href="#installation-manual">Installation Manual</a></li>
         <li><a href="#testing-information">Testing Information</a></li>
+        <li><a href="#uninstall-squidstats">Uninstall SquidStats</a></li>
       </ul>
     </li>
     <li><a href="#to-do">To do</a></li>
@@ -123,13 +124,14 @@ _A modern tool for parsing and analyzing Squid logs, providing a sleek and user-
 
 - Python 3.10+
 - Squid proxy server
-- `squidclient` installed on the server
 
 ```bash
-apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev curl
+apt install git python3 python3-pip python3-venv libmariadb-dev curl
 ```
 
-- ⚠️ !!Important ⚠️ For compatibility with user logs, use this format in /etc/squid/squid.conf:
+> **Note:** If your Squid proxy **does not use user authentication** (i.e., you do not use login or password for clients), you can keep the **default log format** that comes with Squid. The detailed format below is only required for full compatibility with user-based reports.
+
+- ⚠️ !!Important (Only work before version 7.1) ⚠️ For compatibility with user logs, use this format in /etc/squid/squid.conf:
 
 ```bash
   logformat detailed \
@@ -138,12 +140,60 @@ apt install git python3 python3-pip python3-venv python3-pymysql libmariadb-dev 
   access_log /var/log/squid/access.log detailed
 ```
 
+#### 🔧 Cache Manager Configuration (Critical for SquidStats)
+
+**SquidStats requires proper Cache Manager configuration to function correctly.** Please follow the [official Squid Cache Manager documentation](https://wiki.squid-cache.org/Features/CacheManager/Index) for complete setup.
+
+**Essential Configuration Steps:**
+
+1. **Configure Cache Manager Access Controls** in `/etc/squid/squid.conf`:
+   ```bash
+   # Allow localhost access to cache manager
+   acl manager proto cache_object
+   acl localhost src 127.0.0.1/32 ::1
+   
+   # Basic cache manager access
+   http_access allow localhost manager
+   http_access deny manager
+   ```
+
+2. **Configure Remote Access** (if SquidStats runs on different server):
+   ```bash
+   # Replace 192.168.1.100 with your SquidStats server IP
+   acl managerAdmin src 192.168.1.100
+   http_access allow managerAdmin manager
+   ```
+
+3. **Verify Cache Manager is Working**:
+   ```bash
+   # Test cache manager access
+   curl http://127.0.0.1:3128/squid-internal-mgr/menu
+   
+   # Or using squidclient
+   squidclient -h 127.0.0.1 -p 3128 mgr:info
+   ```
+
+**Why This Configuration is Critical:**
+
+- **Real-time Statistics**: SquidStats uses Cache Manager to retrieve live proxy statistics, active connections, and performance metrics
+- **Cache Information**: Provides data about cached objects, memory usage, disk utilization, and hit ratios
+- **Connection Monitoring**: Enables monitoring of active client connections and bandwidth usage
+- **Administrative Functions**: Allows SquidStats to perform cache management operations like cache refresh and statistics retrieval
+
+**⚠️ Security Note:** The Cache Manager provides sensitive information about your proxy server. Always restrict access to trusted IP addresses and consider using authentication for production environments.
+
+**Common Issues Without Proper Configuration:**
+- Empty or missing statistics in SquidStats dashboard
+- "Connection refused" errors when accessing cache data
+- Missing real-time connection information
+- Incomplete bandwidth and user activity reports
+
 ### Installation Script
 
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
 ```
 
 2. Add permission execution:
@@ -216,15 +266,112 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
     Note: for use MARIADB need your own database running
    ```bash
    VERSION=2
+   SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
    SQUID_HOST="127.0.0.1"
    SQUID_PORT=3128
-   FLASK_DEBUG="True"
+   LOG_FORMAT=DETAILED
+   FLASK_DEBUG=True
    DATABASE_TYPE="SQLITE"
    SQUID_LOG="/var/log/squid/access.log"
-   DATABASE_STRING_CONNECTION="/opt/squidstats/"
+   SQUID_CACHE_LOG="/var/log/squid/cache.log"
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/"
    REFRESH_INTERVAL=60
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
+   HTTP_PROXY=""
+   SQUID_CONFIG_PATH=/home/manuel/Desktop/config/squid.conf
+   ACL_FILES_DIR=/home/manuel/Desktop/config/acls
+   LISTEN_HOST=127.0.0.1
+   LISTEN_PORT=8080
    ```
+  
+  ### Forwarding Squid logs from a remote Squid host (important)
+
+  If you install SquidStats on a different machine than the Squid proxy (i.e. Squid is not local
+  on the SquidStats server), you must ensure that the Squid access log (/var/log/squid/access.log)
+  is available on the SquidStats server. The recommended and reliable way to do this is to forward
+  Squid's log entries via syslog (rsyslog or syslog-ng) from the proxy host to the SquidStats host.
+
+  Below are example configurations for both sending (on the Squid proxy host) and receiving
+  (on the SquidStats server). Adjust IP addresses, ports and file paths to your environment.
+
+  NOTE: forwarding logs avoids copying files and ensures live updates for the dashboard.
+
+  - Using rsyslog (proxy = 192.168.1.10, squidstats = 192.168.1.20)
+
+    On the Squid proxy (send): edit `/etc/rsyslog.d/30-squid.conf` and add:
+
+    ```conf
+    # rsyslog - forward squid access log lines to remote host
+    # create a local file watch (imfile) to read Squid access.log
+    module(load="imfile" PollingInterval="10")
+    input(type="imfile"
+          File="/var/log/squid/access.log"
+          Tag="squid_access:"
+          Severity="info"
+          Facility="local0")
+
+    # forward to remote syslog collector
+    *.* @@192.168.1.20:514
+    ```
+
+    On the SquidStats server (receive): enable UDP/TCP syslog reception and store to file.
+    Example `/etc/rsyslog.d/10-remote.conf`:
+
+    ```conf
+    # rsyslog - accept remote logs
+    module(load="imudp")
+    input(type="imudp" port="514")
+
+    # store squid forwarded logs
+    if $programname == 'squid_access' or $syslogtag contains 'squid_access' then {
+        /var/log/remote/squid/access.log
+        stop
+    }
+    ```
+
+    Create the directory and set permissions:
+    ```bash
+    sudo mkdir -p /var/log/remote/squid
+    sudo chown syslog:adm /var/log/remote/squid
+    sudo systemctl restart rsyslog
+    ```
+
+  - Using syslog-ng (proxy send):
+
+    Edit `/etc/syslog-ng/conf.d/squid-forward.conf` on the proxy host:
+
+    ```conf
+    source s_squid { file("/var/log/squid/access.log" follow-freq(1)); };
+    destination d_remote { tcp("192.168.1.20" port(514)); };
+    log { source(s_squid); destination(d_remote); };
+    ```
+
+    On the SquidStats server (receive) with syslog-ng, accept and write to disk:
+
+    ```conf
+    source s_network { tcp(port(514)); }; 
+    destination d_squid { file("/var/log/remote/squid/access.log"); }; 
+    filter f_squid { program("squid_access") or match("^\d+\.\d+\.\d+\.\d+ .*squid" type("regexp")); };
+    log { source(s_network); filter(f_squid); destination(d_squid); }; 
+    ```
+
+  - Firewall and permissions
+
+    - Open port 514 (or the port you choose) on the SquidStats server and allow the proxy host to connect.
+    - Use TCP if you care about delivery guarantees; UDP is faster but lossy.
+    - Ensure the syslog daemon user can write to the destination directory (`/var/log/remote/squid`).
+
+  - Update `SQUID_HOST` in `.env`
+
+    - If you forward logs, set `SQUID_HOST` in the SquidStats `.env` to the IP of the original Squid host
+      or keep it as `127.0.0.1` if SquidStats will process them as local files (i.e., they are written
+      under `/var/log/remote/squid/access.log` locally).
+
+  Examples & notes
+
+  - This approach is preferred over mounting remote filesystems or using scp/rsync cron jobs because
+    it provides near real-time updates and is resilient to log rotation when configured correctly.
+
 5. Run App with python or python3 🚀:
 
 ```bash
@@ -246,7 +393,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/0.2/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
 ```
 
 2. Add permission execution:
@@ -262,23 +409,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
 ```
 
 🕒 Run on System Startup
-To ensure the application starts automatically when the system boots, add the following cron job:
-
-1. Open with a editor the file crontab
-
-```bash
-nano /etc/crontab
-```
-
-2. Add the following line to the crontab file(change path_app for your path):
-
-```bash
-@reboot root nohup python3 path_app/app.py &
-```
-
-3. Save
-
-Or can use service(daemon):
+To ensure the application starts automatically when the system boot :
 
 1. Copy file service:
 
@@ -310,9 +441,67 @@ Or can use service(daemon):
 
 This software has been thoroughly tested and is compatible with Squid version 6.12 in Ubuntu 24.04 and Debian12. Please ensure your Squid installation matches this version or newer for optimal performance.
 
-## To do
+## Uninstall SquidStats
 
-_Make blah blah._
+The installation script now includes a complete uninstall option that cleans all system components:
+
+### Using the Uninstall Script
+
+1. Get the installation script (if you don't have it):
+
+```bash
+wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
+chmod +x install.sh
+```
+
+2. Run the uninstallation:
+
+```bash
+sudo ./install.sh --uninstall
+```
+
+### What Does the Uninstall Do?
+
+The **COMPLETE** uninstallation performs the following actions:
+
+- **🛑 Stops and disables** the systemd service `squidstats.service`
+- **🗑️ Removes files** from the `/opt/squidstats` directory
+- **⚠️ Requires confirmation** from user before proceeding
+
+### Manual Uninstallation
+
+If you prefer to uninstall manually:
+
+```bash
+# Stop and disable service
+sudo systemctl stop squidstats.service
+sudo systemctl disable squidstats.service
+sudo rm -f /etc/systemd/system/squidstats.service
+sudo systemctl daemon-reload
+
+# Remove project files
+sudo rm -rf /opt/squidstats
+```
+
+### ⚠️ Important Note about Uninstallation
+
+- Uninstallation will **permanently delete** all SquidStats data and configurations
+- It's recommended to **backup** any custom configurations before uninstalling
+
+### Upcoming Features
+
+- **Interface Improvements** 🎨
+  - Report export (PDF, Excel)
+
+- **Security Features** 🔒
+  - User authentication
+  - System audit logs
+  - Automated alerts
+
+- **Optimization and Performance** ⚡
+  - Enhanced data caching
+  - Historical log compression
+  - Multi-proxy support
 
 ## Contributing
 
@@ -362,12 +551,12 @@ _The SquidStats project is released under the <a href="https://github.com/kaelth
 > **_Need help?_**
 > **_Feel free to contact me 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
 
-Project Link: ([SquidStats](https://github.com/kaelthasmanu/cucuota))
+Related project: ([CuCuota](https://github.com/kaelthasmanu/cucuota))
 
 ## Technologies Used
 
-Backend: Python, Flask
-Frontend: HTML, CSS
+Backend: Python, Flask  
+Frontend: HTML, CSS, JavaScript
 
 ## Special thanks
 

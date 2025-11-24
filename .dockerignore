@@ -1,0 +1,66 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+.venv
+.env
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.ruff_cache
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+.tox
+coverage.xml
+
+# Build
+build/
+dist/
+*.egg-info
+.eggs
+
+# Logs
+*.log
+logs/
+
+# GitHub
+.github/
+
+# Documentation
+README.md
+README_es.md
+LICENSE
+assets/
+
+# Development
+tests/
+fix_code.sh
+
+# Database (if you want to exclude local db files)
+*.db
+*.sqlite
+*.sqlite3

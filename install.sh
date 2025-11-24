@@ -10,37 +10,24 @@ function ok() {
 
 function checkSudo() {
     if [ "$EUID" -ne 0 ]; then
-        error "ERROR: Este script debe ejecutarse con privilegios de superusuario.\nPor favor, ejecútelo con: sudo $0"
+        error "ERROR: Este script debe ejecutarse con privilegios de superusuario.\nPor favor, ejecútelo con el usuario: root $0"
         exit 1
     fi
-}
-
-function setupVenv() {
-    local venv_dir="/opt/SquidStats/venv"
-
-    if [ -d "$venv_dir" ]; then
-        echo "Entorno virtual ya existe en $venv_dir"
-        return 0
-    fi
-
-    echo "Creando entorno virtual Python en $venv_dir"
-    python3 -m venv "$venv_dir"
-
-    if [ $? -ne 0 ]; then
-        error "Error al crear el entorno virtual"
-        return 1
-    fi
-
-    ok "Entorno virtual creado correctamente"
-    return 0
 }
 
 function installDependencies() {
     local venv_dir="/opt/SquidStats/venv"
 
     if [ ! -d "$venv_dir" ]; then
-        error "El entorno virtual no existe en $venv_dir"
-        return 1
+        echo "El entorno virtual no existe en $venv_dir, creándolo..."
+        python3 -m venv "$venv_dir"
+        
+        if [ $? -ne 0 ]; then
+            error "Error al crear el entorno virtual en $venv_dir"
+            return 1
+        fi
+        
+        ok "Entorno virtual creado correctamente en $venv_dir"
     fi
 
     echo "Activando entorno virtual y instalando dependencias..."
@@ -59,22 +46,22 @@ function installDependencies() {
     deactivate
     return 0
 }
-
+#  pthon3-pymysql delete from packages
 function checkPackages() {
-    local paquetes=("git" "python3" "python3-pip" "python3-venv" "python3-pymysql" "libmariadb-dev" "curl")
-    local faltantes=()
+    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "libicapapi-dev" "python3-dev" "libpq-dev")
+    local missing=()
 
-    for pkg in "${paquetes[@]}"; do
+    for pkg in "${packages[@]}"; do
         if ! dpkg -l | grep -q "^ii  $pkg "; then
-            faltantes+=("$pkg")
+            missing+=("$pkg")
         fi
     done
 
-    if [ ${#faltantes[@]} -ne 0 ]; then
-        echo "Instalando paquetes faltantes: ${faltantes[*]}"
+    if [ ${#missing[@]} -ne 0 ]; then
+        echo "Instalando paquetes faltantes: ${missing[*]}"
         apt-get update
 
-        if ! apt-get install -y "${faltantes[@]}"; then
+        if ! apt-get install -y "${missing[@]}"; then
             error "ERROR: Compruebe la versión de su OS se recomienda Ubuntu20.04+ o Debian12+"
             exit 1
         fi
@@ -98,50 +85,64 @@ function checkSquidLog() {
 }
 
 function updateOrCloneRepo() {
-    local repo_url="https://github.com/alexminator/SquidStats.git"
-    local destino="/opt/SquidStats"
-    local branch="inicio"
+    local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
+    local destinos=("/opt/SquidStats" "/usr/share/squidstats")
+    local branch="main"
     local env_exists=false
+    local db_exists=false
+    local found_dir=""
 
-    if [ -d "$destino" ]; then
-        echo "El directorio $destino ya existe, intentando actualizar con git pull..."
-        cd "$destino"
-
-        if [ -d ".git" ]; then
-            if [ -f ".env" ]; then
-                env_exists=true
-                echo ".env existente detectado, se preservará"
-                cp .env /tmp/.env.backup
-            fi
-
-            if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
-                [ "$env_exists" = true ] && mv /tmp/.env.backup .env
-                echo "? Repositorio actualizado exitosamente en la rama '$branch'"
-                return 0
-            else
-                echo "? Error al actualizar el repositorio, se procederá a clonar de nuevo"
-                cd ..
-                rm -rf "$destino"
-            fi
-        else
-            echo "?? El directorio existe pero no es un repositorio git, se procederá a clonar de nuevo"
-            rm -rf "$destino"
+    for dir in "${destinos[@]}"; do
+        if [ -d "$dir" ]; then
+            found_dir="$dir"
+            break
         fi
+    done
+
+    if [ -z "$found_dir" ]; then
+        echo "❌ No se encontró ninguna instalación de SquidStats en /opt/SquidStats ni /usr/share/squidstats. Abortando actualización."
+        return 1
     fi
 
-    echo "?? Clonando repositorio por primera vez desde la rama '$branch'..."
-    if git clone --branch "$branch" "$repo_url" "$destino"; then
-        chown -R $USER:$USER "$destino"
-        echo "? Repositorio clonado exitosamente en $destino"
+    if [ "$found_dir" = "/usr/share/squidstats" ]; then
+        echo "ℹ️ Instalación detectada en /usr/share/squidstats. Esta versión fue instalada desde un .deb y no puede actualizarse con git."
+        echo "Por favor, use el gestor de paquetes (apt/dpkg) para actualizar."
+        return 1
+    fi
 
-        if [ "$env_exists" = true ] && [ -f /tmp/.env.backup ]; then
-            mv /tmp/.env.backup "$destino/.env"
-            echo "?? Archivo .env restaurado"
+    echo "El directorio $found_dir ya existe, intentando actualizar con git pull..."
+    cd "$found_dir"
+
+    if [ -d ".git" ]; then
+        if [ -f ".env" ]; then
+            env_exists=true
+            echo ".env existente detectado, se preservará"
+            cp .env /tmp/.env.backup
         fi
 
-        return 0
+        local db_files=(*.db)
+        if [ -e "${db_files[0]}" ]; then
+            db_exists=true
+            echo "Archivos .db detectados, se preservarán"
+            mkdir -p /tmp/db_backup
+            cp *.db /tmp/db_backup/
+        fi
+
+        if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
+            [ "$env_exists" = true ] && mv /tmp/.env.backup .env
+            if [ "$db_exists" = true ]; then
+                mv /tmp/db_backup/*.db . 2>/dev/null || true
+                rm -rf /tmp/db_backup
+                echo "📊 Archivos .db restaurados"
+            fi
+            echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
+            return 0
+        else
+            echo "❌ Error al actualizar el repositorio."
+            return 1
+        fi
     else
-        echo "? Error al clonar el repositorio"
+        echo "⚠️ El directorio $found_dir existe pero no es un repositorio git. No se puede actualizar automáticamente."
         return 1
     fi
 }
@@ -185,12 +186,16 @@ function createEnvFile() {
 VERSION=2
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
+LOG_FORMAT=DETAILED
 FLASK_DEBUG=True
 DATABASE_TYPE=SQLITE
 SQUID_LOG=/var/log/squid/access.log
 DATABASE_STRING_CONNECTION=/opt/SquidStats/squidstats.db
 REFRESH_INTERVAL=60
 BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
+HTTP_PROXY=""
+SQUID_CONFIG_PATH=/etc/squid/squid.conf
+ACL_FILES_DIR=/etc/squid/config/acls
 EOF
         ok "Archivo .env creado correctamente en $env_file"
         return 0
@@ -220,6 +225,16 @@ Restart=always
 RestartSec=5
 EnvironmentFile=/opt/SquidStats/.env
 Environment=PATH=/opt/SquidStats/venv/bin:$PATH
+
+# Resource limits
+MemoryLimit=2048M
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=squidstats
 
 [Install]
 WantedBy=multi-user.target
@@ -284,65 +299,71 @@ function configureDatabase() {
     esac
 }
 
-patchSquidConf() {
-    local squid_conf=""
-    if [ -f "/etc/squid/squid.conf" ]; then
-        squid_conf="/etc/squid/squid.conf"
-    elif [ -f "/etc/squid3/squid.conf" ]; then
-        squid_conf="/etc/squid3/squid.conf"
-    else
-        error "Debe tener instalado un servidor proxy Squid. No se encontró squid.conf"
-        return 1
+function uninstallSquidStats() {
+    local destino="/opt/SquidStats"
+    local service_file="/etc/systemd/system/squidstats.service"
+
+    echo -e "\n\033[1;43mDESINSTALACIÓN DE SQUIDSTATS\033[0m"
+    echo "Esta operación eliminará completamente SquidStats del sistema."
+    echo "¿Está seguro de que desea continuar? (s/N)"
+
+    read -p "Respuesta: " confirm
+
+    if [[ ! "$confirm" =~ ^[sS]$ ]]; then
+        echo "Desinstalación cancelada."
+        return 0
     fi
 
-    # Backup solo si no existe
-    if [ ! -f "${squid_conf}.back" ]; then
-        cp "$squid_conf" "${squid_conf}.back"
-        ok "Backup realizado: ${squid_conf}.back"
+    echo "Iniciando desinstalación..."
+
+    if [ -f "$service_file" ]; then
+        echo "Deteniendo servicio squidstats..."
+        systemctl stop squidstats.service 2>/dev/null || true
+
+        echo "Deshabilitando servicio squidstats..."
+        systemctl disable squidstats.service 2>/dev/null || true
+
+        echo "Eliminando archivo de servicio..."
+        rm -f "$service_file"
+
+        systemctl daemon-reload
+        ok "Servicio squidstats eliminado"
     else
-        echo "Backup previo ya existe: ${squid_conf}.back"
+        echo "Servicio squidstats no encontrado"
+    fi
+    
+    if [ -d "$destino" ]; then
+        echo "Eliminando directorio de instalación $destino..."
+        rm -rf "$destino"
+        ok "Directorio de instalación eliminado"
+    else
+        echo "Directorio de instalación no encontrado"
     fi
 
-    # Añadir logformat detailed si no existe
-    if ! grep -q '^logformat[[:space:]]\+detailed' "$squid_conf"; then
-        cat <<'EOF' >>"$squid_conf"
-logformat detailed %ts.%03tu %>a %ui %un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
-EOF
-        ok "Se agregó logformat detailed"
-    else
-        echo "logformat detailed ya existe."
-    fi
-
-    # Asegurar access_log con detailed !manager
-    if grep -q '^access_log[[:space:]]\+/var/log/squid/access\.log' "$squid_conf"; then
-        sed -i '/^access_log[[:space:]]\+\/var\/log\/squid\/access\.log/{
-            s/detailed//g
-            s/!manager//g
-            s/$/ detailed !manager/
-        }' "$squid_conf"
-        ok "access_log actualizado con detailed !manager"
-    else
-        echo 'access_log /var/log/squid/access.log detailed !manager' >>"$squid_conf"
-        ok "access_log agregado con detailed !manager"
-    fi
+    ok "SquidStats ha sido desinstalado completamente del sistema"
 }
 
 function main() {
     checkSudo
 
     if [ "$1" = "--update" ]; then
+        echo "Verificando paquetes instalados..."
+        checkPackages
+        echo "Verificando Dependecias de python..."
+        installDependencies
         echo "Actualizando Servicio..."
         updateOrCloneRepo
+        echo "Reiniciando Servicio..."
         systemctl restart squidstats.service
 
         ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
+    elif [ "$1" = "--uninstall" ]; then
+        uninstallSquidStats
     else
         echo "Instalando aplicación web..."
         checkPackages
         updateOrCloneRepo
-        patchSquidConf
         checkSquidLog
-        setupVenv
         installDependencies
         createEnvFile
         configureDatabase
@@ -357,12 +378,18 @@ case "$1" in
 "--update")
     main "$1"
     ;;
+"--uninstall")
+    main "$1"
+    ;;
 "")
     main
     ;;
 *)
     echo "Parámetro no reconocido: $1"
-    echo "Uso: $0 --update"
+    echo "Uso: $0 [--update|--uninstall]"
+    echo "  Sin parámetros: Instala SquidStats"
+    echo "  --update: Actualiza SquidStats existente"
+    echo "  --uninstall: Desinstala SquidStats completamente"
     exit 1
     ;;
 esac
