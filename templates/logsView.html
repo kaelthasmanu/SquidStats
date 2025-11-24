@@ -1,9 +1,11 @@
 
-{% extends 'base.html' %}
-
-{% block title %}Inicio | Dashboard Squid{% endblock %}
+{% extends 'layouts/base.html' %}
+{% block styles %}{% endblock styles %}
 
 {% block content %}
-    {% include 'components/logs.html' %}
-
+    {% include 'partials/logs.html' %}
 {% endblock %}
+
+{% block scripts %}
+    <script type="module" src="static/js/dashboard.js"></script>
+{% endblock scripts %}

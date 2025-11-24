@@ -1,3 +1,16 @@
-{% extends 'base.html' %} {% block title %}BlackList | Dashboard Squid{%
-endblock %} {% block content %} {% include 'components/black_list.html' %} {%
-endblock %}
+{% extends 'layouts/base.html' %} 
+ 
+{% block content %} 
+    {% include 'partials/black_list.html' %} 
+{%endblock %}
+
+{% block scripts %}
+<script>
+    function updateQueryParam(param, value) {
+        const url = new URL(window.location.href);
+        url.searchParams.set(param, value);
+        url.searchParams.set('page', '1');
+        return url.toString();
+    }
+</script>
+{% endblock scripts %}
