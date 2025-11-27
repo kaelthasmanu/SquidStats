@@ -47,7 +47,7 @@ def find_by_keyword(
             if UserModel is None or LogModel is None:
                 continue
 
-            # Crear query usando ORM
+            # Create query using ORM
             query = (
                 db.query(
                     UserModel.username,
@@ -93,7 +93,7 @@ def find_by_keyword(
             print(f"Error processing table {log_table}: {e}")
             continue
 
-    # Ordenar resultados
+    # Sort results
     all_results.sort(
         key=lambda x: (x["username"], x["log_date"], x["access_count"]), reverse=True
     )
@@ -128,7 +128,7 @@ def find_social_media_activity(
             if UserModel is None or LogModel is None:
                 continue
 
-            # Crear condiciones OR para cada dominio usando ORM
+            # Create OR conditions for each domain using ORM
             domain_conditions = []
             for domain in domain_list:
                 domain_conditions.extend(
@@ -142,7 +142,7 @@ def find_social_media_activity(
                     ]
                 )
 
-            # Crear query usando ORM
+            # Create query using ORM
             query = (
                 db.query(
                     UserModel.username,
@@ -188,7 +188,7 @@ def find_social_media_activity(
             print(f"Error processing table {log_table}: {e}")
             continue
 
-    # Ordenar resultados
+    # Sort results
     all_results.sort(
         key=lambda x: (x["username"], x["log_date"], x["access_count"]), reverse=True
     )
@@ -216,7 +216,7 @@ def find_by_ip(
             if UserModel is None or LogModel is None:
                 continue
 
-            # Crear query usando ORM
+            # Create query using ORM
             query = (
                 db.query(
                     UserModel.username,
@@ -258,7 +258,7 @@ def find_by_ip(
             print(f"Error processing table {log_table}: {e}")
             continue
 
-    # Ordenar resultados
+    # Sort results
     all_results.sort(
         key=lambda x: (x["username"], x["log_date"], x["access_count"]), reverse=True
     )
@@ -286,7 +286,7 @@ def find_by_response_code(
             if UserModel is None or LogModel is None:
                 continue
 
-            # Crear query usando ORM
+            # Create query using ORM
             query = (
                 db.query(
                     UserModel.username,
@@ -335,7 +335,7 @@ def find_by_response_code(
             print(f"Error processing table {log_table}: {e}")
             continue
 
-    # Ordenar resultados
+    # Sort results
     all_results.sort(
         key=lambda x: (x["username"], x["log_date"], x["access_count"]), reverse=True
     )
@@ -355,7 +355,7 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, A
         if UserModel is None or LogModel is None:
             return {"total_requests": 0, "hourly_activity": [0] * 24}
 
-        # Crear query usando ORM - compatible con SQLite y MySQL
+        # Create query using ORM - compatible with SQLite and MySQL
         query = (
             db.query(
                 func.cast(
@@ -414,7 +414,7 @@ def get_all_usernames(db: Session) -> list[str]:
             if UserModel is None:
                 continue
 
-            # Usar ORM para obtener usernames únicos
+            # Use ORM to get unique usernames
             usernames = (
                 db.query(UserModel.username)
                 .filter(
@@ -550,7 +550,7 @@ def get_top_users_by_data(
             print(f"Error processing table {log_table}: {e}")
             continue
 
-    # Ordenar y limitar resultados
+    # Sort and limit results
     sorted_users = sorted(user_data.items(), key=lambda x: x[1], reverse=True)[:limit]
 
     top_users_list = [
@@ -637,7 +637,7 @@ def get_top_urls_by_data(
             print(f"Error processing table {log_table}: {e}")
             continue
 
-    # Ordenar y limitar resultados
+    # Sort and limit results
     sorted_urls = sorted(url_data.items(), key=lambda x: x[1], reverse=True)[:limit]
 
     top_urls_list = [
@@ -711,7 +711,7 @@ def find_denied_access(
             if UserModel is None or LogModel is None:
                 continue
 
-            # Crear query usando ORM
+            # Create query using ORM
             query = (
                 db.query(
                     UserModel.username,
@@ -749,38 +749,59 @@ def find_denied_access(
             print(f"Error processing table {log_table}: {e}")
             continue
 
-    # Ordenar resultados
+    # Sort results
     all_results.sort(key=lambda x: (x["log_date"], x["username"]), reverse=True)
 
     return {"results": all_results}
 
 def find_suspicious_activity(db, threshold=50, hours=1):
     """
-    Encuentra IPs con actividad sospechosa (muchos requests en poco tiempo)
-    Retorna: lista de tuplas [(ip, count), ...]
+    Find IPs with suspicious activity (many requests in short time)
+    Returns: list of tuples [(ip, count), ...]
     """
-    from sqlalchemy import text
     from datetime import datetime, timedelta
     
     try:
         since_time = datetime.now() - timedelta(hours=hours)
         
-        query = text("""
-            SELECT ip_address, COUNT(*) as request_count
-            FROM logs 
-            WHERE timestamp >= :since_time
-            GROUP BY ip_address
-            HAVING request_count > :threshold
-            ORDER BY request_count DESC
-            LIMIT 10
-        """)
+        # Get all user tables to check across all dates
+        engine = db.get_bind()
+        inspector = inspect(engine)
+        all_tables = inspector.get_table_names()
+        user_tables = [t for t in all_tables if t.startswith("user_") and len(t) == 13]
         
-        result = db.execute(query, {
-            'since_time': since_time,
-            'threshold': threshold
-        })
+        ip_counts = defaultdict(int)
         
-        return [(row[0], row[1]) for row in result]
+        for table_name in user_tables:
+            date_suffix = table_name.split("_")[1]
+            try:
+                UserModel, LogModel = get_dynamic_models(date_suffix)
+                if UserModel is None or LogModel is None:
+                    continue
+                
+                # Use ORM to count requests per IP
+                results = (
+                    db.query(
+                        UserModel.ip,
+                        func.count(LogModel.id).label("request_count")
+                    )
+                    .join(LogModel, LogModel.user_id == UserModel.id)
+                    .filter(LogModel.created_at >= since_time)
+                    .group_by(UserModel.ip)
+                    .having(func.count(LogModel.id) > threshold)
+                    .all()
+                )
+                
+                for row in results:
+                    ip_counts[row[0]] += row.request_count
+                    
+            except Exception as e:
+                print(f"Error processing table {table_name}: {e}")
+                continue
+        
+        # Sort by count descending and return top 10
+        sorted_ips = sorted(ip_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+        return sorted_ips
         
     except Exception as e:
         print(f"Error finding suspicious activity: {e}")
@@ -788,25 +809,50 @@ def find_suspicious_activity(db, threshold=50, hours=1):
 
 def get_active_users_count(db, hours=1):
     """
-    Cuenta usuarios únicos activos en las últimas N horas
-    Retorna: número de usuarios únicos
+    Count unique active users in the last N hours
+    Returns: number of unique users
     """
-    from sqlalchemy import text
     from datetime import datetime, timedelta
     
     try:
         since_time = datetime.now() - timedelta(hours=hours)
         
-        query = text("""
-            SELECT COUNT(DISTINCT username)
-            FROM logs
-            WHERE timestamp >= :since_time 
-            AND username IS NOT NULL 
-            AND username != ''
-        """)
+        # Get all user tables to check across all dates
+        engine = db.get_bind()
+        inspector = inspect(engine)
+        all_tables = inspector.get_table_names()
+        user_tables = [t for t in all_tables if t.startswith("user_") and len(t) == 13]
         
-        result = db.execute(query, {'since_time': since_time})
-        return result.scalar() or 0
+        active_users = set()
+        
+        for table_name in user_tables:
+            date_suffix = table_name.split("_")[1]
+            try:
+                UserModel, LogModel = get_dynamic_models(date_suffix)
+                if UserModel is None or LogModel is None:
+                    continue
+                
+                # Use ORM to get distinct usernames with activity in time range
+                usernames = (
+                    db.query(UserModel.username.distinct())
+                    .join(LogModel, LogModel.user_id == UserModel.id)
+                    .filter(
+                        LogModel.created_at >= since_time,
+                        UserModel.username.isnot(None),
+                        UserModel.username != "",
+                        UserModel.username != "-"
+                    )
+                    .all()
+                )
+                
+                for username_row in usernames:
+                    active_users.add(username_row[0])
+                    
+            except Exception as e:
+                print(f"Error processing table {table_name}: {e}")
+                continue
+        
+        return len(active_users)
         
     except Exception as e:
         print(f"Error counting active users: {e}")
@@ -814,36 +860,62 @@ def get_active_users_count(db, hours=1):
 
 def get_high_usage_users(db, hours=24, limit=5, threshold_mb=500):
     """
-    Obtiene usuarios con mayor consumo de datos
-    Retorna: lista de tuplas [(username, usage_mb), ...]
+    Get users with high data consumption
+    Returns: list of tuples [(username, usage_mb), ...]
     """
-    from sqlalchemy import text
     from datetime import datetime, timedelta
     
     try:
         since_time = datetime.now() - timedelta(hours=hours)
         
-        query = text("""
-            SELECT 
-                username,
-                SUM(bytes_sent) / (1024 * 1024) as usage_mb
-            FROM logs
-            WHERE timestamp >= :since_time
-            AND username IS NOT NULL 
-            AND username != ''
-            GROUP BY username
-            HAVING usage_mb > :threshold_mb
-            ORDER BY usage_mb DESC
-            LIMIT :limit
-        """)
+        # Get all user tables to check across all dates
+        engine = db.get_bind()
+        inspector = inspect(engine)
+        all_tables = inspector.get_table_names()
+        user_tables = [t for t in all_tables if t.startswith("user_") and len(t) == 13]
         
-        result = db.execute(query, {
-            'since_time': since_time,
-            'threshold_mb': threshold_mb,
-            'limit': limit
-        })
+        user_usage = defaultdict(float)
         
-        return [(row[0], float(row[1])) for row in result]
+        for table_name in user_tables:
+            date_suffix = table_name.split("_")[1]
+            try:
+                UserModel, LogModel = get_dynamic_models(date_suffix)
+                if UserModel is None or LogModel is None:
+                    continue
+                
+                # Use ORM to sum data usage per user
+                results = (
+                    db.query(
+                        UserModel.username,
+                        func.sum(LogModel.data_transmitted).label("total_bytes")
+                    )
+                    .join(LogModel, LogModel.user_id == UserModel.id)
+                    .filter(
+                        LogModel.created_at >= since_time,
+                        UserModel.username.isnot(None),
+                        UserModel.username != "",
+                        UserModel.username != "-"
+                    )
+                    .group_by(UserModel.username)
+                    .all()
+                )
+                
+                for row in results:
+                    usage_mb = (row.total_bytes or 0) / (1024 * 1024)
+                    user_usage[row[0]] += usage_mb
+                    
+            except Exception as e:
+                print(f"Error processing table {table_name}: {e}")
+                continue
+        
+        # Filter by threshold and sort
+        filtered_users = [
+            (username, usage) for username, usage in user_usage.items() 
+            if usage > threshold_mb
+        ]
+        sorted_users = sorted(filtered_users, key=lambda x: x[1], reverse=True)[:limit]
+        
+        return sorted_users
         
     except Exception as e:
         print(f"Error getting high usage users: {e}")
@@ -851,26 +923,46 @@ def get_high_usage_users(db, hours=24, limit=5, threshold_mb=500):
 
 def get_failed_auth_attempts(db, hours=1, threshold=10):
     """
-    Obtiene intentos de autenticación fallidos
-    Retorna: número de intentos fallidos
+    Get failed authentication attempts
+    Returns: number of failed attempts
     """
-    from sqlalchemy import text
     from datetime import datetime, timedelta
     
     try:
         since_time = datetime.now() - timedelta(hours=hours)
         
-        query = text("""
-            SELECT COUNT(*) as failed_count
-            FROM logs
-            WHERE timestamp >= :since_time
-            AND response_code IN ('407', '401', '403')
-        """)
+        # Get all user tables to check across all dates
+        engine = db.get_bind()
+        inspector = inspect(engine)
+        all_tables = inspector.get_table_names()
+        user_tables = [t for t in all_tables if t.startswith("user_") and len(t) == 13]
         
-        result = db.execute(query, {'since_time': since_time})
-        count = result.scalar() or 0
+        total_failed = 0
         
-        return count
+        for table_name in user_tables:
+            date_suffix = table_name.split("_")[1]
+            try:
+                UserModel, LogModel = get_dynamic_models(date_suffix)
+                if UserModel is None or LogModel is None:
+                    continue
+                
+                # Use ORM to count failed auth attempts (401, 407, 403 responses)
+                count = (
+                    db.query(func.count(LogModel.id))
+                    .filter(
+                        LogModel.created_at >= since_time,
+                        LogModel.response.in_([401, 407, 403])
+                    )
+                    .scalar()
+                )
+                
+                total_failed += count or 0
+                    
+            except Exception as e:
+                print(f"Error processing table {table_name}: {e}")
+                continue
+        
+        return total_failed
         
     except Exception as e:
         print(f"Error getting failed auth attempts: {e}")
@@ -878,26 +970,46 @@ def get_failed_auth_attempts(db, hours=1, threshold=10):
 
 def get_denied_requests(db, hours=1, threshold=5):
     """
-    Obtiene requests denegados
-    Retorna: número de requests denegados
+    Get denied requests
+    Returns: number of denied requests
     """
-    from sqlalchemy import text
     from datetime import datetime, timedelta
     
     try:
         since_time = datetime.now() - timedelta(hours=hours)
         
-        query = text("""
-            SELECT COUNT(*) as denied_count
-            FROM logs
-            WHERE timestamp >= :since_time
-            AND response_code = '403'
-        """)
+        # Get all user tables to check across all dates
+        engine = db.get_bind()
+        inspector = inspect(engine)
+        all_tables = inspector.get_table_names()
+        user_tables = [t for t in all_tables if t.startswith("user_") and len(t) == 13]
         
-        result = db.execute(query, {'since_time': since_time})
-        count = result.scalar() or 0
+        total_denied = 0
         
-        return count
+        for table_name in user_tables:
+            date_suffix = table_name.split("_")[1]
+            try:
+                UserModel, LogModel = get_dynamic_models(date_suffix)
+                if UserModel is None or LogModel is None:
+                    continue
+                
+                # Use ORM to count denied requests (403 responses)
+                count = (
+                    db.query(func.count(LogModel.id))
+                    .filter(
+                        LogModel.created_at >= since_time,
+                        LogModel.response == 403
+                    )
+                    .scalar()
+                )
+                
+                total_denied += count or 0
+                    
+            except Exception as e:
+                print(f"Error processing table {table_name}: {e}")
+                continue
+        
+        return total_denied
         
     except Exception as e:
         print(f"Error getting denied requests: {e}")
