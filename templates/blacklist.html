@@ -1,8 +1,16 @@
-{% extends 'layouts/base.html' %} 
+{% extends 'layouts/base.html' %}
+
+{% block header_actions %}
+<div class="bg-gray-100 px-4 py-2 rounded-lg shadow-sm">
+    <span class="text-sm font-medium text-gray-600">
+        Página {{ pagination.page }} de {{ pagination.total_pages }}
+    </span>
+</div>
+{% endblock header_actions %}
  
 {% block content %} 
     {% include 'partials/black_list.html' %} 
-{%endblock %}
+{% endblock %}
 
 {% block scripts %}
 <script>

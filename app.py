@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from dotenv import load_dotenv
 from flask import Flask
@@ -10,15 +11,13 @@ from config import Config, logger
 from database.database import migrate_database
 from parsers.log import process_logs
 from routes import register_routes
-
-# from routes.main_routes import initialize_proxy_detection
 from routes.stats_routes import realtime_data_thread
 from services.metrics_service import MetricsService
 from services.notifications import (
     has_remote_commits_with_messages,
     set_commit_notifications,
-    set_socketio_instance,  # Nueva importación
-    start_notification_monitor,  # Nueva importación
+    set_socketio_instance,
+    start_notification_monitor,
 )
 from utils.filters import register_filters
 
@@ -50,11 +49,34 @@ def create_app():
     # Register custom filters
     register_filters(app)
 
+    # Register the date format filter for notifications
+    @app.template_filter('datetime_format')
+    def datetime_format(value, format='%d/%m/%Y %H:%M'):
+        """Filtro para formatear fechas en las plantillas"""
+        if isinstance(value, str):
+            try:
+                # Handle ISO format
+                if 'T' in value:
+                    value = datetime.fromisoformat(value.replace('Z', '+00:00'))
+                else:
+                    # Try other common formats
+                    for fmt in ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f']:
+                        try:
+                            value = datetime.strptime(value, fmt)
+                            break
+                        except ValueError:
+                            continue
+                    else:
+                        return value  # Could not parse, returning original
+            except Exception:
+                return value
+        if isinstance(value, datetime):
+            return value.strftime(format)
+        return value
+
     # Register all route blueprints
     register_routes(app)
 
-    # Initialize proxy detection
-    #    initialize_proxy_detection()
 
     # Configure response headers
     @app.after_request
@@ -109,10 +131,10 @@ def main():
     # Initialize SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-    # Configurar Socket.IO en el módulo de notificaciones
+    # Set up Socket.IO in the notifications module
     set_socketio_instance(socketio)
 
-    # Iniciar el monitor de notificaciones
+    # Start the notification monitor
     start_notification_monitor()
 
     # Start real-time data collection thread
@@ -124,7 +146,7 @@ def main():
         f"Starting SquidStats application in {'debug' if debug_mode else 'production'} mode"
     )
 
-    # Leer host/port desde variables de entorno si existen (compatibilidad con FLASK_HOST/PORT)
+    # Read host/port from environment variables if they exist (compatible with FLASK_HOST/PORT)
     host = os.getenv("LISTEN_HOST") or os.getenv("FLASK_HOST") or "0.0.0.0"
     port_str = os.getenv("LISTEN_PORT") or os.getenv("FLASK_PORT") or "5000"
     try:
