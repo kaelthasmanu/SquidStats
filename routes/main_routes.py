@@ -209,7 +209,7 @@ def all_notifications():
             "all_notifications.html",
             page_title="Todas las Notificaciones",
             subtitle="Historial completo de notificaciones del sistema",
-            icon="fa-bell",
+            icon="fas fa-bell",
             notifications=notifications_data['notifications'],
             unread_count=notifications_data['unread_count'],
             pagination=notifications_data.get('pagination', {
