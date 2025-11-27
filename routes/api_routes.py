@@ -1,5 +1,4 @@
 from flask import Blueprint, current_app, jsonify, request
-from services.notifications import get_all_notifications, mark_notifications_read
 
 from config import logger
 from database.database import get_session
@@ -18,7 +17,10 @@ from services.auditoria_service import (
     get_user_activity_summary,
 )
 from services.metrics_service import MetricsService
-from services.notifications import get_commit_notifications
+from services.notifications import (
+    get_all_notifications,
+    mark_notifications_read,
+)
 
 api_bp = Blueprint("api", __name__)
 
@@ -149,19 +151,18 @@ def api_get_notifications():
         return jsonify(get_all_notifications(limit=10))
     except Exception as e:
         logger.error(f"Error getting notifications: {e}")
-        return jsonify({'unread_count': 0, 'notifications': []})
+        return jsonify({"unread_count": 0, "notifications": []})
 
 
 @api_bp.route("/notifications/mark-read", methods=["POST"])
 def api_mark_notifications_read():
     try:
         data = request.get_json()
-        notification_ids = data.get('ids', [])
+        notification_ids = data.get("ids", [])
         mark_notifications_read(notification_ids)
-        return jsonify({
-            'success': True, 
-            'unread_count': get_all_notifications()['unread_count']
-        })
+        return jsonify(
+            {"success": True, "unread_count": get_all_notifications()["unread_count"]}
+        )
     except Exception as e:
         logger.error(f"Error marking notifications as read: {e}")
-        return jsonify({'success': False}), 500
+        return jsonify({"success": False}), 500

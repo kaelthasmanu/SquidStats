@@ -1,6 +1,5 @@
 import os
 import time
-from threading import Lock
 from typing import Any
 
 from flask import Blueprint, current_app, redirect, render_template, request
@@ -125,23 +124,23 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
 def index():
     """
     Ruta unificada para el dashboard
-    
-    CAMBIO PRINCIPAL: 
+
+    CAMBIO PRINCIPAL:
     - Ahora maneja tanto la carga completa de la página como las actualizaciones parciales
     - Elimina la necesidad de la ruta separada /actualizar-conexiones
-    
+
     Detección de tipo de petición:
     - Petición normal: Devuelve index.html completo
     - Petición parcial (param partial=true): Devuelve solo el contenido de conexiones
     """
-    
+
     # CAMBIO: Detectar si es una petición para contenido parcial
-    is_partial_request = request.args.get('partial') == 'true'
-    
+    is_partial_request = request.args.get("partial") == "true"
+
     context, error_response = _get_dashboard_context()
     if error_response:
         return error_response
-    
+
     # CAMBIO: Si es petición parcial, devolver solo el template de conexiones
     if is_partial_request:
         return render_template(
@@ -153,7 +152,7 @@ def index():
             build_time_ms=context["build_time_ms"],
             connection_count=context["connection_count"],
         )
-    
+
     # Petición normal: devolver la página completa
     return render_template("index.html", **context)
 

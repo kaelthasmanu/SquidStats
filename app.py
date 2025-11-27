@@ -5,10 +5,12 @@ from flask import Flask
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
 from flask_wtf.csrf import CSRFProtect
+
 from config import Config, logger
 from database.database import migrate_database
 from parsers.log import process_logs
 from routes import register_routes
+
 # from routes.main_routes import initialize_proxy_detection
 from routes.stats_routes import realtime_data_thread
 from services.metrics_service import MetricsService
@@ -52,7 +54,7 @@ def create_app():
     register_routes(app)
 
     # Initialize proxy detection
-#    initialize_proxy_detection()
+    #    initialize_proxy_detection()
 
     # Configure response headers
     @app.after_request
