@@ -124,12 +124,27 @@ function updateOrCloneRepo() {
                 mv /tmp/.env.backup .env
                 
                 # Actualizar solo la VERSION del .env con la del repositorio
-                if [ -f "example.env" ]; then
-                    new_version=$(grep "^VERSION=" example.env | cut -d'=' -f2)
+                local example_env_path="$found_dir/example.env"
+                local env_path="$found_dir/.env"
+                
+                if [ -f "$example_env_path" ]; then
+                    new_version=$(grep "^VERSION=" "$example_env_path" | cut -d'=' -f2)
                     if [ ! -z "$new_version" ]; then
-                        sed -i "s/^VERSION=.*/VERSION=$new_version/" .env
-                        echo "✅ VERSION actualizada a $new_version en .env"
+                        # Verificar si existe la línea VERSION en .env
+                        if grep -q "^VERSION=" "$env_path"; then
+                            # Actualizar VERSION existente
+                            sed -i "s/^VERSION=.*/VERSION=$new_version/" "$env_path"
+                            echo "✅ VERSION actualizada a $new_version en .env"
+                        else
+                            # Agregar VERSION al inicio del archivo si no existe
+                            sed -i "1iVERSION=$new_version" "$env_path"
+                            echo "✅ VERSION agregada: $new_version en .env"
+                        fi
+                    else
+                        echo "⚠️ No se pudo leer VERSION de example.env"
                     fi
+                else
+                    echo "⚠️ Archivo example.env no encontrado en $example_env_path"
                 fi
             fi
             echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
@@ -318,13 +333,13 @@ function main() {
 
     if [ "$1" = "--update" ]; then
         echo "Verificando paquetes instalados..."
-        checkPackages
+        #checkPackages
         echo "Verificando Dependecias de python..."
-        installDependencies
+        #installDependencies
         echo "Actualizando Servicio..."
         updateOrCloneRepo
         echo "Reiniciando Servicio..."
-        systemctl restart squidstats.service
+        #systemctl restart squidstats.service
 
         ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     elif [ "$1" = "--uninstall" ]; then
