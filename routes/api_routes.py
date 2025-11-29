@@ -175,8 +175,15 @@ def api_mark_notifications_read():
             {"success": True, "unread_count": get_all_notifications()["unread_count"]}
         )
     except Exception as e:
-        logger.error(f"Error marking notifications as read: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        logger.exception("Error marking notifications as read")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+        resp = {"success": False, "error": "Internal server error"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
 
 
 @api_bp.route("/notifications/<int:notification_id>", methods=["DELETE"])
@@ -188,7 +195,7 @@ def api_delete_notification(notification_id):
         )
     except Exception as e:
         logger.error(f"Error deleting notification: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": "Internal server error"}), 500
 
 
 @api_bp.route("/notifications/delete-all", methods=["DELETE"])
@@ -198,4 +205,4 @@ def api_delete_all_notifications():
         return jsonify({"success": True, "unread_count": 0})
     except Exception as e:
         logger.error(f"Error deleting all notifications: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": "Internal server error"}), 500

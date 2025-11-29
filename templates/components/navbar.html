@@ -435,30 +435,52 @@
                 'bg-blue-50 border-blue-500'
             } max-w-sm transform translate-x-full transition-transform duration-300`;
             
-            toast.innerHTML = `
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <i class="fas ${notification.icon} ${
-                            notification.type === 'error' ? 'text-red-600' :
-                            notification.type === 'warning' ? 'text-yellow-600' :
-                            notification.type === 'success' ? 'text-green-600' :
-                            'text-blue-600'
-                        } text-lg"></i>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <p class="text-sm font-medium text-gray-900">
-                            ${notification.source === 'squid' ? 'Squid' : 
-                              notification.source === 'git' ? 'Git' : 'Sistema'}
-                        </p>
-                        <p class="mt-1 text-sm text-gray-600">${notification.message}</p>
-                        <p class="mt-1 text-xs text-gray-500">${notification.time}</p>
-                    </div>
-                    <button onclick="document.getElementById('${toastId}').remove()" 
-                            class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
+            // Create elements safely without innerHTML
+            const container = document.createElement('div');
+            container.className = 'flex items-start';
+            
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'flex-shrink-0';
+            const icon = document.createElement('i');
+            icon.className = `fas ${notification.icon} ${
+                notification.type === 'error' ? 'text-red-600' :
+                notification.type === 'warning' ? 'text-yellow-600' :
+                notification.type === 'success' ? 'text-green-600' :
+                'text-blue-600'
+            } text-lg`;
+            iconDiv.appendChild(icon);
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'ml-3 flex-1';
+            
+            const sourceP = document.createElement('p');
+            sourceP.className = 'text-sm font-medium text-gray-900';
+            sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
+                                  notification.source === 'git' ? 'Git' : 'Sistema';
+            
+            const messageP = document.createElement('p');
+            messageP.className = 'mt-1 text-sm text-gray-600';
+            messageP.textContent = notification.message;
+            
+            const timeP = document.createElement('p');
+            timeP.className = 'mt-1 text-xs text-gray-500';
+            timeP.textContent = notification.time;
+            
+            contentDiv.appendChild(sourceP);
+            contentDiv.appendChild(messageP);
+            contentDiv.appendChild(timeP);
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600';
+            closeBtn.onclick = () => document.getElementById(toastId).remove();
+            const closeIcon = document.createElement('i');
+            closeIcon.className = 'fas fa-times';
+            closeBtn.appendChild(closeIcon);
+            
+            container.appendChild(iconDiv);
+            container.appendChild(contentDiv);
+            container.appendChild(closeBtn);
+            toast.appendChild(container);
             
             document.body.appendChild(toast);
             
@@ -518,24 +540,49 @@
                                 textColor = 'text-blue-600';
                         }
                         
-                        ul.innerHTML += `
-                            <li class="px-4 py-3 flex items-start hover:bg-gray-50 cursor-pointer notification-item ${
-                                notification.read ? 'opacity-60' : ''
-                            }" data-id="${notification.id}">
-                                <span class="inline-flex items-center justify-center h-8 w-8 rounded-full ${bgColor} ${textColor} mr-3">
-                                    <i class="fas ${notification.icon}"></i>
-                                </span>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-900">
-                                        ${notification.source === 'squid' ? 'Squid' : 
-                                          notification.source === 'git' ? 'Git' : 'Sistema'}
-                                    </p>
-                                    <p class="text-sm text-gray-700 mt-1">${notification.message}</p>
-                                    <span class="text-xs text-gray-400 mt-1">${notification.time}</span>
-                                </div>
-                                ${!notification.read ? '<span class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>' : ''}
-                            </li>
-                        `;
+                        // Create list item safely
+                        const li = document.createElement('li');
+                        li.className = `px-4 py-3 flex items-start hover:bg-gray-50 cursor-pointer notification-item ${
+                            notification.read ? 'opacity-60' : ''
+                        }`;
+                        li.dataset.id = notification.id;
+                        
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = `inline-flex items-center justify-center h-8 w-8 rounded-full ${bgColor} ${textColor} mr-3`;
+                        const icon = document.createElement('i');
+                        icon.className = `fas ${notification.icon}`;
+                        iconSpan.appendChild(icon);
+                        
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'flex-1';
+                        
+                        const sourceP = document.createElement('p');
+                        sourceP.className = 'text-sm font-medium text-gray-900';
+                        sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
+                                              notification.source === 'git' ? 'Git' : 'Sistema';
+                        
+                        const messageP = document.createElement('p');
+                        messageP.className = 'text-sm text-gray-700 mt-1';
+                        messageP.textContent = notification.message;
+                        
+                        const timeSpan = document.createElement('span');
+                        timeSpan.className = 'text-xs text-gray-400 mt-1';
+                        timeSpan.textContent = notification.time;
+                        
+                        contentDiv.appendChild(sourceP);
+                        contentDiv.appendChild(messageP);
+                        contentDiv.appendChild(timeSpan);
+                        
+                        li.appendChild(iconSpan);
+                        li.appendChild(contentDiv);
+                        
+                        if (!notification.read) {
+                            const badge = document.createElement('span');
+                            badge.className = 'w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0';
+                            li.appendChild(badge);
+                        }
+                        
+                        ul.appendChild(li);
                     });
                 } else {
                     ul.innerHTML = `
