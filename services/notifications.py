@@ -619,7 +619,7 @@ def check_security_events():
     """Checks security events from the database"""
     try:
         from services.auditoria_service import (
-            #find_suspicious_activity,
+            # find_suspicious_activity,
             get_denied_requests,
             get_failed_auth_attempts,
         )
