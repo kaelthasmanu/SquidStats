@@ -120,33 +120,7 @@ function updateOrCloneRepo() {
         fi
 
         if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
-            if [ "$env_exists" = true ]; then
-                mv /tmp/.env.backup .env
-                
-                # Actualizar solo la VERSION del .env con la del repositorio
-                local example_env_path="$found_dir/example.env"
-                local env_path="$found_dir/.env"
-                
-                if [ -f "$example_env_path" ]; then
-                    new_version=$(grep "^VERSION=" "$example_env_path" | cut -d'=' -f2)
-                    if [ ! -z "$new_version" ]; then
-                        # Verificar si existe la línea VERSION en .env
-                        if grep -q "^VERSION=" "$env_path"; then
-                            # Actualizar VERSION existente
-                            sed -i "s/^VERSION=.*/VERSION=$new_version/" "$env_path"
-                            echo "✅ VERSION actualizada a $new_version en .env"
-                        else
-                            # Agregar VERSION al inicio del archivo si no existe
-                            sed -i "1iVERSION=$new_version" "$env_path"
-                            echo "✅ VERSION agregada: $new_version en .env"
-                        fi
-                    else
-                        echo "⚠️ No se pudo leer VERSION de example.env"
-                    fi
-                else
-                    echo "⚠️ Archivo example.env no encontrado en $example_env_path"
-                fi
-            fi
+            [ "$env_exists" = true ] && mv /tmp/.env.backup .env
             echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
             return 0
         else
@@ -157,6 +131,39 @@ function updateOrCloneRepo() {
         echo "⚠️ El directorio $found_dir existe pero no es un repositorio git. No se puede actualizar automáticamente."
         return 1
     fi
+}
+
+function updateEnvVersion() {
+    local CURRENT_VERSION="2.1"  # Variable de versión actual del script
+    local env_file="/opt/SquidStats/.env"
+    
+    if [ ! -f "$env_file" ]; then
+        echo "⚠️ Archivo .env no encontrado en $env_file"
+        return 1
+    fi
+    
+    # Leer la versión actual del .env
+    local env_version=$(grep "^VERSION=" "$env_file" | cut -d'=' -f2)
+    
+    # Comparar versiones
+    if [ "$env_version" != "$CURRENT_VERSION" ]; then
+        echo "Actualizando VERSION de $env_version a $CURRENT_VERSION en .env..."
+        
+        # Verificar si existe la línea VERSION en .env
+        if grep -q "^VERSION=" "$env_file"; then
+            # Actualizar VERSION existente
+            sed -i "s/^VERSION=.*/VERSION=$CURRENT_VERSION/" "$env_file"
+            echo "✅ VERSION actualizada a $CURRENT_VERSION en .env"
+        else
+            # Agregar VERSION al inicio del archivo si no existe
+            sed -i "1iVERSION=$CURRENT_VERSION" "$env_file"
+            echo "✅ VERSION agregada: $CURRENT_VERSION en .env"
+        fi
+    else
+        echo "✓ VERSION ya está actualizada ($CURRENT_VERSION)"
+    fi
+    
+    return 0
 }
 
 function createEnvFile() {
@@ -338,6 +345,8 @@ function main() {
         #installDependencies
         echo "Actualizando Servicio..."
         updateOrCloneRepo
+        echo "Actualizando versión en .env..."
+        updateEnvVersion
         echo "Reiniciando Servicio..."
         #systemctl restart squidstats.service
 
