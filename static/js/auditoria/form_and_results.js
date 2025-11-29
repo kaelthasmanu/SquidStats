@@ -55,6 +55,7 @@
       else if (auditType === 'top_urls_data') html = window.__AUD_RENDERERS__.renderTopUrls(data);
   else if (auditType === 'top_users_requests') html = window.__AUD_RENDERERS__.renderTopUsersRequests(data);
   else if (auditType === 'top_ips_data') html = window.__AUD_RENDERERS__.renderTopIpsData(data);
+      else if (auditType === 'total_data_consumed') html = window.__AUD_RENDERERS__.renderTotalDataConsumed(data, formData);
       else if (auditType === 'daily_activity') {
         const user = formData.username;
         const date = formData.start_date;

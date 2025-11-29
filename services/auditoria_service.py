@@ -569,6 +569,60 @@ def get_top_users_by_data(
     return {"top_users": top_users_list}
 
 
+def get_total_data_consumed(
+    db: Session, start_str: str, end_str: str
+) -> dict[str, Any]:
+    """
+    Get total data consumed across all users in the date range
+    Returns: dict with total_data_gb and total_requests
+    """
+    start_date = datetime.strptime(start_str, "%Y-%m-%d")
+    end_date = datetime.strptime(end_str, "%Y-%m-%d")
+    inspector = inspect(db.get_bind())
+    tables = _get_tables_in_range(inspector, start_date, end_date)
+    if not tables:
+        return {"error": f"No data tables found for the selected date range ({start_str} to {end_str})."}
+
+    total_data = 0
+    total_requests = 0
+
+    for log_table in tables:
+        date_suffix = log_table.split("_")[1]
+        try:
+            UserModel, LogModel = get_dynamic_models(date_suffix)
+            if UserModel is None or LogModel is None:
+                continue
+
+            # Sum all data transmitted and count all requests
+            result = (
+                db.query(
+                    func.sum(LogModel.data_transmitted).label("total_data"),
+                    func.count(LogModel.id).label("total_requests"),
+                )
+                .first()
+            )
+
+            if result:
+                data_sum = result.total_data or 0
+                request_count = result.total_requests or 0
+                total_data += data_sum
+                total_requests += request_count
+            else:
+                print(f"Table {log_table}: No results from query")
+
+        except Exception as e:
+            print(f"Error processing table {log_table}: {e}")
+            continue
+
+    return {
+        "total_data_gb": float(round(total_data / (1024**3), 2)) if total_data > 0 else 0.0,
+        "total_requests": total_requests,
+        "date_range": f"{start_str} to {end_str}",
+        "tables_processed": len(tables),
+        "total_data_bytes": total_data
+    }
+
+
 def get_top_users_by_requests(
     db: Session, start_str: str, end_str: str, limit: int = 10
 ) -> dict[str, Any]:

@@ -14,6 +14,7 @@ from services.auditoria_service import (
     get_top_urls_by_data,
     get_top_users_by_data,
     get_top_users_by_requests,
+    get_total_data_consumed,
     get_user_activity_summary,
 )
 from services.metrics_service import MetricsService
@@ -132,6 +133,12 @@ def api_run_audit():
             result = find_by_response_code(
                 db, start_date, end_date, int(response_code), username
             )
+        elif audit_type == "total_data_consumed":
+            if not start_date:
+                return jsonify({"error": "Start date is required."}), 400
+            if not end_date:
+                return jsonify({"error": "End date is required."}), 400
+            result = get_total_data_consumed(db, start_date, end_date)
         else:
             return jsonify({"error": "Invalid audit type."}), 400
 

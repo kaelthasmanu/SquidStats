@@ -17,8 +17,8 @@ main_bp = Blueprint("main", __name__)
 
 def filter_valid_users(grouped_connections):
     """
-    Filtra usuarios válidos eliminando usuarios anónimos y vacíos
-    Esta función centraliza la lógica de filtrado que antes estaba en el template
+    Filter valid users by removing anonymous and empty users
+    This function centralizes the filtering logic that was previously in the template
     """
     valid_users = {}
     for user, user_data in grouped_connections.items():
@@ -29,14 +29,14 @@ def filter_valid_users(grouped_connections):
 
 @main_bp.app_context_processor
 def inject_app_version():
-    """Inyecta la versión de la aplicación en todos los templates"""
+    """Inject the application version into all templates"""
     version = getattr(Config, "VERSION", None) or os.getenv("VERSION", "-")
     return {"app_version": version}
 
 
 def _build_error_page(message: str, status: int = 500, details: str | None = None):
     """
-    Construye una página de error estandarizada
+    Build a standardized error page
     """
     if details:
         logger.debug("Error details (server-only): %s", details)
@@ -59,44 +59,44 @@ def _build_error_page(message: str, status: int = 500, details: str | None = Non
 
 def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | None]:
     """
-    Obtiene y procesa el contexto para el dashboard
-    Retorna: (context_dict, error_response) - solo uno será no None
+    Get and process the context for the dashboard
+    Returns: (context_dict, error_response) - only one will be not None
     """
     t0 = time.time()
     try:
         raw_data = fetch_squid_data()
         if not raw_data:
             logger.error("fetch_squid_data() returned empty response")
-            return None, _build_error_page("Sin datos desde Squid", 502)
+            return None, _build_error_page("No data from Squid", 502)
         if isinstance(raw_data, str) and raw_data.strip().lower().startswith("error"):
             logger.error(f"Failed to fetch Squid data: {raw_data}")
-            return None, _build_error_page("Error conectando con Squid", 502, raw_data)
+            return None, _build_error_page("Error connecting to Squid", 502, raw_data)
 
         try:
             connections = parse_raw_data(raw_data)
         except Exception as parse_err:
-            logger.exception("Error parseando conexiones de Squid")
+            logger.exception("Error parsing Squid connections")
             return None, _build_error_page(
-                "Error procesando datos de Squid", 500, str(parse_err)
+                "Error processing Squid data", 500, str(parse_err)
             )
 
         if not connections:
-            logger.warning("No se detectaron conexiones activas en la salida de Squid")
+            logger.warning("No active connections detected in Squid output")
             connections = []
 
         try:
             grouped_connections = group_by_user(connections)
         except Exception:
-            logger.exception("Error agrupando conexiones por usuario")
+            logger.exception("Error grouping connections by user")
             grouped_connections = {}
 
-        # FILTRADO CENTRALIZADO: Generar usuarios válidos aquí en lugar del template
+        # CENTRALIZED FILTERING: Generate valid users here instead of in the template
         valid_users = filter_valid_users(grouped_connections)
 
         try:
             squid_info_stats = fetch_squid_info_stats()
         except Exception:
-            logger.exception("Error obteniendo estadísticas detalladas de Squid")
+            logger.exception("Error getting detailed Squid statistics")
             squid_info_stats = {}
 
         squid_version = (
@@ -117,32 +117,20 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
         }
         return context, None
     except Exception:  # Fallback catch-all
-        logger.exception("Fallo inesperado construyendo el contexto del dashboard")
-        return None, _build_error_page("Fallo interno inesperado", 500)
+        logger.exception("Unexpected failure building dashboard context")
+        return None, _build_error_page("Unexpected internal failure", 500)
 
 
 @main_bp.route("/")
 def index():
-    """
-    Ruta unificada para el dashboard
-
-    CAMBIO PRINCIPAL:
-    - Ahora maneja tanto la carga completa de la página como las actualizaciones parciales
-    - Elimina la necesidad de la ruta separada /actualizar-conexiones
-
-    Detección de tipo de petición:
-    - Petición normal: Devuelve index.html completo
-    - Petición parcial (param partial=true): Devuelve solo el contenido de conexiones
-    """
-
-    # CAMBIO: Detectar si es una petición para contenido parcial
+    # CHANGE: Detect if this is a request for partial content
     is_partial_request = request.args.get("partial") == "true"
 
     context, error_response = _get_dashboard_context()
     if error_response:
         return error_response
 
-    # CAMBIO: Si es petición parcial, devolver solo el template de conexiones
+    # CHANGE: If it's a partial request, return only the connections template
     if is_partial_request:
         return render_template(
             "partials/conexiones.html",
@@ -154,43 +142,43 @@ def index():
             connection_count=context["connection_count"],
         )
 
-    # Petición normal: devolver la página completa
+    # Normal request: return the complete page
     return render_template("index.html", **context)
 
 
 @main_bp.route("/install", methods=["POST"])
 def install_package():
-    """Ruta para instalar/actualizar paquetes de Squid"""
+    """Route to install/update Squid packages"""
     ok = False
     try:
         ok = update_squid()
         if ok:
-            logger.info("Actualización de SquidStats (install) completada exitosamente")
+            logger.info("SquidStats update (install) completed successfully")
         else:
-            logger.warning("update_squid() retornó False en /install")
+            logger.warning("update_squid() returned False in /install")
     except Exception:
-        logger.exception("Error ejecutando actualización en /install")
+        logger.exception("Error executing update in /install")
     return redirect(f"/?install_status={'ok' if ok else 'fail'}")
 
 
 @main_bp.route("/update", methods=["POST"])
 def update_web():
-    """Ruta para actualizar la aplicación web"""
+    """Route to update the web application"""
     ok = False
     try:
         ok = updateSquidStats()
         if ok:
-            logger.info("Actualización web de SquidStats completada")
+            logger.info("SquidStats web update completed")
         else:
-            logger.warning("updateSquidStats() retornó False en /update")
+            logger.warning("updateSquidStats() returned False in /update")
     except Exception:
-        logger.exception("Error ejecutando actualización en /update")
+        logger.exception("Error executing update in /update")
     return redirect(f"/?update_status={'ok' if ok else 'fail'}")
 
 
 @main_bp.route("/all-notifications")
 def all_notifications():
-    """Página para ver todas las notificaciones con paginación"""
+    """Page to view all notifications with pagination"""
     try:
         # Get pagination parameters
         page = request.args.get('page', 1, type=int)
@@ -207,8 +195,8 @@ def all_notifications():
 
         return render_template(
             "all_notifications.html",
-            page_title="Todas las Notificaciones",
-            subtitle="Historial completo de notificaciones del sistema",
+            page_title="All Notifications",
+            subtitle="Complete system notifications history",
             icon="fas fa-bell",
             notifications=notifications_data['notifications'],
             unread_count=notifications_data['unread_count'],
@@ -226,8 +214,8 @@ def all_notifications():
         logger.error(f"Error loading notifications page: {e}")
         return render_template(
             "all_notifications.html",
-            page_title="Todas las Notificaciones",
-            subtitle="Error al cargar notificaciones",
+            page_title="All Notifications",
+            subtitle="Error loading notifications",
             icon="fa-bell",
             notifications=[],
             unread_count=0,

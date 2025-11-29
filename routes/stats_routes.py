@@ -66,7 +66,7 @@ def cache_stats_realtime():
             page_icon="statistics.ico",
             page_title="Estadísticas del Sistema",
             icon="fas fa-chart-bar",
-            subtitle="Texto descriptivo aqui",
+            subtitle="Estadisticas del comportamiento del Sistema",
         )
     except Exception as e:
         logger.error(f"Error in /stats: {str(e)}")
