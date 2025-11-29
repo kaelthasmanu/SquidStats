@@ -1,13 +1,48 @@
 import hashlib
+import logging
 import os
 import subprocess
 import threading
+from contextlib import contextmanager
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Optional
 
 from sqlalchemy import and_, desc, func
+from sqlalchemy.orm import Session
 
 from database.database import Notification, get_session
+
+# Logger
+logger = logging.getLogger(__name__)
+
+# Configuration constants
+CLEANUP_KEEP_COUNT = 100
+DEFAULT_DEDUPLICATE_HOURS = 1
+
+# Notification thresholds
+FAILED_AUTH_THRESHOLD = 15
+DENIED_REQUESTS_THRESHOLD = 20
+SUSPICIOUS_IP_THRESHOLD = 1000
+CRITICAL_IP_THRESHOLD = 2000
+MAX_IPS_TO_REPORT = 5
+
+# User activity thresholds
+HIGH_ACTIVITY_THRESHOLD = 100
+HIGH_USAGE_GB_THRESHOLD = 20.0
+MAX_USERS_TO_REPORT = 3
+
+# System health thresholds
+SQUID_LOG_SIZE_WARNING_MB = 500
+SQUID_LOG_STALE_HOURS = 24
+DISK_CRITICAL_GB = 1
+DISK_WARNING_GB = 5
+
+# Monitor intervals (in minutes)
+CHECK_COMMITS_INTERVAL = 30
+CHECK_SYSTEM_INTERVAL = 5
+CHECK_SQUID_LOG_INTERVAL = 10
+CHECK_SECURITY_INTERVAL = 3
+CHECK_USER_ACTIVITY_INTERVAL = 15
 
 # Global variable for Socket.IO
 socketio = None
@@ -22,6 +57,22 @@ def set_socketio_instance(sio):
     socketio = sio
 
 
+@contextmanager
+def get_db_session():
+    """Context manager for database sessions"""
+    db = get_session()
+    try:
+        yield db
+        # Only commit if there were actual changes (not for read-only operations)
+        if db.new or db.dirty or db.deleted:
+            db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
 def stop_notification_monitor():
     """Stop the notification monitor thread"""
     global _monitor_stop_event, _monitor_thread
@@ -31,6 +82,7 @@ def stop_notification_monitor():
     
     if _monitor_thread and _monitor_thread.is_alive():
         _monitor_thread.join(timeout=5)
+        logger.info("Notification monitor stopped")
 
 
 def _generate_message_hash(message: str, source: str, notification_type: str) -> str:
@@ -40,8 +92,8 @@ def _generate_message_hash(message: str, source: str, notification_type: str) ->
 
 
 def _check_duplicate_notification(
-    db, message_hash: str, hours: int = 24
-) -> Notification:
+    db: Session, message_hash: str, hours: int = 24
+) -> Optional[Notification]:
     """Check if a similar notification exists in the last N hours"""
     time_threshold = datetime.now() - timedelta(hours=hours)
     return (
@@ -64,10 +116,9 @@ def set_commit_notifications(has_updates, messages):
             add_notification("info", f"Commit: {msg}", "fa-code-branch", "git")
 
 
-def get_commit_notifications():
+def get_commit_notifications() -> dict[str, Any]:
     """Keep for compatibility with existing code"""
-    db = get_session()
-    try:
+    with get_db_session() as db:
         git_notifications = (
             db.query(Notification).filter(Notification.source == "git").all()
         )
@@ -76,17 +127,15 @@ def get_commit_notifications():
             "has_updates": len(git_notifications) > 0,
             "commits": [n.message.replace("Commit: ", "") for n in git_notifications],
         }
-    finally:
-        db.close()
 
 
 def add_notification(
     notification_type: str,
     message: str,
-    icon: str = None,
+    icon: Optional[str] = None,
     source: str = "system",
-    deduplicate_hours: int = 1,
-):
+    deduplicate_hours: int = DEFAULT_DEDUPLICATE_HOURS,
+) -> Optional[dict[str, Any]]:
     """Adds a notification to the database and emits via Socket.IO if configured
 
     Args:
@@ -94,13 +143,12 @@ def add_notification(
         message: Notification message
         icon: FontAwesome icon class (optional)
         source: Source of the notification ('squid', 'system', 'security', 'users', 'git')
-        deduplicate_hours: Hours to check for duplicate notifications (default: 1)
+        deduplicate_hours: Hours to check for duplicate notifications
 
     Returns:
         Dictionary with notification data or None if it was a duplicate
     """
-    db = get_session()
-    try:
+    with get_db_session() as db:
         message_hash = _generate_message_hash(message, source, notification_type)
 
         # Check for duplicates
@@ -113,19 +161,13 @@ def add_notification(
             existing.count += 1
             existing.updated_at = datetime.now()
             existing.read = 0  # Mark as unread again
-            db.commit()
 
             # Create dict before closing session
             notification_dict = _notification_to_dict(existing)
 
             # Emit update via Socket.IO
             if socketio:
-                unread_count = (
-                    db.query(func.count(Notification.id))
-                    .filter(Notification.read == 0)
-                    .scalar()
-                )
-
+                unread_count = _get_unread_count(db)
                 socketio.emit(
                     "notification_updated",
                     {
@@ -149,23 +191,18 @@ def add_notification(
         )
 
         db.add(notification)
-        db.commit()
+        db.flush()  # Flush to get ID without committing
         db.refresh(notification)
 
         # Create dict before cleanup
         notification_dict = _notification_to_dict(notification)
 
-        # Clean old notifications (keep last 100)
-        _cleanup_old_notifications(db, keep_count=100)
+        # Clean old notifications (keep last N)
+        _cleanup_old_notifications(db, keep_count=CLEANUP_KEEP_COUNT)
 
         # Emit via Socket.IO if configured
         if socketio:
-            unread_count = (
-                db.query(func.count(Notification.id))
-                .filter(Notification.read == 0)
-                .scalar()
-            )
-
+            unread_count = _get_unread_count(db)
             socketio.emit(
                 "new_notification",
                 {
@@ -175,9 +212,6 @@ def add_notification(
             )
 
         return notification_dict
-
-    finally:
-        db.close()
 
 
 def _notification_to_dict(notification: Notification) -> dict:
@@ -214,27 +248,31 @@ def _format_time_ago(timestamp: datetime) -> str:
         return f"Hace {days} día{'s' if days > 1 else ''}"
 
 
-def _cleanup_old_notifications(db, keep_count: int = 100):
+def _get_unread_count(db: Session) -> int:
+    """Get count of unread notifications"""
+    return db.query(func.count(Notification.id)).filter(Notification.read == 0).scalar()
+
+
+def _cleanup_old_notifications(db: Session, keep_count: int = CLEANUP_KEEP_COUNT):
     """Remove old notifications, keeping only the most recent ones"""
     total_count = db.query(func.count(Notification.id)).scalar()
 
     if total_count > keep_count:
         # Get IDs of notifications to keep
-        keep_ids = (
+        keep_ids_query = (
             db.query(Notification.id)
             .order_by(desc(Notification.created_at))
             .limit(keep_count)
-            .all()
+            .subquery()
         )
 
-        keep_ids = [id_tuple[0] for id_tuple in keep_ids]
-
-        # Delete old notifications
-        db.query(Notification).filter(Notification.id.notin_(keep_ids)).delete(
-            synchronize_session=False
-        )
-
-        db.commit()
+        # Delete old notifications in one query
+        deleted = db.query(Notification).filter(
+            Notification.id.notin_(keep_ids_query)
+        ).delete(synchronize_session=False)
+        
+        if deleted > 0:
+            logger.info(f"Cleaned up {deleted} old notifications")
 
 
 def get_default_icon(notification_type):
@@ -251,16 +289,15 @@ def get_all_notifications(
     limit: int = 10, page: int = 1, per_page: int = 20
 ) -> dict[str, Any]:
     """Gets all system notifications with pagination support from database"""
-    db = get_session()
-    try:
+    with get_db_session() as db:
         # Get total count
-        total_notifications = db.query(func.count(Notification.id)).scalar()
-
+        total_notifications = db.query(func.count(Notification.id)).scalar() or 0
+        
         # Get unread count
         unread_count = (
             db.query(func.count(Notification.id))
             .filter(Notification.read == 0)
-            .scalar()
+            .scalar() or 0
         )
 
         # Calculate pagination
@@ -286,53 +323,62 @@ def get_all_notifications(
         )
 
         return {
-            "unread_count": unread_count,
+            "unread_count": int(unread_count),
             "notifications": notifications_list,
             "pagination": {
                 "current_page": page,
                 "per_page": per_page,
                 "total_pages": total_pages,
-                "total_notifications": total_notifications,
+                "total_notifications": int(total_notifications),
                 "has_prev": page > 1,
                 "has_next": page < total_pages,
             },
         }
-    finally:
-        db.close()
 
 
-def mark_notifications_read(notification_ids: list[int]):
-    """Marks notifications as read in database"""
-    db = get_session()
-    try:
-        db.query(Notification).filter(Notification.id.in_(notification_ids)).update(
-            {"read": 1, "updated_at": datetime.now()}, synchronize_session=False
-        )
-        db.commit()
-    finally:
-        db.close()
-
-
-def delete_notification(notification_id: int):
-    """Delete a specific notification from database"""
-    db = get_session()
-    try:
-        db.query(Notification).filter(Notification.id == notification_id).delete(
+def mark_notifications_read(notification_ids: list[int]) -> int:
+    """Marks notifications as read in database
+    
+    Returns:
+        Number of notifications marked as read
+    """
+    with get_db_session() as db:
+        updated = db.query(Notification).filter(
+            Notification.id.in_(notification_ids)
+        ).update(
+            {"read": 1, "updated_at": datetime.now()}, 
             synchronize_session=False
         )
-        db.commit()
-    finally:
-        db.close()
+        logger.info(f"Marked {updated} notifications as read")
+        return updated
 
 
-def delete_all_notifications():
-    """Delete all notifications from database"""
-    db = get_session()
-    try:
-        db.query(Notification).delete(synchronize_session=False)
-        db.commit()
-    finally:
-        db.close()
+def delete_notification(notification_id: int) -> bool:
+    """Delete a specific notification from database
+    
+    Returns:
+        True if notification was deleted, False otherwise
+    """
+    with get_db_session() as db:
+        deleted = db.query(Notification).filter(
+            Notification.id == notification_id
+        ).delete(synchronize_session=False)
+        
+        if deleted:
+            logger.info(f"Deleted notification {notification_id}")
+        return deleted > 0
+
+
+def delete_all_notifications() -> int:
+    """Delete all notifications from database
+    
+    Returns:
+        Number of notifications deleted
+    """
+    with get_db_session() as db:
+        deleted = db.query(Notification).delete(synchronize_session=False)
+        logger.info(f"Deleted all {deleted} notifications")
+        return deleted
 
 
 def check_squid_log_health():
@@ -340,40 +386,43 @@ def check_squid_log_health():
     try:
         log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
 
-        if os.path.exists(log_file):
-            # Check if log file is growing
-            stat_info = os.stat(log_file)
-            file_size_mb = stat_info.st_size / (1024 * 1024)
-
-            if file_size_mb > 500:  # More than 500MB
-                add_notification(
-                    "warning",
-                    f"Log de Squid muy grande: {file_size_mb:.1f}MB",
-                    "fa-file-alt",
-                    "squid",
-                )
-
-            # Check last modification (not updated in more than 24 hours)
-            last_modified = datetime.fromtimestamp(stat_info.st_mtime)
-            time_diff = datetime.now() - last_modified
-            if time_diff.total_seconds() > 86400:  # 24 hours
-                add_notification(
-                    "warning",
-                    "Log de Squid no actualizado por más de 24 horas",
-                    "fa-clock",
-                    "squid",
-                )
-
-        else:
+        if not os.path.exists(log_file):
             add_notification(
                 "error",
                 f"Archivo de log de Squid no encontrado: {log_file}",
                 "fa-file-exclamation",
                 "squid",
             )
+            return
 
+        stat_info = os.stat(log_file)
+        file_size_mb = stat_info.st_size / (1024 * 1024)
+
+        # Check file size
+        if file_size_mb > SQUID_LOG_SIZE_WARNING_MB:
+            add_notification(
+                "warning",
+                f"Log de Squid muy grande: {file_size_mb:.1f}MB",
+                "fa-file-alt",
+                "squid",
+            )
+
+        # Check last modification
+        last_modified = datetime.fromtimestamp(stat_info.st_mtime)
+        hours_since_update = (datetime.now() - last_modified).total_seconds() / 3600
+        
+        if hours_since_update > SQUID_LOG_STALE_HOURS:
+            add_notification(
+                "warning",
+                f"Log de Squid no actualizado por más de {int(hours_since_update)}h",
+                "fa-clock",
+                "squid",
+            )
+
+    except OSError as e:
+        logger.error(f"Error accessing Squid log file: {e}")
     except Exception as e:
-        print(f"Error checking Squid log health: {e}")
+        logger.error(f"Error checking Squid log health: {e}")
 
 
 def check_system_health():
@@ -381,33 +430,47 @@ def check_system_health():
     try:
         # Check disk usage
         disk_usage = os.statvfs("/")
-        free_disk = (disk_usage.f_bavail * disk_usage.f_frsize) / (1024**3)  # GB free
+        free_disk_gb = (disk_usage.f_bavail * disk_usage.f_frsize) / (1024**3)
 
-        if free_disk < 1:  # Less than 1GB free
+        if free_disk_gb < DISK_CRITICAL_GB:
             add_notification(
                 "error",
-                f"Espacio en disco crítico: {free_disk:.1f}GB libres",
+                f"Espacio en disco crítico: {free_disk_gb:.1f}GB libres",
                 "fa-hdd",
                 "system",
             )
-        elif free_disk < 5:  # Less than 5GB free
+        elif free_disk_gb < DISK_WARNING_GB:
             add_notification(
                 "warning",
-                f"Espacio en disco bajo: {free_disk:.1f}GB libres",
+                f"Espacio en disco bajo: {free_disk_gb:.1f}GB libres",
                 "fa-hdd",
                 "system",
             )
 
+    except OSError as e:
+        logger.error(f"Error checking disk usage: {e}")
     except Exception as e:
-        print(f"Error checking system health: {e}")
+        logger.error(f"Error checking system health: {e}")
 
 
 # Function for commits
 def has_remote_commits_with_messages(
     repo_path: str, branch: str = "main"
 ) -> tuple[bool, list[str]]:
-    if not os.path.isdir(os.path.join(repo_path, ".git")):
-        raise ValueError(f"No es un repositorio Git válido: {repo_path}")
+    """Check if there are remote commits with their messages
+    
+    Args:
+        repo_path: Path to git repository
+        branch: Branch name to check
+        
+    Returns:
+        Tuple of (has_updates, commit_messages)
+    """
+    git_dir = os.path.join(repo_path, ".git")
+    if not os.path.isdir(git_dir):
+        logger.warning(f"Not a valid Git repository: {repo_path}")
+        return False, []
+    
     try:
         # Configurar proxy si existe la variable de entorno
         env = os.environ.copy()
@@ -460,7 +523,10 @@ def has_remote_commits_with_messages(
         return False, []
 
     except subprocess.CalledProcessError as e:
-        print(f"Error al ejecutar comandos git: {e.stderr}")
+        logger.error(f"Error executing git commands: {e.stderr}")
+        return False, []
+    except Exception as e:
+        logger.error(f"Unexpected error checking git commits: {e}")
         return False, []
 
 
@@ -474,37 +540,36 @@ def start_notification_monitor():
     def monitor_loop():
         check_count = 0
         cycle_interval = 60  # 1 minute between cycles for better granularity
+        
+        logger.info("Notification monitor started")
 
         while not _monitor_stop_event.is_set():
             try:
-                # Check commits every 30 minutes (every 30 cycles)
-                if check_count % 30 == 0:
+                # Check commits every N minutes
+                if check_count % CHECK_COMMITS_INTERVAL == 0:
                     current_file_dir = os.path.dirname(os.path.abspath(__file__))
-                    repo_path = os.path.dirname(current_file_dir)  # Go up one level
-                    if os.path.exists(repo_path):
-                        has_updates, messages = has_remote_commits_with_messages(
-                            repo_path
-                        )
+                    repo_path = os.path.dirname(current_file_dir)
+                    if os.path.exists(os.path.join(repo_path, ".git")):
+                        has_updates, messages = has_remote_commits_with_messages(repo_path)
                         set_commit_notifications(has_updates, messages)
 
-                if check_count % 5 == 0:
+                # System health checks at different intervals
+                if check_count % CHECK_SYSTEM_INTERVAL == 0:
                     check_system_health()
 
-                if check_count % 10 == 0:
+                if check_count % CHECK_SQUID_LOG_INTERVAL == 0:
                     check_squid_log_health()
 
-                if check_count % 3 == 0:
+                if check_count % CHECK_SECURITY_INTERVAL == 0:
                     check_security_events()
 
-                if check_count % 15 == 0:
+                if check_count % CHECK_USER_ACTIVITY_INTERVAL == 0:
                     check_user_activity()
 
-                check_count += 1
-                if check_count > 1000:  # Prevent overflow
-                    check_count = 0
+                check_count = (check_count + 1) % 1000  # Reset to prevent overflow
 
             except Exception as e:
-                print(f"Error in notification monitor: {e}")
+                logger.error(f"Error in notification monitor: {e}", exc_info=True)
 
             _monitor_stop_event.wait(timeout=cycle_interval)
 
@@ -545,109 +610,122 @@ def notify_squid_high_usage(warning_message: str):
 def check_security_events():
     """Checks security events from the database"""
     try:
-        from database.database import get_session
         from services.auditoria_service import (
             find_suspicious_activity,
             get_denied_requests,
             get_failed_auth_attempts,
         )
 
-        db = get_session()
+        with get_db_session() as db:
 
-        # 1. Failed authentication attempts
-        failed_auth_count = get_failed_auth_attempts(db, hours=1)
-        if failed_auth_count > 15:
-            add_notification(
-                "warning",
-                f"{failed_auth_count} intentos de autenticación fallidos en la última hora",
-                "fa-shield-alt",
-                "security",
-            )
-
-        # 2. Denied requests
-        denied_count = get_denied_requests(db, hours=1)
-        if denied_count > 20:
-            add_notification(
-                "warning",
-                f"{denied_count} solicitudes denegadas en la última hora",
-                "fa-ban",
-                "security",
-            )
-
-        # 3. Suspicious IPs (many requests in short time)
-        suspicious_ips = find_suspicious_activity(db, threshold=100, hours=1)
-        for ip, count in suspicious_ips:
-            if count > 200:  # More than 200 requests in 1 hour
+            # 1. Failed authentication attempts
+            failed_auth_count = get_failed_auth_attempts(db, hours=1)
+            if failed_auth_count > FAILED_AUTH_THRESHOLD:
                 add_notification(
                     "warning",
-                    f"Actividad sospechosa desde IP {ip}: {count} solicitudes/hora",
-                    "fa-user-secret",
+                    f"{failed_auth_count} intentos de autenticación fallidos en la última hora",
+                    "fa-shield-alt",
                     "security",
                 )
-            elif count > 500:  # More than 500 requests - critical
+
+            # 2. Denied requests
+            denied_count = get_denied_requests(db, hours=1)
+            if denied_count > DENIED_REQUESTS_THRESHOLD:
                 add_notification(
-                    "error",
-                    f"Actividad crítica desde IP {ip}: {count} solicitudes/hora",
-                    "fa-exclamation-triangle",
+                    "warning",
+                    f"{denied_count} solicitudes denegadas en la última hora",
+                    "fa-ban",
                     "security",
                 )
 
-        db.close()
+            # 3. Suspicious IPs (many requests in short time)
+            suspicious_ips = find_suspicious_activity(db, threshold=100, hours=1)
+            
+            if not suspicious_ips:
+                return
+            
+            # Limitar cantidad de notificaciones y ordenar por severidad
+            reported_count = 0
+            for ip, count in suspicious_ips:
+                if reported_count >= MAX_IPS_TO_REPORT:
+                    # Si hay más IPs, notificar con resumen
+                    remaining = len(suspicious_ips) - MAX_IPS_TO_REPORT
+                    add_notification(
+                        "info",
+                        f"Hay {remaining} IP(s) adicionales con actividad sospechosa",
+                        "fa-info-circle",
+                        "security",
+                    )
+                    break
+                
+                # Verificar nivel crítico primero
+                if count > CRITICAL_IP_THRESHOLD:
+                    add_notification(
+                        "error",
+                        f"Actividad crítica desde IP {ip}: {count:,} solicitudes/hora",
+                        "fa-exclamation-triangle",
+                        "security",
+                    )
+                    reported_count += 1
+                elif count > SUSPICIOUS_IP_THRESHOLD:
+                    add_notification(
+                        "warning",
+                        f"Actividad sospechosa desde IP {ip}: {count:,} solicitudes/hora",
+                        "fa-user-secret",
+                        "security",
+                    )
+                    reported_count += 1
 
+    except ImportError as e:
+        logger.error(f"Error importing auditoria_service modules: {e}")
     except Exception as e:
-        print(f"Error checking security events: {e}")
+        logger.error(f"Error checking security events: {e}", exc_info=True)
 
 
 def check_user_activity():
     """Checks user activity from the database"""
     try:
-        from database.database import get_session
         from services.auditoria_service import (
             get_active_users_count,
             get_high_usage_users,
         )
 
-        db = get_session()
+        with get_db_session() as db:
 
-        # 1. Active users in the last hour
-        active_users = get_active_users_count(db, hours=1)
+            # 1. Active users in the last hour
+            active_users = get_active_users_count(db, hours=1)
 
-        if active_users > 50:
-            add_notification(
-                "info",
-                f"Alta actividad: {active_users} usuarios conectados en la última hora",
-                "fa-users",
-                "users",
-            )
-
-        elif active_users == 0:
-            add_notification(
-                "warning",
-                "No hay usuarios activos en la última hora",
-                "fa-users",
-                "users",
-            )
-
-        # 2. Users with high data consumption
-        high_usage_users = get_high_usage_users(db, hours=24, threshold_mb=100)
-
-        for user, usage_mb in high_usage_users[:3]:  # Top 3
-            if usage_mb > 1000:  # More than 1GB
-                add_notification(
-                    "warning",
-                    f"El usuario {user} consumió {usage_mb:.0f}MB en 24h",
-                    "fa-chart-line",
-                    "users",
-                )
-            elif usage_mb > 500:  # More than 500MB
+            if active_users > HIGH_ACTIVITY_THRESHOLD:
                 add_notification(
                     "info",
-                    f"El usuario {user} consumió {usage_mb:.0f}MB en 24h",
-                    "fa-user",
+                    f"Alta actividad: {active_users} usuarios conectados en la última hora",
+                    "fa-users",
+                    "users",
+                )
+            elif active_users == 0:
+                add_notification(
+                    "warning",
+                    "No hay usuarios activos en la última hora",
+                    "fa-users",
                     "users",
                 )
 
-        db.close()
+            # 2. Users with high data consumption
+            high_usage_users = get_high_usage_users(db, hours=24, threshold_mb=100)
 
+            # Limitar a top N usuarios
+            high_usage_gb = HIGH_USAGE_GB_THRESHOLD * 1024
+            for user, usage_mb in high_usage_users[:MAX_USERS_TO_REPORT]:
+                # Solo notificar si supera el umbral alto
+                if usage_mb > high_usage_gb:
+                    add_notification(
+                        "warning",
+                        f"El usuario {user} consumió {usage_mb:,.0f}MB en 24h",
+                        "fa-chart-line",
+                        "users",
+                    )
+
+    except ImportError as e:
+        logger.error(f"Error importing auditoria_service modules: {e}")
     except Exception as e:
-        print(f"Error checking user activity: {e}")
+        logger.error(f"Error checking user activity: {e}", exc_info=True)
