@@ -1,4 +1,8 @@
+import atexit
 import os
+import signal
+import sys
+import threading
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -18,11 +22,15 @@ from services.notifications import (
     set_commit_notifications,
     set_socketio_instance,
     start_notification_monitor,
+    stop_notification_monitor,
 )
 from utils.filters import register_filters
 
 # Load environment variables
 load_dotenv()
+
+# Global shutdown event
+shutdown_event = threading.Event()
 
 
 def create_app():
@@ -120,6 +128,35 @@ def setup_scheduler_tasks(scheduler):
             logger.error(f"Error in metrics cleanup task: {e}")
 
 
+def shutdown_app(scheduler, socketio):
+    logger.info("\n🛑 Shutting down SquidStats...")
+    
+    # Set shutdown event to stop all threads
+    shutdown_event.set()
+    
+    # Stop notification monitor
+    logger.info("Stopping notification monitor...")
+    stop_notification_monitor()
+    
+    # Stop scheduler
+    logger.info("Stopping scheduler...")
+    try:
+        if scheduler and scheduler.running:
+            scheduler.shutdown(wait=False)
+    except Exception as e:
+        logger.error(f"Error stopping scheduler: {e}")
+    
+    # Stop SocketIO
+    logger.info("Stopping SocketIO...")
+    try:
+        if socketio:
+            socketio.stop()
+    except Exception as e:
+        logger.error(f"Error stopping SocketIO: {e}")
+    
+    logger.info("✅ Shutdown complete")
+
+
 def main():
     # Create Flask app and scheduler
     app, scheduler = create_app()
@@ -137,7 +174,19 @@ def main():
     start_notification_monitor()
 
     # Start real-time data collection thread
-    socketio.start_background_task(realtime_data_thread, socketio)
+    socketio.start_background_task(realtime_data_thread, socketio, shutdown_event)
+
+    # Register signal handlers for graceful shutdown
+    def signal_handler(signum, frame):
+        logger.info(f"\n⚠️ Received signal {signum}")
+        shutdown_app(scheduler, socketio)
+        sys.exit(0)
+    
+    signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
+    signal.signal(signal.SIGTERM, signal_handler)  # kill command
+    
+    # Register cleanup on exit
+    atexit.register(lambda: shutdown_app(scheduler, socketio))
 
     # Run the application
     debug_mode = Config.DEBUG
@@ -154,9 +203,17 @@ def main():
         logger.warning(f"Invalid PORT value '{port_str}', falling back to 5000")
         port = 5000
 
-    socketio.run(
-        app, debug=debug_mode, host=host, port=port, allow_unsafe_werkzeug=True
-    )
+    try:
+        socketio.run(
+            app, debug=debug_mode, host=host, port=port, allow_unsafe_werkzeug=True
+        )
+    except KeyboardInterrupt:
+        logger.info("\n⚠️ Keyboard interrupt received")
+        shutdown_app(scheduler, socketio)
+    except Exception as e:
+        logger.error(f"Application error: {e}")
+        shutdown_app(scheduler, socketio)
+        raise
 
 
 if __name__ == "__main__":

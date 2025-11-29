@@ -12,10 +12,25 @@ from database.database import Notification, get_session
 # Global variable for Socket.IO
 socketio = None
 
+# Global stop event for notification monitor
+_monitor_stop_event = None
+_monitor_thread = None
+
 
 def set_socketio_instance(sio):
     global socketio
     socketio = sio
+
+
+def stop_notification_monitor():
+    """Stop the notification monitor thread"""
+    global _monitor_stop_event, _monitor_thread
+    
+    if _monitor_stop_event:
+        _monitor_stop_event.set()
+    
+    if _monitor_thread and _monitor_thread.is_alive():
+        _monitor_thread.join(timeout=5)
 
 
 def _generate_message_hash(message: str, source: str, notification_type: str) -> str:
@@ -452,23 +467,15 @@ def has_remote_commits_with_messages(
 # Thread for periodic checks
 def start_notification_monitor():
     """Starts the notification monitor in background with graceful shutdown support"""
-    import signal
-
-    stop_event = threading.Event()
-
-    def signal_handler(signum, frame):
-        """Handle shutdown signals gracefully"""
-        stop_event.set()
-
-    # Register signal handlers for graceful shutdown
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
+    global _monitor_stop_event, _monitor_thread
+    
+    _monitor_stop_event = threading.Event()
 
     def monitor_loop():
         check_count = 0
         cycle_interval = 60  # 1 minute between cycles for better granularity
 
-        while not stop_event.is_set():
+        while not _monitor_stop_event.is_set():
             try:
                 # Check commits every 30 minutes (every 30 cycles)
                 if check_count % 30 == 0:
@@ -499,14 +506,14 @@ def start_notification_monitor():
             except Exception as e:
                 print(f"Error in notification monitor: {e}")
 
-            stop_event.wait(timeout=cycle_interval)
+            _monitor_stop_event.wait(timeout=cycle_interval)
 
-    thread = threading.Thread(
+    _monitor_thread = threading.Thread(
         target=monitor_loop, daemon=True, name="NotificationMonitor"
     )
-    thread.start()
+    _monitor_thread.start()
 
-    return stop_event  # Return the event for potential external control
+    return _monitor_stop_event  # Return the event for potential external control
 
 
 # Specific functions for Squid that can be called from other parts
