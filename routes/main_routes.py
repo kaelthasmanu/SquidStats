@@ -181,8 +181,8 @@ def all_notifications():
     """Page to view all notifications with pagination"""
     try:
         # Get pagination parameters
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 20, type=int)
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", 20, type=int)
 
         # Validate parameters
         if page < 1:
@@ -191,26 +191,32 @@ def all_notifications():
             per_page = 20
 
         # Get notifications with pagination
-        notifications_data = get_all_notifications(limit=None, page=page, per_page=per_page)
+        notifications_data = get_all_notifications(
+            limit=None, page=page, per_page=per_page
+        )
 
         return render_template(
             "all_notifications.html",
             page_title="Todas las Notificaciones",
             subtitle="Historial completo de notificaciones del sistema",
             icon="fas fa-bell",
-            notifications=notifications_data['notifications'],
-            unread_count=notifications_data['unread_count'],
-            pagination=notifications_data.get('pagination', {
-                'current_page': page,
-                'per_page': per_page,
-                'total_pages': 1,
-                'total_notifications': len(notifications_data['notifications']),
-                'has_prev': False,
-                'has_next': False
-            })
+            notifications=notifications_data["notifications"],
+            unread_count=notifications_data["unread_count"],
+            pagination=notifications_data.get(
+                "pagination",
+                {
+                    "current_page": page,
+                    "per_page": per_page,
+                    "total_pages": 1,
+                    "total_notifications": len(notifications_data["notifications"]),
+                    "has_prev": False,
+                    "has_next": False,
+                },
+            ),
         )
     except Exception as e:
         from config import logger
+
         logger.error(f"Error loading notifications page: {e}")
         return render_template(
             "all_notifications.html",
@@ -219,6 +225,5 @@ def all_notifications():
             icon="fa-bell",
             notifications=[],
             unread_count=0,
-            pagination=None 
+            pagination=None,
         )
-

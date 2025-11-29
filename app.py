@@ -50,17 +50,17 @@ def create_app():
     register_filters(app)
 
     # Register the date format filter for notifications
-    @app.template_filter('datetime_format')
-    def datetime_format(value, format='%d/%m/%Y %H:%M'):
+    @app.template_filter("datetime_format")
+    def datetime_format(value, format="%d/%m/%Y %H:%M"):
         """Filtro para formatear fechas en las plantillas"""
         if isinstance(value, str):
             try:
                 # Handle ISO format
-                if 'T' in value:
-                    value = datetime.fromisoformat(value.replace('Z', '+00:00'))
+                if "T" in value:
+                    value = datetime.fromisoformat(value.replace("Z", "+00:00"))
                 else:
                     # Try other common formats
-                    for fmt in ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f']:
+                    for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f"]:
                         try:
                             value = datetime.strptime(value, fmt)
                             break
@@ -76,7 +76,6 @@ def create_app():
 
     # Register all route blueprints
     register_routes(app)
-
 
     # Configure response headers
     @app.after_request

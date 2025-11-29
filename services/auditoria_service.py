@@ -581,7 +581,9 @@ def get_total_data_consumed(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": f"No data tables found for the selected date range ({start_str} to {end_str})."}
+        return {
+            "error": f"No data tables found for the selected date range ({start_str} to {end_str})."
+        }
 
     total_data = 0
     total_requests = 0
@@ -594,13 +596,10 @@ def get_total_data_consumed(
                 continue
 
             # Sum all data transmitted and count all requests
-            result = (
-                db.query(
-                    func.sum(LogModel.data_transmitted).label("total_data"),
-                    func.count(LogModel.id).label("total_requests"),
-                )
-                .first()
-            )
+            result = db.query(
+                func.sum(LogModel.data_transmitted).label("total_data"),
+                func.count(LogModel.id).label("total_requests"),
+            ).first()
 
             if result:
                 data_sum = result.total_data or 0
@@ -615,11 +614,13 @@ def get_total_data_consumed(
             continue
 
     return {
-        "total_data_gb": float(round(total_data / (1024**3), 2)) if total_data > 0 else 0.0,
+        "total_data_gb": float(round(total_data / (1024**3), 2))
+        if total_data > 0
+        else 0.0,
         "total_requests": total_requests,
         "date_range": f"{start_str} to {end_str}",
         "tables_processed": len(tables),
-        "total_data_bytes": total_data
+        "total_data_bytes": total_data,
     }
 
 

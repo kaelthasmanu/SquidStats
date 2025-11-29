@@ -2,7 +2,6 @@ import hashlib
 import os
 import subprocess
 import threading
-import time
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -25,15 +24,21 @@ def _generate_message_hash(message: str, source: str, notification_type: str) ->
     return hashlib.sha256(content.encode()).hexdigest()
 
 
-def _check_duplicate_notification(db, message_hash: str, hours: int = 24) -> Notification:
+def _check_duplicate_notification(
+    db, message_hash: str, hours: int = 24
+) -> Notification:
     """Check if a similar notification exists in the last N hours"""
     time_threshold = datetime.now() - timedelta(hours=hours)
-    return db.query(Notification).filter(
-        and_(
-            Notification.message_hash == message_hash,
-            Notification.created_at >= time_threshold
+    return (
+        db.query(Notification)
+        .filter(
+            and_(
+                Notification.message_hash == message_hash,
+                Notification.created_at >= time_threshold,
+            )
         )
-    ).first()
+        .first()
+    )
 
 
 def set_commit_notifications(has_updates, messages):
@@ -48,10 +53,10 @@ def get_commit_notifications():
     """Keep for compatibility with existing code"""
     db = get_session()
     try:
-        git_notifications = db.query(Notification).filter(
-            Notification.source == "git"
-        ).all()
-        
+        git_notifications = (
+            db.query(Notification).filter(Notification.source == "git").all()
+        )
+
         return {
             "has_updates": len(git_notifications) > 0,
             "commits": [n.message.replace("Commit: ", "") for n in git_notifications],
@@ -61,43 +66,51 @@ def get_commit_notifications():
 
 
 def add_notification(
-    notification_type: str, message: str, icon: str = None, source: str = "system", deduplicate_hours: int = 1
+    notification_type: str,
+    message: str,
+    icon: str = None,
+    source: str = "system",
+    deduplicate_hours: int = 1,
 ):
     """Adds a notification to the database and emits via Socket.IO if configured
-    
+
     Args:
         notification_type: Type of notification ('info', 'warning', 'error', 'success')
         message: Notification message
         icon: FontAwesome icon class (optional)
         source: Source of the notification ('squid', 'system', 'security', 'users', 'git')
         deduplicate_hours: Hours to check for duplicate notifications (default: 1)
-    
+
     Returns:
         Dictionary with notification data or None if it was a duplicate
     """
     db = get_session()
     try:
         message_hash = _generate_message_hash(message, source, notification_type)
-        
+
         # Check for duplicates
-        existing = _check_duplicate_notification(db, message_hash, hours=deduplicate_hours)
-        
+        existing = _check_duplicate_notification(
+            db, message_hash, hours=deduplicate_hours
+        )
+
         if existing:
             # Update existing notification count and timestamp
             existing.count += 1
             existing.updated_at = datetime.now()
             existing.read = 0  # Mark as unread again
             db.commit()
-            
+
             # Create dict before closing session
             notification_dict = _notification_to_dict(existing)
-            
+
             # Emit update via Socket.IO
             if socketio:
-                unread_count = db.query(func.count(Notification.id)).filter(
-                    Notification.read == 0
-                ).scalar()
-                
+                unread_count = (
+                    db.query(func.count(Notification.id))
+                    .filter(Notification.read == 0)
+                    .scalar()
+                )
+
                 socketio.emit(
                     "notification_updated",
                     {
@@ -105,9 +118,9 @@ def add_notification(
                         "unread_count": unread_count,
                     },
                 )
-            
+
             return notification_dict
-        
+
         # Create new notification
         notification = Notification(
             type=notification_type,
@@ -119,23 +132,25 @@ def add_notification(
             count=1,
             created_at=datetime.now(),
         )
-        
+
         db.add(notification)
         db.commit()
         db.refresh(notification)
-        
+
         # Create dict before cleanup
         notification_dict = _notification_to_dict(notification)
-        
+
         # Clean old notifications (keep last 100)
         _cleanup_old_notifications(db, keep_count=100)
-        
+
         # Emit via Socket.IO if configured
         if socketio:
-            unread_count = db.query(func.count(Notification.id)).filter(
-                Notification.read == 0
-            ).scalar()
-            
+            unread_count = (
+                db.query(func.count(Notification.id))
+                .filter(Notification.read == 0)
+                .scalar()
+            )
+
             socketio.emit(
                 "new_notification",
                 {
@@ -143,9 +158,9 @@ def add_notification(
                     "unread_count": unread_count,
                 },
             )
-        
+
         return notification_dict
-        
+
     finally:
         db.close()
 
@@ -169,11 +184,11 @@ def _format_time_ago(timestamp: datetime) -> str:
     """Format timestamp as 'hace X tiempo'"""
     now = datetime.now()
     diff = now - timestamp
-    
+
     minutes = int(diff.total_seconds() / 60)
     hours = int(diff.total_seconds() / 3600)
     days = int(diff.total_seconds() / 86400)
-    
+
     if minutes < 1:
         return "Hace unos momentos"
     elif minutes < 60:
@@ -187,20 +202,23 @@ def _format_time_ago(timestamp: datetime) -> str:
 def _cleanup_old_notifications(db, keep_count: int = 100):
     """Remove old notifications, keeping only the most recent ones"""
     total_count = db.query(func.count(Notification.id)).scalar()
-    
+
     if total_count > keep_count:
         # Get IDs of notifications to keep
-        keep_ids = db.query(Notification.id).order_by(
-            desc(Notification.created_at)
-        ).limit(keep_count).all()
-        
+        keep_ids = (
+            db.query(Notification.id)
+            .order_by(desc(Notification.created_at))
+            .limit(keep_count)
+            .all()
+        )
+
         keep_ids = [id_tuple[0] for id_tuple in keep_ids]
-        
+
         # Delete old notifications
-        db.query(Notification).filter(
-            Notification.id.notin_(keep_ids)
-        ).delete(synchronize_session=False)
-        
+        db.query(Notification).filter(Notification.id.notin_(keep_ids)).delete(
+            synchronize_session=False
+        )
+
         db.commit()
 
 
@@ -214,32 +232,44 @@ def get_default_icon(notification_type):
     return icons.get(notification_type, "fa-bell")
 
 
-def get_all_notifications(limit: int = 10, page: int = 1, per_page: int = 20) -> dict[str, Any]:
+def get_all_notifications(
+    limit: int = 10, page: int = 1, per_page: int = 20
+) -> dict[str, Any]:
     """Gets all system notifications with pagination support from database"""
     db = get_session()
     try:
         # Get total count
         total_notifications = db.query(func.count(Notification.id)).scalar()
-        
+
         # Get unread count
-        unread_count = db.query(func.count(Notification.id)).filter(
-            Notification.read == 0
-        ).scalar()
-        
+        unread_count = (
+            db.query(func.count(Notification.id))
+            .filter(Notification.read == 0)
+            .scalar()
+        )
+
         # Calculate pagination
         start_index = (page - 1) * per_page
-        
+
         # Get paginated notifications
-        notifications = db.query(Notification).order_by(
-            desc(Notification.created_at)
-        ).offset(start_index).limit(per_page).all()
-        
+        notifications = (
+            db.query(Notification)
+            .order_by(desc(Notification.created_at))
+            .offset(start_index)
+            .limit(per_page)
+            .all()
+        )
+
         # Convert to dict
         notifications_list = [_notification_to_dict(n) for n in notifications]
-        
+
         # Calculate pagination metadata
-        total_pages = (total_notifications + per_page - 1) // per_page if total_notifications > 0 else 1
-        
+        total_pages = (
+            (total_notifications + per_page - 1) // per_page
+            if total_notifications > 0
+            else 1
+        )
+
         return {
             "unread_count": unread_count,
             "notifications": notifications_list,
@@ -250,7 +280,7 @@ def get_all_notifications(limit: int = 10, page: int = 1, per_page: int = 20) ->
                 "total_notifications": total_notifications,
                 "has_prev": page > 1,
                 "has_next": page < total_pages,
-            }
+            },
         }
     finally:
         db.close()
@@ -260,11 +290,8 @@ def mark_notifications_read(notification_ids: list[int]):
     """Marks notifications as read in database"""
     db = get_session()
     try:
-        db.query(Notification).filter(
-            Notification.id.in_(notification_ids)
-        ).update(
-            {"read": 1, "updated_at": datetime.now()},
-            synchronize_session=False
+        db.query(Notification).filter(Notification.id.in_(notification_ids)).update(
+            {"read": 1, "updated_at": datetime.now()}, synchronize_session=False
         )
         db.commit()
     finally:
@@ -275,9 +302,9 @@ def delete_notification(notification_id: int):
     """Delete a specific notification from database"""
     db = get_session()
     try:
-        db.query(Notification).filter(
-            Notification.id == notification_id
-        ).delete(synchronize_session=False)
+        db.query(Notification).filter(Notification.id == notification_id).delete(
+            synchronize_session=False
+        )
         db.commit()
     finally:
         db.close()
@@ -291,6 +318,7 @@ def delete_all_notifications():
         db.commit()
     finally:
         db.close()
+
 
 def check_squid_log_health():
     """Checks Squid logs health"""
@@ -349,7 +377,10 @@ def check_system_health():
             )
         elif free_disk < 5:  # Less than 5GB free
             add_notification(
-                "warning", f"Espacio en disco bajo: {free_disk:.1f}GB libres", "fa-hdd", "system"
+                "warning",
+                f"Espacio en disco bajo: {free_disk:.1f}GB libres",
+                "fa-hdd",
+                "system",
             )
 
     except Exception as e:
@@ -422,21 +453,21 @@ def has_remote_commits_with_messages(
 def start_notification_monitor():
     """Starts the notification monitor in background with graceful shutdown support"""
     import signal
-    
+
     stop_event = threading.Event()
-    
+
     def signal_handler(signum, frame):
         """Handle shutdown signals gracefully"""
         stop_event.set()
-    
+
     # Register signal handlers for graceful shutdown
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
-    
+
     def monitor_loop():
         check_count = 0
         cycle_interval = 60  # 1 minute between cycles for better granularity
-        
+
         while not stop_event.is_set():
             try:
                 # Check commits every 30 minutes (every 30 cycles)
@@ -448,7 +479,7 @@ def start_notification_monitor():
                             repo_path
                         )
                         set_commit_notifications(has_updates, messages)
-                        
+
                 if check_count % 5 == 0:
                     check_system_health()
 
@@ -467,12 +498,14 @@ def start_notification_monitor():
 
             except Exception as e:
                 print(f"Error in notification monitor: {e}")
-            
+
             stop_event.wait(timeout=cycle_interval)
-    
-    thread = threading.Thread(target=monitor_loop, daemon=True, name="NotificationMonitor")
+
+    thread = threading.Thread(
+        target=monitor_loop, daemon=True, name="NotificationMonitor"
+    )
     thread.start()
-    
+
     return stop_event  # Return the event for potential external control
 
 
@@ -582,7 +615,10 @@ def check_user_activity():
 
         elif active_users == 0:
             add_notification(
-                "warning", "No hay usuarios activos en la última hora", "fa-users", "users"
+                "warning",
+                "No hay usuarios activos en la última hora",
+                "fa-users",
+                "users",
             )
 
         # 2. Users with high data consumption

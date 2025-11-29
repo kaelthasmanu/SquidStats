@@ -104,14 +104,20 @@ class Notification(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     type = Column(String(50), nullable=False)  # 'info', 'warning', 'error', 'success'
     message = Column(Text, nullable=False)
-    message_hash = Column(String(64), nullable=False, index=True)  # SHA256 hash for deduplication
+    message_hash = Column(
+        String(64), nullable=False, index=True
+    )  # SHA256 hash for deduplication
     icon = Column(String(100), nullable=True)
-    source = Column(String(50), nullable=False, index=True)  # 'squid', 'system', 'security', 'users', 'git'
+    source = Column(
+        String(50), nullable=False, index=True
+    )  # 'squid', 'system', 'security', 'users', 'git'
     read = Column(Integer, default=0)  # 0 = unread, 1 = read
     created_at = Column(DateTime, default=datetime.now, nullable=False, index=True)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     expires_at = Column(DateTime, nullable=True)  # Optional expiration date
-    count = Column(Integer, default=1)  # Number of times this notification was triggered
+    count = Column(
+        Integer, default=1
+    )  # Number of times this notification was triggered
 
 
 def get_database_url() -> str:
