@@ -5,7 +5,7 @@ import subprocess
 import threading
 from contextlib import contextmanager
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
@@ -76,10 +76,10 @@ def get_db_session():
 def stop_notification_monitor():
     """Stop the notification monitor thread"""
     global _monitor_stop_event, _monitor_thread
-    
+
     if _monitor_stop_event:
         _monitor_stop_event.set()
-    
+
     if _monitor_thread and _monitor_thread.is_alive():
         _monitor_thread.join(timeout=5)
         logger.info("Notification monitor stopped")
@@ -93,7 +93,7 @@ def _generate_message_hash(message: str, source: str, notification_type: str) ->
 
 def _check_duplicate_notification(
     db: Session, message_hash: str, hours: int = 24
-) -> Optional[Notification]:
+) -> Notification | None:
     """Check if a similar notification exists in the last N hours"""
     time_threshold = datetime.now() - timedelta(hours=hours)
     return (
@@ -132,10 +132,10 @@ def get_commit_notifications() -> dict[str, Any]:
 def add_notification(
     notification_type: str,
     message: str,
-    icon: Optional[str] = None,
+    icon: str | None = None,
     source: str = "system",
     deduplicate_hours: int = DEFAULT_DEDUPLICATE_HOURS,
-) -> Optional[dict[str, Any]]:
+) -> dict[str, Any] | None:
     """Adds a notification to the database and emits via Socket.IO if configured
 
     Args:
@@ -267,10 +267,12 @@ def _cleanup_old_notifications(db: Session, keep_count: int = CLEANUP_KEEP_COUNT
         )
 
         # Delete old notifications in one query
-        deleted = db.query(Notification).filter(
-            Notification.id.notin_(keep_ids_query)
-        ).delete(synchronize_session=False)
-        
+        deleted = (
+            db.query(Notification)
+            .filter(Notification.id.notin_(keep_ids_query))
+            .delete(synchronize_session=False)
+        )
+
         if deleted > 0:
             logger.info(f"Cleaned up {deleted} old notifications")
 
@@ -292,12 +294,13 @@ def get_all_notifications(
     with get_db_session() as db:
         # Get total count
         total_notifications = db.query(func.count(Notification.id)).scalar() or 0
-        
+
         # Get unread count
         unread_count = (
             db.query(func.count(Notification.id))
             .filter(Notification.read == 0)
-            .scalar() or 0
+            .scalar()
+            or 0
         )
 
         # Calculate pagination
@@ -338,16 +341,17 @@ def get_all_notifications(
 
 def mark_notifications_read(notification_ids: list[int]) -> int:
     """Marks notifications as read in database
-    
+
     Returns:
         Number of notifications marked as read
     """
     with get_db_session() as db:
-        updated = db.query(Notification).filter(
-            Notification.id.in_(notification_ids)
-        ).update(
-            {"read": 1, "updated_at": datetime.now()}, 
-            synchronize_session=False
+        updated = (
+            db.query(Notification)
+            .filter(Notification.id.in_(notification_ids))
+            .update(
+                {"read": 1, "updated_at": datetime.now()}, synchronize_session=False
+            )
         )
         logger.info(f"Marked {updated} notifications as read")
         return updated
@@ -355,15 +359,17 @@ def mark_notifications_read(notification_ids: list[int]) -> int:
 
 def delete_notification(notification_id: int) -> bool:
     """Delete a specific notification from database
-    
+
     Returns:
         True if notification was deleted, False otherwise
     """
     with get_db_session() as db:
-        deleted = db.query(Notification).filter(
-            Notification.id == notification_id
-        ).delete(synchronize_session=False)
-        
+        deleted = (
+            db.query(Notification)
+            .filter(Notification.id == notification_id)
+            .delete(synchronize_session=False)
+        )
+
         if deleted:
             logger.info(f"Deleted notification {notification_id}")
         return deleted > 0
@@ -371,7 +377,7 @@ def delete_notification(notification_id: int) -> bool:
 
 def delete_all_notifications() -> int:
     """Delete all notifications from database
-    
+
     Returns:
         Number of notifications deleted
     """
@@ -410,7 +416,7 @@ def check_squid_log_health():
         # Check last modification
         last_modified = datetime.fromtimestamp(stat_info.st_mtime)
         hours_since_update = (datetime.now() - last_modified).total_seconds() / 3600
-        
+
         if hours_since_update > SQUID_LOG_STALE_HOURS:
             add_notification(
                 "warning",
@@ -458,11 +464,11 @@ def has_remote_commits_with_messages(
     repo_path: str, branch: str = "main"
 ) -> tuple[bool, list[str]]:
     """Check if there are remote commits with their messages
-    
+
     Args:
         repo_path: Path to git repository
         branch: Branch name to check
-        
+
     Returns:
         Tuple of (has_updates, commit_messages)
     """
@@ -470,7 +476,7 @@ def has_remote_commits_with_messages(
     if not os.path.isdir(git_dir):
         logger.warning(f"Not a valid Git repository: {repo_path}")
         return False, []
-    
+
     try:
         # Configurar proxy si existe la variable de entorno
         env = os.environ.copy()
@@ -534,13 +540,13 @@ def has_remote_commits_with_messages(
 def start_notification_monitor():
     """Starts the notification monitor in background with graceful shutdown support"""
     global _monitor_stop_event, _monitor_thread
-    
+
     _monitor_stop_event = threading.Event()
 
     def monitor_loop():
         check_count = 0
         cycle_interval = 60  # 1 minute between cycles for better granularity
-        
+
         logger.info("Notification monitor started")
 
         while not _monitor_stop_event.is_set():
@@ -550,7 +556,9 @@ def start_notification_monitor():
                     current_file_dir = os.path.dirname(os.path.abspath(__file__))
                     repo_path = os.path.dirname(current_file_dir)
                     if os.path.exists(os.path.join(repo_path, ".git")):
-                        has_updates, messages = has_remote_commits_with_messages(repo_path)
+                        has_updates, messages = has_remote_commits_with_messages(
+                            repo_path
+                        )
                         set_commit_notifications(has_updates, messages)
 
                 # System health checks at different intervals
@@ -611,13 +619,12 @@ def check_security_events():
     """Checks security events from the database"""
     try:
         from services.auditoria_service import (
-            find_suspicious_activity,
+            #find_suspicious_activity,
             get_denied_requests,
             get_failed_auth_attempts,
         )
 
         with get_db_session() as db:
-
             # 1. Failed authentication attempts
             failed_auth_count = get_failed_auth_attempts(db, hours=1)
             if failed_auth_count > FAILED_AUTH_THRESHOLD:
@@ -640,10 +647,10 @@ def check_security_events():
 
             # # 3. Suspicious IPs (many requests in short time)
             # suspicious_ips = find_suspicious_activity(db, threshold=100, hours=1)
-            # 
+            #
             # if not suspicious_ips:
             #     return
-            # 
+            #
             # # Limitar cantidad de notificaciones y ordenar por severidad
             # reported_count = 0
             # for ip, count in suspicious_ips:
@@ -657,7 +664,7 @@ def check_security_events():
             #             "security",
             #         )
             #         break
-            #     
+            #
             #     # Verificar nivel crítico primero
             #     if count > CRITICAL_IP_THRESHOLD:
             #         add_notification(
@@ -691,7 +698,6 @@ def check_user_activity():
         )
 
         with get_db_session() as db:
-
             # 1. Active users in the last hour
             active_users = get_active_users_count(db, hours=1)
 

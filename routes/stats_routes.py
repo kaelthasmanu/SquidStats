@@ -91,7 +91,7 @@ def realtime_data_thread(socketio, shutdown_event=None):
     data_collection_counter = 0
 
     logger.info("Real-time data collection thread started")
-    
+
     while not (shutdown_event and shutdown_event.is_set()):
         try:
             cache_data = fetch_squid_cache_stats()
@@ -193,11 +193,11 @@ def realtime_data_thread(socketio, shutdown_event=None):
             )
         except Exception as e:
             logger.error(f"Error in real-time data thread: {str(e)}")
-        
+
         # Use wait with timeout for responsive shutdown
         if shutdown_event:
             shutdown_event.wait(timeout=15)
         else:
             time.sleep(15)
-    
+
     logger.info("Real-time data collection thread stopped")

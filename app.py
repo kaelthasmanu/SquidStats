@@ -130,14 +130,14 @@ def setup_scheduler_tasks(scheduler):
 
 def shutdown_app(scheduler, socketio):
     logger.info("\n🛑 Shutting down SquidStats...")
-    
+
     # Set shutdown event to stop all threads
     shutdown_event.set()
-    
+
     # Stop notification monitor
     logger.info("Stopping notification monitor...")
     stop_notification_monitor()
-    
+
     # Stop scheduler
     logger.info("Stopping scheduler...")
     try:
@@ -145,7 +145,7 @@ def shutdown_app(scheduler, socketio):
             scheduler.shutdown(wait=False)
     except Exception as e:
         logger.error(f"Error stopping scheduler: {e}")
-    
+
     # Stop SocketIO
     logger.info("Stopping SocketIO...")
     try:
@@ -153,7 +153,7 @@ def shutdown_app(scheduler, socketio):
             socketio.stop()
     except Exception as e:
         logger.error(f"Error stopping SocketIO: {e}")
-    
+
     logger.info("✅ Shutdown complete")
 
 
@@ -181,10 +181,10 @@ def main():
         logger.info(f"\n⚠️ Received signal {signum}")
         shutdown_app(scheduler, socketio)
         sys.exit(0)
-    
+
     signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
     signal.signal(signal.SIGTERM, signal_handler)  # kill command
-    
+
     # Register cleanup on exit
     atexit.register(lambda: shutdown_app(scheduler, socketio))
 
