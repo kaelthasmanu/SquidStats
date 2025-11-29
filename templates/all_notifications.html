@@ -38,11 +38,11 @@
     <!-- Contador -->
     <div class="bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 flex-shrink-0 text-center">
       <span class="text-xs sm:text-sm text-blue-700 font-medium">
-        <span id="unread-count">{{ unread_count }}</span> no leídas
+        <span id="unread-count">{{ unread_count }}</span> No leídas
       </span>
     </div>
     
-    <!-- Botón marcar todas como leídas -->
+    <!-- Mark all as read button -->
     <button id="mark-all-read" class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm flex-1 sm:flex-none">
       <i class="fas fa-check-double"></i>
       <span class="hidden xs:inline">Marcar todas</span>
@@ -63,7 +63,7 @@
     <div class="flex flex-wrap gap-4 items-center">
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium text-gray-700">Filtrar por:</span>
-        <select id="filter-type" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="filter-type" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]">
           <option value="all">Todos los tipos</option>
           <option value="error">Errores</option>
           <option value="warning">Advertencias</option>
@@ -73,7 +73,7 @@
       </div>
       
       <div class="flex items-center gap-2">
-        <select id="filter-source" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="filter-source" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]">
           <option value="all">Todas las fuentes</option>
           <option value="squid">Squid</option>
           <option value="system">Sistema</option>
@@ -84,10 +84,10 @@
       </div>
       
       <div class="flex items-center gap-2">
-        <select id="filter-status" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="filter-status" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[155px]">
           <option value="all">Todos los estados</option>
-          <option value="unread">No leídas</option>
-          <option value="read">Leídas</option>
+          <option value="unread">Sin leer</option>
+          <option value="read">Leída</option>
         </select>
       </div>
       
@@ -122,7 +122,7 @@
     </div>
   </div>
 
-  <!-- Lista de Notificaciones -->
+  <!-- Notifications List -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     {% if notifications %}
     <div id="notifications-list">
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 4000);
     }
 
-    // Función para cargar notificaciones con paginación
+    // Function to load notifications with pagination
     function loadNotifications(page = currentPage) {
         const url = `/api/notifications?page=${page}&per_page=${perPage}`;
         
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Función para renderizar notificaciones
+    // Function to render notifications
     function renderNotifications(notifications) {
         const container = document.getElementById('notifications-list');
         if (!container) return;
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
     }
 
-    // Función para marcar notificación como leída
+    // Function to mark notification as read
     function markAsRead(notificationIds) {
         fetch('/api/notifications/mark-read', {
             method: 'POST',
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Actualizar contador en el header
                 document.getElementById('unread-count').textContent = data.unread_count;
                 
-                // Recargar notificaciones para reflejar cambios
+                // Reload notifications to reflect changes
                 loadNotifications(currentPage);
                 
                 showToast(`${notificationIds.length} notificación(es) marcada(s) como leída(s)`, 'success');

@@ -19,6 +19,8 @@ from services.auditoria_service import (
 )
 from services.metrics_service import MetricsService
 from services.notifications import (
+    delete_all_notifications,
+    delete_notification,
     get_all_notifications,
     mark_notifications_read,
 )
@@ -155,21 +157,45 @@ def api_run_audit():
 @api_bp.route("/notifications", methods=["GET"])
 def api_get_notifications():
     try:
-        return jsonify(get_all_notifications(limit=10))
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", 20, type=int)
+        return jsonify(get_all_notifications(page=page, per_page=per_page))
     except Exception as e:
         logger.error(f"Error getting notifications: {e}")
-        return jsonify({"unread_count": 0, "notifications": []})
+        return jsonify({"unread_count": 0, "notifications": [], "pagination": {}})
 
 
 @api_bp.route("/notifications/mark-read", methods=["POST"])
 def api_mark_notifications_read():
     try:
         data = request.get_json()
-        notification_ids = data.get("ids", [])
+        notification_ids = data.get("notification_ids", data.get("ids", []))
         mark_notifications_read(notification_ids)
         return jsonify(
             {"success": True, "unread_count": get_all_notifications()["unread_count"]}
         )
     except Exception as e:
         logger.error(f"Error marking notifications as read: {e}")
-        return jsonify({"success": False}), 500
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@api_bp.route("/notifications/<int:notification_id>", methods=["DELETE"])
+def api_delete_notification(notification_id):
+    try:
+        delete_notification(notification_id)
+        return jsonify(
+            {"success": True, "unread_count": get_all_notifications()["unread_count"]}
+        )
+    except Exception as e:
+        logger.error(f"Error deleting notification: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@api_bp.route("/notifications/delete-all", methods=["DELETE"])
+def api_delete_all_notifications():
+    try:
+        delete_all_notifications()
+        return jsonify({"success": True, "unread_count": 0})
+    except Exception as e:
+        logger.error(f"Error deleting all notifications: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500

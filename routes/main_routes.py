@@ -195,8 +195,8 @@ def all_notifications():
 
         return render_template(
             "all_notifications.html",
-            page_title="All Notifications",
-            subtitle="Complete system notifications history",
+            page_title="Todas las Notificaciones",
+            subtitle="Historial completo de notificaciones del sistema",
             icon="fas fa-bell",
             notifications=notifications_data['notifications'],
             unread_count=notifications_data['unread_count'],
@@ -214,11 +214,11 @@ def all_notifications():
         logger.error(f"Error loading notifications page: {e}")
         return render_template(
             "all_notifications.html",
-            page_title="All Notifications",
-            subtitle="Error loading notifications",
+            page_title="Todas las Notificaciones",
+            subtitle="Error al cargar las notificaciones",
             icon="fa-bell",
             notifications=[],
             unread_count=0,
-            pagination=None
+            pagination=None 
         )
 
