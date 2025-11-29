@@ -8,6 +8,7 @@ from config import Config, logger
 from parsers.connections import group_by_user, parse_raw_data
 from parsers.squid_info import fetch_squid_info_stats
 from services.fetch_data import fetch_squid_data
+from services.notifications import get_all_notifications
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
 
@@ -185,3 +186,51 @@ def update_web():
     except Exception:
         logger.exception("Error ejecutando actualización en /update")
     return redirect(f"/?update_status={'ok' if ok else 'fail'}")
+
+
+@main_bp.route("/all-notifications")
+def all_notifications():
+    """Página para ver todas las notificaciones con paginación"""
+    try:
+        # Get pagination parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+
+        # Validate parameters
+        if page < 1:
+            page = 1
+        if per_page not in [10, 20, 50, 100]:
+            per_page = 20
+
+        # Get notifications with pagination
+        notifications_data = get_all_notifications(limit=None, page=page, per_page=per_page)
+
+        return render_template(
+            "all_notifications.html",
+            page_title="Todas las Notificaciones",
+            subtitle="Historial completo de notificaciones del sistema",
+            icon="fas fa-bell",
+            notifications=notifications_data['notifications'],
+            unread_count=notifications_data['unread_count'],
+            pagination=notifications_data.get('pagination', {
+                'current_page': page,
+                'per_page': per_page,
+                'total_pages': 1,
+                'total_notifications': len(notifications_data['notifications']),
+                'has_prev': False,
+                'has_next': False
+            })
+        )
+    except Exception as e:
+        from config import logger
+        logger.error(f"Error loading notifications page: {e}")
+        return render_template(
+            "all_notifications.html",
+            page_title="Todas las Notificaciones",
+            subtitle="Error al cargar notificaciones",
+            icon="fa-bell",
+            notifications=[],
+            unread_count=0,
+            pagination=None
+        )
+

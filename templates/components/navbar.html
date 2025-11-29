@@ -1,126 +1,129 @@
 <nav class="top-0 z-[1000] fixed w-full bg-gradient-to-br from-blue-800 to-blue-900 shadow-lg border-b border-white/10 backdrop-blur-md transition-transform duration-300" x-data="{ mobileMenuOpen: false, showSquidModal: false, showWebModal: false }">
-  <div class="max-w-[1200px] mx-auto flex items-center justify-between px-6 py-3 h-[60px]">
-    <!-- Brand/Logo Section -->
-    <div class="flex items-center gap-3 font-bold text-xl text-white no-underline">
-      <spam class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-300">SquidStats</spam>
-    </div>
-    <!-- Contenedor para iconos móviles (notificaciones + hamburguesa) -->
-    <div class="lg:hidden flex items-center gap-3">
-      <!-- Botón de Notificaciones en Móvil -->
-      <div class="relative" x-data="{ open: false }">
-        <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Notificaciones">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-full border-2 border-white shadow-lg hidden">0</span>
-        </button>
-        <!-- Dropdown de notificaciones móvil -->
-        <div x-show="open"
-          @click.away="open = false"
-          @keydown.escape.window="open = false"
-          x-transition:enter="transition ease-out duration-200"
-          x-transition:enter-start="opacity-0 scale-95"
-          x-transition:enter-end="opacity-100 scale-100"
-          x-transition:leave="transition ease-in duration-150"
-          x-transition:leave-start="opacity-100 scale-100"
-          x-transition:leave-end="opacity-0 scale-95"
-          class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
-          style="display: none">
-          <div class="py-2 px-4 border-b border-gray-200 flex items-center justify-between">
-            <span class="font-semibold text-gray-800">Notificaciones</span>
-            <button @click="open = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 notifications-mobile">
-            <li class="px-4 py-3 text-gray-500 text-center">
-              Cargando notificaciones...
-            </li>
-          </ul>
-          <div class="py-2 px-4 text-center border-t border-gray-200">
-            <a href="#" class="text-sm text-blue-600 hover:underline">Ver todas las notificaciones</a>
+  <!-- CONTENEDOR UNIFICADO CON EL RESTO -->
+  <div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto flex items-center justify-between py-4 h-[64px]">
+      <!-- Brand/Logo Section -->
+      <div class="flex items-center gap-3 font-bold text-xl text-white no-underline">
+        <spam class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-300">SquidStats</spam>
+      </div>
+      <!-- Contenedor para iconos móviles (notificaciones + hamburguesa) -->
+      <div class="lg:hidden flex items-center gap-3">
+        <!-- Botón de Notificaciones en Móvil -->
+        <div class="relative" x-data="{ open: false }">
+          <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Notificaciones">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-full border-2 border-white shadow-lg hidden">0</span>
+          </button>
+          <!-- Dropdown de notificaciones móvil -->
+          <div x-show="open"
+            @click.away="open = false"
+            @keydown.escape.window="open = false"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+            style="display: none">
+            <div class="py-2 px-4 border-b border-gray-200 flex items-center justify-between">
+              <span class="font-semibold text-gray-800">Notificaciones</span>
+              <button @click="open = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 notifications-mobile">
+              <li class="px-4 py-3 text-gray-500 text-center">
+                Cargando notificaciones...
+              </li>
+            </ul>
+            <div class="py-2 px-4 text-center border-t border-gray-200">
+                <a href="/all-notifications" class="text-sm text-blue-600 hover:underline">Ver todas las notificaciones</a>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- Hamburger Button for Mobile -->
-      <button @click="mobileMenuOpen = !mobileMenuOpen" class="flex flex-col w-8 h-8 justify-center items-center gap-1.5 text-white focus:outline-none z-[1001]" aria-label="Toggle menu">
-        <span class="w-6 h-0.5 bg-white transition-all" :class="{'rotate-45 translate-y-2': mobileMenuOpen}"></span>
-        <span class="w-6 h-0.5 bg-white transition-all" :class="{'opacity-0': mobileMenuOpen}"></span>
-        <span class="w-6 h-0.5 bg-white transition-all" :class="{'-rotate-45 -translate-y-2': mobileMenuOpen}"></span>
-      </button>
-    </div>
-    <!-- Navigation Links - Desktop -->
-    <div class="hidden lg:flex items-center gap-2">
-      <a href="/" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Panel principal con conexiones activas">
-        <i class="fas fa-home text-base"></i>
-        <span class="font-medium">Inicio</span>
-      </a>
-      <a href="/stats" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Estadísticas de rendimiento del cache">
-        <i class="fas fa-chart-bar text-base"></i>
-        <span class="font-medium">Estadísticas</span>
-      </a>
-      <a href="/logs" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Actividad y logs de usuarios">
-        <i class="fas fa-user-friends text-base"></i>
-        <span class="font-medium">Usuarios</span>
-      </a>
-      <a href="/reports" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Reportes y gráficas avanzadas">
-        <i class="fas fa-chart-simple text-base"></i>
-        <span class="font-medium">Reportes</span>
-      </a>
-      <a href="/blacklist" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Sitios bloqueados y actividad restringida">
-        <i class="fas fa-ban text-base"></i>
-        <span class="font-medium">Blacklist</span>
-      </a>
-      <a href="/auditoria" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Auditoría de actividad por usuario y fecha">
-        <i class="fas fa-magnifying-glass text-base"></i>
-        <span class="font-medium">Auditoría</span>
-      </a>
-    </div>
-    <!-- Notificaciones Desktop -->
-    <div class="hidden lg:flex items-center gap-3">
-      <div class="relative" x-data="{ open: false }">
-	      <!-- Botón de Notificaciones en Desktop -->
-        <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Notificaciones">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-full border-2 border-white shadow-lg hidden">0</span>
+        <!-- Hamburger Button for Mobile -->
+        <button @click="mobileMenuOpen = !mobileMenuOpen" class="flex flex-col w-8 h-8 justify-center items-center gap-1.5 text-white focus:outline-none z-[1001]" aria-label="Toggle menu">
+          <span class="w-6 h-0.5 bg-white transition-all" :class="{'rotate-45 translate-y-2': mobileMenuOpen}"></span>
+          <span class="w-6 h-0.5 bg-white transition-all" :class="{'opacity-0': mobileMenuOpen}"></span>
+          <span class="w-6 h-0.5 bg-white transition-all" :class="{'-rotate-45 -translate-y-2': mobileMenuOpen}"></span>
         </button>
-		    <!-- Dropdown de notificaciones Desktop -->
-        <div x-show="open"
-          @click.away="open = false"
-          @keydown.escape.window="open = false"
-          x-transition:enter="transition ease-out duration-200"
-          x-transition:enter-start="opacity-0 scale-95"
-          x-transition:enter-end="opacity-100 scale-100"
-          x-transition:leave="transition ease-in duration-150"
-          x-transition:leave-start="opacity-100 scale-100"
-          x-transition:leave-end="opacity-0 scale-95"
-          class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
-          style="display: none">
-          <div class="py-2 px-4 border-b border-gray-200 flex items-center justify-between">
-            <span class="font-semibold text-gray-800">Notificaciones</span>
-            <button @click="open = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 notifications">
-            <li class="px-4 py-3 text-gray-500 text-center">
-              Cargando notificaciones...
-            </li>
-          </ul>
-          <div class="py-2 px-4 text-center border-t border-gray-200">
-            <a href="#" class="text-sm text-blue-600 hover:underline">Ver todas las notificaciones</a>
+      </div>
+      <!-- Navigation Links - Desktop -->
+      <div class="hidden lg:flex items-center gap-2">
+        <a href="/" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Panel principal con conexiones activas">
+          <i class="fas fa-home text-base"></i>
+          <span class="font-medium">Inicio</span>
+        </a>
+        <a href="/stats" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Estadísticas de rendimiento del cache">
+          <i class="fas fa-chart-bar text-base"></i>
+          <span class="font-medium">Estadísticas</span>
+        </a>
+        <a href="/logs" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Actividad y logs de usuarios">
+          <i class="fas fa-user-friends text-base"></i>
+          <span class="font-medium">Usuarios</span>
+        </a>
+        <a href="/reports" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Reportes y gráficas avanzadas">
+          <i class="fas fa-chart-simple text-base"></i>
+          <span class="font-medium">Reportes</span>
+        </a>
+        <a href="/blacklist" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Sitios bloqueados y actividad restringida">
+          <i class="fas fa-ban text-base"></i>
+          <span class="font-medium">Blacklist</span>
+        </a>
+        <a href="/auditoria" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Auditoría de actividad por usuario y fecha">
+          <i class="fas fa-magnifying-glass text-base"></i>
+          <span class="font-medium">Auditoría</span>
+        </a>
+      </div>
+      <!-- Notificaciones Desktop -->
+      <div class="hidden lg:flex items-center gap-3">
+        <div class="relative" x-data="{ open: false }">
+          <!-- Botón de Notificaciones en Desktop -->
+          <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Notificaciones">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-full border-2 border-white shadow-lg hidden">0</span>
+          </button>
+          <!-- Dropdown de notificaciones Desktop -->
+          <div x-show="open"
+            @click.away="open = false"
+            @keydown.escape.window="open = false"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+            style="display: none">
+            <div class="py-2 px-4 border-b border-gray-200 flex items-center justify-between">
+              <span class="font-semibold text-gray-800">Notificaciones</span>
+              <button @click="open = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 notifications">
+              <li class="px-4 py-3 text-gray-500 text-center">
+                Cargando notificaciones...
+              </li>
+            </ul>
+            <div class="py-2 px-4 text-center border-t border-gray-200">
+                <a href="/all-notifications" class="text-sm text-blue-600 hover:underline">Ver todas las notificaciones</a>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- Action Buttons - Desktop -->
-      <div class="flex items-center gap-3">
-        <button @click="showSquidModal = true" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Actualizar paquetes y configuración de Squid">
-          <i class="fas fa-sync-alt"></i>
-          <span>Squid</span>
-        </button>
+        <!-- Action Buttons - Desktop -->
+        <div class="flex items-center gap-3">
+          <button @click="showSquidModal = true" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Actualizar paquetes y configuración de Squid">
+            <i class="fas fa-sync-alt"></i>
+            <span>Squid</span>
+          </button>
 
-        <button @click="showWebModal = true" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Actualizar aplicación web SquidStats">
-          <i class="fas fa-cloud-download-alt"></i>
-          <span>Web</span>
-        </button>
+          <button @click="showWebModal = true" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Actualizar aplicación web SquidStats">
+            <i class="fas fa-cloud-download-alt"></i>
+            <span>Web</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -364,6 +367,16 @@
       });
     }
 
+    // Función para obtener el token CSRF de forma segura
+    function getCSRFToken() {
+      const metaTag = document.querySelector('meta[name="csrf-token"]');
+      if (metaTag) {
+        return metaTag.getAttribute('content');
+      }
+      console.warn('CSRF token meta tag no encontrado');
+      return '';
+    }
+
     // Enhanced Notifications System with WebSocket
     function initNotifications() {
         let notificationSocket = null;
@@ -470,7 +483,6 @@
         }
 
         function updateNotificationLists() {
-            // const desktopUl = document.querySelector(".max-h-72.overflow-y-auto");
             const desktopUl = document.querySelector(".notifications");
             const mobileUl = document.querySelector(".notifications-mobile");
             
@@ -478,8 +490,13 @@
                 if (!ul) return;
                 
                 ul.innerHTML = "";
-                if (notifications && notifications.length > 0) {
-                    notifications.slice(0, 10).forEach((notification) => {
+                
+                // Usar el estado local actual - SOLO notificaciones no leídas
+                const unreadNotifications = notificationsData.notifications.filter(n => !n.read);
+                const notificationsToShow = unreadNotifications.slice(0, 10);
+                
+                if (notificationsToShow.length > 0) {
+                    notificationsToShow.forEach((notification) => {
                         let bgColor, textColor;
                         
                         switch(notification.type) {
@@ -546,43 +563,70 @@
         }
 
         function markAsRead(notificationIds) {
+            const csrfToken = getCSRFToken();
             fetch('/api/notifications/mark-read', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
                 },
-                body: JSON.stringify({ ids: notificationIds })
+                body: JSON.stringify({ 
+                    ids: notificationIds
+                })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
+                    // CORRECCIÓN: Filtrar notificaciones marcadas del estado local
+                    notificationsData.notifications = notificationsData.notifications.filter(
+                        notification => !notificationIds.includes(notification.id)
+                    );
+                    
                     notificationsData.unread_count = data.unread_count;
                     updateNotificationBadges(data.unread_count);
-                    
-                    // Marcar como leído localmente
-                    notificationIds.forEach(id => {
-                        const notification = notificationsData.notifications.find(n => n.id === id);
-                        if (notification) {
-                            notification.read = true;
-                        }
-                    });
-                    
                     updateNotificationLists();
+                } else {
+                    console.error('Error del servidor al marcar como leída:', data.error);
+                    showNotificationToast({
+                        type: 'error',
+                        message: 'Error al marcar notificación como leída: ' + (data.error || 'Error desconocido')
+                    });
                 }
             })
-            .catch(error => console.error('Error marking as read:', error));
+            .catch(error => {
+                showNotificationToast({
+                    type: 'error',
+                    message: 'Error al marcar notificación como leída: ' + error.message
+                });
+            });
         }
 
         function fetchInitialNotifications() {
             fetch("/api/notifications")
-                .then((res) => res.json())
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(`Error HTTP: ${res.status}`);
+                    }
+                    return res.json();
+                })
                 .then((data) => {
-                    notificationsData = data;
+                    // REEMPLAZAR completamente el estado local
+                    notificationsData.notifications = data.notifications || [];
+                    notificationsData.unread_count = data.unread_count || 0;
                     updateNotificationLists();
                     updateNotificationBadges(data.unread_count);
                 })
                 .catch((error) => {
                     console.error('Error fetching notifications:', error);
+                    notificationsData.notifications = [];
+                    notificationsData.unread_count = 0;
+                    updateNotificationLists();
+                    updateNotificationBadges(0);
                 });
         }
 
@@ -599,13 +643,14 @@
         fetchInitialNotifications();
         connectWebSocket();
     }
-
+    
     // Initialize all functionality
     initTooltips();
     initNavbarScroll();
     setActiveLink();
-    initNotifications(); // ← Inicializar sistema de notificaciones
+    initNotifications();
   });
+
   // Close modals when clicking outside
   document.addEventListener("click", function (e) {
     if (e.target.classList.contains("modal-overlay")) {
@@ -619,6 +664,7 @@
       });
     }
   });
+
   // Add escape key handling for modals
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
@@ -632,6 +678,7 @@
       });
     }
   });
+
   // Mobile menu close on outside click
   document.addEventListener('click', function(event) {
     const mobileMenu = document.querySelector('[x-data]');

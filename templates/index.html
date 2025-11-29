@@ -1,6 +1,6 @@
 {% extends 'layouts/base.html' %} 
 
-{% from 'macros.html' import format_bandwidth %}  {# CAMBIO: Importar desde macros #}
+{% from 'macros.html' import format_bandwidth %}
 
 {% set valid_users = {} %} 
 {% for user, user_data in grouped_connections.items()%} 
@@ -8,27 +8,31 @@
     {% set _ = valid_users.update({user: user_data}) %} 
   {% endif %} 
 {% endfor %}
-{% block title %}{% endblock title %}
+
+{% block header %}
+  <!-- CONTENEDOR ALINEADO CON EL RESTO DEL CONTENIDO -->
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-wrap items-center gap-3 mb-4 bg-white/70 dark:bg-gray-800/60 px-3 py-2 rounded-md border border-gray-200 shadow-sm text-sm w-full">
+      <label for="refresh-interval" class="text-gray-700 dark:text-gray-200 font-medium select-none">⏱️</label>
+      <div class="flex items-center gap-1">
+        <input id="refresh-interval" type="number" min="10" class="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white/80 dark:bg-gray-700/60 text-gray-700 dark:text-gray-100" placeholder="60" aria-label="Intervalo de refresco (segundos)">
+        <span class="text-gray-500 dark:text-gray-400">s</span>
+      </div>
+      <div class="flex items-center gap-1 text-gray-600 dark:text-gray-300">
+        <span class="hidden sm:inline">→</span>
+        <span id="next-refresh" class="font-mono">--</span>
+      </div>
+      <button id="set-interval-btn" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium transition text-xs">Aplicar</button>
+      <span id="persist-status" class="text-[11px] text-gray-400 ml-auto pr-1 opacity-0 transition-opacity"></span>
+    </div>
+  </div>
+{% endblock header %}
 
 {% block content %}
-<div class="flex flex-wrap items-center gap-3 mb-4 bg-white/70 dark:bg-gray-800/60 px-3 py-2 rounded-md border border-gray-200 shadow-sm text-sm max-w-full">
-  <label for="refresh-interval" class="text-gray-700 dark:text-gray-200 font-medium select-none">⏱️</label>
-  <div class="flex items-center gap-1">
-    <input id="refresh-interval" type="number" min="10" class="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white/80 dark:bg-gray-700/60 text-gray-700 dark:text-gray-100" placeholder="60" aria-label="Intervalo de refresco (segundos)">
-    <span class="text-gray-500 dark:text-gray-400">s</span>
-  </div>
-  <div class="flex items-center gap-1 text-gray-600 dark:text-gray-300">
-    <span class="hidden sm:inline">→</span>
-    <span id="next-refresh" class="font-mono">--</span>
-  </div>
-  <button id="set-interval-btn" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium transition text-xs">Aplicar</button>
-  <span id="persist-status" class="text-[11px] text-gray-400 ml-auto pr-1 opacity-0 transition-opacity"></span>
-</div>
-<div id="datos-conexiones" class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+<div id="datos-conexiones" class="w-full">
   {% include 'partials/conexiones.html' %}
 </div>
 {% endblock %}
-
 
 {% block scripts %}
   <script>
@@ -181,4 +185,3 @@
     });
   </script>
 {% endblock scripts %}
-
