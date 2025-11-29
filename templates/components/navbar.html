@@ -324,7 +324,7 @@
         const tooltipText = element.getAttribute('data-tooltip');
         const tooltip = document.createElement('div');
         tooltip.className = 'absolute invisible bg-gray-900 text-white text-xs rounded py-1 px-2 top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap z-50 opacity-0 transition-opacity duration-200';
-        tooltip.innerHTML = tooltipText;
+        tooltip.textContent = tooltipText;
         element.appendChild(tooltip);
         
         element.addEventListener('mouseenter', function() {
