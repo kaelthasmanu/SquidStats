@@ -292,53 +292,6 @@ def delete_all_notifications():
     finally:
         db.close()
 
-
-def check_squid_service():
-    """Checks Squid service status and generates notifications"""
-    try:
-        # Check if Squid is running
-        result = subprocess.run(
-            ["systemctl", "is-active", "squid"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-        if result.returncode != 0:
-            add_notification(
-                "error",
-                "El servicio Squid no está ejecutándose",
-                "fa-exclamation-triangle",
-                "squid",
-            )
-        else:
-            # Check recent Squid error logs
-            log_check = subprocess.run(
-                ["journalctl", "-u", "squid", "--since", "1 hour ago", "--no-pager"],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-
-            if (
-                "error" in log_check.stdout.lower()
-                or "failed" in log_check.stdout.lower()
-            ):
-                add_notification(
-                    "warning",
-                    "Errores detectados en los logs de Squid",
-                    "fa-exclamation-triangle",
-                    "squid",
-                )
-
-    except subprocess.TimeoutExpired:
-        add_notification(
-            "warning", "Tiempo de espera agotado al verificar el estado de Squid", "fa-clock", "squid"
-        )
-    except Exception as e:
-        print(f"Error checking Squid service: {e}")
-
-
 def check_squid_log_health():
     """Checks Squid logs health"""
     try:
@@ -349,7 +302,7 @@ def check_squid_log_health():
             stat_info = os.stat(log_file)
             file_size_mb = stat_info.st_size / (1024 * 1024)
 
-            if file_size_mb > 100:  # More than 100MB
+            if file_size_mb > 500:  # More than 500MB
                 add_notification(
                     "warning",
                     f"Log de Squid muy grande: {file_size_mb:.1f}MB",
@@ -357,13 +310,13 @@ def check_squid_log_health():
                     "squid",
                 )
 
-            # Check last modification (not updated in more than 5 minutes)
+            # Check last modification (not updated in more than 24 hours)
             last_modified = datetime.fromtimestamp(stat_info.st_mtime)
             time_diff = datetime.now() - last_modified
-            if time_diff.total_seconds() > 300:  # 5 minutes
+            if time_diff.total_seconds() > 86400:  # 24 hours
                 add_notification(
                     "warning",
-                    "Log de Squid no actualizado por más de 5 minutos",
+                    "Log de Squid no actualizado por más de 24 horas",
                     "fa-clock",
                     "squid",
                 )
@@ -467,14 +420,27 @@ def has_remote_commits_with_messages(
 
 # Thread for periodic checks
 def start_notification_monitor():
-    """Inicia el monitor de notificaciones en segundo plano"""
-
+    """Starts the notification monitor in background with graceful shutdown support"""
+    import signal
+    
+    stop_event = threading.Event()
+    
+    def signal_handler(signum, frame):
+        """Handle shutdown signals gracefully"""
+        stop_event.set()
+    
+    # Register signal handlers for graceful shutdown
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    
     def monitor_loop():
         check_count = 0
-        while True:
+        cycle_interval = 60  # 1 minute between cycles for better granularity
+        
+        while not stop_event.is_set():
             try:
-                # Check commits every 30 minutes (every 15 cycles)
-                if check_count % 15 == 0:
+                # Check commits every 30 minutes (every 30 cycles)
+                if check_count % 30 == 0:
                     current_file_dir = os.path.dirname(os.path.abspath(__file__))
                     repo_path = os.path.dirname(current_file_dir)  # Go up one level
                     if os.path.exists(repo_path):
@@ -482,18 +448,17 @@ def start_notification_monitor():
                             repo_path
                         )
                         set_commit_notifications(has_updates, messages)
+                        
+                if check_count % 5 == 0:
+                    check_system_health()
 
-                # CRITICAL checks every 2 minutes (always)
-                check_squid_service()
-                check_squid_log_health()
-                check_system_health()
+                if check_count % 10 == 0:
+                    check_squid_log_health()
 
-                # SECURITY checks every 5 minutes (every 2-3 cycles)
                 if check_count % 3 == 0:
                     check_security_events()
 
-                # USER checks every 10 minutes (every 5 cycles)
-                if check_count % 5 == 0:
+                if check_count % 15 == 0:
                     check_user_activity()
 
                 check_count += 1
@@ -502,11 +467,13 @@ def start_notification_monitor():
 
             except Exception as e:
                 print(f"Error in notification monitor: {e}")
-
-            time.sleep(120)  # Wait 2 minutes between cycles
-
-    thread = threading.Thread(target=monitor_loop, daemon=True)
+            
+            stop_event.wait(timeout=cycle_interval)
+    
+    thread = threading.Thread(target=monitor_loop, daemon=True, name="NotificationMonitor")
     thread.start()
+    
+    return stop_event  # Return the event for potential external control
 
 
 # Specific functions for Squid that can be called from other parts
