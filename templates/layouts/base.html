@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ page_title or 'Dashboard Squid' }}</title>
+    <!-- Favicon dinámico -->
+    <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon"/>
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}"/>
+    <!-- Estilos específicos de cada página -->
+    {% block styles %}{% endblock styles %}
+  </head>
+  <body class="overflow-x-hidden overflow-auto" style="visibility: hidden" onload="document.body.style.visibility='visible';">
+    <!-- Barra de navegación común -->
+    <div class="relative">
+      {% include 'components/navbar.html' %}
+      <!-- Contenido principal con MÁS ESPACIO para el navbar -->
+      <main class="min-h-screen pt-16 lg:pt-20 pb-20">
+        <!-- CONTENEDOR PRINCIPAL UNIFICADO -->
+        <div class="w-full px-4 sm:px-6 lg:px-8">
+          {% block header %}
+            <!-- Header por defecto - MEJORADO PARA RESPONSIVE -->
+            <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+              <!-- Título y subtítulo -->
+              <div class="flex items-center flex-shrink-0">
+                {% if icon %}
+                <i class="{{icon}} text-2xl sm:text-3xl text-blue-600 mr-3 sm:mr-4"></i>
+                {% endif %}
+                <div class="min-w-0">
+                  <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 truncate">{{page_title}}</h1>
+                  <p class="text-gray-500 text-sm sm:text-base mt-1 line-clamp-2">
+                    {{subtitle}}
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Área de acciones del header - editable por las páginas -->
+              <div class="flex items-center justify-start lg:justify-end flex-wrap gap-2 sm:gap-3 min-w-0">
+                {% block header_actions %}
+                  <!-- Por defecto vacío - las páginas pueden agregar contenido aquí -->
+                {% endblock %}
+              </div>
+            </div>
+          {% endblock %}
+          <!-- Área de Contenido - editable por las páginas -->
+          <div class="max-w-7xl mx-auto w-full">
+            {% block content %}{% endblock %}
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+    <!-- Socket.IO -->
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <!-- Scripts de Flowbite (UI components) -->
+    <script src="{{ url_for('static', filename='src/flowbite.min.js') }}"></script>
+    <!-- Scripts específicos de cada página -->
+    {% block scripts %}{% endblock scripts %}
+  </body>
+</html>

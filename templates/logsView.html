@@ -1,9 +1,34 @@
 
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
+{% block styles %}{% endblock styles %}
 
-{% block title %}Inicio | Dashboard Squid{% endblock %}
+{% block header_actions %}
+  <div class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4">
+    <div class="filters-container flex gap-4 items-center">
+      <div class="date-filter max-w-xs mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative">
+        <input type="date" id="date-filter" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12"/>
+      </div>
+
+      <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-[250px] relative">
+        <input type="text" id="username-search" placeholder="Buscar por usuario..." class="search-input w-full pl-4 pr-10 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12"/>
+
+        <!-- Botón de limpiar búsqueda -->
+        <button id="clear-search" class="absolute right-10 h-full items-center justify-center text-gray-400 hover:text-gray-700 hidden" title="Limpiar búsqueda">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+          <i class="fas fa-magnifying-glass text-xl text-[#1A8A9D]"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock header_actions %}
 
 {% block content %}
-    {% include 'components/logs.html' %}
-
+    {% include 'partials/logs.html' %}
 {% endblock %}
+
+{% block scripts %}
+    <script type="module" src="static/js/dashboard.js"></script>
+{% endblock scripts %}

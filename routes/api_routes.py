@@ -14,10 +14,16 @@ from services.auditoria_service import (
     get_top_urls_by_data,
     get_top_users_by_data,
     get_top_users_by_requests,
+    get_total_data_consumed,
     get_user_activity_summary,
 )
 from services.metrics_service import MetricsService
-from services.notifications import get_commit_notifications
+from services.notifications import (
+    delete_all_notifications,
+    delete_notification,
+    get_all_notifications,
+    mark_notifications_read,
+)
 
 api_bp = Blueprint("api", __name__)
 
@@ -129,6 +135,12 @@ def api_run_audit():
             result = find_by_response_code(
                 db, start_date, end_date, int(response_code), username
             )
+        elif audit_type == "total_data_consumed":
+            if not start_date:
+                return jsonify({"error": "Start date is required."}), 400
+            if not end_date:
+                return jsonify({"error": "End date is required."}), 400
+            result = get_total_data_consumed(db, start_date, end_date)
         else:
             return jsonify({"error": "Invalid audit type."}), 400
 
@@ -144,4 +156,53 @@ def api_run_audit():
 # API para notificaciones del sistema
 @api_bp.route("/notifications", methods=["GET"])
 def api_get_notifications():
-    return jsonify(get_commit_notifications())
+    try:
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", 20, type=int)
+        return jsonify(get_all_notifications(page=page, per_page=per_page))
+    except Exception as e:
+        logger.error(f"Error getting notifications: {e}")
+        return jsonify({"unread_count": 0, "notifications": [], "pagination": {}})
+
+
+@api_bp.route("/notifications/mark-read", methods=["POST"])
+def api_mark_notifications_read():
+    try:
+        data = request.get_json()
+        notification_ids = data.get("notification_ids", data.get("ids", []))
+        mark_notifications_read(notification_ids)
+        return jsonify(
+            {"success": True, "unread_count": get_all_notifications()["unread_count"]}
+        )
+    except Exception as e:
+        logger.exception("Error marking notifications as read")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+        resp = {"success": False, "error": "Internal server error"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
+
+
+@api_bp.route("/notifications/<int:notification_id>", methods=["DELETE"])
+def api_delete_notification(notification_id):
+    try:
+        delete_notification(notification_id)
+        return jsonify(
+            {"success": True, "unread_count": get_all_notifications()["unread_count"]}
+        )
+    except Exception as e:
+        logger.error(f"Error deleting notification: {e}")
+        return jsonify({"success": False, "error": "Internal server error"}), 500
+
+
+@api_bp.route("/notifications/delete-all", methods=["DELETE"])
+def api_delete_all_notifications():
+    try:
+        delete_all_notifications()
+        return jsonify({"success": True, "unread_count": 0})
+    except Exception as e:
+        logger.error(f"Error deleting all notifications: {e}")
+        return jsonify({"success": False, "error": "Internal server error"}), 500

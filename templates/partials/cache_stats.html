@@ -1,0 +1,268 @@
+<div class="w-full space-y-6">
+  <div class="flex border-b mb-6">
+    <button id="dashboardTab" class="main-tab-btn active relative overflow-hidden py-3 px-6 font-medium text-blue-600">
+      <i class="fas fa-tachometer-alt mr-2"></i>Sistema
+    </button>
+    <button id="cacheTab"
+      class="main-tab-btn relative overflow-hidden py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
+      <i class="fas fa-database mr-2"></i>Caché
+    </button>
+    <button id="networkTab" class="main-tab-btn relative overflow-hidden py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
+      <i class="fas fa-network-wired mr-2"></i>Red
+    </button>
+  </div>
+
+  <div id="dashboardContent" class="main-tab-content active">
+    <section class="mb-12">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center mb-6">
+            <i class="fas fa-chart-pie text-2xl text-blue-600 mr-3"></i>
+            <h2 class="text-xl font-bold text-gray-800">
+              Estadísticas del Sistema
+            </h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center justify-center">
+            <div class="flex flex-col items-center justify-center">
+              <div class="relative w-36 h-36">
+                <svg viewBox="0 0 36 36" class="block mx-auto">
+                  <path class="fill-none stroke-red-100 stroke-[3.5]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path id="cpu-ring" class="circle-animation fill-none stroke-linecap-round stroke-red-500 stroke-[3.5]" stroke-dasharray="0,100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <text id="cpu-value" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0%</text>
+                </svg>
+              </div>
+              <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
+              <p class="text-xs mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full font-medium">
+                {{ system_info.cpu.physical_cores }} núcleos
+              </p>
+            </div>
+            <div class="flex flex-col items-center justify-center">
+              <div class="relative w-36 h-36">
+                <svg viewBox="0 0 36 36" class="block mx-auto">
+                  <path class="fill-none stroke-blue-100 stroke-[3.5]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path id="ram-ring" class="circle-animation fill-none stroke-linecap-round stroke-blue-600 stroke-[3.5]" stroke-dasharray="0,100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <text id="ram-used" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
+                </svg>
+              </div>
+              <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
+              <p class="text-xs mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">
+                {{ system_info.ram.total }}
+              </p>
+            </div>
+            <div class="flex flex-col items-center justify-center">
+              <div class="relative w-36 h-36">
+                <svg viewBox="0 0 36 36" class="block mx-auto">
+                  <path class="fill-none stroke-emerald-100 stroke-[3.5]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path id="swap-ring" class="circle-animation fill-none stroke-linecap-round stroke-emerald-500 stroke-[3.5]" stroke-dasharray="0,100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <text id="swap-used" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
+                </svg>
+              </div>
+              <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
+              <p class="text-xs mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium">
+                {{ system_info.swap.total }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center mb-6">
+            <i class="fas fa-info-circle text-2xl text-blue-600 mr-3"></i>
+            <h2 class="text-xl font-bold text-gray-800">
+              Información del Sistema
+            </h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start">
+              <i class="fas fa-server text-gray-500 mt-1 mr-3"></i>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-600">
+                  Nombre del Host
+                </h3>
+                <p id="hostname" class="text-gray-800">
+                  {{ system_info.hostname }}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-network-wired text-gray-500 mt-1 mr-3"></i>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-600">
+                  Direcciones IP
+                </h3>
+                <p id="ip-addresses" class="text-gray-800">
+                  {% for ip in system_info.ips %}{{ ip.ip }}<br />{% endfor
+                  %}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <i class="fab fa-linux text-gray-500 mt-1 mr-3"></i>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-600">
+                  Sistema Operativo
+                </h3>
+                <p id="os-info" class="text-gray-800">
+                  {{ system_info.os }}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-600">
+                  Tiempo Encendido
+                </h3>
+                <p id="uptime" class="text-gray-800">
+                  {{ system_info.uptime }}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-globe text-gray-500 mt-1 mr-3"></i>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-600">
+                  Zona Horaria
+                </h3>
+                <p id="timezone" class="text-gray-800">
+                  {{ system_info.timezone }}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-600">
+                  Hora Local
+                </h3>
+                <p id="local-time" class="text-gray-800">
+                  {{ system_info.local_time }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-gray-800">
+          Gráficas del Sistema
+        </h2>
+        <div class="flex bg-gray-100 rounded-lg p-1">
+          <button
+            id="todayBtn"
+            class="time-range-btn active px-4 py-2 rounded-md text-sm font-medium text-blue-600 bg-white shadow"
+          >
+            Hoy
+          </button>
+          <button
+            id="24hoursBtn"
+            class="time-range-btn px-4 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-blue-600"
+          >
+            24 Horas
+          </button>
+        </div>
+      </div>
+      <div class="flex border-b mb-6">
+        <button
+          class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
+        >
+          CPU
+        </button>
+        <button
+          class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
+        >
+          RAM
+        </button>
+        <button
+          class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
+        >
+          SWAP
+        </button>
+      </div>
+      <div class="tab-content active">
+        <div class="h-80"><canvas id="cpuChart"></canvas></div>
+      </div>
+      <div class="tab-content">
+        <div class="h-80"><canvas id="ramChart"></canvas></div>
+      </div>
+      <div class="tab-content">
+        <div class="h-80"><canvas id="swapChart"></canvas></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="cacheContent" class="main-tab-content">
+    <section class="cache-stats">
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div class="flex items-center mb-6">
+          <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
+          <h2 class="text-2xl font-bold text-gray-800">
+            Estadísticas de Caché
+          </h2>
+        </div>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-[1000px] mx-auto"
+        >
+          {{ flip_card(icon='fas fa-database', title='Entradas almacenadas',
+          value=cache_stats.store_entries, back_title='Entradas
+          Almacenadas', description='Número de objetos actualmente en la
+          caché de Squid.') }} {{ flip_card(icon='fas fa-chart-pie',
+          title='Uso de capacidad', value=cache_stats.capacity_used,
+          back_title='Uso de capacidad', description='Porcentaje del
+          almacenamiento de caché en uso actualmente.') }} {% if
+          cache_stats.fs_space_total and cache_stats.fs_space_total > 0 %}
+          {% set total_space_html %}{% if (cache_stats.fs_space_total /
+          1024) < 1024 %}
+          <p class="text-xl text-blue-800" data-stat="espacio_total">
+            {{ (cache_stats.fs_space_total / 1024)|int }} MB
+          </p>
+          {% else %}
+          <p class="text-xl text-blue-800" data-stat="espacio_total">
+            {{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }} GB
+          </p>
+          {% endif %}{% endset %} {{ flip_card(icon='fas fa-hdd',
+          title='Espacio total', back_title='Espacio total',
+          description='Tamaño total del disco asignado a la caché de
+          Squid.', extra_html=total_space_html) }} {% else %} {{
+          flip_card(icon='fas fa-hdd', title='Espacio total',
+          back_title='Espacio total', description='Tamaño total del disco
+          asignado a la caché de Squid.', extra_html='
+          <p class="text-xl text-red-600">No disponible</p>
+          ') }} {% endif %} {% set used_space_html %}{% if
+          (cache_stats.fs_space_used / 1024) < 1024 %}
+          <p class="text-xl text-blue-800" data-stat="espacio_usado">
+            {{ (cache_stats.fs_space_used / 1024)|int }} MB
+          </p>
+          {% else %}
+          <p class="text-xl text-blue-800" data-stat="espacio_usado">
+            {{ (cache_stats.fs_space_used / 1024 / 1024)|round(2) }} GB
+          </p>
+          {% endif %}{% endset %}{{ flip_card(icon='fas fa-folder-open',
+          title='Espacio usado', back_title='Espacio usado',
+          description='Cantidad de espacio de disco ya ocupado por objetos
+          en caché.', extra_html=used_space_html) }} {{ flip_card(icon='fas
+          fa-recycle', title='Eliminación',
+          value=cache_stats.removal_policy, back_title='Política de
+          eliminación', description='Método que Squid usa para eliminar
+          objetos antiguos de la caché.') }} {{ flip_card(icon='fas
+          fa-clock', title='Edad LRU', value=cache_stats.lru_age_days ~ '
+          días', back_title='Edad LRU', description='Tiempo desde que el
+          objeto menos usado fue accedido por última vez.') }}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="networkContent" class="main-tab-content">
+    <section class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center mb-6">
+        <i class="fas fa-network-wired text-2xl text-blue-600 mr-3"></i>
+        <h2 class="text-xl font-bold text-gray-800">Tráfico de Red</h2>
+      </div>
+      <div class="h-80"><canvas id="networkChart"></canvas></div>
+    </section>
+  </div>
+</div>

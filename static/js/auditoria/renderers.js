@@ -179,6 +179,44 @@
     return new Chart(canvas, config);
   }
 
+  function renderTotalDataConsumed(data, formData) {
+    const startDate = formData.start_date;
+    const endDate = formData.end_date;
+    const title = `Total de Datos Consumidos del ${startDate} al ${endDate}`;
+
+    if (data.error) {
+      return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><div class="text-center text-red-500 py-10"><strong>Error:</strong> ${data.error}</div></div>`;
+    }
+
+    const totalDataGB = data.total_data_gb || 0;
+    const totalDataBytes = data.total_data_bytes || 0;
+    const totalRequests = data.total_requests || 0;
+    const tablesProcessed = data.tables_processed || 0;
+
+    return `<div class="bg-white p-6 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-bold mb-4">${title}</h2>
+      <div class="text-center py-10">
+        <div class="text-6xl font-bold text-blue-600 mb-4">
+          <i class="fas fa-database mr-4"></i>${totalDataGB.toFixed(2)} GB
+        </div>
+        <div class="text-xl text-gray-600 mb-4">
+          Total de datos consumidos en el período seleccionado
+        </div>
+        <div class="grid grid-cols-2 gap-4 text-sm text-gray-500">
+          <div>
+            <strong>${totalRequests.toLocaleString()}</strong> peticiones totales
+          </div>
+          <div>
+            <strong>${tablesProcessed}</strong> tablas procesadas
+          </div>
+        </div>
+        <div class="mt-4 text-xs text-gray-400">
+          Equivalente a ${totalDataBytes.toLocaleString()} bytes
+        </div>
+      </div>
+    </div>`;
+  }
+
   window.__AUD_RENDERERS__ = {
     renderNestedAccordionResults,
     renderUserSummary,
@@ -186,6 +224,7 @@
     renderTopUrls,
   renderTopUsersRequests,
   renderTopIpsData,
+    renderTotalDataConsumed,
     renderDailyActivityChart,
     renderDomainChart,
     renderResponseChart

@@ -1,9 +1,83 @@
+{% extends "layouts/base.html" %}
 
-{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}"/>
+    <style>
+        /* Estilo para los "chips" de redes sociales */
+        .social-chip {
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #e5e7eb; /* gray-200 */
+            background-color: #f9fafb; /* gray-50 */
+            color: #374151; /* gray-700 */
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+        .social-chip:hover {
+            border-color: #93c5fd; /* blue-300 */
+            background-color: #eff6ff; /* blue-50 */
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .social-chip.selected {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+            border-color: #1d4ed8; /* blue-800 */
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        .social-chip.selected:hover {
+            background-color: #1d4ed8;
+        }
 
-{% block title %}BlackList | Dashboard Squid{% endblock %}
+        /* Estilo para el tooltip de ayuda sobre los chips */
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            background-color: #111827; /* gray-900 */
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+            pointer-events: none; /* Para que no interfiera con el click */
+            transform-origin: bottom center;
+            transform: translateX(-50%) scale(0.95);
+        }
+        .group:hover .tooltip {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+    </style>
+{% endblock styles %}
 
 {% block content %}
-    {% include 'components/auditoria.html' %}
-
+    {% include 'partials/auditoria.html' %}
 {% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
+
+    <!-- Scripts divididos -->
+    <script src="{{ url_for('static', filename='js/auditoria/config_and_utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auditoria/renderers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auditoria/user_search_and_inputs.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auditoria/form_and_results.js') }}"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', ()=>{
+            window.__AUD_FORM__ && window.__AUD_FORM__.initFormAndResults();
+            window.__AUD_USER_INPUTS__ && window.__AUD_USER_INPUTS__.initUserAndInputs();
+        });
+    </script>
+{% endblock scripts %}

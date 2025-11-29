@@ -1,0 +1,191 @@
+
+<div class="w-full space-y-6">
+  <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+    <form id="audit-form" class="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6">
+      <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="md:col-span-2">
+          <label
+            for="audit-type"
+            class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Auditoría</label>
+          <select
+            id="audit-type"
+            name="audit_type"
+            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
+            <optgroup label="Actividad General">
+              <option value="user_summary" data-requires="user">
+                Resumen por Usuario
+              </option>
+              <option value="top_users_data">Top 10 Usuarios (Datos)</option>
+              <option value="top_urls_data">Top 15 URLs (Datos)</option>
+              <option value="top_users_requests">Top 10 Usuarios (Peticiones)</option>
+              <option value="top_ips_data">Top 10 IPs (Datos)</option>
+              <option value="total_data_consumed" data-requires="date_range">
+                Total de Datos Consumidos
+              </option>
+              <!-- <option value="daily_activity" data-requires="user">
+                Actividad Diaria
+              </option> -->
+            </optgroup>
+            <optgroup label="Seguridad y Políticas">
+              <option
+                value="keyword_search"
+                data-requires="user_optional,keyword">
+                Búsqueda por Palabra Clave
+              </option>
+              <option
+                value="social_media_activity"
+                data-requires="user_optional,social_media">
+                Actividad en Redes Sociales
+              </option>
+            </optgroup>
+            <optgroup label="Auditoría Técnica">
+              <option value="ip_activity" data-requires="ip">
+                Actividad por Dirección IP
+              </option>
+              <option
+                value="response_code_search"
+                data-requires="user_optional,response_code">
+                Análisis por Código de Respuesta
+              </option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div id="conditional-inputs" class="contents">
+          <div id="user-filter-container" class="conditional-input">
+            <label for="username-filter" class="block text-sm font-semibold text-gray-700 mb-1">Usuario</label>
+            <div class="relative">
+              <input type="text" id="user-search-input" placeholder="Buscar usuario..." class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 pr-8" autocomplete="off"/>
+              <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+              <div id="user-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+                <div id="user-options-container">
+                  <!-- Las opciones se llenarán dinámicamente -->
+                </div>
+              </div>
+            </div>
+            <select id="username-filter" name="username" class="hidden">
+              <option value="">-- Todos --</option>
+            </select>
+          </div>
+          <div id="keyword-input-container" class="conditional-input">
+            <label for="keyword-input" class="block text-sm font-semibold text-gray-700 mb-1">Palabra Clave</label>
+            <input type="text" id="keyword-input" name="keyword" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-50" placeholder="Ej: juegos, descargas..."/>
+          </div>
+          <div id="ip-input-container" class="conditional-input">
+            <label for="ip-input" class="block text-sm font-semibold text-gray-700 mb-1">Dirección IP</label>
+            <input type="text" id="ip-input" name="ip_address" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-50" placeholder="Ej: 192.168.1.100"/>
+          </div>
+          <div id="social-media-input-container" class="conditional-input md:col-span-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Redes Sociales</label>
+            <div id="social-media-chips" class="flex flex-wrap gap-3">
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="Facebook">
+                  Facebook
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="Instagram">
+                  Instagram
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="YouTube">
+                  YouTube
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="Twitter/X">
+                  Twitter/X
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="WhatsApp">
+                  WhatsApp
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="Telegram">
+                  Telegram
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+              <div class="relative group">
+                <button type="button" class="social-chip" data-value="Pinterest">
+                  Pinterest
+                </button>
+                <span class="tooltip">Selección múltiple</span>
+              </div>
+            </div>
+          </div>
+          <div id="response-code-input-container" class="conditional-input">
+            <label for="response-code-input" class="block text-sm font-semibold text-gray-700 mb-1">Código HTTP</label>
+            <select id="response-code-input" name="response_code" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
+              <option value="">-- Seleccione un código --</option>
+              <optgroup label="Respuestas Exitosas (2xx)">
+                <option value="200">200 OK</option>
+              </optgroup>
+              <optgroup label="Redirecciones (3xx)">
+                <option value="301">301 Moved Permanently</option>
+                <option value="302">302 Found</option>
+                <option value="304">304 Not Modified</option>
+              </optgroup>
+              <optgroup label="Errores de Cliente (4xx)">
+                <option value="400">400 Bad Request</option>
+                <option value="401">401 Unauthorized</option>
+                <option value="403">403 Forbidden</option>
+                <option value="404">404 Not Found</option>
+              </optgroup>
+              <optgroup label="Errores de Servidor (5xx)">
+                <option value="500">500 Internal Server Error</option>
+                <option value="502">502 Bad Gateway</option>
+                <option value="503">503 Service Unavailable</option>
+                <option value="504">504 Gateway Timeout</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-1 bg-slate-50 border border-slate-200 rounded-lg p-4 h-fit">
+        <h3 class="text-md font-semibold text-slate-800 mb-4 border-b pb-2">
+          Fecha del Reporte
+        </h3>
+        <div class="space-y-4">
+          <div id="start-date-container">
+            <label for="start-date" class="block text-sm font-semibold text-gray-700 mb-1">Fecha</label>
+            <input type="date" id="start-date" name="start_date" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"/>
+          </div>
+          <div id="end-date-container">
+            <label for="end-date" class="block text-sm font-semibold text-gray-700 mb-1"
+              >Fecha de Fin</label>
+            <input type="date" id="end-date" name="end_date" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3">
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl">
+          <i class="fas fa-play mr-2"></i>
+          Generar Reporte
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div id="audit-results-container" class="space-y-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center">
+      <div class="text-center text-gray-500 py-10">
+        <i class="fas fa-clipboard-list text-5xl mb-4 text-gray-300"></i>
+        <h3 class="text-xl font-semibold">
+          Seleccione los filtros y genere un reporte
+        </h3>
+        <p class="mt-2">Los resultados de su auditoría aparecerán aquí.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,9 @@
+import atexit
 import os
+import signal
+import sys
+import threading
+from datetime import datetime
 
 from dotenv import load_dotenv
 from flask import Flask
@@ -10,17 +15,22 @@ from config import Config, logger
 from database.database import migrate_database
 from parsers.log import process_logs
 from routes import register_routes
-from routes.main_routes import initialize_proxy_detection
 from routes.stats_routes import realtime_data_thread
 from services.metrics_service import MetricsService
 from services.notifications import (
     has_remote_commits_with_messages,
     set_commit_notifications,
+    set_socketio_instance,
+    start_notification_monitor,
+    stop_notification_monitor,
 )
 from utils.filters import register_filters
 
 # Load environment variables
 load_dotenv()
+
+# Global shutdown event
+shutdown_event = threading.Event()
 
 
 def create_app():
@@ -47,11 +57,33 @@ def create_app():
     # Register custom filters
     register_filters(app)
 
+    # Register the date format filter for notifications
+    @app.template_filter("datetime_format")
+    def datetime_format(value, format="%d/%m/%Y %H:%M"):
+        """Filtro para formatear fechas en las plantillas"""
+        if isinstance(value, str):
+            try:
+                # Handle ISO format
+                if "T" in value:
+                    value = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                else:
+                    # Try other common formats
+                    for fmt in ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f"]:
+                        try:
+                            value = datetime.strptime(value, fmt)
+                            break
+                        except ValueError:
+                            continue
+                    else:
+                        return value  # Could not parse, returning original
+            except Exception:
+                return value
+        if isinstance(value, datetime):
+            return value.strftime(format)
+        return value
+
     # Register all route blueprints
     register_routes(app)
-
-    # Initialize proxy detection
-    initialize_proxy_detection()
 
     # Configure response headers
     @app.after_request
@@ -96,6 +128,35 @@ def setup_scheduler_tasks(scheduler):
             logger.error(f"Error in metrics cleanup task: {e}")
 
 
+def shutdown_app(scheduler, socketio):
+    logger.info("\n🛑 Shutting down SquidStats...")
+
+    # Set shutdown event to stop all threads
+    shutdown_event.set()
+
+    # Stop notification monitor
+    logger.info("Stopping notification monitor...")
+    stop_notification_monitor()
+
+    # Stop scheduler
+    logger.info("Stopping scheduler...")
+    try:
+        if scheduler and scheduler.running:
+            scheduler.shutdown(wait=False)
+    except Exception as e:
+        logger.error(f"Error stopping scheduler: {e}")
+
+    # Stop SocketIO
+    logger.info("Stopping SocketIO...")
+    try:
+        if socketio:
+            socketio.stop()
+    except Exception as e:
+        logger.error(f"Error stopping SocketIO: {e}")
+
+    logger.info("✅ Shutdown complete")
+
+
 def main():
     # Create Flask app and scheduler
     app, scheduler = create_app()
@@ -106,8 +167,26 @@ def main():
     # Initialize SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
+    # Set up Socket.IO in the notifications module
+    set_socketio_instance(socketio)
+
+    # Start the notification monitor
+    start_notification_monitor()
+
     # Start real-time data collection thread
-    socketio.start_background_task(realtime_data_thread, socketio)
+    socketio.start_background_task(realtime_data_thread, socketio, shutdown_event)
+
+    # Register signal handlers for graceful shutdown
+    def signal_handler(signum, frame):
+        logger.info(f"\n⚠️ Received signal {signum}")
+        shutdown_app(scheduler, socketio)
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
+    signal.signal(signal.SIGTERM, signal_handler)  # kill command
+
+    # Register cleanup on exit
+    atexit.register(lambda: shutdown_app(scheduler, socketio))
 
     # Run the application
     debug_mode = Config.DEBUG
@@ -115,7 +194,7 @@ def main():
         f"Starting SquidStats application in {'debug' if debug_mode else 'production'} mode"
     )
 
-    # Leer host/port desde variables de entorno si existen (compatibilidad con FLASK_HOST/PORT)
+    # Read host/port from environment variables if they exist (compatible with FLASK_HOST/PORT)
     host = os.getenv("LISTEN_HOST") or os.getenv("FLASK_HOST") or "0.0.0.0"
     port_str = os.getenv("LISTEN_PORT") or os.getenv("FLASK_PORT") or "5000"
     try:
@@ -124,9 +203,17 @@ def main():
         logger.warning(f"Invalid PORT value '{port_str}', falling back to 5000")
         port = 5000
 
-    socketio.run(
-        app, debug=debug_mode, host=host, port=port, allow_unsafe_werkzeug=True
-    )
+    try:
+        socketio.run(
+            app, debug=debug_mode, host=host, port=port, allow_unsafe_werkzeug=True
+        )
+    except KeyboardInterrupt:
+        logger.info("\n⚠️ Keyboard interrupt received")
+        shutdown_app(scheduler, socketio)
+    except Exception as e:
+        logger.error(f"Application error: {e}")
+        shutdown_app(scheduler, socketio)
+        raise
 
 
 if __name__ == "__main__":

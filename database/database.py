@@ -99,6 +99,27 @@ class SystemMetrics(Base):
     created_at = Column(DateTime, default=datetime.now)
 
 
+class Notification(Base):
+    __tablename__ = "notifications"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    type = Column(String(50), nullable=False)  # 'info', 'warning', 'error', 'success'
+    message = Column(Text, nullable=False)
+    message_hash = Column(
+        String(64), nullable=False, index=True
+    )  # SHA256 hash for deduplication
+    icon = Column(String(100), nullable=True)
+    source = Column(
+        String(50), nullable=False, index=True
+    )  # 'squid', 'system', 'security', 'users', 'git'
+    read = Column(Integer, default=0)  # 0 = unread, 1 = read
+    created_at = Column(DateTime, default=datetime.now, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    expires_at = Column(DateTime, nullable=True)  # Optional expiration date
+    count = Column(
+        Integer, default=1
+    )  # Number of times this notification was triggered
+
+
 def get_database_url() -> str:
     db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
     conn_str = os.getenv("DATABASE_STRING_CONNECTION", "squidstats.db")
@@ -278,6 +299,7 @@ def create_dynamic_tables(engine, date_suffix: str = None):
     LogMetadata.__table__.create(engine, checkfirst=True)
     DeniedLog.__table__.create(engine, checkfirst=True)
     SystemMetrics.__table__.create(engine, checkfirst=True)
+    Notification.__table__.create(engine, checkfirst=True)  # Add notifications table
 
     user_table_name, log_table_name = get_dynamic_table_names(date_suffix)
 

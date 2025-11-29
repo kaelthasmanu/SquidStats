@@ -65,6 +65,8 @@ def cache_stats_realtime():
             network_stats=network_stats,
             page_icon="statistics.ico",
             page_title="Estadísticas del Sistema",
+            icon="fas fa-chart-bar",
+            subtitle="Estadisticas del comportamiento del Sistema",
         )
     except Exception as e:
         logger.error(f"Error in /stats: {str(e)}")
@@ -82,13 +84,15 @@ def print_icap_service():
     return jsonify(result), status """
 
 
-def realtime_data_thread(socketio):
+def realtime_data_thread(socketio, shutdown_event=None):
     global realtime_cache_stats, realtime_system_info
     import time
 
     data_collection_counter = 0
 
-    while True:
+    logger.info("Real-time data collection thread started")
+
+    while not (shutdown_event and shutdown_event.is_set()):
         try:
             cache_data = fetch_squid_cache_stats()
             cache_stats = (
@@ -189,4 +193,11 @@ def realtime_data_thread(socketio):
             )
         except Exception as e:
             logger.error(f"Error in real-time data thread: {str(e)}")
-        time.sleep(15)  # Actualizar cada 15 segundos
+
+        # Use wait with timeout for responsive shutdown
+        if shutdown_event:
+            shutdown_event.wait(timeout=15)
+        else:
+            time.sleep(15)
+
+    logger.info("Real-time data collection thread stopped")

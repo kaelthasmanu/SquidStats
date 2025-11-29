@@ -55,6 +55,8 @@ def reports():
             metrics=metrics,
             page_icon="bar.ico",
             page_title="Reportes y gráficas",
+            icon="fas fa-chart-simple",
+            subtitle="Top de la Actividad de los Usuarios y comportamiento",
         )
     except Exception as e:
         logger.error(f"Error en ruta /reports: {str(e)}", exc_info=True)
@@ -117,6 +119,8 @@ def reports_for_date(date_str: str):
             metrics=metrics,
             page_icon="bar.ico",
             page_title=f"Reportes y gráficas - {selected.isoformat()}",
+            icon="fas fa-chart-simple",
+            subtitle="Top de la Actividad de los Usuarios y comportamiento",
         )
     except Exception:
         logger.exception("Error generating reports for specific date")
@@ -152,4 +156,6 @@ def auditoria_logs():
         "auditor.html",
         page_icon="magnifying-glass.ico",
         page_title="Centro de Auditoría",
+        icon="fas fa-magnifying-glass",
+        subtitle="Herramienta para el análisis de actividad y seguridad.",
     )

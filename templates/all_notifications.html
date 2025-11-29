@@ -1,0 +1,616 @@
+{% extends "layouts/base.html" %}
+
+{% block styles %}
+<style>
+    .notification-fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .notification-item {
+        transition: all 0.2s ease;
+    }
+    
+    .notification-read {
+        opacity: 0.7;
+        background-color: #f9fafb;
+    }
+    
+    .notification-removing {
+        opacity: 0;
+        transform: translateX(-100%);
+        transition: all 0.3s ease;
+    }
+    
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block header_actions %}
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+    <!-- Contador -->
+    <div class="bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 flex-shrink-0 text-center">
+      <span class="text-xs sm:text-sm text-blue-700 font-medium">
+        <span id="unread-count">{{ unread_count }}</span> No leídas
+      </span>
+    </div>
+    
+    <!-- Mark all as read button -->
+    <button id="mark-all-read" class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm flex-1 sm:flex-none">
+      <i class="fas fa-check-double"></i>
+      <span class="hidden xs:inline">Marcar todas</span>
+    </button>
+
+    <!-- Botón eliminar todas -->
+    <button id="delete-all" class="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm flex-1 sm:flex-none">
+      <i class="fas fa-trash"></i>
+      <span class="hidden xs:inline">Eliminar todas</span>
+    </button>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="w-full space-y-6">
+  <!-- Filtros -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="flex flex-wrap gap-4 items-center">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700">Filtrar por:</span>
+        <select id="filter-type" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]">
+          <option value="all">Todos los tipos</option>
+          <option value="error">Errores</option>
+          <option value="warning">Advertencias</option>
+          <option value="success">Éxitos</option>
+          <option value="info">Información</option>
+        </select>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <select id="filter-source" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]">
+          <option value="all">Todas las fuentes</option>
+          <option value="squid">Squid</option>
+          <option value="system">Sistema</option>
+          <option value="security">Seguridad</option>
+          <option value="users">Usuarios</option>
+          <option value="git">Git</option>
+        </select>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <select id="filter-status" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[155px]">
+          <option value="all">Todos los estados</option>
+          <option value="unread">Sin leer</option>
+          <option value="read">Leída</option>
+        </select>
+      </div>
+      
+      <button id="clear-filters" class="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1">
+        <i class="fas fa-times"></i>
+        <span>Limpiar filtros</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Información de paginación -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="text-sm text-gray-600">
+        Mostrando <span id="current-range">1-{{ notifications|length }}</span> de 
+        <span id="total-notifications">{{ pagination.total_notifications if pagination else notifications|length }}</span> notificaciones
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <button id="prev-page" class="pagination-btn px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                {% if not pagination or not pagination.has_prev %}disabled{% endif %}>
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span id="page-info" class="px-3 py-1 text-gray-700 text-sm">
+          Página {{ pagination.current_page if pagination else 1 }} de {{ pagination.total_pages if pagination else 1 }}
+        </span>
+        <button id="next-page" class="pagination-btn px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                {% if not pagination or not pagination.has_next %}disabled{% endif %}>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications List -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    {% if notifications %}
+    <div id="notifications-list">
+      {% for notification in notifications %}
+      <div class="notification-item border-b border-gray-100 last:border-b-0 {% if notification.read %}notification-read{% endif %}" 
+           data-id="{{ notification.id }}"
+           data-type="{{ notification.type }}"
+           data-source="{{ notification.source }}"
+           data-read="{{ notification.read|lower }}">
+        <div class="p-6 flex items-start gap-4">
+          <!-- Icono -->
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center 
+                        {% if notification.type == 'error' %}bg-red-100 text-red-600
+                        {% elif notification.type == 'warning' %}bg-yellow-100 text-yellow-600
+                        {% elif notification.type == 'success' %}bg-green-100 text-green-600
+                        {% else %}bg-blue-100 text-blue-600{% endif %}">
+              <i class="fas {{ notification.icon }} text-lg"></i>
+            </div>
+          </div>
+          
+          <!-- Contenido -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            {% if notification.type == 'error' %}bg-red-100 text-red-800
+                            {% elif notification.type == 'warning' %}bg-yellow-100 text-yellow-800
+                            {% elif notification.type == 'success' %}bg-green-100 text-green-800
+                            {% else %}bg-blue-100 text-blue-800{% endif %}">
+                  {{ notification.source|upper }}
+                </span>
+                <span class="ml-2 text-sm text-gray-500">{{ notification.time }}</span>
+              </div>
+              {% if not notification.read %}
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                No leída
+              </span>
+              {% endif %}
+            </div>
+            
+            <p class="text-gray-900 font-medium mb-1">{{ notification.message }}</p>
+            
+            <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
+              <span class="flex items-center gap-1">
+                <i class="fas fa-clock"></i>
+                <span>{{ notification.timestamp|datetime_format }}</span>
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="fas fa-{{ notification.icon }}"></i>
+                <span class="capitalize">{{ notification.type }}</span>
+              </span>
+            </div>
+          </div>
+          
+          <!-- Acciones -->
+          <div class="flex-shrink-0 flex items-center gap-2">
+            {% if not notification.read %}
+            <button class="mark-read-btn text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors duration-150" 
+                    data-id="{{ notification.id }}"
+                    title="Marcar como leída">
+              <i class="fas fa-check"></i>
+            </button>
+            {% endif %}
+            <button class="delete-btn text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors duration-150"
+                    data-id="{{ notification.id }}"
+                    title="Eliminar notificación">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <!-- Estado vacío -->
+    <div class="text-center py-16">
+      <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+        <i class="fas fa-bell-slash text-gray-400 text-3xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No hay notificaciones</h3>
+      <p class="text-gray-500 max-w-md mx-auto">Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    let currentPage = {{ pagination.current_page if pagination else 1 }};
+    const totalPages = {{ pagination.total_pages if pagination else 1 }};
+    const perPage = {{ pagination.per_page if pagination else 20 }};
+    
+    // Función para mostrar toast
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 z-[1002] p-4 rounded-lg shadow-lg border-l-4 ${
+            type === 'error' ? 'bg-red-50 border-red-500 text-red-700' :
+            type === 'success' ? 'bg-green-50 border-green-500 text-green-700' :
+            'bg-blue-50 border-blue-500 text-blue-700'
+        } max-w-sm transform translate-x-full transition-transform duration-300`;
+        
+        toast.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${
+                    type === 'error' ? 'fa-exclamation-circle' :
+                    type === 'success' ? 'fa-check-circle' : 'fa-info-circle'
+                } mr-3"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+            toast.classList.add('translate-x-0');
+        }, 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('translate-x-0');
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 300);
+        }, 4000);
+    }
+
+    // Function to load notifications with pagination
+    function loadNotifications(page = currentPage) {
+        const url = `/api/notifications?page=${page}&per_page=${perPage}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.notifications && data.notifications.length > 0) {
+                    renderNotifications(data.notifications);
+                    updatePagination(data.pagination);
+                } else {
+                    showEmptyState();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                showToast('Error al cargar notificaciones', 'error');
+            });
+    }
+
+    // Function to render notifications
+    function renderNotifications(notifications) {
+        const container = document.getElementById('notifications-list');
+        if (!container) return;
+
+        container.innerHTML = notifications.map(notification => `
+            <div class="notification-item border-b border-gray-100 last:border-b-0 ${notification.read ? 'notification-read' : ''}" 
+                 data-id="${notification.id}"
+                 data-type="${notification.type}"
+                 data-source="${notification.source}"
+                 data-read="${notification.read}">
+                <div class="p-6 flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center 
+                                    ${notification.type === 'error' ? 'bg-red-100 text-red-600' :
+                                      notification.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                                      notification.type === 'success' ? 'bg-green-100 text-green-600' :
+                                      'bg-blue-100 text-blue-600'}">
+                            <i class="fas ${notification.icon} text-lg"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                            ${notification.type === 'error' ? 'bg-red-100 text-red-800' :
+                                              notification.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                                              notification.type === 'success' ? 'bg-green-100 text-green-800' :
+                                              'bg-blue-100 text-blue-800'}">
+                                    ${notification.source.toUpperCase()}
+                                </span>
+                                <span class="ml-2 text-sm text-gray-500">${formatTimeAgo(notification.timestamp)}</span>
+                            </div>
+                            ${!notification.read ? `
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                No leída
+                            </span>
+                            ` : ''}
+                        </div>
+                        
+                        <p class="text-gray-900 font-medium mb-1">${notification.message}</p>
+                        
+                        <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-clock"></i>
+                                <span>${new Date(notification.timestamp).toLocaleString('es-ES')}</span>
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-${notification.icon}"></i>
+                                <span class="capitalize">${notification.type}</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-shrink-0 flex items-center gap-2">
+                        ${!notification.read ? `
+                        <button class="mark-read-btn text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors duration-150" 
+                                data-id="${notification.id}"
+                                title="Marcar como leída">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        ` : ''}
+                        <button class="delete-btn text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors duration-150"
+                                data-id="${notification.id}"
+                                title="Eliminar notificación">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Re-aplicar filtros después de cargar
+        applyFilters();
+    }
+
+    // Función para actualizar la paginación
+    function updatePagination(pagination) {
+        currentPage = pagination.current_page;
+        const totalPages = pagination.total_pages;
+        const totalNotifications = pagination.total_notifications;
+        
+        // Actualizar información de paginación
+        document.getElementById('current-range').textContent = 
+            `${((currentPage - 1) * perPage) + 1}-${Math.min(currentPage * perPage, totalNotifications)}`;
+        document.getElementById('total-notifications').textContent = totalNotifications;
+        document.getElementById('page-info').textContent = `Página ${currentPage} de ${totalPages}`;
+        
+        // Actualizar botones de paginación
+        document.getElementById('prev-page').disabled = currentPage <= 1;
+        document.getElementById('next-page').disabled = currentPage >= totalPages;
+    }
+
+    // Función para mostrar estado vacío
+    function showEmptyState() {
+        const container = document.getElementById('notifications-list');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="text-center py-16">
+                <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <i class="fas fa-bell-slash text-gray-400 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No hay notificaciones</h3>
+                <p class="text-gray-500 max-w-md mx-auto">Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!</p>
+            </div>
+        `;
+    }
+
+    // Función para formatear "hace X tiempo"
+    function formatTimeAgo(timestamp) {
+        const now = new Date();
+        const notificationTime = new Date(timestamp);
+        const diffMs = now - notificationTime;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Hace unos momentos';
+        if (diffMins < 60) return `Hace ${diffMins} minuto${diffMins > 1 ? 's' : ''}`;
+        if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+        return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+    }
+
+    // Function to mark notification as read
+    function markAsRead(notificationIds) {
+        fetch('/api/notifications/mark-read', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({ 
+                notification_ids: notificationIds  // Cambiado de 'ids' a 'notification_ids'
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Actualizar contador en el header
+                document.getElementById('unread-count').textContent = data.unread_count;
+                
+                // Reload notifications to reflect changes
+                loadNotifications(currentPage);
+                
+                showToast(`${notificationIds.length} notificación(es) marcada(s) como leída(s)`, 'success');
+            } else {
+                showToast('Error al marcar notificaciones como leídas: ' + (data.error || 'Error desconocido'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error de conexión: ' + error.message, 'error');
+        });
+    }
+
+    // Función para marcar TODAS las notificaciones como leídas
+    function markAllAsRead() {
+        const unreadNotifications = document.querySelectorAll('.notification-item[data-read="false"]');
+        const unreadIds = Array.from(unreadNotifications).map(el => parseInt(el.getAttribute('data-id')));
+        
+        if (unreadIds.length > 0) {
+            markAsRead(unreadIds);
+        } else {
+            showToast('No hay notificaciones sin leer', 'info');
+        }
+    }
+
+    // Función para ELIMINAR notificación
+    function deleteNotification(notificationId) {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta notificación?')) {
+            return;
+        }
+        
+        fetch(`/api/notifications/${notificationId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken,
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Recargar notificaciones
+                loadNotifications(currentPage);
+                
+                // Actualizar contador
+                document.getElementById('unread-count').textContent = data.unread_count;
+                
+                showToast('Notificación eliminada', 'success');
+            } else {
+                showToast('Error al eliminar notificación: ' + (data.error || 'Error desconocido'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error de conexión: ' + error.message, 'error');
+        });
+    }
+
+    // Función para ELIMINAR TODAS las notificaciones
+    function deleteAllNotifications() {
+        if (!confirm('¿Estás seguro de que quieres eliminar TODAS las notificaciones? Esta acción no se puede deshacer.')) {
+            return;
+        }
+        
+        fetch('/api/notifications/delete-all', {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken,
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Mostrar estado vacío
+                showEmptyState();
+                
+                // Actualizar contador
+                document.getElementById('unread-count').textContent = '0';
+                
+                // Actualizar paginación
+                document.getElementById('current-range').textContent = '0-0';
+                document.getElementById('total-notifications').textContent = '0';
+                document.getElementById('page-info').textContent = 'Página 1 de 1';
+                
+                // Deshabilitar botones de paginación
+                document.getElementById('prev-page').disabled = true;
+                document.getElementById('next-page').disabled = true;
+                
+                showToast('Todas las notificaciones han sido eliminadas', 'success');
+            } else {
+                showToast('Error al eliminar notificaciones: ' + (data.error || 'Error desconocido'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error de conexión: ' + error.message, 'error');
+        });
+    }
+    
+    // Filtros
+    function applyFilters() {
+        const typeFilter = document.getElementById('filter-type').value;
+        const sourceFilter = document.getElementById('filter-source').value;
+        const statusFilter = document.getElementById('filter-status').value;
+        
+        const notifications = document.querySelectorAll('.notification-item');
+        let visibleCount = 0;
+        
+        notifications.forEach(notification => {
+            const type = notification.getAttribute('data-type');
+            const source = notification.getAttribute('data-source');
+            const read = notification.getAttribute('data-read') === 'true';
+            
+            const typeMatch = typeFilter === 'all' || type === typeFilter;
+            const sourceMatch = sourceFilter === 'all' || source === sourceFilter;
+            const statusMatch = statusFilter === 'all' || 
+                               (statusFilter === 'unread' && !read) || 
+                               (statusFilter === 'read' && read);
+            
+            if (typeMatch && sourceMatch && statusMatch) {
+                notification.style.display = 'block';
+                visibleCount++;
+            } else {
+                notification.style.display = 'none';
+            }
+        });
+        
+        if (visibleCount === 0 && notifications.length > 0) {
+            // No mostrar toast aquí para evitar spam al aplicar filtros
+        }
+    }
+    
+    // Event Listeners
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.mark-read-btn')) {
+            const button = e.target.closest('.mark-read-btn');
+            const notificationId = parseInt(button.getAttribute('data-id'));
+            markAsRead([notificationId]);
+        }
+        
+        if (e.target.closest('.delete-btn')) {
+            const button = e.target.closest('.delete-btn');
+            const notificationId = parseInt(button.getAttribute('data-id'));
+            deleteNotification(notificationId);
+        }
+    });
+    
+    document.getElementById('mark-all-read').addEventListener('click', markAllAsRead);
+    document.getElementById('delete-all').addEventListener('click', deleteAllNotifications);
+    
+    // Paginación
+    document.getElementById('prev-page').addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadNotifications(currentPage);
+        }
+    });
+    
+    document.getElementById('next-page').addEventListener('click', function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadNotifications(currentPage);
+        }
+    });
+    
+    // Filtros
+    document.getElementById('filter-type').addEventListener('change', applyFilters);
+    document.getElementById('filter-source').addEventListener('change', applyFilters);
+    document.getElementById('filter-status').addEventListener('change', applyFilters);
+    
+    document.getElementById('clear-filters').addEventListener('click', function() {
+        document.getElementById('filter-type').value = 'all';
+        document.getElementById('filter-source').value = 'all';
+        document.getElementById('filter-status').value = 'all';
+        applyFilters();
+        showToast('Filtros limpiados', 'info');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+<div class="w-full space-y-6">
+  <!-- Tarjetas de métricas principales -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-700">
+        Usuarios Totales
+      </h3>
+      <p class="text-2xl font-bold text-blue-600">
+        {{ metrics.total_stats.total_users }}
+      </p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-700">
+        Registros de Log
+      </h3>
+      <p class="text-2xl font-bold text-green-600">
+        {{ metrics.total_stats.total_log_entries }}
+      </p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-700">
+        Datos Transmitidos
+      </h3>
+      <p class="text-2xl font-bold text-purple-600">
+        {{ "%.2f"|format(metrics.total_stats.total_data_transmitted / (1024**3)) }} GB
+      </p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-700">Total Requests</h3>
+      <p class="text-2xl font-bold text-orange-600">
+        {{ metrics.total_stats.total_requests }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Gráficos principales -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">
+        Top 20 Usuarios por Actividad
+      </h2>
+      <div class="h-80">
+        <canvas id="usersActivityChart"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">
+        Top 20 Usuarios por Datos Transmitidos
+      </h2>
+      <div class="h-80">
+        <canvas id="usersDataChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de códigos HTTP -->
+  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">
+      Distribución de Códigos HTTP
+    </h2>
+    <div class="h-96">
+      <canvas id="httpCodesChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Tabla de páginas más visitadas -->
+  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">
+      Top 20 Páginas Más Visitadas
+    </h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              URL
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Total Requests
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Visitas Únicas
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Datos Transmitidos
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for page in metrics.top_pages %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 truncate max-w-xs">
+              {{ page.url }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ page.total_requests }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ page.unique_visits }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ "%.2f"|format(page.total_data_bytes / (1024**2)) }} MB
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tabla de IPs compartidas -->
+  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">
+      IPs Compartidas por Múltiples Usuarios
+    </h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              IP
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Número de Usuarios
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Usuarios
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for ip in metrics.users_per_ip %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              {{ ip.ip }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ ip.user_count }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ ip.usernames }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
