@@ -638,43 +638,43 @@ def check_security_events():
                     "security",
                 )
 
-            # 3. Suspicious IPs (many requests in short time)
-            suspicious_ips = find_suspicious_activity(db, threshold=100, hours=1)
-            
-            if not suspicious_ips:
-                return
-            
-            # Limitar cantidad de notificaciones y ordenar por severidad
-            reported_count = 0
-            for ip, count in suspicious_ips:
-                if reported_count >= MAX_IPS_TO_REPORT:
-                    # Si hay más IPs, notificar con resumen
-                    remaining = len(suspicious_ips) - MAX_IPS_TO_REPORT
-                    add_notification(
-                        "info",
-                        f"Hay {remaining} IP(s) adicionales con actividad sospechosa",
-                        "fa-info-circle",
-                        "security",
-                    )
-                    break
-                
-                # Verificar nivel crítico primero
-                if count > CRITICAL_IP_THRESHOLD:
-                    add_notification(
-                        "error",
-                        f"Actividad crítica desde IP {ip}: {count:,} solicitudes/hora",
-                        "fa-exclamation-triangle",
-                        "security",
-                    )
-                    reported_count += 1
-                elif count > SUSPICIOUS_IP_THRESHOLD:
-                    add_notification(
-                        "warning",
-                        f"Actividad sospechosa desde IP {ip}: {count:,} solicitudes/hora",
-                        "fa-user-secret",
-                        "security",
-                    )
-                    reported_count += 1
+            # # 3. Suspicious IPs (many requests in short time)
+            # suspicious_ips = find_suspicious_activity(db, threshold=100, hours=1)
+            # 
+            # if not suspicious_ips:
+            #     return
+            # 
+            # # Limitar cantidad de notificaciones y ordenar por severidad
+            # reported_count = 0
+            # for ip, count in suspicious_ips:
+            #     if reported_count >= MAX_IPS_TO_REPORT:
+            #         # Si hay más IPs, notificar con resumen
+            #         remaining = len(suspicious_ips) - MAX_IPS_TO_REPORT
+            #         add_notification(
+            #             "info",
+            #             f"Hay {remaining} IP(s) adicionales con actividad sospechosa",
+            #             "fa-info-circle",
+            #             "security",
+            #         )
+            #         break
+            #     
+            #     # Verificar nivel crítico primero
+            #     if count > CRITICAL_IP_THRESHOLD:
+            #         add_notification(
+            #             "error",
+            #             f"Actividad crítica desde IP {ip}: {count:,} solicitudes/hora",
+            #             "fa-exclamation-triangle",
+            #             "security",
+            #         )
+            #         reported_count += 1
+            #     elif count > SUSPICIOUS_IP_THRESHOLD:
+            #         add_notification(
+            #             "warning",
+            #             f"Actividad sospechosa desde IP {ip}: {count:,} solicitudes/hora",
+            #             "fa-user-secret",
+            #             "security",
+            #         )
+            #         reported_count += 1
 
     except ImportError as e:
         logger.error(f"Error importing auditoria_service modules: {e}")
