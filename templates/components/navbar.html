@@ -236,6 +236,7 @@
         </div>
       </div>
       <form method="POST" action="/install" class="flex justify-end gap-3 px-6 py-4 bg-gray-50">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <button type="button" @click="showSquidModal = false" class="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
           <i class="fas fa-times"></i>
           Cancelar
@@ -297,6 +298,7 @@
         </div>
       </div>
       <form method="POST" action="/update" class="flex justify-end gap-3 px-6 py-4 bg-gray-50">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <button type="button" @click="showWebModal = false" class="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
           <i class="fas fa-times"></i>
           Cancelar
