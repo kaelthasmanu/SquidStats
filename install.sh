@@ -120,7 +120,18 @@ function updateOrCloneRepo() {
         fi
 
         if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
-            [ "$env_exists" = true ] && mv /tmp/.env.backup .env
+            if [ "$env_exists" = true ]; then
+                mv /tmp/.env.backup .env
+                
+                # Actualizar solo la VERSION del .env con la del repositorio
+                if [ -f "example.env" ]; then
+                    new_version=$(grep "^VERSION=" example.env | cut -d'=' -f2)
+                    if [ ! -z "$new_version" ]; then
+                        sed -i "s/^VERSION=.*/VERSION=$new_version/" .env
+                        echo "✅ VERSION actualizada a $new_version en .env"
+                    fi
+                fi
+            fi
             echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
             return 0
         else
@@ -142,7 +153,7 @@ function createEnvFile() {
     else
         echo "Creando archivo de configuración .env..."
         cat >"$env_file" <<EOF
-VERSION=2
+VERSION=2.1
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
 LOG_FORMAT=DETAILED
