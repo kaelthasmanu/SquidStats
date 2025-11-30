@@ -5,7 +5,7 @@ import subprocess
 import threading
 from contextlib import contextmanager
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Optional, Union
 
 from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
@@ -63,9 +63,7 @@ def get_db_session():
     db = get_session()
     try:
         yield db
-        # Only commit if there were actual changes (not for read-only operations)
-        if db.new or db.dirty or db.deleted:
-            db.commit()
+        db.commit()
     except Exception:
         db.rollback()
         raise
@@ -93,7 +91,7 @@ def _generate_message_hash(message: str, source: str, notification_type: str) ->
 
 def _check_duplicate_notification(
     db: Session, message_hash: str, hours: int = 24
-) -> Notification | None:
+) -> Optional[Notification]:
     """Check if a similar notification exists in the last N hours"""
     time_threshold = datetime.now() - timedelta(hours=hours)
     return (
@@ -132,10 +130,10 @@ def get_commit_notifications() -> dict[str, Any]:
 def add_notification(
     notification_type: str,
     message: str,
-    icon: str | None = None,
+    icon: Optional[str] = None,
     source: str = "system",
     deduplicate_hours: int = DEFAULT_DEDUPLICATE_HOURS,
-) -> dict[str, Any] | None:
+) -> Optional[dict[str, Any]]:
     """Adds a notification to the database and emits via Socket.IO if configured
 
     Args:
