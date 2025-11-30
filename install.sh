@@ -341,10 +341,10 @@ function main() {
     if [ "$1" = "--update" ]; then
         echo "Verificando paquetes instalados..."
         checkPackages
-        echo "Verificando Dependecias de python..."
-        installDependencies
         echo "Actualizando Servicio..."
         updateOrCloneRepo
+        echo "Verificando Dependecias de python..."
+        installDependencies
         echo "Actualizando versión en .env..."
         updateEnvVersion
         echo "Reiniciando Servicio..."
