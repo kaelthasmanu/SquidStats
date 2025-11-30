@@ -403,6 +403,13 @@
                 showNotificationToast(data.notification);
             });
             
+            notificationSocket.on('notification_updated', function(data) {
+                console.log('Notificación actualizada recibida:', data);
+                updateExistingNotification(data.notification);
+                updateNotificationBadges(data.unread_count);
+                showNotificationToast(data.notification);
+            });
+            
             notificationSocket.on('disconnect', function() {
                 console.log('Desconectado del servidor de notificaciones');
                 // Reconectar después de 5 segundos
@@ -423,6 +430,24 @@
                 updateNotificationLists();
                 updateNotificationBadges(notificationsData.unread_count);
             }
+        }
+
+        function updateExistingNotification(notification) {
+            // Buscar y actualizar la notificación existente
+            const existingIndex = notificationsData.notifications.findIndex(n => n.id === notification.id);
+            if (existingIndex !== -1) {
+                // Actualizar la notificación existente
+                notificationsData.notifications[existingIndex] = notification;
+                // Moverla al principio de la lista
+                const updated = notificationsData.notifications.splice(existingIndex, 1)[0];
+                notificationsData.notifications.unshift(updated);
+            } else {
+                // Si no existe, agregarla como nueva
+                notificationsData.notifications.unshift(notification);
+            }
+            
+            // Actualizar ambas listas (desktop y móvil)
+            updateNotificationLists();
         }
 
         function showNotificationToast(notification) {
@@ -457,8 +482,19 @@
             
             const sourceP = document.createElement('p');
             sourceP.className = 'text-sm font-medium text-gray-900';
-            sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
-                                  notification.source === 'git' ? 'Git' : 'Sistema';
+            
+            // Agregar badge de count si es mayor a 1
+            if (notification.count && notification.count > 1) {
+                const countBadge = document.createElement('span');
+                countBadge.className = 'inline-flex items-center justify-center px-2 py-0.5 ml-2 text-xs font-bold leading-none text-white bg-red-600 rounded-full';
+                countBadge.textContent = `×${notification.count}`;
+                sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
+                                      notification.source === 'git' ? 'Git' : 'Sistema';
+                sourceP.appendChild(countBadge);
+            } else {
+                sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
+                                      notification.source === 'git' ? 'Git' : 'Sistema';
+            }
             
             const messageP = document.createElement('p');
             messageP.className = 'mt-1 text-sm text-gray-600';
