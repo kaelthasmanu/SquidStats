@@ -60,12 +60,13 @@ jobs:
             echo "First release of SquidStats" >> CHANGELOG.md
           fi
           
-          # Use proper multiline output format
+          # Use delimiter with random suffix to avoid conflicts
+          DELIMITER="EOF_$(date +%s)_$$"
           {
-            echo "changelog<<CHANGELOG_EOF"
+            echo "changelog<<${DELIMITER}"
             cat CHANGELOG.md
-            echo "CHANGELOG_EOF"
-          } >> $GITHUB_OUTPUT
+            echo "${DELIMITER}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         id: create_release
