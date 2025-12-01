@@ -1,0 +1,359 @@
+name: Build and Publish to PPA
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Se ejecuta cuando se crea un tag como v1.0.0
+  workflow_dispatch:  # Permite ejecutar manualmente
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+env:
+  PACKAGE_NAME: squidstats
+  MAINTAINER_NAME: "Manuel"
+  MAINTAINER_EMAIL: "kaelthasmanu@example.com"
+  DESCRIPTION: "The definitive analysis for your Squid proxy"
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Determine version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        elif [ -n "${{ github.ref }}" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          VERSION="${{ github.ref }}"
+          VERSION="${VERSION#refs/tags/v}"
+          VERSION="${VERSION#refs/tags/}"
+        else
+          # Fallback para testing local con act
+          VERSION="1.0.0-dev"
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building version: $VERSION"
+        
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          debhelper \
+          dh-python \
+          python3-all \
+          python3-setuptools \
+          devscripts \
+          build-essential \
+          lintian \
+          dput
+          
+    - name: Create Debian package structure
+      env:
+        VERSION: ${{ steps.version.outputs.VERSION }}
+      run: |
+        PACKAGE_DIR="${PACKAGE_NAME}-${VERSION}"
+        mkdir -p $PACKAGE_DIR
+        
+        # Copiar archivos de la aplicación
+        cp -r app.py config.py requirements.txt $PACKAGE_DIR/
+        cp -r database parsers routes services static templates utils $PACKAGE_DIR/
+        cp -r assets $PACKAGE_DIR/ || true
+        
+        # Crear estructura debian/
+        mkdir -p $PACKAGE_DIR/debian
+        
+        # Crear debian/control
+        cat > $PACKAGE_DIR/debian/control << EOF
+        Source: $PACKAGE_NAME
+        Section: web
+        Priority: optional
+        Maintainer: $MAINTAINER_NAME <$MAINTAINER_EMAIL>
+        Build-Depends: debhelper-compat (= 13),
+                       dh-python,
+                       python3-all,
+                       python3-setuptools
+        Standards-Version: 4.6.0
+        Homepage: https://github.com/${{ github.repository }}
+        
+        Package: $PACKAGE_NAME
+        Architecture: all
+        Depends: \${python3:Depends},
+                 \${misc:Depends},
+                 adduser,
+                 python3-flask (>= 3.1),
+                 python3-flask-wtf,
+                 python3-sqlalchemy (>= 2.0),
+                 python3-dotenv,
+                 python3-pymysql,
+                 python3-psycopg2,
+                 python3-psutil,
+                 python3-eventlet,
+                 python3-tz,
+                 python3-requests,
+                 squid (>= 5.0) | squid3
+        Description: $DESCRIPTION
+         SquidStats is a comprehensive web-based dashboard for analyzing and
+         monitoring Squid proxy server logs. It provides real-time statistics,
+         user activity tracking, bandwidth monitoring, and detailed reports.
+         .
+         Features include:
+          - Real-time dashboard with WebSocket support
+          - Traffic analysis and bandwidth monitoring
+          - User auditing and blacklist management
+          - Report generation with date filtering
+          - Cache statistics and connection monitoring
+          - Admin panel for Squid configuration
+        EOF
+        
+        # Crear debian/changelog
+        cat > $PACKAGE_DIR/debian/changelog << EOF
+        $PACKAGE_NAME ($VERSION-1) jammy; urgency=medium
+        
+          * New release $VERSION
+          * Package built from GitHub Actions
+        
+         -- $MAINTAINER_NAME <$MAINTAINER_EMAIL>  $(date -R)
+        EOF
+        
+        # Crear debian/rules
+        cat > $PACKAGE_DIR/debian/rules << 'EOF'
+        #!/usr/bin/make -f
+        
+        %:
+        	dh $@
+        
+        override_dh_auto_configure:
+        	# Skip auto-configure
+        
+        override_dh_auto_build:
+        	# Skip auto-build
+        
+        override_dh_auto_install:
+        	mkdir -p debian/squidstats/opt/squidstats
+        	mkdir -p debian/squidstats/etc/systemd/system
+        	mkdir -p debian/squidstats/var/log/squidstats
+        	
+        	# Copiar aplicación
+        	cp -r app.py config.py requirements.txt debian/squidstats/opt/squidstats/
+        	cp -r database parsers routes services utils debian/squidstats/opt/squidstats/
+        	cp -r static templates debian/squidstats/opt/squidstats/
+        	
+        	# Copiar archivos de servicio si existen
+        	if [ -f utils/squidstats.service ]; then \
+        		cp utils/squidstats.service debian/squidstats/etc/systemd/system/; \
+        	fi
+        
+        override_dh_auto_test:
+        	# Skip tests
+        
+        override_dh_shlibdeps:
+        	# Skip shlibdeps since we're pure Python
+        EOF
+        
+        chmod +x $PACKAGE_DIR/debian/rules
+        
+        # Crear debian/install
+        cat > $PACKAGE_DIR/debian/install << EOF
+        app.py opt/squidstats/
+        config.py opt/squidstats/
+        requirements.txt opt/squidstats/
+        database opt/squidstats/
+        parsers opt/squidstats/
+        routes opt/squidstats/
+        services opt/squidstats/
+        static opt/squidstats/
+        templates opt/squidstats/
+        utils opt/squidstats/
+        EOF
+        
+        # Crear debian/postinst
+        cat > $PACKAGE_DIR/debian/postinst << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        case "$1" in
+            configure)
+                # Crear usuario si no existe
+                if ! id squidstats >/dev/null 2>&1; then
+                    adduser --system --group --home /opt/squidstats --no-create-home squidstats
+                fi
+                
+                # Crear directorios necesarios
+                mkdir -p /var/log/squidstats
+                mkdir -p /etc/squidstats
+                
+                # Crear archivo .env si no existe
+                if [ ! -f /etc/squidstats/.env ]; then
+                    cat > /etc/squidstats/.env << ENVEOF
+        SECRET_KEY=$(openssl rand -hex 32)
+        DATABASE_URL=sqlite:////opt/squidstats/squidstats.db
+        SQUID_LOG=/var/log/squid/access.log
+        FLASK_DEBUG=false
+        ENVEOF
+                fi
+                
+                # Instalar dependencias de Python
+                cd /opt/squidstats
+                pip3 install -r requirements.txt >/dev/null 2>&1 || true
+                
+                # Establecer permisos
+                chown -R squidstats:squidstats /opt/squidstats
+                chown -R squidstats:squidstats /var/log/squidstats
+                chown -R squidstats:squidstats /etc/squidstats
+                chmod 600 /etc/squidstats/.env
+                
+                # Habilitar y arrancar servicio si existe
+                if [ -f /etc/systemd/system/squidstats.service ]; then
+                    systemctl daemon-reload
+                    systemctl enable squidstats.service
+                    systemctl start squidstats.service || true
+                fi
+                ;;
+        esac
+        
+        #DEBHELPER#
+        
+        exit 0
+        EOF
+        
+        chmod +x $PACKAGE_DIR/debian/postinst
+        
+        # Crear debian/postrm
+        cat > $PACKAGE_DIR/debian/postrm << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        case "$1" in
+            purge)
+                rm -rf /var/log/squidstats
+                rm -rf /etc/squidstats
+                if id squidstats >/dev/null 2>&1; then
+                    deluser squidstats || true
+                fi
+                ;;
+        esac
+        
+        #DEBHELPER#
+        
+        exit 0
+        EOF
+        
+        chmod +x $PACKAGE_DIR/debian/postrm
+        
+        # Crear debian/source/format
+        mkdir -p $PACKAGE_DIR/debian/source
+        echo "3.0 (native)" > $PACKAGE_DIR/debian/source/format
+        
+        echo "Package structure created successfully"
+        ls -la $PACKAGE_DIR/ | head -20
+        
+    - name: Build Debian package
+      env:
+        VERSION: ${{ steps.version.outputs.VERSION }}
+      run: |
+        cd ${PACKAGE_NAME}-${VERSION}
+        debuild -us -uc -b
+        cd ..
+        ls -lh *.deb
+        
+    - name: Check package with lintian
+      run: |
+        lintian --info *.deb || true
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: debian-package
+        path: |
+          *.deb
+          *.changes
+          *.buildinfo
+        retention-days: 30
+        
+    - name: Import GPG key
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      run: |
+        echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+        echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+        gpgconf --kill gpg-agent
+        gpgconf --launch gpg-agent
+        
+    - name: Sign package
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      env:
+        VERSION: ${{ steps.version.outputs.VERSION }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      run: |
+        cd ${PACKAGE_NAME}-${VERSION}
+        debuild -S -sa -k${{ secrets.GPG_KEY_ID }}
+        cd ..
+        
+    - name: Configure dput for PPA
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      env:
+        PPA_NAME: ${{ secrets.PPA_NAME }}  # Por ejemplo: ppa:usuario/ppa-name
+      run: |
+        mkdir -p ~/.dput.cf
+        cat > ~/.dput.cf << EOF
+        [squidstats-ppa]
+        fqdn = ppa.launchpad.net
+        method = ftp
+        incoming = ~${PPA_NAME#ppa:}/ubuntu/
+        login = anonymous
+        allow_unsigned_uploads = 0
+        EOF
+        
+    - name: Upload to PPA
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      env:
+        VERSION: ${{ steps.version.outputs.VERSION }}
+      run: |
+        dput squidstats-ppa ${PACKAGE_NAME}_${VERSION}_source.changes
+        
+    - name: Create GitHub Release
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          *.deb
+        body: |
+          ## SquidStats ${{ steps.version.outputs.VERSION }}
+          
+          ### Instalación desde PPA (Ubuntu/Debian):
+          ```bash
+          sudo add-apt-repository ${{ secrets.PPA_NAME }}
+          sudo apt update
+          sudo apt install squidstats
+          ```
+          
+          ### Instalación manual (.deb):
+          ```bash
+          sudo dpkg -i squidstats_${{ steps.version.outputs.VERSION }}-1_all.deb
+          sudo apt-get install -f
+          ```
+          
+          ### Configuración:
+          Editar `/etc/squidstats/.env` con tu configuración.
+          
+          ### Uso:
+          ```bash
+          sudo systemctl start squidstats
+          sudo systemctl status squidstats
+          ```
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
