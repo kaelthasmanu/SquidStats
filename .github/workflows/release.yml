@@ -60,9 +60,12 @@ jobs:
             echo "First release of SquidStats" >> CHANGELOG.md
           fi
           
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          cat CHANGELOG.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Use proper multiline output format
+          {
+            echo "changelog<<CHANGELOG_EOF"
+            cat CHANGELOG.md
+            echo "CHANGELOG_EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Create Release
         id: create_release
