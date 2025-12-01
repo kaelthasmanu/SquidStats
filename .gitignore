@@ -170,3 +170,8 @@ cython_debug/
 
 # Custom
 eicar.com.txt
+
+# GitHub Actions local testing
+.github/workflows/.secrets
+.github/workflows/.env
+.github/secrets/

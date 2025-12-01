@@ -365,3 +365,21 @@ jobs:
           ```
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Generate changelog
+      id: changelog
+      run: |
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        if [ -n "$PREV_TAG" ]; then
+          echo "## Changes since $PREV_TAG" > CHANGELOG.md
+          git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD >> CHANGELOG.md
+        else
+          echo "## Initial Release" > CHANGELOG.md
+          echo "First release of SquidStats" >> CHANGELOG.md
+        fi
+
+        DELIM="EOF_$(uuidgen)"
+        {
+          printf 'changelog<<%s\n' "$DELIM"
+          cat CHANGELOG.md
+          printf '%s\n' "$DELIM"
+        } >>"$GITHUB_OUTPUT"
