@@ -257,38 +257,12 @@ jobs:
         
         chmod +x $PACKAGE_DIR/debian/postrm
         
-        # Crear debian/source/format
+        # Crear debian/source/format - usar native para incluir binarios fácilmente
         mkdir -p $PACKAGE_DIR/debian/source
-        echo "3.0 (quilt)" > $PACKAGE_DIR/debian/source/format
+        echo "3.0 (native)" > $PACKAGE_DIR/debian/source/format
         
         echo "Package structure created successfully"
         ls -la $PACKAGE_DIR/ | head -20
-        
-        # Normalizar versión para nombres de archivo
-        DEB_VERSION=$(echo "$VERSION" | sed 's/-/~/g')
-        
-        # Crear archivo .orig.tar.gz requerido por debuild
-        tar czf ${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz \
-          --exclude='debian' \
-          --exclude='.git' \
-          --exclude='.github' \
-          --transform "s|^\.|${PACKAGE_NAME}-${DEB_VERSION}|" \
-          --transform "s|^|${PACKAGE_NAME}-${DEB_VERSION}/|" \
-          -C $PACKAGE_DIR \
-          . 2>/dev/null || true
-        
-        # Si falla, intentar método alternativo
-        if [ ! -f "${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz" ]; then
-          cd $PACKAGE_DIR
-          tar czf ../${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz \
-            --exclude='debian' \
-            --exclude='.git' \
-            .
-          cd ..
-        fi
-        
-        echo "Created orig tarball: ${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz"
-        ls -lh ${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz
         
     - name: Build Debian package
       env:
