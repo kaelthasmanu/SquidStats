@@ -61,12 +61,10 @@ jobs:
           fi
           
           # Use delimiter with random suffix to avoid conflicts
-          DELIMITER="EOF_$(date +%s)_$$"
-          {
-            echo "changelog<<${DELIMITER}"
-            cat CHANGELOG.md
-            echo "${DELIMITER}"
-          } >> "$GITHUB_OUTPUT"
+          DELIM="EOF_$(uuidgen)"
+          printf 'changelog<<%s\n' "$DELIM" >> "$GITHUB_OUTPUT"
+          cat CHANGELOG.md >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$DELIM" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         id: create_release

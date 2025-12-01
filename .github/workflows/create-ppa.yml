@@ -378,8 +378,6 @@ jobs:
         fi
 
         DELIM="EOF_$(uuidgen)"
-        {
-          printf 'changelog<<%s\n' "$DELIM"
-          cat CHANGELOG.md
-          printf '%s\n' "$DELIM"
-        } >>"$GITHUB_OUTPUT"
+        printf 'changelog<<%s\n' "$DELIM" >> "$GITHUB_OUTPUT"
+        cat CHANGELOG.md >> "$GITHUB_OUTPUT"
+        printf '%s\n' "$DELIM" >> "$GITHUB_OUTPUT"
