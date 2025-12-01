@@ -63,7 +63,9 @@ jobs:
       env:
         VERSION: ${{ steps.version.outputs.VERSION }}
       run: |
-        PACKAGE_DIR="${PACKAGE_NAME}-${VERSION}"
+        # Normalizar versión para Debian (reemplazar - por ~ para versiones pre-release)
+        DEB_VERSION=$(echo "$VERSION" | sed 's/-/~/g')
+        PACKAGE_DIR="${PACKAGE_NAME}-${DEB_VERSION}"
         mkdir -p $PACKAGE_DIR
         
         # Copiar archivos de la aplicación
@@ -118,8 +120,11 @@ jobs:
         EOF
         
         # Crear debian/changelog
+        # Normalizar versión para Debian (reemplazar guiones por tildes excepto el último)
+        DEB_VERSION=$(echo "$VERSION" | sed 's/-/~/g')
+        
         cat > $PACKAGE_DIR/debian/changelog << EOF
-        $PACKAGE_NAME ($VERSION-1) jammy; urgency=medium
+        $PACKAGE_NAME (${DEB_VERSION}-1) jammy; urgency=medium
         
           * New release $VERSION
           * Package built from GitHub Actions
@@ -254,16 +259,43 @@ jobs:
         
         # Crear debian/source/format
         mkdir -p $PACKAGE_DIR/debian/source
-        echo "3.0 (native)" > $PACKAGE_DIR/debian/source/format
+        echo "3.0 (quilt)" > $PACKAGE_DIR/debian/source/format
         
         echo "Package structure created successfully"
         ls -la $PACKAGE_DIR/ | head -20
+        
+        # Normalizar versión para nombres de archivo
+        DEB_VERSION=$(echo "$VERSION" | sed 's/-/~/g')
+        
+        # Crear archivo .orig.tar.gz requerido por debuild
+        tar czf ${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz \
+          --exclude='debian' \
+          --exclude='.git' \
+          --exclude='.github' \
+          --transform "s|^\.|${PACKAGE_NAME}-${DEB_VERSION}|" \
+          --transform "s|^|${PACKAGE_NAME}-${DEB_VERSION}/|" \
+          -C $PACKAGE_DIR \
+          . 2>/dev/null || true
+        
+        # Si falla, intentar método alternativo
+        if [ ! -f "${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz" ]; then
+          cd $PACKAGE_DIR
+          tar czf ../${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz \
+            --exclude='debian' \
+            --exclude='.git' \
+            .
+          cd ..
+        fi
+        
+        echo "Created orig tarball: ${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz"
+        ls -lh ${PACKAGE_NAME}_${DEB_VERSION}.orig.tar.gz
         
     - name: Build Debian package
       env:
         VERSION: ${{ steps.version.outputs.VERSION }}
       run: |
-        cd ${PACKAGE_NAME}-${VERSION}
+        DEB_VERSION=$(echo "$VERSION" | sed 's/-/~/g')
+        cd ${PACKAGE_NAME}-${DEB_VERSION}
         debuild -us -uc -b
         cd ..
         ls -lh *.deb
@@ -299,7 +331,8 @@ jobs:
         VERSION: ${{ steps.version.outputs.VERSION }}
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       run: |
-        cd ${PACKAGE_NAME}-${VERSION}
+        DEB_VERSION=$(echo "$VERSION" | sed 's/-/~/g')
+        cd ${PACKAGE_NAME}-${DEB_VERSION}
         debuild -S -sa -k${{ secrets.GPG_KEY_ID }}
         cd ..
         
@@ -323,7 +356,8 @@ jobs:
       env:
         VERSION: ${{ steps.version.outputs.VERSION }}
       run: |
-        dput squidstats-ppa ${PACKAGE_NAME}_${VERSION}_source.changes
+        DEB_VERSION=$(echo "$VERSION" | sed 's/-/~/g')
+        dput squidstats-ppa ${PACKAGE_NAME}_${DEB_VERSION}-1_source.changes
         
     - name: Create GitHub Release
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
