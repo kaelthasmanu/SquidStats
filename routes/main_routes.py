@@ -9,6 +9,7 @@ from parsers.connections import group_by_user, parse_raw_data
 from parsers.squid_info import fetch_squid_info_stats
 from services.fetch_data import fetch_squid_data
 from services.notifications import get_all_notifications
+from services.system_info import get_system_type
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
 
@@ -114,6 +115,7 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
             "page_title": "Inicio Dashboard",
             "build_time_ms": int((time.time() - t0) * 1000),
             "connection_count": len(connections),
+            "system_type": get_system_type(),
         }
         return context, None
     except Exception:  # Fallback catch-all
@@ -140,6 +142,7 @@ def index():
             squid_info_stats=context["squid_info_stats"],
             build_time_ms=context["build_time_ms"],
             connection_count=context["connection_count"],
+            system_type=context["system_type"],
         )
 
     # Normal request: return the complete page

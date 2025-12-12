@@ -132,6 +132,19 @@
         </div>
       </div>
       {% endif %}
+
+      {# Tarjeta de Tipo de Sistema #}
+      <div class="bg-white p-3 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5 min-w-0">
+        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mr-3 flex-shrink-0">
+          <i class="fas fa-desktop text-orange-500 text-lg"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-gray-500 text-xs">Tipo de Sistema</p>
+          <p class="text-lg font-bold truncate" title="{{ system_type }}">
+            {{ system_type }}
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 

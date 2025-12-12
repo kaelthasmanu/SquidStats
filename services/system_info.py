@@ -226,3 +226,47 @@ def get_timezone():
         return "Unknown"
     except Exception as e:
         return f"Error getting timezone: {str(e)}"
+
+
+def get_system_type():
+    # Check for Linux
+    if os.path.exists("/etc/os-release"):
+        try:
+            with open("/etc/os-release") as f:
+                for line in f:
+                    if line.startswith("PRETTY_NAME="):
+                        return line.split("=", 1)[1].strip('"')
+        except Exception:
+            pass
+    
+    # Check for macOS
+    try:
+        result = subprocess.run(["sw_vers", "-productName"], capture_output=True, text=True, timeout=5)
+        if result.returncode == 0:
+            name = result.stdout.strip()
+            result = subprocess.run(["sw_vers", "-productVersion"], capture_output=True, text=True, timeout=5)
+            version = result.stdout.strip()
+            return f"{name} {version}"
+    except Exception:
+        pass
+    
+    # Check for Windows
+    try:
+        result = subprocess.run('systeminfo | findstr /B /C:"OS Name" /B /C:"OS Version"', shell=True, capture_output=True, text=True, timeout=10)
+        if result.returncode == 0:
+            lines = result.stdout.strip().split('\n')
+            os_name = ""
+            os_version = ""
+            for line in lines:
+                if line.startswith("OS Name:"):
+                    os_name = line.split(":", 1)[1].strip()
+                elif line.startswith("OS Version:"):
+                    os_version = line.split(":", 1)[1].strip()
+            if os_name and os_version:
+                return f"{os_name} {os_version}"
+            elif os_name:
+                return os_name
+    except Exception:
+        pass
+    
+    return "Unknown"
