@@ -238,23 +238,36 @@ def get_system_type():
                         return line.split("=", 1)[1].strip('"')
         except Exception:
             pass
-    
+
     # Check for macOS
     try:
-        result = subprocess.run(["sw_vers", "-productName"], capture_output=True, text=True, timeout=5)
+        result = subprocess.run(
+            ["sw_vers", "-productName"], capture_output=True, text=True, timeout=5
+        )
         if result.returncode == 0:
             name = result.stdout.strip()
-            result = subprocess.run(["sw_vers", "-productVersion"], capture_output=True, text=True, timeout=5)
+            result = subprocess.run(
+                ["sw_vers", "-productVersion"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
             version = result.stdout.strip()
             return f"{name} {version}"
     except Exception:
         pass
-    
+
     # Check for Windows
     try:
-        result = subprocess.run('systeminfo | findstr /B /C:"OS Name" /B /C:"OS Version"', shell=True, capture_output=True, text=True, timeout=10)
+        result = subprocess.run(
+            'systeminfo | findstr /B /C:"OS Name" /B /C:"OS Version"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
         if result.returncode == 0:
-            lines = result.stdout.strip().split('\n')
+            lines = result.stdout.strip().split("\n")
             os_name = ""
             os_version = ""
             for line in lines:
@@ -268,5 +281,5 @@ def get_system_type():
                 return os_name
     except Exception:
         pass
-    
+
     return "Unknown"

@@ -2,7 +2,7 @@ Flask==3.1.1
 Flask-WTF==1.2.2
 SQLAlchemy==2.0.42
 flask_apscheduler==1.13.1
-python-dotenv==1.1.1
+python-dotenv==1.2.1
 pymysql==1.1.1
 psycopg2-binary
 psutil==7.0.0
