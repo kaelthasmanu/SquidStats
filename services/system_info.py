@@ -55,12 +55,12 @@ def get_os_info():
 
 def get_uptime():
     try:
-        with open("/proc/uptime") as f:
-            uptime_seconds = float(f.readline().split()[0])
-            days = int(uptime_seconds // 86400)
-            hours = int((uptime_seconds % 86400) // 3600)
-            minutes = int((uptime_seconds % 3600) // 60)
-            return f"{days}d {hours}h {minutes}m"
+        boot_time = psutil.boot_time()
+        uptime_seconds = time.time() - boot_time
+        days = int(uptime_seconds // 86400)
+        hours = int((uptime_seconds % 86400) // 3600)
+        minutes = int((uptime_seconds % 3600) // 60)
+        return f"{days}d {hours}h {minutes}m"
     except Exception as e:
         return f"Error getting uptime: {str(e)}"
 
