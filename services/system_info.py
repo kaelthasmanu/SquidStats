@@ -235,7 +235,12 @@ def get_system_type():
             with open("/etc/os-release") as f:
                 for line in f:
                     if line.startswith("PRETTY_NAME="):
-                        return line.split("=", 1)[1].strip('"')
+                        value = line.split("=", 1)[1].strip()
+                        if (value.startswith('"') and value.endswith('"')) or (
+                            value.startswith("'") and value.endswith("'")
+                        ):
+                            value = value[1:-1]
+                        return value
         except Exception:
             pass
 
