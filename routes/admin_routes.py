@@ -20,6 +20,26 @@ admin_bp = Blueprint("admin", __name__)
 config_manager = SquidConfigManager()
 
 
+def load_env_vars():
+    env_vars = {}
+    env_file = os.path.join(os.getcwd(), '.env')
+    if os.path.exists(env_file):
+        with open(env_file, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and '=' in line:
+                    key, value = line.split('=', 1)
+                    env_vars[key] = value.strip('"')
+    return env_vars
+
+
+def save_env_vars(env_vars):
+    env_file = os.path.join(os.getcwd(), '.env')
+    with open(env_file, 'w') as f:
+        for key, value in env_vars.items():
+            f.write(f'{key}="{value}"\n')
+
+
 @admin_bp.route("/")
 def admin_dashboard():
     acls = config_manager.get_acls()
@@ -36,8 +56,9 @@ def admin_dashboard():
 
 @admin_bp.route("/config")
 def view_config():
+    env_vars = load_env_vars()
     return render_template(
-        "admin/config.html", config_content=config_manager.config_content
+        "admin/config.html", config_content=config_manager.config_content, env_vars=env_vars
     )
 
 
@@ -64,6 +85,17 @@ def edit_config():
     return render_template(
         "admin/edit_config.html", config_content=config_manager.config_content
     )
+
+
+@admin_bp.route("/config/env/save", methods=["POST"])
+def save_env():
+    env_vars = {}
+    for key in request.form:
+        if key != 'csrf_token':
+            env_vars[key] = request.form[key]
+    save_env_vars(env_vars)
+    flash("Variables de entorno guardadas exitosamente", "success")
+    return redirect(url_for("admin.view_config"))
 
 
 @admin_bp.route("/acls")

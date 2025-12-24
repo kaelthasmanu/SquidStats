@@ -16,7 +16,7 @@
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-4">
                     <i class="fas fa-server text-2xl"></i>
-                    <h1 class="text-xl font-bold">Administrador Squid Proxy</h1>
+                    <h1 class="text-xl font-bold">Administrador Squid Proxy (BETA version)</h1>
                 </div>
                 <div class="flex space-x-4">
                     <button onclick="reloadSquid()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors">
@@ -77,6 +77,11 @@
         </main>
     </div>
 
+    <!-- Custom Confirm Modal -->
+    {% include 'components/confirm_modal.html' %}
+
+    <script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
     <script>
         // Get CSRF token from meta tag
         function getCsrfToken() {
@@ -84,27 +89,29 @@
         }
 
         async function reloadSquid() {
-            try {
-                const response = await fetch('/api/reload-squid', { 
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCsrfToken()
+            showCustomConfirm('¿Está seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio.', async () => {
+                try {
+                    const response = await fetch('/api/reload-squid', { 
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification(data.message, 'error');
                     }
-                });
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    showNotification(data.message, 'success');
-                } else {
-                    showNotification(data.message, 'error');
+                } catch (error) {
+                    showNotification('Error al recargar Squid', 'error');
                 }
-            } catch (error) {
-                showNotification('Error al recargar Squid', 'error');
-            }
+            });
         }
 
         async function restartSquid() {
-            if (confirm('¿Está seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio.')) {
+            showCustomConfirm('¿Está seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio.', async () => {
                 try {
                     const response = await fetch('/api/restart-squid', { 
                         method: 'POST',
@@ -122,7 +129,7 @@
                 } catch (error) {
                     showNotification('Error al reiniciar Squid', 'error');
                 }
-            }
+            });
         }
 
         function showNotification(message, type) {
