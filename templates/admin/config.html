@@ -16,7 +16,7 @@
     
     <!-- Squid Tab -->
     <!-- <div x-show="activeTab === 'squid'" class="mt-6">
-        <div class="flex justify-between items-center mb-6">
+        -center mb-6">
             <h3 class="text-xl font-bold text-gray-800">Configuración de Squid</h3>
             <a href="{{ url_for('admin.edit_config') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
                 <i class="fas fa-edit mr-2"></i>Editar
@@ -39,10 +39,23 @@
         
         <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            {% set sensitive_vars = ['SECRET_KEY', 'JWT_SECRET_KEY', 'ADMIN_PASSWORD', 'DATABASE_URL', 'VERSION'] %}
             {% for key, value in env_vars.items() %}
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
-                <input type="text" name="{{ key }}" value="{{ value }}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                {% if key == 'FLASK_DEBUG' %}
+                <select name="{{ key }}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                    <option value="true" {% if value.lower() == 'true' %}selected{% endif %}>True</option>
+                    <option value="false" {% if value.lower() == 'false' %}selected{% endif %}>False</option>
+                </select>
+                {% else %}
+                <input type="text" name="{{ key }}" value="{{ value }}" 
+                       {% if key in sensitive_vars %}disabled{% endif %}
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors {% if key in sensitive_vars %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}">
+                {% endif %}
+                {% if key in sensitive_vars %}
+                <p class="text-xs text-gray-500 mt-1">Esta variable está protegida y no puede ser modificada desde aquí</p>
+                {% endif %}
             </div>
             {% endfor %}
             <div class="md:col-span-2 flex justify-center mt-4">

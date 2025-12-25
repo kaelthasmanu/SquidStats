@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Login - SquidStats Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .login-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="login-bg min-h-screen flex items-center justify-center p-4">
+    <!-- Background decoration -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 float-animation"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 float-animation" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 float-animation" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Login Card -->
+    <div class="glass-card rounded-2xl shadow-2xl w-full max-w-md p-8 relative z-10">
+        <!-- Logo/Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-24 h-24 mb-4">
+                <img
+                    src="{{ url_for('static', filename='navidadsquidstats.png') }}"
+                    alt="SquidStats"
+                    class="w-full h-full object-contain drop-shadow-lg"
+                >
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">SquidStats</h1>
+            <p class="text-gray-500 mt-1">Panel de Administración</p>
+        </div>
+
+        <!-- Error Message -->
+        {% if error %}
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                <p class="text-red-700 text-sm">{{ error }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="{% if category == 'success' %}bg-green-50 border-l-4 border-green-500{% elif category == 'warning' %}bg-yellow-50 border-l-4 border-yellow-500{% else %}bg-red-50 border-l-4 border-red-500{% endif %} p-4 mb-6 rounded-r-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-{% if category == 'success' %}check-circle text-green-500{% elif category == 'warning' %}exclamation-triangle text-yellow-500{% else %}exclamation-circle text-red-500{% endif %} mr-3"></i>
+                        <p class="{% if category == 'success' %}text-green-700{% elif category == 'warning' %}text-yellow-700{% else %}text-red-700{% endif %} text-sm">{{ message }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <!-- Username Field -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user mr-2 text-gray-400"></i>Usuario
+                </label>
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        required
+                        autocomplete="username"
+                        class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pl-11"
+                        placeholder="Ingresa tu usuario"
+                    >
+                    <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i class="fas fa-user"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-lock mr-2 text-gray-400"></i>Contraseña
+                </label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required
+                        autocomplete="current-password"
+                        class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pl-11 pr-11"
+                        placeholder="Ingresa tu contraseña"
+                    >
+                    <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <button 
+                        type="button" 
+                        onclick="togglePassword()" 
+                        class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    >
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center justify-between">
+                <label class="flex items-center">
+                    <input 
+                        type="checkbox" 
+                        name="remember" 
+                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    >
+                    <span class="ml-2 text-sm text-gray-600">Recordarme</span>
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button 
+                type="submit" 
+                class="btn-gradient w-full py-3 px-4 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center"
+            >
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+            <p class="text-gray-500 text-sm">
+                <i class="fas fa-shield-alt mr-1"></i>
+                Conexión segura con JWT
+            </p>
+            <a href="{{ url_for('main.index') }}" class="inline-flex items-center mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Volver al Dashboard Principal
+            </a>
+        </div>
+    </div>
+
+    <!-- Version Badge -->
+    <div class="fixed bottom-4 right-4 text-white/50 text-xs">
+        SquidStats v2.1
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Auto-focus on username field
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('username').focus();
+        });
+
+        // Form submission loading state
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Verificando...';
+            btn.disabled = true;
+        });
+    </script>
+</body>
+</html>
