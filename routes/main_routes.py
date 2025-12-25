@@ -42,12 +42,6 @@ def _build_error_page(message: str, status: int = 500, details: str | None = Non
     if details:
         logger.debug("Error details (server-only): %s", details)
 
-    try:
-        show_details = bool(current_app.debug)
-    except RuntimeError:
-        # No app context: be conservative and do not show details
-        show_details = False
-
     return (
         render_template(
             "error.html",
