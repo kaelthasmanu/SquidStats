@@ -52,7 +52,6 @@ def _build_error_page(message: str, status: int = 500, details: str | None = Non
         render_template(
             "error.html",
             message=message,
-            details=details if show_details else None,
         ),
         status,
     )

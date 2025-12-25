@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from flask import Blueprint, current_app, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request
 
 from config import logger
 from database.database import get_session
@@ -49,16 +49,8 @@ def get_logs_by_date():
         return jsonify(users_data)
     except ValueError:
         return jsonify({"error": "Invalid date format"}), 400
-    except Exception as e:
+    except Exception:
         logger.exception("Error en get-logs-by-date")
-
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-
-        if show_details:
-            return jsonify({"error": "Internal server error", "details": str(e)}), 500
         return jsonify({"error": "Internal server error"}), 500
     finally:
         if db:
