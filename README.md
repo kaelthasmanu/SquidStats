@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img alt="SQUIDSTAT logo" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/squidstats.png" width="300px"/><br/>
+  <img alt="SQUIDSTAT logo" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/navidadsquidstats.png" width="300px"/><br/>
   <strong>The definitive analysis for your proxy</strong>
 </h1>
 
