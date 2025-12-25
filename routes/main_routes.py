@@ -2,7 +2,7 @@ import os
 import time
 from typing import Any
 
-from flask import Blueprint, current_app, redirect, render_template, request
+from flask import Blueprint, redirect, render_template, request
 
 from config import Config, logger
 from parsers.connections import group_by_user, parse_raw_data
