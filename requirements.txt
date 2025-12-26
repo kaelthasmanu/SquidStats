@@ -12,3 +12,5 @@ pytz
 requests
 #icapclient3
 uvicorn
+PyJWT==2.10.1
+bcrypt==5.0.0
