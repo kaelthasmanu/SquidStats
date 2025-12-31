@@ -18,13 +18,20 @@
                     <i class="fas fa-server text-2xl"></i>
                     <h1 class="text-xl font-bold">Administrador Squid Proxy (BETA version)</h1>
                 </div>
-                <div class="flex space-x-4">
+                <div class="flex items-center space-x-4">
                     <button onclick="reloadSquid()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors">
                         <i class="fas fa-sync-alt mr-2"></i>Recargar
                     </button>
                     <button onclick="restartSquid()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition-colors">
                         <i class="fas fa-power-off mr-2"></i>Reiniciar
                     </button>
+                    <div class="flex items-center space-x-2 text-white">
+                        <i class="fas fa-user"></i>
+                        <span>{{ session.user.username if session.user else 'Admin' }}</span>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+                    </a>
                 </div>
             </div>
         </div>

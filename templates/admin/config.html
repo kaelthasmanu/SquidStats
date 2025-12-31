@@ -39,7 +39,7 @@
         
         <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            {% set sensitive_vars = ['SECRET_KEY', 'JWT_SECRET_KEY', 'ADMIN_PASSWORD', 'DATABASE_URL', 'VERSION'] %}
+            {% set sensitive_vars = ['SECRET_KEY', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_URL', 'VERSION'] %}
             {% for key, value in env_vars.items() %}
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
