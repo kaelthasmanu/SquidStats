@@ -12,6 +12,7 @@ from flask import (
 )
 
 from config import logger
+from services.auth_service import admin_required, api_auth_required
 from utils.admin import SquidConfigManager
 
 admin_bp = Blueprint("admin", __name__)
@@ -41,6 +42,7 @@ def save_env_vars(env_vars):
 
 
 @admin_bp.route("/")
+@admin_required
 def admin_dashboard():
     acls = config_manager.get_acls()
     delay_pools = config_manager.get_delay_pools()
@@ -55,6 +57,7 @@ def admin_dashboard():
 
 
 @admin_bp.route("/config")
+@admin_required
 def view_config():
     env_vars = load_env_vars()
     return render_template(
@@ -65,6 +68,7 @@ def view_config():
 
 
 @admin_bp.route("/config/edit", methods=["GET", "POST"])
+@admin_required
 def edit_config():
     if request.method == "POST":
         new_content = request.form["config_content"]
@@ -90,23 +94,36 @@ def edit_config():
 
 
 @admin_bp.route("/config/env/save", methods=["POST"])
+@admin_required
 def save_env():
+    # Variables sensibles que no se pueden modificar desde la interfaz
+    sensitive_vars = {"VERSION"}
+
     env_vars = {}
     for key in request.form:
-        if key != "csrf_token":
+        if key != "csrf_token" and key not in sensitive_vars:
             env_vars[key] = request.form[key]
-    save_env_vars(env_vars)
+
+    # Cargar variables existentes para mantener las sensibles
+    existing_vars = load_env_vars()
+    # Solo actualizar las no sensibles
+    for key, value in env_vars.items():
+        existing_vars[key] = value
+
+    save_env_vars(existing_vars)
     flash("Variables de entorno guardadas exitosamente", "success")
     return redirect(url_for("admin.view_config"))
 
 
 @admin_bp.route("/acls")
+@admin_required
 def manage_acls():
     acls = config_manager.get_acls()
     return render_template("admin/acls.html", acls=acls)
 
 
 @admin_bp.route("/acls/add", methods=["POST"])
+@admin_required
 def add_acl():
     name = request.form["name"]
     acl_type = request.form["type"]
@@ -131,6 +148,7 @@ def add_acl():
 
 
 @admin_bp.route("/acls/edit", methods=["POST"])
+@admin_required
 def edit_acl():
     acl_id = request.form["id"]
     new_name = request.form["name"]
@@ -166,6 +184,7 @@ def edit_acl():
 
 
 @admin_bp.route("/acls/delete", methods=["POST"])
+@admin_required
 def delete_acl():
     acl_id = request.form["id"]
 
@@ -202,18 +221,21 @@ def delete_acl():
 
 
 @admin_bp.route("/delay-pools")
+@admin_required
 def manage_delay_pools():
     delay_pools = config_manager.get_delay_pools()
     return render_template("admin/delay_pools.html", delay_pools=delay_pools)
 
 
 @admin_bp.route("/http-access")
+@admin_required
 def manage_http_access():
     rules = config_manager.get_http_access_rules()
     return render_template("admin/http_access.html", rules=rules)
 
 
 @admin_bp.route("/view-logs")
+@admin_required
 def view_logs():
     log_files = [
         os.getenv("SQUID_LOG", "/var/log/squid/access.log"),
@@ -245,6 +267,7 @@ def view_logs():
 
 
 @admin_bp.route("/api/restart-squid", methods=["POST"])
+@api_auth_required
 def restart_squid():
     try:
         os.system("systemctl restart squid")
@@ -263,6 +286,7 @@ def restart_squid():
 
 
 @admin_bp.route("/api/reload-squid", methods=["POST"])
+@api_auth_required
 def reload_squid():
     try:
         os.system("systemctl reload squid")

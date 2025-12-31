@@ -120,6 +120,22 @@ class Notification(Base):
     )  # Number of times this notification was triggered
 
 
+class AdminUser(Base):
+    """Model for admin users with encrypted passwords."""
+
+    __tablename__ = "admin_users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(100), nullable=False, unique=True, index=True)
+    password_hash = Column(String(255), nullable=False)  # bcrypt hash
+    salt = Column(String(64), nullable=False)  # Salt used for hashing
+    role = Column(String(50), nullable=False, default="admin")
+    is_active = Column(Integer, default=1)  # 1 = active, 0 = inactive
+    last_login = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
 def get_database_url() -> str:
     db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
     conn_str = os.getenv("DATABASE_STRING_CONNECTION", "squidstats.db")
@@ -417,6 +433,32 @@ def migrate_database():
     logger.setLevel(logging.DEBUG)
     try:
         with engine.connect() as conn:
+            # Ensure admin_users table exists for authentication
+            if not inspector.has_table("admin_users"):
+                logger.info("Creating admin_users table (missing)")
+                AdminUser.__table__.create(bind=engine, checkfirst=True)
+                conn.commit()
+                # Refresh inspector after table creation
+                inspector = inspect(engine)
+
+                # Create default admin user if table was just created
+                _create_default_admin_user(conn, engine)
+
+            # Check if admin user exists, create if not
+            try:
+                session = get_session()
+                existing_admin = (
+                    session.query(AdminUser).filter_by(username="admin").first()
+                )
+                if not existing_admin:
+                    logger.info("Admin user not found, creating default admin user")
+                    _create_default_admin_user(conn, engine)
+                else:
+                    logger.info("Admin user already exists")
+                session.close()
+            except Exception as e:
+                logger.warning(f"Could not check/create admin user: {e}")
+
             # Define expected schema for all tables
             expected_schemas = {
                 "user_base": {
@@ -607,3 +649,59 @@ def _migrate_dynamic_tables(conn, inspector, db_type):
                     )
                 else:
                     logger.info(f"No migration needed for {table_name}.{column_name}")
+
+
+def _create_default_admin_user(conn, engine):
+    """Create the default admin user using FIRST_PASSWORD from environment."""
+    try:
+        import bcrypt
+
+        # Get FIRST_PASSWORD from environment
+        first_password = os.getenv("FIRST_PASSWORD", "").strip()
+
+        if not first_password:
+            logger.warning(
+                "FIRST_PASSWORD not set in .env file. Skipping admin user creation."
+            )
+            logger.warning(
+                "Set FIRST_PASSWORD in your .env file to create the admin user."
+            )
+            return
+
+        # Hash the password
+        salt = bcrypt.gensalt()
+        password_hash = bcrypt.hashpw(first_password.encode("utf-8"), salt)
+
+        # Insert admin user
+        from sqlalchemy import text
+
+        insert_query = text("""
+            INSERT INTO admin_users (username, password_hash, salt, role, is_active, created_at, updated_at)
+            VALUES (:username, :password_hash, :salt, :role, :is_active, :created_at, :updated_at)
+        """)
+
+        from datetime import datetime
+
+        now = datetime.now()
+
+        conn.execute(
+            insert_query,
+            {
+                "username": "admin",
+                "password_hash": password_hash.decode("utf-8"),
+                "salt": salt.decode("utf-8"),
+                "role": "admin",
+                "is_active": 1,
+                "created_at": now,
+                "updated_at": now,
+            },
+        )
+
+        conn.commit()
+        logger.info("✓ Default admin user created successfully with FIRST_PASSWORD")
+
+    except ImportError:
+        logger.error("bcrypt module not available. Cannot create admin user.")
+    except Exception as e:
+        logger.error(f"Error creating default admin user: {e}")
+        conn.rollback()
