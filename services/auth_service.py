@@ -7,7 +7,7 @@ Follows security best practices for token-based authentication.
 import hmac
 import os
 import secrets
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 
 import bcrypt
@@ -82,7 +82,7 @@ class AuthService:
         Check if the user is rate limited.
         Returns tuple of (is_allowed, remaining_attempts).
         """
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
 
         if identifier in cls._login_attempts:
             attempts, lockout_until = cls._login_attempts[identifier]
@@ -105,7 +105,7 @@ class AuthService:
     @classmethod
     def record_failed_attempt(cls, identifier: str) -> None:
         """Record a failed login attempt."""
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
 
         if identifier in cls._login_attempts:
             attempts, _ = cls._login_attempts[identifier]
@@ -151,14 +151,14 @@ class AuthService:
 
             if password_match:
                 # Update last login
-                user.last_login = datetime.now(UTC)
+                user.last_login = datetime.now(timezone.utc)
                 session.commit()
 
                 return {
                     "id": user.id,
                     "username": user.username,
                     "role": user.role,
-                    "authenticated_at": datetime.now(UTC).isoformat(),
+                    "authenticated_at": datetime.now(timezone.utc).isoformat(),
                 }
 
             return None
@@ -175,7 +175,7 @@ class AuthService:
         Generate a JWT token for authenticated user.
         Includes security claims like expiration and issued-at times.
         """
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
 
         payload = {
             # Standard JWT claims
