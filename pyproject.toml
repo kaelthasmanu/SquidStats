@@ -47,6 +47,7 @@ ignore = [
     "B008",  # Do not perform function calls in argument defaults
     "B904",  # Within an except clause, raise exceptions with raise ... from err
     "C901",  # too complex
+    "UP017", # Use `datetime.UTC` alias (not available in Python 3.10)
 ]
 
 # Permitir arreglos automáticos
