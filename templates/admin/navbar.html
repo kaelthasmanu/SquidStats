@@ -114,10 +114,12 @@
         </div>
         <!-- Action Buttons - Desktop -->
         <div class="flex items-center gap-3">
+          {% if session.user and session.user.role == "admin" %}
           <a href="/admin" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow hover:from-blue-700 hover:to-blue-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Panel de administración del sistema">
             <i class="fas fa-cog"></i>
             <span>Admin</span>
           </a>
+          {% endif %}
 
           <button onclick="confirmSquidUpdate()" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Actualizar paquetes y configuración de Squid">
             <i class="fas fa-sync-alt"></i>
@@ -178,10 +180,6 @@
       <!-- Botones Squid y Web en fila -->
       <div class="flex flex-row gap-3 mb-8">
         <div class="flex flex-1 gap-2">
-          <a href="/admin" @click="mobileMenuOpen = false" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow hover:from-blue-700 hover:to-blue-600 transition-all duration-300">
-            <i class="fas fa-cog"></i>
-            <span>Admin</span>
-          </a>
           <button onclick="confirmSquidUpdate(); mobileMenuOpen = false" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 transition-all duration-300">
             <i class="fas fa-sync-alt"></i>
             <span>Squid</span>
