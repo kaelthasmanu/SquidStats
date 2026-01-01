@@ -14,7 +14,7 @@ import bcrypt
 import jwt
 from flask import flash, redirect, request, session, url_for
 
-from config import logger
+from config import Config, logger
 from database.database import AdminUser, get_session
 
 
@@ -48,11 +48,7 @@ class AuthService:
     @staticmethod
     def get_secret_key() -> str:
         """Get the JWT secret key from environment or app config."""
-        return (
-            os.getenv("JWT_SECRET_KEY")
-            or os.getenv("SECRET_KEY")
-            or "change-me-in-production"
-        )
+        return Config.JWT_SECRET_KEY
 
     @classmethod
     def hash_password_bcrypt(cls, password: str) -> tuple[str, str]:

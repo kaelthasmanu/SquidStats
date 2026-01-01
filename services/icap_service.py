@@ -3,7 +3,9 @@ import tempfile
 
 import icapclient
 
-ICAP_HOST = os.getenv("ICAP_HOST", os.getenv("SQUID_HOST"))
+from config import Config
+
+ICAP_HOST = os.getenv("ICAP_HOST", Config.SQUID_HOST)
 ICAP_PORT = int(os.getenv("ICAP_PORT", 1344))
 
 

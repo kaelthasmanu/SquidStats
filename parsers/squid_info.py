@@ -6,10 +6,12 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 
+from config import Config
+
 load_dotenv()
 
-SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
-SQUID_PORT = int(os.getenv("SQUID_PORT", "3128"))
+SQUID_HOST = Config.SQUID_HOST
+SQUID_PORT = Config.SQUID_PORT
 SQUID_MGR_USER = os.getenv("SQUID_MGR_USER")
 SQUID_MGR_PASS = os.getenv("SQUID_MGR_PASS")
 

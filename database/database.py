@@ -5,7 +5,6 @@ from datetime import date, datetime
 from typing import Any
 from urllib.parse import urlparse
 
-from dotenv import load_dotenv
 from sqlalchemy import (
     BigInteger,
     Column,
@@ -21,8 +20,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Cargar variables de entorno desde .env
-load_dotenv()
+from config import Config
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -137,8 +135,8 @@ class AdminUser(Base):
 
 
 def get_database_url() -> str:
-    db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
-    conn_str = os.getenv("DATABASE_STRING_CONNECTION", "squidstats.db")
+    db_type = Config.DATABASE_TYPE
+    conn_str = Config.DATABASE_STRING_CONNECTION
     if db_type == "SQLITE":
         if not conn_str.startswith("sqlite:///"):
             return f"sqlite:///{conn_str}"
@@ -173,7 +171,7 @@ def get_database_url() -> str:
 
 
 def create_database_if_not_exists():
-    db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
+    db_type = Config.DATABASE_TYPE
     if db_type == "SQLITE":
         # SQLite crea el archivo automáticamente, no necesitamos hacer nada
         logger.info("SQLite database will be created automatically if it doesn't exist")
@@ -410,7 +408,7 @@ def get_dynamic_models(date_suffix: str):
 
 
 def get_concat_function(column, separator=", "):
-    db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
+    db_type = Config.DATABASE_TYPE
 
     if db_type in ("POSTGRESQL", "POSTGRES"):
         # PostgreSQL usa STRING_AGG
@@ -427,7 +425,7 @@ def get_concat_function(column, separator=", "):
 
 def migrate_database():
     engine = get_engine()
-    db_type = os.getenv("DATABASE_TYPE", "SQLITE").upper()
+    db_type = Config.DATABASE_TYPE
     inspector = inspect(engine)
     original_level = logger.level
     logger.setLevel(logging.DEBUG)
@@ -657,7 +655,7 @@ def _create_default_admin_user(conn, engine):
         import bcrypt
 
         # Get FIRST_PASSWORD from environment
-        first_password = os.getenv("FIRST_PASSWORD", "").strip()
+        first_password = Config.FIRST_PASSWORD
 
         if not first_password:
             logger.warning(

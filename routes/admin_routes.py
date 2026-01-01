@@ -11,7 +11,7 @@ from flask import (
     url_for,
 )
 
-from config import logger
+from config import Config, logger
 from services.auth_service import admin_required, api_auth_required
 from utils.admin import SquidConfigManager
 
@@ -238,8 +238,8 @@ def manage_http_access():
 @admin_required
 def view_logs():
     log_files = [
-        os.getenv("SQUID_LOG", "/var/log/squid/access.log"),
-        os.getenv("SQUID_CACHE_LOG", "/var/log/squid/cache.log"),
+        Config.SQUID_LOG,
+        Config.SQUID_CACHE_LOG,
     ]
     logs = {}
     for log_file in log_files:

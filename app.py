@@ -195,13 +195,8 @@ def main():
     )
 
     # Read host/port from environment variables if they exist (compatible with FLASK_HOST/PORT)
-    host = os.getenv("LISTEN_HOST") or os.getenv("FLASK_HOST") or "0.0.0.0"
-    port_str = os.getenv("LISTEN_PORT") or os.getenv("FLASK_PORT") or "5000"
-    try:
-        port = int(port_str)
-    except ValueError:
-        logger.warning(f"Invalid PORT value '{port_str}', falling back to 5000")
-        port = 5000
+    host = Config.LISTEN_HOST
+    port = Config.LISTEN_PORT
 
     try:
         socketio.run(

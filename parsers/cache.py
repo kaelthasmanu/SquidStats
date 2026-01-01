@@ -1,4 +1,3 @@
-import os
 import re
 import re as _re
 import socket
@@ -6,11 +5,13 @@ import traceback
 
 from dotenv import load_dotenv
 
+from config import Config
+
 # Load environment variables from .env file
 load_dotenv()
 
-SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
-SQUID_PORT = int(os.getenv("SQUID_PORT", "3128"))
+SQUID_HOST = Config.SQUID_HOST
+SQUID_PORT = Config.SQUID_PORT
 
 
 def fetch_squid_cache_stats():
