@@ -19,17 +19,17 @@
                     <h1 class="text-xl font-bold">Administrador Squid Proxy (BETA version)</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button onclick="reloadSquid()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors">
+                    <button onclick="reloadSquid()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium px-6 py-3 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center">
                         <i class="fas fa-sync-alt mr-2"></i>Recargar
                     </button>
-                    <button onclick="restartSquid()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition-colors">
+                    <button onclick="restartSquid()" class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium px-6 py-3 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center">
                         <i class="fas fa-power-off mr-2"></i>Reiniciar
                     </button>
-                    <div class="flex items-center space-x-2 text-white">
+                    <div class="flex items-center space-x-2 text-white bg-blue-700 bg-opacity-50 px-3 py-2 rounded-lg">
                         <i class="fas fa-user"></i>
                         <span>{{ session.user.username if session.user else 'Admin' }}</span>
                     </div>
-                    <a href="{{ url_for('auth.logout') }}" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors">
+                    <a href="{{ url_for('auth.logout') }}" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium px-6 py-3 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center">
                         <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
                     </a>
                 </div>
@@ -48,15 +48,21 @@
                     <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-cog mr-3"></i>Configuración
                     </a>
-                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-shield-alt mr-3"></i>ACLs
-                    </a>
-                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-clock mr-3"></i>Delay Pools
-                    </a>
-                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-key mr-3"></i>HTTP Access
-                    </a>
+                    <div class="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-lg">
+                        <i class="fas fa-shield-alt mr-3"></i>
+                        <span>ACLs</span>
+                        <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Próximamente</span>
+                    </div>
+                    <div class="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-lg">
+                        <i class="fas fa-clock mr-3"></i>
+                        <span>Delay Pools</span>
+                        <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Próximamente</span>
+                    </div>
+                    <div class="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-lg">
+                        <i class="fas fa-key mr-3"></i>
+                        <span>HTTP Access</span>
+                        <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Próximamente</span>
+                    </div>
                     <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-file-alt mr-3"></i>Logs
                     </a>
@@ -71,8 +77,8 @@
                 {% if messages %}
                     <div class="mb-6">
                         {% for category, message in messages %}
-                            <div class="alert alert-{{ 'success' if category == 'success' else 'error' }} p-4 rounded-lg mb-4 {% if category == 'success' %}bg-green-100 text-green-700 border border-green-300{% else %}bg-red-100 text-red-700 border border-red-300{% endif %}">
-                                <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} mr-2"></i>
+                            <div class="alert alert-{{ 'success' if category == 'success' else 'warning' }} p-4 rounded-lg mb-4 {% if category == 'success' %}bg-blue-50 text-blue-800 border border-blue-200{% else %}bg-orange-50 text-orange-800 border border-orange-200{% endif %}">
+                                <i class="fas fa-{% if category == 'success' %}check-circle text-blue-600{% else %}exclamation-triangle text-orange-600{% endif %} mr-2"></i>
                                 {{ message }}
                             </div>
                         {% endfor %}
@@ -142,7 +148,7 @@
         function showNotification(message, type) {
             const notification = document.createElement('div');
             notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                type === 'success' ? 'bg-blue-500 text-white' : 'bg-orange-500 text-white'
             }`;
             notification.innerHTML = `
                 <div class="flex items-center">
