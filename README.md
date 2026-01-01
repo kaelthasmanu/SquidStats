@@ -282,6 +282,7 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    ACL_FILES_DIR=/home/manuel/Desktop/config/acls
    LISTEN_HOST=127.0.0.1
    LISTEN_PORT=8080
+   FIRST_PASSWORD="mipassword"
    ```
   
   ### Forwarding Squid logs from a remote Squid host (important)

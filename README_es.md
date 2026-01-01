@@ -266,6 +266,7 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
     Nota: para usar MARIADB necesitas tu propia base de datos ejecutándose
    ```bash
    VERSION=2
+   SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
    SQUID_HOST="127.0.0.1"
    SQUID_PORT=3128
    LOG_FORMAT=DETAILED
@@ -279,6 +280,9 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    HTTP_PROXY=""
    SQUID_CONFIG_PATH=/home/manuel/Desktop/config/squid.conf
    ACL_FILES_DIR=/home/manuel/Desktop/config/acls
+   LISTEN_HOST=127.0.0.1
+   LISTEN_PORT=8080
+   FIRST_PASSWORD="mipassword"
    ```
 5. Ejecutar la App con python o python3 🚀:
 
