@@ -86,7 +86,7 @@ function checkSquidLog() {
 
 function updateOrCloneRepo() {
     local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local destinos=("/opt/SquidStats" "/usr/share/squidstats")
+    local destinos=("/opt/SquidStats" "/usr/share/squidstats" "/Users/manuel/Desktop/Projects/codeSquidStats/SquidStats")
     local branch="main"
     local env_exists=false
     local found_dir=""
