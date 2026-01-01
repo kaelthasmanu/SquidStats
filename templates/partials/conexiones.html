@@ -124,7 +124,7 @@
             {% if squid_info_stats.connection_status == 'connected' %}Conectado
             {% elif squid_info_stats.connection_status == 'connected_but_parse_error' %}Error Parsing 
             {% elif squid_info_stats.connection_status == 'timeout' %}Timeout 
-            {% elif squid_info_stats.connection_status == 'connection_refused'%}Rechazado 
+            {% elif squid_info_stats.connection_status == 'connection_refused' %}Rechazado 
             {% elif squid_info_stats.connection_status == 'dns_error' %}Error DNS 
             {% else %}Error
             {% endif %}
@@ -163,7 +163,7 @@
     {% set client_ip = user_data.client_ip %}
 
     <div class="user-accordion bg-white rounded-lg shadow-md mb-3 overflow-hidden">
-      <div class="w-full text-left p-4 border-b bg-white cursor-pointer" onclick="toggleAccordion('{{ user }}')" id="header-{{ user }}">
+      <div class="w-full text-left p-4 border-b bg-white cursor-pointer" onclick="toggleAccordion({{ loop.index }})" id="header-{{ loop.index }}">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center mb-3 sm:mb-0">
             <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
@@ -219,13 +219,13 @@
             </div>
             
             <div class="w-6 text-center">
-              <i class="fas fa-chevron-down transition-transform duration-300 rotate-180" id="icon-{{ user }}"></i>
+              <i class="fas fa-chevron-down transition-transform duration-300 rotate-180" id="icon-{{ loop.index }}"></i>
             </div>
           </div>
         </div>
       </div>
 
-      <div data-accordion-content id="content-{{ user }}">
+      <div data-accordion-content data-user='{{ user|tojson }}' id="content-{{ loop.index }}">
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -313,10 +313,53 @@
  </div>
 
 <script>
-function toggleAccordion(user) {
-  const content = document.getElementById('content-' + user);
-  const icon = document.getElementById('icon-' + user);
-  content.classList.toggle('hidden');
+function restoreAccordionState() {
+  console.log('Restoring accordion state');
+  // Restaurar el estado de los acordeones desde localStorage
+  const accordionState = JSON.parse(localStorage.getItem('accordion-state')) || {};
+  console.log('accordionState:', accordionState);
+  
+  // Iterar sobre todos los elementos de contenido de acordeón
+  document.querySelectorAll('[data-accordion-content]').forEach(content => {
+    const user = JSON.parse(content.getAttribute('data-user'));
+    const index = content.id.replace('content-', '');
+    const icon = document.getElementById('icon-' + index);
+    console.log('Processing user:', user, 'index:', index, 'state:', accordionState[user], 'content:', content, 'icon:', icon);
+    
+    // Por defecto abierto, a menos que esté explícitamente cerrado
+    const isOpen = accordionState[user] !== false;
+    console.log('isOpen:', isOpen);
+    
+    if (isOpen) {
+      content.style.display = '';
+      icon.classList.add('rotate-180');
+    } else {
+      content.style.display = 'none';
+      icon.classList.remove('rotate-180');
+    }
+    console.log('After set: display:', content.style.display, 'rotated?', icon.classList.contains('rotate-180'));
+  });
+}
+
+// Ejecutar inmediatamente ya que el script está al final
+restoreAccordionState();
+
+function toggleAccordion(index) {
+  console.log('toggleAccordion called with index:', index);
+  const content = document.getElementById('content-' + index);
+  const icon = document.getElementById('icon-' + index);
+  const user = JSON.parse(content.getAttribute('data-user'));
+  console.log('user:', user, 'content:', content, 'icon:', icon);
+  
+  // Alternar display
+  const isCurrentlyHidden = content.style.display === 'none';
+  content.style.display = isCurrentlyHidden ? '' : 'none';
   icon.classList.toggle('rotate-180');
+  
+  // Guardar el estado en localStorage
+  const accordionState = JSON.parse(localStorage.getItem('accordion-state')) || {};
+  accordionState[user] = content.style.display !== 'none'; // true si está abierto
+  console.log('Saving state for user:', user, 'open:', accordionState[user]);
+  localStorage.setItem('accordion-state', JSON.stringify(accordionState));
 }
 </script>

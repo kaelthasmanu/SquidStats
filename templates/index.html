@@ -46,11 +46,11 @@
       if (contents.length === 0 || !toggleAllButton) return;
 
       if (isDetailedView) {
-        contents.forEach((content) => content.classList.remove("hidden"));
+        contents.forEach((content) => content.style.display = '');
         icons.forEach((icon) => icon.classList.add("rotate-180"));
         toggleAllButton.textContent = "Ver Resumen";
       } else {
-        contents.forEach((content) => content.classList.add("hidden"));
+        contents.forEach((content) => content.style.display = 'none');
         icons.forEach((icon) => icon.classList.remove("rotate-180"));
         toggleAllButton.textContent = "Ver Detalles";
       }
@@ -81,6 +81,8 @@
 
         setupSummaryButton();
         applyViewState();
+        // Restaurar el estado individual de los acordeones después de aplicar la vista global
+        if (window.restoreAccordionState) window.restoreAccordionState();
       } catch (error) {
         console.error("Error al actualizar conexiones:", error);
       }
@@ -167,6 +169,8 @@
 
       setupSummaryButton();
       applyViewState();
+      // Restaurar el estado individual de los acordeones después de aplicar la vista global
+      if (window.restoreAccordionState) window.restoreAccordionState();
       startRefreshTimer();
 
       const intervalInput = document.getElementById('refresh-interval');
