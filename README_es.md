@@ -296,6 +296,34 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
   http://ip/hostname:5000
 ```
 
+## Accediendo al Panel de Admin
+
+Para acceder al panel de admin, necesitas configurar la contraseña inicial y reiniciar el servicio.
+
+1. Edita el archivo `.env` usando tu editor preferido (vi, vim o nano). Aquí un ejemplo con nano:
+
+   ```bash
+   nano .env
+   ```
+
+   Agrega o modifica la siguiente línea en el archivo `.env`:
+
+   ```bash
+   FIRST_PASSWORD="mipassword"
+   ```
+
+   Guarda el archivo y sal del editor (en nano, presiona Ctrl+X, luego Y, luego Enter).
+
+2. Reinicia el servicio SquidStats:
+
+   ```bash
+   sudo systemctl restart squidstats.service
+   ```
+
+3. Accede al panel de admin visitando `http://tu-ip:tu-puerto/admin` en tu navegador.
+
+4. Inicia sesión con el usuario `admin` y la contraseña que configuraste en `FIRST_PASSWORD` (en este ejemplo, "mipassword").
+
 ### ⚠️ Alerta de Primera Ejecución ⚠️
 
 Advertencia: 🚨 La primera ejecución puede causar alto uso de CPU.
