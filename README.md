@@ -43,6 +43,7 @@
         <li><a href="#installation-manual">Installation Manual</a></li>
         <li><a href="#testing-information">Testing Information</a></li>
         <li><a href="#uninstall-squidstats">Uninstall SquidStats</a></li>
+        <li><a href="#resetting-forgotten-password">Reset forgotten admin password</a></li>
       </ul>
     </li>
     <li><a href="#to-do">To do</a></li>
@@ -412,6 +413,29 @@ To access the admin panel, you need to configure the initial password and restar
 3. Access the admin panel by visiting `http://your-ip:your-port/admin` in your browser.
 
 4. Log in with the username `admin` and the password you set in `FIRST_PASSWORD` (in this example, "mipassword").
+
+### Resetting forgotten password (localhost only)
+
+If you lose the admin password, you can reset it from the server where SquidStats runs (localhost only):
+
+1) Make sure the app is running (default listens on `127.0.0.1:5000`, or the `LISTEN_PORT` you set in `.env`).
+2) Run this from the SquidStats host:
+
+```bash
+curl -X POST http://127.0.0.1:5000/auth/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "new_password": "NewSecurePass123"}'
+```
+
+Notes:
+- Must be executed on localhost; remote calls are rejected.
+- `new_password` must be at least 8 characters.
+- You can also send form data if preferred:
+  ```bash
+  curl -X POST http://127.0.0.1:5000/auth/reset-password \
+    -d "username=admin" \
+    -d "new_password=NewSecurePass123"
+  ```
 
 ### ⚠️ First Execution Alert ⚠️
 
