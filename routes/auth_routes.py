@@ -15,11 +15,13 @@ from flask import (
     session,
     url_for,
 )
+from flask_wtf.csrf import CSRFProtect
 
 from config import logger
 from services.auth_service import AuthConfig, AuthService
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+csrf = CSRFProtect()
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -147,3 +149,52 @@ def check_auth():
         }
 
     return {"authenticated": False}, 401
+
+
+@auth_bp.route("/reset-password", methods=["POST"])
+@csrf.exempt
+def reset_password():
+    """
+    Reset user password. Only accessible from localhost for security.
+    Requires username and new_password in request body.
+
+    Usage examples:
+    curl -X POST http://localhost:5000/auth/reset-password \
+      -H "Content-Type: application/json" \
+      -d '{"username": "admin", "new_password": "newpassword123"}'
+    """
+    # Check if request is from localhost
+    client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+
+    # Allow only localhost connections
+    if client_ip not in ["127.0.0.1", "::1", "localhost"]:
+        logger.warning("Password reset attempt from unauthorized IP")
+        return {
+            "error": "Access denied. This endpoint is only accessible from localhost."
+        }, 403
+
+    # Get data from request
+    data = request.get_json() if request.is_json else request.form
+    username = data.get("username", "").strip()
+    new_password = data.get("new_password", "")
+
+    # Validate input
+    if not username or not new_password:
+        return {"error": "Username and new_password are required."}, 400
+
+    if len(new_password) < 8:
+        return {"error": "Password must be at least 8 characters long."}, 400
+
+    # Update password
+    success = AuthService.update_user_password(username, new_password)
+
+    if success:
+        logger.info(f"Password reset successful for user: {username} from localhost")
+        return {
+            "success": True,
+            "message": f"Password updated successfully for user: {username}",
+        }, 200
+    else:
+        return {"error": "Failed to update password. User may not exist."}, 400

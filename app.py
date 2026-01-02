@@ -9,12 +9,12 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
-from flask_wtf.csrf import CSRFProtect
 
 from config import Config, logger
 from database.database import migrate_database
 from parsers.log import process_logs
 from routes import register_routes
+from routes.auth_routes import csrf
 from routes.stats_routes import realtime_data_thread
 from services.metrics_service import MetricsService
 from services.notifications import (
@@ -46,8 +46,8 @@ def create_app():
     app = Flask(__name__, static_folder="./static")
     app.config.from_object(Config())
 
-    # Initialize CSRF protection
-    CSRFProtect(app)
+    # Initialize CSRF protection (shared instance with routes)
+    csrf.init_app(app)
 
     # Initialize extensions
     scheduler = APScheduler()

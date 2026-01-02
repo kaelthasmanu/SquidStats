@@ -246,6 +246,38 @@ class AuthService:
         """Check if current request is from an authenticated user."""
         return cls.get_current_user() is not None
 
+    @classmethod
+    def update_user_password(cls, username: str, new_password: str) -> bool:
+        """
+        Update user password in the database.
+        Returns True if successful, False otherwise.
+        """
+        session = get_session()
+        try:
+            user = session.query(AdminUser).filter_by(username=username).first()
+
+            if not user:
+                logger.error(f"User not found: {username}")
+                return False
+
+            # Hash the new password
+            password_hash, salt = cls.hash_password_bcrypt(new_password)
+
+            # Update user password
+            user.password_hash = password_hash
+            user.salt = salt
+            session.commit()
+
+            logger.info(f"Password updated successfully for user: {username}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error updating password for {username}: {e}")
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
 
 def login_required(f):
     """
