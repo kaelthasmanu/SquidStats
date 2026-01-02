@@ -192,9 +192,10 @@ def reset_password():
 
     if success:
         logger.info(f"Password reset successful for user: {username} from localhost")
+        # Do not reflect user input in the response to avoid XSS/vector reflection
         return {
             "success": True,
-            "message": f"Password updated successfully for user: {username}",
+            "message": "Password updated successfully.",
         }, 200
     else:
         return {"error": "Failed to update password. User may not exist."}, 400
