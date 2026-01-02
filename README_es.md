@@ -43,6 +43,7 @@
         <li><a href="#instalación-manual">Instalación Manual</a></li>
         <li><a href="#información-de-pruebas">Información de Pruebas</a></li>
         <li><a href="#desinstalar-squidstats">Desinstalar SquidStats</a></li>
+        <li><a href="#restablecer-contraseña-olvidada">Restablecer contraseña olvidada</a></li>
       </ul>
     </li>
     <li><a href="#por-hacer">Por hacer</a></li>
@@ -323,6 +324,29 @@ Para acceder al panel de admin, necesitas configurar la contraseña inicial y re
 3. Accede al panel de admin visitando `http://tu-ip:tu-puerto/admin` en tu navegador.
 
 4. Inicia sesión con el usuario `admin` y la contraseña que configuraste en `FIRST_PASSWORD` (en este ejemplo, "mipassword").
+
+### Restablecer contraseña olvidada (solo localhost)
+
+Si olvidaste la contraseña de admin, puedes restablecerla desde el mismo servidor donde corre SquidStats (solo localhost):
+
+1) Asegúrate de que la app esté corriendo (por defecto escucha en `127.0.0.1:8080`, o el `LISTEN_PORT` que definas en `.env`).
+2) Ejecuta esto en el host de SquidStats:
+
+```bash
+curl -X POST http://127.0.0.1:8080/auth/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "new_password": "NuevaClaveSegura123"}'
+```
+
+Notas:
+- Debe ejecutarse en localhost; las llamadas remotas se rechazan.
+- `new_password` debe tener al menos 8 caracteres.
+- También puedes enviar los datos como formulario si prefieres:
+  ```bash
+  curl -X POST http://127.0.0.1:8080/auth/reset-password \
+    -d "username=admin" \
+    -d "new_password=NuevaClaveSegura123"
+  ```
 
 ### ⚠️ Alerta de Primera Ejecución ⚠️
 
