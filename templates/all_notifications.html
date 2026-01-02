@@ -35,7 +35,7 @@
 
 {% block header_actions %}
   <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-    <!-- Contador -->
+    <!-- Counter -->
     <div class="bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 flex-shrink-0 text-center">
       <span class="text-xs sm:text-sm text-blue-700 font-medium">
         <span id="unread-count">{{ unread_count }}</span> No leídas
@@ -48,7 +48,7 @@
       <span class="hidden xs:inline">Marcar todas</span>
     </button>
 
-    <!-- Botón eliminar todas -->
+    <!-- Delete all button -->
     <button id="delete-all" class="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm flex-1 sm:flex-none">
       <i class="fas fa-trash"></i>
       <span class="hidden xs:inline">Eliminar todas</span>
@@ -58,7 +58,7 @@
 
 {% block content %}
 <div class="w-full space-y-6">
-  <!-- Filtros -->
+  <!-- Filters -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
     <div class="flex flex-wrap gap-4 items-center">
       <div class="flex items-center gap-2">
@@ -98,7 +98,7 @@
     </div>
   </div>
 
-  <!-- Información de paginación -->
+  <!-- Pagination information -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
     <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
       <div class="text-sm text-gray-600">
@@ -133,7 +133,7 @@
            data-source="{{ notification.source }}"
            data-read="{{ notification.read|lower }}">
         <div class="p-6 flex items-start gap-4">
-          <!-- Icono -->
+          <!-- Icon -->
           <div class="flex-shrink-0">
             <div class="w-12 h-12 rounded-full flex items-center justify-center 
                         {% if notification.type == 'error' %}bg-red-100 text-red-600
@@ -144,7 +144,7 @@
             </div>
           </div>
           
-          <!-- Contenido -->
+          <!-- Content -->
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between mb-2">
               <div>
@@ -178,7 +178,7 @@
             </div>
           </div>
           
-          <!-- Acciones -->
+          <!-- Actions -->
           <div class="flex-shrink-0 flex items-center gap-2">
             {% if not notification.read %}
             <button class="mark-read-btn text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors duration-150" 
@@ -198,7 +198,7 @@
       {% endfor %}
     </div>
     {% else %}
-    <!-- Estado vacío -->
+    <!-- Empty state -->
     <div class="text-center py-16">
       <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
         <i class="fas fa-bell-slash text-gray-400 text-3xl"></i>

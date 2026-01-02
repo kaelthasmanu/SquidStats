@@ -5,29 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ page_title or 'Dashboard Squid' }}</title>
-    <!-- Favicon dinámico -->
+    <!-- Dynamic favicon -->
     <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon"/>
-    <!-- Hojas de estilo -->
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
     <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}"/>
-    <!-- Estilos específicos de cada página -->
+    <!-- Page-specific styles -->
     {% block styles %}{% endblock styles %}
   </head>
   <body class="overflow-x-hidden overflow-auto" style="visibility: hidden" onload="document.body.style.visibility='visible';">
-    <!-- Barra de navegación común -->
+    <!-- Common navigation bar -->
     <div class="relative">
       {% include 'components/navbar.html' %}
-      <!-- Contenido principal con MÁS ESPACIO para el navbar -->
+      <!-- Main content with MORE SPACE for the navbar -->
       <main class="min-h-screen pt-16 lg:pt-20 pb-20">
-        <!-- CONTENEDOR PRINCIPAL UNIFICADO -->
+        <!-- UNIFIED MAIN CONTAINER -->
         <div class="w-full px-4 sm:px-6 lg:px-8">
           {% block header %}
-            <!-- Header por defecto - MEJORADO PARA RESPONSIVE -->
+            <!-- Default header - IMPROVED FOR RESPONSIVE -->
             <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-              <!-- Título y subtítulo -->
+              <!-- Title and subtitle -->
               <div class="flex items-center flex-shrink-0">
                 {% if icon %}
                 <i class="{{icon}} text-2xl sm:text-3xl text-blue-600 mr-3 sm:mr-4"></i>
@@ -40,15 +40,15 @@
                 </div>
               </div>
               
-              <!-- Área de acciones del header - editable por las páginas -->
+              <!-- Header actions area - editable by pages -->
               <div class="flex items-center justify-start lg:justify-end flex-wrap gap-2 sm:gap-3 min-w-0">
                 {% block header_actions %}
-                  <!-- Por defecto vacío - las páginas pueden agregar contenido aquí -->
+                  <!-- Empty by default - pages can add content here -->
                 {% endblock %}
               </div>
             </div>
           {% endblock %}
-          <!-- Área de Contenido - editable por las páginas -->
+          <!-- Content area - editable by pages -->
           <div class="max-w-7xl mx-auto w-full">
             {% block content %}{% endblock %}
           </div>
@@ -59,9 +59,9 @@
     {% include 'components/footer.html' %}
     <!-- Socket.IO -->
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
-    <!-- Scripts de Flowbite (UI components) -->
+    <!-- Flowbite scripts (UI components) -->
     <script src="{{ url_for('static', filename='src/flowbite.min.js') }}"></script>
-    <!-- Scripts específicos de cada página -->
+    <!-- Page-specific scripts -->
     {% block scripts %}{% endblock scripts %}
   </body>
 </html>
