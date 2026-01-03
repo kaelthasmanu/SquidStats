@@ -34,6 +34,10 @@
         .pulse-slow {
             animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        /* Hide native password reveal button in Edge */
+        input[type="password"]::-ms-reveal {
+            display: none;
+        }
     </style>
 </head>
 <body class="login-bg min-h-screen flex items-center justify-center p-4">
