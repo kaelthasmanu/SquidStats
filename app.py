@@ -3,7 +3,7 @@ import os
 import signal
 import sys
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
 from flask import Flask
@@ -16,6 +16,7 @@ from parsers.log import process_logs
 from routes import register_routes
 from routes.auth_routes import csrf
 from routes.stats_routes import realtime_data_thread
+from services.auth_service import AuthConfig
 from services.metrics_service import MetricsService
 from services.notifications import (
     has_remote_commits_with_messages,
@@ -45,6 +46,14 @@ def create_app():
 
     app = Flask(__name__, static_folder="./static")
     app.config.from_object(Config())
+
+    # Configure session for remember me functionality
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
+        days=AuthConfig.REMEMBER_ME_DAYS
+    )
+    app.config["SESSION_COOKIE_HTTPONLY"] = AuthConfig.SESSION_COOKIE_HTTPONLY
+    app.config["SESSION_COOKIE_SECURE"] = AuthConfig.SESSION_COOKIE_SECURE
+    app.config["SESSION_COOKIE_SAMESITE"] = AuthConfig.SESSION_COOKIE_SAMESITE
 
     # Initialize CSRF protection (shared instance with routes)
     csrf.init_app(app)

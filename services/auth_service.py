@@ -22,7 +22,8 @@ class AuthConfig:
     """Authentication configuration constants."""
 
     # Token settings
-    TOKEN_EXPIRY_HOURS = int(os.getenv("JWT_EXPIRY_HOURS", "24"))
+    TOKEN_EXPIRY_HOURS = 24
+    REMEMBER_ME_DAYS = 30
     ALGORITHM = "HS256"
 
     # Session settings
@@ -166,29 +167,46 @@ class AuthService:
             session.close()
 
     @classmethod
-    def generate_token(cls, user_data: dict) -> str:
+    def generate_token(cls, user_data: dict, remember_me: bool = False) -> str:
         """
         Generate a JWT token for authenticated user.
         Includes security claims like expiration and issued-at times.
+        Args:
+            user_data: Dictionary containing user information
+            remember_me: If True, token expires in REMEMBER_ME_DAYS, otherwise in TOKEN_EXPIRY_HOURS
+        Returns:
+            JWT token string
         """
         now = datetime.now(timezone.utc)
+
+        # Set expiration based on remember_me flag
+        if remember_me:
+            expiration = now + timedelta(days=AuthConfig.REMEMBER_ME_DAYS)
+            logger.info(
+                f"Generating extended token for user: {user_data.get('username')} (expires in {AuthConfig.REMEMBER_ME_DAYS} days)"
+            )
+        else:
+            expiration = now + timedelta(hours=AuthConfig.TOKEN_EXPIRY_HOURS)
+            logger.info(
+                f"Generating standard token for user: {user_data.get('username')} (expires in {AuthConfig.TOKEN_EXPIRY_HOURS} hours)"
+            )
 
         payload = {
             # Standard JWT claims
             "iat": now,  # Issued at
-            "exp": now + timedelta(hours=AuthConfig.TOKEN_EXPIRY_HOURS),  # Expiration
+            "exp": expiration,  # Expiration
             "nbf": now,  # Not valid before
             # Custom claims
             "sub": user_data.get("username"),  # Subject (username)
             "role": user_data.get("role", "user"),
             "jti": secrets.token_hex(16),  # JWT ID for token revocation
+            "remember": remember_me,  # Track if this was a remember me session
         }
 
         token = jwt.encode(
             payload, cls.get_secret_key(), algorithm=AuthConfig.ALGORITHM
         )
 
-        logger.info(f"Generated token for user: {user_data.get('username')}")
         return token
 
     @classmethod

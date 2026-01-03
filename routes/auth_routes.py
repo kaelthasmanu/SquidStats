@@ -63,8 +63,11 @@ def login():
                 # Clear failed attempts on successful login
                 AuthService.clear_failed_attempts(client_ip)
 
-                # Generate JWT token
-                token = AuthService.generate_token(user_data)
+                # Convert remember checkbox value to boolean
+                remember_me = remember == "on"
+
+                # Generate JWT token with appropriate expiration
+                token = AuthService.generate_token(user_data, remember_me=remember_me)
 
                 # Store in session
                 session[AuthConfig.SESSION_COOKIE_NAME] = token
@@ -72,9 +75,16 @@ def login():
                     "username": user_data["username"],
                     "role": user_data["role"],
                 }
+                session.permanent = (
+                    remember_me  # Make session permanent if remember me is checked
+                )
 
+                # Log successful login with remember me status
+                remember_status = (
+                    "con sesión extendida" if remember_me else "sesión estándar"
+                )
                 logger.info(
-                    f"Successful login for user: {username} from IP: {client_ip}"
+                    f"Successful login for user: {username} from IP: {client_ip} ({remember_status})"
                 )
                 flash(f"¡Bienvenido, {username}!", "success")
 
@@ -86,9 +96,15 @@ def login():
                     response = make_response(redirect(url_for("admin.admin_dashboard")))
 
                 # Set secure cookie with token
-                max_age = timedelta(hours=AuthConfig.TOKEN_EXPIRY_HOURS).total_seconds()
-                if remember:
-                    max_age = timedelta(days=30).total_seconds()
+                # Use extended expiration if remember me is checked
+                if remember_me:
+                    max_age = timedelta(
+                        days=AuthConfig.REMEMBER_ME_DAYS
+                    ).total_seconds()
+                else:
+                    max_age = timedelta(
+                        hours=AuthConfig.TOKEN_EXPIRY_HOURS
+                    ).total_seconds()
 
                 response.set_cookie(
                     AuthConfig.SESSION_COOKIE_NAME,
