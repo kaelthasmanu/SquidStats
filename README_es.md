@@ -662,7 +662,7 @@ git push origin nombre-caracteristica
 
 4. Abrir un pull request.
 
-**Colaboradores**
+<!-- **Colaboradores**
 <table style="width:100%">
   <tr>
     <th><b>Kaelthas</b></th>
@@ -676,7 +676,7 @@ git push origin nombre-caracteristica
     <td align="center"></a> <a href="https://www.linkedin.com/in/manuel-gorrin-095242238/"><img src="assets/linkedin-48.png" width="32px" height="32px"></a><a href="https://t.me/king_0f_deathhh"><img src="assets/telegram-app-48.png" width="32px" height="32px"></a></td>
     <td align="center"><a href="https://twitter.com/alexminator99"><img src="assets/x_48.png" width="32px" height="32px"></a> <a href="https://www.linkedin.com/in/alexander-rivas-73532037/"><img src="assets/linkedin-48.png" width="32px" height="32px"></a><a href="https://t.me/Alexminator"><img src="assets/telegram-app-48.png" width="32px" height="32px"></a></td>
   </tr>
-</table>
+</table> -->
 
 ## Licencia
 
