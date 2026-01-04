@@ -42,11 +42,17 @@
         <aside class="w-64 bg-white shadow-lg min-h-screen">
             <nav class="mt-8">
                 <div class="px-4 space-y-2">
-                                        <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-home mr-3"></i>Dashboard
+                    <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <i class="fas fa-home mr-3"></i>Dashboard 
+                    </a>
+                    <a href="{{ url_for('admin.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <i class="fas fa-home mr-3"></i>Dashboard Admin
                     </a>
                     <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-cog mr-3"></i>Configuración
+                    </a>
+                    <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <i class="fas fa-users mr-3"></i>Usuarios
                     </a>
                     <div class="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-lg">
                         <i class="fas fa-shield-alt mr-3"></i>

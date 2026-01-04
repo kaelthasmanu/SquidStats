@@ -296,6 +296,164 @@ class AuthService:
         finally:
             session.close()
 
+    @classmethod
+    def get_all_users(cls) -> list[dict]:
+        """
+        Get all admin users.
+        Returns list of user dictionaries.
+        """
+        session = get_session()
+        try:
+            users = session.query(AdminUser).all()
+            return [
+                {
+                    "id": user.id,
+                    "username": user.username,
+                    "role": user.role,
+                    "is_active": user.is_active,
+                    "last_login": user.last_login.isoformat()
+                    if user.last_login
+                    else None,
+                    "created_at": user.created_at.isoformat(),
+                    "updated_at": user.updated_at.isoformat(),
+                }
+                for user in users
+            ]
+        except Exception as e:
+            logger.error(f"Error getting users: {e}")
+            return []
+        finally:
+            session.close()
+
+    @classmethod
+    def create_user(cls, username: str, password: str, role: str = "admin") -> bool:
+        """
+        Create a new admin user.
+        Returns True if successful, False otherwise.
+        """
+        session = get_session()
+        try:
+            # Check if user already exists
+            existing = (
+                session.query(AdminUser).filter_by(username=username.lower()).first()
+            )
+            if existing:
+                logger.error(f"User already exists: {username}")
+                return False
+
+            # Hash the password
+            password_hash, salt = cls.hash_password_bcrypt(password)
+
+            # Create new user
+            new_user = AdminUser(
+                username=username.lower(),
+                password_hash=password_hash,
+                salt=salt,
+                role=role,
+                is_active=1,
+            )
+            session.add(new_user)
+            session.commit()
+
+            logger.info(f"User created successfully: {username}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error creating user {username}: {e}")
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
+    @classmethod
+    def update_user(
+        cls,
+        user_id: int,
+        username: str = None,
+        password: str = None,
+        role: str = None,
+        is_active: int = None,
+    ) -> bool:
+        """
+        Update an admin user.
+        Returns True if successful, False otherwise.
+        """
+        session = get_session()
+        try:
+            user = session.query(AdminUser).filter_by(id=user_id).first()
+            if not user:
+                logger.error(f"User not found: {user_id}")
+                return False
+
+            if username is not None:
+                # Check if username is taken by another user
+                existing = (
+                    session.query(AdminUser)
+                    .filter(
+                        AdminUser.username == username.lower(), AdminUser.id != user_id
+                    )
+                    .first()
+                )
+                if existing:
+                    logger.error(f"Username already taken: {username}")
+                    return False
+                user.username = username.lower()
+
+            if password is not None:
+                password_hash, salt = cls.hash_password_bcrypt(password)
+                user.password_hash = password_hash
+                user.salt = salt
+
+            if role is not None:
+                user.role = role
+
+            if is_active is not None:
+                user.is_active = is_active
+
+            session.commit()
+
+            logger.info(f"User updated successfully: {user_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error updating user {user_id}: {e}")
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
+    @classmethod
+    def delete_user(cls, user_id: int) -> bool:
+        """
+        Delete an admin user.
+        Returns True if successful, False otherwise.
+        Prevents deletion of the default admin user.
+        """
+        session = get_session()
+        try:
+            user = session.query(AdminUser).filter_by(id=user_id).first()
+            if not user:
+                logger.error(f"User not found: {user_id}")
+                return False
+
+            # Prevent deletion of admin user
+            if user.username.lower() == "admin":
+                logger.error("Cannot delete the default admin user")
+                return False
+
+            session.delete(user)
+            session.commit()
+
+            logger.info(f"User deleted successfully: {user_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error deleting user {user_id}: {e}")
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
 
 def login_required(f):
     """

@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,22 @@ def format_bytes_filter(value):
         return "0 bytes"
 
 
+def strftime_filter(value, format_string="%Y-%m-%d %H:%M:%S"):
+    if not value:
+        return "Nunca"
+    try:
+        if isinstance(value, str):
+            # If it's already a string, assume it's ISO format
+            dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        else:
+            dt = value
+        return dt.strftime(format_string)
+    except (ValueError, AttributeError) as e:
+        logger.error(f"Error in strftime filter: {str(e)}")
+        return str(value)
+
+
 def register_filters(app):
     app.template_filter("divide")(divide_filter)
     app.template_filter("format_bytes")(format_bytes_filter)
+    app.template_filter("strftime")(strftime_filter)

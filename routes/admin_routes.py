@@ -12,7 +12,7 @@ from flask import (
 )
 
 from config import Config, logger
-from services.auth_service import admin_required, api_auth_required
+from services.auth_service import AuthService, admin_required, api_auth_required
 from utils.admin import SquidConfigManager
 
 admin_bp = Blueprint("admin", __name__)
@@ -264,6 +264,85 @@ def view_logs():
                 logs[os.path.basename(log_file)] = ["Error reading log"]
 
     return render_template("admin/logs.html", logs=logs)
+
+
+@admin_bp.route("/users")
+@admin_required
+def manage_users():
+    users = AuthService.get_all_users()
+    return render_template("admin/users.html", users=users)
+
+
+@admin_bp.route("/users/create", methods=["GET", "POST"])
+@admin_required
+def create_user():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        role = request.form.get("role", "admin")
+
+        if not username or not password:
+            flash("El nombre de usuario y la contraseña son obligatorios", "error")
+            return redirect(url_for("admin.create_user"))
+
+        if len(password) < 8:
+            flash("La contraseña debe tener al menos 8 caracteres", "error")
+            return redirect(url_for("admin.create_user"))
+
+        if AuthService.create_user(username, password, role):
+            flash("Usuario creado exitosamente", "success")
+            return redirect(url_for("admin.manage_users"))
+        else:
+            flash(
+                "Error al crear usuario. El nombre de usuario ya puede existir.",
+                "error",
+            )
+
+    return render_template("admin/user_form.html", user=None, action="create")
+
+
+@admin_bp.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
+@admin_required
+def edit_user(user_id):
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        role = request.form.get("role")
+        is_active = 1 if request.form.get("is_active") else 0
+
+        if password and len(password) < 8:
+            flash("La contraseña debe tener al menos 8 caracteres", "error")
+            return redirect(url_for("admin.edit_user", user_id=user_id))
+
+        update_data = {"username": username, "role": role, "is_active": is_active}
+        if password:
+            update_data["password"] = password
+
+        if AuthService.update_user(user_id, **update_data):
+            flash("Usuario actualizado exitosamente", "success")
+            return redirect(url_for("admin.manage_users"))
+        else:
+            flash("Error al actualizar usuario", "error")
+
+    users = AuthService.get_all_users()
+    user = next((u for u in users if u["id"] == user_id), None)
+    if not user:
+        flash("Usuario no encontrado", "error")
+        return redirect(url_for("admin.manage_users"))
+
+    return render_template("admin/user_form.html", user=user, action="edit")
+
+
+@admin_bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@admin_required
+def delete_user(user_id):
+    if AuthService.delete_user(user_id):
+        flash("Usuario eliminado exitosamente", "success")
+    else:
+        flash(
+            "Error al eliminar usuario. No se puede eliminar el usuario admin.", "error"
+        )
+    return redirect(url_for("admin.manage_users"))
 
 
 @admin_bp.route("/api/restart-squid", methods=["POST"])
