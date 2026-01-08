@@ -17,7 +17,7 @@ from utils.admin import SquidConfigManager
 
 admin_bp = Blueprint("admin", __name__)
 
-# Instancia global del manager
+# Global manager instance
 config_manager = SquidConfigManager()
 
 
@@ -130,7 +130,7 @@ def add_acl():
     value = request.form["value"]
     new_acl = f"acl {name} {acl_type} {value}"
 
-    # Agregar la nueva ACL al final de la sección de ACLs
+    # Add the new ACL at the end of the ACLs section
     lines = config_manager.config_content.split("\n")
     acl_section_end = -1
     for i, line in enumerate(lines):
@@ -162,7 +162,7 @@ def edit_acl():
         if 0 <= acl_index < len(acls):
             new_acl_line = f"acl {new_name} {new_type} {new_value}"
 
-            # Reemplazar la línea en el contenido
+            # Replace the line in the content
             lines = config_manager.config_content.split("\n")
             acl_count = 0
             for i, line in enumerate(lines):
@@ -195,7 +195,7 @@ def delete_acl():
         if 0 <= acl_index < len(acls):
             acl_to_delete = acls[acl_index]
 
-            # Remover la línea del contenido
+            # Remove the line from the content
             lines = config_manager.config_content.split("\n")
             new_lines = []
             acl_count = 0
@@ -203,7 +203,7 @@ def delete_acl():
             for line in lines:
                 if line.strip().startswith("acl ") and not line.strip().startswith("#"):
                     if acl_count == acl_index:
-                        # Saltar esta línea (eliminarla)
+                        # Skip this line (delete it)
                         acl_count += 1
                         continue
                     acl_count += 1
@@ -237,6 +237,10 @@ def manage_http_access():
 @admin_bp.route("/view-logs")
 @admin_required
 def view_logs():
+    # Get the requested number of lines (default 250, maximum 1000)
+    max_lines = request.args.get("lines", 250, type=int)
+    max_lines = min(max(max_lines, 10), 1000)  # Between 10 and 1000 lines
+
     log_files = [
         Config.SQUID_LOG,
         Config.SQUID_CACHE_LOG,
@@ -245,9 +249,9 @@ def view_logs():
     for log_file in log_files:
         try:
             with open(log_file) as f:
-                # Leer las últimas 100 líneas
+                # Read the last N lines
                 lines = f.readlines()
-                logs[os.path.basename(log_file)] = lines[-100:]
+                logs[os.path.basename(log_file)] = lines[-max_lines:]
         except FileNotFoundError:
             logs[os.path.basename(log_file)] = ["Log file not found"]
         except Exception as e:
@@ -263,7 +267,7 @@ def view_logs():
             else:
                 logs[os.path.basename(log_file)] = ["Error reading log"]
 
-    return render_template("admin/logs.html", logs=logs)
+    return render_template("admin/logs.html", logs=logs, max_lines=max_lines)
 
 
 @admin_bp.route("/users")
