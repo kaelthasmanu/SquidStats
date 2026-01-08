@@ -1,12 +1,12 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Dashboard - Resumen del Sistema</h2>
+<div class="space-y-4 sm:space-y-6">
+    <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Dashboard - Resumen del Sistema</h2>
         
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
 
             <!-- ACLs Card -->
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg">
@@ -89,9 +89,9 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="bg-gray-50 rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-gray-50 rounded-lg p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {% if status.errors %}
                 <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-300 opacity-60 cursor-not-allowed" title="Deshabilitado por errores de configuración">
                     <i class="fas fa-edit text-blue-300 text-2xl mb-2"></i>

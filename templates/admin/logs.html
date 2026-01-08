@@ -1,13 +1,13 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-4 sm:space-y-6">
     <!-- Selector global de líneas -->
     <div class="bg-white rounded-lg shadow-lg p-4">
-        <div class="flex items-center gap-4">
-            <label for="lines-selector" class="text-sm font-medium text-gray-700">Líneas a mostrar:</label>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <label for="lines-selector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Líneas a mostrar:</label>
             <select id="lines-selector" 
-                    class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
                     onchange="window.location.href='{{ url_for('admin.view_logs') }}?lines=' + this.value">
                 <option value="10" {% if max_lines == 10 %}selected{% endif %}>10</option>
                 <option value="25" {% if max_lines == 25 %}selected{% endif %}>25</option>
@@ -17,16 +17,16 @@
                 <option value="500" {% if max_lines == 500 %}selected{% endif %}>500</option>
                 <option value="1000" {% if max_lines == 1000 %}selected{% endif %}>1000</option>
             </select>
-            <span class="text-sm text-gray-500">Mostrando últimas {{ max_lines }} líneas de cada log</span>
+            <span class="text-xs sm:text-sm text-gray-500">Mostrando últimas {{ max_lines }} líneas de cada log</span>
         </div>
     </div>
 
     {% for log_name, log_lines in logs.items() %}
-    <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">{{ log_name }} <span class="text-sm font-normal text-gray-500">({{ log_lines|length }} líneas)</span></h2>
+    <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">{{ log_name }} <span class="text-xs sm:text-sm font-normal text-gray-500">({{ log_lines|length }} líneas)</span></h2>
         
-        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto max-h-96 overflow-y-auto">
-            <pre class="text-green-400 text-sm font-mono">{% for line in log_lines %}{{ line }}{% endfor %}</pre>
+        <div class="bg-gray-900 rounded-lg p-2 sm:p-4 overflow-x-auto h-96 overflow-y-auto">
+            <pre class="text-green-400 text-xs sm:text-sm font-mono whitespace-pre">{% for line in log_lines %}{{ line }}{% endfor %}</pre>
         </div>
     </div>
     {% endfor %}

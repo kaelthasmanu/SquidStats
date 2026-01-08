@@ -1,8 +1,8 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div x-data="{ activeTab: 'env', editing: false }" class="bg-white rounded-lg shadow-lg p-6">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Configuración</h2>
+<div x-data="{ activeTab: 'env', editing: false }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Configuración</h2>
     
     <!-- Tabs -->
     <div class="flex border-b border-gray-200">
@@ -30,9 +30,9 @@
     
     <!-- Env Tab -->
     <div x-show="activeTab === 'env'" class="mt-6">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-gray-800">Variables de Entorno</h3>
-            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Variables de Entorno</h3>
+            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
                 <i class="fas fa-edit mr-2"></i>Editar
             </button>
         </div>

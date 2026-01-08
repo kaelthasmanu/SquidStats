@@ -1,8 +1,8 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="bg-white rounded-lg shadow-lg p-6">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Editar Configuración de Squid</h2>
+<div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Editar Configuración de Squid</h2>
     
     <form method="POST" class="space-y-4">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -11,11 +11,11 @@
             <textarea name="config_content" rows="30" class="w-full p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ config_content }}</textarea>
         </div>
         
-        <div class="flex space-x-4">
+        <div class="flex flex-col sm:flex-row gap-2 sm:space-x-4 sm:gap-0">
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors">
                 <i class="fas fa-save mr-2"></i>Guardar Cambios
             </button>
-            <a href="/admin/config" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+            <a href="/admin/config" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors text-center">
                 <i class="fas fa-times mr-2"></i>Cancelar
             </a>
         </div>
