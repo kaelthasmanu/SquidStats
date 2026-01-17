@@ -283,21 +283,18 @@
             });
             
             notificationSocket.on('new_notification', function(data) {
-                console.log('Nueva notificación recibida:', data);
                 addNewNotification(data.notification);
                 updateNotificationBadges(data.unread_count);
                 showNotificationToast(data.notification);
             });
             
             notificationSocket.on('notification_updated', function(data) {
-                console.log('Notificación actualizada recibida:', data);
                 updateExistingNotification(data.notification);
                 updateNotificationBadges(data.unread_count);
                 showNotificationToast(data.notification);
             });
             
             notificationSocket.on('disconnect', function() {
-                console.log('Desconectado del servidor de notificaciones');
                 // Reconectar después de 5 segundos
                 setTimeout(connectWebSocket, 5000);
             });

@@ -411,9 +411,6 @@
         .then((response) => response.json())
         .then((data) => {
           if (!data || data.length === 0) {
-            console.log(
-              `No hay historial de métricas para el endpoint: ${endpoint}`
-            );
             return;
           }
 
@@ -423,9 +420,6 @@
             // Si hay más de 288 puntos (4.8 horas con intervalos de 1 minuto)
             const sampleRate = Math.ceil(data.length / 288);
             sampledData = data.filter((_, index) => index % sampleRate === 0);
-            console.log(
-              `Aplicado sampling: ${data.length} → ${sampledData.length} puntos`
-            );
           }
 
           const labels = [],
