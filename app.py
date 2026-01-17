@@ -29,9 +29,10 @@ from services.notifications import (
 # Import Telegram integration (optional)
 try:
     from services.telegram_integration import (
-        initialize_telegram_service,
         cleanup_telegram,
+        initialize_telegram_service,
     )
+
     TELEGRAM_AVAILABLE = True
 except Exception:
     TELEGRAM_AVAILABLE = False

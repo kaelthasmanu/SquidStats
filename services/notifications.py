@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # Import Telegram integration (optional - fails gracefully if not configured)
 try:
     from services.telegram_integration import send_telegram_notification
+
     TELEGRAM_AVAILABLE = True
 except Exception as e:
     logger.debug(f"Telegram integration not available: {e}")
@@ -219,14 +220,12 @@ def add_notification(
                     "unread_count": unread_count,
                 },
             )
-        
+
         # Send to Telegram if enabled and requested
         if send_telegram and TELEGRAM_AVAILABLE and send_telegram_notification:
             try:
                 send_telegram_notification(
-                    notification_type=notification_type,
-                    message=message,
-                    source=source
+                    notification_type=notification_type, message=message, source=source
                 )
             except Exception as e:
                 logger.error(f"Failed to send Telegram notification: {e}")
@@ -468,7 +467,6 @@ def check_system_health():
 def has_remote_commits_with_messages(
     repo_path: str, branch: str = "main"
 ) -> tuple[bool, list[str]]:
-    
     git_dir = os.path.join(repo_path, ".git")
     if not os.path.isdir(git_dir):
         logger.warning(f"Not a valid Git repository: {repo_path}")

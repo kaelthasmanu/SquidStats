@@ -62,7 +62,9 @@ class Config:
     TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
     TELEGRAM_SESSION_NAME = os.getenv("TELEGRAM_SESSION_NAME", "squidstats_bot")
     TELEGRAM_PHONE = os.getenv("TELEGRAM_PHONE")
-    TELEGRAM_RECIPIENTS = os.getenv("TELEGRAM_RECIPIENTS", "").split(",")  # Comma-separated list
+    TELEGRAM_RECIPIENTS = os.getenv("TELEGRAM_RECIPIENTS", "").split(
+        ","
+    )  # Comma-separated list
 
     # Proxy settings
     HTTP_PROXY = os.getenv("HTTP_PROXY", "").strip()
