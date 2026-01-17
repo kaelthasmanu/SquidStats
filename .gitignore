@@ -171,3 +171,7 @@ cython_debug/
 # Custom
 eicar.com.txt
 .DS_Store
+
+# Telegram session files
+*.session
+*.session-journal
