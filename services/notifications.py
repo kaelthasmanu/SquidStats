@@ -15,6 +15,15 @@ from database.database import Notification, get_session
 # Logger
 logger = logging.getLogger(__name__)
 
+# Import Telegram integration (optional - fails gracefully if not configured)
+try:
+    from services.telegram_integration import send_telegram_notification
+    TELEGRAM_AVAILABLE = True
+except Exception as e:
+    logger.debug(f"Telegram integration not available: {e}")
+    TELEGRAM_AVAILABLE = False
+    send_telegram_notification = None
+
 # Configuration constants
 CLEANUP_KEEP_COUNT = 100
 DEFAULT_DEDUPLICATE_HOURS = 1
@@ -133,6 +142,7 @@ def add_notification(
     icon: str | None = None,
     source: str = "system",
     deduplicate_hours: int = DEFAULT_DEDUPLICATE_HOURS,
+    send_telegram: bool = True,
 ) -> dict[str, Any] | None:
     """Adds a notification to the database and emits via Socket.IO if configured
 
@@ -142,6 +152,7 @@ def add_notification(
         icon: FontAwesome icon class (optional)
         source: Source of the notification ('squid', 'system', 'security', 'users', 'git')
         deduplicate_hours: Hours to check for duplicate notifications
+        send_telegram: Send notification to Telegram (default: True)
 
     Returns:
         Dictionary with notification data or None if it was a duplicate
@@ -208,6 +219,17 @@ def add_notification(
                     "unread_count": unread_count,
                 },
             )
+        
+        # Send to Telegram if enabled and requested
+        if send_telegram and TELEGRAM_AVAILABLE and send_telegram_notification:
+            try:
+                send_telegram_notification(
+                    notification_type=notification_type,
+                    message=message,
+                    source=source
+                )
+            except Exception as e:
+                logger.error(f"Failed to send Telegram notification: {e}")
 
         return notification_dict
 
@@ -338,11 +360,6 @@ def get_all_notifications(
 
 
 def mark_notifications_read(notification_ids: list[int]) -> int:
-    """Marks notifications as read in database
-
-    Returns:
-        Number of notifications marked as read
-    """
     with get_db_session() as db:
         updated = (
             db.query(Notification)
@@ -356,11 +373,6 @@ def mark_notifications_read(notification_ids: list[int]) -> int:
 
 
 def delete_notification(notification_id: int) -> bool:
-    """Delete a specific notification from database
-
-    Returns:
-        True if notification was deleted, False otherwise
-    """
     with get_db_session() as db:
         deleted = (
             db.query(Notification)
@@ -374,11 +386,6 @@ def delete_notification(notification_id: int) -> bool:
 
 
 def delete_all_notifications() -> int:
-    """Delete all notifications from database
-
-    Returns:
-        Number of notifications deleted
-    """
     with get_db_session() as db:
         deleted = db.query(Notification).delete(synchronize_session=False)
         logger.info(f"Deleted all {deleted} notifications")
@@ -461,15 +468,7 @@ def check_system_health():
 def has_remote_commits_with_messages(
     repo_path: str, branch: str = "main"
 ) -> tuple[bool, list[str]]:
-    """Check if there are remote commits with their messages
-
-    Args:
-        repo_path: Path to git repository
-        branch: Branch name to check
-
-    Returns:
-        Tuple of (has_updates, commit_messages)
-    """
+    
     git_dir = os.path.join(repo_path, ".git")
     if not os.path.isdir(git_dir):
         logger.warning(f"Not a valid Git repository: {repo_path}")

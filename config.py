@@ -54,3 +54,17 @@ class Config:
     MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS", 5))
     LOCKOUT_DURATION_MINUTES = int(os.getenv("LOCKOUT_DURATION_MINUTES", 15))
     FIRST_PASSWORD = os.getenv("FIRST_PASSWORD", "").strip()
+
+    # Telegram Notifications
+    TELEGRAM_ENABLED = os.getenv("TELEGRAM_ENABLED", "false").lower() == "true"
+    TELEGRAM_API_ID = os.getenv("TELEGRAM_API_ID")
+    TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
+    TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    TELEGRAM_SESSION_NAME = os.getenv("TELEGRAM_SESSION_NAME", "squidstats_bot")
+    TELEGRAM_PHONE = os.getenv("TELEGRAM_PHONE")
+    TELEGRAM_RECIPIENTS = os.getenv("TELEGRAM_RECIPIENTS", "").split(",")  # Comma-separated list
+
+    # Proxy settings
+    HTTP_PROXY = os.getenv("HTTP_PROXY", "").strip()
+    HTTPS_PROXY = os.getenv("HTTPS_PROXY", "").strip()
+    NO_PROXY = os.getenv("NO_PROXY", "").strip()

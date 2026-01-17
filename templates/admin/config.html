@@ -1,37 +1,38 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div x-data="{ activeTab: 'env', editing: false }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+<div x-data="{ activeTab: 'general', editing: false }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Configuración</h2>
     
     <!-- Tabs -->
-    <div class="flex border-b border-gray-200">
-        <!-- <button @click="activeTab = 'squid'" :class="activeTab === 'squid' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm">
-            Squid Config
-        </button> -->
-        <button @click="activeTab = 'env'" :class="activeTab === 'env' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm">
-            Variables de Entorno
+    <div class="flex border-b border-gray-200 flex-wrap">
+        <button @click="activeTab = 'general'" :class="activeTab === 'general' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            General
+        </button>
+        <button @click="activeTab = 'squid'" :class="activeTab === 'squid' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Squid
+        </button>
+        <button @click="activeTab = 'database'" :class="activeTab === 'database' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Base de Datos
+        </button>
+        <button @click="activeTab = 'security'" :class="activeTab === 'security' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Seguridad
+        </button>
+        <button @click="activeTab = 'blacklist'" :class="activeTab === 'blacklist' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Lista Negra
+        </button>
+        <button @click="activeTab = 'proxy'" :class="activeTab === 'proxy' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Proxy
+        </button>
+        <button @click="activeTab = 'telegram'" :class="activeTab === 'telegram' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Telegram
         </button>
     </div>
     
-    <!-- Squid Tab -->
-    <!-- <div x-show="activeTab === 'squid'" class="mt-6">
-        -center mb-6">
-            <h3 class="text-xl font-bold text-gray-800">Configuración de Squid</h3>
-            <a href="{{ url_for('admin.edit_config') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
-                <i class="fas fa-edit mr-2"></i>Editar
-            </a>
-        </div>
-        
-        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{{ config_content }}</pre>
-        </div>
-    </div> -->
-    
-    <!-- Env Tab -->
-    <div x-show="activeTab === 'env'" class="mt-6">
+    <!-- General Tab -->
+    <div x-show="activeTab === 'general'" class="mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Variables de Entorno</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración General</h3>
             <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
                 <i class="fas fa-edit mr-2"></i>Editar
             </button>
@@ -39,8 +40,9 @@
         
         <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            {% set sensitive_vars = ['SECRET_KEY', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_URL', 'VERSION'] %}
-            {% for key, value in env_vars.items() %}
+            {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
+            {% for key in ['VERSION', 'FLASK_DEBUG', 'REFRESH_INTERVAL', 'LISTEN_HOST', 'LISTEN_PORT'] %}
+            {% set value = env_vars.get(key, '') %}
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
                 {% if key == 'FLASK_DEBUG' %}
@@ -66,7 +68,219 @@
         </form>
         
         <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key, value in env_vars.items() %}{{ key }}="{{ value }}"
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['VERSION', 'FLASK_DEBUG', 'REFRESH_INTERVAL', 'LISTEN_HOST', 'LISTEN_PORT'] %}{{ key }}="{{ env_vars.get(key, '') }}"
+{% endfor %}</pre>
+        </div>
+    </div>
+    
+    <!-- Squid Tab -->
+    <div x-show="activeTab === 'squid'" class="mt-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Squid</h3>
+            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
+                <i class="fas fa-edit mr-2"></i>Editar
+            </button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
+            {% for key in ['SQUID_HOST', 'SQUID_PORT', 'LOG_FORMAT', 'SQUID_LOG', 'SQUID_CACHE_LOG', 'SQUID_CONFIG_PATH', 'ACL_FILES_DIR'] %}
+            {% set value = env_vars.get(key, '') %}
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
+                <input type="text" name="{{ key }}" value="{{ value }}" 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+            </div>
+            {% endfor %}
+            <div class="md:col-span-2 flex justify-center mt-4">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
+                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                </button>
+            </div>
+        </form>
+        
+        <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['SQUID_HOST', 'SQUID_PORT', 'LOG_FORMAT', 'SQUID_LOG', 'SQUID_CACHE_LOG', 'SQUID_CONFIG_PATH', 'ACL_FILES_DIR'] %}{{ key }}="{{ env_vars.get(key, '') }}"
+{% endfor %}</pre>
+        </div>
+    </div>
+    
+    <!-- Database Tab -->
+    <div x-show="activeTab === 'database'" class="mt-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Base de Datos</h3>
+            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
+                <i class="fas fa-edit mr-2"></i>Editar
+            </button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
+            {% for key in ['DATABASE_TYPE', 'DATABASE_STRING_CONNECTION'] %}
+            {% set value = env_vars.get(key, '') %}
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
+                <input type="text" name="{{ key }}" value="{{ value }}" 
+                       {% if key in sensitive_vars %}disabled{% endif %}
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors {% if key in sensitive_vars %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}">
+                {% if key in sensitive_vars %}
+                <p class="text-xs text-gray-500 mt-1">Esta variable está protegida y no puede ser modificada desde aquí</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="md:col-span-2 flex justify-center mt-4">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
+                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                </button>
+            </div>
+        </form>
+        
+        <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['DATABASE_TYPE', 'DATABASE_STRING_CONNECTION'] %}{{ key }}="{{ env_vars.get(key, '') }}"
+{% endfor %}</pre>
+        </div>
+    </div>
+    
+    <!-- Security Tab -->
+    <div x-show="activeTab === 'security'" class="mt-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Seguridad</h3>
+            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
+                <i class="fas fa-edit mr-2"></i>Editar
+            </button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
+            {% for key in ['FIRST_PASSWORD', 'JWT_SECRET_KEY', 'JWT_EXPIRY_HOURS', 'MAX_LOGIN_ATTEMPTS', 'LOCKOUT_DURATION_MINUTES'] %}
+            {% set value = env_vars.get(key, '') %}
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
+                <input type="text" name="{{ key }}" value="{{ value }}" 
+                       {% if key in sensitive_vars %}disabled{% endif %}
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors {% if key in sensitive_vars %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}">
+                {% if key in sensitive_vars %}
+                <p class="text-xs text-gray-500 mt-1">Esta variable está protegida y no puede ser modificada desde aquí</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="md:col-span-2 flex justify-center mt-4">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
+                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                </button>
+            </div>
+        </form>
+        
+        <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['FIRST_PASSWORD', 'JWT_SECRET_KEY', 'JWT_EXPIRY_HOURS', 'MAX_LOGIN_ATTEMPTS', 'LOCKOUT_DURATION_MINUTES'] %}{{ key }}="{{ env_vars.get(key, '') }}"
+{% endfor %}</pre>
+        </div>
+    </div>
+    
+    <!-- Blacklist Tab -->
+    <div x-show="activeTab === 'blacklist'" class="mt-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Lista Negra de Dominios</h3>
+            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
+                <i class="fas fa-edit mr-2"></i>Editar
+            </button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 gap-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
+            {% for key in ['BLACKLIST_DOMAINS'] %}
+            {% set value = env_vars.get(key, '') %}
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
+                <textarea name="{{ key }}" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">{{ value }}</textarea>
+            </div>
+            {% endfor %}
+            <div class="flex justify-center mt-4">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
+                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                </button>
+            </div>
+        </form>
+        
+        <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['BLACKLIST_DOMAINS'] %}{{ key }}="{{ env_vars.get(key, '') }}"
+{% endfor %}</pre>
+        </div>
+    </div>
+    
+    <!-- Proxy Tab -->
+    <div x-show="activeTab === 'proxy'" class="mt-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Proxy</h3>
+            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
+                <i class="fas fa-edit mr-2"></i>Editar
+            </button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
+            {% for key in ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'] %}
+            {% set value = env_vars.get(key, '') %}
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
+                <input type="text" name="{{ key }}" value="{{ value }}" 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+            </div>
+            {% endfor %}
+            <div class="md:col-span-2 flex justify-center mt-4">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
+                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                </button>
+            </div>
+        </form>
+        
+        <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'] %}{{ key }}="{{ env_vars.get(key, '') }}"
+{% endfor %}</pre>
+        </div>
+    </div>
+    
+    <!-- Telegram Tab -->
+    <div x-show="activeTab === 'telegram'" class="mt-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Telegram</h3>
+            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
+                <i class="fas fa-edit mr-2"></i>Editar
+            </button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
+            {% for key in ['TELEGRAM_ENABLED', 'TELEGRAM_API_ID', 'TELEGRAM_API_HASH', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_PHONE', 'TELEGRAM_SESSION_NAME', 'TELEGRAM_RECIPIENTS'] %}
+            {% set value = env_vars.get(key, '') %}
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
+                {% if key == 'TELEGRAM_ENABLED' %}
+                <select name="{{ key }}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                    <option value="true" {% if value.lower() == 'true' %}selected{% endif %}>True</option>
+                    <option value="false" {% if value.lower() == 'false' %}selected{% endif %}>False</option>
+                </select>
+                {% else %}
+                <input type="text" name="{{ key }}" value="{{ value }}" 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="md:col-span-2 flex justify-center mt-4">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
+                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                </button>
+            </div>
+        </form>
+        
+        <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['TELEGRAM_ENABLED', 'TELEGRAM_API_ID', 'TELEGRAM_API_HASH', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_PHONE', 'TELEGRAM_SESSION_NAME', 'TELEGRAM_RECIPIENTS'] %}{{ key }}="{{ env_vars.get(key, '') }}"
 {% endfor %}</pre>
         </div>
     </div>

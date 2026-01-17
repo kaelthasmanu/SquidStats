@@ -14,3 +14,4 @@ requests
 uvicorn
 PyJWT==2.10.1
 bcrypt==5.0.0
+telethon>=1.42.0

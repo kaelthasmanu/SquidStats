@@ -25,6 +25,19 @@ from services.notifications import (
     start_notification_monitor,
     stop_notification_monitor,
 )
+
+# Import Telegram integration (optional)
+try:
+    from services.telegram_integration import (
+        initialize_telegram_service,
+        cleanup_telegram,
+    )
+    TELEGRAM_AVAILABLE = True
+except Exception:
+    TELEGRAM_AVAILABLE = False
+    initialize_telegram_service = None
+    cleanup_telegram = None
+
 from utils.filters import register_filters
 
 # Load environment variables
@@ -147,6 +160,14 @@ def shutdown_app(scheduler, socketio):
     logger.info("Stopping notification monitor...")
     stop_notification_monitor()
 
+    # Cleanup Telegram service
+    if TELEGRAM_AVAILABLE and cleanup_telegram:
+        logger.info("Cleaning up Telegram service...")
+        try:
+            cleanup_telegram()
+        except Exception as e:
+            logger.error(f"Error cleaning up Telegram: {e}")
+
     # Stop scheduler
     logger.info("Stopping scheduler...")
     try:
@@ -178,6 +199,14 @@ def main():
 
     # Set up Socket.IO in the notifications module
     set_socketio_instance(socketio)
+
+    # Initialize Telegram service if available
+    if TELEGRAM_AVAILABLE and initialize_telegram_service:
+        logger.info("Initializing Telegram service...")
+        try:
+            initialize_telegram_service()
+        except Exception as e:
+            logger.error(f"Failed to initialize Telegram: {e}")
 
     # Start the notification monitor
     start_notification_monitor()
