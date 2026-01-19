@@ -39,14 +39,57 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation-script">Installation Script</a></li>
-        <li><a href="#installation-manual">Installation Manual</a></li>
-        <li><a href="#testing-information">Testing Information</a></li>
-        <li><a href="#uninstall-squidstats">Uninstall SquidStats</a></li>
-        <li><a href="#resetting-forgotten-password">Reset forgotten admin password</a></li>
+        <li>
+          <a href="#installation-script">Installation Script</a>
+          <ul>
+            <li><a href="#installation-options">Installation Options</a></li>
+            <li><a href="#️-blacklist-configuration">Blacklist Configuration</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#installation-manual">Installation Manual</a>
+          <ul>
+            <li><a href="#forwarding-squid-logs-from-a-remote-squid-host-important">Forwarding Squid logs from remote host</a></li>
+          </ul>
+        </li>
       </ul>
     </li>
-    <li><a href="#to-do">To do</a></li>
+    <li>
+      <a href="#accessing-the-admin-panel">Accessing the Admin Panel</a>
+    </li>
+    <li>
+      <a href="#-telegram-notifications-setup-optional">Telegram Notifications Setup</a>
+      <ul>
+        <li><a href="#prerequisites-1">Prerequisites</a></li>
+        <li><a href="#getting-telegram-api-credentials">Getting Telegram API Credentials</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+        <li><a href="#finding-chat-ids">Finding Chat IDs</a></li>
+        <li><a href="#proxy-support">Proxy Support</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#resetting-forgotten-password-localhost-only">Resetting Forgotten Password</a>
+    </li>
+    <li>
+      <a href="#update-projectweb-with-script">Update Project</a>
+    </li>
+    <li>
+      <a href="#-run-on-system-startup">Run on System Startup</a>
+    </li>
+    <li>
+      <a href="#testing-information">Testing Information</a>
+    </li>
+    <li>
+      <a href="#uninstall-squidstats">Uninstall SquidStats</a>
+      <ul>
+        <li><a href="#using-the-uninstall-script">Using the Uninstall Script</a></li>
+        <li><a href="#what-does-the-uninstall-do">What Does the Uninstall Do?</a></li>
+        <li><a href="#manual-uninstallation">Manual Uninstallation</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#upcoming-features">Upcoming Features</a>
+    </li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -266,24 +309,54 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
 4. Create a .env file in the project root and add the following content:\
     Note: for use MARIADB need your own database running
    ```bash
-   VERSION=2
+   # Application Version
+   VERSION="2"
+   
+   # Security Keys
    SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   JWT_SECRET_KEY="your-jwt-secret-key"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   
+   # Squid Configuration
    SQUID_HOST="127.0.0.1"
-   SQUID_PORT=3128
-   LOG_FORMAT=DETAILED
-   FLASK_DEBUG=True
-   DATABASE_TYPE="SQLITE"
+   SQUID_PORT="3128"
    SQUID_LOG="/var/log/squid/access.log"
    SQUID_CACHE_LOG="/var/log/squid/cache.log"
-   DATABASE_STRING_CONNECTION="/opt/SquidStats/"
-   REFRESH_INTERVAL=60
+   SQUID_CONFIG_PATH="/etc/squid/squid.conf"
+   ACL_FILES_DIR="/etc/squid/acls"
+   LOG_FORMAT="DETAILED"  # Options: DETAILED or DEFAULT
+   
+   # Database Configuration
+   DATABASE_TYPE="SQLITE"  # Options: SQLITE or MARIADB
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/"  # For SQLite: directory path, For MariaDB: connection string
+   
+   # Flask Application Settings
+   FLASK_DEBUG="False"  # Set to True only for development
+   LISTEN_HOST="0.0.0.0"
+   LISTEN_PORT="5000"
+   REFRESH_INTERVAL="60"
+   
+   # Authentication & Security
+   FIRST_PASSWORD="mipassword"  # Initial admin password (change after first login)
+   JWT_EXPIRY_HOURS="24"
+   MAX_LOGIN_ATTEMPTS="5"
+   LOCKOUT_DURATION_MINUTES="15"
+   
+   # Blacklist Configuration
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
-   HTTP_PROXY=""
-   SQUID_CONFIG_PATH=/home/manuel/Desktop/config/squid.conf
-   ACL_FILES_DIR=/home/manuel/Desktop/config/acls
-   LISTEN_HOST=127.0.0.1
-   LISTEN_PORT=8080
-   FIRST_PASSWORD="mipassword"
+   
+   # Telegram Notifications (Optional)
+   TELEGRAM_ENABLED="false"  # Set to "true" to enable Telegram notifications
+   TELEGRAM_API_ID=""  # Get from https://my.telegram.org
+   TELEGRAM_API_HASH=""  # Get from https://my.telegram.org
+   TELEGRAM_BOT_TOKEN=""  # Get from @BotFather (optional, for bot mode)
+   TELEGRAM_PHONE=""  # Your phone number (optional, for user mode)
+   TELEGRAM_SESSION_NAME="squidstats_bot"
+   TELEGRAM_RECIPIENTS=""  # Comma-separated list of recipients (usernames, phone numbers, or chat IDs)
+   
+   # Proxy Configuration (Optional)
+   HTTP_PROXY=""  # Example: http://proxy.example.com:8080
+   HTTPS_PROXY=""  # Example: https://proxy.example.com:8443
+   NO_PROXY=""  # Comma-separated list of hosts to bypass proxy
    ```
   
   ### Forwarding Squid logs from a remote Squid host (important)
@@ -413,6 +486,73 @@ To access the admin panel, you need to configure the initial password and restar
 3. Access the admin panel by visiting `http://your-ip:your-port/admin` in your browser.
 
 4. Log in with the username `admin` and the password you set in `FIRST_PASSWORD` (in this example, "mipassword").
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
+## 📱 Telegram Notifications Setup (Optional)
+
+SquidStats supports sending notifications via Telegram. This feature allows you to receive real-time alerts about security events, system status, and important activities directly on your Telegram account or groups.
+
+### Prerequisites
+
+- A Telegram account
+- Telegram API credentials (from [my.telegram.org](https://my.telegram.org))
+- Optional: A Telegram Bot Token (from [@BotFather](https://t.me/botfather))
+
+### Getting Telegram API Credentials
+
+1. Visit [https://my.telegram.org](https://my.telegram.org)
+2. Log in with your phone number
+3. Go to **API development tools**
+4. Create a new application
+5. Copy your `api_id` and `api_hash`
+
+### Configuration
+
+Edit your `.env` file and configure the Telegram variables:
+
+```bash
+# Enable Telegram notifications
+TELEGRAM_ENABLED="true"
+
+# API Credentials from my.telegram.org
+TELEGRAM_API_ID="your_api_id"
+TELEGRAM_API_HASH="your_api_hash"
+
+# Optional: Bot Token from @BotFather (recommended for production)
+TELEGRAM_BOT_TOKEN="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+
+# Optional: Your phone number (format: +1234567890)
+TELEGRAM_PHONE="+1234567890"
+
+# Session name for storing Telegram connection
+TELEGRAM_SESSION_NAME="squidstats_bot"
+
+# Recipients (comma-separated)
+# Can be: usernames (@username), phone numbers (+1234567890), or chat IDs (-1001234567890)
+TELEGRAM_RECIPIENTS="@your_username,-1001234567890"
+```
+
+### Finding Chat IDs
+
+To send notifications to groups or channels, you need their chat ID:
+
+1. Add your bot to the group/channel
+2. Send a message in the group
+3. Visit: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
+4. Look for `"chat":{"id":-1001234567890}` in the response
+
+### Proxy Support
+
+If SquidStats runs behind a proxy, configure the proxy settings:
+
+```bash
+HTTP_PROXY="http://proxy.example.com:8080"
+HTTPS_PROXY="https://proxy.example.com:8443"
+NO_PROXY="localhost,127.0.0.1"
+```
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 
 ### Resetting forgotten password (localhost only)
 
