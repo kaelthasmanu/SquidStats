@@ -39,14 +39,57 @@
       <a href="#empezando">Empezando</a>
       <ul>
         <li><a href="#prerrequisitos">Prerrequisitos</a></li>
-        <li><a href="#script-de-instalación">Script de Instalación</a></li>
-        <li><a href="#instalación-manual">Instalación Manual</a></li>
-        <li><a href="#información-de-pruebas">Información de Pruebas</a></li>
-        <li><a href="#desinstalar-squidstats">Desinstalar SquidStats</a></li>
-        <li><a href="#restablecer-contraseña-olvidada">Restablecer contraseña olvidada</a></li>
+        <li>
+          <a href="#script-de-instalación">Script de Instalación</a>
+          <ul>
+            <li><a href="#opciones-de-instalación">Opciones de Instalación</a></li>
+            <li><a href="#️-configuración-de-blacklist">Configuración de Blacklist</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#instalación-manual">Instalación Manual</a>
+          <ul>
+            <li><a href="#reenviar-logs-de-squid-desde-un-host-proxy-remoto-importante">Reenviar logs desde host remoto</a></li>
+          </ul>
+        </li>
       </ul>
     </li>
-    <li><a href="#por-hacer">Por hacer</a></li>
+    <li>
+      <a href="#accediendo-al-panel-de-admin">Accediendo al Panel de Admin</a>
+    </li>
+    <li>
+      <a href="#-notificaciones-de-telegram-opcional">Notificaciones de Telegram</a>
+      <ul>
+        <li><a href="#prerrequisitos-1">Prerrequisitos</a></li>
+        <li><a href="#obtener-credenciales-de-telegram-api">Obtener Credenciales API</a></li>
+        <li><a href="#configuración">Configuración</a></li>
+        <li><a href="#encontrar-chat-ids">Encontrar Chat IDs</a></li>
+        <li><a href="#soporte-de-proxy">Soporte de Proxy</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#restablecer-contraseña-olvidada-solo-localhost">Restablecer Contraseña Olvidada</a>
+    </li>
+    <li>
+      <a href="#actualizar-proyectoweb-con-script">Actualizar Proyecto</a>
+    </li>
+    <li>
+      <a href="#-ejecutar-al-inicio-del-sistema">Ejecutar al Inicio del Sistema</a>
+    </li>
+    <li>
+      <a href="#información-de-pruebas">Información de Pruebas</a>
+    </li>
+    <li>
+      <a href="#desinstalar-squidstats">Desinstalar SquidStats</a>
+      <ul>
+        <li><a href="#usando-el-script-de-desinstalación">Usando el Script de Desinstalación</a></li>
+        <li><a href="#qué-hace-la-desinstalación">¿Qué Hace la Desinstalación?</a></li>
+        <li><a href="#desinstalación-manual">Desinstalación Manual</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#características-próximas">Características Próximas</a>
+    </li>
     <li><a href="#contribuir">Contribuir</a></li>
     <li><a href="#licencia">Licencia</a></li>
     <li><a href="#contacto">Contacto</a></li>
@@ -266,25 +309,147 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
 4. Crear un archivo .env en la raíz del proyecto y agregar el siguiente contenido:\
     Nota: para usar MARIADB necesitas tu propia base de datos ejecutándose
    ```bash
-   VERSION=2
-   SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   # Versión de la Aplicación
+   VERSION="2"
+   
+   # Claves de Seguridad
+   SECRET_KEY="your-secret-key-here"  # Generar con: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   JWT_SECRET_KEY="your-jwt-secret-key"  # Generar con: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   
+   # Configuración de Squid
    SQUID_HOST="127.0.0.1"
-   SQUID_PORT=3128
-   LOG_FORMAT=DETAILED
-   FLASK_DEBUG=True
-   DATABASE_TYPE="SQLITE"
+   SQUID_PORT="3128"
    SQUID_LOG="/var/log/squid/access.log"
    SQUID_CACHE_LOG="/var/log/squid/cache.log"
-   DATABASE_STRING_CONNECTION="/opt/SquidStats/"
-   REFRESH_INTERVAL=60
+   SQUID_CONFIG_PATH="/etc/squid/squid.conf"
+   ACL_FILES_DIR="/etc/squid/acls"
+   LOG_FORMAT="DETAILED"  # Opciones: DETAILED o DEFAULT
+   
+   # Configuración de Base de Datos
+   DATABASE_TYPE="SQLITE"  # Opciones: SQLITE o MARIADB
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/"  # Para SQLite: ruta del directorio, Para MariaDB: cadena de conexión
+   
+   # Configuración de la Aplicación Flask
+   FLASK_DEBUG="False"  # Establecer a True solo para desarrollo
+   LISTEN_HOST="0.0.0.0"
+   LISTEN_PORT="5000"
+   REFRESH_INTERVAL="60"
+   
+   # Autenticación y Seguridad
+   FIRST_PASSWORD="mipassword"  # Contraseña inicial del admin (cambiar después del primer login)
+   JWT_EXPIRY_HOURS="24"
+   MAX_LOGIN_ATTEMPTS="5"
+   LOCKOUT_DURATION_MINUTES="15"
+   
+   # Configuración de Blacklist
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
-   HTTP_PROXY=""
-   SQUID_CONFIG_PATH=/home/manuel/Desktop/config/squid.conf
-   ACL_FILES_DIR=/home/manuel/Desktop/config/acls
-   LISTEN_HOST=127.0.0.1
-   LISTEN_PORT=8080
-   FIRST_PASSWORD="mipassword"
+   
+   # Notificaciones de Telegram (Opcional)
+   TELEGRAM_ENABLED="false"  # Establecer a "true" para habilitar notificaciones de Telegram
+   TELEGRAM_API_ID=""  # Obtener de https://my.telegram.org
+   TELEGRAM_API_HASH=""  # Obtener de https://my.telegram.org
+   TELEGRAM_BOT_TOKEN=""  # Obtener de @BotFather (opcional, para modo bot)
+   TELEGRAM_PHONE=""  # Tu número de teléfono (opcional, para modo usuario)
+   TELEGRAM_SESSION_NAME="squidstats_bot"
+   TELEGRAM_RECIPIENTS=""  # Lista separada por comas de destinatarios (nombres de usuario, números de teléfono o chat IDs)
+   
+   # Configuración de Proxy (Opcional)
+   HTTP_PROXY=""  # Ejemplo: http://proxy.example.com:8080
+   HTTPS_PROXY=""  # Ejemplo: https://proxy.example.com:8443
+   NO_PROXY=""  # Lista separada por comas de hosts para omitir el proxy
    ```
+  
+  ### Reenviar logs de Squid desde un host proxy remoto (importante)
+
+  Si instalas SquidStats en una máquina diferente a la del proxy Squid (es decir, Squid no está
+  instalado en el servidor donde corre SquidStats), debes asegurarte de que el fichero de logs de
+  Squid (`/var/log/squid/access.log`) esté disponible en el servidor de SquidStats. La forma
+  recomendada y confiable es reenviar las entradas del log mediante syslog (rsyslog o syslog-ng)
+  desde el host proxy hacia el host que ejecuta SquidStats.
+
+  A continuación tienes ejemplos de configuración para el envío (en el proxy) y la recepción
+  (en el servidor de SquidStats). Ajusta las IPs, puertos y rutas según tu entorno.
+
+  NOTA: el reenvío por syslog evita copiar archivos periódicamente y garantiza actualizaciones en
+  casi tiempo real para el panel.
+
+  - Usando rsyslog (proxy = 192.168.1.10, squidstats = 192.168.1.20)
+
+    En el proxy Squid (enviar): crea o edita `/etc/rsyslog.d/30-squid.conf` y agrega:
+
+    ```conf
+    # rsyslog - reenviar líneas del access.log de squid al host remoto
+    module(load="imfile" PollingInterval="10")
+    input(type="imfile"
+          File="/var/log/squid/access.log"
+          Tag="squid_access:"
+          Severity="info"
+          Facility="local0")
+
+    # reenviar al colector remoto (usa TCP con @@ para mayor fiabilidad)
+    *.* @@192.168.1.20:514
+    ```
+
+    En el servidor SquidStats (recibir): habilita la recepción syslog y guarda en fichero.
+    Ejemplo `/etc/rsyslog.d/10-remote.conf`:
+
+    ```conf
+    # rsyslog - aceptar logs remotos
+    module(load="imudp")
+    input(type="imudp" port="514")
+
+    # almacenar logs reenviados de squid
+    if $programname == 'squid_access' or $syslogtag contains 'squid_access' then {
+        /var/log/remote/squid/access.log
+        stop
+    }
+    ```
+
+    Crear el directorio y ajustar permisos:
+    ```bash
+    sudo mkdir -p /var/log/remote/squid
+    sudo chown syslog:adm /var/log/remote/squid
+    sudo systemctl restart rsyslog
+    ```
+
+  - Usando syslog-ng (proxy enviar):
+
+    Edita `/etc/syslog-ng/conf.d/squid-forward.conf` en el host proxy:
+
+    ```conf
+    source s_squid { file("/var/log/squid/access.log" follow-freq(1)); };
+    destination d_remote { tcp("192.168.1.20" port(514)); };
+    log { source(s_squid); destination(d_remote); };
+    ```
+
+    En el servidor SquidStats (recibir) con syslog-ng, aceptar y escribir a disco:
+
+    ```conf
+    source s_network { tcp(port(514)); }; 
+    destination d_squid { file("/var/log/remote/squid/access.log"); }; 
+    filter f_squid { program("squid_access") or match("^\d+\.\d+\.\d+\.\d+ .*squid" type("regexp")); };
+    log { source(s_network); filter(f_squid); destination(d_squid); }; 
+    ```
+
+  - Firewall y permisos
+
+    - Abre el puerto 514 (o el puerto que elijas) en el servidor SquidStats y permite conexión desde
+      el host proxy.
+    - Usa TCP si te interesa garantía de entrega; UDP es más rápido pero puede perder paquetes.
+    - Asegúrate de que el usuario del demonio syslog pueda escribir en el directorio destino
+      (`/var/log/remote/squid`).
+
+  - Actualiza `SQUID_HOST` en `.env`
+
+    - Si reenvías logs, establece `SQUID_HOST` en el `.env` de SquidStats a la IP del proxy original
+      (o mantenlo en `127.0.0.1` si los logs se escriben localmente en `/var/log/remote/squid/access.log`).
+
+  Ejemplos y notas
+
+  - Esta estrategia es preferible a montar sistemas de archivos remotos o usar scp/rsync periódicos
+    porque ofrece actualizaciones casi en tiempo real y maneja rotación de logs adecuadamente cuando
+    se configura correctamente.
+
 5. Ejecutar la App con python o python3 🚀:
 
 ```bash
@@ -325,6 +490,91 @@ Para acceder al panel de admin, necesitas configurar la contraseña inicial y re
 
 4. Inicia sesión con el usuario `admin` y la contraseña que configuraste en `FIRST_PASSWORD` (en este ejemplo, "mipassword").
 
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
+## 📱 Notificaciones de Telegram (Opcional)
+
+SquidStats soporta el envío de notificaciones vía Telegram. Esta característica te permite recibir alertas en tiempo real sobre eventos de seguridad, estado del sistema y actividades importantes directamente en tu cuenta o grupos de Telegram.
+
+### Prerrequisitos
+
+- Una cuenta de Telegram
+- Credenciales API de Telegram (de [my.telegram.org](https://my.telegram.org))
+- Opcional: Un Token de Bot de Telegram (de [@BotFather](https://t.me/botfather))
+
+### Obtener Credenciales de Telegram API
+
+1. Visita [https://my.telegram.org](https://my.telegram.org)
+2. Inicia sesión con tu número de teléfono
+3. Ve a **API development tools**
+4. Crea una nueva aplicación
+5. Copia tu `api_id` y `api_hash`
+
+### Configuración
+
+Edita tu archivo `.env` y configura las variables de Telegram:
+
+```bash
+# Habilitar notificaciones de Telegram
+TELEGRAM_ENABLED="true"
+
+# Credenciales API de my.telegram.org
+TELEGRAM_API_ID="tu_api_id"
+TELEGRAM_API_HASH="tu_api_hash"
+
+# Opcional: Token de Bot de @BotFather (recomendado para producción)
+TELEGRAM_BOT_TOKEN="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+
+# Opcional: Tu número de teléfono (formato: +1234567890)
+TELEGRAM_PHONE="+1234567890"
+
+# Nombre de sesión para almacenar la conexión de Telegram
+TELEGRAM_SESSION_NAME="squidstats_bot"
+
+# Destinatarios (separados por comas)
+# Pueden ser: nombres de usuario (@username), números de teléfono (+1234567890) o chat IDs (-1001234567890)
+TELEGRAM_RECIPIENTS="@tu_usuario,-1001234567890"
+```
+
+### Encontrar Chat IDs
+
+Para enviar notificaciones a grupos o canales, necesitas su chat ID:
+
+1. Agrega tu bot al grupo/canal
+2. Envía un mensaje en el grupo
+3. Visita: `https://api.telegram.org/bot<TU_BOT_TOKEN>/getUpdates`
+4. Busca `"chat":{"id":-1001234567890}` en la respuesta
+
+### Probar la Configuración
+
+Después de la configuración, puedes probar las notificaciones de Telegram desde el panel de admin:
+
+1. Ve a **Configuración → Telegram**
+2. Verifica tus configuraciones
+3. Haz clic en **"Reiniciar Servicio"** para aplicar los cambios sin reiniciar la app
+
+### Características
+
+- 🔔 Notificaciones en tiempo real para eventos de seguridad
+- 📊 Alertas de estado del sistema
+- 🚨 Notificaciones de errores críticos
+- 👥 Alertas de actividad de usuarios
+- 🔄 Recarga dinámica de configuración (sin necesidad de reinicio)
+
+### Soporte de Proxy
+
+Si SquidStats corre detrás de un proxy, configura los ajustes de proxy:
+
+```bash
+HTTP_PROXY="http://proxy.example.com:8080"
+HTTPS_PROXY="https://proxy.example.com:8443"
+NO_PROXY="localhost,127.0.0.1"
+```
+
+Para más detalles, consulta [TELEGRAM_INTEGRATION.md](TELEGRAM_INTEGRATION.md) y [TELEGRAM_CONFIG_RELOAD.md](TELEGRAM_CONFIG_RELOAD.md).
+
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
 ### Restablecer contraseña olvidada (solo localhost)
 
 Si olvidaste la contraseña de admin, puedes restablecerla desde el mismo servidor donde corre SquidStats (solo localhost):
@@ -352,12 +602,14 @@ Notas:
 
 Advertencia: 🚨 La primera ejecución puede causar alto uso de CPU.
 
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
 ### Actualizar proyecto(web) con Script
 
 1. Obtener el Script con curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.0/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
 ```
 
 2. Agregar permisos de ejecución:
@@ -372,8 +624,11 @@ Advertencia: 🚨 La primera ejecución puede causar alto uso de CPU.
  sudo ./install.sh --update
 ```
 
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
 🕒 Ejecutar al Inicio del Sistema
-Para asegurar que la aplicación inicie automáticamente cuando el sistema arranque :
+
+Para asegurar que la aplicación inicie automáticamente cuando el sistema arranque:
 
 1. Copiar archivo de servicio:
 
@@ -393,185 +648,7 @@ Para asegurar que la aplicación inicie automáticamente cuando el sistema arran
   systemctl enable squidstats.service
 ```
 
-```bash
-# Detener y deshabilitar el servicio
-sudo systemctl stop squidstats.service
-sudo systemctl disable squidstats.service
-sudo rm -f /etc/systemd/system/squidstats.service
-sudo systemctl daemon-reload
-
-# Eliminar archivos del proyecto
-sudo rm -rf /opt/squidstats
-```
-</div>
-<a name="readme-top"></a>
-
-    ### Reenviar logs de Squid desde un host proxy remoto (importante)
-
-    Si instalas SquidStats en una máquina diferente a la del proxy Squid (es decir, Squid no está
-    instalado en el servidor donde corre SquidStats), debes asegurarte de que el fichero de logs de
-    Squid (`/var/log/squid/access.log`) esté disponible en el servidor de SquidStats. La forma
-    recomendada y confiable es reenviar las entradas del log mediante syslog (rsyslog o syslog-ng)
-    desde el host proxy hacia el host que ejecuta SquidStats.
-
-    A continuación tienes ejemplos de configuración para el envío (en el proxy) y la recepción
-    (en el servidor de SquidStats). Ajusta las IPs, puertos y rutas según tu entorno.
-
-    NOTA: el reenvío por syslog evita copiar archivos periódicamente y garantiza actualizaciones en
-    casi tiempo real para el panel.
-
-    - Usando rsyslog (proxy = 192.168.1.10, squidstats = 192.168.1.20)
-
-      En el proxy Squid (enviar): crea o edita `/etc/rsyslog.d/30-squid.conf` y agrega:
-
-      ```conf
-      # rsyslog - reenviar líneas del access.log de squid al host remoto
-      module(load="imfile" PollingInterval="10")
-      input(type="imfile"
-            File="/var/log/squid/access.log"
-            Tag="squid_access:"
-            Severity="info"
-            Facility="local0")
-
-      # reenviar al colector remoto (usa TCP con @@ para mayor fiabilidad)
-      *.* @@192.168.1.20:514
-      ```
-
-      En el servidor SquidStats (recibir): habilita la recepción syslog y guarda en fichero.
-      Ejemplo `/etc/rsyslog.d/10-remote.conf`:
-
-      ```conf
-      # rsyslog - aceptar logs remotos
-      module(load="imudp")
-      input(type="imudp" port="514")
-
-      # almacenar logs reenviados de squid
-      if $programname == 'squid_access' or $syslogtag contains 'squid_access' then {
-          /var/log/remote/squid/access.log
-          stop
-      }
-      ```
-
-      Crear el directorio y ajustar permisos:
-      ```bash
-      sudo mkdir -p /var/log/remote/squid
-      sudo chown syslog:adm /var/log/remote/squid
-      sudo systemctl restart rsyslog
-      ```
-
-    - Usando syslog-ng (proxy enviar):
-
-      Edita `/etc/syslog-ng/conf.d/squid-forward.conf` en el host proxy:
-
-      ```conf
-      source s_squid { file("/var/log/squid/access.log" follow-freq(1)); };
-      destination d_remote { tcp("192.168.1.20" port(514)); };
-      log { source(s_squid); destination(d_remote); };
-      ```
-
-      En el servidor SquidStats (recibir) con syslog-ng, aceptar y escribir a disco:
-
-      ```conf
-      source s_network { tcp(port(514)); }; 
-      destination d_squid { file("/var/log/remote/squid/access.log"); }; 
-      filter f_squid { program("squid_access") or match("^\d+\.\d+\.\d+\.\d+ .*squid" type("regexp")); };
-      log { source(s_network); filter(f_squid); destination(d_squid); }; 
-      ```
-
-    - Firewall y permisos
-
-      - Abre el puerto 514 (o el puerto que elijas) en el servidor SquidStats y permite conexión desde
-        el host proxy.
-      - Usa TCP si te interesa garantía de entrega; UDP es más rápido pero puede perder paquetes.
-      - Asegúrate de que el usuario del demonio syslog pueda escribir en el directorio destino
-        (`/var/log/remote/squid`).
-
-    - Actualiza `SQUID_HOST` en `.env`
-
-      - Si reenvías logs, establece `SQUID_HOST` en el `.env` de SquidStats a la IP del proxy original
-        (o mantenlo en `127.0.0.1` si los logs se escriben localmente en `/var/log/remote/squid/access.log`).
-
-    - Notas y recomendaciones
-
-      - Esta estrategia es preferible a montar sistemas de archivos remotos o usar scp/rsync periódicos
-        porque ofrece actualizaciones casi en tiempo real y maneja rotación de logs adecuadamente si
-        se configura el `imfile`/`follow` correctamente.
-
-
-1. Ejecutar la aplicación con python o python3 🚀:
-
-```bash
-  python3 app.py
-```
-
-6. En el navegador de su preferencia, visite el siguiente enlace:
-
-```bash
-  http://ip/hostname:5000 
-```
-### ⚠️ Alerta en la primera ejecución ⚠️
-
-Advertencia: 🚨 La primera vez que se ejecuta puede causar un alto uso de la CPU.
-
-### Actualizar el proyecto (web) con Script
-
-1. Obtener el script con curl o wget:
-
-```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
-``` 
-
-2. Dar permisos de ejecución:
-
-```bash
- sudo chmod +x install.sh
-```
-
-3. Ejecutar el script con el parámetro update:
-
-```bash
- sudo ./install.sh --update
-```
-
-🕒 **Ejecutar al iniciar el sistema operativo**
-
-Para garantizar que la aplicación se inicie automáticamente cuando se inicia el sistema, agregue el siguiente trabajo al cron:
-
-1. Abrir con un editor el fichero crontab
-
-```bash
-nano /etc/crontab
-```
-
-2. Añadir la siguiente línea al fichero de crontab (cambiar path_app por su ruta):
-
-```bash
-@reboot root nohup python3 path_app/app.py &
-```
-
-3. Guardar
-
-O puede usar servicios (daemon):
-
-1. Copiar el fichero de servicio:
-
-```bash
-  cp ./utils/squidstats.service /etc/systemd/system/squidstats.service
-```
-
-2. Reiniciar daemons:
-
-```bash
-  systemctl daemon-reload
-```
-
-3. Activar el servicio:
-
-```bash
-  systemctl enable squidstats.service
-```
-
-4. Iniciar el servicio:
+4. Iniciar servicio:
 
 ```bash
   systemctl start squidstats.service
