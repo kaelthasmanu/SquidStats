@@ -387,3 +387,122 @@ def reload_squid():
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
+
+
+@admin_bp.route("/api/get-tables", methods=["GET"])
+@api_auth_required
+def get_tables():
+    """API endpoint to get all database tables with row counts."""
+    try:
+        from database.database import get_engine
+        from sqlalchemy import inspect, text
+        
+        engine = get_engine()
+        inspector = inspect(engine)
+        
+        # Get all table names
+        tables = inspector.get_table_names()
+        
+        # Get row count for each table
+        table_info = []
+        
+        with engine.connect() as conn:
+            for table_name in tables:
+                try:
+                    result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+                    count = result.scalar()
+                    table_info.append({
+                        'name': table_name,
+                        'rows': count,
+                        'has_data': count > 0
+                    })
+                except Exception as e:
+                    logger.warning(f"Error counting rows in {table_name}: {e}")
+                    table_info.append({
+                        'name': table_name,
+                        'rows': 0,
+                        'has_data': False
+                    })
+        
+        return jsonify({
+            "status": "success",
+            "tables": table_info
+        })
+    
+    except Exception as e:
+        logger.exception("Error getting database tables")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+
+        resp = {"status": "error", "message": "Error interno del servidor"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
+
+
+@admin_bp.route("/clean-data")
+@admin_required
+def clean_data():
+    """View for cleaning database tables."""
+    return render_template('admin/clean_data.html')
+
+
+@admin_bp.route("/api/delete-table-data", methods=["POST"])
+@api_auth_required
+def delete_table_data():
+    """API endpoint to delete all data from a table."""
+    try:
+        data = request.get_json()
+        table_name = data.get('table_name')
+        
+        if not table_name:
+            return jsonify({
+                "status": "error",
+                "message": "Nombre de tabla no proporcionado"
+            }), 400
+        
+        # Validate table name to prevent SQL injection
+        import re
+        if not re.match(r'^[a-zA-Z0-9_]+$', table_name):
+            return jsonify({
+                "status": "error",
+                "message": "Nombre de tabla inválido"
+            }), 400
+        
+        from database.database import get_engine
+        from sqlalchemy import inspect, text
+        
+        engine = get_engine()
+        inspector = inspect(engine)
+        
+        # Verify table exists
+        if table_name not in inspector.get_table_names():
+            return jsonify({
+                "status": "error",
+                "message": "La tabla no existe"
+            }), 404
+        
+        # Delete all data from table
+        with engine.connect() as conn:
+            conn.execute(text(f"DELETE FROM {table_name}"))
+            conn.commit()
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Datos de la tabla '{table_name}' eliminados correctamente"
+        })
+    
+    except Exception as e:
+        logger.exception("Error deleting data from table")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+
+        resp = {"status": "error", "message": "Error interno del servidor"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
+

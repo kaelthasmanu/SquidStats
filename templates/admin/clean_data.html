@@ -1,0 +1,224 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Limpiar Datos - Administrador Squid Proxy{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-database mr-3"></i>Limpiar Datos
+        </h2>
+        <p class="text-gray-600">Selecciona una tabla y elimina todos sus datos</p>
+    </div>
+
+    <!-- Warning Alert -->
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3"></i>
+            <div>
+                <p class="text-red-800 font-medium">¡Advertencia!</p>
+                <p class="text-red-700 text-sm">Esta acción es irreversible. Una vez eliminados los datos, no se pueden recuperar.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clean Data Form -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-700">
+            <h3 class="text-xl font-semibold text-white flex items-center">
+                <i class="fas fa-trash-alt mr-2"></i>
+                Eliminar Datos de Tabla
+            </h3>
+        </div>
+
+        <div class="p-6">
+            <form id="cleanDataForm" class="space-y-6">
+                <!-- Table Selection -->
+                <div>
+                    <label for="tableSelect" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-table mr-1"></i>Seleccionar Tabla
+                    </label>
+                    <select id="tableSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Cargando tablas...</option>
+                    </select>
+                </div>
+
+                <!-- Table Info Display -->
+                <div id="tableInfo" class="hidden bg-gray-50 p-4 rounded-lg border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">Información de la Tabla</h4>
+                            <p id="tableDetails" class="text-sm text-gray-600 mt-1"></p>
+                        </div>
+                        <div id="actionButtons" class="hidden">
+                            <button type="button" id="cleanButton" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center">
+                                <i class="fas fa-trash-alt mr-2"></i>
+                                Limpiar Datos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4">
+        <div class="flex items-start">
+            <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
+            <div>
+                <p class="text-blue-800 font-medium mb-2">Información Importante</p>
+                <ul class="text-blue-700 text-sm space-y-1 list-disc list-inside">
+                    <li>Solo se eliminan los datos de la tabla, no la estructura</li>
+                    <li>Las tablas con sufijo de fecha (ej: log_20240121) son tablas diarias</li>
+                    <li>Algunas tablas son críticas para el funcionamiento del sistema</li>
+                    <li>Se recomienda hacer un respaldo antes de eliminar datos importantes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let tablesData = [];
+
+    // Get CSRF token from meta tag
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+
+    // Load tables on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTables();
+    });
+
+    async function loadTables() {
+        try {
+            const response = await fetch('/admin/api/get-tables', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                tablesData = data.tables;
+                populateTableSelect();
+            } else {
+                showNotification('Error al cargar las tablas', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Error al cargar las tablas', 'error');
+        }
+    }
+
+    function populateTableSelect() {
+        const select = document.getElementById('tableSelect');
+        select.innerHTML = '<option value="">Selecciona una tabla...</option>';
+        
+        tablesData.forEach(table => {
+            const option = document.createElement('option');
+            option.value = table.name;
+            option.textContent = `${table.name} (${table.rows.toLocaleString()} registros)`;
+            select.appendChild(option);
+        });
+    }
+
+    // Handle table selection change
+    document.getElementById('tableSelect').addEventListener('change', function() {
+        const selectedTable = this.value;
+        const tableInfo = document.getElementById('tableInfo');
+        const tableDetails = document.getElementById('tableDetails');
+        const actionButtons = document.getElementById('actionButtons');
+        const cleanButton = document.getElementById('cleanButton');
+        
+        if (selectedTable) {
+            const table = tablesData.find(t => t.name === selectedTable);
+            if (table) {
+                tableDetails.textContent = `Tabla: ${table.name} | Registros: ${table.rows.toLocaleString()}`;
+                tableInfo.classList.remove('hidden');
+                
+                if (table.has_data) {
+                    actionButtons.classList.remove('hidden');
+                    cleanButton.onclick = () => confirmDeleteTable(table.name, table.rows);
+                } else {
+                    actionButtons.classList.add('hidden');
+                    tableDetails.textContent += ' | Esta tabla está vacía';
+                }
+            }
+        } else {
+            tableInfo.classList.add('hidden');
+        }
+    });
+
+    function confirmDeleteTable(tableName, rowCount) {
+        const message = `¿Está seguro de que desea eliminar TODOS los datos de la tabla "${tableName}"?\n\nSe eliminarán ${rowCount.toLocaleString()} registros.\n\nEsta acción NO se puede deshacer.`;
+        
+        showCustomConfirm(message, async () => {
+            await deleteTableData(tableName);
+        });
+    }
+
+    async function deleteTableData(tableName) {
+        try {
+            showNotification('Eliminando datos...', 'info');
+            
+            const response = await fetch('/admin/api/delete-table-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({ table_name: tableName })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                showNotification(data.message, 'success');
+                // Reload tables after 1.5 seconds
+                setTimeout(() => {
+                    loadTables();
+                    // Reset form
+                    document.getElementById('tableSelect').value = '';
+                    document.getElementById('tableInfo').classList.add('hidden');
+                }, 1500);
+            } else {
+                showNotification(data.message || 'Error al eliminar los datos', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Error al eliminar los datos de la tabla', 'error');
+        }
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+            type === 'success' ? 'bg-green-500 text-white' : 
+            type === 'error' ? 'bg-red-500 text-white' : 
+            'bg-blue-500 text-white'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-${
+                    type === 'success' ? 'check-circle' : 
+                    type === 'error' ? 'exclamation-circle' : 
+                    'info-circle'
+                } mr-2"></i>
+                ${message}
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+</script>
+{% endblock %}
