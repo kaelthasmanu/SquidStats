@@ -10,8 +10,10 @@ from flask import (
     request,
     url_for,
 )
+from sqlalchemy import inspect, text
 
 from config import Config, logger
+from database.database import get_engine
 from services.auth_service import AuthService, admin_required, api_auth_required
 from utils.admin import SquidConfigManager
 
@@ -394,18 +396,15 @@ def reload_squid():
 def get_tables():
     """API endpoint to get all database tables with row counts."""
     try:
-        from database.database import get_engine
-        from sqlalchemy import inspect, text
-        
         engine = get_engine()
         inspector = inspect(engine)
-        
+
         # Get all table names
         tables = inspector.get_table_names()
-        
+
         # Get row count for each table
         table_info = []
-        
+
         with engine.connect() as conn:
             for table_name in tables:
                 try:
@@ -423,12 +422,12 @@ def get_tables():
                         'rows': 0,
                         'has_data': False
                     })
-        
+
         return jsonify({
             "status": "success",
             "tables": table_info
         })
-    
+
     except Exception as e:
         logger.exception("Error getting database tables")
         try:
@@ -456,13 +455,13 @@ def delete_table_data():
     try:
         data = request.get_json()
         table_name = data.get('table_name')
-        
+
         if not table_name:
             return jsonify({
                 "status": "error",
                 "message": "Nombre de tabla no proporcionado"
             }), 400
-        
+
         # Validate table name to prevent SQL injection
         import re
         if not re.match(r'^[a-zA-Z0-9_]+$', table_name):
@@ -470,30 +469,27 @@ def delete_table_data():
                 "status": "error",
                 "message": "Nombre de tabla inválido"
             }), 400
-        
-        from database.database import get_engine
-        from sqlalchemy import inspect, text
-        
+
         engine = get_engine()
         inspector = inspect(engine)
-        
+
         # Verify table exists
         if table_name not in inspector.get_table_names():
             return jsonify({
                 "status": "error",
                 "message": "La tabla no existe"
             }), 404
-        
+
         # Delete all data from table
         with engine.connect() as conn:
             conn.execute(text(f"DELETE FROM {table_name}"))
             conn.commit()
-        
+
         return jsonify({
             "status": "success",
             "message": f"Datos de la tabla '{table_name}' eliminados correctamente"
         })
-    
+
     except Exception as e:
         logger.exception("Error deleting data from table")
         try:
