@@ -516,8 +516,10 @@ def delete_table_data():
             return jsonify({"status": "error", "message": "La tabla no existe"}), 404
 
         # Delete all data from table
+        metadata = MetaData()
+        table = Table(table_name, metadata, autoload_with=engine)
         with engine.connect() as conn:
-            conn.execute(text(f"DELETE FROM {table_name}"))
+            conn.execute(table.delete())
             conn.commit()
 
         return jsonify(
