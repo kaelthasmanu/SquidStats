@@ -10,7 +10,7 @@ from flask import (
     request,
     url_for,
 )
-from sqlalchemy import inspect, text, MetaData, select, func
+from sqlalchemy import Table, inspect, text, MetaData, select, func
 
 from config import Config, logger
 from database.database import get_engine, get_session
@@ -41,6 +41,44 @@ def save_env_vars(env_vars):
     with open(env_file, "w") as f:
         for key, value in env_vars.items():
             f.write(f'{key}="{value}"\n')
+
+def get_table_row_count(session, engine, table_name):
+    metadata = MetaData()
+    table = Table(table_name, metadata, autoload_with=engine)
+
+    return session.execute(
+        select(func.count()).select_from(table)
+    ).scalar_one()
+
+
+def get_table_size(session, db_type, table_name):
+    if db_type == "SQLITE":
+        result = session.execute(
+            text("SELECT SUM(pgsize) FROM dbstat WHERE name = :name"),
+            {"name": table_name},
+        )
+        return result.scalar() or 0
+
+    if db_type in ("MYSQL", "MARIADB"):
+        result = session.execute(
+            text("""
+                SELECT data_length + index_length
+                FROM information_schema.tables
+                WHERE table_name = :name
+                AND table_schema = DATABASE()
+            """),
+            {"name": table_name},
+        )
+        return result.scalar() or 0
+
+    if db_type in ("POSTGRES", "POSTGRESQL"):
+        result = session.execute(
+            text("SELECT pg_total_relation_size(:name)"),
+            {"name": table_name},
+        )
+        return result.scalar() or 0
+
+    return 0
 
 
 @admin_bp.route("/")
@@ -394,91 +432,50 @@ def reload_squid():
 @admin_bp.route("/api/get-tables", methods=["GET"])
 @api_auth_required
 def get_tables():
-    """API endpoint to get all database tables with row counts."""
     session = None
     try:
         engine = get_engine()
         inspector = inspect(engine)
-        db_type = Config.DATABASE_TYPE
         session = get_session()
+        db_type = Config.DATABASE_TYPE
 
-        # Reflejar las tablas existentes para usar ORM
-        metadata = MetaData()
-        metadata.reflect(bind=engine)
-
-        # Get all table names
         tables = inspector.get_table_names()
-
-        # Get row count for each table
         table_info = []
 
         for table_name in tables:
             try:
-                table = metadata.tables.get(table_name)
-                if table is not None:
-                    # Usar ORM para contar filas
-                    count = session.query(table).count()
-                else:
-                    # Fallback a raw SQL si no se puede reflejar
-                    result = session.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
-                    count = result.scalar()
+                rows = get_table_row_count(session, engine, table_name)
+                size = get_table_size(session, db_type, table_name)
 
-                # Get table size based on database type (mantener raw SQL)
-                if db_type == "SQLITE":
-                    try:
-                        result_size = session.execute(
-                            text(
-                                f"SELECT SUM(pgsize) FROM dbstat WHERE name = '{table_name}'"
-                            )
-                        )
-                        size = result_size.scalar() or 0
-                    except:
-                        size = 0
-                elif db_type in ("MYSQL", "MARIADB"):
-                    result_size = session.execute(
-                        text(
-                            f"SELECT data_length + index_length FROM information_schema.tables WHERE table_name = '{table_name}' AND table_schema = DATABASE()"
-                        )
-                    )
-                    size = result_size.scalar() or 0
-                elif db_type in ("POSTGRESQL", "POSTGRES"):
-                    result_size = session.execute(
-                        text(f"SELECT pg_total_relation_size('{table_name}')")
-                    )
-                    size = result_size.scalar() or 0
-                else:
-                    size = 0
+                table_info.append({
+                    "name": table_name,
+                    "rows": rows,
+                    "size": size,
+                    "has_data": rows > 0,
+                })
 
-                table_info.append(
-                    {
-                        "name": table_name,
-                        "rows": count,
-                        "size": size,
-                        "has_data": count > 0,
-                    }
-                )
             except Exception as e:
-                logger.warning(f"Error getting info for {table_name}: {e}")
-                table_info.append(
-                    {"name": table_name, "rows": 0, "size": 0, "has_data": False}
-                )
+                logger.warning(f"Error processing table {table_name}: {e}")
+                table_info.append({
+                    "name": table_name,
+                    "rows": 0,
+                    "size": 0,
+                    "has_data": False,
+                })
 
         return jsonify({"status": "success", "tables": table_info})
 
     except Exception as e:
         logger.exception("Error getting database tables")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-
         resp = {"status": "error", "message": "Error interno del servidor"}
-        if show_details:
+        if current_app.debug:
             resp["details"] = str(e)
         return jsonify(resp), 500
+
     finally:
         if session:
             session.close()
+
 
 
 @admin_bp.route("/clean-data")
