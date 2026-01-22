@@ -10,7 +10,7 @@ from flask import (
     request,
     url_for,
 )
-from sqlalchemy import Table, inspect, text, MetaData, select, func
+from sqlalchemy import MetaData, Table, func, inspect, select, text
 
 from config import Config, logger
 from database.database import get_engine, get_session
