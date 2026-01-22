@@ -10,8 +10,10 @@ from flask import (
     request,
     url_for,
 )
+from sqlalchemy import MetaData, Table, func, inspect, select, text
 
 from config import Config, logger
+from database.database import get_engine, get_session
 from services.auth_service import AuthService, admin_required, api_auth_required
 from utils.admin import SquidConfigManager
 
@@ -39,6 +41,43 @@ def save_env_vars(env_vars):
     with open(env_file, "w") as f:
         for key, value in env_vars.items():
             f.write(f'{key}="{value}"\n')
+
+
+def get_table_row_count(session, engine, table_name):
+    metadata = MetaData()
+    table = Table(table_name, metadata, autoload_with=engine)
+
+    return session.execute(select(func.count()).select_from(table)).scalar_one()
+
+
+def get_table_size(session, db_type, table_name):
+    if db_type == "SQLITE":
+        result = session.execute(
+            text("SELECT SUM(pgsize) FROM dbstat WHERE name = :name"),
+            {"name": table_name},
+        )
+        return result.scalar() or 0
+
+    if db_type in ("MYSQL", "MARIADB"):
+        result = session.execute(
+            text("""
+                SELECT data_length + index_length
+                FROM information_schema.tables
+                WHERE table_name = :name
+                AND table_schema = DATABASE()
+            """),
+            {"name": table_name},
+        )
+        return result.scalar() or 0
+
+    if db_type in ("POSTGRES", "POSTGRESQL"):
+        result = session.execute(
+            text("SELECT pg_total_relation_size(:name)"),
+            {"name": table_name},
+        )
+        return result.scalar() or 0
+
+    return 0
 
 
 @admin_bp.route("/")
@@ -384,6 +423,120 @@ def reload_squid():
             show_details = False
 
         resp = {"status": "error", "message": "Internal server error"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
+
+
+@admin_bp.route("/api/get-tables", methods=["GET"])
+@api_auth_required
+def get_tables():
+    session = None
+    try:
+        engine = get_engine()
+        inspector = inspect(engine)
+        session = get_session()
+        db_type = Config.DATABASE_TYPE
+
+        tables = inspector.get_table_names()
+        table_info = []
+
+        for table_name in tables:
+            try:
+                rows = get_table_row_count(session, engine, table_name)
+                size = get_table_size(session, db_type, table_name)
+
+                table_info.append(
+                    {
+                        "name": table_name,
+                        "rows": rows,
+                        "size": size,
+                        "has_data": rows > 0,
+                    }
+                )
+
+            except Exception as e:
+                logger.warning(f"Error processing table {table_name}: {e}")
+                table_info.append(
+                    {
+                        "name": table_name,
+                        "rows": 0,
+                        "size": 0,
+                        "has_data": False,
+                    }
+                )
+
+        return jsonify({"status": "success", "tables": table_info})
+
+    except Exception as e:
+        logger.exception("Error getting database tables")
+        resp = {"status": "error", "message": "Error interno del servidor"}
+        if current_app.debug:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
+
+    finally:
+        if session:
+            session.close()
+
+
+@admin_bp.route("/clean-data")
+@admin_required
+def clean_data():
+    """View for cleaning database tables."""
+    return render_template("admin/clean_data.html")
+
+
+@admin_bp.route("/api/delete-table-data", methods=["POST"])
+@api_auth_required
+def delete_table_data():
+    """API endpoint to delete all data from a table."""
+    try:
+        data = request.get_json()
+        table_name = data.get("table_name")
+
+        if not table_name:
+            return jsonify(
+                {"status": "error", "message": "Nombre de tabla no proporcionado"}
+            ), 400
+
+        # Validate table name to prevent SQL injection
+        import re
+
+        if not re.match(r"^[a-zA-Z0-9_]+$", table_name):
+            return jsonify(
+                {"status": "error", "message": "Nombre de tabla inválido"}
+            ), 400
+
+        engine = get_engine()
+        inspector = inspect(engine)
+
+        # Verify table exists
+        if table_name not in inspector.get_table_names():
+            return jsonify({"status": "error", "message": "La tabla no existe"}), 404
+
+        # Delete all data from table
+        metadata = MetaData()
+        table = Table(table_name, metadata, autoload_with=engine)
+        with engine.connect() as conn:
+            conn.execute(table.delete())
+            conn.commit()
+
+        return jsonify(
+            {
+                "status": "success",
+                "message": f"Datos de la tabla '{table_name}' eliminados correctamente",
+            }
+        )
+
+    except Exception as e:
+        logger.exception("Error deleting data from table")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+
+        resp = {"status": "error", "message": "Error interno del servidor"}
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
