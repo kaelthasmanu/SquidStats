@@ -127,31 +127,6 @@ def get_cpu_info():
         return f"Error: {str(e)}"
 
 
-r""" def get_squid_version():
-    try:
-        result = subprocess.run(
-            ["squid", "-v"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        output = result.stdout + result.stderr
-        patterns = [
-            r"Squid Cache: Version ([\d\.]+[\w\-\.]*)",
-            r"Version: ([\d\.]+[\w\-\.]*)",
-            r"squid/([\d\.]+[\w\-\.]*)",
-        ]
-        for pattern in patterns:
-            match = re.search(pattern, output)
-            if match:
-                return match.group(1)
-        return "Installed (version not detected)"
-    except FileNotFoundError:
-        return "Not installed"
-    except Exception as e:
-        return f"Error: {str(e)}" """
-
-
 def get_network_stats():
     """Obtiene estadísticas de uso de red (ancho de banda)"""
     global _last_net_io, _last_net_time

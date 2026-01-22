@@ -337,95 +337,24 @@
         }
 
         function showNotificationToast(notification) {
-            // Crear un toast notification
-            const toastId = 'toast-' + Date.now();
-            const toast = document.createElement('div');
-            toast.id = toastId;
-            toast.className = `fixed top-4 right-4 z-[1002] p-4 rounded-lg shadow-lg border-l-4 ${
-                notification.type === 'error' ? 'bg-red-50 border-red-500' :
-                notification.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
-                notification.type === 'success' ? 'bg-green-50 border-green-500' :
-                'bg-blue-50 border-blue-500'
-            } max-w-sm transform translate-x-full transition-transform duration-300`;
+            if (!window.toastr) return;
             
-            // Create elements safely without innerHTML
-            const container = document.createElement('div');
-            container.className = 'flex items-start';
+            // Construir el título con la fuente
+            const source = notification.source === 'squid' ? 'Squid' : 
+                          notification.source === 'git' ? 'Git' : 'Sistema';
+            const title = notification.count && notification.count > 1 ? 
+                         `${source} (×${notification.count})` : source;
             
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'flex-shrink-0';
-            const icon = document.createElement('i');
-            icon.className = `fas ${notification.icon} ${
-                notification.type === 'error' ? 'text-red-600' :
-                notification.type === 'warning' ? 'text-yellow-600' :
-                notification.type === 'success' ? 'text-green-600' :
-                'text-blue-600'
-            } text-lg`;
-            iconDiv.appendChild(icon);
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'ml-3 flex-1';
-            
-            const sourceP = document.createElement('p');
-            sourceP.className = 'text-sm font-medium text-gray-900';
-            
-            // Agregar badge de count si es mayor a 1
-            if (notification.count && notification.count > 1) {
-                const countBadge = document.createElement('span');
-                countBadge.className = 'inline-flex items-center justify-center px-2 py-0.5 ml-2 text-xs font-bold leading-none text-white bg-red-600 rounded-full';
-                countBadge.textContent = `×${notification.count}`;
-                sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
-                                      notification.source === 'git' ? 'Git' : 'Sistema';
-                sourceP.appendChild(countBadge);
+            // Mostrar notificación según el tipo
+            if (notification.type === 'error') {
+                toastr.error(notification.message, title);
+            } else if (notification.type === 'warning') {
+                toastr.warning(notification.message, title);
+            } else if (notification.type === 'success') {
+                toastr.success(notification.message, title);
             } else {
-                sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
-                                      notification.source === 'git' ? 'Git' : 'Sistema';
+                toastr.info(notification.message, title);
             }
-            
-            const messageP = document.createElement('p');
-            messageP.className = 'mt-1 text-sm text-gray-600';
-            messageP.textContent = notification.message;
-            
-            const timeP = document.createElement('p');
-            timeP.className = 'mt-1 text-xs text-gray-500';
-            timeP.textContent = notification.time;
-            
-            contentDiv.appendChild(sourceP);
-            contentDiv.appendChild(messageP);
-            contentDiv.appendChild(timeP);
-            
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600';
-            closeBtn.onclick = () => document.getElementById(toastId).remove();
-            const closeIcon = document.createElement('i');
-            closeIcon.className = 'fas fa-times';
-            closeBtn.appendChild(closeIcon);
-            
-            container.appendChild(iconDiv);
-            container.appendChild(contentDiv);
-            container.appendChild(closeBtn);
-            toast.appendChild(container);
-            
-            document.body.appendChild(toast);
-            
-            // Animación de entrada
-            setTimeout(() => {
-                toast.classList.remove('translate-x-full');
-                toast.classList.add('translate-x-0');
-            }, 100);
-            
-            // Auto-remover después de 8 segundos
-            setTimeout(() => {
-                const toastElement = document.getElementById(toastId);
-                if (toastElement) {
-                    toastElement.classList.add('translate-x-full');
-                    setTimeout(() => {
-                        if (toastElement.parentElement) {
-                            toastElement.remove();
-                        }
-                    }, 300);
-                }
-            }, 8000);
         }
 
         function updateNotificationLists() {

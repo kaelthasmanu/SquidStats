@@ -1,0 +1,22 @@
+/* Personalización mínima para el apilamiento vertical de notificaciones toastr */
+/* Este archivo NO debe sobrescribir la funcionalidad básica de toastr */
+
+/* Ajustar el espaciado entre notificaciones - aparecen hacia abajo */
+#toast-container.toast-top-right > div {
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+/* Asegurar que las notificaciones sean responsivas en móviles */
+@media screen and (max-width: 768px) {
+  #toast-container.toast-top-right {
+    right: 8px;
+    top: 8px;
+    left: 8px;
+  }
+  
+  #toast-container > div {
+    width: auto !important;
+    max-width: 100%;
+  }
+}

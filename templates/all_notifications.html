@@ -219,41 +219,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalPages = {{ pagination.total_pages if pagination else 1 }};
     const perPage = {{ pagination.per_page if pagination else 20 }};
     
-    // Función para mostrar toast
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 z-[1002] p-4 rounded-lg shadow-lg border-l-4 ${
-            type === 'error' ? 'bg-red-50 border-red-500 text-red-700' :
-            type === 'success' ? 'bg-green-50 border-green-500 text-green-700' :
-            'bg-blue-50 border-blue-500 text-blue-700'
-        } max-w-sm transform translate-x-full transition-transform duration-300`;
-        
-        toast.innerHTML = `
-            <div class="flex items-center">
-                <i class="fas ${
-                    type === 'error' ? 'fa-exclamation-circle' :
-                    type === 'success' ? 'fa-check-circle' : 'fa-info-circle'
-                } mr-3"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.classList.remove('translate-x-full');
-            toast.classList.add('translate-x-0');
-        }, 100);
-        
-        setTimeout(() => {
-            toast.classList.remove('translate-x-0');
-            toast.classList.add('translate-x-full');
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.remove();
-                }
-            }, 300);
-        }, 4000);
+// Función para mostrar toast usando toastr
+      function showToast(message, type = 'info') {
+          if (window.toastr) {
+              if (type === 'error') {
+                  toastr.error(message);
+              } else if (type === 'success') {
+                  toastr.success(message);
+              } else if (type === 'warning') {
+                  toastr.warning(message);
+              } else {
+                  toastr.info(message);
+              }
+          }
     }
 
     // Function to load notifications with pagination
