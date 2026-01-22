@@ -42,13 +42,12 @@ def save_env_vars(env_vars):
         for key, value in env_vars.items():
             f.write(f'{key}="{value}"\n')
 
+
 def get_table_row_count(session, engine, table_name):
     metadata = MetaData()
     table = Table(table_name, metadata, autoload_with=engine)
 
-    return session.execute(
-        select(func.count()).select_from(table)
-    ).scalar_one()
+    return session.execute(select(func.count()).select_from(table)).scalar_one()
 
 
 def get_table_size(session, db_type, table_name):
@@ -447,21 +446,25 @@ def get_tables():
                 rows = get_table_row_count(session, engine, table_name)
                 size = get_table_size(session, db_type, table_name)
 
-                table_info.append({
-                    "name": table_name,
-                    "rows": rows,
-                    "size": size,
-                    "has_data": rows > 0,
-                })
+                table_info.append(
+                    {
+                        "name": table_name,
+                        "rows": rows,
+                        "size": size,
+                        "has_data": rows > 0,
+                    }
+                )
 
             except Exception as e:
                 logger.warning(f"Error processing table {table_name}: {e}")
-                table_info.append({
-                    "name": table_name,
-                    "rows": 0,
-                    "size": 0,
-                    "has_data": False,
-                })
+                table_info.append(
+                    {
+                        "name": table_name,
+                        "rows": 0,
+                        "size": 0,
+                        "has_data": False,
+                    }
+                )
 
         return jsonify({"status": "success", "tables": table_info})
 
@@ -475,7 +478,6 @@ def get_tables():
     finally:
         if session:
             session.close()
-
 
 
 @admin_bp.route("/clean-data")
