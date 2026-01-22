@@ -10,10 +10,10 @@ from flask import (
     request,
     url_for,
 )
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, text, MetaData, select, func
 
 from config import Config, logger
-from database.database import get_engine
+from database.database import get_engine, get_session
 from services.auth_service import AuthService, admin_required, api_auth_required
 from utils.admin import SquidConfigManager
 
@@ -395,9 +395,16 @@ def reload_squid():
 @api_auth_required
 def get_tables():
     """API endpoint to get all database tables with row counts."""
+    session = None
     try:
         engine = get_engine()
         inspector = inspect(engine)
+        db_type = Config.DATABASE_TYPE
+        session = get_session()
+
+        # Reflejar las tablas existentes para usar ORM
+        metadata = MetaData()
+        metadata.reflect(bind=engine)
 
         # Get all table names
         tables = inspector.get_table_names()
@@ -405,28 +412,58 @@ def get_tables():
         # Get row count for each table
         table_info = []
 
-        with engine.connect() as conn:
-            for table_name in tables:
-                try:
-                    result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+        for table_name in tables:
+            try:
+                table = metadata.tables.get(table_name)
+                if table is not None:
+                    # Usar ORM para contar filas
+                    count = session.query(table).count()
+                else:
+                    # Fallback a raw SQL si no se puede reflejar
+                    result = session.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                     count = result.scalar()
-                    table_info.append({
-                        'name': table_name,
-                        'rows': count,
-                        'has_data': count > 0
-                    })
-                except Exception as e:
-                    logger.warning(f"Error counting rows in {table_name}: {e}")
-                    table_info.append({
-                        'name': table_name,
-                        'rows': 0,
-                        'has_data': False
-                    })
 
-        return jsonify({
-            "status": "success",
-            "tables": table_info
-        })
+                # Get table size based on database type (mantener raw SQL)
+                if db_type == "SQLITE":
+                    try:
+                        result_size = session.execute(
+                            text(
+                                f"SELECT SUM(pgsize) FROM dbstat WHERE name = '{table_name}'"
+                            )
+                        )
+                        size = result_size.scalar() or 0
+                    except:
+                        size = 0
+                elif db_type in ("MYSQL", "MARIADB"):
+                    result_size = session.execute(
+                        text(
+                            f"SELECT data_length + index_length FROM information_schema.tables WHERE table_name = '{table_name}' AND table_schema = DATABASE()"
+                        )
+                    )
+                    size = result_size.scalar() or 0
+                elif db_type in ("POSTGRESQL", "POSTGRES"):
+                    result_size = session.execute(
+                        text(f"SELECT pg_total_relation_size('{table_name}')")
+                    )
+                    size = result_size.scalar() or 0
+                else:
+                    size = 0
+
+                table_info.append(
+                    {
+                        "name": table_name,
+                        "rows": count,
+                        "size": size,
+                        "has_data": count > 0,
+                    }
+                )
+            except Exception as e:
+                logger.warning(f"Error getting info for {table_name}: {e}")
+                table_info.append(
+                    {"name": table_name, "rows": 0, "size": 0, "has_data": False}
+                )
+
+        return jsonify({"status": "success", "tables": table_info})
 
     except Exception as e:
         logger.exception("Error getting database tables")
@@ -439,13 +476,16 @@ def get_tables():
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
+    finally:
+        if session:
+            session.close()
 
 
 @admin_bp.route("/clean-data")
 @admin_required
 def clean_data():
     """View for cleaning database tables."""
-    return render_template('admin/clean_data.html')
+    return render_template("admin/clean_data.html")
 
 
 @admin_bp.route("/api/delete-table-data", methods=["POST"])
@@ -454,41 +494,39 @@ def delete_table_data():
     """API endpoint to delete all data from a table."""
     try:
         data = request.get_json()
-        table_name = data.get('table_name')
+        table_name = data.get("table_name")
 
         if not table_name:
-            return jsonify({
-                "status": "error",
-                "message": "Nombre de tabla no proporcionado"
-            }), 400
+            return jsonify(
+                {"status": "error", "message": "Nombre de tabla no proporcionado"}
+            ), 400
 
         # Validate table name to prevent SQL injection
         import re
-        if not re.match(r'^[a-zA-Z0-9_]+$', table_name):
-            return jsonify({
-                "status": "error",
-                "message": "Nombre de tabla inválido"
-            }), 400
+
+        if not re.match(r"^[a-zA-Z0-9_]+$", table_name):
+            return jsonify(
+                {"status": "error", "message": "Nombre de tabla inválido"}
+            ), 400
 
         engine = get_engine()
         inspector = inspect(engine)
 
         # Verify table exists
         if table_name not in inspector.get_table_names():
-            return jsonify({
-                "status": "error",
-                "message": "La tabla no existe"
-            }), 404
+            return jsonify({"status": "error", "message": "La tabla no existe"}), 404
 
         # Delete all data from table
         with engine.connect() as conn:
             conn.execute(text(f"DELETE FROM {table_name}"))
             conn.commit()
 
-        return jsonify({
-            "status": "success",
-            "message": f"Datos de la tabla '{table_name}' eliminados correctamente"
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": f"Datos de la tabla '{table_name}' eliminados correctamente",
+            }
+        )
 
     except Exception as e:
         logger.exception("Error deleting data from table")
@@ -501,4 +539,3 @@ def delete_table_data():
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
-

@@ -88,6 +88,14 @@
         return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     }
 
+    function formatSize(bytes) {
+        if (bytes === 0 || bytes === null || bytes === undefined) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
     // Load tables on page load
     document.addEventListener('DOMContentLoaded', function() {
         loadTables();
@@ -123,7 +131,7 @@
         tablesData.forEach(table => {
             const option = document.createElement('option');
             option.value = table.name;
-            option.textContent = `${table.name} (${table.rows.toLocaleString()} registros)`;
+            option.textContent = `${table.name} (${table.rows.toLocaleString()} registros, ${formatSize(table.size)})`;
             select.appendChild(option);
         });
     }
@@ -139,15 +147,15 @@
         if (selectedTable) {
             const table = tablesData.find(t => t.name === selectedTable);
             if (table) {
-                tableDetails.textContent = `Tabla: ${table.name} | Registros: ${table.rows.toLocaleString()}`;
+                tableDetails.textContent = `Tabla: ${table.name} | Registros: ${table.rows.toLocaleString()} | Tamaño: ${formatSize(table.size)}`;
                 tableInfo.classList.remove('hidden');
                 
                 if (table.has_data) {
                     actionButtons.classList.remove('hidden');
-                    cleanButton.onclick = () => confirmDeleteTable(table.name, table.rows);
+                    cleanButton.onclick = () => confirmDeleteTable(table.name, table.rows, table.size);
                 } else {
                     actionButtons.classList.add('hidden');
-                    tableDetails.textContent += ' | Esta tabla está vacía';
+                    tableDetails.textContent += ` | Tamaño: ${formatSize(table.size)} | Esta tabla está vacía`;
                 }
             }
         } else {
@@ -155,8 +163,8 @@
         }
     });
 
-    function confirmDeleteTable(tableName, rowCount) {
-        const message = `¿Está seguro de que desea eliminar TODOS los datos de la tabla "${tableName}"?\n\nSe eliminarán ${rowCount.toLocaleString()} registros.\n\nEsta acción NO se puede deshacer.`;
+    function confirmDeleteTable(tableName, rowCount, size) {
+        const message = `¿Está seguro de que desea eliminar TODOS los datos de la tabla "${tableName}"?\n\nSe eliminarán ${rowCount.toLocaleString()} registros.\nTamaño aproximado: ${formatSize(size)}\n\nEsta acción NO se puede deshacer.`;
         
         showCustomConfirm(message, async () => {
             await deleteTableData(tableName);
