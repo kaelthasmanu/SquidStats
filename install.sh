@@ -48,7 +48,7 @@ function installDependencies() {
 }
 #  pthon3-pymysql delete from packages
 function checkPackages() {
-    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "libicapapi-dev" "python3-dev" "libpq-dev")
+    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "python3-dev" "libpq-dev") # C-ICAP Implementation not using for now libicapapi-dev
     local missing=()
 
     for pkg in "${packages[@]}"; do
@@ -86,7 +86,7 @@ function checkSquidLog() {
 
 function updateOrCloneRepo() {
     local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local destinos=("/opt/SquidStats" "/usr/share/squidstats" "/Users/manuel/Desktop/Projects/codeSquidStats/SquidStats")
+    local destinos=("/opt/SquidStats" "/usr/share/squidstats" "/home/manuel/Desktop/Projects/SquidStats")
     local branch="main"
     local env_exists=false
     local found_dir=""
@@ -176,18 +176,35 @@ function createEnvFile() {
         echo "Creando archivo de configuración .env..."
         cat >"$env_file" <<EOF
 VERSION=2.1
+SECRET_KEY="your-secret-key-here-generate-with-python-secrets"
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
 LOG_FORMAT=DETAILED
 FLASK_DEBUG=True
 DATABASE_TYPE=SQLITE
 SQUID_LOG=/var/log/squid/access.log
+SQUID_CACHE_LOG=/var/log/squid/cache.log
 DATABASE_STRING_CONNECTION=/opt/SquidStats/squidstats.db
 REFRESH_INTERVAL=60
 BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
 HTTP_PROXY=""
+HTTPS_PROXY=
+NO_PROXY=
 SQUID_CONFIG_PATH=/etc/squid/squid.conf
 ACL_FILES_DIR=/etc/squid/config/acls
+LISTEN_HOST=127.0.0.1
+LISTEN_PORT=5000
+FIRST_PASSWORD="admin"
+JWT_EXPIRY_HOURS=24
+MAX_LOGIN_ATTEMPTS=5
+LOCKOUT_DURATION_MINUTES=15
+TELEGRAM_ENABLED=false
+TELEGRAM_API_ID=
+TELEGRAM_API_HASH=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_PHONE=
+TELEGRAM_SESSION_NAME=squidstats_bot
+TELEGRAM_RECIPIENTS=
 EOF
         ok "Archivo .env creado correctamente en $env_file"
         return 0

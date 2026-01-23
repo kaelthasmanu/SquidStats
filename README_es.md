@@ -314,7 +314,6 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    
    # Claves de Seguridad
    SECRET_KEY="your-secret-key-here"  # Generar con: python3 -c 'import secrets; print(secrets.token_hex(32))'
-   JWT_SECRET_KEY="your-jwt-secret-key"  # Generar con: python3 -c 'import secrets; print(secrets.token_hex(32))'
    
    # Configuración de Squid
    SQUID_HOST="127.0.0.1"

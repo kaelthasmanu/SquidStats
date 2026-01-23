@@ -45,11 +45,7 @@ class Config:
     VERSION = os.getenv("VERSION", "2.1")
 
     # Authentication settings
-    JWT_SECRET_KEY = (
-        os.getenv("JWT_SECRET_KEY")
-        or os.getenv("SECRET_KEY")
-        or "change-me-in-production"
-    )
+    JWT_SECRET_KEY = SECRET_KEY
     JWT_EXPIRY_HOURS = int(os.getenv("JWT_EXPIRY_HOURS", 24))
     MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS", 5))
     LOCKOUT_DURATION_MINUTES = int(os.getenv("LOCKOUT_DURATION_MINUTES", 15))
