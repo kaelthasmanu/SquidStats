@@ -1,68 +1,183 @@
 import logging
 import os
+from typing import Any
 
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
-# Configure logging
+# Configure logging first
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
+# Try to load environment variables
+try:
+    load_dotenv()
+    logger.info("Variables de entorno cargadas correctamente desde .env")
+except Exception as e:
+    logger.warning(
+        f"No se pudo cargar el archivo .env: {e}. Usando valores predeterminados."
+    )
+
+
+def safe_get_env(
+    key: str, default: Any = None, var_type: type = str, required: bool = False
+) -> Any:
+    """
+    Obtiene una variable de entorno de forma segura con manejo de errores.
+
+    Args:
+        key: Nombre de la variable de entorno
+        default: Valor por defecto si no existe o hay error
+        var_type: Tipo esperado (str, int, bool, etc.)
+        required: Si es True, logea una advertencia si no existe
+
+    Returns:
+        El valor convertido al tipo correcto o el default
+    """
+    try:
+        value = os.getenv(key)
+
+        if value is None or value.strip() == "":
+            if required:
+                logger.warning(
+                    f"Variable requerida '{key}' no encontrada en .env. "
+                    f"Usando valor por defecto: {default}"
+                )
+            return default
+
+        # Conversión según el tipo
+        if var_type is bool:
+            return value.lower() in ("true", "1", "yes", "si", "sí")
+        elif var_type is int:
+            try:
+                return int(value)
+            except (ValueError, TypeError) as e:
+                logger.error(
+                    f"Error al convertir '{key}' a entero (valor: '{value}'): {e}. "
+                    f"Usando valor por defecto: {default}"
+                )
+                return default
+        elif var_type is float:
+            try:
+                return float(value)
+            except (ValueError, TypeError) as e:
+                logger.error(
+                    f"Error al convertir '{key}' a float (valor: '{value}'): {e}. "
+                    f"Usando valor por defecto: {default}"
+                )
+                return default
+        else:
+            return value.strip()
+
+    except Exception as e:
+        logger.error(
+            f"Error inesperado al obtener variable '{key}': {e}. "
+            f"Usando valor por defecto: {default}"
+        )
+        return default
+
+
+def safe_get_list(key: str, default: list | None = None, separator: str = ",") -> list:
+    """
+    Obtiene una lista desde una variable de entorno separada por comas.
+
+    Args:
+        key: Nombre de la variable de entorno
+        default: Lista por defecto si no existe o hay error
+        separator: Separador de elementos (por defecto coma)
+
+    Returns:
+        Lista de elementos o el default
+    """
+    if default is None:
+        default = []
+
+    try:
+        value = os.getenv(key, "").strip()
+        if not value:
+            return default
+
+        result = [item.strip() for item in value.split(separator) if item.strip()]
+        return result if result else default
+
+    except Exception as e:
+        logger.error(
+            f"Error al procesar lista desde '{key}': {e}. "
+            f"Usando valor por defecto: {default}"
+        )
+        return default
+
 
 class Config:
+    """Configuración de la aplicación con manejo robusto de errores."""
+
+    # API Scheduler
     SCHEDULER_API_ENABLED = True
-    SECRET_KEY = os.getenv("SECRET_KEY") or os.urandom(24).hex()
+
+    # Security settings
+    SECRET_KEY = safe_get_env("SECRET_KEY", os.urandom(24).hex())
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None  # CSRF tokens don't expire
 
     # Database settings
-    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///squidstats.db")
-    DATABASE_TYPE = os.getenv("DATABASE_TYPE", "SQLITE").upper()
-    DATABASE_STRING_CONNECTION = os.getenv(
+    DATABASE_URL = safe_get_env("DATABASE_URL", "sqlite:///squidstats.db")
+    DATABASE_TYPE = safe_get_env("DATABASE_TYPE", "SQLITE").upper()
+    DATABASE_STRING_CONNECTION = safe_get_env(
         "DATABASE_STRING_CONNECTION", "/opt/SquidStats/"
     )
 
     # Squid settings
-    SQUID_LOG = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
-    SQUID_CACHE_LOG = os.getenv("SQUID_CACHE_LOG", "/var/log/squid/cache.log")
-    SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
-    SQUID_PORT = int(os.getenv("SQUID_PORT") or 3128)
-    BLACKLIST_DOMAINS = os.getenv("BLACKLIST_DOMAINS", "")
+    SQUID_LOG = safe_get_env("SQUID_LOG", "/var/log/squid/access.log")
+    SQUID_CACHE_LOG = safe_get_env("SQUID_CACHE_LOG", "/var/log/squid/cache.log")
+    SQUID_HOST = safe_get_env("SQUID_HOST", "127.0.0.1")
+    SQUID_PORT = safe_get_env("SQUID_PORT", 3128, var_type=int)
+    BLACKLIST_DOMAINS = safe_get_env("BLACKLIST_DOMAINS", "")
 
     # Flask settings
-    DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    LISTEN_HOST = os.getenv("LISTEN_HOST") or os.getenv("FLASK_HOST") or "0.0.0.0"
-    LISTEN_PORT = int(os.getenv("LISTEN_PORT") or os.getenv("FLASK_PORT") or 5000)
+    DEBUG = safe_get_env("FLASK_DEBUG", False, var_type=bool)
+    LISTEN_HOST = safe_get_env("LISTEN_HOST") or safe_get_env("FLASK_HOST") or "0.0.0.0"
+    LISTEN_PORT = safe_get_env(
+        "LISTEN_PORT", safe_get_env("FLASK_PORT", 5000, var_type=int), var_type=int
+    )
 
     # Log parsing mode: 'DETAILED' (current behavior) or 'DEFAULT' (classic Squid format)
-    LOG_FORMAT = os.getenv("LOG_FORMAT", "DETAILED").upper()
+    LOG_FORMAT = safe_get_env("LOG_FORMAT", "DETAILED").upper()
 
     # Application version
-    VERSION = os.getenv("VERSION", "2.1")
+    VERSION = safe_get_env("VERSION", "2.1")
 
     # Authentication settings
     JWT_SECRET_KEY = SECRET_KEY
-    JWT_EXPIRY_HOURS = int(os.getenv("JWT_EXPIRY_HOURS") or 24)
-    MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS") or 5)
-    LOCKOUT_DURATION_MINUTES = int(os.getenv("LOCKOUT_DURATION_MINUTES") or 15)
-    FIRST_PASSWORD = os.getenv("FIRST_PASSWORD", "").strip()
+    JWT_EXPIRY_HOURS = safe_get_env("JWT_EXPIRY_HOURS", 24, var_type=int)
+    MAX_LOGIN_ATTEMPTS = safe_get_env("MAX_LOGIN_ATTEMPTS", 5, var_type=int)
+    LOCKOUT_DURATION_MINUTES = safe_get_env(
+        "LOCKOUT_DURATION_MINUTES", 15, var_type=int
+    )
+    FIRST_PASSWORD = safe_get_env("FIRST_PASSWORD", "")
 
     # Telegram Notifications
-    TELEGRAM_ENABLED = os.getenv("TELEGRAM_ENABLED", "false").lower() == "true"
-    TELEGRAM_API_ID = os.getenv("TELEGRAM_API_ID")
-    TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
-    TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-    TELEGRAM_SESSION_NAME = os.getenv("TELEGRAM_SESSION_NAME", "squidstats_bot")
-    TELEGRAM_PHONE = os.getenv("TELEGRAM_PHONE")
-    TELEGRAM_RECIPIENTS = os.getenv("TELEGRAM_RECIPIENTS", "").split(
-        ","
-    )  # Comma-separated list
+    TELEGRAM_ENABLED = safe_get_env("TELEGRAM_ENABLED", False, var_type=bool)
+    TELEGRAM_API_ID = safe_get_env("TELEGRAM_API_ID", None)
+    TELEGRAM_API_HASH = safe_get_env("TELEGRAM_API_HASH", None)
+    TELEGRAM_BOT_TOKEN = safe_get_env("TELEGRAM_BOT_TOKEN", None)
+    TELEGRAM_SESSION_NAME = safe_get_env("TELEGRAM_SESSION_NAME", "squidstats_bot")
+    TELEGRAM_PHONE = safe_get_env("TELEGRAM_PHONE", None)
+    TELEGRAM_RECIPIENTS = safe_get_list("TELEGRAM_RECIPIENTS", [])
 
     # Proxy settings
-    HTTP_PROXY = os.getenv("HTTP_PROXY", "").strip()
-    HTTPS_PROXY = os.getenv("HTTPS_PROXY", "").strip()
-    NO_PROXY = os.getenv("NO_PROXY", "").strip()
+    HTTP_PROXY = safe_get_env("HTTP_PROXY", "")
+    HTTPS_PROXY = safe_get_env("HTTPS_PROXY", "")
+    NO_PROXY = safe_get_env("NO_PROXY", "")
+
+    # Log configuration status
+    logger.info("=" * 60)
+    logger.info("Configuración de SquidStats cargada:")
+    logger.info(f"  - Versión: {VERSION}")
+    logger.info(f"  - Debug: {DEBUG}")
+    logger.info(f"  - Host: {LISTEN_HOST}:{LISTEN_PORT}")
+    logger.info(f"  - Base de datos: {DATABASE_TYPE}")
+    logger.info(f"  - Squid Host: {SQUID_HOST}:{SQUID_PORT}")
+    logger.info(f"  - Formato de logs: {LOG_FORMAT}")
+    logger.info(f"  - Telegram habilitado: {TELEGRAM_ENABLED}")
+    logger.info("=" * 60)
