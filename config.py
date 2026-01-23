@@ -30,7 +30,7 @@ class Config:
     SQUID_LOG = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
     SQUID_CACHE_LOG = os.getenv("SQUID_CACHE_LOG", "/var/log/squid/cache.log")
     SQUID_HOST = os.getenv("SQUID_HOST", "127.0.0.1")
-    SQUID_PORT = int(os.getenv("SQUID_PORT", 3128))
+    SQUID_PORT = int(os.getenv("SQUID_PORT") or 3128)
     BLACKLIST_DOMAINS = os.getenv("BLACKLIST_DOMAINS", "")
 
     # Flask settings
@@ -46,9 +46,9 @@ class Config:
 
     # Authentication settings
     JWT_SECRET_KEY = SECRET_KEY
-    JWT_EXPIRY_HOURS = int(os.getenv("JWT_EXPIRY_HOURS", 24))
-    MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS", 5))
-    LOCKOUT_DURATION_MINUTES = int(os.getenv("LOCKOUT_DURATION_MINUTES", 15))
+    JWT_EXPIRY_HOURS = int(os.getenv("JWT_EXPIRY_HOURS") or 24)
+    MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS") or 5)
+    LOCKOUT_DURATION_MINUTES = int(os.getenv("LOCKOUT_DURATION_MINUTES") or 15)
     FIRST_PASSWORD = os.getenv("FIRST_PASSWORD", "").strip()
 
     # Telegram Notifications
