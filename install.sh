@@ -134,7 +134,7 @@ function updateOrCloneRepo() {
 }
 
 function updateEnvVersion() {
-    local CURRENT_VERSION="2.1"  # Variable de versión actual del script
+    local CURRENT_VERSION="2.2"  # Variable de versión actual del script
     local env_file="/opt/SquidStats/.env"
     
     if [ ! -f "$env_file" ]; then
