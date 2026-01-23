@@ -169,15 +169,3 @@ class Config:
     HTTP_PROXY = safe_get_env("HTTP_PROXY", "")
     HTTPS_PROXY = safe_get_env("HTTPS_PROXY", "")
     NO_PROXY = safe_get_env("NO_PROXY", "")
-
-    # Log configuration status
-    logger.info("=" * 60)
-    logger.info("Configuración de SquidStats cargada:")
-    logger.info(f"  - Versión: {VERSION}")
-    logger.info(f"  - Debug: {DEBUG}")
-    logger.info(f"  - Host: {LISTEN_HOST}:{LISTEN_PORT}")
-    logger.info(f"  - Base de datos: {DATABASE_TYPE}")
-    logger.info(f"  - Squid Host: {SQUID_HOST}:{SQUID_PORT}")
-    logger.info(f"  - Formato de logs: {LOG_FORMAT}")
-    logger.info(f"  - Telegram habilitado: {TELEGRAM_ENABLED}")
-    logger.info("=" * 60)
