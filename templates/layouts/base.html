@@ -9,9 +9,9 @@
     <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon"/>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
-    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}"/>
-    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/>
-    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}"/> <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/> <!-- Font Awesome -->
+    <!-- Logs CSS Custom-->
     <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}"/>
     <!-- Toastr CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}"/>
@@ -66,7 +66,7 @@
     <!-- Flowbite scripts (UI components) -->
     <script src="{{ url_for('static', filename='src/flowbite.min.js') }}"></script>
     <!-- jQuery (requerido por toastr) -->
-    <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-4.0.0.min.js') }}"></script>
     <!-- Toastr JS -->
     <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
     <!-- Configuración global de Toastr -->
