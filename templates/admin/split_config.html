@@ -1,0 +1,233 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dividir Configuración Squid{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 mb-6 text-white">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-code-branch text-4xl"></i>
+            <div>
+                <h2 class="text-3xl font-bold">Dividir Configuración Squid</h2>
+                <p class="text-blue-100 mt-1">Modulariza tu archivo squid.conf para una gestión más sencilla</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-file-code text-blue-600 text-2xl"></i>
+                <div>
+                    <p class="text-gray-600 text-sm">Archivo de entrada</p>
+                    <p class="font-semibold text-gray-800 text-sm">{{ input_file }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-folder text-emerald-600 text-2xl"></i>
+                <div>
+                    <p class="text-gray-600 text-sm">Directorio de salida</p>
+                    <p class="font-semibold text-gray-800 text-sm">{{ output_dir }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-layer-group text-amber-600 text-2xl"></i>
+                <div>
+                    <p class="text-gray-600 text-sm">Estado</p>
+                    {% if output_exists %}
+                        <p class="font-semibold text-emerald-600 text-sm">{{ files_count }} archivos generados</p>
+                    {% else %}
+                        <p class="font-semibold text-gray-600 text-sm">No dividido aún</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+            <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+            ¿Qué hace esta funcionalidad?
+        </h3>
+        <p class="text-gray-700 mb-4">
+            Esta herramienta divide tu archivo monolítico <code class="bg-gray-100 px-2 py-1 rounded">squid.conf</code> 
+            en múltiples archivos modulares organizados por categorías. Esto facilita:
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+            <li>Gestión y mantenimiento más sencillo de la configuración</li>
+            <li>Mejor organización de directivas por funcionalidad</li>
+            <li>Facilita la edición desde la interfaz web</li>
+            <li>Reduce errores al editar configuraciones complejas</li>
+        </ul>
+    </div>
+
+    <!-- Files to be generated -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-list text-blue-600 mr-2"></i>
+            Archivos que se generarán
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for filename, description in split_info.items() %}
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-file-alt text-blue-500 mt-1"></i>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800 text-sm">{{ filename }}</p>
+                            <p class="text-gray-600 text-xs mt-1">{{ description }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-cogs text-blue-600 mr-2"></i>
+            Acciones
+        </h3>
+        
+        <div class="space-y-4">
+            <!-- Strict mode toggle -->
+            <div class="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                <input type="checkbox" id="strictMode" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                <div class="flex-1">
+                    <label for="strictMode" class="font-medium text-gray-800 cursor-pointer">Modo estricto</label>
+                    <p class="text-sm text-gray-600">Abortar si se encuentran directivas desconocidas</p>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button onclick="executeSplit()" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
+                    <i class="fas fa-code-branch mr-2"></i>
+                    Dividir Configuración
+                </button>
+                
+                {% if output_exists %}
+                <a href="{{ url_for('admin.view_config') }}" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center text-center">
+                    <i class="fas fa-folder-open mr-2"></i>
+                    Ver Archivos Generados
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Warning -->
+        <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-amber-600 text-xl mt-1"></i>
+            <div class="flex-1">
+                <p class="font-semibold text-amber-800">Advertencia</p>
+                <p class="text-sm text-amber-700 mt-1">
+                    Esta operación creará múltiples archivos en el directorio <code class="bg-amber-100 px-2 py-0.5 rounded">{{ output_dir }}</code>. 
+                    Si ya existen archivos en ese directorio, serán sobrescritos.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results area (hidden by default) -->
+    <div id="resultsArea" class="hidden mt-6 bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-check-circle text-emerald-600 mr-2"></i>
+            Resultados
+        </h3>
+        <div id="resultsContent" class="space-y-3"></div>
+    </div>
+</div>
+
+<!-- Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- jQuery (required for Toastr) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+    // Configure toastr
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: "5000",
+    };
+
+    // Get CSRF token
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+
+    async function executeSplit() {
+        const strictMode = document.getElementById('strictMode').checked;
+        const resultsArea = document.getElementById('resultsArea');
+        const resultsContent = document.getElementById('resultsContent');
+
+        try {
+            // Show loading toast
+            toastr.info('Dividiendo configuración...', 'Procesando');
+
+            const response = await fetch('/admin/api/split-config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({ strict: strictMode })
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                toastr.success(data.message, 'Éxito');
+
+                // Show results
+                resultsArea.classList.remove('hidden');
+                resultsContent.innerHTML = `
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                        <p class="font-semibold text-emerald-800 mb-2">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Configuración dividida exitosamente
+                        </p>
+                        <p class="text-sm text-emerald-700">
+                            Se generaron <strong>${data.data.total_files}</strong> archivos en 
+                            <code class="bg-emerald-100 px-2 py-0.5 rounded">${data.data.output_dir}</code>
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <p class="font-semibold text-gray-800 mb-2">Archivos generados:</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            ${Object.entries(data.data.files).map(([filename, lines]) => `
+                                <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded">
+                                    <span class="text-sm text-gray-700">${filename}</span>
+                                    <span class="text-xs text-gray-500">${lines} líneas</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                // Reload page after 3 seconds to update the stats
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else {
+                toastr.error(data.message || 'Error al dividir la configuración', 'Error');
+                resultsArea.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            toastr.error('Error de conexión al dividir la configuración', 'Error');
+            resultsArea.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}
