@@ -75,14 +75,23 @@
                     <a href="{{ url_for('admin.clean_data') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-database mr-3"></i>Limpiar Datos
                     </a>
-                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-shield-alt mr-3"></i>ACLs
+                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <span class="flex items-center">
+                            <i class="fas fa-shield-alt mr-3"></i>ACLs
+                        </span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
                     </a>
-                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-clock mr-3"></i>Delay Pools
+                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-3"></i>Delay Pools
+                        </span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
                     </a>
-                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-key mr-3"></i>HTTP Access
+                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <span class="flex items-center">
+                            <i class="fas fa-key mr-3"></i>HTTP Access
+                        </span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
                     </a>
                     <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-file-alt mr-3"></i>Logs
