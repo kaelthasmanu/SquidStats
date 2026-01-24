@@ -250,7 +250,8 @@ def edit_acl():
 
         if 0 <= acl_index < len(acls):
             target_acl = acls[acl_index]
-            target_line = target_acl['line_number']
+            # line_number from parser is 1-based, convert to 0-based index
+            target_line = target_acl['line_number'] - 1
             
             # Build new ACL line
             acl_parts = ["acl", new_name]
@@ -266,12 +267,16 @@ def edit_acl():
                 if acl_content is not None:
                     lines = acl_content.split("\n")
                     
-                    # Replace the ACL line
+                    # Replace the ACL line (line_number is 1-based, list index is 0-based)
                     if 0 <= target_line < len(lines):
+                        # Check if there's a comment before this ACL
+                        has_comment = target_line > 0 and lines[target_line - 1].strip().startswith("#")
+                        
+                        # Replace the ACL line
                         lines[target_line] = new_acl_line
                         
-                        # Handle comment: check if previous line is a comment
-                        if target_line > 0 and lines[target_line - 1].strip().startswith("#"):
+                        # Handle comment
+                        if has_comment:
                             if comment:
                                 # Update existing comment
                                 lines[target_line - 1] = f"# {comment}"
@@ -280,7 +285,7 @@ def edit_acl():
                                 lines.pop(target_line - 1)
                         else:
                             if comment:
-                                # Insert new comment
+                                # Insert new comment before the ACL
                                 lines.insert(target_line, f"# {comment}")
                         
                         new_content = "\n".join(lines)
@@ -332,7 +337,8 @@ def delete_acl():
 
         if 0 <= acl_index < len(acls):
             acl_to_delete = acls[acl_index]
-            target_line = acl_to_delete['line_number']
+            # line_number from parser is 1-based, convert to 0-based index
+            target_line = acl_to_delete['line_number'] - 1
 
             # Check if using modular configuration
             if config_manager.is_modular:
@@ -340,7 +346,7 @@ def delete_acl():
                 if acl_content is not None:
                     lines = acl_content.split("\n")
                     
-                    # Check if there's a comment before this ACL
+                    # Check if there's a comment before this ACL (line_number is 1-based, we need 0-based)
                     comment_to_remove = None
                     if target_line > 0 and lines[target_line - 1].strip().startswith("#"):
                         comment_to_remove = target_line - 1
@@ -364,7 +370,7 @@ def delete_acl():
             # Fallback to main config
             lines = config_manager.config_content.split("\n")
             
-            # Check if there's a comment before this ACL
+            # Check if there's a comment before this ACL (convert to 0-based index)
             comment_to_remove = None
             if target_line > 0 and lines[target_line - 1].strip().startswith("#"):
                 comment_to_remove = target_line - 1
