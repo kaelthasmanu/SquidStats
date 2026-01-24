@@ -204,6 +204,17 @@ class SquidConfigManager:
             return []
 
     def get_delay_pools(self):
+        """
+        Parse delay pools configuration and group by pool number.
+        Returns a list of pool dictionaries with all related directives.
+        Format:
+        {
+            'pool_number': '1',
+            'class': '3',
+            'parameters': '8192/131072 1024/65536 256/32768',
+            'access_rules': [{'action': 'allow', 'acl': 'students'}]
+        }
+        """
         if not self.is_valid:
             logger.error("Cannot get delay pools: invalid environment")
             return []
@@ -223,56 +234,72 @@ class SquidConfigManager:
             config_to_parse = self.config_content
 
         try:
-            delay_pools = []
+            pools_dict = {}  # Dictionary to group by pool number
+            total_pools = 0
             lines = config_to_parse.split("\n")
 
             for line_num, line in enumerate(lines, 1):
                 try:
                     line = line.strip()
+                    
                     if line.startswith("delay_pools "):
                         parts = line.split()
                         if len(parts) >= 2:
-                            delay_pools.append(
-                                {"directive": "delay_pools", "value": parts[1]}
-                            )
+                            total_pools = int(parts[1])
+                            
                     elif line.startswith("delay_class "):
                         parts = line.split()
                         if len(parts) >= 3:
-                            delay_pools.append(
-                                {
-                                    "directive": "delay_class",
-                                    "pool": parts[1],
-                                    "class": parts[2],
+                            pool_num = parts[1]
+                            if pool_num not in pools_dict:
+                                pools_dict[pool_num] = {
+                                    'pool_number': pool_num,
+                                    'class': parts[2],
+                                    'parameters': None,
+                                    'access_rules': []
                                 }
-                            )
+                            else:
+                                pools_dict[pool_num]['class'] = parts[2]
+                                
                     elif line.startswith("delay_parameters "):
                         parts = line.split()
                         if len(parts) >= 3:
-                            delay_pools.append(
-                                {
-                                    "directive": "delay_parameters",
-                                    "pool": parts[1],
-                                    "parameters": " ".join(parts[2:]),
+                            pool_num = parts[1]
+                            if pool_num not in pools_dict:
+                                pools_dict[pool_num] = {
+                                    'pool_number': pool_num,
+                                    'class': None,
+                                    'parameters': " ".join(parts[2:]),
+                                    'access_rules': []
                                 }
-                            )
+                            else:
+                                pools_dict[pool_num]['parameters'] = " ".join(parts[2:])
+                                
                     elif line.startswith("delay_access "):
                         parts = line.split()
                         if len(parts) >= 4:
-                            delay_pools.append(
-                                {
-                                    "directive": "delay_access",
-                                    "pool": parts[1],
-                                    "action": parts[2],
-                                    "acl": " ".join(parts[3:]),
+                            pool_num = parts[1]
+                            if pool_num not in pools_dict:
+                                pools_dict[pool_num] = {
+                                    'pool_number': pool_num,
+                                    'class': None,
+                                    'parameters': None,
+                                    'access_rules': []
                                 }
-                            )
+                            pools_dict[pool_num]['access_rules'].append({
+                                'action': parts[2],
+                                'acl': " ".join(parts[3:])
+                            })
+                            
                 except Exception as e:
                     logger.warning(
                         f"Error processing delay pool at line {line_num}: {e}"
                     )
                     continue
 
-            logger.debug(f"Found {len(delay_pools)} delay pool configurations")
+            # Convert dictionary to sorted list
+            delay_pools = [pools_dict[key] for key in sorted(pools_dict.keys(), key=int)]
+            logger.debug(f"Found {len(delay_pools)} delay pool configurations (total_pools={total_pools})")
             return delay_pools
 
         except Exception as e:

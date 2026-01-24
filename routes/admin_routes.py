@@ -446,54 +446,52 @@ def edit_http_access():
 @admin_bp.route("/delay-pools/delete", methods=["POST"])
 @admin_required
 def delete_delay_pool():
-    index = request.form.get("index")
+    """Delete all directives related to a specific delay pool"""
+    pool_number = request.form.get("pool_number")
     
     try:
-        directive_index = int(index)
-        
         # Check if using modular configuration
         if config_manager.is_modular:
             delay_content = config_manager.read_modular_config("110_delay_pools.conf")
             if delay_content is not None:
                 lines = delay_content.split("\n")
                 new_lines = []
-                directive_count = 0
                 
+                # Remove all lines related to this pool number
                 for line in lines:
-                    if line.strip().startswith("delay_") and not line.strip().startswith("#"):
-                        if directive_count == directive_index:
-                            # Skip this line (delete it)
-                            directive_count += 1
-                            continue
-                        directive_count += 1
+                    stripped = line.strip()
+                    # Skip delay_class, delay_parameters, and delay_access for this pool
+                    if (stripped.startswith(f"delay_class {pool_number} ") or
+                        stripped.startswith(f"delay_parameters {pool_number} ") or
+                        stripped.startswith(f"delay_access {pool_number} ")):
+                        continue
                     new_lines.append(line)
                 
                 new_content = "\n".join(new_lines)
                 if config_manager.save_modular_config("110_delay_pools.conf", new_content):
-                    flash("Directiva de delay pool eliminada exitosamente", "success")
+                    flash(f"Delay Pool #{pool_number} eliminado exitosamente", "success")
                 else:
-                    flash("Error al eliminar la directiva", "error")
+                    flash("Error al eliminar el delay pool", "error")
                 return redirect(url_for("admin.manage_delay_pools"))
         
         # Fallback to main config
         lines = config_manager.config_content.split("\n")
         new_lines = []
-        directive_count = 0
         
         for line in lines:
-            if line.strip().startswith("delay_") and not line.strip().startswith("#"):
-                if directive_count == directive_index:
-                    directive_count += 1
-                    continue
-                directive_count += 1
+            stripped = line.strip()
+            if (stripped.startswith(f"delay_class {pool_number} ") or
+                stripped.startswith(f"delay_parameters {pool_number} ") or
+                stripped.startswith(f"delay_access {pool_number} ")):
+                continue
             new_lines.append(line)
         
         new_content = "\n".join(new_lines)
         config_manager.save_config(new_content)
-        flash("Directiva de delay pool eliminada exitosamente", "success")
+        flash(f"Delay Pool #{pool_number} eliminado exitosamente", "success")
         
-    except (ValueError, IndexError) as e:
-        flash(f"Error al eliminar la directiva: {str(e)}", "error")
+    except Exception as e:
+        flash(f"Error al eliminar el delay pool: {str(e)}", "error")
     
     return redirect(url_for("admin.manage_delay_pools"))
 
@@ -501,50 +499,139 @@ def delete_delay_pool():
 @admin_bp.route("/delay-pools/edit", methods=["POST"])
 @admin_required
 def edit_delay_pool():
-    index = request.form.get("index")
-    directive_line = request.form.get("directive_line")
+    """Edit all directives related to a specific delay pool"""
+    pool_number = request.form.get("pool_number")
+    pool_class = request.form.get("pool_class")
+    parameters = request.form.get("parameters")
+    access_actions = request.form.getlist("access_action[]")
+    access_acls = request.form.getlist("access_acl[]")
     
     try:
-        directive_index = int(index)
+        # Build new directives
+        new_directives = []
+        new_directives.append(f"delay_class {pool_number} {pool_class}")
+        new_directives.append(f"delay_parameters {pool_number} {parameters}")
+        
+        # Add access rules
+        for action, acl in zip(access_actions, access_acls):
+            if acl.strip():
+                new_directives.append(f"delay_access {pool_number} {action} {acl}")
         
         # Check if using modular configuration
         if config_manager.is_modular:
             delay_content = config_manager.read_modular_config("110_delay_pools.conf")
             if delay_content is not None:
                 lines = delay_content.split("\n")
-                directive_count = 0
+                new_lines = []
+                pool_found = False
+                insert_index = -1
                 
+                # Remove old directives and find insertion point
                 for i, line in enumerate(lines):
-                    if line.strip().startswith("delay_") and not line.strip().startswith("#"):
-                        if directive_count == directive_index:
-                            lines[i] = directive_line
-                            break
-                        directive_count += 1
+                    stripped = line.strip()
+                    if (stripped.startswith(f"delay_class {pool_number} ") or
+                        stripped.startswith(f"delay_parameters {pool_number} ") or
+                        stripped.startswith(f"delay_access {pool_number} ")):
+                        if not pool_found:
+                            insert_index = len(new_lines)
+                            pool_found = True
+                        continue
+                    new_lines.append(line)
                 
-                new_content = "\n".join(lines)
-                if config_manager.save_modular_config("110_delay_pools.conf", new_content):
-                    flash("Directiva de delay pool actualizada exitosamente", "success")
+                # Insert new directives at the same location
+                if insert_index >= 0:
+                    for directive in reversed(new_directives):
+                        new_lines.insert(insert_index, directive)
                 else:
-                    flash("Error al actualizar la directiva", "error")
+                    # If not found, append at the end
+                    new_lines.extend(new_directives)
+                
+                new_content = "\n".join(new_lines)
+                if config_manager.save_modular_config("110_delay_pools.conf", new_content):
+                    flash(f"Delay Pool #{pool_number} actualizado exitosamente", "success")
+                else:
+                    flash("Error al actualizar el delay pool", "error")
                 return redirect(url_for("admin.manage_delay_pools"))
         
         # Fallback to main config
         lines = config_manager.config_content.split("\n")
-        directive_count = 0
+        new_lines = []
+        pool_found = False
+        insert_index = -1
         
         for i, line in enumerate(lines):
-            if line.strip().startswith("delay_") and not line.strip().startswith("#"):
-                if directive_count == directive_index:
-                    lines[i] = directive_line
-                    break
-                directive_count += 1
+            stripped = line.strip()
+            if (stripped.startswith(f"delay_class {pool_number} ") or
+                stripped.startswith(f"delay_parameters {pool_number} ") or
+                stripped.startswith(f"delay_access {pool_number} ")):
+                if not pool_found:
+                    insert_index = len(new_lines)
+                    pool_found = True
+                continue
+            new_lines.append(line)
+        
+        if insert_index >= 0:
+            for directive in reversed(new_directives):
+                new_lines.insert(insert_index, directive)
+        else:
+            new_lines.extend(new_directives)
+        
+        new_content = "\n".join(new_lines)
+        config_manager.save_config(new_content)
+        flash(f"Delay Pool #{pool_number} actualizado exitosamente", "success")
+        
+    except Exception as e:
+        flash(f"Error al actualizar el delay pool: {str(e)}", "error")
+    
+    return redirect(url_for("admin.manage_delay_pools"))
+
+
+@admin_bp.route("/delay-pools/add", methods=["POST"])
+@admin_required
+def add_delay_pool():
+    """Add a new delay pool with all its directives"""
+    pool_number = request.form.get("pool_number")
+    pool_class = request.form.get("pool_class")
+    parameters = request.form.get("parameters")
+    access_actions = request.form.getlist("access_action[]")
+    access_acls = request.form.getlist("access_acl[]")
+    
+    try:
+        # Build new directives
+        new_directives = []
+        new_directives.append(f"delay_class {pool_number} {pool_class}")
+        new_directives.append(f"delay_parameters {pool_number} {parameters}")
+        
+        # Add access rules
+        for action, acl in zip(access_actions, access_acls):
+            if acl.strip():
+                new_directives.append(f"delay_access {pool_number} {action} {acl}")
+        
+        # Check if using modular configuration
+        if config_manager.is_modular:
+            delay_content = config_manager.read_modular_config("110_delay_pools.conf")
+            if delay_content is not None:
+                # Append new directives at the end
+                lines = delay_content.split("\n")
+                lines.extend(new_directives)
+                
+                new_content = "\n".join(lines)
+                if config_manager.save_modular_config("110_delay_pools.conf", new_content):
+                    flash(f"Delay Pool #{pool_number} creado exitosamente", "success")
+                else:
+                    flash("Error al crear el delay pool", "error")
+                return redirect(url_for("admin.manage_delay_pools"))
+        
+        # Fallback to main config
+        lines = config_manager.config_content.split("\n")
+        lines.extend(new_directives)
         
         new_content = "\n".join(lines)
         config_manager.save_config(new_content)
-        flash("Directiva de delay pool actualizada exitosamente", "success")
+        flash(f"Delay Pool #{pool_number} creado exitosamente", "success")
         
-    except (ValueError, IndexError) as e:
-        flash(f"Error al actualizar la directiva: {str(e)}", "error")
+    except Exception as e:
+        flash(f"Error al crear el delay pool: {str(e)}", "error")
     
     return redirect(url_for("admin.manage_delay_pools"))
 

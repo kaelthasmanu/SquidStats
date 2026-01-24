@@ -9,66 +9,282 @@
         </button>
     </div>
     
+    {% if delay_pools %}
     <div class="space-y-4 sm:space-y-6">
         {% for pool in delay_pools %}
-        <div class="border border-gray-200 rounded-lg p-4 sm:p-6">
+        <div class="border border-gray-200 rounded-lg p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50">
             <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">{{ pool.directive }}</h3>
+                <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                        <h3 class="text-xl font-bold text-gray-800">Pool #{{ pool.pool_number }}</h3>
+                        <span class="ml-3 bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                            Clase {{ pool.class }}
+                        </span>
+                    </div>
                     <p class="text-sm text-gray-600">
-                        {% if pool.pool %}Pool: {{ pool.pool }}{% endif %}
-                        {% if pool.class %}| Clase: {{ pool.class }}{% endif %}
-                        {% if pool.value %}| Valor: {{ pool.value }}{% endif %}
+                        {% if pool.class == '1' %}
+                            <i class="fas fa-stream mr-1"></i> Bucket único agregado para todos los clientes
+                        {% elif pool.class == '2' %}
+                            <i class="fas fa-network-wired mr-1"></i> Bucket agregado + 255 buckets por host (red /24)
+                        {% elif pool.class == '3' %}
+                            <i class="fas fa-sitemap mr-1"></i> Buckets por subred + buckets por host (red /16)
+                        {% elif pool.class == '4' %}
+                            <i class="fas fa-users mr-1"></i> Como clase 3 + buckets por usuario autenticado
+                        {% elif pool.class == '5' %}
+                            <i class="fas fa-tags mr-1"></i> Buckets basados en tags de external_acl_type
+                        {% endif %}
                     </p>
                 </div>
                 <div class="flex space-x-2">
-                    <button onclick="editPool({{ loop.index0 }}, '{{ pool.directive }}')" class="text-blue-600 hover:text-blue-900" title="Editar">
-                        <i class="fas fa-edit"></i>
+                    <button onclick='editPool({{ pool.pool_number }}, "{{ pool.class }}", "{{ pool.parameters }}", {{ pool.access_rules|tojson }})' 
+                            class="text-blue-600 hover:text-blue-900 p-2" title="Editar">
+                        <i class="fas fa-edit text-lg"></i>
                     </button>
-                    <button onclick="deletePool({{ loop.index0 }}, '{{ pool.directive }}')" class="text-red-600 hover:text-red-900" title="Eliminar">
-                        <i class="fas fa-trash"></i>
+                    <button onclick="deletePool('{{ pool.pool_number }}')" 
+                            class="text-red-600 hover:text-red-900 p-2" title="Eliminar">
+                        <i class="fas fa-trash text-lg"></i>
                     </button>
                 </div>
             </div>
             
             {% if pool.parameters %}
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <h4 class="font-medium text-gray-800 mb-2">Parámetros:</h4>
-                <code class="text-sm text-gray-700">{{ pool.parameters }}</code>
+            <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+                <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                    <i class="fas fa-tachometer-alt mr-2 text-blue-600"></i> Parámetros de Velocidad:
+                </h4>
+                <div class="font-mono text-sm text-gray-700 bg-white p-3 rounded border border-gray-300">
+                    {{ pool.parameters }}
+                </div>
+                <div class="mt-2 text-xs text-gray-600">
+                    {% set params = pool.parameters.split() %}
+                    {% if pool.class == '1' %}
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Agregado: {{ params[0] if params|length > 0 }}</span>
+                    {% elif pool.class == '2' %}
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Agregado: {{ params[0] if params|length > 0 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Individual (por host): {{ params[1] if params|length > 1 }}</span>
+                    {% elif pool.class in ['3', '4'] %}
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Agregado: {{ params[0] if params|length > 0 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Red: {{ params[1] if params|length > 1 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Individual (por host): {{ params[2] if params|length > 2 }}</span>
+                    {% endif %}
+                    <p class="mt-1 italic">Formato: restore/max (bytes por segundo)</p>
+                </div>
             </div>
             {% endif %}
             
-            {% if pool.action %}
-            <div class="bg-gray-50 rounded-lg p-4">
-                <h4 class="font-medium text-gray-800 mb-2">Acción:</h4>
-                <code class="text-sm text-gray-700">{{ pool.action }} - {{ pool.acl }}</code>
+            {% if pool.access_rules %}
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                    <i class="fas fa-shield-alt mr-2 text-blue-600"></i> Reglas de Acceso:
+                </h4>
+                <div class="space-y-2">
+                    {% for rule in pool.access_rules %}
+                    <div class="flex items-center bg-white p-2 rounded border border-gray-200">
+                        {% if rule.action == 'allow' %}
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded mr-2">ALLOW</span>
+                        {% else %}
+                            <span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded mr-2">DENY</span>
+                        {% endif %}
+                        <span class="text-sm text-gray-700 font-mono">{{ rule.acl }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="text-center py-12">
+        <i class="fas fa-clock text-6xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 text-lg">No hay delay pools configurados</p>
+        <button onclick="showAddModal()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-colors">
+            <i class="fas fa-plus mr-2"></i>Crear primer Pool
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-plus-circle text-blue-600 mr-2"></i>Agregar Nuevo Delay Pool
+        </h3>
+        <form id="addForm" method="POST" action="/admin/delay-pools/add">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Número de Pool:</label>
+                <input type="number" name="pool_number" id="addPoolNumber" min="1" max="255" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                       required placeholder="1">
+                <p class="text-xs text-gray-500 mt-1">Número único del pool (1-255)</p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Clase de Pool:</label>
+                <select name="pool_class" id="addPoolClass" onchange="updateParametersHelp('add')"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    <option value="">Seleccione una clase...</option>
+                    <option value="1">Clase 1 - Bucket único agregado</option>
+                    <option value="2">Clase 2 - Agregado + por host (/24)</option>
+                    <option value="3">Clase 3 - Agregado + red + por host (/16)</option>
+                    <option value="4">Clase 4 - Como clase 3 + por usuario</option>
+                    <option value="5">Clase 5 - Basado en tags</option>
+                </select>
+            </div>
+            
+            <div id="addParametersSection" class="mb-4 hidden">
+                <label class="block text-gray-700 font-semibold mb-2">Parámetros de Velocidad:</label>
+                
+                <!-- Clase 1 -->
+                <div id="addClass1Params" class="hidden space-y-3">
+                    <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700">
+                        <strong>Clase 1:</strong> Un solo bucket agregado para todos los clientes
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Agregado (restore/max en bytes/seg):</label>
+                        <input type="text" id="addAggregateClass1" placeholder="64000/64000" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
+                        <p class="text-xs text-gray-500 mt-1">Ej: 64000/64000 = 512 Kbps</p>
+                    </div>
+                </div>
+                
+                <!-- Clase 2 -->
+                <div id="addClass2Params" class="hidden space-y-3">
+                    <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700">
+                        <strong>Clase 2:</strong> Bucket agregado + 255 buckets individuales por host
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Agregado (restore/max):</label>
+                        <input type="text" id="addAggregateClass2" placeholder="64000/64000" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Individual por host (restore/max):</label>
+                        <input type="text" id="addIndividualClass2" placeholder="16000/64000" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
+                        <p class="text-xs text-gray-500 mt-1">Usa -1/-1 para deshabilitar este bucket</p>
+                    </div>
+                </div>
+                
+                <!-- Clase 3/4 -->
+                <div id="addClass3Params" class="hidden space-y-3">
+                    <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700">
+                        <strong id="addClass3Title">Clase 3:</strong> <span id="addClass3Desc">Buckets por subred + por host</span>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Agregado (restore/max):</label>
+                        <input type="text" id="addAggregateClass3" placeholder="64000/64000" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Por red (restore/max):</label>
+                        <input type="text" id="addNetworkClass3" placeholder="8000/64000" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
+                        <p class="text-xs text-gray-500 mt-1">Usa -1/-1 para deshabilitar</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Individual por host (restore/max):</label>
+                        <input type="text" id="addIndividualClass3" placeholder="2000/16000" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
+                    </div>
+                </div>
+                
+                <!-- Clase 5 -->
+                <div id="addClass5Params" class="hidden space-y-3">
+                    <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700">
+                        <strong>Clase 5:</strong> Basado en tags de external_acl_type (un bucket por tag)
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Parámetros por tag (restore/max):</label>
+                        <input type="text" id="addTagClass5" placeholder="16000/32000" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Reglas de Acceso (ACLs):</label>
+                <div id="addAccessRules" class="space-y-2">
+                    <!-- Las reglas se agregarán dinámicamente -->
+                </div>
+                <button type="button" onclick="addAccessRule('add')" 
+                        class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <i class="fas fa-plus-circle mr-1"></i>Agregar regla de acceso
+                </button>
+            </div>
+            
+            <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
+                <button type="button" onclick="closeAddModal()" 
+                        class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors font-medium">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
+                    <i class="fas fa-save mr-2"></i>Crear Pool
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Edit Modal -->
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold text-gray-800 mb-4">Editar Directiva Delay Pool</h3>
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-edit text-blue-600 mr-2"></i>Editar Delay Pool
+        </h3>
         <form id="editForm" method="POST" action="/admin/delay-pools/edit">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="index" id="editIndex">
+            <input type="hidden" name="pool_number" id="editPoolNumber">
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-medium mb-2">Directiva completa:</label>
-                <textarea name="directive" id="editDirective" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" required></textarea>
-                <p class="text-xs text-gray-500 mt-1">Ejemplo: delay_parameters 1 64000/64000 8000/8000</p>
+                <label class="block text-gray-700 font-semibold mb-2">Número de Pool:</label>
+                <input type="text" id="editPoolNumberDisplay" disabled
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
             </div>
             
-            <div class="flex space-x-2 justify-end">
-                <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors">
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Clase de Pool:</label>
+                <select name="pool_class" id="editPoolClass" onchange="updateParametersHelp('edit')"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    <option value="1">Clase 1 - Bucket único agregado</option>
+                    <option value="2">Clase 2 - Agregado + por host (/24)</option>
+                    <option value="3">Clase 3 - Agregado + red + por host (/16)</option>
+                    <option value="4">Clase 4 - Como clase 3 + por usuario</option>
+                    <option value="5">Clase 5 - Basado en tags</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Parámetros:</label>
+                <textarea name="parameters" id="editParameters" rows="2" 
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" 
+                          required placeholder="64000/64000 -1/-1 16000/64000"></textarea>
+                <p class="text-xs text-gray-500 mt-1" id="editParametersHelp">Formato: restore/max (bytes/seg)</p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Reglas de Acceso:</label>
+                <div id="editAccessRules" class="space-y-2">
+                    <!-- Se llenarán dinámicamente -->
+                </div>
+                <button type="button" onclick="addAccessRule('edit')" 
+                        class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <i class="fas fa-plus-circle mr-1"></i>Agregar regla de acceso
+                </button>
+            </div>
+            
+            <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
+                <button type="button" onclick="closeEditModal()" 
+                        class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors font-medium">
                     Cancelar
                 </button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                    Guardar
+                <button type="submit" 
+                        class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
+                    <i class="fas fa-save mr-2"></i>Guardar Cambios
                 </button>
             </div>
         </form>
@@ -76,13 +292,41 @@
 </div>
 
 <script>
+let addAccessRuleCounter = 0;
+let editAccessRuleCounter = 0;
+
 function showAddModal() {
-    alert('Funcionalidad de agregar delay pool - En desarrollo');
+    document.getElementById('addModal').classList.remove('hidden');
+    document.getElementById('addForm').reset();
+    document.getElementById('addAccessRules').innerHTML = '';
+    document.getElementById('addParametersSection').classList.add('hidden');
+    addAccessRuleCounter = 0;
 }
 
-function editPool(index, directive) {
-    document.getElementById('editIndex').value = index;
-    document.getElementById('editDirective').value = directive;
+function closeAddModal() {
+    document.getElementById('addModal').classList.add('hidden');
+}
+
+function editPool(poolNumber, poolClass, parameters, accessRules) {
+    document.getElementById('editPoolNumber').value = poolNumber;
+    document.getElementById('editPoolNumberDisplay').value = 'Pool #' + poolNumber;
+    document.getElementById('editPoolClass').value = poolClass;
+    document.getElementById('editParameters').value = parameters || '';
+    
+    // Update parameters help text
+    updateParametersHelp('edit');
+    
+    // Fill access rules
+    const rulesContainer = document.getElementById('editAccessRules');
+    rulesContainer.innerHTML = '';
+    editAccessRuleCounter = 0;
+    
+    if (accessRules && accessRules.length > 0) {
+        accessRules.forEach(rule => {
+            addAccessRule('edit', rule.action, rule.acl);
+        });
+    }
+    
     document.getElementById('editModal').classList.remove('hidden');
 }
 
@@ -90,27 +334,148 @@ function closeEditModal() {
     document.getElementById('editModal').classList.add('hidden');
 }
 
-function deletePool(index, directive) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta configuración de delay pool:\n' + directive + '?')) {
+function updateParametersHelp(mode) {
+    const classSelect = document.getElementById(mode + 'PoolClass');
+    const selectedClass = classSelect.value;
+    
+    if (mode === 'add') {
+        // Hide all parameter sections
+        document.querySelectorAll('[id^="addClass"]').forEach(el => {
+            if (el.id.includes('Params')) el.classList.add('hidden');
+        });
+        
+        // Show parameters section
+        const paramsSection = document.getElementById('addParametersSection');
+        if (selectedClass) {
+            paramsSection.classList.remove('hidden');
+            
+            // Show specific class parameters
+            if (selectedClass === '1') {
+                document.getElementById('addClass1Params').classList.remove('hidden');
+            } else if (selectedClass === '2') {
+                document.getElementById('addClass2Params').classList.remove('hidden');
+            } else if (selectedClass === '3' || selectedClass === '4') {
+                document.getElementById('addClass3Params').classList.remove('hidden');
+                if (selectedClass === '4') {
+                    document.getElementById('addClass3Title').textContent = 'Clase 4:';
+                    document.getElementById('addClass3Desc').textContent = 'Buckets por subred + por host + por usuario autenticado';
+                } else {
+                    document.getElementById('addClass3Title').textContent = 'Clase 3:';
+                    document.getElementById('addClass3Desc').textContent = 'Buckets por subred + por host';
+                }
+            } else if (selectedClass === '5') {
+                document.getElementById('addClass5Params').classList.remove('hidden');
+            }
+        } else {
+            paramsSection.classList.add('hidden');
+        }
+    } else {
+        // Update edit help text
+        const helpText = document.getElementById('editParametersHelp');
+        if (selectedClass === '1') {
+            helpText.textContent = 'Formato: aggregate_restore/aggregate_max';
+        } else if (selectedClass === '2') {
+            helpText.textContent = 'Formato: aggregate_restore/aggregate_max individual_restore/individual_max';
+        } else if (selectedClass === '3' || selectedClass === '4') {
+            helpText.textContent = 'Formato: aggregate_restore/aggregate_max network_restore/network_max individual_restore/individual_max';
+        } else if (selectedClass === '5') {
+            helpText.textContent = 'Formato: tag_restore/tag_max';
+        }
+    }
+}
+
+function addAccessRule(mode, action = 'allow', acl = '') {
+    const container = document.getElementById(mode + 'AccessRules');
+    const counter = mode === 'add' ? addAccessRuleCounter++ : editAccessRuleCounter++;
+    
+    const ruleDiv = document.createElement('div');
+    ruleDiv.className = 'flex items-center space-x-2 bg-gray-50 p-2 rounded border border-gray-200';
+    ruleDiv.id = mode + 'AccessRule' + counter;
+    
+    ruleDiv.innerHTML = `
+        <select name="access_action[]" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            <option value="allow" ${action === 'allow' ? 'selected' : ''}>allow</option>
+            <option value="deny" ${action === 'deny' ? 'selected' : ''}>deny</option>
+        </select>
+        <input type="text" name="access_acl[]" value="${acl}" placeholder="ACL names (ej: students !local)" 
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
+        <button type="button" onclick="removeAccessRule('${mode}', ${counter})" 
+                class="text-red-600 hover:text-red-800 p-2">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(ruleDiv);
+}
+
+function removeAccessRule(mode, counter) {
+    const ruleDiv = document.getElementById(mode + 'AccessRule' + counter);
+    if (ruleDiv) {
+        ruleDiv.remove();
+    }
+}
+
+function deletePool(poolNumber) {
+    if (confirm('¿Estás seguro de que quieres eliminar el Delay Pool #' + poolNumber + '?\n\nEsto eliminará todas las configuraciones asociadas (clase, parámetros y reglas de acceso).')) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/admin/delay-pools/delete';
         
-        const indexInput = document.createElement('input');
-        indexInput.type = 'hidden';
-        indexInput.name = 'index';
-        indexInput.value = index;
+        const poolInput = document.createElement('input');
+        poolInput.type = 'hidden';
+        poolInput.name = 'pool_number';
+        poolInput.value = poolNumber;
         
         const csrfInput = document.createElement('input');
         csrfInput.type = 'hidden';
         csrfInput.name = 'csrf_token';
         csrfInput.value = '{{ csrf_token() }}';
         
-        form.appendChild(indexInput);
+        form.appendChild(poolInput);
         form.appendChild(csrfInput);
         document.body.appendChild(form);
         form.submit();
     }
 }
+
+// Form submission handler for add form
+document.getElementById('addForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const poolClass = formData.get('pool_class');
+    
+    // Build parameters string based on class
+    let parameters = '';
+    if (poolClass === '1') {
+        parameters = document.getElementById('addAggregateClass1').value;
+    } else if (poolClass === '2') {
+        const agg = document.getElementById('addAggregateClass2').value;
+        const ind = document.getElementById('addIndividualClass2').value;
+        parameters = `${agg} ${ind}`;
+    } else if (poolClass === '3' || poolClass === '4') {
+        const agg = document.getElementById('addAggregateClass3').value;
+        const net = document.getElementById('addNetworkClass3').value;
+        const ind = document.getElementById('addIndividualClass3').value;
+        parameters = `${agg} ${net} ${ind}`;
+    } else if (poolClass === '5') {
+        parameters = document.getElementById('addTagClass5').value;
+    }
+    
+    // Validate parameters
+    if (!parameters.trim()) {
+        alert('Por favor completa los parámetros de velocidad');
+        return;
+    }
+    
+    // Add parameters to form
+    const paramsInput = document.createElement('input');
+    paramsInput.type = 'hidden';
+    paramsInput.name = 'parameters';
+    paramsInput.value = parameters.trim();
+    this.appendChild(paramsInput);
+    
+    this.submit();
+});
 </script>
 {% endblock %}
