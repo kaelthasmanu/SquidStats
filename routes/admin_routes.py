@@ -15,6 +15,7 @@ from sqlalchemy import MetaData, Table, func, inspect, select, text
 from config import Config, logger
 from database.database import get_engine, get_session
 from services.auth_service import AuthService, admin_required, api_auth_required
+from services.squid_config_splitter import SquidConfigSplitter
 from utils.admin import SquidConfigManager
 
 admin_bp = Blueprint("admin", __name__)
@@ -537,6 +538,95 @@ def delete_table_data():
             show_details = False
 
         resp = {"status": "error", "message": "Error interno del servidor"}
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
+
+
+@admin_bp.route("/config/split")
+@admin_required
+def split_config_view():
+    """Vista para dividir el archivo squid.conf en archivos modulares."""
+    try:
+        splitter = SquidConfigSplitter()
+        split_info = splitter.get_split_info()
+        output_exists = splitter.check_output_dir_exists()
+        files_count = splitter.count_files_in_output_dir()
+
+        return render_template(
+            "admin/split_config.html",
+            split_info=split_info,
+            output_dir=splitter.output_dir,
+            input_file=splitter.input_file,
+            output_exists=output_exists,
+            files_count=files_count,
+        )
+    except Exception as e:
+        logger.exception("Error al cargar la vista de división de configuración")
+        flash(f"Error al cargar la vista: {str(e)}", "error")
+        return redirect(url_for("admin.admin_dashboard"))
+
+
+@admin_bp.route("/api/split-config", methods=["POST"])
+@api_auth_required
+def split_config():
+    """API endpoint para dividir el archivo squid.conf en archivos modulares."""
+    try:
+        data = request.get_json() or {}
+        strict = data.get("strict", False)
+
+        splitter = SquidConfigSplitter(strict=strict)
+
+        if not os.path.exists(splitter.input_file):
+            return jsonify({
+                "status": "error",
+                "message": f"Archivo squid.conf no encontrado en: {splitter.input_file}"
+            }), 404
+
+        results = splitter.split_config()
+
+        return jsonify({
+            "status": "success",
+            "message": f"Configuración dividida exitosamente en {len(results)} archivos",
+            "data": {
+                "output_dir": splitter.output_dir,
+                "files": results,
+                "total_files": len(results)
+            }
+        })
+
+    except FileNotFoundError as e:
+        logger.error(f"Archivo no encontrado: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 404
+
+    except PermissionError as e:
+        logger.error(f"Error de permisos: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "No se tienen permisos suficientes para crear los archivos"
+        }), 403
+
+    except RuntimeError as e:
+        logger.error(f"Error de validación: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 400
+
+    except Exception as e:
+        logger.exception("Error al dividir el archivo de configuración")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+
+        resp = {
+            "status": "error",
+            "message": "Error interno al dividir la configuración"
+        }
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
