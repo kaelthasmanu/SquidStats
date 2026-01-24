@@ -7,8 +7,10 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-SQUID_CONFIG_PATH = os.getenv("SQUID_CONFIG_PATH", "/etc/squid/squid.conf")
-ACL_FILES_DIR = os.getenv("ACL_FILES_DIR", "/etc/squid/acls")
+# SQUID_CONFIG_PATH = os.getenv("SQUID_CONFIG_PATH", "/etc/squid/squid.conf")
+# ACL_FILES_DIR = os.getenv("ACL_FILES_DIR", "/etc/squid/acls")
+SQUID_CONFIG_PATH = "/etc/squid/squid.conf"
+ACL_FILES_DIR = "/etc/squid/acls"
 
 
 def validate_paths():

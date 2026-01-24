@@ -23,18 +23,6 @@ except Exception as e:
 def safe_get_env(
     key: str, default: Any = None, var_type: type = str, required: bool = False
 ) -> Any:
-    """
-    Obtiene una variable de entorno de forma segura con manejo de errores.
-
-    Args:
-        key: Nombre de la variable de entorno
-        default: Valor por defecto si no existe o hay error
-        var_type: Tipo esperado (str, int, bool, etc.)
-        required: Si es True, logea una advertencia si no existe
-
-    Returns:
-        El valor convertido al tipo correcto o el default
-    """
     try:
         value = os.getenv(key)
 
@@ -79,17 +67,6 @@ def safe_get_env(
 
 
 def safe_get_list(key: str, default: list | None = None, separator: str = ",") -> list:
-    """
-    Obtiene una lista desde una variable de entorno separada por comas.
-
-    Args:
-        key: Nombre de la variable de entorno
-        default: Lista por defecto si no existe o hay error
-        separator: Separador de elementos (por defecto coma)
-
-    Returns:
-        Lista de elementos o el default
-    """
     if default is None:
         default = []
 
@@ -110,8 +87,6 @@ def safe_get_list(key: str, default: list | None = None, separator: str = ",") -
 
 
 class Config:
-    """Configuración de la aplicación con manejo robusto de errores."""
-
     # API Scheduler
     SCHEDULER_API_ENABLED = True
 
