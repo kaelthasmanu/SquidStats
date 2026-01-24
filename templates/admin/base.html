@@ -11,34 +11,39 @@
 </head>
 <body class="bg-gray-50 min-h-screen" x-data="{ sidebarOpen: false }">
     <!-- Navigation -->
-    <nav class="bg-blue-600 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
+    <nav class="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white shadow-xl border-b border-blue-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
-                <div class="flex items-center space-x-2 md:space-x-4">
+                <div class="flex items-center space-x-3 md:space-x-6">
                     <!-- Mobile menu button -->
-                    <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-white focus:outline-none">
+                    <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-white hover:bg-blue-500 p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <i class="fas fa-server text-xl md:text-2xl"></i>
-                    <h1 class="text-sm md:text-xl font-bold hidden sm:block">Administrador Squid Proxy (BETA version)</h1>
-                    <h1 class="text-sm font-bold sm:hidden">Admin Squid</h1>
-                </div>
-                <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
-                    <button onclick="reloadSquid()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center text-xs md:text-base">
-                        <i class="fas fa-sync-alt"></i>
-                        <span class="ml-1 md:ml-2 hidden sm:inline">Recargar</span>
-                    </button>
-                    <button onclick="restartSquid()" class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center text-xs md:text-base">
-                        <i class="fas fa-power-off"></i>
-                        <span class="ml-1 md:ml-2 hidden sm:inline">Reiniciar</span>
-                    </button>
-                    <div class="hidden md:flex items-center space-x-2 text-white bg-blue-700 bg-opacity-50 px-3 py-2 rounded-lg">
-                        <i class="fas fa-user"></i>
-                        <span>{{ session.user.username if session.user else 'Admin' }}</span>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-server text-2xl md:text-3xl text-blue-200"></i>
+                        <div>
+                            <h1 class="text-lg md:text-2xl font-bold hidden sm:block">Administrador Squid Proxy</h1>
+                            <p class="text-xs md:text-sm text-blue-200 hidden sm:block">BETA version</p>
+                            <h1 class="text-lg font-bold sm:hidden">Admin Squid</h1>
+                        </div>
                     </div>
-                    <a href="{{ url_for('auth.logout') }}" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium px-2 sm:px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center text-xs md:text-base">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="ml-1 md:ml-2 hidden sm:inline">Cerrar Sesión</span>
+                </div>
+                <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+                    <button onclick="reloadSquid()" class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        <span class="hidden sm:inline">Recargar</span>
+                    </button>
+                    <button onclick="restartSquid()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
+                        <i class="fas fa-power-off mr-2"></i>
+                        <span class="hidden sm:inline">Reiniciar</span>
+                    </button>
+                    <div class="hidden md:flex items-center space-x-2 text-white bg-blue-800 bg-opacity-60 px-4 py-2 rounded-lg shadow-md">
+                        <i class="fas fa-user-circle text-lg"></i>
+                        <span class="font-medium">{{ session.user.username if session.user else 'Admin' }}</span>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        <span class="hidden sm:inline">Cerrar Sesión</span>
                     </a>
                 </div>
             </div>
