@@ -87,7 +87,6 @@ def safe_get_list(key: str, default: list | None = None, separator: str = ",") -
 
 
 class Config:
-
     # API Scheduler
     SCHEDULER_API_ENABLED = True
 
