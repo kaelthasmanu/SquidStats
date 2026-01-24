@@ -2,43 +2,115 @@
 
 {% block content %}
 <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Gestión de Delay Pools</h2>
+    <div class="flex justify-between items-center mb-4 sm:mb-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Gestión de Delay Pools</h2>
+        <button onclick="showAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">
+            <i class="fas fa-plus mr-2"></i>Agregar Pool
+        </button>
+    </div>
     
     <div class="space-y-4 sm:space-y-6">
         {% for pool in delay_pools %}
         <div class="border border-gray-200 rounded-lg p-4 sm:p-6">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Pool {{ pool.id }}</h3>
-                    <p class="text-sm text-gray-600">Clase: {{ pool.class }}</p>
+                    <h3 class="text-lg font-semibold text-gray-800">{{ pool.directive }}</h3>
+                    <p class="text-sm text-gray-600">
+                        {% if pool.pool %}Pool: {{ pool.pool }}{% endif %}
+                        {% if pool.class %}| Clase: {{ pool.class }}{% endif %}
+                        {% if pool.value %}| Valor: {{ pool.value }}{% endif %}
+                    </p>
                 </div>
                 <div class="flex space-x-2">
-                    <button class="text-blue-600 hover:text-blue-900">
+                    <button onclick="editPool({{ loop.index0 }}, '{{ pool.directive }}')" class="text-blue-600 hover:text-blue-900" title="Editar">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="text-red-600 hover:text-red-900">
+                    <button onclick="deletePool({{ loop.index0 }}, '{{ pool.directive }}')" class="text-red-600 hover:text-red-900" title="Eliminar">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </div>
             
+            {% if pool.parameters %}
             <div class="bg-gray-50 rounded-lg p-4 mb-4">
                 <h4 class="font-medium text-gray-800 mb-2">Parámetros:</h4>
                 <code class="text-sm text-gray-700">{{ pool.parameters }}</code>
             </div>
+            {% endif %}
             
-            <div>
-                <h4 class="font-medium text-gray-800 mb-2">Reglas de Acceso:</h4>
-                <div class="space-y-1">
-                    {% for rule in pool.access_rules %}
-                    <div class="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                        <code>{{ rule }}</code>
-                    </div>
-                    {% endfor %}
-                </div>
+            {% if pool.action %}
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h4 class="font-medium text-gray-800 mb-2">Acción:</h4>
+                <code class="text-sm text-gray-700">{{ pool.action }} - {{ pool.acl }}</code>
             </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
 </div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Editar Directiva Delay Pool</h3>
+        <form id="editForm" method="POST" action="/admin/delay-pools/edit">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="index" id="editIndex">
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Directiva completa:</label>
+                <textarea name="directive" id="editDirective" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" required></textarea>
+                <p class="text-xs text-gray-500 mt-1">Ejemplo: delay_parameters 1 64000/64000 8000/8000</p>
+            </div>
+            
+            <div class="flex space-x-2 justify-end">
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showAddModal() {
+    alert('Funcionalidad de agregar delay pool - En desarrollo');
+}
+
+function editPool(index, directive) {
+    document.getElementById('editIndex').value = index;
+    document.getElementById('editDirective').value = directive;
+    document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.add('hidden');
+}
+
+function deletePool(index, directive) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta configuración de delay pool:\n' + directive + '?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/delay-pools/delete';
+        
+        const indexInput = document.createElement('input');
+        indexInput.type = 'hidden';
+        indexInput.name = 'index';
+        indexInput.value = index;
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = '{{ csrf_token() }}';
+        
+        form.appendChild(indexInput);
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 {% endblock %}

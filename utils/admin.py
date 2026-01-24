@@ -1,5 +1,8 @@
 import logging
 import os
+import shutil
+from datetime import datetime
+from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -10,7 +13,7 @@ load_dotenv()
 # SQUID_CONFIG_PATH = os.getenv("SQUID_CONFIG_PATH", "/etc/squid/squid.conf")
 # ACL_FILES_DIR = os.getenv("ACL_FILES_DIR", "/etc/squid/acls")
 SQUID_CONFIG_PATH = "/etc/squid/squid.conf"
-ACL_FILES_DIR = "/etc/squid/acls"
+ACL_FILES_DIR = "/etc/squid/squid.d/"
 
 
 def validate_paths():
@@ -59,16 +62,19 @@ def validate_paths():
 
 
 class SquidConfigManager:
-    def __init__(self, config_path=SQUID_CONFIG_PATH):
+    def __init__(self, config_path=SQUID_CONFIG_PATH, config_dir=ACL_FILES_DIR):
         self.config_path = config_path
+        self.config_dir = config_dir
         self.config_content = ""
         self.is_valid = False
         self.errors = []
+        self.is_modular = False  # Flag to check if using modular configs
 
         self._validate_environment()
 
         if self.is_valid:
             self.load_config()
+            self._check_modular_config()
 
     def _validate_environment(self):
         self.errors = validate_paths()
@@ -143,49 +149,28 @@ class SquidConfigManager:
             logger.error("Cannot create backup: invalid environment")
             return False
 
-        """ try:
-            if not os.path.exists(BACKUP_DIR):
-                logger.error(f"Backup directory does not exist: {BACKUP_DIR}")
-                return False
-
-            if not os.access(BACKUP_DIR, os.W_OK):
-                logger.error(f"No write permissions in backup directory: {BACKUP_DIR}")
-                return False
-
-            if not os.path.exists(self.config_path):
-                logger.warning("No configuration file exists to backup")
-                return False
-
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_filename = f"squid.conf.backup_{timestamp}"
-            backup_path = os.path.join(BACKUP_DIR, backup_filename)
-
-            shutil.copy2(self.config_path, backup_path)
-            logger.info(f"Backup created: {backup_path}")
-            return True
-
-        except PermissionError:
-            logger.error(f"No permissions to create backup in: {BACKUP_DIR}")
-            return False
-        except OSError as e:
-            logger.error(f"System error creating backup: {e}")
-            return False
-        except Exception as e:
-            logger.error(f"Unexpected error creating backup: {e}")
-            return False """
-
     def get_acls(self):
         if not self.is_valid:
             logger.error("Cannot get ACLs: invalid environment")
             return []
 
-        if not self.config_content:
-            logger.warning("No configuration content available")
-            return []
+        # If using modular config, read from the ACLs specific file
+        if self.is_modular:
+            acl_content = self.read_modular_config("100_acls.conf")
+            if not acl_content:
+                logger.warning("Could not read modular ACL config, falling back to main config")
+                config_to_parse = self.config_content
+            else:
+                config_to_parse = acl_content
+        else:
+            if not self.config_content:
+                logger.warning("No configuration content available")
+                return []
+            config_to_parse = self.config_content
 
         try:
             acls = []
-            lines = self.config_content.split("\n")
+            lines = config_to_parse.split("\n")
             acl_index = 0
 
             for line_num, line in enumerate(lines, 1):
@@ -223,13 +208,23 @@ class SquidConfigManager:
             logger.error("Cannot get delay pools: invalid environment")
             return []
 
-        if not self.config_content:
-            logger.warning("No configuration content available")
-            return []
+        # If using modular config, read from the delay pools specific file
+        if self.is_modular:
+            delay_content = self.read_modular_config("110_delay_pools.conf")
+            if not delay_content:
+                logger.warning("Could not read modular delay pools config, falling back to main config")
+                config_to_parse = self.config_content
+            else:
+                config_to_parse = delay_content
+        else:
+            if not self.config_content:
+                logger.warning("No configuration content available")
+                return []
+            config_to_parse = self.config_content
 
         try:
             delay_pools = []
-            lines = self.config_content.split("\n")
+            lines = config_to_parse.split("\n")
 
             for line_num, line in enumerate(lines, 1):
                 try:
@@ -289,13 +284,23 @@ class SquidConfigManager:
             logger.error("Cannot get HTTP rules: invalid environment")
             return []
 
-        if not self.config_content:
-            logger.warning("No configuration content available")
-            return []
+        # If using modular config, read from the http_access specific file
+        if self.is_modular:
+            http_content = self.read_modular_config("120_http_access.conf")
+            if not http_content:
+                logger.warning("Could not read modular http_access config, falling back to main config")
+                config_to_parse = self.config_content
+            else:
+                config_to_parse = http_content
+        else:
+            if not self.config_content:
+                logger.warning("No configuration content available")
+                return []
+            config_to_parse = self.config_content
 
         try:
             rules = []
-            lines = self.config_content.split("\n")
+            lines = config_to_parse.split("\n")
 
             for line_num, line in enumerate(lines, 1):
                 try:
@@ -319,12 +324,146 @@ class SquidConfigManager:
             logger.error(f"Unexpected error extracting HTTP rules: {e}")
             return []
 
+    def _check_modular_config(self):
+        """Check if the main config file uses modular includes."""
+        if not self.config_content:
+            return
+
+        # Check if config contains include directives pointing to squid.d
+        self.is_modular = "include" in self.config_content.lower() and "squid.d" in self.config_content
+        if self.is_modular:
+            logger.info("Modular configuration detected")
+
+    def list_modular_configs(self) -> list[dict[str, str]]:
+        """List all modular configuration files in squid.d directory."""
+        if not os.path.exists(self.config_dir):
+            logger.warning(f"Config directory not found: {self.config_dir}")
+            return []
+
+        try:
+            configs = []
+            for filename in sorted(os.listdir(self.config_dir)):
+                if filename.endswith('.conf'):
+                    filepath = os.path.join(self.config_dir, filename)
+                    if os.path.isfile(filepath):
+                        try:
+                            stat = os.stat(filepath)
+                            configs.append({
+                                "filename": filename,
+                                "filepath": filepath,
+                                "size": stat.st_size,
+                                "modified": datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+                                "readable": os.access(filepath, os.R_OK),
+                                "writable": os.access(filepath, os.W_OK),
+                            })
+                        except Exception as e:
+                            logger.warning(f"Error reading file info for {filename}: {e}")
+            return configs
+        except Exception as e:
+            logger.error(f"Error listing modular configs: {e}")
+            return []
+
+    def read_modular_config(self, filename: str) -> Optional[str]:
+        """Read a specific modular configuration file."""
+        filepath = os.path.join(self.config_dir, filename)
+
+        if not os.path.exists(filepath):
+            logger.error(f"Config file not found: {filepath}")
+            return None
+
+        if not filepath.endswith('.conf'):
+            logger.error(f"Invalid file extension: {filename}")
+            return None
+
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+            logger.debug(f"Read modular config: {filename}")
+            return content
+        except Exception as e:
+            logger.error(f"Error reading modular config {filename}: {e}")
+            return None
+
+    def save_modular_config(self, filename: str, content: str) -> bool:
+        """Save content to a specific modular configuration file."""
+        filepath = os.path.join(self.config_dir, filename)
+
+        if not filename.endswith('.conf'):
+            logger.error(f"Invalid file extension: {filename}")
+            return False
+
+        # Validate filename to prevent directory traversal
+        if '/' in filename or '\\' in filename or '..' in filename:
+            logger.error(f"Invalid filename (potential path traversal): {filename}")
+            return False
+
+        try:
+            # Create backup before saving
+            if os.path.exists(filepath):
+                backup_path = f"{filepath}.bak{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                try:
+                    shutil.copy2(filepath, backup_path)
+                    logger.info(f"Backup created: {backup_path}")
+                except Exception as e:
+                    logger.warning(f"Could not create backup: {e}")
+
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+            logger.info(f"Saved modular config: {filename}")
+            return True
+        except Exception as e:
+            logger.error(f"Error saving modular config {filename}: {e}")
+            return False
+
+    def delete_modular_config(self, filename: str) -> bool:
+        """Delete a specific modular configuration file."""
+        filepath = os.path.join(self.config_dir, filename)
+
+        if not os.path.exists(filepath):
+            logger.error(f"Config file not found: {filepath}")
+            return False
+
+        if not filename.endswith('.conf'):
+            logger.error(f"Invalid file extension: {filename}")
+            return False
+
+        # Validate filename to prevent directory traversal
+        if '/' in filename or '\\' in filename or '..' in filename:
+            logger.error(f"Invalid filename (potential path traversal): {filename}")
+            return False
+
+        try:
+            # Create backup before deleting
+            backup_path = f"{filepath}.deleted{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            try:
+                shutil.move(filepath, backup_path)
+                logger.info(f"File moved to: {backup_path}")
+                return True
+            except Exception as e:
+                logger.error(f"Error deleting file {filename}: {e}")
+                return False
+        except Exception as e:
+            logger.error(f"Error handling file deletion {filename}: {e}")
+            return False
+
+    def get_modular_config_info(self) -> dict:
+        """Get information about the modular configuration setup."""
+        return {
+            "is_modular": self.is_modular,
+            "config_dir": self.config_dir,
+            "config_dir_exists": os.path.exists(self.config_dir),
+            "config_files_count": len(self.list_modular_configs()),
+            "main_config_path": self.config_path,
+        }
+
     def get_status(self):
         return {
             "is_valid": self.is_valid,
             "errors": self.errors,
             "config_loaded": bool(self.config_content),
             "config_path": self.config_path,
-            # "backup_dir": BACKUP_DIR,
+            "config_dir": self.config_dir,
+            "is_modular": self.is_modular,
             "acl_files_dir": ACL_FILES_DIR,
         }
