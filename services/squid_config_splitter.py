@@ -192,12 +192,22 @@ class SquidConfigSplitter:
             logger.error(f"Failed to create backup: {e}")
             raise RuntimeError(f"Failed to create backup: {e}")
 
-        # Create the output directory
+        # Create the output directory if it doesn't exist
         try:
-            os.makedirs(self.output_dir, exist_ok=True)
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir, exist_ok=True)
+                logger.info(f"Output directory created: {self.output_dir}")
+            else:
+                logger.info(f"Output directory already exists: {self.output_dir}")
         except PermissionError as e:
+            logger.error(f"Permission denied to create directory: {self.output_dir}")
             raise PermissionError(
                 f"No permissions to create directory: {self.output_dir}"
+            ) from e
+        except OSError as e:
+            logger.error(f"Failed to create output directory: {e}")
+            raise RuntimeError(
+                f"Failed to create output directory: {self.output_dir}"
             ) from e
 
         buffers: dict[str, list[str]] = {}
