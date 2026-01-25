@@ -25,7 +25,7 @@ def updateSquidStats():
             ) as tmp_script:
                 tmp_script_path = tmp_script.name
                 response = requests.get(
-                    "https://github.com/kaelthasmanu/SquidStats/releases/download/2.1/install.sh",
+                    "https://github.com/kaelthasmanu/SquidStats/releases/download/2.2/install.sh",
                     proxies=proxies,
                     timeout=30,
                 )
