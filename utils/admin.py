@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 from datetime import datetime
-from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -176,7 +175,9 @@ class SquidConfigManager:
         if self.is_modular:
             acl_content = self.read_modular_config("100_acls.conf")
             if not acl_content:
-                logger.warning("Could not read modular ACL config, falling back to main config")
+                logger.warning(
+                    "Could not read modular ACL config, falling back to main config"
+                )
                 config_to_parse = self.config_content
             else:
                 config_to_parse = acl_content
@@ -190,148 +191,349 @@ class SquidConfigManager:
             acls = []
             lines = config_to_parse.split("\n")
             acl_index = 0
-            
+
             # Predefined ACLs in Squid
-            predefined_acls = ['all', 'manager', 'localhost', 'to_localhost', 'to_linklocal', 'CONNECT']
-            
+            predefined_acls = [
+                "all",
+                "manager",
+                "localhost",
+                "to_localhost",
+                "to_linklocal",
+                "CONNECT",
+            ]
+
             # ACL type metadata
             acl_types_info = {
                 # Network ACLs
-                'src': {'category': 'network', 'slow': False, 'desc': 'Source IP address'},
-                'dst': {'category': 'network', 'slow': True, 'desc': 'Destination IP address'},
-                'localip': {'category': 'network', 'slow': False, 'desc': 'Local IP client connected to'},
-                'arp': {'category': 'network', 'slow': False, 'desc': 'MAC address (EUI-48)'},
-                'eui64': {'category': 'network', 'slow': False, 'desc': 'EUI-64 address'},
-                'client_connection_mark': {'category': 'network', 'slow': False, 'desc': 'CONNMARK of connection'},
-                
+                "src": {
+                    "category": "network",
+                    "slow": False,
+                    "desc": "Source IP address",
+                },
+                "dst": {
+                    "category": "network",
+                    "slow": True,
+                    "desc": "Destination IP address",
+                },
+                "localip": {
+                    "category": "network",
+                    "slow": False,
+                    "desc": "Local IP client connected to",
+                },
+                "arp": {
+                    "category": "network",
+                    "slow": False,
+                    "desc": "MAC address (EUI-48)",
+                },
+                "eui64": {
+                    "category": "network",
+                    "slow": False,
+                    "desc": "EUI-64 address",
+                },
+                "client_connection_mark": {
+                    "category": "network",
+                    "slow": False,
+                    "desc": "CONNMARK of connection",
+                },
                 # Domain ACLs
-                'srcdomain': {'category': 'domain', 'slow': True, 'desc': 'Reverse DNS lookup of client IP'},
-                'dstdomain': {'category': 'domain', 'slow': False, 'desc': 'Destination domain from URL'},
-                'srcdom_regex': {'category': 'domain', 'slow': True, 'desc': 'Regex match on client name'},
-                'dstdom_regex': {'category': 'domain', 'slow': False, 'desc': 'Regex match on server domain'},
-                
+                "srcdomain": {
+                    "category": "domain",
+                    "slow": True,
+                    "desc": "Reverse DNS lookup of client IP",
+                },
+                "dstdomain": {
+                    "category": "domain",
+                    "slow": False,
+                    "desc": "Destination domain from URL",
+                },
+                "srcdom_regex": {
+                    "category": "domain",
+                    "slow": True,
+                    "desc": "Regex match on client name",
+                },
+                "dstdom_regex": {
+                    "category": "domain",
+                    "slow": False,
+                    "desc": "Regex match on server domain",
+                },
                 # AS Number ACLs
-                'src_as': {'category': 'network', 'slow': False, 'desc': 'Source Autonomous System number'},
-                'dst_as': {'category': 'network', 'slow': False, 'desc': 'Destination AS number'},
-                
+                "src_as": {
+                    "category": "network",
+                    "slow": False,
+                    "desc": "Source Autonomous System number",
+                },
+                "dst_as": {
+                    "category": "network",
+                    "slow": False,
+                    "desc": "Destination AS number",
+                },
                 # Time ACLs
-                'time': {'category': 'time', 'slow': False, 'desc': 'Time of day and day of week'},
-                
+                "time": {
+                    "category": "time",
+                    "slow": False,
+                    "desc": "Time of day and day of week",
+                },
                 # URL ACLs
-                'url_regex': {'category': 'url', 'slow': False, 'desc': 'Regex match on full URL'},
-                'urllogin': {'category': 'url', 'slow': False, 'desc': 'Regex match on URL login field'},
-                'urlpath_regex': {'category': 'url', 'slow': False, 'desc': 'Regex match on URL path'},
-                
+                "url_regex": {
+                    "category": "url",
+                    "slow": False,
+                    "desc": "Regex match on full URL",
+                },
+                "urllogin": {
+                    "category": "url",
+                    "slow": False,
+                    "desc": "Regex match on URL login field",
+                },
+                "urlpath_regex": {
+                    "category": "url",
+                    "slow": False,
+                    "desc": "Regex match on URL path",
+                },
                 # Port ACLs
-                'port': {'category': 'port', 'slow': False, 'desc': 'Destination TCP port'},
-                'localport': {'category': 'port', 'slow': False, 'desc': 'TCP port client connected to'},
-                'myportname': {'category': 'port', 'slow': False, 'desc': 'Port name from *_port directive'},
-                
+                "port": {
+                    "category": "port",
+                    "slow": False,
+                    "desc": "Destination TCP port",
+                },
+                "localport": {
+                    "category": "port",
+                    "slow": False,
+                    "desc": "TCP port client connected to",
+                },
+                "myportname": {
+                    "category": "port",
+                    "slow": False,
+                    "desc": "Port name from *_port directive",
+                },
                 # Protocol & Method ACLs
-                'proto': {'category': 'protocol', 'slow': False, 'desc': 'Request protocol (HTTP, FTP, etc)'},
-                'method': {'category': 'protocol', 'slow': False, 'desc': 'HTTP request method'},
-                'http_status': {'category': 'protocol', 'slow': False, 'desc': 'HTTP status code in reply'},
-                
+                "proto": {
+                    "category": "protocol",
+                    "slow": False,
+                    "desc": "Request protocol (HTTP, FTP, etc)",
+                },
+                "method": {
+                    "category": "protocol",
+                    "slow": False,
+                    "desc": "HTTP request method",
+                },
+                "http_status": {
+                    "category": "protocol",
+                    "slow": False,
+                    "desc": "HTTP status code in reply",
+                },
                 # Header ACLs
-                'browser': {'category': 'content', 'slow': False, 'desc': 'User-Agent header pattern'},
-                'referer_regex': {'category': 'content', 'slow': False, 'desc': 'Referer header pattern'},
-                'req_header': {'category': 'content', 'slow': False, 'desc': 'Request header pattern'},
-                'rep_header': {'category': 'content', 'slow': False, 'desc': 'Reply header pattern'},
-                
+                "browser": {
+                    "category": "content",
+                    "slow": False,
+                    "desc": "User-Agent header pattern",
+                },
+                "referer_regex": {
+                    "category": "content",
+                    "slow": False,
+                    "desc": "Referer header pattern",
+                },
+                "req_header": {
+                    "category": "content",
+                    "slow": False,
+                    "desc": "Request header pattern",
+                },
+                "rep_header": {
+                    "category": "content",
+                    "slow": False,
+                    "desc": "Reply header pattern",
+                },
                 # Authentication ACLs
-                'proxy_auth': {'category': 'auth', 'slow': True, 'desc': 'Proxy authentication username'},
-                'proxy_auth_regex': {'category': 'auth', 'slow': True, 'desc': 'Proxy auth username regex'},
-                'ext_user': {'category': 'auth', 'slow': True, 'desc': 'External ACL helper username'},
-                'ext_user_regex': {'category': 'auth', 'slow': True, 'desc': 'External ACL helper username regex'},
-                
+                "proxy_auth": {
+                    "category": "auth",
+                    "slow": True,
+                    "desc": "Proxy authentication username",
+                },
+                "proxy_auth_regex": {
+                    "category": "auth",
+                    "slow": True,
+                    "desc": "Proxy auth username regex",
+                },
+                "ext_user": {
+                    "category": "auth",
+                    "slow": True,
+                    "desc": "External ACL helper username",
+                },
+                "ext_user_regex": {
+                    "category": "auth",
+                    "slow": True,
+                    "desc": "External ACL helper username regex",
+                },
                 # MIME Type ACLs
-                'req_mime_type': {'category': 'content', 'slow': False, 'desc': 'Request MIME type'},
-                'rep_mime_type': {'category': 'content', 'slow': False, 'desc': 'Reply MIME type'},
-                
+                "req_mime_type": {
+                    "category": "content",
+                    "slow": False,
+                    "desc": "Request MIME type",
+                },
+                "rep_mime_type": {
+                    "category": "content",
+                    "slow": False,
+                    "desc": "Reply MIME type",
+                },
                 # Connection ACLs
-                'maxconn': {'category': 'connection', 'slow': False, 'desc': 'Max TCP connections from IP'},
-                'max_user_ip': {'category': 'connection', 'slow': False, 'desc': 'Max IPs per user'},
-                
+                "maxconn": {
+                    "category": "connection",
+                    "slow": False,
+                    "desc": "Max TCP connections from IP",
+                },
+                "max_user_ip": {
+                    "category": "connection",
+                    "slow": False,
+                    "desc": "Max IPs per user",
+                },
                 # SSL/TLS ACLs
-                'ssl_error': {'category': 'ssl', 'slow': False, 'desc': 'SSL certificate validation error'},
-                'server_cert_fingerprint': {'category': 'ssl', 'slow': False, 'desc': 'Server cert fingerprint'},
-                'ssl::server_name': {'category': 'ssl', 'slow': False, 'desc': 'TLS SNI server name'},
-                'ssl::server_name_regex': {'category': 'ssl', 'slow': False, 'desc': 'TLS SNI regex match'},
-                'connections_encrypted': {'category': 'ssl', 'slow': False, 'desc': 'All connections over TLS'},
-                
+                "ssl_error": {
+                    "category": "ssl",
+                    "slow": False,
+                    "desc": "SSL certificate validation error",
+                },
+                "server_cert_fingerprint": {
+                    "category": "ssl",
+                    "slow": False,
+                    "desc": "Server cert fingerprint",
+                },
+                "ssl::server_name": {
+                    "category": "ssl",
+                    "slow": False,
+                    "desc": "TLS SNI server name",
+                },
+                "ssl::server_name_regex": {
+                    "category": "ssl",
+                    "slow": False,
+                    "desc": "TLS SNI regex match",
+                },
+                "connections_encrypted": {
+                    "category": "ssl",
+                    "slow": False,
+                    "desc": "All connections over TLS",
+                },
                 # Advanced ACLs
-                'external': {'category': 'advanced', 'slow': True, 'desc': 'External ACL helper lookup'},
-                'random': {'category': 'advanced', 'slow': False, 'desc': 'Random probability match'},
-                'note': {'category': 'advanced', 'slow': False, 'desc': 'Transaction annotation'},
-                'annotate_transaction': {'category': 'advanced', 'slow': False, 'desc': 'Add transaction annotation'},
-                'annotate_client': {'category': 'advanced', 'slow': False, 'desc': 'Add client annotation'},
-                'peername': {'category': 'advanced', 'slow': False, 'desc': 'Cache peer name'},
-                'peername_regex': {'category': 'advanced', 'slow': False, 'desc': 'Cache peer name regex'},
-                'hier_code': {'category': 'advanced', 'slow': False, 'desc': 'Squid hierarchy code'},
-                
+                "external": {
+                    "category": "advanced",
+                    "slow": True,
+                    "desc": "External ACL helper lookup",
+                },
+                "random": {
+                    "category": "advanced",
+                    "slow": False,
+                    "desc": "Random probability match",
+                },
+                "note": {
+                    "category": "advanced",
+                    "slow": False,
+                    "desc": "Transaction annotation",
+                },
+                "annotate_transaction": {
+                    "category": "advanced",
+                    "slow": False,
+                    "desc": "Add transaction annotation",
+                },
+                "annotate_client": {
+                    "category": "advanced",
+                    "slow": False,
+                    "desc": "Add client annotation",
+                },
+                "peername": {
+                    "category": "advanced",
+                    "slow": False,
+                    "desc": "Cache peer name",
+                },
+                "peername_regex": {
+                    "category": "advanced",
+                    "slow": False,
+                    "desc": "Cache peer name regex",
+                },
+                "hier_code": {
+                    "category": "advanced",
+                    "slow": False,
+                    "desc": "Squid hierarchy code",
+                },
                 # Group ACLs
-                'any-of': {'category': 'group', 'slow': False, 'desc': 'Match any of the ACLs'},
-                'all-of': {'category': 'group', 'slow': False, 'desc': 'Match all of the ACLs'},
+                "any-of": {
+                    "category": "group",
+                    "slow": False,
+                    "desc": "Match any of the ACLs",
+                },
+                "all-of": {
+                    "category": "group",
+                    "slow": False,
+                    "desc": "Match all of the ACLs",
+                },
             }
-            
+
             last_comment = ""
 
             for line_num, line in enumerate(lines, 1):
                 try:
                     stripped = line.strip()
-                    
+
                     # Track comments for context
                     if stripped.startswith("#"):
                         last_comment = stripped[1:].strip()
                         continue
-                    
+
                     if stripped.startswith("acl "):
                         parts = stripped.split()
                         if len(parts) >= 3:
                             acl_name = parts[1]
-                            
+
                             # Parse options and type
                             options = []
                             type_index = 2
-                            while type_index < len(parts) and parts[type_index].startswith('-'):
+                            while type_index < len(parts) and parts[
+                                type_index
+                            ].startswith("-"):
                                 options.append(parts[type_index])
                                 type_index += 1
-                            
+
                             if type_index >= len(parts):
                                 continue
-                                
+
                             acl_type = parts[type_index]
-                            values = parts[type_index + 1:] if len(parts) > type_index + 1 else []
+                            values = (
+                                parts[type_index + 1 :]
+                                if len(parts) > type_index + 1
+                                else []
+                            )
                             value_string = " ".join(values)
-                            
+
                             # Get type metadata
-                            type_info = acl_types_info.get(acl_type, {
-                                'category': 'other',
-                                'slow': False,
-                                'desc': 'Custom ACL type'
-                            })
-                            
+                            type_info = acl_types_info.get(
+                                acl_type,
+                                {
+                                    "category": "other",
+                                    "slow": False,
+                                    "desc": "Custom ACL type",
+                                },
+                            )
+
                             # Check if predefined
                             is_predefined = acl_name in predefined_acls
-                            
-                            acls.append({
-                                "id": acl_index,
-                                "name": acl_name,
-                                "type": acl_type,
-                                "options": options,
-                                "value_list": values,
-                                "value_string": value_string,
-                                "is_predefined": is_predefined,
-                                "is_slow": type_info.get('slow', False),
-                                "category": type_info.get('category', 'other'),
-                                "type_description": type_info.get('desc', ''),
-                                "comment": last_comment if last_comment else "",
-                                "line_number": line_num,
-                                "full_line": stripped
-                            })
+
+                            acls.append(
+                                {
+                                    "id": acl_index,
+                                    "name": acl_name,
+                                    "type": acl_type,
+                                    "options": options,
+                                    "value_list": values,
+                                    "value_string": value_string,
+                                    "is_predefined": is_predefined,
+                                    "is_slow": type_info.get("slow", False),
+                                    "category": type_info.get("category", "other"),
+                                    "type_description": type_info.get("desc", ""),
+                                    "comment": last_comment if last_comment else "",
+                                    "line_number": line_num,
+                                    "full_line": stripped,
+                                }
+                            )
                             acl_index += 1
                             last_comment = ""
-                            
+
                 except Exception as e:
                     logger.warning(f"Error processing ACL at line {line_num}: {e}")
                     continue
@@ -363,7 +565,9 @@ class SquidConfigManager:
         if self.is_modular:
             delay_content = self.read_modular_config("110_delay_pools.conf")
             if not delay_content:
-                logger.warning("Could not read modular delay pools config, falling back to main config")
+                logger.warning(
+                    "Could not read modular delay pools config, falling back to main config"
+                )
                 config_to_parse = self.config_content
             else:
                 config_to_parse = delay_content
@@ -381,56 +585,55 @@ class SquidConfigManager:
             for line_num, line in enumerate(lines, 1):
                 try:
                     line = line.strip()
-                    
+
                     if line.startswith("delay_pools "):
                         parts = line.split()
                         if len(parts) >= 2:
                             total_pools = int(parts[1])
-                            
+
                     elif line.startswith("delay_class "):
                         parts = line.split()
                         if len(parts) >= 3:
                             pool_num = parts[1]
                             if pool_num not in pools_dict:
                                 pools_dict[pool_num] = {
-                                    'pool_number': pool_num,
-                                    'class': parts[2],
-                                    'parameters': None,
-                                    'access_rules': []
+                                    "pool_number": pool_num,
+                                    "class": parts[2],
+                                    "parameters": None,
+                                    "access_rules": [],
                                 }
                             else:
-                                pools_dict[pool_num]['class'] = parts[2]
-                                
+                                pools_dict[pool_num]["class"] = parts[2]
+
                     elif line.startswith("delay_parameters "):
                         parts = line.split()
                         if len(parts) >= 3:
                             pool_num = parts[1]
                             if pool_num not in pools_dict:
                                 pools_dict[pool_num] = {
-                                    'pool_number': pool_num,
-                                    'class': None,
-                                    'parameters': " ".join(parts[2:]),
-                                    'access_rules': []
+                                    "pool_number": pool_num,
+                                    "class": None,
+                                    "parameters": " ".join(parts[2:]),
+                                    "access_rules": [],
                                 }
                             else:
-                                pools_dict[pool_num]['parameters'] = " ".join(parts[2:])
-                                
+                                pools_dict[pool_num]["parameters"] = " ".join(parts[2:])
+
                     elif line.startswith("delay_access "):
                         parts = line.split()
                         if len(parts) >= 4:
                             pool_num = parts[1]
                             if pool_num not in pools_dict:
                                 pools_dict[pool_num] = {
-                                    'pool_number': pool_num,
-                                    'class': None,
-                                    'parameters': None,
-                                    'access_rules': []
+                                    "pool_number": pool_num,
+                                    "class": None,
+                                    "parameters": None,
+                                    "access_rules": [],
                                 }
-                            pools_dict[pool_num]['access_rules'].append({
-                                'action': parts[2],
-                                'acl': " ".join(parts[3:])
-                            })
-                            
+                            pools_dict[pool_num]["access_rules"].append(
+                                {"action": parts[2], "acl": " ".join(parts[3:])}
+                            )
+
                 except Exception as e:
                     logger.warning(
                         f"Error processing delay pool at line {line_num}: {e}"
@@ -438,8 +641,12 @@ class SquidConfigManager:
                     continue
 
             # Convert dictionary to sorted list
-            delay_pools = [pools_dict[key] for key in sorted(pools_dict.keys(), key=int)]
-            logger.debug(f"Found {len(delay_pools)} delay pool configurations (total_pools={total_pools})")
+            delay_pools = [
+                pools_dict[key] for key in sorted(pools_dict.keys(), key=int)
+            ]
+            logger.debug(
+                f"Found {len(delay_pools)} delay pool configurations (total_pools={total_pools})"
+            )
             return delay_pools
 
         except Exception as e:
@@ -468,7 +675,9 @@ class SquidConfigManager:
         if self.is_modular:
             http_content = self.read_modular_config("120_http_access.conf")
             if not http_content:
-                logger.warning("Could not read modular http_access config, falling back to main config")
+                logger.warning(
+                    "Could not read modular http_access config, falling back to main config"
+                )
                 config_to_parse = self.config_content
             else:
                 config_to_parse = http_content
@@ -486,22 +695,22 @@ class SquidConfigManager:
             for line_num, line in enumerate(lines, 1):
                 try:
                     stripped = line.strip()
-                    
+
                     # Track comments for context
                     if stripped.startswith("#"):
                         last_comment = stripped[1:].strip()
                         continue
-                    
+
                     if stripped.startswith("http_access "):
                         parts = stripped.split()
                         if len(parts) >= 3:
                             action = parts[1]
                             acl_string = " ".join(parts[2:])
                             acls = parts[2:]
-                            
+
                             # Check if any ACL has negation
                             is_negative = any(acl.startswith("!") for acl in acls)
-                            
+
                             # Identify special/common ACLs
                             special_acls = []
                             if "localhost" in acls:
@@ -514,18 +723,20 @@ class SquidConfigManager:
                                 special_acls.append("SSL_ports")
                             if "CONNECT" in acls:
                                 special_acls.append("CONNECT")
-                            
-                            rules.append({
-                                "action": action,
-                                "acls": acls,
-                                "acl_string": acl_string,
-                                "is_negative": is_negative,
-                                "line_number": line_num,
-                                "description": last_comment if last_comment else "",
-                                "special_acls": special_acls
-                            })
+
+                            rules.append(
+                                {
+                                    "action": action,
+                                    "acls": acls,
+                                    "acl_string": acl_string,
+                                    "is_negative": is_negative,
+                                    "line_number": line_num,
+                                    "description": last_comment if last_comment else "",
+                                    "special_acls": special_acls,
+                                }
+                            )
                             last_comment = ""  # Reset comment
-                            
+
                 except Exception as e:
                     logger.warning(
                         f"Error processing HTTP rule at line {line_num}: {e}"
@@ -545,7 +756,10 @@ class SquidConfigManager:
             return
 
         # Check if config contains include directives pointing to squid.d
-        self.is_modular = "include" in self.config_content.lower() and "squid.d" in self.config_content
+        self.is_modular = (
+            "include" in self.config_content.lower()
+            and "squid.d" in self.config_content
+        )
         if self.is_modular:
             logger.info("Modular configuration detected")
 
@@ -558,27 +772,33 @@ class SquidConfigManager:
         try:
             configs = []
             for filename in sorted(os.listdir(self.config_dir)):
-                if filename.endswith('.conf'):
+                if filename.endswith(".conf"):
                     filepath = os.path.join(self.config_dir, filename)
                     if os.path.isfile(filepath):
                         try:
                             stat = os.stat(filepath)
-                            configs.append({
-                                "filename": filename,
-                                "filepath": filepath,
-                                "size": stat.st_size,
-                                "modified": datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
-                                "readable": os.access(filepath, os.R_OK),
-                                "writable": os.access(filepath, os.W_OK),
-                            })
+                            configs.append(
+                                {
+                                    "filename": filename,
+                                    "filepath": filepath,
+                                    "size": stat.st_size,
+                                    "modified": datetime.fromtimestamp(
+                                        stat.st_mtime
+                                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                                    "readable": os.access(filepath, os.R_OK),
+                                    "writable": os.access(filepath, os.W_OK),
+                                }
+                            )
                         except Exception as e:
-                            logger.warning(f"Error reading file info for {filename}: {e}")
+                            logger.warning(
+                                f"Error reading file info for {filename}: {e}"
+                            )
             return configs
         except Exception as e:
             logger.error(f"Error listing modular configs: {e}")
             return []
 
-    def read_modular_config(self, filename: str) -> Optional[str]:
+    def read_modular_config(self, filename: str) -> str | None:
         """Read a specific modular configuration file."""
         filepath = os.path.join(self.config_dir, filename)
 
@@ -586,12 +806,12 @@ class SquidConfigManager:
             logger.error(f"Config file not found: {filepath}")
             return None
 
-        if not filepath.endswith('.conf'):
+        if not filepath.endswith(".conf"):
             logger.error(f"Invalid file extension: {filename}")
             return None
 
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding="utf-8") as f:
                 content = f.read()
             logger.debug(f"Read modular config: {filename}")
             return content
@@ -603,26 +823,28 @@ class SquidConfigManager:
         """Save content to a specific modular configuration file."""
         filepath = os.path.join(self.config_dir, filename)
 
-        if not filename.endswith('.conf'):
+        if not filename.endswith(".conf"):
             logger.error(f"Invalid file extension: {filename}")
             return False
 
         # Validate filename to prevent directory traversal
-        if '/' in filename or '\\' in filename or '..' in filename:
+        if "/" in filename or "\\" in filename or ".." in filename:
             logger.error(f"Invalid filename (potential path traversal): {filename}")
             return False
 
         try:
             # Create backup before saving
             if os.path.exists(filepath):
-                backup_path = f"{filepath}.bak{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                backup_path = (
+                    f"{filepath}.bak{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                )
                 try:
                     shutil.copy2(filepath, backup_path)
                     logger.info(f"Backup created: {backup_path}")
                 except Exception as e:
                     logger.warning(f"Could not create backup: {e}")
 
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 f.write(content)
 
             logger.info(f"Saved modular config: {filename}")
@@ -639,18 +861,20 @@ class SquidConfigManager:
             logger.error(f"Config file not found: {filepath}")
             return False
 
-        if not filename.endswith('.conf'):
+        if not filename.endswith(".conf"):
             logger.error(f"Invalid file extension: {filename}")
             return False
 
         # Validate filename to prevent directory traversal
-        if '/' in filename or '\\' in filename or '..' in filename:
+        if "/" in filename or "\\" in filename or ".." in filename:
             logger.error(f"Invalid filename (potential path traversal): {filename}")
             return False
 
         try:
             # Create backup before deleting
-            backup_path = f"{filepath}.deleted{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            backup_path = (
+                f"{filepath}.deleted{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            )
             try:
                 shutil.move(filepath, backup_path)
                 logger.info(f"File moved to: {backup_path}")
