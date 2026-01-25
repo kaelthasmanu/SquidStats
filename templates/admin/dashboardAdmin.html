@@ -88,6 +88,31 @@
 
         </div>
 
+        <!-- Info cuando todo está en 0 -->
+        {% if not status.errors and stats.total_acls == 0 and stats.total_delay_pools == 0 and stats.total_http_rules == 0 %}
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 sm:p-6 rounded-lg mb-6">
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl mt-1 mr-4"></i>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-yellow-900 mb-2">No se encontraron configuraciones</h3>
+                    <p class="text-yellow-800 mb-3">No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración de Squid.</p>
+                    <div class="bg-white rounded-lg p-4 border border-yellow-200">
+                        <p class="text-sm text-gray-700 mb-2"><strong>¿Tu configuración ya está dividida en módulos?</strong></p>
+                        <p class="text-sm text-gray-600 mb-3">Si ya tienes tu configuración organizada en archivos separados (por ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede leerla directamente sin necesidad de unificarla.</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <a href="{{ url_for('admin.split_config') }}" class="inline-flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-cog mr-2"></i>Gestionar Configuración Modular
+                            </a>
+                            <a href="{{ url_for('admin.edit_config') }}" class="inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-edit mr-2"></i>Editar squid.conf
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Quick Actions -->
         <div class="bg-gray-50 rounded-lg p-4 sm:p-6">
             <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h3>

@@ -2,7 +2,7 @@
 let confirmCallback = null;
 
 function showCustomConfirm(message, callback) {
-    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmMessage').innerHTML = message;
     confirmCallback = callback;
     document.getElementById('confirmModal').classList.remove('hidden');
 }

@@ -108,7 +108,7 @@
 
             <!-- Action buttons -->
             <div class="flex flex-col sm:flex-row gap-4">
-                <button onclick="executeSplit()" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
+                <button onclick="confirmSplit()" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
                     <i class="fas fa-code-branch mr-2"></i>
                     Dividir Configuración
                 </button>
@@ -164,6 +164,29 @@
     // Get CSRF token
     function getCsrfToken() {
         return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+
+    // Get current date for backup filename
+    function getCurrentDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${year}${month}${day}_${hours}${minutes}`;
+    }
+
+    function confirmSplit() {
+        const backupFilename = `squid.conf.bak${getCurrentDate()}`;
+        const message = `¿Está seguro de que desea dividir la configuración de Squid?<br><br>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2 text-left">
+                <p class="text-sm text-blue-900 mb-2"><i class="fas fa-info-circle mr-2"></i><strong>Esta operación es reversible</strong></p>
+                <p class="text-xs text-blue-800">Se creará automáticamente una copia de seguridad de tu archivo <code class="bg-blue-100 px-1 py-0.5 rounded">squid.conf</code> con el nombre:</p>
+                <p class="text-xs text-blue-900 font-mono mt-1 bg-blue-100 px-2 py-1 rounded">${backupFilename}</p>
+            </div>`;
+        
+        showCustomConfirm(message, executeSplit);
     }
 
     async function executeSplit() {
