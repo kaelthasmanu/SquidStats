@@ -1238,6 +1238,11 @@ def split_config():
 
         results = splitter.split_config()
 
+        # Reload config_manager to detect modular configuration
+        global config_manager
+        config_manager = SquidConfigManager()
+        logger.info("Config manager reloaded after splitting configuration")
+
         return jsonify(
             {
                 "status": "success",
