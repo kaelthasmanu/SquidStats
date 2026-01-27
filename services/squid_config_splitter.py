@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -259,11 +260,79 @@ class SquidConfigSplitter:
             self._generate_main_config(list(buffers.keys()))
             logger.info(f"Generated new main config: {self.input_file}")
 
+            # Validate Squid configuration
+            if not self._validate_squid_config():
+                logger.error(
+                    "Squid configuration validation failed. Rolling back changes."
+                )
+                self._rollback_changes(backup_file, list(buffers.keys()))
+                raise RuntimeError(
+                    "Squid configuration validation failed. Changes have been reverted."
+                )
+
+            logger.info("Squid configuration validated successfully.")
             return results
 
         except Exception as e:
             logger.exception(f"Error splitting configuration file: {e}")
             raise
+
+    def _validate_squid_config(self) -> bool:
+        """
+        Validate Squid configuration using 'squid -k parse'.
+        Returns True if configuration is valid, False otherwise.
+        """
+        try:
+            logger.info("Validating Squid configuration with 'squid -k parse'...")
+            result = subprocess.run(
+                ["squid", "-k", "parse"], capture_output=True, text=True, timeout=30
+            )
+
+            if result.returncode == 0:
+                logger.info("Squid configuration is valid.")
+                return True
+            else:
+                logger.error(
+                    f"Squid configuration validation failed with return code {result.returncode}"
+                )
+                logger.error(f"STDOUT: {result.stdout}")
+                logger.error(f"STDERR: {result.stderr}")
+                return False
+
+        except subprocess.TimeoutExpired:
+            logger.error("Squid configuration validation timed out.")
+            return False
+        except FileNotFoundError:
+            logger.error("squid command not found. Cannot validate configuration.")
+            return False
+        except Exception as e:
+            logger.error(f"Error validating Squid configuration: {e}")
+            return False
+
+    def _rollback_changes(self, backup_file: str, generated_files: list[str]) -> None:
+        """
+        Rollback changes by restoring the backup and deleting generated files.
+        """
+        try:
+            # Restore backup
+            if os.path.exists(backup_file):
+                shutil.copy2(backup_file, self.input_file)
+                logger.info(f"Restored backup from {backup_file} to {self.input_file}")
+            else:
+                logger.error(f"Backup file not found: {backup_file}")
+
+            # Delete generated files
+            for filename in generated_files:
+                file_path = os.path.join(self.output_dir, filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    logger.info(f"Deleted generated file: {file_path}")
+
+            logger.info("Rollback completed successfully.")
+
+        except Exception as e:
+            logger.error(f"Error during rollback: {e}")
+            raise RuntimeError(f"Rollback failed: {e}")
 
     def _generate_main_config(self, generated_files: list[str]) -> None:
         header = [
