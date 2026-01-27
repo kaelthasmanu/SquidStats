@@ -9,7 +9,8 @@ class ThemeManager {
         this.STORAGE_KEY = 'squidstats-theme';
         this.THEME_LIGHT = 'light';
         this.THEME_DARK = 'dark';
-        this.currentTheme = this.getStoredTheme() || this.getSystemTheme();
+        // Tema oscuro por defecto
+        this.currentTheme = this.getStoredTheme() || this.THEME_DARK;
         
         // Inicializar el tema inmediatamente para evitar flash
         this.initTheme();
