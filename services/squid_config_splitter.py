@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -188,9 +189,14 @@ class SquidConfigSplitter:
         try:
             shutil.copy2(self.input_file, backup_file)
             logger.info(f"Backup created: {backup_file}")
+        except PermissionError as e:
+            error_msg = f"Permission denied to create backup file: {backup_file}. Error: {str(e)}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
         except Exception as e:
-            logger.error(f"Failed to create backup: {e}")
-            raise RuntimeError(f"Failed to create backup: {e}")
+            error_msg = f"Failed to create backup: {backup_file}. Error: {str(e)}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
         # Create the output directory if it doesn't exist
         try:
@@ -229,13 +235,18 @@ class SquidConfigSplitter:
                     try:
                         target = self._classify_line(stripped)
                     except ValueError as e:
-                        logger.error(f"Error in line {lineno}: {e}")
-                        raise RuntimeError(f"Line {lineno}: {e}")
+                        error_msg = f"Error classifying line {lineno}: {stripped}\nError: {str(e)}"
+                        logger.error(error_msg)
+                        raise RuntimeError(error_msg)
 
                     if target == self.unknown_file and self.strict:
-                        raise RuntimeError(
-                            f"Unknown directive at line {lineno}: {stripped}"
+                        error_msg = (
+                            f"Unknown directive at line {lineno}: '{stripped}'\n"
+                            f"This directive is not recognized by the splitter rules. "
+                            f"Consider adding a rule for it or disable strict mode."
                         )
+                        logger.error(error_msg)
+                        raise RuntimeError(error_msg)
 
                     buffers.setdefault(target, [])
                     buffers[target].extend(pending_comments)
@@ -249,21 +260,141 @@ class SquidConfigSplitter:
             # Final writing
             for filename, content in sorted(buffers.items()):
                 path = os.path.join(self.output_dir, filename)
-                with open(path, "w", encoding="utf-8") as f:
-                    f.writelines(content)
-
-                results[filename] = len(content)
-                logger.info(f"[OK] {path} ({len(content)} lines)")
+                try:
+                    with open(path, "w", encoding="utf-8") as f:
+                        f.writelines(content)
+                    results[filename] = len(content)
+                    logger.info(f"[OK] {path} ({len(content)} lines)")
+                except PermissionError as e:
+                    error_msg = (
+                        f"Permission denied writing to file: {path}. Error: {str(e)}"
+                    )
+                    logger.error(error_msg)
+                    raise RuntimeError(error_msg)
+                except Exception as e:
+                    error_msg = f"Failed to write file: {path}. Error: {str(e)}"
+                    logger.error(error_msg)
+                    raise RuntimeError(error_msg)
 
             # Generate the new main squid.conf with includes
             self._generate_main_config(list(buffers.keys()))
             logger.info(f"Generated new main config: {self.input_file}")
 
+            # Validate Squid configuration
+            validation_result = self._validate_squid_config()
+            if not validation_result["success"]:
+                error_details = validation_result.get("error_message", "Unknown error")
+                logger.error(
+                    f"Squid configuration validation failed. Rolling back changes. Error: {error_details}"
+                )
+                self._rollback_changes(backup_file, list(buffers.keys()))
+                raise RuntimeError(
+                    f"Squid configuration validation failed. Changes have been reverted.\n"
+                    f"Error details: {error_details}"
+                )
+
+            logger.info("Squid configuration validated successfully.")
             return results
 
         except Exception as e:
             logger.exception(f"Error splitting configuration file: {e}")
             raise
+
+    def _validate_squid_config(self) -> dict:
+        """
+        Validate Squid configuration using 'squid -k parse'.
+        Returns dict with 'success' (bool), 'output' (str), and 'error_message' (str) if failed.
+        """
+        try:
+            logger.info("Validating Squid configuration with 'squid -k parse'...")
+            result = subprocess.run(
+                ["squid", "-k", "parse"], capture_output=True, text=True, timeout=30
+            )
+
+            # Capture all output
+            stdout_output = result.stdout.strip() if result.stdout else ""
+            stderr_output = result.stderr.strip() if result.stderr else ""
+
+            full_output = ""
+            if stdout_output:
+                full_output += f"STDOUT:\n{stdout_output}\n"
+            if stderr_output:
+                full_output += f"STDERR:\n{stderr_output}\n"
+
+            if not full_output:
+                full_output = "No output from squid command"
+
+            if result.returncode == 0:
+                logger.info(
+                    f"Squid configuration is valid.\nCommand output:\n{full_output}"
+                )
+                return {
+                    "success": True,
+                    "output": full_output,
+                    "return_code": result.returncode,
+                }
+            else:
+                error_msg = (
+                    f"Validation failed with return code {result.returncode}\n"
+                    f"{full_output}"
+                )
+                logger.error(f"Squid configuration validation failed:\n{error_msg}")
+                return {
+                    "success": False,
+                    "error_message": error_msg,
+                    "output": full_output,
+                    "return_code": result.returncode,
+                }
+
+        except subprocess.TimeoutExpired as e:
+            # Capture partial output if available
+            stdout_partial = e.stdout.strip() if e.stdout else ""
+            stderr_partial = e.stderr.strip() if e.stderr else ""
+            partial_output = ""
+            if stdout_partial:
+                partial_output += f"STDOUT (partial):\n{stdout_partial}\n"
+            if stderr_partial:
+                partial_output += f"STDERR (partial):\n{stderr_partial}\n"
+            error_msg = f"Squid configuration validation timed out after 30 seconds.\n{partial_output}"
+            logger.error(error_msg)
+            return {
+                "success": False,
+                "error_message": error_msg,
+                "output": partial_output,
+            }
+        except FileNotFoundError:
+            error_msg = "squid command not found. Cannot validate configuration. Please ensure Squid is installed."
+            logger.error(error_msg)
+            return {"success": False, "error_message": error_msg}
+        except Exception as e:
+            error_msg = f"Unexpected error validating Squid configuration: {str(e)}"
+            logger.error(error_msg)
+            return {"success": False, "error_message": error_msg}
+
+    def _rollback_changes(self, backup_file: str, generated_files: list[str]) -> None:
+        """
+        Rollback changes by restoring the backup and deleting generated files.
+        """
+        try:
+            # Restore backup
+            if os.path.exists(backup_file):
+                shutil.copy2(backup_file, self.input_file)
+                logger.info(f"Restored backup from {backup_file} to {self.input_file}")
+            else:
+                logger.error(f"Backup file not found: {backup_file}")
+
+            # Delete generated files
+            for filename in generated_files:
+                file_path = os.path.join(self.output_dir, filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    logger.info(f"Deleted generated file: {file_path}")
+
+            logger.info("Rollback completed successfully.")
+
+        except Exception as e:
+            logger.error(f"Error during rollback: {e}")
+            raise RuntimeError(f"Rollback failed: {e}")
 
     def _generate_main_config(self, generated_files: list[str]) -> None:
         header = [
@@ -317,3 +448,72 @@ class SquidConfigSplitter:
         if not self.check_output_dir_exists():
             return 0
         return len([f for f in os.listdir(self.output_dir) if f.endswith(".conf")])
+
+    @staticmethod
+    def get_split_files_info(output_dir: str = None) -> dict:
+        if output_dir is None:
+            output_dir = "/etc/squid/squid.d"
+
+        if not os.path.exists(output_dir):
+            return {
+                "status": "error",
+                "message": f"El directorio {output_dir} no existe",
+                "code": 404,
+            }
+
+        try:
+            files_info = []
+            for filename in sorted(os.listdir(output_dir)):
+                if filename.endswith(".conf"):
+                    file_path = os.path.join(output_dir, filename)
+                    try:
+                        # Get file statistics
+                        stat_info = os.stat(file_path)
+                        file_size = stat_info.st_size
+                        modified_time = datetime.fromtimestamp(
+                            stat_info.st_mtime
+                        ).strftime("%Y-%m-%d %H:%M:%S")
+
+                        # Count lines
+                        with open(file_path, encoding="utf-8") as f:
+                            line_count = sum(1 for _ in f)
+
+                        files_info.append(
+                            {
+                                "filename": filename,
+                                "size": file_size,
+                                "size_human": f"{file_size / 1024:.2f} KB"
+                                if file_size > 1024
+                                else f"{file_size} B",
+                                "lines": line_count,
+                                "modified": modified_time,
+                            }
+                        )
+                    except Exception as e:
+                        logger.error(f"Error al leer archivo {filename}: {e}")
+                        continue
+
+            return {
+                "status": "success",
+                "data": {
+                    "output_dir": output_dir,
+                    "files": files_info,
+                    "total_files": len(files_info),
+                },
+            }
+
+        except PermissionError as e:
+            logger.error(f"Error de permisos al leer archivos: {e}")
+            return {
+                "status": "error",
+                "message": "No se tienen permisos suficientes para leer los archivos",
+                "code": 403,
+            }
+
+        except Exception:
+            logger.exception("Error al obtener archivos de configuración")
+            return {
+                "status": "error",
+                "message": "Error interno al obtener los archivos",
+                "code": 500,
+            }

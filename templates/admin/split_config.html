@@ -114,10 +114,10 @@
                 </button>
                 
                 {% if output_exists %}
-                <a href="{{ url_for('admin.view_config') }}" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center text-center">
+                <button onclick="showFilesModal()" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
                     <i class="fas fa-folder-open mr-2"></i>
                     Ver Archivos Generados
-                </a>
+                </button>
                 {% endif %}
             </div>
         </div>
@@ -142,6 +142,43 @@
             Resultados
         </h3>
         <div id="resultsContent" class="space-y-3"></div>
+    </div>
+</div>
+
+<!-- Modal para ver archivos generados -->
+<div id="filesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-folder-open text-2xl"></i>
+                <h3 class="text-xl font-bold">Archivos Generados</h3>
+            </div>
+            <button onclick="closeFilesModal()" class="text-white hover:text-gray-200 transition-colors">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <div id="filesModalContent" class="space-y-4">
+                <!-- Loading spinner -->
+                <div class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex items-center justify-between border-t">
+            <p class="text-sm text-gray-600">
+                <i class="fas fa-info-circle mr-1"></i>
+                Directorio: <code class="bg-gray-200 px-2 py-1 rounded text-xs">{{ output_dir }}</code>
+            </p>
+            <button onclick="closeFilesModal()" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
+                Cerrar
+            </button>
+        </div>
     </div>
 </div>
 
@@ -252,5 +289,123 @@
             resultsArea.classList.add('hidden');
         }
     }
+
+    // Función para mostrar el modal de archivos
+    async function showFilesModal() {
+        const modal = document.getElementById('filesModal');
+        const content = document.getElementById('filesModalContent');
+        
+        // Mostrar modal
+        modal.classList.remove('hidden');
+        
+        // Mostrar loading
+        content.innerHTML = `
+            <div class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+            </div>
+        `;
+        
+        try {
+            const response = await fetch('/admin/api/get-split-files', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                const files = data.data.files;
+                
+                if (files.length === 0) {
+                    content.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-folder-open text-gray-400 text-6xl mb-4"></i>
+                            <p class="text-gray-600">No se encontraron archivos en el directorio</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                content.innerHTML = `
+                    <div class="mb-4 bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                        <p class="text-emerald-800">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Se encontraron <strong>${data.data.total_files}</strong> archivo${data.data.total_files !== 1 ? 's' : ''} de configuración
+                        </p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        ${files.map(file => `
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-3 flex-1">
+                                        <i class="fas fa-file-code text-blue-500 text-xl mt-1"></i>
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-gray-800">${file.filename}</p>
+                                            <div class="mt-2 flex flex-wrap gap-3 text-xs text-gray-600">
+                                                <span class="flex items-center">
+                                                    <i class="fas fa-align-left mr-1"></i>
+                                                    ${file.lines} línea${file.lines !== 1 ? 's' : ''}
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i class="fas fa-weight-hanging mr-1"></i>
+                                                    ${file.size_human}
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    ${file.modified}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p class="text-red-800">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            ${data.message || 'Error al obtener los archivos'}
+                        </p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            content.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p class="text-red-800">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        Error de conexión al obtener los archivos
+                    </p>
+                </div>
+            `;
+        }
+    }
+
+    // Función para cerrar el modal
+    function closeFilesModal() {
+        const modal = document.getElementById('filesModal');
+        modal.classList.add('hidden');
+    }
+
+    // Cerrar modal al hacer clic fuera de él
+    document.getElementById('filesModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeFilesModal();
+        }
+    });
+
+    // Cerrar modal con la tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeFilesModal();
+        }
+    });
 </script>
 {% endblock %}
