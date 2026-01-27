@@ -303,7 +303,7 @@ class SquidConfigSplitter:
     def _validate_squid_config(self) -> dict:
         """
         Validate Squid configuration using 'squid -k parse'.
-        Returns dict with 'success' (bool) and 'error_message' (str) if failed.
+        Returns dict with 'success' (bool), 'output' (str), and 'error_message' (str) if failed.
         """
         try:
             logger.info("Validating Squid configuration with 'squid -k parse'...")
@@ -311,22 +311,57 @@ class SquidConfigSplitter:
                 ["squid", "-k", "parse"], capture_output=True, text=True, timeout=30
             )
 
+            # Capture all output
+            stdout_output = result.stdout.strip() if result.stdout else ""
+            stderr_output = result.stderr.strip() if result.stderr else ""
+
+            full_output = ""
+            if stdout_output:
+                full_output += f"STDOUT:\n{stdout_output}\n"
+            if stderr_output:
+                full_output += f"STDERR:\n{stderr_output}\n"
+
+            if not full_output:
+                full_output = "No output from squid command"
+
             if result.returncode == 0:
-                logger.info("Squid configuration is valid.")
-                return {"success": True}
+                logger.info(
+                    f"Squid configuration is valid.\nCommand output:\n{full_output}"
+                )
+                return {
+                    "success": True,
+                    "output": full_output,
+                    "return_code": result.returncode,
+                }
             else:
                 error_msg = (
                     f"Validation failed with return code {result.returncode}\n"
-                    f"STDOUT: {result.stdout.strip()}\n"
-                    f"STDERR: {result.stderr.strip()}"
+                    f"{full_output}"
                 )
-                logger.error(f"Squid configuration validation failed: {error_msg}")
-                return {"success": False, "error_message": error_msg}
+                logger.error(f"Squid configuration validation failed:\n{error_msg}")
+                return {
+                    "success": False,
+                    "error_message": error_msg,
+                    "output": full_output,
+                    "return_code": result.returncode,
+                }
 
-        except subprocess.TimeoutExpired:
-            error_msg = "Squid configuration validation timed out after 30 seconds."
+        except subprocess.TimeoutExpired as e:
+            # Capture partial output if available
+            stdout_partial = e.stdout.strip() if e.stdout else ""
+            stderr_partial = e.stderr.strip() if e.stderr else ""
+            partial_output = ""
+            if stdout_partial:
+                partial_output += f"STDOUT (partial):\n{stdout_partial}\n"
+            if stderr_partial:
+                partial_output += f"STDERR (partial):\n{stderr_partial}\n"
+            error_msg = f"Squid configuration validation timed out after 30 seconds.\n{partial_output}"
             logger.error(error_msg)
-            return {"success": False, "error_message": error_msg}
+            return {
+                "success": False,
+                "error_message": error_msg,
+                "output": partial_output,
+            }
         except FileNotFoundError:
             error_msg = "squid command not found. Cannot validate configuration. Please ensure Squid is installed."
             logger.error(error_msg)
