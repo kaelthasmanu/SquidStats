@@ -448,3 +448,72 @@ class SquidConfigSplitter:
         if not self.check_output_dir_exists():
             return 0
         return len([f for f in os.listdir(self.output_dir) if f.endswith(".conf")])
+
+    @staticmethod
+    def get_split_files_info(output_dir: str = None) -> dict:
+        if output_dir is None:
+            output_dir = "/etc/squid/squid.d"
+
+        if not os.path.exists(output_dir):
+            return {
+                "status": "error",
+                "message": f"El directorio {output_dir} no existe",
+                "code": 404,
+            }
+
+        try:
+            files_info = []
+            for filename in sorted(os.listdir(output_dir)):
+                if filename.endswith(".conf"):
+                    file_path = os.path.join(output_dir, filename)
+                    try:
+                        # Get file statistics
+                        stat_info = os.stat(file_path)
+                        file_size = stat_info.st_size
+                        modified_time = datetime.fromtimestamp(
+                            stat_info.st_mtime
+                        ).strftime("%Y-%m-%d %H:%M:%S")
+
+                        # Count lines
+                        with open(file_path, encoding="utf-8") as f:
+                            line_count = sum(1 for _ in f)
+
+                        files_info.append(
+                            {
+                                "filename": filename,
+                                "size": file_size,
+                                "size_human": f"{file_size / 1024:.2f} KB"
+                                if file_size > 1024
+                                else f"{file_size} B",
+                                "lines": line_count,
+                                "modified": modified_time,
+                            }
+                        )
+                    except Exception as e:
+                        logger.error(f"Error al leer archivo {filename}: {e}")
+                        continue
+
+            return {
+                "status": "success",
+                "data": {
+                    "output_dir": output_dir,
+                    "files": files_info,
+                    "total_files": len(files_info),
+                },
+            }
+
+        except PermissionError as e:
+            logger.error(f"Error de permisos al leer archivos: {e}")
+            return {
+                "status": "error",
+                "message": "No se tienen permisos suficientes para leer los archivos",
+                "code": 403,
+            }
+
+        except Exception:
+            logger.exception("Error al obtener archivos de configuración")
+            return {
+                "status": "error",
+                "message": "Error interno al obtener los archivos",
+                "code": 500,
+            }

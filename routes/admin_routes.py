@@ -1286,3 +1286,16 @@ def split_config():
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
+
+
+@admin_bp.route("/api/get-split-files", methods=["GET"])
+@api_auth_required
+def get_split_files():
+    """API endpoint para obtener la lista de archivos generados en squid.d."""
+    splitter = SquidConfigSplitter()
+    result = SquidConfigSplitter.get_split_files_info(splitter.output_dir)
+
+    if result["status"] == "success":
+        return jsonify(result)
+    else:
+        return jsonify(result), result.get("code", 500)
