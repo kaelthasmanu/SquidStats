@@ -36,7 +36,7 @@
     elements.userOptionsContainer.innerHTML = '';
     if (!searchTerm){
       const allOption = document.createElement('div');
-      allOption.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 border-b border-gray-100';
+      allOption.className = 'px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-slate-600';
       allOption.textContent = '-- Todos --';
       allOption.dataset.value = '';
       allOption.addEventListener('click', ()=>selectUser('', '-- Todos --'));
@@ -44,20 +44,20 @@
     }
     users.forEach((user,index)=>{
       const option = document.createElement('div');
-      option.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700';
+      option.className = 'px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-gray-700 dark:text-gray-300';
       option.textContent = user;
       option.dataset.value = user;
       option.dataset.index = index;
       option.addEventListener('click', ()=>selectUser(user, user));
       if (searchTerm){
         const regex = new RegExp(`(${searchTerm})`, 'gi');
-        option.innerHTML = user.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+        option.innerHTML = user.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-600 dark:text-gray-900">$1</mark>');
       }
       elements.userOptionsContainer.appendChild(option);
     });
     if (users.length===0 && searchTerm){
       const noResults = document.createElement('div');
-      noResults.className = 'px-3 py-2 text-gray-500 italic';
+      noResults.className = 'px-3 py-2 text-gray-500 dark:text-gray-400 italic';
       noResults.textContent = 'No se encontraron usuarios';
       elements.userOptionsContainer.appendChild(noResults);
     }

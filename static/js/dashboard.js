@@ -91,30 +91,30 @@ document.addEventListener("DOMContentLoaded", function () {
     usersContainer.innerHTML = usersData
       .map(
         (user, index) => `
-      <div class="user-card group bg-[#f0f2f5] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
+      <div class="user-card group bg-[#f0f2f5] dark:bg-slate-800 text-center overflow-hidden relative rounded-lg shadow-md dark:shadow-slate-900/50 w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="${user.username.toLowerCase()}">
         <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] z-[1]">
-          <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-300 ease-linear z-0 group-hover:h-full"></div>
-          <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
-          <div class="avatar w-full h-full rounded-full bg-slate-200 flex items-center justify-center text-[2.5rem] text-slate-500 relative transition-all duration-900 ease-in-out group-hover:shadow-[0_0_0_10px_#f7f5ec] group-hover:scale-[0.7] z-[2]">
+          <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] dark:bg-blue-600 opacity-90 scale-[3] transition-all duration-300 ease-linear z-0 group-hover:h-full"></div>
+          <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] dark:bg-blue-600 z-[1]"></div>
+          <div class="avatar w-full h-full rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[2.5rem] text-slate-500 dark:text-slate-300 relative transition-all duration-900 ease-in-out group-hover:shadow-[0_0_0_10px_#f7f5ec] dark:group-hover:shadow-[0_0_0_10px_rgba(51,65,85,0.8)] group-hover:scale-[0.7] z-[2]">
             <i class="fas fa-user"></i>
           </div>
         </div>
         
         <div class="user-info mt-[-15px] mb-4 px-[15px]">
-          <h3 class="username font-semibold text-[1.2rem] text-[#1369ce] mb-0">${
+          <h3 class="username font-semibold text-[1.2rem] text-[#1369ce] dark:text-blue-400 mb-0">${
             user.username
           }</h3>
-          <h4 class="ip-address text-[0.9rem] text-gray-500">${user.ip}</h4>
+          <h4 class="ip-address text-[0.9rem] text-gray-500 dark:text-gray-400">${user.ip}</h4>
         </div>
         
         <div class="card-action px-[15px] mt-[2px] relative z-[2]">
-          <button class="activity-button w-full bg-[#1369ce] text-white font-bold py-2 rounded-md cursor-pointer transition-all duration-300 text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5 shadow-md" 
+          <button class="activity-button w-full bg-[#1369ce] dark:bg-blue-600 text-white font-bold py-2 rounded-md cursor-pointer transition-all duration-300 text-sm hover:bg-[#0d5bb5] dark:hover:bg-blue-700 hover:-translate-y-0.5 shadow-md" 
                   onclick="window.openLogsModal(${index});">
             ACTIVIDAD
           </button>
         </div>
         
-        <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] z-[1]">
+        <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] dark:bg-blue-600 text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] dark:shadow-[0_-4px_6px_rgba(0,0,0,0.5)] z-[1]">
           <li class="flex flex-col items-center">
             <span class="label text-xs font-light uppercase tracking-wide">Solicitudes:</span>
             <span class="value font-semib">${user.total_requests}</span>

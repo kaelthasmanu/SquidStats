@@ -94,18 +94,18 @@
             {% endfor %}
         </div>
 
-        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
             <div class="flex flex-col sm:flex-row justify-between items-center">
-                <span class="text-sm text-gray-600 mb-2 sm:mb-0">
+                <span class="text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-0">
                     Mostrando {{ (results | groupby('usuario') | list) | length }} grupos de usuarios en esta página.
                 </span>
                 <div class="flex space-x-2">
                     <a href="{{ url_for('logs.blacklist_logs', page=pagination.page-1, per_page=pagination.per_page) }}" 
-                       class="px-4 py-2 bg-white border rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 {% if pagination.page == 1 %}opacity-50 cursor-not-allowed{% endif %}">
+                       class="px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 {% if pagination.page == 1 %}opacity-50 cursor-not-allowed{% endif %}">
                         Anterior
                     </a>
                     <a href="{{ url_for('logs.blacklist_logs', page=pagination.page+1, per_page=pagination.per_page) }}" 
-                       class="px-4 py-2 bg-white border rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 {% if pagination.page >= pagination.total_pages %}opacity-50 cursor-not-allowed{% endif %}">
+                       class="px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 {% if pagination.page >= pagination.total_pages %}opacity-50 cursor-not-allowed{% endif %}">
                         Siguiente
                     </a>
                 </div>
