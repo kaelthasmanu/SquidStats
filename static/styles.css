@@ -1,30 +1,15 @@
-/* Base styles */
-:root {
-    --primary-color: #2563eb;
-    --secondary-color: #1e40af;
-    --background-color: #f1f5f9;
-    --card-background: #ffffff;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --border-color: #e2e8f0;
-    --table-header-bg: #f8fafc;
-    --table-border: #e5e7eb;
-    --table-stripe: #f9fafb;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --info-color: #3b82f6;
-}
+/* Base styles - Updated for theme support */
+/* Note: Main theme variables are defined in theme.css */
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /*outline: 1px solid red;*/
 }
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--background-color);
+    background-color: var(--bg-secondary);
     color: var(--text-primary);
     line-height: 1.5;
     padding: 1rem;
@@ -38,12 +23,12 @@ body {
 
 /* Header styles */
 .header {
-    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    background: var(--nav-bg);
     padding: 1.5rem;
     border-radius: 0.5rem;
     margin-bottom: 1.5rem;
     color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .header-content {
@@ -70,18 +55,25 @@ body {
 }
 
 .stat-card {
-    background-color: var(--card-background);
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
     padding: 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--card-shadow);
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .stat-icon {
     font-size: 1.25rem;
-    background-color: var(--background-color);
+    background-color: var(--bg-tertiary);
     padding: 0.5rem;
     border-radius: 0.375rem;
 }
@@ -104,9 +96,10 @@ body {
 
 /* User Section */
 .user-section {
-    background-color: var(--card-background);
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: 0.5rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--card-shadow);
     margin-bottom: 1.5rem;
     overflow: hidden;
 }
@@ -136,7 +129,7 @@ body {
 }
 
 .connection-count {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
@@ -145,7 +138,7 @@ body {
 }
 
 .data-usage {
-    background-color: var(--success-color);
+    background-color: var(--color-success);
     color: white;
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
@@ -154,7 +147,7 @@ body {
 }
 
 .total-requests {
-    background-color: var(--info-color);
+    background-color: var(--color-info);
     color: white;
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
@@ -163,16 +156,16 @@ body {
 }
 
 .grouped-log-entry {
-  background-color: #f0f9ff;
-  border-left: 4px solid #3b82f6;
+  background-color: var(--color-info-light);
+  border-left: 4px solid var(--color-info);
 }
 
 .grouped-log-entry .wave {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+  background: linear-gradient(135deg, var(--color-info-light) 0%, var(--color-info-light) 100%) !important;
 }
 
 .fa-layer-group {
-  color: #3b82f6;
+  color: var(--color-info);
 }
 
 /* Responsive adjustments */

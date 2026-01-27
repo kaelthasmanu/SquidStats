@@ -1,0 +1,384 @@
+/**
+ * Theme Polyfills and Enhancements
+ * Additional styles to ensure perfect theme compatibility
+ */
+
+/* ============================================
+   NOTIFICATION DROPDOWN FIXES
+   ============================================ */
+
+.dark .notifications,
+.dark .notifications-mobile {
+    background-color: var(--dropdown-bg);
+}
+
+.dark .notifications li,
+.dark .notifications-mobile li {
+    color: var(--text-primary);
+}
+
+.dark .notifications li:hover,
+.dark .notifications-mobile li:hover {
+    background-color: var(--dropdown-hover);
+}
+
+.dark .notification-item {
+    border-color: var(--border-primary);
+}
+
+/* ============================================
+   NAVBAR ENHANCEMENTS
+   ============================================ */
+
+.dark nav {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+}
+
+nav a.text-gray-200 {
+    transition: all 0.3s ease;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="search"],
+.dark input[type="tel"],
+.dark input[type="url"],
+.dark textarea,
+.dark select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+    border-color: var(--input-focus-border);
+    ring-color: var(--input-focus-border);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: var(--text-tertiary);
+}
+
+.dark input:disabled,
+.dark textarea:disabled,
+.dark select:disabled {
+    background-color: var(--input-disabled-bg);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.dark button:not([class*="bg-"]):not([class*="gradient"]) {
+    background-color: var(--button-secondary-bg);
+    color: var(--text-primary);
+}
+
+.dark button:not([class*="bg-"]):not([class*="gradient"]):hover {
+    background-color: var(--button-secondary-hover);
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+.dark table {
+    border-color: var(--table-border);
+}
+
+.dark thead {
+    background-color: var(--table-header-bg);
+}
+
+.dark thead th {
+    color: var(--text-primary);
+    border-color: var(--table-border);
+}
+
+.dark tbody td {
+    color: var(--text-primary);
+    border-color: var(--table-border);
+}
+
+.dark tbody tr {
+    background-color: var(--table-row-odd);
+}
+
+.dark tbody tr:nth-child(even) {
+    background-color: var(--table-row-even);
+}
+
+.dark tbody tr:hover {
+    background-color: var(--table-row-hover);
+}
+
+/* ============================================
+   BADGES AND TAGS
+   ============================================ */
+
+.dark .badge,
+.dark .tag {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+}
+
+/* Status badges keep their colors */
+.dark .badge.bg-blue-100,
+.dark .badge.bg-green-100,
+.dark .badge.bg-red-100,
+.dark .badge.bg-yellow-100 {
+    opacity: 0.9;
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+
+.dark .alert {
+    border-color: var(--border-primary);
+}
+
+.dark .alert-info {
+    background-color: var(--color-info-light);
+    border-color: var(--color-info);
+}
+
+.dark .alert-success {
+    background-color: var(--color-success-light);
+    border-color: var(--color-success);
+}
+
+.dark .alert-warning {
+    background-color: var(--color-warning-light);
+    border-color: var(--color-warning);
+}
+
+.dark .alert-danger,
+.dark .alert-error {
+    background-color: var(--color-danger-light);
+    border-color: var(--color-danger);
+}
+
+/* ============================================
+   CODE BLOCKS
+   ============================================ */
+
+.dark code,
+.dark pre {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+}
+
+/* ============================================
+   DIVIDERS
+   ============================================ */
+
+.dark hr {
+    border-color: var(--border-primary);
+}
+
+/* ============================================
+   LOADING SPINNERS
+   ============================================ */
+
+.dark .spinner,
+.dark .loading {
+    border-color: var(--border-primary);
+    border-top-color: var(--color-primary);
+}
+
+/* ============================================
+   TOOLTIPS
+   ============================================ */
+
+.dark [data-tooltip]::after,
+.dark .tooltip {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--shadow-xl);
+}
+
+/* ============================================
+   BREADCRUMBS
+   ============================================ */
+
+.dark .breadcrumb {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.dark .breadcrumb a {
+    color: var(--text-link);
+}
+
+.dark .breadcrumb a:hover {
+    color: var(--text-link-hover);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.dark .pagination {
+    border-color: var(--border-primary);
+}
+
+.dark .pagination a,
+.dark .pagination button {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+}
+
+.dark .pagination a:hover,
+.dark .pagination button:hover {
+    background-color: var(--dropdown-hover);
+}
+
+.dark .pagination .active {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* ============================================
+   ACCORDIONS
+   ============================================ */
+
+.dark .accordion-header {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+}
+
+.dark .accordion-body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+
+.dark .tab {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-color: var(--border-primary);
+}
+
+.dark .tab:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.dark .tab.active {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+/* ============================================
+   PROGRESS BARS
+   ============================================ */
+
+.dark .progress {
+    background-color: var(--bg-tertiary);
+}
+
+.dark .progress-bar {
+    background-color: var(--color-primary);
+}
+
+/* ============================================
+   LIST GROUPS
+   ============================================ */
+
+.dark .list-group-item {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+}
+
+.dark .list-group-item:hover {
+    background-color: var(--dropdown-hover);
+}
+
+.dark .list-group-item.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+/* ============================================
+   SPECIAL ENHANCEMENTS
+   ============================================ */
+
+/* Smooth color transitions for all text */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+.dark p, .dark span, .dark div, .dark a, .dark li {
+    transition: color 0.3s ease;
+}
+
+/* Image brightness adjustment in dark mode */
+.dark img:not([class*="logo"]):not([class*="icon"]) {
+    opacity: 0.9;
+}
+
+/* Better focus indicators */
+.dark *:focus-visible {
+    outline-color: var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Selection color */
+.dark ::selection {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.dark ::-moz-selection {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .dark {
+        /* Force light mode for printing */
+        background-color: white !important;
+        color: black !important;
+    }
+    
+    .dark * {
+        background-color: white !important;
+        color: black !important;
+        border-color: #ccc !important;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .dark * {
+        transition: none !important;
+        animation: none !important;
+    }
+}

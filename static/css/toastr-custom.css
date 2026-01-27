@@ -1,5 +1,38 @@
-/* Personalización mínima para el apilamiento vertical de notificaciones toastr */
+/* Personalización para toastr con soporte de modo oscuro */
 /* Este archivo NO debe sobrescribir la funcionalidad básica de toastr */
+
+/* Dark mode support for toastr */
+.dark #toast-container > div {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-primary);
+}
+
+.dark #toast-container > .toast-success {
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+}
+
+.dark #toast-container > .toast-error {
+    background-color: var(--color-danger);
+    border-color: var(--color-danger);
+}
+
+.dark #toast-container > .toast-warning {
+    background-color: var(--color-warning);
+    border-color: var(--color-warning);
+}
+
+.dark #toast-container > .toast-info {
+    background-color: var(--color-info);
+    border-color: var(--color-info);
+}
+
+/* Improved transitions */
+#toast-container > div {
+    transition: all 0.3s ease;
+}
 
 /* Ajustar el espaciado entre notificaciones - aparecen hacia abajo */
 #toast-container.toast-top-right > div {

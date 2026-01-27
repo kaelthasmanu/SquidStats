@@ -8,15 +8,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Theme System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-enhancements.css') }}">
+    <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
 </head>
-<body class="bg-gray-50 min-h-screen" x-data="{ sidebarOpen: false }">
+<body class="bg-gray-50 min-h-screen transition-colors duration-300" x-data="{ sidebarOpen: false }">
     <!-- Navigation -->
-    <nav class="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white shadow-xl border-b border-blue-500">
+    <nav class="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white shadow-xl border-b border-blue-500 dark:from-blue-800 dark:via-blue-900 dark:to-slate-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-3 md:space-x-6">
                     <!-- Mobile menu button -->
-                    <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-white hover:bg-blue-500 p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-white hover:bg-blue-500 dark:hover:bg-blue-700 p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div class="flex items-center space-x-3">
@@ -29,6 +33,10 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+                    <!-- Theme Toggle Button -->
+                    <button data-theme-toggle class="theme-toggle text-white hover:bg-blue-500 dark:hover:bg-blue-700 p-2 rounded-lg transition-colors duration-200" title="Cambiar tema">
+                        <i class="fas fa-moon theme-toggle-icon"></i>
+                    </button>
                     <button onclick="reloadSquid()" class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
                         <i class="fas fa-sync-alt mr-2"></i>
                         <span class="hidden sm:inline">Recargar</span>
@@ -37,7 +45,7 @@
                         <i class="fas fa-power-off mr-2"></i>
                         <span class="hidden sm:inline">Reiniciar</span>
                     </button>
-                    <div class="hidden md:flex items-center space-x-2 text-white bg-blue-800 bg-opacity-60 px-4 py-2 rounded-lg shadow-md">
+                    <div class="hidden md:flex items-center space-x-2 text-white bg-blue-800 dark:bg-slate-800 bg-opacity-60 px-4 py-2 rounded-lg shadow-md">
                         <i class="fas fa-user-circle text-lg"></i>
                         <span class="font-medium">{{ session.user.username if session.user else 'Admin' }}</span>
                     </div>
@@ -54,49 +62,49 @@
     <div class="flex relative">
         <!-- Mobile sidebar overlay -->
         <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" style="display: none;"></div>
-        <aside class="w-64 bg-white shadow-lg min-h-screen">
+        <aside class="w-64 bg-white dark:bg-slate-800 shadow-lg min-h-screen transition-colors duration-300">
             <nav class="mt-8">
                 <div class="px-4 space-y-2">
-                    <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-home mr-3"></i>Dashboard 
                     </a>
-                    <a href="{{ url_for('admin.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-home mr-3"></i>Dashboard Admin
                     </a>
-                    <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-cog mr-3"></i>Configuración
                     </a>
-                    <a href="{{ url_for('admin.split_config_view') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.split_config_view') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <span class="flex items-center">
                             <i class="fas fa-code-branch mr-3"></i>Dividir Config
                         </span>
                         <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
                     </a>
-                    <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-users mr-3"></i>Usuarios
                     </a>
-                    <a href="{{ url_for('admin.clean_data') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.clean_data') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-database mr-3"></i>Limpiar Datos
                     </a>
-                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <span class="flex items-center">
                             <i class="fas fa-shield-alt mr-3"></i>ACLs
                         </span>
                         <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
                     </a>
-                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <span class="flex items-center">
                             <i class="fas fa-clock mr-3"></i>Delay Pools
                         </span>
                         <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
                     </a>
-                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <span class="flex items-center">
                             <i class="fas fa-key mr-3"></i>HTTP Access
                         </span>
                         <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
                     </a>
-                    <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-file-alt mr-3"></i>Logs
                     </a>
                 </div>
@@ -104,13 +112,13 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 w-full lg:w-auto">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 w-full lg:w-auto bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
             <!-- Flash Messages -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     <div class="mb-6">
                         {% for category, message in messages %}
-                            <div class="alert alert-{{ 'success' if category == 'success' else 'warning' }} p-4 rounded-lg mb-4 {% if category == 'success' %}bg-blue-50 text-blue-800 border border-blue-200{% else %}bg-orange-50 text-orange-800 border border-orange-200{% endif %}">
+                            <div class="alert alert-{{ 'success' if category == 'success' else 'warning' }} p-4 rounded-lg mb-4 {% if category == 'success' %}bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700{% else %}bg-orange-50 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border border-orange-200 dark:border-orange-700{% endif %}">
                                 <i class="fas fa-{% if category == 'success' %}check-circle text-blue-600{% else %}exclamation-triangle text-orange-600{% endif %} mr-2"></i>
                                 {{ message }}
                             </div>

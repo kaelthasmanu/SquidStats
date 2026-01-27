@@ -89,31 +89,31 @@
             </div>
             
             <!-- Type Info Display -->
-            <div id="addTypeInfo" class="hidden mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div id="addTypeInfo" class="hidden mb-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
                 <div class="flex items-start">
-                    <i id="addTypeIcon" class="fas fa-info-circle text-blue-600 mt-1 mr-2"></i>
+                    <i id="addTypeIcon" class="fas fa-info-circle text-blue-600 dark:text-blue-400 mt-1 mr-2"></i>
                     <div class="flex-1">
-                        <p id="addTypeDesc" class="text-sm text-gray-700 font-medium"></p>
-                        <p id="addTypeExample" class="text-xs text-gray-600 mt-1 font-mono"></p>
+                        <p id="addTypeDesc" class="text-sm text-gray-700 dark:text-gray-200 font-medium"></p>
+                        <p id="addTypeExample" class="text-xs text-gray-600 dark:text-gray-300 mt-1 font-mono"></p>
                     </div>
                 </div>
             </div>
             
             <!-- Options -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Opciones (opcional):</label>
+                <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Opciones (opcional):</label>
                 <div class="flex flex-wrap gap-2">
-                    <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                    <label class="flex items-center px-3 py-2 border-2 border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                         <input type="checkbox" name="options[]" value="-i" class="mr-2">
-                        <span class="text-sm"><code>-i</code> Case-insensitive</span>
+                        <span class="text-sm text-gray-700 dark:text-gray-200"><code class="bg-gray-100 dark:bg-slate-700 px-1 rounded">-i</code> Case-insensitive</span>
                     </label>
-                    <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                    <label class="flex items-center px-3 py-2 border-2 border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                         <input type="checkbox" name="options[]" value="-n" class="mr-2">
-                        <span class="text-sm"><code>-n</code> No lookups</span>
+                        <span class="text-sm text-gray-700 dark:text-gray-200"><code class="bg-gray-100 dark:bg-slate-700 px-1 rounded">-n</code> No lookups</span>
                     </label>
-                    <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                    <label class="flex items-center px-3 py-2 border-2 border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                         <input type="checkbox" name="options[]" value="-m" class="mr-2">
-                        <span class="text-sm"><code>-m</code> List membership</span>
+                        <span class="text-sm text-gray-700 dark:text-gray-200"><code class="bg-gray-100 dark:bg-slate-700 px-1 rounded">-m</code> List membership</span>
                     </label>
                 </div>
             </div>

@@ -1,0 +1,498 @@
+/**
+ * SquidStats Theme Styles
+ * Sistema completo de variables CSS para modo claro y oscuro
+ * Diseño profesional con colores accesibles y bien balanceados
+ */
+
+/* ============================================
+   TRANSICIONES Y ANIMACIONES
+   ============================================ */
+
+/* Deshabilitar transiciones durante la carga inicial */
+.theme-transition-disabled * {
+    transition: none !important;
+}
+
+/* Transiciones suaves para cambio de tema */
+* {
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                color 0.3s ease,
+                box-shadow 0.3s ease;
+}
+
+/* ============================================
+   VARIABLES CSS - MODO CLARO (por defecto)
+   ============================================ */
+
+:root {
+    /* Colores de fondo */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --bg-elevated: #ffffff;
+    --bg-overlay: rgba(0, 0, 0, 0.5);
+    
+    /* Colores de texto */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #64748b;
+    --text-inverse: #ffffff;
+    --text-link: #2563eb;
+    --text-link-hover: #1e40af;
+    
+    /* Colores de borde */
+    --border-primary: #e2e8f0;
+    --border-secondary: #cbd5e1;
+    --border-focus: #3b82f6;
+    
+    /* Colores de sombra */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Colores de estado */
+    --color-primary: #2563eb;
+    --color-primary-hover: #1e40af;
+    --color-primary-light: #dbeafe;
+    
+    --color-success: #10b981;
+    --color-success-hover: #059669;
+    --color-success-light: #d1fae5;
+    
+    --color-warning: #f59e0b;
+    --color-warning-hover: #d97706;
+    --color-warning-light: #fef3c7;
+    
+    --color-danger: #ef4444;
+    --color-danger-hover: #dc2626;
+    --color-danger-light: #fee2e2;
+    
+    --color-info: #3b82f6;
+    --color-info-hover: #2563eb;
+    --color-info-light: #dbeafe;
+    
+    /* Colores de componentes */
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --card-shadow: var(--shadow-sm);
+    
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-focus-border: #3b82f6;
+    --input-disabled-bg: #f1f5f9;
+    
+    --button-primary-bg: #2563eb;
+    --button-primary-hover: #1e40af;
+    --button-secondary-bg: #e2e8f0;
+    --button-secondary-hover: #cbd5e1;
+    
+    --table-header-bg: #f8fafc;
+    --table-row-hover: #f1f5f9;
+    --table-row-odd: #ffffff;
+    --table-row-even: #f9fafb;
+    --table-border: #e5e7eb;
+    
+    --nav-bg: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    --nav-text: #ffffff;
+    --nav-hover-bg: rgba(255, 255, 255, 0.1);
+    
+    --sidebar-bg: #ffffff;
+    --sidebar-border: #e2e8f0;
+    --sidebar-item-hover: #f1f5f9;
+    
+    --modal-bg: #ffffff;
+    --modal-overlay: rgba(0, 0, 0, 0.75);
+    
+    --dropdown-bg: #ffffff;
+    --dropdown-hover: #f1f5f9;
+    --dropdown-border: #e2e8f0;
+    
+    /* Colores de gráficos */
+    --chart-text: #1e293b;
+    --chart-grid: rgba(0, 0, 0, 0.1);
+    --chart-tooltip-bg: #ffffff;
+    --chart-tooltip-border: #e2e8f0;
+}
+
+/* ============================================
+   VARIABLES CSS - MODO OSCURO
+   ============================================ */
+
+.dark {
+    /* Colores de fondo */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --bg-elevated: #1e293b;
+    --bg-overlay: rgba(0, 0, 0, 0.75);
+    
+    /* Colores de texto */
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --text-inverse: #0f172a;
+    --text-link: #60a5fa;
+    --text-link-hover: #93c5fd;
+    
+    /* Colores de borde */
+    --border-primary: #334155;
+    --border-secondary: #475569;
+    --border-focus: #60a5fa;
+    
+    /* Colores de sombra */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    
+    /* Colores de estado */
+    --color-primary: #3b82f6;
+    --color-primary-hover: #60a5fa;
+    --color-primary-light: #1e3a8a;
+    
+    --color-success: #22c55e;
+    --color-success-hover: #4ade80;
+    --color-success-light: #14532d;
+    
+    --color-warning: #f59e0b;
+    --color-warning-hover: #fbbf24;
+    --color-warning-light: #78350f;
+    
+    --color-danger: #ef4444;
+    --color-danger-hover: #f87171;
+    --color-danger-light: #7f1d1d;
+    
+    --color-info: #3b82f6;
+    --color-info-hover: #60a5fa;
+    --color-info-light: #1e3a8a;
+    
+    /* Colores de componentes */
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --card-shadow: var(--shadow-lg);
+    
+    --input-bg: #0f172a;
+    --input-border: #475569;
+    --input-focus-border: #60a5fa;
+    --input-disabled-bg: #1e293b;
+    
+    --button-primary-bg: #3b82f6;
+    --button-primary-hover: #60a5fa;
+    --button-secondary-bg: #334155;
+    --button-secondary-hover: #475569;
+    
+    --table-header-bg: #1e293b;
+    --table-row-hover: #334155;
+    --table-row-odd: #0f172a;
+    --table-row-even: #1e293b;
+    --table-border: #334155;
+    
+    --nav-bg: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+    --nav-text: #f1f5f9;
+    --nav-hover-bg: rgba(255, 255, 255, 0.1);
+    
+    --sidebar-bg: #1e293b;
+    --sidebar-border: #334155;
+    --sidebar-item-hover: #334155;
+    
+    --modal-bg: #1e293b;
+    --modal-overlay: rgba(0, 0, 0, 0.9);
+    
+    --dropdown-bg: #1e293b;
+    --dropdown-hover: #334155;
+    --dropdown-border: #475569;
+    
+    /* Colores de gráficos */
+    --chart-text: #e2e8f0;
+    --chart-grid: rgba(255, 255, 255, 0.1);
+    --chart-tooltip-bg: #1e293b;
+    --chart-tooltip-border: #475569;
+}
+
+/* ============================================
+   ESTILOS BASE CON VARIABLES
+   ============================================ */
+
+body {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Elementos de texto */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+p, span, div {
+    color: var(--text-primary);
+}
+
+a {
+    color: var(--text-link);
+}
+
+a:hover {
+    color: var(--text-link-hover);
+}
+
+/* Cards y contenedores */
+.card, .stat-card, .user-section {
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+/* Inputs y formularios */
+input, textarea, select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--input-focus-border);
+    outline-color: var(--input-focus-border);
+}
+
+input:disabled, textarea:disabled, select:disabled {
+    background-color: var(--input-disabled-bg);
+    color: var(--text-tertiary);
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Tablas */
+table {
+    border-color: var(--table-border);
+}
+
+thead {
+    background-color: var(--table-header-bg);
+}
+
+tbody tr:hover {
+    background-color: var(--table-row-hover);
+}
+
+tbody tr:nth-child(odd) {
+    background-color: var(--table-row-odd);
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--table-row-even);
+}
+
+th, td {
+    border-color: var(--table-border);
+    color: var(--text-primary);
+}
+
+/* Modales */
+.modal-content {
+    background-color: var(--modal-bg);
+    color: var(--text-primary);
+}
+
+.modal-overlay {
+    background-color: var(--modal-overlay);
+}
+
+/* Dropdowns */
+.dropdown-menu {
+    background-color: var(--dropdown-bg);
+    border-color: var(--dropdown-border);
+    box-shadow: var(--shadow-xl);
+}
+
+.dropdown-item:hover {
+    background-color: var(--dropdown-hover);
+}
+
+/* ============================================
+   CLASES UTILITARIAS
+   ============================================ */
+
+.bg-primary { background-color: var(--bg-primary) !important; }
+.bg-secondary { background-color: var(--bg-secondary) !important; }
+.bg-tertiary { background-color: var(--bg-tertiary) !important; }
+.bg-elevated { background-color: var(--bg-elevated) !important; }
+
+.text-primary { color: var(--text-primary) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
+.text-tertiary { color: var(--text-tertiary) !important; }
+
+.border-primary { border-color: var(--border-primary) !important; }
+.border-secondary { border-color: var(--border-secondary) !important; }
+
+/* ============================================
+   BOTÓN DE TOGGLE DE TEMA
+   ============================================ */
+
+.theme-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background-color: var(--nav-hover-bg);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.theme-toggle-icon {
+    font-size: 1.25rem;
+    color: var(--nav-text);
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover .theme-toggle-icon {
+    transform: rotate(20deg);
+}
+
+/* ============================================
+   ANIMACIONES ESPECIALES
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* ============================================
+   MEJORAS DE ACCESIBILIDAD
+   ============================================ */
+
+/* Focus visible mejorado */
+*:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* Mejora del contraste en modo oscuro */
+.dark .text-gray-500 {
+    color: var(--text-tertiary);
+}
+
+.dark .text-gray-600 {
+    color: var(--text-secondary);
+}
+
+.dark .text-gray-700,
+.dark .text-gray-800 {
+    color: var(--text-primary);
+}
+
+/* Colores de bg adaptables */
+.dark .bg-white {
+    background-color: var(--card-bg);
+}
+
+.dark .bg-gray-50 {
+    background-color: var(--bg-secondary);
+}
+
+.dark .bg-gray-100 {
+    background-color: var(--bg-tertiary);
+}
+
+.dark .bg-gray-200 {
+    background-color: var(--bg-elevated);
+}
+
+/* Bordes adaptables */
+.dark .border-gray-200,
+.dark .border-gray-300 {
+    border-color: var(--border-primary);
+}
+
+/* Sombras mejoradas en modo oscuro */
+.dark .shadow,
+.dark .shadow-sm {
+    box-shadow: var(--shadow-sm);
+}
+
+.dark .shadow-md {
+    box-shadow: var(--shadow-md);
+}
+
+.dark .shadow-lg {
+    box-shadow: var(--shadow-lg);
+}
+
+.dark .shadow-xl {
+    box-shadow: var(--shadow-xl);
+}
+
+/* ============================================
+   ESTILOS ESPECÍFICOS DE COMPONENTES
+   ============================================ */
+
+/* Notificaciones Toastr */
+.dark #toast-container > div {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xl);
+}
+
+.dark .toast-success {
+    background-color: var(--color-success-light) !important;
+}
+
+.dark .toast-error {
+    background-color: var(--color-danger-light) !important;
+}
+
+.dark .toast-warning {
+    background-color: var(--color-warning-light) !important;
+}
+
+.dark .toast-info {
+    background-color: var(--color-info-light) !important;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-secondary);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-secondary) var(--bg-secondary);
+}

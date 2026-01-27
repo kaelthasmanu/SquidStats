@@ -1,29 +1,21 @@
-/* =================== Variables =================== */
+/* =================== Variables - Using theme.css variables =================== */
+/* Note: This file now uses CSS variables from theme.css for dark mode support */
+
 :root {
-    --primary-color: #4361ee;
-    --secondary-color: #3f37c9;
-    --success-color: #4cc9f0;
-    --danger-color: #f72585;
-    --warning-color: #f8961e;
-    --info-color: #4895ef;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
-    --gray-color: #6c757d;
     --border-radius: 8px;
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
-    --modal-bg: rgba(0, 0, 0, 0.6);
     --hover-bg: #e9ecef;
+}
+
+.dark {
+    --hover-bg: #334155;
 }
 
 /* =================== Base =================== */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
-    color: #333;
     line-height: 1.6;
-    margin: 0;
-    padding: 0;
 }
 
 
@@ -41,24 +33,33 @@ body {
   z-index: 10; /* Coloca la tarjeta elevada sobre las demás */
 }
 
+/* Dark mode adjustments */
+.dark .user-card:hover {
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
 /* =================== Logs =================== */
 
 /* Estilos mejorados para la scrollbar */
 .logs-list::-webkit-scrollbar {
     width: 12px;
-    background-color: #F5F5F5;
+    background-color: var(--bg-secondary);
 }
 
 .logs-list::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     border-radius: 10px;
-    background-color: #F5F5F5;
+    background-color: var(--bg-secondary);
 }
 
 .logs-list::-webkit-scrollbar-thumb {
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
-    background-color: #555;
+    background-color: var(--text-tertiary);
+}
+
+.dark .logs-list::-webkit-scrollbar-thumb {
+    background-color: var(--border-secondary);
 }
 
 
@@ -66,13 +67,14 @@ body {
     font-weight: 500;
     margin-bottom: 0.3rem;
     word-break: break-word;
+    color: var(--text-primary);
 }
 
 .log-details {
     display: flex;
     align-items: center;
     font-size: 0.8rem;
-    color: var(--gray-color);
+    color: var(--text-tertiary);
     flex-wrap: wrap;
     gap: 0.5rem;
 }
@@ -80,13 +82,13 @@ body {
 .log-meta::before {
     content: "•";
     margin-right: 0.3rem;
-    color: #ccc;
+    color: var(--text-tertiary);
 }
 
 .no-logs {
     text-align: center;
     padding: 1rem;
-    color: var(--gray-color);
+    color: var(--text-tertiary);
     font-style: italic;
 }
 

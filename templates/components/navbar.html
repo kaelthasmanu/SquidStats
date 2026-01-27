@@ -6,8 +6,13 @@
       <div class="flex items-center gap-3 font-bold text-xl text-white no-underline">
         <spam class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-300">SquidStats</spam>
       </div>
-      <!-- Container for mobile icons (notifications + hamburger) -->
+      <!-- Container for mobile icons (theme + notifications + hamburger) -->
       <div class="lg:hidden flex items-center gap-3">
+        <!-- Mobile Theme Toggle Button -->
+        <button data-theme-toggle class="theme-toggle" title="Cambiar tema" data-tooltip="Cambiar tema">
+          <i class="fas fa-moon theme-toggle-icon"></i>
+        </button>
+        
         <!-- Mobile Notifications Button -->
         <div class="relative" x-data="{ open: false }">
           <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Notificaciones">
@@ -76,8 +81,13 @@
           <span class="font-medium">Auditoría</span>
         </a>
       </div>
-      <!-- Desktop Notifications -->
+      <!-- Desktop Notifications and Theme Toggle -->
       <div class="hidden lg:flex items-center gap-3">
+        <!-- Theme Toggle Button -->
+        <button data-theme-toggle class="theme-toggle" title="Cambiar tema" data-tooltip="Cambiar tema">
+          <i class="fas fa-moon theme-toggle-icon"></i>
+        </button>
+        
         <div class="relative" x-data="{ open: false }">
           <!-- Desktop Notifications Button -->
           <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Notificaciones">

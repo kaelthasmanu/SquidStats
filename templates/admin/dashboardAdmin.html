@@ -90,15 +90,15 @@
 
         <!-- Info cuando todo está en 0 -->
         {% if not status.errors and stats.total_acls == 0 and stats.total_delay_pools == 0 and stats.total_http_rules == 0 %}
-        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 sm:p-6 rounded-lg mb-6">
+        <div class="bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 sm:p-6 rounded-lg mb-6">
             <div class="flex items-start">
-                <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl mt-1 mr-4"></i>
+                <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400 text-2xl mt-1 mr-4"></i>
                 <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-yellow-900 mb-2">No se encontraron configuraciones</h3>
-                    <p class="text-yellow-800 mb-3">No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración de Squid.</p>
-                    <div class="bg-white rounded-lg p-4 border border-yellow-200">
-                        <p class="text-sm text-gray-700 mb-2"><strong>¿Tu configuración ya está dividida en módulos?</strong></p>
-                        <p class="text-sm text-gray-600 mb-3">Si ya tienes tu configuración organizada en archivos separados (por ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede leerla directamente sin necesidad de unificarla.</p>
+                    <h3 class="text-lg font-semibold text-yellow-900 dark:text-yellow-100 mb-2">No se encontraron configuraciones</h3>
+                    <p class="text-yellow-800 dark:text-yellow-200 mb-3">No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración de Squid.</p>
+                    <div class="bg-white dark:bg-slate-800 rounded-lg p-4 border border-yellow-200 dark:border-yellow-700">
+                        <p class="text-sm text-gray-700 dark:text-gray-200 mb-2"><strong>¿Tu configuración ya está dividida en módulos?</strong></p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">Si ya tienes tu configuración organizada en archivos separados (por ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede leerla directamente sin necesidad de unificarla.</p>
                         <div class="flex flex-col sm:flex-row gap-2">
                             <a href="{{ url_for('admin.split_config') }}" class="inline-flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
                                 <i class="fas fa-cog mr-2"></i>Gestionar Configuración Modular
@@ -114,70 +114,70 @@
         {% endif %}
 
         <!-- Quick Actions -->
-        <div class="bg-gray-50 rounded-lg p-4 sm:p-6">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h3>
+        <div class="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Acciones Rápidas</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {% if status.errors %}
-                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-300 opacity-60 cursor-not-allowed" title="Deshabilitado por errores de configuración">
-                    <i class="fas fa-edit text-blue-300 text-2xl mb-2"></i>
-                    <h4 class="font-semibold text-gray-500">Editar Configuración</h4>
-                    <p class="text-sm text-gray-400">Modificar archivo squid.conf (deshabilitado)</p>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow border-l-4 border-blue-300 dark:border-blue-700 opacity-60 cursor-not-allowed" title="Deshabilitado por errores de configuración">
+                    <i class="fas fa-edit text-blue-300 dark:text-blue-600 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-500 dark:text-gray-400">Editar Configuración</h4>
+                    <p class="text-sm text-gray-400 dark:text-gray-500">Modificar archivo squid.conf (deshabilitado)</p>
                 </div>
 
-                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-300 opacity-60 cursor-not-allowed" title="Deshabilitado por errores de configuración">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow border-l-4 border-green-300 dark:border-green-700 opacity-60 cursor-not-allowed" title="Deshabilitado por errores de configuración">
                     <i class="fas fa-plus text-green-300 text-2xl mb-2"></i>
                     <h4 class="font-semibold text-gray-500">Agregar ACL</h4>
                     <p class="text-sm text-gray-400">Crear nueva regla de acceso (deshabilitado)</p>
                 </div>
                 {% else %}
-                <a href="/admin/config/edit" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-blue-500">
-                    <i class="fas fa-edit text-blue-500 text-2xl mb-2"></i>
-                    <h4 class="font-semibold text-gray-800">Editar Configuración</h4>
-                    <p class="text-sm text-gray-600">Modificar archivo squid.conf</p>
+                <a href="/admin/config/edit" class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-blue-500">
+                    <i class="fas fa-edit text-blue-500 dark:text-blue-400 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">Editar Configuración</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Modificar archivo squid.conf</p>
                 </a>
                 
-                <a href="/admin/acls" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-green-500">
-                    <i class="fas fa-plus text-green-500 text-2xl mb-2"></i>
-                    <h4 class="font-semibold text-gray-800">Agregar ACL</h4>
-                    <p class="text-sm text-gray-600">Crear nueva regla de acceso</p>
+                <a href="/admin/acls" class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-green-500">
+                    <i class="fas fa-plus text-green-500 dark:text-green-400 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">Agregar ACL</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Crear nueva regla de acceso</p>
                 </a>
                 {% endif %}
                  
-                <a href="{{ url_for('admin.view_logs') }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-yellow-500">
-                    <i class="fas fa-file-alt text-yellow-500 text-2xl mb-2"></i>
-                    <h4 class="font-semibold text-gray-800">Ver Logs</h4>
-                    <p class="text-sm text-gray-600">Revisar logs del sistema</p>
+                <a href="{{ url_for('admin.view_logs') }}" class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-yellow-500">
+                    <i class="fas fa-file-alt text-yellow-500 dark:text-yellow-400 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">Ver Logs</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Revisar logs del sistema</p>
                 </a>
                 
-                <div class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-red-500 cursor-pointer" onclick="restartSquid()">
-                    <i class="fas fa-power-off text-red-500 text-2xl mb-2"></i>
-                    <h4 class="font-semibold text-gray-800">Reiniciar Squid</h4>
-                    <p class="text-sm text-gray-600">Reiniciar el servicio</p>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow border-l-4 border-red-500 cursor-pointer" onclick="restartSquid()">
+                    <i class="fas fa-power-off text-red-500 dark:text-red-400 text-2xl mb-2"></i>
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">Reiniciar Squid</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Reiniciar el servicio</p>
                 </div>
             </div>
         </div>
 
         <!-- System Status -->
-        <div class="mt-8 bg-white border rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado del Sistema</h3>
+        <div class="mt-8 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Estado del Sistema</h3>
             <div class="space-y-3">
-                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
                     <div class="flex items-center">
-                        <i class="fas fa-circle text-green-500 mr-3"></i>
-                        <span class="font-medium">Servicio Squid</span>
+                        <i class="fas fa-circle text-green-500 dark:text-green-400 mr-3"></i>
+                        <span class="font-medium text-gray-800 dark:text-gray-200">Servicio Squid</span>
                     </div>
-                    <span class="text-green-600 font-semibold">Activo</span>
+                    <span class="text-green-600 dark:text-green-400 font-semibold">Activo</span>
                 </div>
                 
-                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                     <div class="flex items-center">
-                        <i class="fas fa-database text-blue-500 mr-3"></i>
-                        <span class="font-medium">Configuración</span>
+                        <i class="fas fa-database text-blue-500 dark:text-blue-400 mr-3"></i>
+                        <span class="font-medium text-gray-800 dark:text-gray-200">Configuración</span>
                     </div>
                     {% if status.errors %}
-                        <span class="text-red-600 font-semibold">No cargada</span>
+                        <span class="text-red-600 dark:text-red-400 font-semibold">No cargada</span>
                     {% else %}
-                        <span class="text-blue-600 font-semibold">Cargada</span>
+                        <span class="text-blue-600 dark:text-blue-400 font-semibold">Cargada</span>
                     {% endif %}
                 </div>
             </div>

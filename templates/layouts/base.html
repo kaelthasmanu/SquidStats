@@ -9,6 +9,8 @@
     <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon"/>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}"/> <!-- Theme System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-enhancements.css') }}"/> <!-- Theme Polyfills -->
     <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}"/> <!-- Tailwind CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/> <!-- Font Awesome -->
     <!-- Logs CSS Custom-->
@@ -17,6 +19,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}"/>
     <!-- Toastr Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr-custom.css') }}"/>
+    <!-- Theme Manager (load early to prevent flash) -->
+    <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
     <!-- Page-specific styles -->
     {% block styles %}{% endblock styles %}
   </head>
@@ -71,6 +75,8 @@
     <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
     <!-- Configuración global de Toastr -->
     <script src="{{ url_for('static', filename='js/toastr-config.js') }}"></script>
+    <!-- Chart.js Theme Support -->
+    <script src="{{ url_for('static', filename='js/chart-theme.js') }}"></script>
     <!-- Page-specific scripts -->
     {% block scripts %}{% endblock scripts %}
   </body>

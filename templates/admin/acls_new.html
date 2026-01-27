@@ -13,16 +13,16 @@
     </div>
     
     {% if acls %}
-    <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="mb-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
         <div class="flex items-start">
-            <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
-            <div class="text-sm text-gray-700">
-                <p class="font-semibold text-gray-800 mb-1">Acerca de las ACLs:</p>
+            <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mt-1 mr-3"></i>
+            <div class="text-sm text-gray-700 dark:text-gray-300">
+                <p class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Acerca de las ACLs:</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li><span class="font-mono text-xs bg-white px-1 rounded">[fast]</span> ACLs rápidas - no requieren lookups externos</li>
-                    <li><span class="font-mono text-xs bg-orange-100 px-1 rounded">[slow]</span> ACLs lentas - pueden requerir DNS o autenticación</li>
+                    <li><span class="font-mono text-xs bg-white dark:bg-slate-700 dark:text-gray-200 px-1 rounded">[fast]</span> ACLs rápidas - no requieren lookups externos</li>
+                    <li><span class="font-mono text-xs bg-orange-100 dark:bg-orange-900/40 dark:text-orange-300 px-1 rounded">[slow]</span> ACLs lentas - pueden requerir DNS o autenticación</li>
                     <li>Usa las ACLs en reglas de http_access, http_reply_access, etc.</li>
-                    <li>ACLs predefinidas: <code class="bg-white px-1 rounded">all, manager, localhost, to_localhost, to_linklocal, CONNECT</code></li>
+                    <li>ACLs predefinidas: <code class="bg-white dark:bg-slate-700 dark:text-gray-200 px-1 rounded">all, manager, localhost, to_localhost, to_linklocal, CONNECT</code></li>
                 </ul>
             </div>
         </div>
@@ -30,58 +30,58 @@
 
     <div class="space-y-2">
         {% for acl in acls %}
-        <div class="flex flex-col sm:flex-row items-start justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all gap-3">
+        <div class="flex flex-col sm:flex-row items-start justify-between p-4 bg-gradient-to-r from-gray-50 to-white dark:from-slate-800 dark:to-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 transition-all gap-3">
             <div class="flex items-start space-x-3 flex-1 min-w-0 w-full">
                 <div class="flex flex-col items-center space-y-1 flex-shrink-0">
                     {% if acl.is_predefined %}
-                        <span class="inline-flex px-2 py-1 text-xs font-bold rounded-full bg-purple-100 text-purple-800 border border-purple-300">
+                        <span class="inline-flex px-2 py-1 text-xs font-bold rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700">
                             <i class="fas fa-star mr-1"></i>BUILT-IN
                         </span>
                     {% endif %}
                     
                     {% if acl.category == 'network' %}
-                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <i class="fas fa-network-wired text-blue-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                            <i class="fas fa-network-wired text-blue-600 dark:text-blue-400"></i>
                         </div>
                     {% elif acl.category == 'domain' %}
-                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                            <i class="fas fa-globe text-green-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                            <i class="fas fa-globe text-green-600 dark:text-green-400"></i>
                         </div>
                     {% elif acl.category == 'time' %}
-                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                            <i class="fas fa-clock text-orange-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
+                            <i class="fas fa-clock text-orange-600 dark:text-orange-400"></i>
                         </div>
                     {% elif acl.category == 'url' %}
-                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                            <i class="fas fa-link text-indigo-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                            <i class="fas fa-link text-indigo-600 dark:text-indigo-400"></i>
                         </div>
                     {% elif acl.category == 'port' %}
-                        <div class="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                            <i class="fas fa-plug text-cyan-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center">
+                            <i class="fas fa-plug text-cyan-600 dark:text-cyan-400"></i>
                         </div>
                     {% elif acl.category == 'protocol' %}
-                        <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
-                            <i class="fas fa-exchange-alt text-teal-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center">
+                            <i class="fas fa-exchange-alt text-teal-600 dark:text-teal-400"></i>
                         </div>
                     {% elif acl.category == 'auth' %}
-                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                            <i class="fas fa-user-lock text-red-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
+                            <i class="fas fa-user-lock text-red-600 dark:text-red-400"></i>
                         </div>
                     {% elif acl.category == 'content' %}
-                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                            <i class="fas fa-file-alt text-yellow-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center">
+                            <i class="fas fa-file-alt text-yellow-600 dark:text-yellow-400"></i>
                         </div>
                     {% elif acl.category == 'ssl' %}
-                        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <i class="fas fa-lock text-emerald-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                            <i class="fas fa-lock text-emerald-600 dark:text-emerald-400"></i>
                         </div>
                     {% elif acl.category == 'connection' %}
-                        <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                            <i class="fas fa-server text-pink-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/40 flex items-center justify-center">
+                            <i class="fas fa-server text-pink-600 dark:text-pink-400"></i>
                         </div>
                     {% else %}
-                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                            <i class="fas fa-cog text-gray-600"></i>
+                        <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                            <i class="fas fa-tag text-gray-600 dark:text-gray-400"></i>
                         </div>
                     {% endif %}
                 </div>
