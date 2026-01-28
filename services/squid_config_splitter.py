@@ -258,6 +258,9 @@ class SquidConfigSplitter:
             if pending_comments:
                 buffers.setdefault(self.unknown_file, []).extend(pending_comments)
 
+            # Ensure auth file is created if auth config exists
+            self._ensure_auth_file(buffers)
+
             # Final writing
             for filename, content in sorted(buffers.items()):
                 path = os.path.join(self.output_dir, filename)
@@ -425,6 +428,45 @@ class SquidConfigSplitter:
         except Exception as e:
             logger.error(f"Failed to generate main config: {e}")
             raise RuntimeError(f"Failed to generate main config: {e}")
+
+    def _ensure_auth_file(self, buffers: dict[str, list[str]]) -> None:
+        """
+        Ensure that 50_auth.conf is created if there are auth-related lines in the original config.
+        """
+        auth_filename = "50_auth.conf"
+        if auth_filename in buffers:
+            return  # Already exists
+
+        # Check if original file has auth lines
+        has_auth = False
+        try:
+            with open(self.input_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    stripped = line.strip()
+                    if stripped and not stripped.startswith("#"):
+                        if re.search(r"^auth_param\b", stripped) or re.search(r"^acl auth\b", stripped):
+                            has_auth = True
+                            break
+        except Exception as e:
+            logger.warning(f"Could not check for auth lines in {self.input_file}: {e}")
+            return
+
+        if has_auth:
+            # Create default auth file content
+            default_auth_content = [
+                "# Auth Configuration\n",
+                "auth_param basic program /usr/lib/squid/basic_ldap_auth -R -b \"dc=umcc,dc=cu\" -D \"cn=ZimbraUM,ou=Servicios,dc=umcc,dc=cu\" -w \"gato123*\" -f sAMAccountName=%s -h 10.34.8.5\n",
+                "auth_param basic casesensitive off\n",
+                "auth_param basic utf8 on\n",
+                "auth_param basic children 20\n",
+                "auth_param basic realm **Proxy-UNIVERSIDAD DE MATANZAS**\n",
+                "auth_param basic credentialsttl 30 minutes\n",
+                "\n",
+                "# ACL de autenticación\n",
+                "acl auth proxy_auth REQUIRED\n",
+            ]
+            buffers[auth_filename] = default_auth_content
+            logger.info(f"Created default {auth_filename} with authentication configuration")
 
     def _post_process_delay_pools(self) -> None:
         """
