@@ -128,12 +128,13 @@ class SquidConfigSplitter:
                 [
                     re.compile(r"^auth_param\b"),
                     re.compile(r"^authenticate_"),
+                    re.compile(r"^acl auth\b"),
                 ],
             ),
             Rule(
                 "100_acls.conf",
                 [
-                    re.compile(r"^acl\b"),
+                    re.compile(r"^acl(?! auth\b)"),
                 ],
             ),
             Rule(
