@@ -99,7 +99,7 @@ class SquidConfigSplitter:
                 ],
             ),
             Rule(
-                "50_ssl_bump.conf",
+                "55_ssl_bump.conf",
                 [
                     re.compile(r"^ssl_"),
                     re.compile(r"^sslcrtd_"),
@@ -124,7 +124,7 @@ class SquidConfigSplitter:
                 ],
             ),
             Rule(
-                "90_auth.conf",
+                "50_auth.conf",
                 [
                     re.compile(r"^auth_param\b"),
                     re.compile(r"^authenticate_"),
@@ -277,6 +277,9 @@ class SquidConfigSplitter:
                     logger.error(error_msg)
                     raise RuntimeError(error_msg)
 
+            # Post-process delay pools to replace 'auth' with 'proxy_auth'
+            self._post_process_delay_pools()
+
             # Generate the new main squid.conf with includes
             self._generate_main_config(list(buffers.keys()))
             logger.info(f"Generated new main config: {self.input_file}")
@@ -423,6 +426,36 @@ class SquidConfigSplitter:
             logger.error(f"Failed to generate main config: {e}")
             raise RuntimeError(f"Failed to generate main config: {e}")
 
+    def _post_process_delay_pools(self) -> None:
+        """
+        Post-process 110_delay_pools.conf to replace 'auth' with 'proxy_auth' in delay_access rules.
+        """
+        delay_pools_file = os.path.join(self.output_dir, "110_delay_pools.conf")
+        if not os.path.exists(delay_pools_file):
+            return
+
+        try:
+            with open(delay_pools_file, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Replace 'allow auth' with 'allow proxy_auth' in delay_access lines
+            modified_content = re.sub(
+                r'(delay_access\s+\d+\s+allow\s+)auth(\s+|$)',
+                r'\1proxy_auth\2',
+                content
+            )
+
+            if modified_content != content:
+                with open(delay_pools_file, "w", encoding="utf-8") as f:
+                    f.write(modified_content)
+                logger.info("Post-processed 110_delay_pools.conf: replaced 'auth' with 'proxy_auth'")
+            else:
+                logger.info("No changes needed in 110_delay_pools.conf")
+
+        except Exception as e:
+            logger.error(f"Error post-processing delay pools file: {e}")
+            raise RuntimeError(f"Failed to post-process delay pools: {e}")
+
     def get_split_info(self) -> dict[str, str]:
         return {
             "00_ports.conf": "HTTP ports configuration",
@@ -430,11 +463,11 @@ class SquidConfigSplitter:
             "20_security.conf": "Security configuration",
             "30_cache.conf": "Cache configuration",
             "40_refresh_patterns.conf": "Refresh patterns",
-            "50_ssl_bump.conf": "SSL Bump configuration",
+            "50_auth.conf": "Authentication configuration",
+            "55_ssl_bump.conf": "SSL Bump configuration",
             "60_logs.conf": "Logs configuration",
             "70_icap.conf": "ICAP configuration",
             "80_dns.conf": "DNS configuration",
-            "90_auth.conf": "Authentication configuration",
             "100_acls.conf": "Access control lists (ACLs)",
             "110_delay_pools.conf": "Delay pools configuration",
             "115_cache_control.conf": "Cache control and peering",
