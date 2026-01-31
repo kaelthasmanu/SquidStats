@@ -22,6 +22,9 @@ class SquidConfigSplitter:
         self.output_dir = output_dir or "/etc/squid/squid.d"
         self.strict = strict
         self.unknown_file = "999_unknown.conf"
+        self.has_auth = False
+        self.auth_lines = []
+        self.auth_patterns = [re.compile(r"^auth_param\b"), re.compile(r"^acl auth\b")]
         self.rules = self._compile_rules()
 
     def _compile_rules(self) -> list[Rule]:
@@ -233,6 +236,11 @@ class SquidConfigSplitter:
                         pending_comments.append(raw_line)
                         continue
 
+                    # Check for auth lines and collect them
+                    if any(p.search(stripped) for p in self.auth_patterns):
+                        self.has_auth = True
+                        self.auth_lines.append(raw_line)
+
                     try:
                         target = self._classify_line(stripped)
                     except ValueError as e:
@@ -261,6 +269,9 @@ class SquidConfigSplitter:
             # Ensure auth file is created if auth config exists
             self._ensure_auth_file(buffers)
 
+            # Post-process delay pools in buffers
+            self._post_process_delay_pools_in_buffers(buffers)
+
             # Final writing
             for filename, content in sorted(buffers.items()):
                 path = os.path.join(self.output_dir, filename)
@@ -279,9 +290,6 @@ class SquidConfigSplitter:
                     error_msg = f"Failed to write file: {path}. Error: {str(e)}"
                     logger.error(error_msg)
                     raise RuntimeError(error_msg)
-
-            # Post-process delay pools to replace 'auth' with 'proxy_auth'
-            self._post_process_delay_pools()
 
             # Generate the new main squid.conf with includes
             self._generate_main_config(list(buffers.keys()))
@@ -315,7 +323,10 @@ class SquidConfigSplitter:
         try:
             logger.info("Validating Squid configuration with 'squid -k parse'...")
             result = subprocess.run(
-                ["squid", "-k", "parse"], capture_output=True, text=True, timeout=30
+                ["docker", "exec", "05f09faa0d60", "squid", "-k", "parse"],
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
 
             # Capture all output
@@ -437,66 +448,40 @@ class SquidConfigSplitter:
         if auth_filename in buffers:
             return  # Already exists
 
-        # Check if original file has auth lines
-        has_auth = False
-        try:
-            with open(self.input_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if stripped and not stripped.startswith("#"):
-                        if re.search(r"^auth_param\b", stripped) or re.search(r"^acl auth\b", stripped):
-                            has_auth = True
-                            break
-        except Exception as e:
-            logger.warning(f"Could not check for auth lines in {self.input_file}: {e}")
-            return
-
-        if has_auth:
-            # Create default auth file content
-            default_auth_content = [
-                "# Auth Configuration\n",
-                "auth_param basic program /usr/lib/squid/basic_ldap_auth -R -b \"dc=umcc,dc=cu\" -D \"cn=ZimbraUM,ou=Servicios,dc=umcc,dc=cu\" -w \"gato123*\" -f sAMAccountName=%s -h 10.34.8.5\n",
-                "auth_param basic casesensitive off\n",
-                "auth_param basic utf8 on\n",
-                "auth_param basic children 20\n",
-                "auth_param basic realm **Proxy-UNIVERSIDAD DE MATANZAS**\n",
-                "auth_param basic credentialsttl 30 minutes\n",
-                "\n",
-                "# ACL de autenticación\n",
-                "acl auth proxy_auth REQUIRED\n",
-            ]
-            buffers[auth_filename] = default_auth_content
-            logger.info(f"Created default {auth_filename} with authentication configuration")
-
-    def _post_process_delay_pools(self) -> None:
-        """
-        Post-process 110_delay_pools.conf to replace 'auth' with 'proxy_auth' in delay_access rules.
-        """
-        delay_pools_file = os.path.join(self.output_dir, "110_delay_pools.conf")
-        if not os.path.exists(delay_pools_file):
-            return
-
-        try:
-            with open(delay_pools_file, "r", encoding="utf-8") as f:
-                content = f.read()
-
-            # Replace 'allow auth' with 'allow proxy_auth' in delay_access lines
-            modified_content = re.sub(
-                r'(delay_access\s+\d+\s+allow\s+)auth(\s+|$)',
-                r'\1proxy_auth\2',
-                content
+        if self.has_auth:
+            # Create auth file content from collected lines
+            auth_content = ["# Auth Configuration\n"] + self.auth_lines
+            buffers[auth_filename] = auth_content
+            logger.info(
+                f"Created {auth_filename} with authentication configuration from original file"
             )
 
-            if modified_content != content:
-                with open(delay_pools_file, "w", encoding="utf-8") as f:
-                    f.write(modified_content)
-                logger.info("Post-processed 110_delay_pools.conf: replaced 'auth' with 'proxy_auth'")
-            else:
-                logger.info("No changes needed in 110_delay_pools.conf")
+    def _post_process_delay_pools_in_buffers(
+        self, buffers: dict[str, list[str]]
+    ) -> None:
+        """
+        Post-process 110_delay_pools.conf content in buffers to replace 'auth' with 'proxy_auth' in delay_access rules.
+        """
+        delay_file = "110_delay_pools.conf"
+        if delay_file not in buffers:
+            return
 
-        except Exception as e:
-            logger.error(f"Error post-processing delay pools file: {e}")
-            raise RuntimeError(f"Failed to post-process delay pools: {e}")
+        content = buffers[delay_file]
+        modified = False
+        for i, line in enumerate(content):
+            new_line = re.sub(
+                r"(delay_access\s+\d+\s+allow\s+)auth(\s+|$)", r"\1proxy_auth\2", line
+            )
+            if new_line != line:
+                content[i] = new_line
+                modified = True
+
+        if modified:
+            logger.info(
+                f"Post-processed {delay_file}: replaced 'auth' with 'proxy_auth'"
+            )
+        else:
+            logger.info(f"No changes needed in {delay_file}")
 
     def get_split_info(self) -> dict[str, str]:
         return {
