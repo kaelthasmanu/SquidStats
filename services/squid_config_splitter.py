@@ -323,7 +323,7 @@ class SquidConfigSplitter:
         try:
             logger.info("Validating Squid configuration with 'squid -k parse'...")
             result = subprocess.run(
-                ["docker", "exec", "05f09faa0d60", "squid", "-k", "parse"],
+                ["squid", "-k", "parse"],
                 capture_output=True,
                 text=True,
                 timeout=30,
