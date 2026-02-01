@@ -15,6 +15,7 @@ from sqlalchemy import MetaData, Table, func, inspect, select, text
 from config import Config, logger
 from database.database import get_engine, get_session
 from services.auth_service import AuthService, admin_required, api_auth_required
+from services.squid_config_splitter import SquidConfigSplitter
 from utils.admin import SquidConfigManager
 
 admin_bp = Blueprint("admin", __name__)
@@ -157,67 +158,175 @@ def save_env():
 @admin_bp.route("/acls")
 @admin_required
 def manage_acls():
+    """Display ACLs management interface with categorization and metadata."""
     acls = config_manager.get_acls()
-    return render_template("admin/acls.html", acls=acls)
+    return render_template("admin/acls_new.html", acls=acls)
 
 
 @admin_bp.route("/acls/add", methods=["POST"])
 @admin_required
 def add_acl():
-    name = request.form["name"]
-    acl_type = request.form["type"]
-    value = request.form["value"]
-    new_acl = f"acl {name} {acl_type} {value}"
+    """Add a new ACL with options, multiple values, and comment."""
+    name = request.form.get("name")
+    acl_type = request.form.get("type")
+    values = request.form.getlist("values[]")
+    options = request.form.getlist("options[]")
+    comment = request.form.get("comment", "").strip()
 
-    # Add the new ACL at the end of the ACLs section
+    if not name or not acl_type or not values:
+        flash("Debe proporcionar nombre, tipo y al menos un valor para la ACL", "error")
+        return redirect(url_for("admin.manage_acls"))
+
+    # Build ACL line: acl name [options] type values...
+    acl_parts = ["acl", name]
+    if options:
+        acl_parts.extend(options)
+    acl_parts.append(acl_type)
+    acl_parts.extend(values)
+    new_acl = " ".join(acl_parts)
+
+    # Check if using modular configuration
+    if config_manager.is_modular:
+        acl_content = config_manager.read_modular_config("100_acls.conf")
+        if acl_content is not None:
+            lines = acl_content.split("\n")
+
+            # Add comment if provided
+            if comment:
+                lines.append(f"# {comment}")
+
+            # Add the new ACL
+            lines.append(new_acl)
+
+            new_content = "\n".join(lines)
+            if config_manager.save_modular_config("100_acls.conf", new_content):
+                flash(f"ACL '{name}' agregada exitosamente", "success")
+            else:
+                flash("Error al guardar la ACL", "error")
+            return redirect(url_for("admin.manage_acls"))
+
+    # Fallback to main config
     lines = config_manager.config_content.split("\n")
     acl_section_end = -1
     for i, line in enumerate(lines):
         if line.strip().startswith("acl "):
             acl_section_end = i
+
     if acl_section_end != -1:
-        lines.insert(acl_section_end + 1, new_acl)
+        if comment:
+            lines.insert(acl_section_end + 1, f"# {comment}")
+            lines.insert(acl_section_end + 2, new_acl)
+        else:
+            lines.insert(acl_section_end + 1, new_acl)
     else:
+        if comment:
+            lines.append(f"# {comment}")
         lines.append(new_acl)
 
     new_content = "\n".join(lines)
     config_manager.save_config(new_content)
-    flash("ACL agregada exitosamente", "success")
+    flash(f"ACL '{name}' agregada exitosamente", "success")
     return redirect(url_for("admin.manage_acls"))
 
 
 @admin_bp.route("/acls/edit", methods=["POST"])
 @admin_required
 def edit_acl():
-    acl_id = request.form["id"]
-    new_name = request.form["name"]
-    new_type = request.form["type"]
-    new_value = request.form["value"]
+    """Edit an existing ACL using line number for precise targeting."""
+    acl_id = request.form.get("id")
+    new_name = request.form.get("name")
+    acl_type = request.form.get("type")
+    values = request.form.getlist("values[]")
+    options = request.form.getlist("options[]")
+    comment = request.form.get("comment", "").strip()
+
+    if not acl_id or not new_name or not acl_type or not values:
+        flash("Datos incompletos para editar la ACL", "error")
+        return redirect(url_for("admin.manage_acls"))
 
     try:
         acl_index = int(acl_id)
         acls = config_manager.get_acls()
 
         if 0 <= acl_index < len(acls):
-            new_acl_line = f"acl {new_name} {new_type} {new_value}"
+            target_acl = acls[acl_index]
+            # line_number from parser is 1-based, convert to 0-based index
+            target_line = target_acl["line_number"] - 1
 
-            # Replace the line in the content
+            # Build new ACL line
+            acl_parts = ["acl", new_name]
+            if options:
+                acl_parts.extend(options)
+            acl_parts.append(acl_type)
+            acl_parts.extend(values)
+            new_acl_line = " ".join(acl_parts)
+
+            # Check if using modular configuration
+            if config_manager.is_modular:
+                acl_content = config_manager.read_modular_config("100_acls.conf")
+                if acl_content is not None:
+                    lines = acl_content.split("\n")
+
+                    # Replace the ACL line (line_number is 1-based, list index is 0-based)
+                    if 0 <= target_line < len(lines):
+                        # Check if there's a comment before this ACL
+                        has_comment = target_line > 0 and lines[
+                            target_line - 1
+                        ].strip().startswith("#")
+
+                        # Replace the ACL line
+                        lines[target_line] = new_acl_line
+
+                        # Handle comment
+                        if has_comment:
+                            if comment:
+                                # Update existing comment
+                                lines[target_line - 1] = f"# {comment}"
+                            else:
+                                # Remove existing comment
+                                lines.pop(target_line - 1)
+                        else:
+                            if comment:
+                                # Insert new comment before the ACL
+                                lines.insert(target_line, f"# {comment}")
+
+                        new_content = "\n".join(lines)
+                        if config_manager.save_modular_config(
+                            "100_acls.conf", new_content
+                        ):
+                            flash(
+                                f"ACL '{new_name}' actualizada exitosamente", "success"
+                            )
+                        else:
+                            flash("Error al guardar la ACL", "error")
+                    else:
+                        flash("Línea de ACL no encontrada", "error")
+                    return redirect(url_for("admin.manage_acls"))
+
+            # Fallback to main config
             lines = config_manager.config_content.split("\n")
-            acl_count = 0
-            for i, line in enumerate(lines):
-                if line.strip().startswith("acl ") and not line.strip().startswith("#"):
-                    if acl_count == acl_index:
-                        lines[i] = new_acl_line
-                        break
-                    acl_count += 1
+            if 0 <= target_line < len(lines):
+                lines[target_line] = new_acl_line
 
-            new_content = "\n".join(lines)
-            config_manager.save_config(new_content)
-            flash("ACL actualizada exitosamente", "success")
+                # Handle comment
+                if target_line > 0 and lines[target_line - 1].strip().startswith("#"):
+                    if comment:
+                        lines[target_line - 1] = f"# {comment}"
+                    else:
+                        lines.pop(target_line - 1)
+                else:
+                    if comment:
+                        lines.insert(target_line, f"# {comment}")
+
+                new_content = "\n".join(lines)
+                config_manager.save_config(new_content)
+                flash(f"ACL '{new_name}' actualizada exitosamente", "success")
+            else:
+                flash("Línea de ACL no encontrada", "error")
         else:
             flash("ACL no encontrada", "error")
-    except (ValueError, IndexError):
-        flash("Error al actualizar la ACL", "error")
+    except (ValueError, IndexError) as e:
+        flash(f"Error al actualizar la ACL: {str(e)}", "error")
 
     return redirect(url_for("admin.manage_acls"))
 
@@ -225,7 +334,8 @@ def edit_acl():
 @admin_bp.route("/acls/delete", methods=["POST"])
 @admin_required
 def delete_acl():
-    acl_id = request.form["id"]
+    """Delete an ACL using its ID (index) and line number."""
+    acl_id = request.form.get("id")
 
     try:
         acl_index = int(acl_id)
@@ -233,19 +343,56 @@ def delete_acl():
 
         if 0 <= acl_index < len(acls):
             acl_to_delete = acls[acl_index]
+            # line_number from parser is 1-based, convert to 0-based index
+            target_line = acl_to_delete["line_number"] - 1
 
-            # Remove the line from the content
+            # Check if using modular configuration
+            if config_manager.is_modular:
+                acl_content = config_manager.read_modular_config("100_acls.conf")
+                if acl_content is not None:
+                    lines = acl_content.split("\n")
+
+                    # Check if there's a comment before this ACL (line_number is 1-based, we need 0-based)
+                    comment_to_remove = None
+                    if target_line > 0 and lines[target_line - 1].strip().startswith(
+                        "#"
+                    ):
+                        comment_to_remove = target_line - 1
+
+                    # Remove lines (comment + ACL or just ACL)
+                    new_lines = []
+                    for i, line in enumerate(lines):
+                        if i == target_line:
+                            continue  # Skip the ACL line
+                        if comment_to_remove is not None and i == comment_to_remove:
+                            continue  # Skip the comment line
+                        new_lines.append(line)
+
+                    new_content = "\n".join(new_lines)
+                    if config_manager.save_modular_config("100_acls.conf", new_content):
+                        flash(
+                            f"ACL '{acl_to_delete['name']}' eliminada exitosamente",
+                            "success",
+                        )
+                    else:
+                        flash("Error al eliminar la ACL", "error")
+                    return redirect(url_for("admin.manage_acls"))
+
+            # Fallback to main config
             lines = config_manager.config_content.split("\n")
-            new_lines = []
-            acl_count = 0
 
-            for line in lines:
-                if line.strip().startswith("acl ") and not line.strip().startswith("#"):
-                    if acl_count == acl_index:
-                        # Skip this line (delete it)
-                        acl_count += 1
-                        continue
-                    acl_count += 1
+            # Check if there's a comment before this ACL (convert to 0-based index)
+            comment_to_remove = None
+            if target_line > 0 and lines[target_line - 1].strip().startswith("#"):
+                comment_to_remove = target_line - 1
+
+            # Remove lines (comment + ACL or just ACL)
+            new_lines = []
+            for i, line in enumerate(lines):
+                if i == target_line:
+                    continue  # Skip the ACL line
+                if comment_to_remove is not None and i == comment_to_remove:
+                    continue  # Skip the comment line
                 new_lines.append(line)
 
             new_content = "\n".join(new_lines)
@@ -271,6 +418,511 @@ def manage_delay_pools():
 def manage_http_access():
     rules = config_manager.get_http_access_rules()
     return render_template("admin/http_access.html", rules=rules)
+
+
+@admin_bp.route("/http-access/delete", methods=["POST"])
+@admin_required
+def delete_http_access():
+    index = request.form.get("index")
+
+    try:
+        rule_index = int(index)
+
+        # Check if using modular configuration
+        if config_manager.is_modular:
+            http_content = config_manager.read_modular_config("120_http_access.conf")
+            if http_content is not None:
+                lines = http_content.split("\n")
+                new_lines = []
+                http_count = 0
+
+                for line in lines:
+                    if line.strip().startswith(
+                        "http_access "
+                    ) and not line.strip().startswith("#"):
+                        if http_count == rule_index:
+                            # Skip this line (delete it)
+                            http_count += 1
+                            continue
+                        http_count += 1
+                    new_lines.append(line)
+
+                new_content = "\n".join(new_lines)
+                if config_manager.save_modular_config(
+                    "120_http_access.conf", new_content
+                ):
+                    flash("Regla HTTP Access eliminada exitosamente", "success")
+                else:
+                    flash("Error al eliminar la regla", "error")
+                return redirect(url_for("admin.manage_http_access"))
+
+        # Fallback to main config
+        lines = config_manager.config_content.split("\n")
+        new_lines = []
+        http_count = 0
+
+        for line in lines:
+            if line.strip().startswith("http_access ") and not line.strip().startswith(
+                "#"
+            ):
+                if http_count == rule_index:
+                    http_count += 1
+                    continue
+                http_count += 1
+            new_lines.append(line)
+
+        new_content = "\n".join(new_lines)
+        config_manager.save_config(new_content)
+        flash("Regla HTTP Access eliminada exitosamente", "success")
+
+    except (ValueError, IndexError) as e:
+        flash(f"Error al eliminar la regla: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_http_access"))
+
+
+@admin_bp.route("/http-access/edit", methods=["POST"])
+@admin_required
+def edit_http_access():
+    """Edit an http_access rule with support for multiple ACLs and description"""
+    index = request.form.get("index")
+    action = request.form.get("action")
+    acls = request.form.getlist("acls[]")
+    description = request.form.get("description", "").strip()
+
+    try:
+        rule_index = int(index)
+        acl_string = " ".join([acl.strip() for acl in acls if acl.strip()])
+
+        if not acl_string:
+            flash("Debe especificar al menos una ACL", "error")
+            return redirect(url_for("admin.manage_http_access"))
+
+        new_rule = f"http_access {action} {acl_string}"
+
+        # Check if using modular configuration
+        if config_manager.is_modular:
+            http_content = config_manager.read_modular_config("120_http_access.conf")
+            if http_content is not None:
+                lines = http_content.split("\n")
+                http_count = 0
+
+                for i, line in enumerate(lines):
+                    if line.strip().startswith(
+                        "http_access "
+                    ) and not line.strip().startswith("#"):
+                        if http_count == rule_index:
+                            # Replace the rule, optionally with a comment above
+                            if description:
+                                # Check if there's already a comment above this line
+                                if i > 0 and lines[i - 1].strip().startswith("#"):
+                                    lines[i - 1] = f"# {description}"
+                                else:
+                                    lines.insert(i, f"# {description}")
+                                    i += 1
+                            lines[i] = new_rule
+                            break
+                        http_count += 1
+
+                new_content = "\n".join(lines)
+                if config_manager.save_modular_config(
+                    "120_http_access.conf", new_content
+                ):
+                    flash("Regla HTTP Access actualizada exitosamente", "success")
+                else:
+                    flash("Error al actualizar la regla", "error")
+                return redirect(url_for("admin.manage_http_access"))
+
+        # Fallback to main config
+        lines = config_manager.config_content.split("\n")
+        http_count = 0
+
+        for i, line in enumerate(lines):
+            if line.strip().startswith("http_access ") and not line.strip().startswith(
+                "#"
+            ):
+                if http_count == rule_index:
+                    if description:
+                        if i > 0 and lines[i - 1].strip().startswith("#"):
+                            lines[i - 1] = f"# {description}"
+                        else:
+                            lines.insert(i, f"# {description}")
+                            i += 1
+                    lines[i] = new_rule
+                    break
+                http_count += 1
+
+        new_content = "\n".join(lines)
+        config_manager.save_config(new_content)
+        flash("Regla HTTP Access actualizada exitosamente", "success")
+
+    except (ValueError, IndexError) as e:
+        flash(f"Error al actualizar la regla: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_http_access"))
+
+
+@admin_bp.route("/http-access/add", methods=["POST"])
+@admin_required
+def add_http_access():
+    """Add a new http_access rule"""
+    action = request.form.get("action")
+    acls = request.form.getlist("acls[]")
+    description = request.form.get("description", "").strip()
+
+    try:
+        acl_string = " ".join([acl.strip() for acl in acls if acl.strip()])
+
+        if not acl_string:
+            flash("Debe especificar al menos una ACL", "error")
+            return redirect(url_for("admin.manage_http_access"))
+
+        new_rule = f"http_access {action} {acl_string}"
+        lines_to_add = []
+
+        if description:
+            lines_to_add.append(f"# {description}")
+        lines_to_add.append(new_rule)
+
+        # Check if using modular configuration
+        if config_manager.is_modular:
+            http_content = config_manager.read_modular_config("120_http_access.conf")
+            if http_content is not None:
+                lines = http_content.split("\n")
+                # Add at the end (before final "deny all" if it exists)
+                lines.extend(lines_to_add)
+
+                new_content = "\n".join(lines)
+                if config_manager.save_modular_config(
+                    "120_http_access.conf", new_content
+                ):
+                    flash("Regla HTTP Access agregada exitosamente", "success")
+                else:
+                    flash("Error al agregar la regla", "error")
+                return redirect(url_for("admin.manage_http_access"))
+
+        # Fallback to main config
+        lines = config_manager.config_content.split("\n")
+        lines.extend(lines_to_add)
+
+        new_content = "\n".join(lines)
+        config_manager.save_config(new_content)
+        flash("Regla HTTP Access agregada exitosamente", "success")
+
+    except Exception as e:
+        flash(f"Error al agregar la regla: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_http_access"))
+
+
+@admin_bp.route("/http-access/move", methods=["POST"])
+@admin_required
+def move_http_access():
+    """Move an http_access rule up or down"""
+    index = request.form.get("index")
+    direction = request.form.get("direction")  # 'up' or 'down'
+
+    try:
+        rule_index = int(index)
+
+        # Check if using modular configuration
+        if config_manager.is_modular:
+            http_content = config_manager.read_modular_config("120_http_access.conf")
+            if http_content is not None:
+                lines = http_content.split("\n")
+                http_lines_indices = []
+
+                # Find all http_access lines
+                for i, line in enumerate(lines):
+                    if line.strip().startswith(
+                        "http_access "
+                    ) and not line.strip().startswith("#"):
+                        http_lines_indices.append(i)
+
+                if rule_index >= len(http_lines_indices):
+                    flash("Índice de regla inválido", "error")
+                    return redirect(url_for("admin.manage_http_access"))
+
+                current_line_index = http_lines_indices[rule_index]
+
+                if direction == "up" and rule_index > 0:
+                    target_line_index = http_lines_indices[rule_index - 1]
+                    # Swap lines
+                    lines[current_line_index], lines[target_line_index] = (
+                        lines[target_line_index],
+                        lines[current_line_index],
+                    )
+                elif direction == "down" and rule_index < len(http_lines_indices) - 1:
+                    target_line_index = http_lines_indices[rule_index + 1]
+                    # Swap lines
+                    lines[current_line_index], lines[target_line_index] = (
+                        lines[target_line_index],
+                        lines[current_line_index],
+                    )
+
+                new_content = "\n".join(lines)
+                if config_manager.save_modular_config(
+                    "120_http_access.conf", new_content
+                ):
+                    flash(
+                        f"Regla movida {direction == 'up' and 'arriba' or 'abajo'} exitosamente",
+                        "success",
+                    )
+                else:
+                    flash("Error al mover la regla", "error")
+                return redirect(url_for("admin.manage_http_access"))
+
+        # Fallback to main config
+        lines = config_manager.config_content.split("\n")
+        http_lines_indices = []
+
+        for i, line in enumerate(lines):
+            if line.strip().startswith("http_access ") and not line.strip().startswith(
+                "#"
+            ):
+                http_lines_indices.append(i)
+
+        if rule_index >= len(http_lines_indices):
+            flash("Índice de regla inválido", "error")
+            return redirect(url_for("admin.manage_http_access"))
+
+        current_line_index = http_lines_indices[rule_index]
+
+        if direction == "up" and rule_index > 0:
+            target_line_index = http_lines_indices[rule_index - 1]
+            lines[current_line_index], lines[target_line_index] = (
+                lines[target_line_index],
+                lines[current_line_index],
+            )
+        elif direction == "down" and rule_index < len(http_lines_indices) - 1:
+            target_line_index = http_lines_indices[rule_index + 1]
+            lines[current_line_index], lines[target_line_index] = (
+                lines[target_line_index],
+                lines[current_line_index],
+            )
+
+        new_content = "\n".join(lines)
+        config_manager.save_config(new_content)
+        flash(
+            f"Regla movida {direction == 'up' and 'arriba' or 'abajo'} exitosamente",
+            "success",
+        )
+
+    except (ValueError, IndexError) as e:
+        flash(f"Error al mover la regla: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_http_access"))
+
+
+@admin_bp.route("/delay-pools/delete", methods=["POST"])
+@admin_required
+def delete_delay_pool():
+    """Delete all directives related to a specific delay pool"""
+    pool_number = request.form.get("pool_number")
+
+    try:
+        # Check if using modular configuration
+        if config_manager.is_modular:
+            delay_content = config_manager.read_modular_config("110_delay_pools.conf")
+            if delay_content is not None:
+                lines = delay_content.split("\n")
+                new_lines = []
+
+                # Remove all lines related to this pool number
+                for line in lines:
+                    stripped = line.strip()
+                    # Skip delay_class, delay_parameters, and delay_access for this pool
+                    if (
+                        stripped.startswith(f"delay_class {pool_number} ")
+                        or stripped.startswith(f"delay_parameters {pool_number} ")
+                        or stripped.startswith(f"delay_access {pool_number} ")
+                    ):
+                        continue
+                    new_lines.append(line)
+
+                new_content = "\n".join(new_lines)
+                if config_manager.save_modular_config(
+                    "110_delay_pools.conf", new_content
+                ):
+                    flash(
+                        f"Delay Pool #{pool_number} eliminado exitosamente", "success"
+                    )
+                else:
+                    flash("Error al eliminar el delay pool", "error")
+                return redirect(url_for("admin.manage_delay_pools"))
+
+        # Fallback to main config
+        lines = config_manager.config_content.split("\n")
+        new_lines = []
+
+        for line in lines:
+            stripped = line.strip()
+            if (
+                stripped.startswith(f"delay_class {pool_number} ")
+                or stripped.startswith(f"delay_parameters {pool_number} ")
+                or stripped.startswith(f"delay_access {pool_number} ")
+            ):
+                continue
+            new_lines.append(line)
+
+        new_content = "\n".join(new_lines)
+        config_manager.save_config(new_content)
+        flash(f"Delay Pool #{pool_number} eliminado exitosamente", "success")
+
+    except Exception as e:
+        flash(f"Error al eliminar el delay pool: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_delay_pools"))
+
+
+@admin_bp.route("/delay-pools/edit", methods=["POST"])
+@admin_required
+def edit_delay_pool():
+    """Edit all directives related to a specific delay pool"""
+    pool_number = request.form.get("pool_number")
+    pool_class = request.form.get("pool_class")
+    parameters = request.form.get("parameters")
+    access_actions = request.form.getlist("access_action[]")
+    access_acls = request.form.getlist("access_acl[]")
+
+    try:
+        # Build new directives
+        new_directives = []
+        new_directives.append(f"delay_class {pool_number} {pool_class}")
+        new_directives.append(f"delay_parameters {pool_number} {parameters}")
+
+        # Add access rules
+        for action, acl in zip(access_actions, access_acls, strict=True):
+            if acl.strip():
+                new_directives.append(f"delay_access {pool_number} {action} {acl}")
+
+        # Check if using modular configuration
+        if config_manager.is_modular:
+            delay_content = config_manager.read_modular_config("110_delay_pools.conf")
+            if delay_content is not None:
+                lines = delay_content.split("\n")
+                new_lines = []
+                pool_found = False
+                insert_index = -1
+
+                # Remove old directives and find insertion point
+                for _i, line in enumerate(lines):
+                    stripped = line.strip()
+                    if (
+                        stripped.startswith(f"delay_class {pool_number} ")
+                        or stripped.startswith(f"delay_parameters {pool_number} ")
+                        or stripped.startswith(f"delay_access {pool_number} ")
+                    ):
+                        if not pool_found:
+                            insert_index = len(new_lines)
+                            pool_found = True
+                        continue
+                    new_lines.append(line)
+
+                # Insert new directives at the same location
+                if insert_index >= 0:
+                    for directive in reversed(new_directives):
+                        new_lines.insert(insert_index, directive)
+                else:
+                    # If not found, append at the end
+                    new_lines.extend(new_directives)
+
+                new_content = "\n".join(new_lines)
+                if config_manager.save_modular_config(
+                    "110_delay_pools.conf", new_content
+                ):
+                    flash(
+                        f"Delay Pool #{pool_number} actualizado exitosamente", "success"
+                    )
+                else:
+                    flash("Error al actualizar el delay pool", "error")
+                return redirect(url_for("admin.manage_delay_pools"))
+
+        # Fallback to main config
+        lines = config_manager.config_content.split("\n")
+        new_lines = []
+        pool_found = False
+        insert_index = -1
+
+        for _i, line in enumerate(lines):
+            stripped = line.strip()
+            if (
+                stripped.startswith(f"delay_class {pool_number} ")
+                or stripped.startswith(f"delay_parameters {pool_number} ")
+                or stripped.startswith(f"delay_access {pool_number} ")
+            ):
+                if not pool_found:
+                    insert_index = len(new_lines)
+                    pool_found = True
+                continue
+            new_lines.append(line)
+
+        if insert_index >= 0:
+            for directive in reversed(new_directives):
+                new_lines.insert(insert_index, directive)
+        else:
+            new_lines.extend(new_directives)
+
+        new_content = "\n".join(new_lines)
+        config_manager.save_config(new_content)
+        flash(f"Delay Pool #{pool_number} actualizado exitosamente", "success")
+
+    except Exception as e:
+        flash(f"Error al actualizar el delay pool: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_delay_pools"))
+
+
+@admin_bp.route("/delay-pools/add", methods=["POST"])
+@admin_required
+def add_delay_pool():
+    """Add a new delay pool with all its directives"""
+    pool_number = request.form.get("pool_number")
+    pool_class = request.form.get("pool_class")
+    parameters = request.form.get("parameters")
+    access_actions = request.form.getlist("access_action[]")
+    access_acls = request.form.getlist("access_acl[]")
+
+    try:
+        # Build new directives
+        new_directives = []
+        new_directives.append(f"delay_class {pool_number} {pool_class}")
+        new_directives.append(f"delay_parameters {pool_number} {parameters}")
+
+        # Add access rules
+        for action, acl in zip(access_actions, access_acls, strict=True):
+            if acl.strip():
+                new_directives.append(f"delay_access {pool_number} {action} {acl}")
+
+        # Check if using modular configuration
+        if config_manager.is_modular:
+            delay_content = config_manager.read_modular_config("110_delay_pools.conf")
+            if delay_content is not None:
+                # Append new directives at the end
+                lines = delay_content.split("\n")
+                lines.extend(new_directives)
+
+                new_content = "\n".join(lines)
+                if config_manager.save_modular_config(
+                    "110_delay_pools.conf", new_content
+                ):
+                    flash(f"Delay Pool #{pool_number} creado exitosamente", "success")
+                else:
+                    flash("Error al crear el delay pool", "error")
+                return redirect(url_for("admin.manage_delay_pools"))
+
+        # Fallback to main config
+        lines = config_manager.config_content.split("\n")
+        lines.extend(new_directives)
+
+        new_content = "\n".join(lines)
+        config_manager.save_config(new_content)
+        flash(f"Delay Pool #{pool_number} creado exitosamente", "success")
+
+    except Exception as e:
+        flash(f"Error al crear el delay pool: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_delay_pools"))
 
 
 @admin_bp.route("/view-logs")
@@ -540,3 +1192,120 @@ def delete_table_data():
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
+
+
+@admin_bp.route("/config/split")
+@admin_required
+def split_config_view():
+    """Vista para dividir el archivo squid.conf en archivos modulares."""
+    try:
+        splitter = SquidConfigSplitter()
+        split_info = splitter.get_split_info()
+        output_exists = splitter.check_output_dir_exists()
+        files_count = splitter.count_files_in_output_dir()
+
+        return render_template(
+            "admin/split_config.html",
+            split_info=split_info,
+            output_dir=splitter.output_dir,
+            input_file=splitter.input_file,
+            output_exists=output_exists,
+            files_count=files_count,
+        )
+    except Exception as e:
+        logger.exception("Error al cargar la vista de división de configuración")
+        flash(f"Error al cargar la vista: {str(e)}", "error")
+        return redirect(url_for("admin.admin_dashboard"))
+
+
+@admin_bp.route("/api/split-config", methods=["POST"])
+@api_auth_required
+def split_config():
+    """API endpoint para dividir el archivo squid.conf en archivos modulares."""
+    try:
+        data = request.get_json() or {}
+        strict = data.get("strict", False)
+
+        splitter = SquidConfigSplitter(strict=strict)
+
+        if not os.path.exists(splitter.input_file):
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": f"Archivo squid.conf no encontrado en: {splitter.input_file}",
+                }
+            ), 404
+
+        results = splitter.split_config()
+
+        # Reload config_manager to detect modular configuration
+        global config_manager
+        config_manager = SquidConfigManager()
+        logger.info("Config manager reloaded after splitting configuration")
+
+        return jsonify(
+            {
+                "status": "success",
+                "message": f"Configuración dividida exitosamente en {len(results)} archivos",
+                "data": {
+                    "output_dir": splitter.output_dir,
+                    "files": results,
+                    "total_files": len(results),
+                },
+            }
+        )
+
+    except FileNotFoundError as e:
+        logger.error(f"Archivo no encontrado: {e}")
+        return jsonify(
+            {
+                "status": "error",
+                "message": "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf.",
+            }
+        ), 404
+
+    except PermissionError as e:
+        logger.error(f"Error de permisos: {e}")
+        return jsonify(
+            {
+                "status": "error",
+                "message": "No se tienen permisos suficientes para crear los archivos",
+            }
+        ), 403
+
+    except RuntimeError as e:
+        logger.error(f"Error de validación: {e}")
+        return jsonify(
+            {
+                "status": "error",
+                "message": "Error de validación de la configuración",
+            }
+        ), 400
+
+    except Exception as e:
+        logger.exception("Error al dividir el archivo de configuración")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+
+        resp = {
+            "status": "error",
+            "message": "Error interno al dividir la configuración",
+        }
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500
+
+
+@admin_bp.route("/api/get-split-files", methods=["GET"])
+@api_auth_required
+def get_split_files():
+    """API endpoint para obtener la lista de archivos generados en squid.d."""
+    splitter = SquidConfigSplitter()
+    result = SquidConfigSplitter.get_split_files_info(splitter.output_dir)
+
+    if result["status"] == "success":
+        return jsonify(result)
+    else:
+        return jsonify(result), result.get("code", 500)

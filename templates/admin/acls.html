@@ -86,6 +86,7 @@
         </div>
 
         <!-- ACLs List -->
+        {% if acls and acls|length > 0 %}
         <div class="overflow-x-auto -mx-4 sm:mx-0">
             <table class="w-full table-auto">
                 <thead class="bg-gray-50">
@@ -119,6 +120,28 @@
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <i class="fas fa-shield-alt text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg font-medium">No hay ACLs configuradas</p>
+            <p class="text-gray-400 text-sm mt-2">Las ACLs son fundamentales para controlar el acceso en Squid</p>
+            
+            <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                    <div class="text-left text-sm">
+                        <p class="font-semibold text-blue-900 mb-1">¿Ya tienes ACLs configuradas?</p>
+                        <p class="text-blue-800 mb-2">Si tu squid.conf aún no está dividido, puedes <a href="{{ url_for('admin.split_config') }}" class="underline hover:text-blue-600 font-semibold">dividir tu configuración</a> para una mejor gestión modular.</p>
+                        <p class="text-blue-800">Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde <a href="{{ url_for('admin.view_config') }}" class="underline hover:text-blue-600 font-semibold">Configuración</a>.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="toggleAddForm()" class="mt-4 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors">
+                <i class="fas fa-plus mr-2"></i>Crear primera ACL
+            </button>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -181,7 +204,14 @@ function deleteAcl(id, name) {
         idInput.name = 'id';
         idInput.value = id;
         
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = '{{ csrf_token() }}';
+        
         form.appendChild(idInput);
+        form.appendChild(csrfInput);
         document.body.appendChild(form);
         form.submit();
     }

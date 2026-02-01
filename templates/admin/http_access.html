@@ -2,34 +2,478 @@
 
 {% block content %}
 <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Reglas de Acceso HTTP</h2>
+    <div class="flex justify-between items-center mb-4 sm:mb-6">
+        <div>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Reglas de Acceso HTTP</h2>
+            <p class="text-sm text-gray-600 mt-1">Las reglas se evalúan en orden. La primera coincidencia determina el acceso.</p>
+        </div>
+        <button onclick="showAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">
+            <i class="fas fa-plus mr-2"></i>Agregar Regla
+        </button>
+    </div>
     
-    <div class="space-y-3">
+    <!-- Beta Warning -->
+    <div class="mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-6 flex items-start space-x-4">
+        <i class="fas fa-exclamation-triangle text-red-600 text-3xl mt-1 animate-pulse"></i>
+        <div class="flex-1">
+            <p class="font-bold text-red-800 text-lg">¡MUY IMPORTANTE!</p>
+            <p class="text-red-700 mt-2 font-medium">
+                Esta funcionalidad se encuentra en <strong>BETA</strong>. Puede contener errores y comportamientos inesperados.
+            </p>
+            <p class="text-red-700 mt-2">
+                <strong>Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba.</strong>
+            </p>
+        </div>
+    </div>
+    
+    {% if rules %}
+    <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start">
+            <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+            <div class="text-sm text-gray-700">
+                <p class="font-semibold text-gray-800 mb-1">Importante sobre el orden:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                    <li>Las reglas se procesan de arriba hacia abajo</li>
+                    <li>La primera regla que coincida se aplica (allow o deny)</li>
+                    <li>Si ninguna regla coincide, se aplica el comportamiento contrario a la última regla</li>
+                    <li>Se recomienda terminar con "deny all" para evitar confusión</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-2">
         {% for rule in rules %}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg gap-2">
-            <div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
-                <div class="flex-shrink-0">
-                    {% if 'allow' in rule %}
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            ALLOW
+        <div class="flex flex-col sm:flex-row items-start justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all gap-3">
+            <div class="flex items-start space-x-3 flex-1 min-w-0 w-full">
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <span class="text-xs font-mono text-gray-400">#{{ loop.index }}</span>
+                    {% if rule.action == 'allow' %}
+                        <span class="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800 border border-green-300">
+                            <i class="fas fa-check mr-1"></i>ALLOW
                         </span>
                     {% else %}
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                            DENY
+                        <span class="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800 border border-red-300">
+                            <i class="fas fa-times mr-1"></i>DENY
                         </span>
                     {% endif %}
                 </div>
-                <code class="text-xs sm:text-sm text-gray-700 break-all">{{ rule }}</code>
+                
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        {% for acl in rule.acls %}
+                            {% if acl.startswith('!') %}
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-orange-100 text-orange-800 text-xs font-mono border border-orange-300">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>{{ acl }}
+                                </span>
+                            {% elif acl in ['localhost', 'manager', 'all'] %}
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-purple-100 text-purple-800 text-xs font-mono border border-purple-300">
+                                    <i class="fas fa-star mr-1"></i>{{ acl }}
+                                </span>
+                            {% elif 'ports' in acl.lower() %}
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-mono border border-blue-300">
+                                    <i class="fas fa-plug mr-1"></i>{{ acl }}
+                                </span>
+                            {% elif acl == 'CONNECT' %}
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-indigo-100 text-indigo-800 text-xs font-mono border border-indigo-300">
+                                    <i class="fas fa-link mr-1"></i>{{ acl }}
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 text-xs font-mono border border-gray-300">
+                                    {{ acl }}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    {% if rule.description %}
+                    <p class="text-xs text-gray-500 mt-2 italic">
+                        <i class="fas fa-comment-alt mr-1"></i>{{ rule.description }}
+                    </p>
+                    {% endif %}
+                    
+                    {% if rule.is_negative %}
+                    <p class="text-xs text-orange-600 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>Contiene negación (!) - se aplica cuando NO coincide con la ACL
+                    </p>
+                    {% endif %}
+                </div>
             </div>
-            <div class="flex space-x-2 flex-shrink-0">\n                <button class="text-blue-600 hover:text-blue-900">
+            
+            <div class="flex space-x-2 flex-shrink-0 sm:ml-3">
+                <button onclick='moveRuleUp({{ loop.index0 }})' 
+                        class="text-gray-600 hover:text-gray-900 p-2 hover:bg-gray-100 rounded" 
+                        title="Mover arriba"
+                        {% if loop.first %}disabled class="opacity-30 cursor-not-allowed"{% endif %}>
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button onclick='moveRuleDown({{ loop.index0 }})' 
+                        class="text-gray-600 hover:text-gray-900 p-2 hover:bg-gray-100 rounded" 
+                        title="Mover abajo"
+                        {% if loop.last %}disabled class="opacity-30 cursor-not-allowed"{% endif %}>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button onclick='editRule({{ loop.index0 }}, "{{ rule.action }}", "{{ rule.acl_string }}", "{{ rule.description }}")' 
+                        class="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-100 rounded" 
+                        title="Editar">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="text-red-600 hover:text-red-900">
+                <button onclick='deleteRule({{ loop.index0 }}, "{{ rule.action }} {{ rule.acl_string }}")' 
+                        class="text-red-600 hover:text-red-900 p-2 hover:bg-red-100 rounded" 
+                        title="Eliminar">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <i class="fas fa-shield-alt text-6xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 text-lg font-medium">No hay reglas HTTP access configuradas</p>
+        <p class="text-gray-400 text-sm mt-2">⚠️ Sin reglas, el acceso será DENEGADO por defecto</p>
+        
+        <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                <div class="text-left text-sm">
+                    <p class="font-semibold text-blue-900 mb-1">¿Ya tienes reglas configuradas?</p>
+                    <p class="text-blue-800 mb-2">Si tu squid.conf aún no está dividido, puedes <a href="{{ url_for('admin.split_config') }}" class="underline hover:text-blue-600 font-semibold">dividir tu configuración</a> para una mejor gestión modular.</p>
+                    <p class="text-blue-800">Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde <a href="{{ url_for('admin.view_config') }}" class="underline hover:text-blue-600 font-semibold">Configuración</a>.</p>
+                </div>
+            </div>
+        </div>
+        
+        <button onclick="showAddModal()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-colors">
+            <i class="fas fa-plus mr-2"></i>Crear primera regla
+        </button>
+    </div>
+    {% endif %}
 </div>
+
+<!-- Add Modal -->
+<div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-plus-circle text-blue-600 mr-2"></i>Agregar Regla HTTP Access
+        </h3>
+        <form id="addForm" method="POST" action="/admin/http-access/add">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Acción:</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center justify-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all">
+                        <input type="radio" name="action" value="allow" class="mr-3 w-4 h-4" required>
+                        <div class="text-center">
+                            <i class="fas fa-check-circle text-green-600 text-2xl mb-1"></i>
+                            <p class="font-semibold text-gray-800">ALLOW</p>
+                            <p class="text-xs text-gray-600">Permitir acceso</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 hover:bg-red-50 transition-all">
+                        <input type="radio" name="action" value="deny" class="mr-3 w-4 h-4" required>
+                        <div class="text-center">
+                            <i class="fas fa-times-circle text-red-600 text-2xl mb-1"></i>
+                            <p class="font-semibold text-gray-800">DENY</p>
+                            <p class="text-xs text-gray-600">Denegar acceso</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">ACLs:</label>
+                <div id="addAclsList" class="space-y-2 mb-2">
+                    <!-- ACLs se agregarán dinámicamente -->
+                </div>
+                <button type="button" onclick="addAclInput('add')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <i class="fas fa-plus-circle mr-1"></i>Agregar ACL
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">
+                    <i class="fas fa-star text-yellow-500 mr-1"></i>ACLs Comunes (opcional):
+                </label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <button type="button" onclick="addCommonAcl('add', 'localhost')" class="px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded text-sm border border-purple-300">
+                        localhost
+                    </button>
+                    <button type="button" onclick="addCommonAcl('add', 'manager')" class="px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded text-sm border border-purple-300">
+                        manager
+                    </button>
+                    <button type="button" onclick="addCommonAcl('add', 'all')" class="px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded text-sm border border-purple-300">
+                        all
+                    </button>
+                    <button type="button" onclick="addCommonAcl('add', '!Safe_ports')" class="px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded text-sm border border-orange-300">
+                        !Safe_ports
+                    </button>
+                    <button type="button" onclick="addCommonAcl('add', '!SSL_ports')" class="px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded text-sm border border-orange-300">
+                        !SSL_ports
+                    </button>
+                    <button type="button" onclick="addCommonAcl('add', 'CONNECT')" class="px-3 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded text-sm border border-indigo-300">
+                        CONNECT
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                    <i class="fas fa-info-circle mr-1"></i>Haz clic en estas ACLs predefinidas para agregarlas rápidamente
+                </p>
+            </div>
+            
+            <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p class="text-sm text-gray-700">
+                    <i class="fas fa-lightbulb text-yellow-600 mr-2"></i>
+                    <strong>Tip:</strong> Usa <code class="bg-white px-1 rounded">!</code> antes del nombre de una ACL para negación.
+                    Ej: <code class="bg-white px-1 rounded">!Safe_ports</code> coincide cuando NO es un puerto seguro.
+                </p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Descripción (opcional):</label>
+                <input type="text" name="description" placeholder="Ej: Permitir acceso desde la red local"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                <p class="text-xs text-gray-500 mt-1">Se agregará como comentario antes de la regla</p>
+            </div>
+            
+            <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
+                <button type="button" onclick="closeAddModal()" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors font-medium">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
+                    <i class="fas fa-save mr-2"></i>Crear Regla
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-edit text-blue-600 mr-2"></i>Editar Regla HTTP Access
+        </h3>
+        <form id="editForm" method="POST" action="/admin/http-access/edit">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="index" id="editIndex">
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Acción:</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center justify-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all">
+                        <input type="radio" name="action" value="allow" id="editActionAllow" class="mr-3 w-4 h-4" required>
+                        <div class="text-center">
+                            <i class="fas fa-check-circle text-green-600 text-2xl mb-1"></i>
+                            <p class="font-semibold text-gray-800">ALLOW</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 hover:bg-red-50 transition-all">
+                        <input type="radio" name="action" value="deny" id="editActionDeny" class="mr-3 w-4 h-4" required>
+                        <div class="text-center">
+                            <i class="fas fa-times-circle text-red-600 text-2xl mb-1"></i>
+                            <p class="font-semibold text-gray-800">DENY</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">ACLs:</label>
+                <div id="editAclsList" class="space-y-2 mb-2">
+                    <!-- ACLs se llenarán dinámicamente -->
+                </div>
+                <button type="button" onclick="addAclInput('edit')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <i class="fas fa-plus-circle mr-1"></i>Agregar ACL
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Descripción (opcional):</label>
+                <input type="text" name="description" id="editDescription" placeholder="Ej: Permitir acceso desde la red local"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+            </div>
+            
+            <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
+                <button type="button" onclick="closeEditModal()" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors font-medium">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
+                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let addAclCounter = 0;
+let editAclCounter = 0;
+
+function showAddModal() {
+    document.getElementById('addModal').classList.remove('hidden');
+    document.getElementById('addForm').reset();
+    document.getElementById('addAclsList').innerHTML = '';
+    addAclCounter = 0;
+    // Add one initial ACL input
+    addAclInput('add');
+}
+
+function closeAddModal() {
+    document.getElementById('addModal').classList.add('hidden');
+}
+
+function editRule(index, action, aclString, description) {
+    document.getElementById('editIndex').value = index;
+    
+    // Set action radio button
+    if (action === 'allow') {
+        document.getElementById('editActionAllow').checked = true;
+    } else {
+        document.getElementById('editActionDeny').checked = true;
+    }
+    
+    // Set description
+    document.getElementById('editDescription').value = description || '';
+    
+    // Parse ACLs and fill inputs
+    const acls = aclString.split(' ');
+    const aclsContainer = document.getElementById('editAclsList');
+    aclsContainer.innerHTML = '';
+    editAclCounter = 0;
+    
+    acls.forEach(acl => {
+        if (acl.trim()) {
+            addAclInput('edit', acl.trim());
+        }
+    });
+    
+    // If no ACLs were added, add one empty input
+    if (editAclCounter === 0) {
+        addAclInput('edit');
+    }
+    
+    document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.add('hidden');
+}
+
+function addAclInput(mode, value = '') {
+    const container = document.getElementById(mode + 'AclsList');
+    const counter = mode === 'add' ? addAclCounter++ : editAclCounter++;
+    
+    const aclDiv = document.createElement('div');
+    aclDiv.className = 'flex items-center space-x-2';
+    aclDiv.id = mode + 'Acl' + counter;
+    
+    aclDiv.innerHTML = `
+        <input type="text" name="acls[]" value="${value}" placeholder="Nombre de ACL (ej: localhost, !Safe_ports)" 
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500" required>
+        <button type="button" onclick="removeAclInput('${mode}', ${counter})" 
+                class="text-red-600 hover:text-red-800 p-2">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(aclDiv);
+}
+
+function removeAclInput(mode, counter) {
+    const aclDiv = document.getElementById(mode + 'Acl' + counter);
+    if (aclDiv) {
+        // Only allow removal if there's more than one ACL input
+        const container = document.getElementById(mode + 'AclsList');
+        if (container.children.length > 1) {
+            aclDiv.remove();
+        } else {
+            alert('Debe haber al menos una ACL en la regla');
+        }
+    }
+}
+
+function addCommonAcl(mode, aclName) {
+    addAclInput(mode, aclName);
+}
+
+function deleteRule(index, rule) {
+    if (confirm('¿Estás seguro de que quieres eliminar la regla:\nhttp_access ' + rule + '?\n\nEsto puede afectar el acceso al proxy.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/http-access/delete';
+        
+        const indexInput = document.createElement('input');
+        indexInput.type = 'hidden';
+        indexInput.name = 'index';
+        indexInput.value = index;
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = '{{ csrf_token() }}';
+        
+        form.appendChild(indexInput);
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function moveRuleUp(index) {
+    if (index === 0) return;
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/http-access/move';
+    
+    const indexInput = document.createElement('input');
+    indexInput.type = 'hidden';
+    indexInput.name = 'index';
+    indexInput.value = index;
+    
+    const directionInput = document.createElement('input');
+    directionInput.type = 'hidden';
+    directionInput.name = 'direction';
+    directionInput.value = 'up';
+    
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = '{{ csrf_token() }}';
+    
+    form.appendChild(indexInput);
+    form.appendChild(directionInput);
+    form.appendChild(csrfInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function moveRuleDown(index) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/http-access/move';
+    
+    const indexInput = document.createElement('input');
+    indexInput.type = 'hidden';
+    indexInput.name = 'index';
+    indexInput.value = index;
+    
+    const directionInput = document.createElement('input');
+    directionInput.type = 'hidden';
+    directionInput.name = 'direction';
+    directionInput.value = 'down';
+    
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = '{{ csrf_token() }}';
+    
+    form.appendChild(indexInput);
+    form.appendChild(directionInput);
+    form.appendChild(csrfInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 {% endblock %}

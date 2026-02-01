@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Administrador Squid Proxy{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='src/alpine.min.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}">
 </head>
 <body class="bg-gray-50 min-h-screen" x-data="{ sidebarOpen: false }">
     <!-- Navigation -->
@@ -37,14 +37,54 @@
                         <i class="fas fa-power-off mr-2"></i>
                         <span class="hidden sm:inline">Reiniciar</span>
                     </button>
-                    <div class="hidden md:flex items-center space-x-2 text-white bg-blue-800 bg-opacity-60 px-4 py-2 rounded-lg shadow-md">
-                        <i class="fas fa-user-circle text-lg"></i>
-                        <span class="font-medium">{{ session.user.username if session.user else 'Admin' }}</span>
+                    <!-- User Dropdown -->
+                    <div class="relative" x-data="{ userMenuOpen: false }">
+                        <button @click="userMenuOpen = !userMenuOpen" @click.away="userMenuOpen = false" class="flex items-center space-x-2 text-white bg-blue-800 bg-opacity-60 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-sm"></i>
+                                </div>
+                                <div class="hidden md:block text-left">
+                                    <div class="text-sm font-semibold">{{ session.user.username if session.user else 'Admin' }}</div>
+                                    <div class="text-xs text-blue-200">{{ session.user.role if session.user else 'Administrator' }}</div>
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-down text-sm transition-transform duration-200" :class="userMenuOpen ? 'rotate-180' : ''"></i>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div x-show="userMenuOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50" style="display: none;">
+                            <!-- User Info Header -->
+                            <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">{{ session.user.username if session.user else 'Admin' }}</p>
+                                        <p class="text-xs text-gray-600">{{ session.user.role if session.user else 'Administrator' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Menu Items -->
+                            <div class="py-2">
+                                <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                                    <i class="fas fa-users mr-3 text-gray-400"></i>
+                                    Gestionar Usuarios
+                                </a>
+                                <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                                    <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                    Configuración
+                                </a>
+                                <div class="border-t border-gray-200 my-1"></div>
+                                <a href="{{ url_for('auth.logout') }}" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
+                                    <i class="fas fa-sign-out-alt mr-3"></i>
+                                    Cerrar Sesión
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <a href="{{ url_for('auth.logout') }}" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
-                        <i class="fas fa-sign-out-alt mr-2"></i>
-                        <span class="hidden sm:inline">Cerrar Sesión</span>
-                    </a>
                 </div>
             </div>
         </div>
@@ -66,27 +106,36 @@
                     <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-cog mr-3"></i>Configuración
                     </a>
+                    <a href="{{ url_for('admin.split_config_view') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <span class="flex items-center">
+                            <i class="fas fa-code-branch mr-3"></i>Dividir Config
+                        </span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
+                    </a>
                     <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-users mr-3"></i>Usuarios
                     </a>
                     <a href="{{ url_for('admin.clean_data') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-database mr-3"></i>Limpiar Datos
                     </a>
-                    <div class="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-lg">
-                        <i class="fas fa-shield-alt mr-3"></i>
-                        <span>ACLs</span>
-                        <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Próximamente</span>
-                    </div>
-                    <div class="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-lg">
-                        <i class="fas fa-clock mr-3"></i>
-                        <span>Delay Pools</span>
-                        <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Próximamente</span>
-                    </div>
-                    <div class="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-lg">
-                        <i class="fas fa-key mr-3"></i>
-                        <span>HTTP Access</span>
-                        <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Próximamente</span>
-                    </div>
+                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <span class="flex items-center">
+                            <i class="fas fa-shield-alt mr-3"></i>ACLs
+                        </span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
+                    </a>
+                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-3"></i>Delay Pools
+                        </span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
+                    </a>
+                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <span class="flex items-center">
+                            <i class="fas fa-key mr-3"></i>HTTP Access
+                        </span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">BETA</span>
+                    </a>
                     <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-file-alt mr-3"></i>Logs
                     </a>

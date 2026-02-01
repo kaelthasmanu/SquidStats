@@ -120,7 +120,7 @@ class Config:
     LOG_FORMAT = safe_get_env("LOG_FORMAT", "DETAILED").upper()
 
     # Application version
-    VERSION = safe_get_env("VERSION", "2.1")
+    VERSION = safe_get_env("VERSION", "2.2")
 
     # Authentication settings
     JWT_SECRET_KEY = SECRET_KEY
@@ -144,3 +144,6 @@ class Config:
     HTTP_PROXY = safe_get_env("HTTP_PROXY", "")
     HTTPS_PROXY = safe_get_env("HTTPS_PROXY", "")
     NO_PROXY = safe_get_env("NO_PROXY", "")
+
+    # Squid configuration path
+    SQUID_CONFIG_PATH = safe_get_env("SQUID_CONFIG_PATH", "/etc/squid/squid.conf")

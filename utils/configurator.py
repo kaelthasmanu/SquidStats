@@ -1,7 +1,9 @@
 import os
 import re
 
-input_file = "/home/manuel/Desktop/squid.conf"
+from config import SQUID_CONFIG_PATH
+
+input_file = SQUID_CONFIG_PATH
 
 files = {
     "acls.conf": [],
@@ -60,4 +62,4 @@ def extract_squid_config(input_file):
 
 
 if __name__ == "__main__":
-    extract_squid_config()
+    extract_squid_config(input_file)
