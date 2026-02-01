@@ -1257,7 +1257,12 @@ def split_config():
 
     except FileNotFoundError as e:
         logger.error(f"Archivo no encontrado: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 404
+        return jsonify(
+            {
+                "status": "error",
+                "message": "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf.",
+            }
+        ), 404
 
     except PermissionError as e:
         logger.error(f"Error de permisos: {e}")
@@ -1270,7 +1275,12 @@ def split_config():
 
     except RuntimeError as e:
         logger.error(f"Error de validación: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 400
+        return jsonify(
+            {
+                "status": "error",
+                "message": "Error de validación de la configuración",
+            }
+        ), 400
 
     except Exception as e:
         logger.exception("Error al dividir el archivo de configuración")
