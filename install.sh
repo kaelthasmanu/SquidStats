@@ -380,7 +380,7 @@ function main() {
 
     if [ "$1" = "--update" ]; then
         echo "Verificando paquetes instalados..."
-        #checkPackages
+        checkPackages
         echo "Actualizando Servicio..."
         if ! updateOrCloneRepo; then
             return 1
