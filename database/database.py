@@ -1,10 +1,11 @@
 import logging
 import os
-import re
 from datetime import date, datetime
 from typing import Any
 from urllib.parse import urlparse
 
+from alembic.config import Config as AlembicConfig
+from alembic.runtime.migration import MigrationContext
 from sqlalchemy import (
     BigInteger,
     Column,
@@ -20,6 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+from alembic import command
 from config import Config
 
 logging.basicConfig(
@@ -424,229 +426,110 @@ def get_concat_function(column, separator=", "):
 
 
 def migrate_database():
-    engine = get_engine()
-    db_type = Config.DATABASE_TYPE
-    inspector = inspect(engine)
-    original_level = logger.level
-    logger.setLevel(logging.DEBUG)
+    """Run Alembic migrations to update the database schema."""
     try:
+        # Get Alembic configuration
+        alembic_ini_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "alembic.ini"
+        )
+
+        if not os.path.exists(alembic_ini_path):
+            logger.warning("alembic.ini not found. Skipping Alembic migrations.")
+            logger.warning("Please run: python manage_db.py init")
+            return
+
+        alembic_cfg = AlembicConfig(alembic_ini_path)
+
+        # Check if database has been initialized with Alembic
+        engine = get_engine()
         with engine.connect() as conn:
-            # Ensure admin_users table exists for authentication
-            if not inspector.has_table("admin_users"):
-                logger.info("Creating admin_users table (missing)")
-                AdminUser.__table__.create(bind=engine, checkfirst=True)
-                conn.commit()
-                # Refresh inspector after table creation
+            context = MigrationContext.configure(conn)
+            current_rev = context.get_current_revision()
+
+            if current_rev is None:
+                # Database not initialized with Alembic yet
+                logger.info("Database not yet initialized with Alembic.")
+                logger.info("Checking if schema already exists...")
+
                 inspector = inspect(engine)
 
-                # Create default admin user if table was just created
-                _create_default_admin_user(conn, engine)
-
-            # Check if admin user exists, create if not
-            try:
-                session = get_session()
-                existing_admin = (
-                    session.query(AdminUser).filter_by(username="admin").first()
+                # Check if core tables exist
+                core_tables_exist = (
+                    inspector.has_table("log_metadata")
+                    and inspector.has_table("denied_logs")
+                    and inspector.has_table("system_metrics")
+                    and inspector.has_table("notifications")
+                    and inspector.has_table("admin_users")
                 )
-                if not existing_admin:
-                    logger.info("Admin user not found, creating default admin user")
-                    _create_default_admin_user(conn, engine)
-                else:
-                    logger.info("Admin user already exists")
-                session.close()
-            except Exception as e:
-                logger.warning(f"Could not check/create admin user: {e}")
 
-            # Define expected schema for all tables
-            expected_schemas = {
-                "user_base": {
-                    "username": {"type": "VARCHAR(255)", "nullable": False},
-                    "ip": {"type": "VARCHAR(255)", "nullable": False},
-                },
-                "log_base": {"url": {"type": "TEXT", "nullable": False}},
-                "denied_logs": {
-                    "username": {"type": "VARCHAR(255)", "nullable": False},
-                    "ip": {"type": "VARCHAR(255)", "nullable": False},
-                    "url": {"type": "TEXT", "nullable": False},
-                    "method": {"type": "VARCHAR(255)", "nullable": False},
-                    "status": {"type": "VARCHAR(255)", "nullable": False},
-                },
-                "system_metrics": {
-                    "cpu_usage": {"type": "VARCHAR(255)", "nullable": False}
-                },
-            }
-            for table_name, expected_columns in expected_schemas.items():
-                if not inspector.has_table(table_name):
-                    logger.info(f"Table {table_name} doesn't exist, skipping migration")
-                    continue
-                logger.info(f"Checking schema for table: {table_name}")
-                current_columns = inspector.get_columns(table_name)
-                for column_name, expected_spec in expected_columns.items():
-                    # Find current column info
-                    current_column = next(
-                        (col for col in current_columns if col["name"] == column_name),
-                        None,
-                    )
-                    if not current_column:
-                        logger.warning(
-                            f"Column {column_name} not found in {table_name}"
-                        )
-                        continue
+                if core_tables_exist:
+                    # Schema exists, stamp as current version
                     logger.info(
-                        f"Checking {table_name}.{column_name}: current type = {current_column['type']}"
+                        "Existing schema detected. Marking database as up-to-date..."
                     )
-                    # Check if migration is needed
-                    needs_migration = _column_needs_migration(
-                        current_column, expected_spec, db_type
+                    command.stamp(alembic_cfg, "head")
+                    logger.info("✓ Database marked as up-to-date with migrations.")
+
+                    # Ensure admin user exists
+                    _ensure_admin_user(conn, engine)
+                else:
+                    # No schema exists, run all migrations
+                    logger.info(
+                        "No existing schema found. Running initial migrations..."
                     )
-                    if needs_migration:
-                        logger.info(
-                            f"Migrating {table_name}.{column_name} to {expected_spec['type']}"
-                        )
-                        _migrate_column(
-                            conn, table_name, column_name, expected_spec, db_type
-                        )
-                    else:
-                        logger.info(
-                            f"No migration needed for {table_name}.{column_name}"
-                        )
-            # Also check dynamic tables (user_YYYYMMDD, log_YYYYMMDD)
-            _migrate_dynamic_tables(conn, inspector, db_type)
-            conn.commit()
-            logger.info("Database migration completed successfully")
+                    command.upgrade(alembic_cfg, "head")
+                    logger.info("✓ Database schema created successfully.")
+
+                    # Create admin user after migrations
+                    _ensure_admin_user(conn, engine)
+            else:
+                # Database already initialized, run pending migrations
+                logger.info(f"Current database version: {current_rev}")
+                logger.info("Checking for pending migrations...")
+
+                # Run pending migrations
+                command.upgrade(alembic_cfg, "head")
+                logger.info("✓ Database migrations completed successfully.")
+
+                # Ensure admin user exists
+                _ensure_admin_user(conn, engine)
+
+    except ImportError as e:
+        logger.error(f"Alembic not installed: {e}")
+        logger.error("Please install: pip install alembic")
+        raise
     except Exception as e:
-        logger.warning(
-            f"Migration warning (this might be expected if already migrated): {e}"
+        logger.error(f"Migration error: {e}")
+        logger.error(
+            "If you have an existing database, please run: python manage_db.py init"
         )
-    finally:
-        logger.setLevel(original_level)
+        raise
 
 
-def _column_needs_migration(current_column, expected_spec, db_type):
-    current_type = str(current_column["type"]).upper()
-    expected_type = expected_spec["type"].upper()
-    logger.debug(
-        f"Checking migration: current='{current_type}' vs expected='{expected_type}'"
-    )
-    # Normalize type representations across different databases
-    if db_type in ("MYSQL", "MARIADB"):
-        # MySQL type mapping
-        if "VARCHAR(255)" in expected_type and (
-            "VARCHAR" in current_type or "CHAR" in current_type
-        ):
-            # Extract current length
-            import re
-
-            match = re.search(r"VARCHAR\((\d+)\)", current_type)
-            if match:
-                current_length = int(match.group(1))
-                logger.debug(
-                    f"MySQL VARCHAR: current length={current_length}, expected=255"
-                )
-                return current_length != 255  # Changed from < to != for exact match
-            else:
-                # If no length found, assume it needs migration
-                return True
-        elif "TEXT" in expected_type and "TEXT" not in current_type:
-            return True
-    elif db_type in ("POSTGRESQL", "POSTGRES"):
-        # PostgreSQL type mapping
-        if "VARCHAR(255)" in expected_type:
-            if "CHARACTER VARYING" in current_type or "VARCHAR" in current_type:
-                import re
-
-                match = re.search(
-                    r"(?:CHARACTER VARYING|VARCHAR)\((\d+)\)", current_type
-                )
-                if match:
-                    current_length = int(match.group(1))
-                    logger.debug(
-                        f"PostgreSQL VARCHAR: current length={current_length}, expected=255"
-                    )
-                    return current_length != 255  # Changed from < to != for exact match
-                # If no length specified, it might need migration
-                return "(" not in current_type
-            else:
-                # Different type entirely, needs migration
-                return True
-        elif "TEXT" in expected_type and "TEXT" not in current_type:
-            return True
-    elif db_type == "SQLITE":
-        # SQLite is more flexible with types, but let's still check for obvious differences
-        if "VARCHAR(255)" in expected_type and (
-            "VARCHAR" in current_type or "CHAR" in current_type
-        ):
-            import re
-
-            match = re.search(r"VARCHAR\((\d+)\)", current_type)
-            if match:
-                current_length = int(match.group(1))
-                logger.debug(
-                    f"SQLite VARCHAR: current length={current_length}, expected=255"
-                )
-                return current_length != 255
-        # For SQLite, generally don't migrate unless there's a significant type difference
-        return False
-    return False
-
-
-def _migrate_column(conn, table_name, column_name, expected_spec, db_type):
+def _ensure_admin_user(conn, engine):
+    """Ensure admin user exists, create if not."""
     try:
-        if db_type in ("MYSQL", "MARIADB"):
-            nullable_clause = "" if expected_spec["nullable"] else "NOT NULL"
-            sql = f"ALTER TABLE {table_name} MODIFY COLUMN {column_name} {expected_spec['type']} {nullable_clause}"
-            conn.execute(text(sql))
-            logger.info(
-                f"Migrated {table_name}.{column_name} to {expected_spec['type']}"
+        inspector = inspect(engine)
+
+        if not inspector.has_table("admin_users"):
+            logger.warning("admin_users table not found. Cannot create admin user.")
+            return
+
+        # Check if admin user exists
+        session = get_session()
+        try:
+            existing_admin = (
+                session.query(AdminUser).filter_by(username="admin").first()
             )
-        elif db_type in ("POSTGRESQL", "POSTGRES"):
-            sql = f"ALTER TABLE {table_name} ALTER COLUMN {column_name} TYPE {expected_spec['type']}"
-            conn.execute(text(sql))
-            logger.info(
-                f"Migrated {table_name}.{column_name} to {expected_spec['type']}"
-            )
-        elif db_type == "SQLITE":
-            logger.info(
-                f"SQLite migration skipped for {table_name}.{column_name} (flexible typing)"
-            )
+            if not existing_admin:
+                logger.info("Admin user not found, creating default admin user...")
+                _create_default_admin_user(conn, engine)
+            else:
+                logger.debug("Admin user already exists.")
+        finally:
+            session.close()
     except Exception as e:
-        logger.error(f"Failed to migrate {table_name}.{column_name}: {e}")
-
-
-def _migrate_dynamic_tables(conn, inspector, db_type):
-    # Get all table names that match the dynamic pattern
-    all_tables = inspector.get_table_names()
-    user_tables = [t for t in all_tables if re.match(r"user_\d{8}$", t)]
-    logger.info(f"Found {len(user_tables)} dynamic user tables: {user_tables}")
-    # Define expected schema for dynamic tables
-    user_schema = {
-        "username": {"type": "VARCHAR(255)", "nullable": False},
-        "ip": {
-            "type": "VARCHAR(255)",
-            "nullable": False,
-        },
-    }
-    # Migrate user tables
-    for table_name in user_tables:
-        logger.info(f"Checking dynamic table: {table_name}")
-        current_columns = inspector.get_columns(table_name)
-        for column_name, expected_spec in user_schema.items():
-            current_column = next(
-                (col for col in current_columns if col["name"] == column_name), None
-            )
-            if current_column:
-                logger.info(
-                    f"Checking {table_name}.{column_name}: current type = {current_column['type']}"
-                )
-                if _column_needs_migration(current_column, expected_spec, db_type):
-                    logger.info(
-                        f"Migrating dynamic table {table_name}.{column_name} to {expected_spec['type']}"
-                    )
-                    _migrate_column(
-                        conn, table_name, column_name, expected_spec, db_type
-                    )
-                else:
-                    logger.info(f"No migration needed for {table_name}.{column_name}")
+        logger.warning(f"Could not check/create admin user: {e}")
 
 
 def _create_default_admin_user(conn, engine):
