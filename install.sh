@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# Variable global para modo no interactivo
+NON_INTERACTIVE=false
+
 function error() {
     echo -e "\n\033[1;41m$1\033[0m\n"
 }
@@ -281,19 +284,25 @@ function configureDatabase() {
     local install_dir="${1:-/opt/SquidStats}"
     local env_file="$install_dir/.env"
 
-    echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
-    echo "Seleccione el tipo de base de datos:"
-    echo "1) SQLite (por defecto)"
-    echo "2) MariaDB (necesitas tener mariadb ejecutándose)"
+    # En modo no interactivo, usar SQLite por defecto
+    if [ "$NON_INTERACTIVE" = true ]; then
+        echo "Modo no interactivo: configurando SQLite por defecto"
+        choice=1
+    else
+        echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
+        echo "Seleccione el tipo de base de datos:"
+        echo "1) SQLite (por defecto)"
+        echo "2) MariaDB (necesitas tener mariadb ejecutándose)"
 
-    while true; do
-        read -p "Opción [1/2]: " choice
-        case $choice in
-        1 | "") break ;;
-        2) break ;;
-        *) error "Opción inválida. Intente nuevamente." ;;
-        esac
-    done
+        while true; do
+            read -p "Opción [1/2]: " choice
+            case $choice in
+            1 | "") break ;;
+            2) break ;;
+            *) error "Opción inválida. Intente nuevamente." ;;
+            esac
+        done
+    fi
 
     case $choice in
     2)
@@ -337,9 +346,15 @@ function uninstallSquidStats() {
 
     echo -e "\n\033[1;43mDESINSTALACIÓN DE SQUIDSTATS\033[0m"
     echo "Esta operación eliminará completamente SquidStats del sistema."
-    echo "¿Está seguro de que desea continuar? (s/N)"
-
-    read -p "Respuesta: " confirm
+    
+    # En modo no interactivo, proceder sin confirmación
+    if [ "$NON_INTERACTIVE" = true ]; then
+        echo "Modo no interactivo: procediendo con la desinstalación"
+        confirm="s"
+    else
+        echo "¿Está seguro de que desea continuar? (s/N)"
+        read -p "Respuesta: " confirm
+    fi
 
     if [[ ! "$confirm" =~ ^[sS]$ ]]; then
         echo "Desinstalación cancelada."
@@ -378,7 +393,21 @@ function uninstallSquidStats() {
 function main() {
     checkSudo
 
-    if [ "$1" = "--update" ]; then
+    # Procesar parámetros de modo no interactivo
+    local action=""
+    for arg in "$@"; do
+        case "$arg" in
+            --non-interactive|-y)
+                NON_INTERACTIVE=true
+                echo "Modo no interactivo activado"
+                ;;
+            --update|--uninstall)
+                action="$arg"
+                ;;
+        esac
+    done
+
+    if [ "$action" = "--update" ]; then
         echo "Verificando paquetes instalados..."
         checkPackages
         echo "Actualizando Servicio..."
@@ -408,7 +437,7 @@ function main() {
         fi
 
         ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
-    elif [ "$1" = "--uninstall" ]; then
+    elif [ "$action" = "--uninstall" ]; then
         uninstallSquidStats
     else
         echo "Instalando aplicación web..."
@@ -424,22 +453,36 @@ function main() {
     fi
 }
 
-case "$1" in
-"--update")
-    main "$1"
-    ;;
-"--uninstall")
-    main "$1"
-    ;;
-"")
+# Procesar argumentos
+if [ $# -eq 0 ]; then
     main
-    ;;
-*)
-    echo "Parámetro no reconocido: $1"
-    echo "Uso: $0 [--update|--uninstall]"
-    echo "  Sin parámetros: Instala SquidStats"
-    echo "  --update: Actualiza SquidStats existente"
-    echo "  --uninstall: Desinstala SquidStats completamente"
-    exit 1
-    ;;
-esac
+else
+    # Verificar si hay parámetros válidos
+    valid_params=false
+    for arg in "$@"; do
+        case "$arg" in
+            --update|--uninstall|--non-interactive|-y)
+                valid_params=true
+                ;;
+            *)
+                echo "Parámetro no reconocido: $arg"
+                echo "Uso: $0 [--update|--uninstall] [--non-interactive|-y]"
+                echo "  Sin parámetros: Instala SquidStats"
+                echo "  --update: Actualiza SquidStats existente"
+                echo "  --uninstall: Desinstala SquidStats completamente"
+                echo "  --non-interactive, -y: Modo no interactivo (sin preguntas)"
+                echo ""
+                echo "Ejemplos:"
+                echo "  $0                    # Instalación interactiva"
+                echo "  $0 --non-interactive  # Instalación automática"
+                echo "  $0 --update -y        # Actualización automática"
+                echo "  $0 --uninstall -y     # Desinstalación automática"
+                exit 1
+                ;;
+        esac
+    done
+    
+    if [ "$valid_params" = true ]; then
+        main "$@"
+    fi
+fi
