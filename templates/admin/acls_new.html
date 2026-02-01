@@ -12,6 +12,20 @@
         </button>
     </div>
     
+    <!-- Beta Warning -->
+    <div class="mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-6 flex items-start space-x-4">
+        <i class="fas fa-exclamation-triangle text-red-600 text-3xl mt-1 animate-pulse"></i>
+        <div class="flex-1">
+            <p class="font-bold text-red-800 text-lg">¡MUY IMPORTANTE!</p>
+            <p class="text-red-700 mt-2 font-medium">
+                Esta funcionalidad se encuentra en <strong>BETA</strong>. Puede contener errores y comportamientos inesperados.
+            </p>
+            <p class="text-red-700 mt-2">
+                <strong>Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba.</strong>
+            </p>
+        </div>
+    </div>
+    
     {% if acls %}
     <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div class="flex items-start">
