@@ -16,7 +16,8 @@ function checkSudo() {
 }
 
 function installDependencies() {
-    local venv_dir="/opt/SquidStats/venv"
+    local install_dir="${1:-/opt/SquidStats}"
+    local venv_dir="$install_dir/venv"
 
     if [ ! -d "$venv_dir" ]; then
         echo "El entorno virtual no existe en $venv_dir, creándolo..."
@@ -34,7 +35,7 @@ function installDependencies() {
     source "$venv_dir/bin/activate"
 
     pip install --upgrade pip
-    pip install -r /opt/SquidStats/requirements.txt
+    pip install -r "$install_dir/requirements.txt"
 
     if [ $? -ne 0 ]; then
         error "Error al instalar dependencias"
@@ -46,7 +47,7 @@ function installDependencies() {
     deactivate
     return 0
 }
-#  pthon3-pymysql delete from packages
+#  python3-pymysql delete from packages
 function checkPackages() {
     local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "python3-dev" "libpq-dev") # C-ICAP Implementation not using for now libicapapi-dev
     local missing=()
@@ -84,23 +85,41 @@ function checkSquidLog() {
     fi
 }
 
+function findInstallDir() {
+    local destinos=("/opt/SquidStats" "/usr/share/squidstats" "/home/manuel/Desktop/Projects/SquidStats")
+
+    # Agregar el directorio actual si contiene archivos de SquidStats
+    if [ -f "app.py" ] && [ -f "requirements.txt" ] && [ -d ".git" ]; then
+        destinos+=("$(pwd)")
+    fi
+
+    for dir in "${destinos[@]}"; do
+        if [ -d "$dir" ]; then
+            echo "$dir"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 function updateOrCloneRepo() {
     local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local destinos=("/opt/SquidStats" "/usr/share/squidstats" "/home/manuel/Desktop/Projects/SquidStats")
     local branch="main"
     local env_exists=false
     local found_dir=""
 
-    for dir in "${destinos[@]}"; do
-        if [ -d "$dir" ]; then
-            found_dir="$dir"
-            break
-        fi
-    done
+    found_dir=$(findInstallDir)
 
     if [ -z "$found_dir" ]; then
-        echo "❌ No se encontró ninguna instalación de SquidStats en /opt/SquidStats ni /usr/share/squidstats. Abortando actualización."
-        return 1
+        echo "No se encontró instalación existente, clonando repositorio en /opt/SquidStats..."
+        if git clone "$repo_url" /opt/SquidStats && cd /opt/SquidStats && git checkout "$branch"; then
+            echo "✅ Repositorio clonado exitosamente en /opt/SquidStats"
+            return 0
+        else
+            echo "❌ Error al clonar el repositorio."
+            return 1
+        fi
     fi
 
     if [ "$found_dir" = "/usr/share/squidstats" ]; then
@@ -134,8 +153,9 @@ function updateOrCloneRepo() {
 }
 
 function updateEnvVersion() {
+    local install_dir="${1:-/opt/SquidStats}"
     local CURRENT_VERSION="2.2"  # Variable de versión actual del script
-    local env_file="/opt/SquidStats/.env"
+    local env_file="$install_dir/.env"
     
     if [ ! -f "$env_file" ]; then
         echo "⚠️ Archivo .env no encontrado en $env_file"
@@ -167,7 +187,8 @@ function updateEnvVersion() {
 }
 
 function createEnvFile() {
-    local env_file="/opt/SquidStats/.env"
+    local install_dir="${1:-/opt/SquidStats}"
+    local env_file="$install_dir/.env"
 
     if [ -f "$env_file" ]; then
         echo "El archivo .env ya existe en $env_file."
@@ -184,7 +205,7 @@ FLASK_DEBUG=True
 DATABASE_TYPE=SQLITE
 SQUID_LOG=/var/log/squid/access.log
 SQUID_CACHE_LOG=/var/log/squid/cache.log
-DATABASE_STRING_CONNECTION=/opt/SquidStats/squidstats.db
+DATABASE_STRING_CONNECTION=$install_dir/squidstats.db
 REFRESH_INTERVAL=60
 BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
 HTTP_PROXY=""
@@ -212,6 +233,7 @@ EOF
 }
 
 function createService() {
+    local install_dir="${1:-/opt/SquidStats}"
     local service_file="/etc/systemd/system/squidstats.service"
 
     if [ -f "$service_file" ]; then
@@ -228,12 +250,12 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/SquidStats
-ExecStart=/opt/SquidStats/venv/bin/python3 /opt/SquidStats/app.py
+WorkingDirectory=$install_dir
+ExecStart=$install_dir/venv/bin/python3 $install_dir/app.py
 Restart=always
 RestartSec=5
-EnvironmentFile=/opt/SquidStats/.env
-Environment=PATH=/opt/SquidStats/venv/bin:$PATH
+EnvironmentFile=$install_dir/.env
+Environment=PATH=$install_dir/venv/bin:$PATH
 
 # Resource limits
 MemoryLimit=2048M
@@ -256,7 +278,8 @@ EOF
 }
 
 function configureDatabase() {
-    local env_file="/opt/SquidStats/.env"
+    local install_dir="${1:-/opt/SquidStats}"
+    local env_file="$install_dir/.env"
 
     echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
     echo "Seleccione el tipo de base de datos:"
@@ -282,7 +305,7 @@ function configureDatabase() {
                 continue
             fi
 
-            validation_result=$(python3 /opt/SquidStats/utils/validateString.py "$conn_str" 2>&1)
+            validation_result=$(python3 $install_dir/utils/validateString.py "$conn_str" 2>&1)
             exit_code=$?
 
             if [[ $exit_code -eq 0 ]]; then
@@ -300,7 +323,7 @@ function configureDatabase() {
         done
         ;;
     *)
-        sqlite_path="/opt/SquidStats/squidstats.db"
+        sqlite_path="$install_dir/squidstats.db"
         sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=SQLITE|" "$env_file"
         sed -i "s|^DATABASE_STRING_CONNECTION=.*|DATABASE_STRING_CONNECTION=$sqlite_path|" "$env_file"
         ok "Configuración SQLite establecida!"
@@ -357,15 +380,32 @@ function main() {
 
     if [ "$1" = "--update" ]; then
         echo "Verificando paquetes instalados..."
-        checkPackages
+        #checkPackages
         echo "Actualizando Servicio..."
-        updateOrCloneRepo
+        if ! updateOrCloneRepo; then
+            return 1
+        fi
+        
+        # Find the installation directory
+        local install_dir=$(findInstallDir)
+        
+        if [ -z "$install_dir" ]; then
+            error "No se pudo determinar el directorio de instalación"
+            return 1
+        fi
+        
         echo "Verificando Dependecias de python..."
-        installDependencies
+        installDependencies "$install_dir"
         echo "Actualizando versión en .env..."
-        updateEnvVersion
-        echo "Reiniciando Servicio..."
-        systemctl restart squidstats.service
+        updateEnvVersion "$install_dir"
+        
+        if [ "$install_dir" = "/opt/SquidStats" ] || [ "$install_dir" = "/usr/share/squidstats" ]; then
+            echo "Reiniciando Servicio..."
+            systemctl restart squidstats.service
+        else
+            echo "Instalación de desarrollo detectada en $install_dir. No se reinicia el servicio del sistema."
+            echo "Para ejecutar en modo desarrollo, use: python3 app.py"
+        fi
 
         ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     elif [ "$1" = "--uninstall" ]; then
@@ -375,10 +415,10 @@ function main() {
         checkPackages
         updateOrCloneRepo
         checkSquidLog
-        installDependencies
-        createEnvFile
-        configureDatabase
-        createService
+        installDependencies "/opt/SquidStats"
+        createEnvFile "/opt/SquidStats"
+        configureDatabase "/opt/SquidStats"
+        createService "/opt/SquidStats"
 
         ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     fi
