@@ -196,7 +196,7 @@ function createEnvFile() {
     else
         echo "Creando archivo de configuración .env..."
         cat >"$env_file" <<EOF
-VERSION=2.2
+VERSION=2.2.1
 SECRET_KEY="your-secret-key-here-generate-with-python-secrets"
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
