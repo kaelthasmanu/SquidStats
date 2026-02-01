@@ -175,3 +175,9 @@ eicar.com.txt
 # Telegram session files
 *.session
 *.session-journal
+
+# Documentation files (exclude migration and summary docs)
+*.md
+!README.md
+!README_es.md
+!CONTRIBUTING.md

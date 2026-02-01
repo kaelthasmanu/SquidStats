@@ -50,12 +50,15 @@ shutdown_event = threading.Event()
 
 def create_app():
     # Run database migration at startup
-    logger.info("Running database migration at startup...")
+    logger.info("Running database migrations with Alembic...")
     try:
         migrate_database()
-        logger.info("Database migration completed successfully")
+        logger.info("✓ Database migrations completed successfully")
     except Exception as e:
         logger.error(f"Database migration failed: {e}")
+        logger.error(
+            "Please check your database configuration and run: python manage_db.py init"
+        )
         # Continue anyway - the app might still work with existing schema
 
     app = Flask(__name__, static_folder="./static")
