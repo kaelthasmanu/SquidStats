@@ -1,27 +1,27 @@
-// ===== CONFIGURACIÓN GLOBAL DE TOASTR =====
-// Este archivo configura el comportamiento de las notificaciones toastr en toda la aplicación
+// ===== GLOBAL TOASTR CONFIGURATION =====
+// This file configures the behavior of toastr notifications throughout the application
 
-// Configurar toastr tan pronto como jQuery esté disponible
+// Configure toastr as soon as jQuery is available
 (function() {
   function initToastr() {
-    // Verificar que jQuery y toastr estén disponibles
+    // Check that jQuery and toastr are available
     if (typeof $ === 'undefined' || typeof toastr === 'undefined') {
-      console.warn('jQuery o toastr no están disponibles aún');
+      console.warn('jQuery or toastr are not available yet');
       return false;
     }
 
-    // Configuración de toastr
+    // Toastr configuration
     toastr.options = {
       closeButton: true,
       debug: false,
-      newestOnTop: false, // false = las nuevas notificaciones aparecen DEBAJO
+      newestOnTop: false, // false = new notifications appear BELOW
       progressBar: true,
       positionClass: "toast-top-right",
       preventDuplicates: false,
       onclick: null,
       showDuration: 300,
       hideDuration: 1000,
-      timeOut: 5000, // 5 segundos
+      timeOut: 5000, // 5 seconds
       extendedTimeOut: 1000,
       showEasing: "swing",
       hideEasing: "linear",
@@ -29,17 +29,15 @@
       hideMethod: "fadeOut",
       tapToDismiss: true
     };
-
-    console.log('✅ Toastr configurado correctamente');
     return true;
   }
 
-  // Intentar configurar inmediatamente
+  // Try to configure immediately
   if (initToastr()) {
-    return; // Ya está configurado
+    return; // Already configured
   }
 
-  // Si no funciona, esperar al DOMContentLoaded
+  // If it doesn't work, wait for DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
       setTimeout(initToastr, 100);
@@ -48,7 +46,7 @@
     setTimeout(initToastr, 100);
   }
 
-  // También intentar en window.load por si acaso
+  // Also try on window.load just in case
   window.addEventListener('load', function() {
     setTimeout(initToastr, 100);
   });
