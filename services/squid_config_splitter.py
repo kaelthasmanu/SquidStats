@@ -164,6 +164,29 @@ class SquidConfigSplitter:
             ),
         ]
 
+    def _get_load_order(self) -> list[str]:
+        """
+        Return the correct load order for config files.
+        ACLs and auth must be loaded before being referenced.
+        """
+        return [
+            "00_ports.conf",
+            "10_misc.conf",
+            "20_security.conf",
+            "30_cache.conf",
+            "40_refresh_patterns.conf",
+            "50_auth.conf",          # Auth defines 'auth' ACL
+            "60_logs.conf",
+            "80_dns.conf",
+            "100_acls.conf",         # All other ACLs defined here
+            "70_icap.conf",          # Uses 'infoaccess' ACL
+            "110_delay_pools.conf",  # Uses 'auth', 'work_time_*', 'research_files' ACLs
+            "115_cache_control.conf",
+            "120_http_access.conf",  # Uses all ACLs
+            "55_ssl_bump.conf",      # Can go anywhere but typically after ACLs
+            self.unknown_file        # Catch-all for unclassified
+        ]
+
     def _classify_line(self, line: str) -> str:
         matches = [
             rule.filename
@@ -269,9 +292,6 @@ class SquidConfigSplitter:
             # Ensure auth file is created if auth config exists
             self._ensure_auth_file(buffers)
 
-            # Post-process delay pools in buffers
-            self._post_process_delay_pools_in_buffers(buffers)
-
             # Final writing
             for filename, content in sorted(buffers.items()):
                 path = os.path.join(self.output_dir, filename)
@@ -292,7 +312,7 @@ class SquidConfigSplitter:
                     raise RuntimeError(error_msg)
 
             # Generate the new main squid.conf with includes
-            self._generate_main_config(list(buffers.keys()))
+            self._generate_main_config(buffers)
             logger.info(f"Generated new main config: {self.input_file}")
 
             # Validate Squid configuration
@@ -414,7 +434,7 @@ class SquidConfigSplitter:
             logger.error(f"Error during rollback: {e}")
             raise RuntimeError(f"Rollback failed: {e}")
 
-    def _generate_main_config(self, generated_files: list[str]) -> None:
+    def _generate_main_config(self, buffers: dict[str, list[str]]) -> None:
         header = [
             "# ============================================================\n",
             "# Archivo generado automáticamente por SquidStats\n",
@@ -425,16 +445,18 @@ class SquidConfigSplitter:
         ]
 
         includes = []
-        for filename in sorted(generated_files):
-            include_path = os.path.join(self.output_dir, filename)
-            includes.append(f"include {include_path}\n")
+        load_order = self._get_load_order()
+        for filename in load_order:
+            if filename in buffers:
+                include_path = os.path.join(self.output_dir, filename)
+                includes.append(f"include {include_path}\n")
 
         try:
             with open(self.input_file, "w", encoding="utf-8") as f:
                 f.writelines(header)
                 f.writelines(includes)
             logger.info(
-                f"Main configuration file regenerated with {len(includes)} includes"
+                f"Main configuration file regenerated with {len(includes)} includes in correct dependency order"
             )
         except Exception as e:
             logger.error(f"Failed to generate main config: {e}")
@@ -455,33 +477,6 @@ class SquidConfigSplitter:
             logger.info(
                 f"Created {auth_filename} with authentication configuration from original file"
             )
-
-    def _post_process_delay_pools_in_buffers(
-        self, buffers: dict[str, list[str]]
-    ) -> None:
-        """
-        Post-process 110_delay_pools.conf content in buffers to replace 'auth' with 'proxy_auth' in delay_access rules.
-        """
-        delay_file = "110_delay_pools.conf"
-        if delay_file not in buffers:
-            return
-
-        content = buffers[delay_file]
-        modified = False
-        for i, line in enumerate(content):
-            new_line = re.sub(
-                r"(delay_access\s+\d+\s+allow\s+)auth(\s+|$)", r"\1proxy_auth\2", line
-            )
-            if new_line != line:
-                content[i] = new_line
-                modified = True
-
-        if modified:
-            logger.info(
-                f"Post-processed {delay_file}: replaced 'auth' with 'proxy_auth'"
-            )
-        else:
-            logger.info(f"No changes needed in {delay_file}")
 
     def get_split_info(self) -> dict[str, str]:
         return {
