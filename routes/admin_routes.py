@@ -1160,6 +1160,15 @@ def delete_table_data():
                 {"status": "error", "message": "Nombre de tabla inválido"}
             ), 400
 
+        # Prevent deletion of critical tables like admin_users and alembic_version
+        if table_name == "admin_users" or table_name == "alembic_version":
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "No se puede eliminar estas tablas críticas",
+                }
+            ), 400
+
         engine = get_engine()
         inspector = inspect(engine)
 
