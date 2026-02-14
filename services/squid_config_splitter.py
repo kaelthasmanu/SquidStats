@@ -175,16 +175,16 @@ class SquidConfigSplitter:
             "20_security.conf",
             "30_cache.conf",
             "40_refresh_patterns.conf",
-            "50_auth.conf",          # Auth defines 'auth' ACL
+            "50_auth.conf",  # Auth defines 'auth' ACL
             "60_logs.conf",
             "80_dns.conf",
-            "100_acls.conf",         # All other ACLs defined here
-            "70_icap.conf",          # Uses 'infoaccess' ACL
+            "100_acls.conf",  # All other ACLs defined here
+            "70_icap.conf",  # Uses 'infoaccess' ACL
             "110_delay_pools.conf",  # Uses 'auth', 'work_time_*', 'research_files' ACLs
             "115_cache_control.conf",
             "120_http_access.conf",  # Uses all ACLs
-            "55_ssl_bump.conf",      # Can go anywhere but typically after ACLs
-            self.unknown_file        # Catch-all for unclassified
+            "55_ssl_bump.conf",  # Can go anywhere but typically after ACLs
+            self.unknown_file,  # Catch-all for unclassified
         ]
 
     def _classify_line(self, line: str) -> str:
