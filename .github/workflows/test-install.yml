@@ -50,7 +50,8 @@ jobs:
             openrc \
             sudo \
             procps \
-            grep
+            grep \
+            tzdata
         else
           # Configurar entorno no interactivo para Ubuntu/Debian
           export DEBIAN_FRONTEND=noninteractive
