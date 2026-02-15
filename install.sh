@@ -122,6 +122,7 @@ checkPackages() {
 
         if [ -n "$missing" ]; then
             echo "Instalando paquetes faltantes:$missing"
+            export DEBIAN_FRONTEND=noninteractive
             apt-get update
 
             if ! apt-get install -y $missing; then
