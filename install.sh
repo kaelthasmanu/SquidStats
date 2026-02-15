@@ -13,6 +13,12 @@ ok() {
     echo -e "\n\033[1;42m$1\033[0m\n"
 }
 
+isContainer() {
+    grep -qaE 'docker|containerd' /proc/1/cgroup 2>/dev/null && return 0
+    [ -f /.dockerenv ] && return 0
+    return 1
+}
+
 detectDistro() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -342,6 +348,14 @@ createService() {
             ok "Archivo de servicio OpenRC creado correctamente"
         fi
     else
+        if isContainer; then
+            echo "⚠️ Entorno contenedor detectado. No se creará servicio systemd."
+            echo "Para iniciar manualmente:"
+            echo "$install_dir/venv/bin/python3 $install_dir/app.py"
+            ok "Instalación completada en modo contenedor"
+            return 0
+        fi
+
         local service_file="/etc/systemd/system/squidstats.service"
         local template="$install_dir/utils/squidstats.service"
 
