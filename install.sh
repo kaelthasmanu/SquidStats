@@ -65,30 +65,22 @@ installDependencies() {
 
     if [ ! -d "$venv_dir" ]; then
         echo "El entorno virtual no existe en $venv_dir, creándolo..."
-        python3 -m venv "$venv_dir"
-        
-        if [ $? -ne 0 ]; then
+        python3 -m venv "$venv_dir" || {
             error "Error al crear el entorno virtual en $venv_dir"
             return 1
-        fi
-        
+        }
         ok "Entorno virtual creado correctamente en $venv_dir"
     fi
 
-    echo "Activando entorno virtual y instalando dependencias..."
-    source "$venv_dir/bin/activate"
+    echo "Instalando dependencias en el entorno virtual..."
 
-    pip install --upgrade pip
-    pip install -r "$install_dir/requirements.txt"
-
-    if [ $? -ne 0 ]; then
+    "$venv_dir/bin/pip" install --upgrade pip || return 1
+    "$venv_dir/bin/pip" install -r "$install_dir/requirements.txt" || {
         error "Error al instalar dependencias"
-        deactivate
         return 1
-    fi
+    }
 
     ok "Dependencias instaladas correctamente en el entorno virtual"
-    deactivate
     return 0
 }
 #  python3-pymysql delete from packages
