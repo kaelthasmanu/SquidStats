@@ -3,10 +3,11 @@ import os
 import signal
 import sys
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 from flask import Flask
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
 
@@ -76,7 +77,8 @@ def create_app():
     csrf.init_app(app)
 
     # Initialize extensions
-    scheduler = APScheduler()
+    # Pass explicit timezone to avoid tzlocal.get_localzone() failures in containers
+    scheduler = APScheduler(scheduler=BackgroundScheduler(timezone=timezone.utc))
     scheduler.init_app(app)
     scheduler.start()
 

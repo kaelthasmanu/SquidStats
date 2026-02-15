@@ -1,82 +1,143 @@
-#! /bin/bash
+#!/bin/sh
 
 # Variable global para modo no interactivo
 NON_INTERACTIVE=false
+# Tipo de distribución detectada: debian | alpine
+DISTRO_TYPE=""
 
-function error() {
+error() {
     echo -e "\n\033[1;41m$1\033[0m\n"
 }
 
-function ok() {
+ok() {
     echo -e "\n\033[1;42m$1\033[0m\n"
 }
 
-function checkSudo() {
-    if [ "$EUID" -ne 0 ]; then
-        error "ERROR: Este script debe ejecutarse con privilegios de superusuario.\nPor favor, ejecútelo con el usuario: root $0"
+isContainer() {
+    grep -qaE 'docker|containerd' /proc/1/cgroup 2>/dev/null && return 0
+    [ -f /.dockerenv ] && return 0
+    return 1
+}
+
+detectDistro() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        case "$ID" in
+            alpine)
+                DISTRO_TYPE="alpine"
+                ;;
+            debian|ubuntu|linuxmint|pop|raspbian|kali)
+                DISTRO_TYPE="debian"
+                ;;
+            *)
+                # Intentar detectar por familia
+                if echo "$ID_LIKE" | grep -qi "debian"; then
+                    DISTRO_TYPE="debian"
+                elif echo "$ID_LIKE" | grep -qi "alpine"; then
+                    DISTRO_TYPE="alpine"
+                else
+                    error "Distribución no soportada: $ID ($PRETTY_NAME)\nDistribuciones soportadas: Debian/Ubuntu, Alpine Linux"
+                    exit 1
+                fi
+                ;;
+        esac
+    elif [ -f /etc/alpine-release ]; then
+        DISTRO_TYPE="alpine"
+    elif [ -f /etc/debian_version ]; then
+        DISTRO_TYPE="debian"
+    else
+        error "No se pudo detectar la distribución del sistema operativo"
+        exit 1
+    fi
+    echo "Distribución detectada: $DISTRO_TYPE"
+}
+
+checkSudo() {
+    if [ "$(id -u)" -ne 0 ]; then
+        error "ERROR: Este script debe ejecutarse como root."
         exit 1
     fi
 }
 
-function installDependencies() {
+installDependencies() {
     local install_dir="${1:-/opt/SquidStats}"
     local venv_dir="$install_dir/venv"
 
     if [ ! -d "$venv_dir" ]; then
         echo "El entorno virtual no existe en $venv_dir, creándolo..."
-        python3 -m venv "$venv_dir"
-        
-        if [ $? -ne 0 ]; then
+        python3 -m venv "$venv_dir" || {
             error "Error al crear el entorno virtual en $venv_dir"
             return 1
-        fi
-        
+        }
         ok "Entorno virtual creado correctamente en $venv_dir"
     fi
 
-    echo "Activando entorno virtual y instalando dependencias..."
-    source "$venv_dir/bin/activate"
+    echo "Instalando dependencias en el entorno virtual..."
 
-    pip install --upgrade pip
-    pip install -r "$install_dir/requirements.txt"
-
-    if [ $? -ne 0 ]; then
+    "$venv_dir/bin/pip" install --upgrade pip || return 1
+    "$venv_dir/bin/pip" install -r "$install_dir/requirements.txt" || {
         error "Error al instalar dependencias"
-        deactivate
         return 1
-    fi
+    }
 
     ok "Dependencias instaladas correctamente en el entorno virtual"
-    deactivate
     return 0
 }
 #  python3-pymysql delete from packages
-function checkPackages() {
-    local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "python3-dev" "libpq-dev") # C-ICAP Implementation not using for now libicapapi-dev
-    local missing=()
+checkPackages() {
+    #local packages=("git" "python3" "python3-pip" "python3-venv" "libmariadb-dev" "curl" "build-essential" "libssl-dev" "python3-dev" "libpq-dev") # C-ICAP Implementation not using for now libicapapi-dev
+    local packages=""
+    local missing=""
 
-    for pkg in "${packages[@]}"; do
-        if ! dpkg -l | grep -q "^ii  $pkg "; then
-            missing+=("$pkg")
+    if [ "$DISTRO_TYPE" = "alpine" ]; then
+        packages="git python3 py3-pip py3-virtualenv mariadb-dev curl build-base openssl-dev python3-dev postgresql-dev openrc"
+
+        for pkg in $packages; do
+            if ! apk info -e "$pkg" >/dev/null 2>&1; then
+                missing="$missing $pkg"
+            fi
+        done
+
+        if [ -n "$missing" ]; then
+            echo "Instalando paquetes faltantes:$missing"
+            apk update
+
+            if ! apk add --no-cache $missing; then
+                error "ERROR: Compruebe la versión de su Alpine Linux (se recomienda 3.18+)"
+                exit 1
+            fi
+
+            ok "Paquetes instalados correctamente"
+        else
+            echo "Todos los paquetes necesarios ya están instalados"
         fi
-    done
-
-    if [ ${#missing[@]} -ne 0 ]; then
-        echo "Instalando paquetes faltantes: ${missing[*]}"
-        apt-get update
-
-        if ! apt-get install -y "${missing[@]}"; then
-            error "ERROR: Compruebe la versión de su OS se recomienda Ubuntu20.04+ o Debian12+"
-            exit 1
-        fi
-
-        ok "Paquetes instalados correctamente"
     else
-        echo "Todos los paquetes necesarios ya están instalados"
+        packages="git python3 python3-pip python3-venv libmariadb-dev curl build-essential libssl-dev python3-dev libpq-dev"
+
+        for pkg in $packages; do
+            if ! dpkg -l | grep -q "^ii  $pkg "; then
+                missing="$missing $pkg"
+            fi
+        done
+
+        if [ -n "$missing" ]; then
+            echo "Instalando paquetes faltantes:$missing"
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+
+            if ! apt-get install -y $missing; then
+                error "ERROR: Compruebe la versión de su OS se recomienda Ubuntu20.04+ o Debian12+"
+                exit 1
+            fi
+
+            ok "Paquetes instalados correctamente"
+        else
+            echo "Todos los paquetes necesarios ya están instalados"
+        fi
     fi
 }
 
-function checkSquidLog() {
+checkSquidLog() {
     local log_file="/var/log/squid/access.log"
 
     if [ ! -f "$log_file" ]; then
@@ -88,15 +149,15 @@ function checkSquidLog() {
     fi
 }
 
-function findInstallDir() {
-    local destinos=("/opt/SquidStats" "/usr/share/squidstats" "/home/manuel/Desktop/Projects/SquidStats")
+findInstallDir() {
+    local destinos="/opt/SquidStats /usr/share/squidstats"
 
     # Agregar el directorio actual si contiene archivos de SquidStats
     if [ -f "app.py" ] && [ -f "requirements.txt" ] && [ -d ".git" ]; then
-        destinos+=("$(pwd)")
+        destinos="$(pwd) $destinos"
     fi
 
-    for dir in "${destinos[@]}"; do
+    for dir in $destinos; do
         if [ -d "$dir" ]; then
             echo "$dir"
             return 0
@@ -106,9 +167,9 @@ function findInstallDir() {
     return 1
 }
 
-function updateOrCloneRepo() {
+updateOrCloneRepo() {
     local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local branch="main"
+    local branch="distro-install-support"
     local env_exists=false
     local found_dir=""
 
@@ -127,7 +188,7 @@ function updateOrCloneRepo() {
 
     if [ "$found_dir" = "/usr/share/squidstats" ]; then
         echo "ℹ️ Instalación detectada en /usr/share/squidstats. Esta versión fue instalada desde un .deb y no puede actualizarse con git."
-        echo "Por favor, use el gestor de paquetes (apt/dpkg) para actualizar."
+        echo "Por favor, use el gestor de paquetes de su distribución para actualizar."
         return 1
     fi
 
@@ -155,7 +216,7 @@ function updateOrCloneRepo() {
     fi
 }
 
-function updateEnvVersion() {
+updateEnvVersion() {
     local install_dir="${1:-/opt/SquidStats}"
     local CURRENT_VERSION="2.2.1"  # Variable de versión actual del script
     local env_file="$install_dir/.env"
@@ -189,7 +250,7 @@ function updateEnvVersion() {
     return 0
 }
 
-function createEnvFile() {
+createEnvFile() {
     local install_dir="${1:-/opt/SquidStats}"
     local env_file="$install_dir/.env"
 
@@ -216,7 +277,7 @@ HTTPS_PROXY=
 NO_PROXY=
 SQUID_CONFIG_PATH=/etc/squid/squid.conf
 ACL_FILES_DIR=/etc/squid/config/acls
-LISTEN_HOST=127.0.0.1
+LISTEN_HOST=0.0.0.0
 LISTEN_PORT=5000
 FIRST_PASSWORD="admin"
 JWT_EXPIRY_HOURS=24
@@ -235,52 +296,84 @@ EOF
     fi
 }
 
-function createService() {
+createService() {
     local install_dir="${1:-/opt/SquidStats}"
-    local service_file="/etc/systemd/system/squidstats.service"
 
-    if [ -f "$service_file" ]; then
-        echo "El servicio ya existe en $service_file, no se realizan cambios."
+    if isContainer; then
+        echo "⚠️ Entorno contenedor detectado. No se creará servicio."
+        echo "Para iniciar manualmente:"
+        echo "$install_dir/venv/bin/python3 $install_dir/app.py"
+        ok "Instalación completada en modo contenedor"
         return 0
     fi
 
-    echo "Creando servicio en $service_file..."
-    cat >"$service_file" <<EOF
-[Unit]
-Description=SquidStats Web Application
-After=network.target
+    if [ "$DISTRO_TYPE" = "alpine" ]; then
+        
+        local service_file="/etc/init.d/squidstats"
+        local template="$install_dir/utils/openRC"
 
-[Service]
-Type=simple
-User=root
-WorkingDirectory=$install_dir
-ExecStart=$install_dir/venv/bin/python3 $install_dir/app.py
-Restart=always
-RestartSec=5
-EnvironmentFile=$install_dir/.env
-Environment=PATH=$install_dir/venv/bin:$PATH
+        if [ -f "$service_file" ]; then
+            echo "El servicio ya existe en $service_file, no se realizan cambios."
+            return 0
+        fi
 
-# Resource limits
-MemoryLimit=2048M
-TimeoutStartSec=30
-TimeoutStopSec=10
+        if [ ! -f "$template" ]; then
+            error "Plantilla de servicio OpenRC no encontrada en $template"
+            return 1
+        fi
 
-# Logging
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=squidstats
+        mkdir -p /etc/init.d
 
-[Install]
-WantedBy=multi-user.target
-EOF
+        echo "Creando servicio OpenRC en $service_file..."
+        sed "s|__INSTALL_DIR__|$install_dir|g" "$template" > "$service_file"
+        chmod +x "$service_file"
 
-    systemctl daemon-reload
-    systemctl enable squidstats.service
-    systemctl start squidstats.service
-    ok "Servicio creado y iniciado correctamente"
+        if command -v rc-update >/dev/null 2>&1; then
+            rc-update add squidstats default
+            chmod 755 /etc/init.d/squidstats
+
+            # Verifica si OpenRC ya está inicializado
+            if [ -f /run/openrc/softlevel ]; then
+                echo "✓ OpenRC ya está inicializado"
+                rc-status --all | head -5
+                
+            else
+                echo "✗ OpenRC NO está inicializado... intentando inicializarlo..."
+                openrc boot
+            fi
+            
+            rc-service squidstats start
+            ok "Servicio OpenRC creado y iniciado correctamente"
+        else
+            echo "⚠️ OpenRC no está activo (probable entorno Docker/contenedor). El servicio se ha creado en $service_file."
+            echo "Para iniciarlo manualmente: $install_dir/venv/bin/python3 $install_dir/app.py"
+            ok "Archivo de servicio OpenRC creado correctamente"
+        fi
+    else
+        local service_file="/etc/systemd/system/squidstats.service"
+        local template="$install_dir/utils/squidstats.service"
+
+        if [ -f "$service_file" ]; then
+            echo "El servicio ya existe en $service_file, no se realizan cambios."
+            return 0
+        fi
+
+        if [ ! -f "$template" ]; then
+            error "Plantilla de servicio systemd no encontrada en $template"
+            return 1
+        fi
+
+        echo "Creando servicio systemd en $service_file..."
+        sed "s|__INSTALL_DIR__|$install_dir|g" "$template" > "$service_file"
+
+        systemctl daemon-reload
+        systemctl enable squidstats.service
+        systemctl start squidstats.service
+        ok "Servicio systemd creado y iniciado correctamente"
+    fi
 }
 
-function configureDatabase() {
+configureDatabase() {
     local install_dir="${1:-/opt/SquidStats}"
     local env_file="$install_dir/.env"
 
@@ -309,15 +402,16 @@ function configureDatabase() {
         while true; do
             read -p "Ingrese cadena de conexión (mysql+pymysql://user:clave@host:port/db): " conn_str
 
-            if [[ "$conn_str" != mysql+pymysql://* ]]; then
-                error "Formato inválido. Debe comenzar con: mysql+pymysql://"
-                continue
-            fi
+            case "$conn_str" in
+            mysql+pymysql://*) ;;
+            *) error "Formato inválido. Debe comenzar con: mysql+pymysql://"
+               continue ;;
+            esac
 
             validation_result=$(python3 $install_dir/utils/validateString.py "$conn_str" 2>&1)
             exit_code=$?
 
-            if [[ $exit_code -eq 0 ]]; then
+            if [ "$exit_code" -eq 0 ]; then
                 sed -i "s|^DATABASE_TYPE=.*|DATABASE_TYPE=MARIADB|" "$env_file"
 
                 # validation_result tiene la cadena codificada, escapamos para sed
@@ -340,9 +434,59 @@ function configureDatabase() {
     esac
 }
 
-function uninstallSquidStats() {
+stopAndRemoveService() {
+    if [ "$DISTRO_TYPE" = "alpine" ]; then
+        local service_file="/etc/init.d/squidstats"
+        if [ -f "$service_file" ]; then
+            if command -v rc-service >/dev/null 2>&1; then
+                echo "Deteniendo servicio squidstats..."
+                rc-service squidstats stop 2>/dev/null || true
+
+                echo "Deshabilitando servicio squidstats..."
+                rc-update del squidstats default 2>/dev/null || true
+            fi
+
+            echo "Eliminando archivo de servicio..."
+            rm -f "$service_file"
+
+            ok "Servicio squidstats (OpenRC) eliminado"
+        else
+            echo "Servicio squidstats no encontrado"
+        fi
+    else
+        local service_file="/etc/systemd/system/squidstats.service"
+        if [ -f "$service_file" ]; then
+            echo "Deteniendo servicio squidstats..."
+            systemctl stop squidstats.service 2>/dev/null || true
+
+            echo "Deshabilitando servicio squidstats..."
+            systemctl disable squidstats.service 2>/dev/null || true
+
+            echo "Eliminando archivo de servicio..."
+            rm -f "$service_file"
+
+            systemctl daemon-reload
+            ok "Servicio squidstats (systemd) eliminado"
+        else
+            echo "Servicio squidstats no encontrado"
+        fi
+    fi
+}
+
+restartService() {
+    if [ "$DISTRO_TYPE" = "alpine" ]; then
+        if command -v rc-service >/dev/null 2>&1; then
+            rc-service squidstats restart
+        else
+            echo "⚠️ OpenRC no disponible, reinicie manualmente la aplicación"
+        fi
+    else
+        systemctl restart squidstats.service
+    fi
+}
+
+uninstallSquidStats() {
     local destino="/opt/SquidStats"
-    local service_file="/etc/systemd/system/squidstats.service"
 
     echo -e "\n\033[1;43mDESINSTALACIÓN DE SQUIDSTATS\033[0m"
     echo "Esta operación eliminará completamente SquidStats del sistema."
@@ -356,28 +500,14 @@ function uninstallSquidStats() {
         read -p "Respuesta: " confirm
     fi
 
-    if [[ ! "$confirm" =~ ^[sS]$ ]]; then
+    if [ "$confirm" != "s" ] && [ "$confirm" != "S" ]; then
         echo "Desinstalación cancelada."
         return 0
     fi
 
     echo "Iniciando desinstalación..."
 
-    if [ -f "$service_file" ]; then
-        echo "Deteniendo servicio squidstats..."
-        systemctl stop squidstats.service 2>/dev/null || true
-
-        echo "Deshabilitando servicio squidstats..."
-        systemctl disable squidstats.service 2>/dev/null || true
-
-        echo "Eliminando archivo de servicio..."
-        rm -f "$service_file"
-
-        systemctl daemon-reload
-        ok "Servicio squidstats eliminado"
-    else
-        echo "Servicio squidstats no encontrado"
-    fi
+    stopAndRemoveService
     
     if [ -d "$destino" ]; then
         echo "Eliminando directorio de instalación $destino..."
@@ -390,8 +520,9 @@ function uninstallSquidStats() {
     ok "SquidStats ha sido desinstalado completamente del sistema"
 }
 
-function main() {
+main() {
     checkSudo
+    detectDistro
 
     # Procesar parámetros de modo no interactivo
     local action=""
@@ -430,7 +561,7 @@ function main() {
         
         if [ "$install_dir" = "/opt/SquidStats" ] || [ "$install_dir" = "/usr/share/squidstats" ]; then
             echo "Reiniciando Servicio..."
-            systemctl restart squidstats.service
+            restartService
         else
             echo "Instalación de desarrollo detectada en $install_dir. No se reinicia el servicio del sistema."
             echo "Para ejecutar en modo desarrollo, use: python3 app.py"
@@ -442,12 +573,24 @@ function main() {
     else
         echo "Instalando aplicación web..."
         checkPackages
-        updateOrCloneRepo
-        checkSquidLog
-        installDependencies "/opt/SquidStats"
-        createEnvFile "/opt/SquidStats"
-        configureDatabase "/opt/SquidStats"
-        createService "/opt/SquidStats"
+
+        # Detectar si ya estamos en el directorio del repo (CI/desarrollo local)
+        if [ "$NON_INTERACTIVE" = true ] && [ -f "app.py" ] && [ -f "requirements.txt" ]; then
+            echo "Modo CI/local detectado: usando repositorio actual en $(pwd)"
+            install_dir="$(pwd)"
+        else
+            if ! updateOrCloneRepo; then
+                error "Error al obtener el repositorio"
+                exit 1
+            fi
+            install_dir="/opt/SquidStats"
+        fi
+
+        checkSquidLog || true
+        installDependencies "$install_dir"
+        createEnvFile "$install_dir"
+        configureDatabase "$install_dir"
+        createService "$install_dir"
 
         ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     fi

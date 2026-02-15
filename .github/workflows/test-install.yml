@@ -1,0 +1,232 @@
+name: Test Installation Script
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main , dev, workflow-install-test ]
+  workflow_dispatch:
+
+jobs:
+  test-install:
+    runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      TZ: Etc/UTC
+
+    strategy:
+      matrix:
+        distro: [alpine, ubuntu]
+        include:
+          - distro: alpine
+            container: alpine:latest
+            squid_package: squid
+            squid_service: squid
+            python_packages: "python3 py3-pip py3-virtualenv"
+          - distro: ubuntu
+            container: ubuntu:latest
+            squid_package: squid
+            squid_service: squid
+            python_packages: "python3 python3-pip python3-venv"
+
+    container:
+      image: ${{ matrix.container }}
+
+    steps:
+    - name: Install system dependencies
+      run: |
+        if [ "${{ matrix.distro }}" = "alpine" ]; then
+          apk update
+          apk add --no-cache \
+            bash \
+            git \
+            ${{ matrix.python_packages }} \
+            mariadb-dev \
+            curl \
+            build-base \
+            openssl-dev \
+            postgresql-dev \
+            ${{ matrix.squid_package }} \
+            openrc \
+            sudo \
+            procps \
+            grep \
+            tzdata
+        else
+          # Configurar entorno no interactivo para Ubuntu/Debian
+          export DEBIAN_FRONTEND=noninteractive
+          export TZ=UTC
+          
+          apt-get update
+          apt-get install -y \
+            bash \
+            git \
+            ${{ matrix.python_packages }} \
+            libmariadb-dev \
+            curl \
+            build-essential \
+            libssl-dev \
+            postgresql-server-dev-all \
+            ${{ matrix.squid_package }} \
+            sudo \
+            procps \
+            grep \
+            tzdata
+        fi
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure Squid (Alpine)
+      if: matrix.distro == 'alpine'
+      run: |
+        # Crear directorios necesarios
+        mkdir -p /var/log/squid /var/cache/squid /var/run/squid
+        
+        # Configurar squid básico
+        cat > /etc/squid/squid.conf << 'EOF'
+        # Basic Squid configuration for testing
+        http_port 3128
+        cache_dir ufs /var/cache/squid 100 16 256
+        access_log /var/log/squid/access.log squid
+        cache_log /var/log/squid/cache.log
+        pid_filename /var/run/squid/squid.pid
+        
+        # Allow local access
+        acl localnet src 127.0.0.0/8
+        http_access allow localnet
+        http_access deny all
+        EOF
+        
+        # Inicializar cache
+        squid -z || true
+        
+        # Iniciar squid en background
+        squid || echo "Squid started"
+
+    - name: Configure Squid (Ubuntu)
+      if: matrix.distro == 'ubuntu'
+      run: |
+        # Crear directorios necesarios
+        mkdir -p /var/log/squid /var/cache/squid /var/run/squid
+        
+        # Configurar squid básico
+        cat > /etc/squid/squid.conf << 'EOF'
+        # Basic Squid configuration for testing
+        http_port 3128
+        cache_dir ufs /var/cache/squid 100 16 256
+        access_log /var/log/squid/access.log squid
+        cache_log /var/log/squid/cache.log
+        pid_filename /var/run/squid/squid.pid
+        
+        # Allow local access
+        acl localnet src 127.0.0.0/8
+        http_access allow localnet
+        http_access deny all
+        EOF
+
+        chown -R proxy:proxy /var/log/squid /var/cache/squid /var/run/squid
+        chmod -R 755 /var/log/squid /var/cache/squid /var/run/squid
+        
+        # Inicializar cache
+        squid -z || true
+        
+        # Iniciar squid
+        service squid start || squid
+
+    - name: Generate Squid access log
+      run: |
+        # Esperar a que squid esté listo
+        sleep 2
+        
+        # Generar una entrada en el log accediendo a squid
+        curl -s -o /dev/null http://127.0.0.1:3128/ || echo "Squid access logged"
+        
+        # Verificar que el log existe
+        ls -la /var/log/squid/access.log || echo "Log file check"
+
+    - name: Make install script executable
+      run: |
+        chmod +x install.sh
+
+    - name: Run installation script (non-interactive)
+      run: |
+        # Ejecutar instalación no interactiva
+        # En CI, el script detecta app.py + requirements.txt y usa el directorio actual
+        ./install.sh --non-interactive
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        TZ: UTC
+
+    - name: Start application (container mode)
+      run: |
+        # En contenedor no hay systemd/openrc, iniciar la app manualmente
+        # El script instaló el venv en el directorio actual (checkout)
+        INSTALL_DIR="$(pwd)"
+        
+        if [ ! -f "$INSTALL_DIR/app.py" ]; then
+          echo "app.py not found in $INSTALL_DIR"
+          ls -la "$INSTALL_DIR"
+          exit 1
+        fi
+        
+        # Start application in background with more robust method
+        "$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/app.py" > "$INSTALL_DIR/app.log" 2>&1 &
+        APP_PID=$!
+        echo $APP_PID > "$INSTALL_DIR/squidstats.pid"
+        echo "Application started with PID $APP_PID from $INSTALL_DIR"
+        
+        # Give it a moment to start
+        sleep 2
+
+    - name: Wait for application to start
+      run: |
+        for i in $(seq 1 30); do
+          if curl -s --max-time 5 http://localhost:5000 > /dev/null 2>&1; then
+            echo "Application is responding on port 5000"
+            break
+          fi
+          if [ "$i" -eq 30 ]; then
+            echo "Timeout waiting for application"
+            cat "$(pwd)/app.log" 2>/dev/null || true
+            exit 1
+          fi
+          echo "Waiting for application to start... ($i/30)"
+          sleep 1
+        done
+
+    - name: Test application response
+      run: |
+        response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000)
+        if [ "$response" = "200" ]; then
+          echo "✅ SUCCESS: Application returned HTTP 200"
+        else
+          echo "❌ FAILED: Application returned HTTP $response"
+          echo "=== Application logs ==="
+          tail -50 "$(pwd)/app.log" 2>/dev/null || echo "No app.log found"
+          echo "=== Process check ==="
+          if [ -f "$(pwd)/squidstats.pid" ]; then
+            pid=$(cat "$(pwd)/squidstats.pid")
+            ps -p $pid 2>/dev/null || echo "Process $pid not running"
+          fi
+          exit 1
+        fi
+
+    - name: Show application logs
+      if: always()
+      run: |
+        INSTALL_DIR="$(pwd)"
+        echo "=== Install Directory ==="
+        echo "$INSTALL_DIR"
+        ls -la "$INSTALL_DIR/venv/" 2>/dev/null || echo "No venv found"
+        
+        echo "=== Application Logs ==="
+        tail -50 "$INSTALL_DIR/app.log" 2>/dev/null || echo "No application logs found"
+        
+        echo "=== Process Status ==="
+        if [ -f "$INSTALL_DIR/squidstats.pid" ]; then
+          pid=$(cat "$INSTALL_DIR/squidstats.pid")
+          ps -p $pid 2>/dev/null || echo "Process $pid not running"
+        else
+          echo "No PID file found"
+        fi

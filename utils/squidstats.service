@@ -1,15 +1,26 @@
 [Unit]
-Description=SquidStats
+Description=SquidStats Web Application
 After=network.target
 
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/SquidStats
-ExecStart=/opt/SquidStats/venv/bin/python /opt/SquidStats/app.py
+WorkingDirectory=__INSTALL_DIR__
+ExecStart=__INSTALL_DIR__/venv/bin/python3 __INSTALL_DIR__/app.py
 Restart=always
 RestartSec=5
-EnvironmentFile=/opt/SquidStats/.env
+EnvironmentFile=__INSTALL_DIR__/.env
+Environment=PATH=__INSTALL_DIR__/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Resource limits
+MemoryLimit=2048M
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=squidstats
 
 [Install]
 WantedBy=multi-user.target
