@@ -302,47 +302,22 @@ createService() {
 
     if [ "$DISTRO_TYPE" = "alpine" ]; then
         local service_file="/etc/init.d/squidstats"
+        local template="$install_dir/utils/openRC"
 
         if [ -f "$service_file" ]; then
             echo "El servicio ya existe en $service_file, no se realizan cambios."
             return 0
         fi
 
-        # Asegurar que el directorio init.d existe
+        if [ ! -f "$template" ]; then
+            error "Plantilla de servicio OpenRC no encontrada en $template"
+            return 1
+        fi
+
         mkdir -p /etc/init.d
 
         echo "Creando servicio OpenRC en $service_file..."
-        cat >"$service_file" <<'EOFRC'
-#!/sbin/openrc-run
-
-name="SquidStats"
-description="SquidStats Web Application"
-EOFRC
-
-        # Añadir variables que necesitan expansión
-        cat >>"$service_file" <<EOF
-command="$install_dir/venv/bin/python3"
-command_args="$install_dir/app.py"
-directory="$install_dir"
-pidfile="/run/\${RC_SVCNAME}.pid"
-command_background=true
-
-depend() {
-    need net
-    after firewall
-}
-
-start_pre() {
-    # Cargar variables de entorno desde .env
-    if [ -f "$install_dir/.env" ]; then
-        set -a
-        . "$install_dir/.env"
-        set +a
-    fi
-    export PATH="$install_dir/venv/bin:\$PATH"
-}
-EOF
-
+        sed "s|__INSTALL_DIR__|$install_dir|g" "$template" > "$service_file"
         chmod +x "$service_file"
 
         if command -v rc-update >/dev/null 2>&1; then
@@ -356,41 +331,20 @@ EOF
         fi
     else
         local service_file="/etc/systemd/system/squidstats.service"
+        local template="$install_dir/utils/squidstats.service"
 
         if [ -f "$service_file" ]; then
             echo "El servicio ya existe en $service_file, no se realizan cambios."
             return 0
         fi
 
+        if [ ! -f "$template" ]; then
+            error "Plantilla de servicio systemd no encontrada en $template"
+            return 1
+        fi
+
         echo "Creando servicio systemd en $service_file..."
-        cat >"$service_file" <<EOF
-[Unit]
-Description=SquidStats Web Application
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=$install_dir
-ExecStart=$install_dir/venv/bin/python3 $install_dir/app.py
-Restart=always
-RestartSec=5
-EnvironmentFile=$install_dir/.env
-Environment=PATH=$install_dir/venv/bin:$PATH
-
-# Resource limits
-MemoryLimit=2048M
-TimeoutStartSec=30
-TimeoutStopSec=10
-
-# Logging
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=squidstats
-
-[Install]
-WantedBy=multi-user.target
-EOF
+        sed "s|__INSTALL_DIR__|$install_dir|g" "$template" > "$service_file"
 
         systemctl daemon-reload
         systemctl enable squidstats.service

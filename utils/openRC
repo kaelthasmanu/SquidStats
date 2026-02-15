@@ -3,9 +3,9 @@
 
 name="SquidStats"
 description="SquidStats Web Application"
-command="/opt/SquidStats/venv/bin/python3"
-command_args="/opt/SquidStats/app.py"
-directory="/opt/SquidStats"
+command="__INSTALL_DIR__/venv/bin/python3"
+command_args="__INSTALL_DIR__/app.py"
+directory="__INSTALL_DIR__"
 pidfile="/run/${RC_SVCNAME}.pid"
 command_background=true
 
@@ -15,10 +15,10 @@ depend() {
 }
 
 start_pre() {
-    if [ -f "/opt/SquidStats/.env" ]; then
+    if [ -f "__INSTALL_DIR__/.env" ]; then
         set -a
-        . "/opt/SquidStats/.env"
+        . "__INSTALL_DIR__/.env"
         set +a
     fi
-    export PATH="/opt/SquidStats/venv/bin:$PATH"
+    export PATH="__INSTALL_DIR__/venv/bin:$PATH"
 }

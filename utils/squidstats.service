@@ -5,12 +5,12 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=$install_dir
-ExecStart=$install_dir/venv/bin/python3 $install_dir/app.py
+WorkingDirectory=__INSTALL_DIR__
+ExecStart=__INSTALL_DIR__/venv/bin/python3 __INSTALL_DIR__/app.py
 Restart=always
 RestartSec=5
-EnvironmentFile=$install_dir/.env
-Environment=PATH=$install_dir/venv/bin:$PATH
+EnvironmentFile=__INSTALL_DIR__/.env
+Environment=PATH=__INSTALL_DIR__/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Resource limits
 MemoryLimit=2048M
