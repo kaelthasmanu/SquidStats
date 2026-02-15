@@ -157,11 +157,11 @@ checkSquidLog() {
 }
 
 findInstallDir() {
-    local destinos="/opt/SquidStats /usr/share/squidstats /home/manuel/Desktop/Projects/SquidStats"
+    local destinos="/opt/SquidStats /usr/share/squidstats"
 
     # Agregar el directorio actual si contiene archivos de SquidStats
     if [ -f "app.py" ] && [ -f "requirements.txt" ] && [ -d ".git" ]; then
-        destinos="$destinos $(pwd)"
+        destinos="$(pwd) $destinos"
     fi
 
     for dir in $destinos; do
@@ -579,12 +579,24 @@ main() {
     else
         echo "Instalando aplicación web..."
         checkPackages
-        updateOrCloneRepo
-        checkSquidLog
-        installDependencies "/opt/SquidStats"
-        createEnvFile "/opt/SquidStats"
-        configureDatabase "/opt/SquidStats"
-        createService "/opt/SquidStats"
+
+        # Detectar si ya estamos en el directorio del repo (CI/desarrollo local)
+        if [ "$NON_INTERACTIVE" = true ] && [ -f "app.py" ] && [ -f "requirements.txt" ]; then
+            echo "Modo CI/local detectado: usando repositorio actual en $(pwd)"
+            install_dir="$(pwd)"
+        else
+            if ! updateOrCloneRepo; then
+                error "Error al obtener el repositorio"
+                exit 1
+            fi
+            install_dir="/opt/SquidStats"
+        fi
+
+        checkSquidLog || true
+        installDependencies "$install_dir"
+        createEnvFile "$install_dir"
+        configureDatabase "$install_dir"
+        createService "$install_dir"
 
         ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     fi
