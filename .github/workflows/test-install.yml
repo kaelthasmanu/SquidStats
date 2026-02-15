@@ -170,9 +170,14 @@ jobs:
           exit 1
         fi
         
-        nohup "$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/app.py" > "$INSTALL_DIR/app.log" 2>&1 &
-        echo $! > "$INSTALL_DIR/squidstats.pid"
-        echo "Application started with PID $(cat $INSTALL_DIR/squidstats.pid) from $INSTALL_DIR"
+        # Start application in background with more robust method
+        "$INSTALL_DIR/venv/bin/python3" "$INSTALL_DIR/app.py" > "$INSTALL_DIR/app.log" 2>&1 &
+        APP_PID=$!
+        echo $APP_PID > "$INSTALL_DIR/squidstats.pid"
+        echo "Application started with PID $APP_PID from $INSTALL_DIR"
+        
+        # Give it a moment to start
+        sleep 2
 
     - name: Wait for application to start
       run: |

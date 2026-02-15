@@ -298,7 +298,16 @@ EOF
 createService() {
     local install_dir="${1:-/opt/SquidStats}"
 
+    if isContainer; then
+        echo "⚠️ Entorno contenedor detectado. No se creará servicio."
+        echo "Para iniciar manualmente:"
+        echo "$install_dir/venv/bin/python3 $install_dir/app.py"
+        ok "Instalación completada en modo contenedor"
+        return 0
+    fi
+
     if [ "$DISTRO_TYPE" = "alpine" ]; then
+        
         local service_file="/etc/init.d/squidstats"
         local template="$install_dir/utils/openRC"
 
@@ -340,14 +349,6 @@ createService() {
             ok "Archivo de servicio OpenRC creado correctamente"
         fi
     else
-        if isContainer; then
-            echo "⚠️ Entorno contenedor detectado. No se creará servicio systemd."
-            echo "Para iniciar manualmente:"
-            echo "$install_dir/venv/bin/python3 $install_dir/app.py"
-            ok "Instalación completada en modo contenedor"
-            return 0
-        fi
-
         local service_file="/etc/systemd/system/squidstats.service"
         local template="$install_dir/utils/squidstats.service"
 
