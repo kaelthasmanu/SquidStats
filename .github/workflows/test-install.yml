@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DEBIAN_FRONTEND: noninteractive
-      TZ: UTC
+      TZ: Etc/UTC
 
     strategy:
       matrix:

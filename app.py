@@ -75,6 +75,9 @@ def create_app():
     # Initialize CSRF protection (shared instance with routes)
     csrf.init_app(app)
 
+    # Set timezone for APScheduler before initialization
+    os.environ['TZ'] = Config.TZ
+
     # Initialize extensions
     scheduler = APScheduler()
     scheduler.init_app(app)
