@@ -170,7 +170,7 @@ findInstallDir() {
 
 updateOrCloneRepo() {
     local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local branch="main"
+    local branch="distro-install-support"
     local env_exists=false
     local found_dir=""
 
@@ -322,6 +322,18 @@ createService() {
 
         if command -v rc-update >/dev/null 2>&1; then
             rc-update add squidstats default
+            chmod 755 /etc/init.d/squidstats
+
+            # Verifica si OpenRC ya está inicializado
+            if [ -f /run/openrc/softlevel ]; then
+                echo "✓ OpenRC ya está inicializado"
+                rc-status --all | head -5
+                
+            else
+                echo "✗ OpenRC NO está inicializado... intentando inicializarlo..."
+                openrc boot
+            fi
+            
             rc-service squidstats start
             ok "Servicio OpenRC creado y iniciado correctamente"
         else
