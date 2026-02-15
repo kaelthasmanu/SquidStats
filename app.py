@@ -5,9 +5,9 @@ import sys
 import threading
 from datetime import datetime, timedelta, timezone
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 from flask import Flask
-from apscheduler.schedulers.background import BackgroundScheduler
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
 

@@ -169,7 +169,7 @@ findInstallDir() {
 
 updateOrCloneRepo() {
     local repo_url="https://github.com/kaelthasmanu/SquidStats.git"
-    local branch="distro-install-support"
+    local branch="main"
     local env_exists=false
     local found_dir=""
 
