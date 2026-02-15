@@ -47,8 +47,8 @@ detectDistro() {
 }
 
 checkSudo() {
-    if [ "$EUID" -ne 0 ]; then
-        error "ERROR: Este script debe ejecutarse con privilegios de superusuario.\nPor favor, ejecútelo con el usuario: root $0"
+    if [ "$(id -u)" -ne 0 ]; then
+        error "ERROR: Este script debe ejecutarse como root."
         exit 1
     fi
 }
