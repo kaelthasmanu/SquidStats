@@ -631,7 +631,13 @@ To ensure the application starts automatically when the system boot :
 
 ## Testing Information
 
-This software has been thoroughly tested and is compatible with Squid version 6.12 in Ubuntu 24.04 and Debian12. Please ensure your Squid installation matches this version or newer for optimal performance.
+This software has been thoroughly tested and is compatible with Squid version 6.12 in the following distributions:
+
+- **Ubuntu**: 24.04 LTS
+- **Debian**: 12 and 13
+- **Alpine Linux**: 3.23.3
+
+Please ensure your Squid installation matches this version or newer for optimal performance. For Docker container environments, Alpine Linux 3.23.3 is recommended due to its small size and compatibility.
 
 ## Uninstall SquidStats
 
