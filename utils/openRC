@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+# Description: SquidStats Web Application
+
+name="SquidStats"
+description="SquidStats Web Application"
+command="__INSTALL_DIR__/venv/bin/python3"
+command_args="__INSTALL_DIR__/app.py"
+directory="__INSTALL_DIR__"
+pidfile="/run/${RC_SVCNAME}.pid"
+command_background=true
+
+depend() {
+    need net
+    after firewall
+}
+
+start_pre() {
+    if [ -f "__INSTALL_DIR__/.env" ]; then
+        set -a
+        . "__INSTALL_DIR__/.env"
+        set +a
+    fi
+    export PATH="__INSTALL_DIR__/venv/bin:$PATH"
+}
