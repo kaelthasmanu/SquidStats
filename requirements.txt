@@ -16,3 +16,4 @@ uvicorn
 PyJWT==2.11.0
 bcrypt==5.0.0
 telethon>=1.42.0
+loguru==0.7.3
