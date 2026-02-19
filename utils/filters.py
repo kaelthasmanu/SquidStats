@@ -1,7 +1,6 @@
-import logging
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 def divide_filter(numerator, denominator, precision=2):

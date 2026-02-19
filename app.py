@@ -10,8 +10,9 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO
+from loguru import logger
 
-from config import Config, logger
+from config import Config
 from database.database import migrate_database
 from parsers.log import process_logs
 from routes import register_routes
@@ -26,6 +27,9 @@ from services.notifications import (
     start_notification_monitor,
     stop_notification_monitor,
 )
+from utils.filters import register_filters
+
+logger.add("logs/app.log", rotation="100 MB", retention="31 days", level="INFO")
 
 # Import Telegram integration (optional)
 try:
@@ -39,8 +43,6 @@ except Exception:
     TELEGRAM_AVAILABLE = False
     initialize_telegram_service = None
     cleanup_telegram = None
-
-from utils.filters import register_filters
 
 # Load environment variables
 load_dotenv()

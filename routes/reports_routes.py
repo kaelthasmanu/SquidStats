@@ -1,8 +1,8 @@
 from datetime import date, datetime
 
 from flask import Blueprint, render_template, request
+from loguru import logger
 
-from config import logger
 from database.database import get_dynamic_models, get_session
 from services.fetch_data_logs import get_metrics_for_date
 from services.get_reports import get_important_metrics

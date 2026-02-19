@@ -1,12 +1,10 @@
-import logging
 from datetime import datetime, timedelta
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import desc
 
 from database.database import SystemMetrics, get_session
-
-logger = logging.getLogger(__name__)
 
 
 class MetricsService:

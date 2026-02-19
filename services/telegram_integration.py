@@ -4,11 +4,12 @@ Integrates Telegram notifications with the existing notification system
 """
 
 import asyncio
-import logging
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from typing import Any
+
+from loguru import logger
 
 from config import Config
 from services.telegram_service import (
@@ -17,8 +18,6 @@ from services.telegram_service import (
     get_telegram_service,
     parse_http_proxy_url,
 )
-
-logger = logging.getLogger(__name__)
 
 # Thread pool for async execution
 _executor = ThreadPoolExecutor(max_workers=2)

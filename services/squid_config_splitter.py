@@ -5,7 +5,7 @@ import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 
-from config import logger
+from loguru import logger
 
 
 @dataclass(frozen=True)
@@ -344,6 +344,7 @@ class SquidConfigSplitter:
             logger.info("Validating Squid configuration with 'squid -k parse'...")
             result = subprocess.run(
                 ["squid", "-k", "parse"],
+                #["docker", "exec", "squid_proxy", "squid", "-k", "parse"],
                 capture_output=True,
                 text=True,
                 timeout=30,

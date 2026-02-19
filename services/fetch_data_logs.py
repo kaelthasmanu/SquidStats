@@ -1,19 +1,13 @@
-import logging
 import re
 from datetime import date, datetime
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import func, inspect
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 
 from database.database import get_concat_function, get_dynamic_models, get_session
-
-# Configuración básica de logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
 
 # Patrones de validación para nombres de tabla y fechas
 TABLE_NAME_PATTERN = re.compile(r"^[a-z_]{3,20}$")

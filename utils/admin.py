@@ -1,11 +1,9 @@
-import logging
 import os
 import shutil
 from datetime import datetime
 
 from dotenv import load_dotenv
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 load_dotenv()
 

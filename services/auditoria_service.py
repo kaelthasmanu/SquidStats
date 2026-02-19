@@ -1,8 +1,8 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any
-from venv import logger
 
+from loguru import logger
 from sqlalchemy import func, inspect, or_, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session

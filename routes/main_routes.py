@@ -3,8 +3,9 @@ import time
 from typing import Any
 
 from flask import Blueprint, redirect, render_template, request
+from loguru import logger
 
-from config import Config, logger
+from config import Config
 from parsers.connections import group_by_user, parse_raw_data
 from parsers.squid_info import fetch_squid_info_stats
 from services.fetch_data import fetch_squid_data
@@ -211,8 +212,6 @@ def all_notifications():
             ),
         )
     except Exception as e:
-        from config import logger
-
         logger.error(f"Error loading notifications page: {e}")
         return render_template(
             "all_notifications.html",

@@ -1,8 +1,8 @@
-import logging
 import os
 import time
 from datetime import datetime
 
+from loguru import logger
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from config import Config
@@ -16,13 +16,6 @@ from database.database import (
     get_session,
     table_exists,
 )
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler("log_processor.log")],
-)
-logger = logging.getLogger(__name__)
 
 
 class DatabaseManager:
@@ -312,7 +305,7 @@ def process_logs(log_file):
                         f"File truncated (size: {file_size} < position: {last_position})"
                     )
                     last_position = 0
-            logger.info(f"Reading from position: {last_position}")
+            #logger.info(f"Reading from position: {last_position}")
             user_cache = {}
             logs_to_insert, new_users_to_insert, denied_to_insert = [], [], []
             processed_lines = inserted_logs = inserted_users = inserted_denied = 0
@@ -454,7 +447,7 @@ def process_logs(log_file):
             metadata.updated_at = datetime.now()
             session.commit()
             elapsed = time.time() - start_time
-            logger.info(f"Processing completed. Lines: {processed_lines}")
+            #logger.info(f"Processing completed. Lines: {processed_lines}")
             logger.info(
                 f"Logs inserted: {inserted_logs}, New users: {inserted_users}, Denied: {inserted_denied}"
             )

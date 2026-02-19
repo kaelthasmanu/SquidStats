@@ -16,8 +16,8 @@ from flask import (
     url_for,
 )
 from flask_wtf.csrf import CSRFProtect
+from loguru import logger
 
-from config import logger
 from services.auth_service import AuthConfig, AuthService
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")

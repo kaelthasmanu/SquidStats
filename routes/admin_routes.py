@@ -10,9 +10,10 @@ from flask import (
     request,
     url_for,
 )
+from loguru import logger
 from sqlalchemy import MetaData, Table, func, inspect, select, text
 
-from config import Config, logger
+from config import Config
 from database.database import get_engine, get_session
 from services.auth_service import AuthService, admin_required, api_auth_required
 from services.squid_config_splitter import SquidConfigSplitter

@@ -13,12 +13,12 @@ Usage:
     python manage_db.py create     # Create a new migration
 """
 
-import logging
 import sys
 from pathlib import Path
 
 from alembic.config import Config as AlembicConfig
 from dotenv import load_dotenv
+from loguru import logger
 
 from alembic import command
 
@@ -28,12 +28,6 @@ sys.path.insert(0, str(project_root))
 
 # Load environment variables
 load_dotenv()
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
 
 
 def get_alembic_config():

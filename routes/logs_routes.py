@@ -2,8 +2,8 @@ import os
 from datetime import datetime
 
 from flask import Blueprint, jsonify, render_template, request
+from loguru import logger
 
-from config import logger
 from database.database import get_session
 from services.blacklist_users import find_blacklisted_sites
 from services.fetch_data_logs import get_users_logs
