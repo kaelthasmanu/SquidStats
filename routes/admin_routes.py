@@ -17,6 +17,25 @@ from config import Config
 from database.database import get_engine, get_session
 from services.auth_service import AuthService, admin_required, api_auth_required
 from services.squid_config_splitter import SquidConfigSplitter
+from services.db_info_service import get_tables_info as service_get_tables_info
+from services.config_service import save_config as service_save_config
+from services.user_service import (
+    get_all_users as service_get_all_users,
+    create_user as service_create_user,
+    update_user as service_update_user,
+    delete_user as service_delete_user,
+)
+from services.logs_service import read_logs as service_read_logs
+from services.system_service import (
+    restart_squid as service_restart_squid,
+    reload_squid as service_reload_squid,
+)
+from services.db_admin_service import delete_table_data as service_delete_table_data
+from services.split_config_service import (
+    split_config as service_split_config,
+    get_split_view_data as service_get_split_view_data,
+    get_split_files_info as service_get_split_files_info,
+)
 from utils.admin import SquidConfigManager
 
 admin_bp = Blueprint("admin", __name__)
@@ -82,20 +101,18 @@ def view_config():
 def edit_config():
     if request.method == "POST":
         new_content = request.form["config_content"]
-        try:
-            config_manager.save_config(new_content)
-            flash("Configuration saved successfully", "success")
+        ok, message = service_save_config(new_content, config_manager)
+        if ok:
+            flash(message, "success")
             return redirect(url_for("admin.view_config"))
-        except Exception as e:
-            # Log full exception; avoid showing raw exception text to users
-            logger.exception("Error saving configuration")
+        else:
             try:
                 show_details = bool(current_app.debug)
             except RuntimeError:
                 show_details = False
 
             if show_details:
-                flash(f"Error saving configuration: {str(e)}", "error")
+                flash(f"Error saving configuration: {message}", "error")
             else:
                 flash("Error saving configuration", "error")
     return render_template(
@@ -306,60 +323,14 @@ def blacklist_save_custom():
 @admin_required
 def delete_http_access():
     index = request.form.get("index")
-
     try:
         rule_index = int(index)
+    except (ValueError, TypeError):
+        flash("Índice de regla inválido", "error")
+        return redirect(url_for("admin.manage_http_access"))
 
-        # Check if using modular configuration
-        if config_manager.is_modular:
-            http_content = config_manager.read_modular_config("120_http_access.conf")
-            if http_content is not None:
-                lines = http_content.split("\n")
-                new_lines = []
-                http_count = 0
-
-                for line in lines:
-                    if line.strip().startswith(
-                        "http_access "
-                    ) and not line.strip().startswith("#"):
-                        if http_count == rule_index:
-                            # Skip this line (delete it)
-                            http_count += 1
-                            continue
-                        http_count += 1
-                    new_lines.append(line)
-
-                new_content = "\n".join(new_lines)
-                if config_manager.save_modular_config(
-                    "120_http_access.conf", new_content
-                ):
-                    flash("Regla HTTP Access eliminada exitosamente", "success")
-                else:
-                    flash("Error al eliminar la regla", "error")
-                return redirect(url_for("admin.manage_http_access"))
-
-        # Fallback to main config
-        lines = config_manager.config_content.split("\n")
-        new_lines = []
-        http_count = 0
-
-        for line in lines:
-            if line.strip().startswith("http_access ") and not line.strip().startswith(
-                "#"
-            ):
-                if http_count == rule_index:
-                    http_count += 1
-                    continue
-                http_count += 1
-            new_lines.append(line)
-
-        new_content = "\n".join(new_lines)
-        config_manager.save_config(new_content)
-        flash("Regla HTTP Access eliminada exitosamente", "success")
-
-    except (ValueError, IndexError) as e:
-        flash(f"Error al eliminar la regla: {str(e)}", "error")
-
+    success, message = service_delete_http_access(rule_index, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_http_access"))
 
 
@@ -374,73 +345,12 @@ def edit_http_access():
 
     try:
         rule_index = int(index)
-        acl_string = " ".join([acl.strip() for acl in acls if acl.strip()])
+    except (ValueError, TypeError):
+        flash("Índice de regla inválido", "error")
+        return redirect(url_for("admin.manage_http_access"))
 
-        if not acl_string:
-            flash("Debe especificar al menos una ACL", "error")
-            return redirect(url_for("admin.manage_http_access"))
-
-        new_rule = f"http_access {action} {acl_string}"
-
-        # Check if using modular configuration
-        if config_manager.is_modular:
-            http_content = config_manager.read_modular_config("120_http_access.conf")
-            if http_content is not None:
-                lines = http_content.split("\n")
-                http_count = 0
-
-                for i, line in enumerate(lines):
-                    if line.strip().startswith(
-                        "http_access "
-                    ) and not line.strip().startswith("#"):
-                        if http_count == rule_index:
-                            # Replace the rule, optionally with a comment above
-                            if description:
-                                # Check if there's already a comment above this line
-                                if i > 0 and lines[i - 1].strip().startswith("#"):
-                                    lines[i - 1] = f"# {description}"
-                                else:
-                                    lines.insert(i, f"# {description}")
-                                    i += 1
-                            lines[i] = new_rule
-                            break
-                        http_count += 1
-
-                new_content = "\n".join(lines)
-                if config_manager.save_modular_config(
-                    "120_http_access.conf", new_content
-                ):
-                    flash("Regla HTTP Access actualizada exitosamente", "success")
-                else:
-                    flash("Error al actualizar la regla", "error")
-                return redirect(url_for("admin.manage_http_access"))
-
-        # Fallback to main config
-        lines = config_manager.config_content.split("\n")
-        http_count = 0
-
-        for i, line in enumerate(lines):
-            if line.strip().startswith("http_access ") and not line.strip().startswith(
-                "#"
-            ):
-                if http_count == rule_index:
-                    if description:
-                        if i > 0 and lines[i - 1].strip().startswith("#"):
-                            lines[i - 1] = f"# {description}"
-                        else:
-                            lines.insert(i, f"# {description}")
-                            i += 1
-                    lines[i] = new_rule
-                    break
-                http_count += 1
-
-        new_content = "\n".join(lines)
-        config_manager.save_config(new_content)
-        flash("Regla HTTP Access actualizada exitosamente", "success")
-
-    except (ValueError, IndexError) as e:
-        flash(f"Error al actualizar la regla: {str(e)}", "error")
-
+    success, message = service_edit_http_access(rule_index, action, acls, description, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_http_access"))
 
 
@@ -452,48 +362,8 @@ def add_http_access():
     acls = request.form.getlist("acls[]")
     description = request.form.get("description", "").strip()
 
-    try:
-        acl_string = " ".join([acl.strip() for acl in acls if acl.strip()])
-
-        if not acl_string:
-            flash("Debe especificar al menos una ACL", "error")
-            return redirect(url_for("admin.manage_http_access"))
-
-        new_rule = f"http_access {action} {acl_string}"
-        lines_to_add = []
-
-        if description:
-            lines_to_add.append(f"# {description}")
-        lines_to_add.append(new_rule)
-
-        # Check if using modular configuration
-        if config_manager.is_modular:
-            http_content = config_manager.read_modular_config("120_http_access.conf")
-            if http_content is not None:
-                lines = http_content.split("\n")
-                # Add at the end (before final "deny all" if it exists)
-                lines.extend(lines_to_add)
-
-                new_content = "\n".join(lines)
-                if config_manager.save_modular_config(
-                    "120_http_access.conf", new_content
-                ):
-                    flash("Regla HTTP Access agregada exitosamente", "success")
-                else:
-                    flash("Error al agregar la regla", "error")
-                return redirect(url_for("admin.manage_http_access"))
-
-        # Fallback to main config
-        lines = config_manager.config_content.split("\n")
-        lines.extend(lines_to_add)
-
-        new_content = "\n".join(lines)
-        config_manager.save_config(new_content)
-        flash("Regla HTTP Access agregada exitosamente", "success")
-
-    except Exception as e:
-        flash(f"Error al agregar la regla: {str(e)}", "error")
-
+    success, message = service_add_http_access(action, acls, description, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_http_access"))
 
 
@@ -506,93 +376,12 @@ def move_http_access():
 
     try:
         rule_index = int(index)
+    except (ValueError, TypeError):
+        flash("Índice de regla inválido", "error")
+        return redirect(url_for("admin.manage_http_access"))
 
-        # Check if using modular configuration
-        if config_manager.is_modular:
-            http_content = config_manager.read_modular_config("120_http_access.conf")
-            if http_content is not None:
-                lines = http_content.split("\n")
-                http_lines_indices = []
-
-                # Find all http_access lines
-                for i, line in enumerate(lines):
-                    if line.strip().startswith(
-                        "http_access "
-                    ) and not line.strip().startswith("#"):
-                        http_lines_indices.append(i)
-
-                if rule_index >= len(http_lines_indices):
-                    flash("Índice de regla inválido", "error")
-                    return redirect(url_for("admin.manage_http_access"))
-
-                current_line_index = http_lines_indices[rule_index]
-
-                if direction == "up" and rule_index > 0:
-                    target_line_index = http_lines_indices[rule_index - 1]
-                    # Swap lines
-                    lines[current_line_index], lines[target_line_index] = (
-                        lines[target_line_index],
-                        lines[current_line_index],
-                    )
-                elif direction == "down" and rule_index < len(http_lines_indices) - 1:
-                    target_line_index = http_lines_indices[rule_index + 1]
-                    # Swap lines
-                    lines[current_line_index], lines[target_line_index] = (
-                        lines[target_line_index],
-                        lines[current_line_index],
-                    )
-
-                new_content = "\n".join(lines)
-                if config_manager.save_modular_config(
-                    "120_http_access.conf", new_content
-                ):
-                    flash(
-                        f"Regla movida {direction == 'up' and 'arriba' or 'abajo'} exitosamente",
-                        "success",
-                    )
-                else:
-                    flash("Error al mover la regla", "error")
-                return redirect(url_for("admin.manage_http_access"))
-
-        # Fallback to main config
-        lines = config_manager.config_content.split("\n")
-        http_lines_indices = []
-
-        for i, line in enumerate(lines):
-            if line.strip().startswith("http_access ") and not line.strip().startswith(
-                "#"
-            ):
-                http_lines_indices.append(i)
-
-        if rule_index >= len(http_lines_indices):
-            flash("Índice de regla inválido", "error")
-            return redirect(url_for("admin.manage_http_access"))
-
-        current_line_index = http_lines_indices[rule_index]
-
-        if direction == "up" and rule_index > 0:
-            target_line_index = http_lines_indices[rule_index - 1]
-            lines[current_line_index], lines[target_line_index] = (
-                lines[target_line_index],
-                lines[current_line_index],
-            )
-        elif direction == "down" and rule_index < len(http_lines_indices) - 1:
-            target_line_index = http_lines_indices[rule_index + 1]
-            lines[current_line_index], lines[target_line_index] = (
-                lines[target_line_index],
-                lines[current_line_index],
-            )
-
-        new_content = "\n".join(lines)
-        config_manager.save_config(new_content)
-        flash(
-            f"Regla movida {direction == 'up' and 'arriba' or 'abajo'} exitosamente",
-            "success",
-        )
-
-    except (ValueError, IndexError) as e:
-        flash(f"Error al mover la regla: {str(e)}", "error")
-
+    success, message = service_move_http_access(rule_index, direction, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_http_access"))
 
 
@@ -602,58 +391,8 @@ def delete_delay_pool():
     """Delete all directives related to a specific delay pool"""
     pool_number = request.form.get("pool_number")
 
-    try:
-        # Check if using modular configuration
-        if config_manager.is_modular:
-            delay_content = config_manager.read_modular_config("110_delay_pools.conf")
-            if delay_content is not None:
-                lines = delay_content.split("\n")
-                new_lines = []
-
-                # Remove all lines related to this pool number
-                for line in lines:
-                    stripped = line.strip()
-                    # Skip delay_class, delay_parameters, and delay_access for this pool
-                    if (
-                        stripped.startswith(f"delay_class {pool_number} ")
-                        or stripped.startswith(f"delay_parameters {pool_number} ")
-                        or stripped.startswith(f"delay_access {pool_number} ")
-                    ):
-                        continue
-                    new_lines.append(line)
-
-                new_content = "\n".join(new_lines)
-                if config_manager.save_modular_config(
-                    "110_delay_pools.conf", new_content
-                ):
-                    flash(
-                        f"Delay Pool #{pool_number} eliminado exitosamente", "success"
-                    )
-                else:
-                    flash("Error al eliminar el delay pool", "error")
-                return redirect(url_for("admin.manage_delay_pools"))
-
-        # Fallback to main config
-        lines = config_manager.config_content.split("\n")
-        new_lines = []
-
-        for line in lines:
-            stripped = line.strip()
-            if (
-                stripped.startswith(f"delay_class {pool_number} ")
-                or stripped.startswith(f"delay_parameters {pool_number} ")
-                or stripped.startswith(f"delay_access {pool_number} ")
-            ):
-                continue
-            new_lines.append(line)
-
-        new_content = "\n".join(new_lines)
-        config_manager.save_config(new_content)
-        flash(f"Delay Pool #{pool_number} eliminado exitosamente", "success")
-
-    except Exception as e:
-        flash(f"Error al eliminar el delay pool: {str(e)}", "error")
-
+    success, message = service_delete_delay_pool(pool_number, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_delay_pools"))
 
 
@@ -667,91 +406,8 @@ def edit_delay_pool():
     access_actions = request.form.getlist("access_action[]")
     access_acls = request.form.getlist("access_acl[]")
 
-    try:
-        # Build new directives
-        new_directives = []
-        new_directives.append(f"delay_class {pool_number} {pool_class}")
-        new_directives.append(f"delay_parameters {pool_number} {parameters}")
-
-        # Add access rules
-        for action, acl in zip(access_actions, access_acls, strict=True):
-            if acl.strip():
-                new_directives.append(f"delay_access {pool_number} {action} {acl}")
-
-        # Check if using modular configuration
-        if config_manager.is_modular:
-            delay_content = config_manager.read_modular_config("110_delay_pools.conf")
-            if delay_content is not None:
-                lines = delay_content.split("\n")
-                new_lines = []
-                pool_found = False
-                insert_index = -1
-
-                # Remove old directives and find insertion point
-                for _i, line in enumerate(lines):
-                    stripped = line.strip()
-                    if (
-                        stripped.startswith(f"delay_class {pool_number} ")
-                        or stripped.startswith(f"delay_parameters {pool_number} ")
-                        or stripped.startswith(f"delay_access {pool_number} ")
-                    ):
-                        if not pool_found:
-                            insert_index = len(new_lines)
-                            pool_found = True
-                        continue
-                    new_lines.append(line)
-
-                # Insert new directives at the same location
-                if insert_index >= 0:
-                    for directive in reversed(new_directives):
-                        new_lines.insert(insert_index, directive)
-                else:
-                    # If not found, append at the end
-                    new_lines.extend(new_directives)
-
-                new_content = "\n".join(new_lines)
-                if config_manager.save_modular_config(
-                    "110_delay_pools.conf", new_content
-                ):
-                    flash(
-                        f"Delay Pool #{pool_number} actualizado exitosamente", "success"
-                    )
-                else:
-                    flash("Error al actualizar el delay pool", "error")
-                return redirect(url_for("admin.manage_delay_pools"))
-
-        # Fallback to main config
-        lines = config_manager.config_content.split("\n")
-        new_lines = []
-        pool_found = False
-        insert_index = -1
-
-        for _i, line in enumerate(lines):
-            stripped = line.strip()
-            if (
-                stripped.startswith(f"delay_class {pool_number} ")
-                or stripped.startswith(f"delay_parameters {pool_number} ")
-                or stripped.startswith(f"delay_access {pool_number} ")
-            ):
-                if not pool_found:
-                    insert_index = len(new_lines)
-                    pool_found = True
-                continue
-            new_lines.append(line)
-
-        if insert_index >= 0:
-            for directive in reversed(new_directives):
-                new_lines.insert(insert_index, directive)
-        else:
-            new_lines.extend(new_directives)
-
-        new_content = "\n".join(new_lines)
-        config_manager.save_config(new_content)
-        flash(f"Delay Pool #{pool_number} actualizado exitosamente", "success")
-
-    except Exception as e:
-        flash(f"Error al actualizar el delay pool: {str(e)}", "error")
-
+    success, message = service_edit_delay_pool(pool_number, pool_class, parameters, access_actions, access_acls, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_delay_pools"))
 
 
@@ -765,45 +421,8 @@ def add_delay_pool():
     access_actions = request.form.getlist("access_action[]")
     access_acls = request.form.getlist("access_acl[]")
 
-    try:
-        # Build new directives
-        new_directives = []
-        new_directives.append(f"delay_class {pool_number} {pool_class}")
-        new_directives.append(f"delay_parameters {pool_number} {parameters}")
-
-        # Add access rules
-        for action, acl in zip(access_actions, access_acls, strict=True):
-            if acl.strip():
-                new_directives.append(f"delay_access {pool_number} {action} {acl}")
-
-        # Check if using modular configuration
-        if config_manager.is_modular:
-            delay_content = config_manager.read_modular_config("110_delay_pools.conf")
-            if delay_content is not None:
-                # Append new directives at the end
-                lines = delay_content.split("\n")
-                lines.extend(new_directives)
-
-                new_content = "\n".join(lines)
-                if config_manager.save_modular_config(
-                    "110_delay_pools.conf", new_content
-                ):
-                    flash(f"Delay Pool #{pool_number} creado exitosamente", "success")
-                else:
-                    flash("Error al crear el delay pool", "error")
-                return redirect(url_for("admin.manage_delay_pools"))
-
-        # Fallback to main config
-        lines = config_manager.config_content.split("\n")
-        lines.extend(new_directives)
-
-        new_content = "\n".join(lines)
-        config_manager.save_config(new_content)
-        flash(f"Delay Pool #{pool_number} creado exitosamente", "success")
-
-    except Exception as e:
-        flash(f"Error al crear el delay pool: {str(e)}", "error")
-
+    success, message = service_add_delay_pool(pool_number, pool_class, parameters, access_actions, access_acls, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_delay_pools"))
 
 
@@ -814,39 +433,15 @@ def view_logs():
     max_lines = request.args.get("lines", 250, type=int)
     max_lines = min(max(max_lines, 10), 1000)  # Between 10 and 1000 lines
 
-    log_files = [
-        Config.SQUID_LOG,
-        Config.SQUID_CACHE_LOG,
-    ]
-    logs = {}
-    for log_file in log_files:
-        try:
-            with open(log_file) as f:
-                # Read the last N lines
-                lines = f.readlines()
-                logs[os.path.basename(log_file)] = lines[-max_lines:]
-        except FileNotFoundError:
-            logs[os.path.basename(log_file)] = ["Log file not found"]
-        except Exception as e:
-            # Log the exception with traceback on the server
-            logger.exception("Error reading log file %s", log_file)
-            try:
-                show_details = bool(current_app.debug)
-            except RuntimeError:
-                show_details = False
-
-            if show_details:
-                logs[os.path.basename(log_file)] = [f"Error reading log: {str(e)}"]
-            else:
-                logs[os.path.basename(log_file)] = ["Error reading log"]
-
+    log_files = [Config.SQUID_LOG, Config.SQUID_CACHE_LOG]
+    logs = service_read_logs(log_files, max_lines, debug=bool(current_app.debug))
     return render_template("admin/logs.html", logs=logs, max_lines=max_lines)
 
 
 @admin_bp.route("/users")
 @admin_required
 def manage_users():
-    users = AuthService.get_all_users()
+    users = service_get_all_users()
     return render_template("admin/users.html", users=users)
 
 
@@ -858,22 +453,10 @@ def create_user():
         password = request.form.get("password")
         role = request.form.get("role", "admin")
 
-        if not username or not password:
-            flash("El nombre de usuario y la contraseña son obligatorios", "error")
-            return redirect(url_for("admin.create_user"))
-
-        if len(password) < 8:
-            flash("La contraseña debe tener al menos 8 caracteres", "error")
-            return redirect(url_for("admin.create_user"))
-
-        if AuthService.create_user(username, password, role):
-            flash("Usuario creado exitosamente", "success")
+        ok, message = service_create_user(username, password, role)
+        flash(message, "success" if ok else "error")
+        if ok:
             return redirect(url_for("admin.manage_users"))
-        else:
-            flash(
-                "Error al crear usuario. El nombre de usuario ya puede existir.",
-                "error",
-            )
 
     return render_template("admin/user_form.html", user=None, action="create")
 
@@ -887,19 +470,10 @@ def edit_user(user_id):
         role = request.form.get("role")
         is_active = 1 if request.form.get("is_active") else 0
 
-        if password and len(password) < 8:
-            flash("La contraseña debe tener al menos 8 caracteres", "error")
-            return redirect(url_for("admin.edit_user", user_id=user_id))
-
-        update_data = {"username": username, "role": role, "is_active": is_active}
-        if password:
-            update_data["password"] = password
-
-        if AuthService.update_user(user_id, **update_data):
-            flash("Usuario actualizado exitosamente", "success")
+        ok, message = service_update_user(user_id, username, password, role, is_active)
+        flash(message, "success" if ok else "error")
+        if ok:
             return redirect(url_for("admin.manage_users"))
-        else:
-            flash("Error al actualizar usuario", "error")
 
     users = AuthService.get_all_users()
     user = next((u for u in users if u["id"] == user_id), None)
@@ -913,105 +487,40 @@ def edit_user(user_id):
 @admin_bp.route("/users/<int:user_id>/delete", methods=["POST"])
 @admin_required
 def delete_user(user_id):
-    if AuthService.delete_user(user_id):
-        flash("Usuario eliminado exitosamente", "success")
-    else:
-        flash(
-            "Error al eliminar usuario. No se puede eliminar el usuario admin.", "error"
-        )
+    ok, message = service_delete_user(user_id)
+    flash(message, "success" if ok else "error")
     return redirect(url_for("admin.manage_users"))
 
 
 @admin_bp.route("/api/restart-squid", methods=["POST"])
 @api_auth_required
 def restart_squid():
-    try:
-        os.system("systemctl restart squid")
-        return jsonify({"status": "success", "message": "Squid restarted successfully"})
-    except Exception as e:
-        logger.exception("Error restarting squid")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-
-        resp = {"status": "error", "message": "Internal server error"}
-        if show_details:
-            resp["details"] = str(e)
-        return jsonify(resp), 500
+    success, message, details = service_restart_squid()
+    if success:
+        return jsonify({"status": "success", "message": message})
+    resp = {"status": "error", "message": message}
+    if bool(current_app.debug) and details:
+        resp["details"] = details
+    return jsonify(resp), 500
 
 
 @admin_bp.route("/api/reload-squid", methods=["POST"])
 @api_auth_required
 def reload_squid():
-    try:
-        os.system("systemctl reload squid")
-        return jsonify(
-            {"status": "success", "message": "Configuration reloaded successfully"}
-        )
-    except Exception as e:
-        logger.exception("Error reloading squid configuration")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-
-        resp = {"status": "error", "message": "Internal server error"}
-        if show_details:
-            resp["details"] = str(e)
-        return jsonify(resp), 500
+    success, message, details = service_reload_squid()
+    if success:
+        return jsonify({"status": "success", "message": message})
+    resp = {"status": "error", "message": message}
+    if bool(current_app.debug) and details:
+        resp["details"] = details
+    return jsonify(resp), 500
 
 
 @admin_bp.route("/api/get-tables", methods=["GET"])
 @api_auth_required
 def get_tables():
-    session = None
-    try:
-        engine = get_engine()
-        inspector = inspect(engine)
-        session = get_session()
-        db_type = Config.DATABASE_TYPE
-
-        tables = inspector.get_table_names()
-        table_info = []
-
-        for table_name in tables:
-            try:
-                rows = get_table_row_count(session, engine, table_name)
-                size = get_table_size(session, db_type, table_name)
-
-                table_info.append(
-                    {
-                        "name": table_name,
-                        "rows": rows,
-                        "size": size,
-                        "has_data": rows > 0,
-                    }
-                )
-
-            except Exception as e:
-                logger.warning(f"Error processing table {table_name}: {e}")
-                table_info.append(
-                    {
-                        "name": table_name,
-                        "rows": 0,
-                        "size": 0,
-                        "has_data": False,
-                    }
-                )
-
-        return jsonify({"status": "success", "tables": table_info})
-
-    except Exception as e:
-        logger.exception("Error getting database tables")
-        resp = {"status": "error", "message": "Error interno del servidor"}
-        if current_app.debug:
-            resp["details"] = str(e)
-        return jsonify(resp), 500
-
-    finally:
-        if session:
-            session.close()
+    resp, code = service_get_tables_info()
+    return jsonify(resp), code
 
 
 @admin_bp.route("/clean-data")
@@ -1051,26 +560,8 @@ def delete_table_data():
                 }
             ), 400
 
-        engine = get_engine()
-        inspector = inspect(engine)
-
-        # Verify table exists
-        if table_name not in inspector.get_table_names():
-            return jsonify({"status": "error", "message": "La tabla no existe"}), 404
-
-        # Delete all data from table
-        metadata = MetaData()
-        table = Table(table_name, metadata, autoload_with=engine)
-        with engine.connect() as conn:
-            conn.execute(table.delete())
-            conn.commit()
-
-        return jsonify(
-            {
-                "status": "success",
-                "message": f"Datos de la tabla '{table_name}' eliminados correctamente",
-            }
-        )
+        resp, code = service_delete_table_data(table_name)
+        return jsonify(resp), code
 
     except Exception as e:
         logger.exception("Error deleting data from table")
@@ -1090,18 +581,14 @@ def delete_table_data():
 def split_config_view():
     """Vista para dividir el archivo squid.conf en archivos modulares."""
     try:
-        splitter = SquidConfigSplitter()
-        split_info = splitter.get_split_info()
-        output_exists = splitter.check_output_dir_exists()
-        files_count = splitter.count_files_in_output_dir()
-
+        data = service_get_split_view_data()
         return render_template(
             "admin/split_config.html",
-            split_info=split_info,
-            output_dir=splitter.output_dir,
-            input_file=splitter.input_file,
-            output_exists=output_exists,
-            files_count=files_count,
+            split_info=data["split_info"],
+            output_dir=data["output_dir"],
+            input_file=data["input_file"],
+            output_exists=data["output_exists"],
+            files_count=data["files_count"],
         )
     except Exception as e:
         logger.exception("Error al cargar la vista de división de configuración")
@@ -1117,34 +604,15 @@ def split_config():
         data = request.get_json() or {}
         strict = data.get("strict", False)
 
-        splitter = SquidConfigSplitter(strict=strict)
+        resp, code = service_split_config(strict=strict)
 
-        if not os.path.exists(splitter.input_file):
-            return jsonify(
-                {
-                    "status": "error",
-                    "message": f"Archivo squid.conf no encontrado en: {splitter.input_file}",
-                }
-            ), 404
+        # Reload config_manager to detect modular configuration if successful
+        if code == 200:
+            global config_manager
+            config_manager = SquidConfigManager()
+            logger.info("Config manager reloaded after splitting configuration")
 
-        results = splitter.split_config()
-
-        # Reload config_manager to detect modular configuration
-        global config_manager
-        config_manager = SquidConfigManager()
-        logger.info("Config manager reloaded after splitting configuration")
-
-        return jsonify(
-            {
-                "status": "success",
-                "message": f"Configuración dividida exitosamente en {len(results)} archivos",
-                "data": {
-                    "output_dir": splitter.output_dir,
-                    "files": results,
-                    "total_files": len(results),
-                },
-            }
-        )
+        return jsonify(resp), code
 
     except FileNotFoundError as e:
         logger.error(f"Archivo no encontrado: {e}")
@@ -1194,9 +662,8 @@ def split_config():
 def get_split_files():
     """API endpoint para obtener la lista de archivos generados en squid.d."""
     splitter = SquidConfigSplitter()
-    result = SquidConfigSplitter.get_split_files_info(splitter.output_dir)
+    result = service_get_split_files_info(splitter.output_dir)
 
-    if result["status"] == "success":
+    if result.get("status") == "success":
         return jsonify(result)
-    else:
-        return jsonify(result), result.get("code", 500)
+    return jsonify(result), result.get("code", 500)
