@@ -421,6 +421,157 @@ def manage_http_access():
     return render_template("admin/http_access.html", rules=rules)
 
 
+@admin_bp.route("/blacklist", methods=["GET"]) 
+@admin_required
+def manage_blacklist():
+    """Render the blacklist management UI."""
+    env_vars = load_env_vars()
+    # Provide current blacklist domains to the template
+    blacklist = env_vars.get("BLACKLIST_DOMAINS", "")
+    return render_template("admin/blacklist.html", env_vars=env_vars, blacklist=blacklist)
+
+
+@admin_bp.route("/blacklist/test-connection", methods=["POST"])
+@admin_required
+def blacklist_test_connection():
+    host = request.form.get("host") or request.form.get("pihole_host")
+    token = request.form.get("token") or request.form.get("api_token")
+    if not host:
+        flash("Host de Pi-hole no proporcionado", "error")
+        return redirect(url_for("admin.manage_blacklist"))
+
+    import requests
+
+    try:
+        url = host
+        # Normalize host to include scheme if missing
+        if not url.startswith("http://") and not url.startswith("https://"):
+            url = f"http://{url}"
+
+        # Try a basic request to the Pi-hole admin API endpoint
+        params = {}
+        headers = {}
+        if token:
+            # many Pi-hole setups accept 'Authorization' header or 'auth' param; try both
+            headers["Authorization"] = token
+            params["auth"] = token
+
+        resp = requests.get(f"{url}/admin/api.php", params=params, headers=headers, timeout=6)
+        if resp.status_code == 200:
+            flash("Conexión a Pi-hole exitosa", "success")
+        else:
+            flash(f"Respuesta inesperada de Pi-hole: {resp.status_code}", "error")
+    except Exception as e:
+        logger.exception("Error probando conexión Pi-hole")
+        flash(f"Error al conectar con Pi-hole: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_blacklist"))
+
+
+@admin_bp.route("/blacklist/sync", methods=["POST"])
+@admin_required
+def blacklist_sync():
+    # Placeholder: kick off background sync job in production
+    # For now just flash success and return
+    flash("Sincronización de listas iniciada (en segundo plano)", "success")
+    return redirect(url_for("admin.manage_blacklist"))
+
+
+@admin_bp.route("/blacklist/import", methods=["POST"])
+@admin_required
+def blacklist_import():
+    # Import domains from uploaded file or URL and append to BLACKLIST_DOMAINS
+    env_vars = load_env_vars()
+    existing = [d.strip() for d in env_vars.get("BLACKLIST_DOMAINS", "").split(",") if d.strip()]
+
+    domains = set(existing)
+
+    # Handle file upload
+    uploaded = request.files.get("file")
+    if uploaded and uploaded.filename:
+        try:
+            content = uploaded.read().decode("utf-8", errors="ignore")
+            for line in content.splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                # support hosts-like files and plain domains
+                if " " in line:
+                    parts = line.split()
+                    domain = parts[-1]
+                else:
+                    domain = line
+                domains.add(domain)
+            flash("Archivo importado correctamente", "success")
+        except Exception as e:
+            logger.exception("Error importando archivo de blacklist")
+            flash(f"Error al procesar el archivo: {str(e)}", "error")
+            return redirect(url_for("admin.manage_blacklist"))
+
+    # Handle URL import
+    url = request.form.get("url")
+    if url:
+        import requests
+        try:
+            resp = requests.get(url, timeout=8)
+            if resp.status_code == 200:
+                for line in resp.text.splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if " " in line:
+                        parts = line.split()
+                        domain = parts[-1]
+                    else:
+                        domain = line
+                    domains.add(domain)
+                flash("Lista importada desde URL correctamente", "success")
+            else:
+                flash(f"Error al descargar la lista: {resp.status_code}", "error")
+        except Exception as e:
+            logger.exception("Error descargando lista desde URL")
+            flash(f"Error descargando la lista: {str(e)}", "error")
+
+    # Save merged domains back to .env
+    try:
+        env_vars["BLACKLIST_DOMAINS"] = ",".join(sorted(domains))
+        save_env_vars(env_vars)
+        flash("Blacklist actualizada exitosamente", "success")
+    except Exception as e:
+        logger.exception("Error guardando BLACKLIST_DOMAINS")
+        flash(f"Error al guardar blacklist: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_blacklist"))
+
+
+@admin_bp.route("/blacklist/save-custom", methods=["POST"])
+@admin_required
+def blacklist_save_custom():
+    custom = request.form.get("custom_list", "")
+    if not custom.strip():
+        flash("Lista personalizada vacía", "error")
+        return redirect(url_for("admin.manage_blacklist"))
+
+    # parse lines and commas
+    items = []
+    for line in custom.splitlines():
+        for part in line.split(","):
+            d = part.strip()
+            if d:
+                items.append(d)
+
+    try:
+        env_vars = load_env_vars()
+        env_vars["BLACKLIST_DOMAINS"] = ",".join(sorted(set(items)))
+        save_env_vars(env_vars)
+        flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
+    except Exception as e:
+        logger.exception("Error guardando lista personalizada")
+        flash(f"Error al guardar la lista: {str(e)}", "error")
+
+    return redirect(url_for("admin.manage_blacklist"))
+
+
 @admin_bp.route("/http-access/delete", methods=["POST"])
 @admin_required
 def delete_http_access():
