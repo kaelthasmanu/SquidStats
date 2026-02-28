@@ -1,0 +1,106 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div x-data="{ activeTab: 'pihole' }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Blacklist - Gestor de Listas</h2>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 flex-wrap">
+        <button @click="activeTab = 'pihole'" :class="activeTab === 'pihole' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Pi-hole
+        </button>
+        <button @click="activeTab = 'adguard'" :class="activeTab === 'adguard' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            AdGuard
+        </button>
+        <button @click="activeTab = 'dnsmasq'" :class="activeTab === 'dnsmasq' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            DNSmasq
+        </button>
+        <button @click="activeTab = 'custom'" :class="activeTab === 'custom' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Personalizada
+        </button>
+        <button @click="activeTab = 'import'" :class="activeTab === 'import' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            Importar
+        </button>
+    </div>
+
+    <!-- Pi-hole Tab -->
+    <div x-show="activeTab === 'pihole'" class="mt-6">
+        <h3 class="text-lg font-semibold mb-3">Integración Pi-hole</h3>
+        <p class="text-sm text-gray-600 mb-4">Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí puedes configurar conexión y ver el estado.</p>
+
+        <form method="POST" action="/admin/blacklist/test-connection" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="bg-gray-50 p-4 rounded border">
+                <label class="text-sm font-medium text-gray-700">Pi-hole Host</label>
+                <input name="host" type="text" class="w-full mt-2 p-2 border rounded" placeholder="192.168.1.2 or example.com" />
+            </div>
+            <div class="bg-gray-50 p-4 rounded border">
+                <label class="text-sm font-medium text-gray-700">API Token</label>
+                <input name="token" type="password" class="w-full mt-2 p-2 border rounded" placeholder="Token (opcional)" />
+            </div>
+
+            <div class="md:col-span-2 mt-4 flex gap-2">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Probar Conexión</button>
+        </form>
+        <form method="POST" action="/admin/blacklist/sync" class="mt-0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Sincronizar Listas</button>
+        </form>
+            </div>
+    </div>
+
+    <!-- AdGuard Tab -->
+    <div x-show="activeTab === 'adguard'" class="mt-6">
+        <h3 class="text-lg font-semibold mb-3">Integración AdGuard</h3>
+        <p class="text-sm text-gray-600 mb-4">Soporte para fuentes y listas públicas compatibles con AdGuard.</p>
+        <form method="POST" action="/admin/blacklist/import" class="bg-gray-50 p-4 rounded border">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <label class="text-sm font-medium text-gray-700">URL de la lista</label>
+            <input name="url" type="text" class="w-full mt-2 p-2 border rounded" placeholder="https://example.com/list.txt" />
+            <div class="mt-3">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Agregar Lista</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- DNSmasq Tab -->
+    <div x-show="activeTab === 'dnsmasq'" class="mt-6">
+        <h3 class="text-lg font-semibold mb-3">DNSmasq</h3>
+        <p class="text-sm text-gray-600 mb-4">Exporta o importa reglas en formato compatible con dnsmasq.</p>
+        <div class="bg-gray-50 p-4 rounded border">
+            <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Exportar archivo hosts</button>
+        </div>
+    </div>
+
+    <!-- Custom Tab -->
+    <div x-show="activeTab === 'custom'" class="mt-6">
+        <h3 class="text-lg font-semibold mb-3">Lista Personalizada</h3>
+        <p class="text-sm text-gray-600 mb-4">Añade dominios manualmente o pega una lista separada por comas/lineas.</p>
+        <form method="POST" action="/admin/blacklist/save-custom" class="grid grid-cols-1 gap-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <textarea name="custom_list" rows="6" class="w-full p-3 border rounded" placeholder="example.com
+example.org
+"></textarea>
+            <div class="flex gap-2">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar</button>
+                <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Import Tab -->
+    <div x-show="activeTab === 'import'" class="mt-6">
+        <h3 class="text-lg font-semibold mb-3">Importar listas</h3>
+        <p class="text-sm text-gray-600 mb-4">Importa desde archivos locales o pega URLs de listas públicas.</p>
+
+        <form method="POST" action="/admin/blacklist/import" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded border">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <label class="text-sm font-medium text-gray-700">Subir archivo</label>
+            <input name="file" type="file" class="w-full mt-2" />
+            <div class="mt-3">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Importar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

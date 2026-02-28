@@ -1,14 +1,8 @@
-import logging
 import os
 from typing import Any
 
 from dotenv import load_dotenv
-
-# Configure logging first
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 # Try to load environment variables
 try:
@@ -120,7 +114,7 @@ class Config:
     LOG_FORMAT = safe_get_env("LOG_FORMAT", "DETAILED").upper()
 
     # Application version
-    VERSION = safe_get_env("VERSION", "2.2")
+    VERSION = safe_get_env("VERSION", "2.3")
 
     # Authentication settings
     JWT_SECRET_KEY = SECRET_KEY

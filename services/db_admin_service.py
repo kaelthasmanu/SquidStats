@@ -1,9 +1,7 @@
 import re
-
-from loguru import logger
 from sqlalchemy import MetaData, Table, inspect
-
 from database.database import get_engine
+from loguru import logger
 
 
 def delete_table_data(table_name: str):
@@ -43,8 +41,4 @@ def delete_table_data(table_name: str):
 
     except Exception as e:
         logger.exception("Error deleting data from table %s", table_name)
-        return {
-            "status": "error",
-            "message": "Error interno del servidor",
-            "details": str(e),
-        }, 500
+        return {"status": "error", "message": "Error interno del servidor", "details": str(e)}, 500

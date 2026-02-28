@@ -1,9 +1,8 @@
 from loguru import logger
 from sqlalchemy import inspect
-
-from config import Config
 from database.database import get_engine, get_session
 from services.admin_helpers import get_table_row_count, get_table_size
+from config import Config
 
 
 def get_tables_info():
@@ -39,7 +38,7 @@ def get_tables_info():
 
         return {"status": "success", "tables": table_info}, 200
 
-    except Exception:
+    except Exception as e:
         logger.exception("Error getting database tables")
         resp = {"status": "error", "message": "Error interno del servidor"}
         return resp, 500

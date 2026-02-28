@@ -1,5 +1,4 @@
 import hashlib
-import logging
 import os
 import subprocess
 import threading
@@ -7,13 +6,11 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
 
 from database.database import Notification, get_session
-
-# Logger
-logger = logging.getLogger(__name__)
 
 # Import Telegram integration (optional - fails gracefully if not configured)
 try:

@@ -1,4 +1,3 @@
-import logging
 import os
 from datetime import date, datetime
 from typing import Any
@@ -6,6 +5,7 @@ from urllib.parse import urlparse
 
 from alembic.config import Config as AlembicConfig
 from alembic.runtime.migration import MigrationContext
+from loguru import logger
 from sqlalchemy import (
     BigInteger,
     Column,
@@ -23,11 +23,6 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from alembic import command
 from config import Config
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
 
 Base = declarative_base()
 _engine = None
@@ -319,20 +314,12 @@ def create_dynamic_tables(engine, date_suffix: str = None):
 
     user_table_name, log_table_name = get_dynamic_table_names(date_suffix)
 
-    creation_logger = logging.getLogger(f"CreateTable_{date_suffix or 'today'}")
-    creation_logger.propagate = False  # Evita que el log suba al logger raíz
-    if not creation_logger.handlers:
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
-        handler.setFormatter(formatter)
-        creation_logger.addHandler(handler)
+    logger.info(f"CreateTable_{date_suffix or 'today'}")
 
     if not table_exists(engine, user_table_name) or not table_exists(
         engine, log_table_name
     ):
-        creation_logger.info(
+        logger.info(
             f"Creating dynamic tables for date suffix '{date_suffix}': {user_table_name}, {log_table_name}"
         )
         DynamicBase = declarative_base()

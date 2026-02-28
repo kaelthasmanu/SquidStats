@@ -13,8 +13,9 @@ from functools import wraps
 import bcrypt
 import jwt
 from flask import flash, redirect, request, session, url_for
+from loguru import logger
 
-from config import Config, logger
+from config import Config
 from database.database import AdminUser, get_session
 
 

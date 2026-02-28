@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, jsonify, request
+from loguru import logger
 
-from config import logger
 from database.database import get_session
 from services.auditoria_service import (
     find_by_ip,

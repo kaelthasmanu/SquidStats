@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
 from enum import Enum
@@ -7,10 +6,9 @@ from functools import wraps
 from typing import Any, Optional
 from urllib.parse import urlparse
 
+from loguru import logger
 from telethon import TelegramClient, errors
 from telethon.tl.types import InputPeerUser, User
-
-logger = logging.getLogger(__name__)
 
 
 def parse_http_proxy_url(proxy_url: str) -> dict[str, Any] | None:

@@ -237,7 +237,7 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.2/install.sh
 ```
 
 2. Add permission execution:
@@ -585,7 +585,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/1.0/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.2/install.sh
 ```
 
 2. Add permission execution:
@@ -631,7 +631,13 @@ To ensure the application starts automatically when the system boot :
 
 ## Testing Information
 
-This software has been thoroughly tested and is compatible with Squid version 6.12 in Ubuntu 24.04 and Debian12. Please ensure your Squid installation matches this version or newer for optimal performance.
+This software has been thoroughly tested and is compatible with Squid version 6.12 in the following distributions:
+
+- **Ubuntu**: 24.04 LTS
+- **Debian**: 12 and 13
+- **Alpine Linux**: 3.23.3
+
+Please ensure your Squid installation matches this version or newer for optimal performance. For Docker container environments, Alpine Linux 3.23.3 is recommended due to its small size and compatibility.
 
 ## Uninstall SquidStats
 

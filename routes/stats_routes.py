@@ -4,9 +4,9 @@ from datetime import datetime
 from threading import Lock
 
 from flask import Blueprint, render_template  # , request, jsonify
+from loguru import logger
 
 # from services.icap_service import scan_file_with_icap
-from config import logger
 from parsers.cache import fetch_squid_cache_stats
 from services.metrics_service import MetricsService
 from services.system_info import (

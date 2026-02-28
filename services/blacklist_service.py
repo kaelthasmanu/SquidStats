@@ -19,9 +19,7 @@ def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, s
         params["auth"] = token
 
     try:
-        resp = requests.get(
-            f"{url}/admin/api.php", params=params, headers=headers, timeout=6
-        )
+        resp = requests.get(f"{url}/admin/api.php", params=params, headers=headers, timeout=6)
         if resp.status_code == 200:
             return True, "Conexión a Pi-hole exitosa"
         return False, f"Respuesta inesperada de Pi-hole: {resp.status_code}"
@@ -73,11 +71,7 @@ def import_domains_from_url(url: str) -> tuple[bool, set, str]:
 
 
 def merge_and_save_blacklist(existing_env: dict, new_domains: set) -> None:
-    existing = [
-        d.strip()
-        for d in existing_env.get("BLACKLIST_DOMAINS", "").split(",")
-        if d.strip()
-    ]
+    existing = [d.strip() for d in existing_env.get("BLACKLIST_DOMAINS", "").split(",") if d.strip()]
     merged = set(existing)
     merged.update(new_domains)
     existing_env["BLACKLIST_DOMAINS"] = ",".join(sorted(merged))
