@@ -23,63 +23,32 @@ admin_bp = Blueprint("admin", __name__)
 
 # Global manager instance
 config_manager = SquidConfigManager()
+from services.admin_helpers import (
+    load_env_vars,
+    save_env_vars,
+    get_table_row_count,
+    get_table_size,
+)
 
-
-def load_env_vars():
-    env_vars = {}
-    env_file = os.path.join(os.getcwd(), ".env")
-    if os.path.exists(env_file):
-        with open(env_file) as f:
-            for line in f:
-                line = line.strip()
-                if line and "=" in line:
-                    key, value = line.split("=", 1)
-                    env_vars[key] = value.strip('"')
-    return env_vars
-
-
-def save_env_vars(env_vars):
-    env_file = os.path.join(os.getcwd(), ".env")
-    with open(env_file, "w") as f:
-        for key, value in env_vars.items():
-            f.write(f'{key}="{value}"\n')
-
-
-def get_table_row_count(session, engine, table_name):
-    metadata = MetaData()
-    table = Table(table_name, metadata, autoload_with=engine)
-
-    return session.execute(select(func.count()).select_from(table)).scalar_one()
-
-
-def get_table_size(session, db_type, table_name):
-    if db_type == "SQLITE":
-        result = session.execute(
-            text("SELECT SUM(pgsize) FROM dbstat WHERE name = :name"),
-            {"name": table_name},
-        )
-        return result.scalar() or 0
-
-    if db_type in ("MYSQL", "MARIADB"):
-        result = session.execute(
-            text("""
-                SELECT data_length + index_length
-                FROM information_schema.tables
-                WHERE table_name = :name
-                AND table_schema = DATABASE()
-            """),
-            {"name": table_name},
-        )
-        return result.scalar() or 0
-
-    if db_type in ("POSTGRES", "POSTGRESQL"):
-        result = session.execute(
-            text("SELECT pg_total_relation_size(:name)"),
-            {"name": table_name},
-        )
-        return result.scalar() or 0
-
-    return 0
+from services.blacklist_service import (
+    test_pihole_connection,
+    import_domains_from_file,
+    import_domains_from_url,
+    merge_and_save_blacklist,
+    save_custom_list,
+)
+from services.acls_service import add_acl as service_add_acl, edit_acl as service_edit_acl, delete_acl as service_delete_acl
+from services.http_access_service import (
+    add_http_access as service_add_http_access,
+    edit_http_access as service_edit_http_access,
+    delete_http_access as service_delete_http_access,
+    move_http_access as service_move_http_access,
+)
+from services.delay_pools_service import (
+    add_delay_pool as service_add_delay_pool,
+    edit_delay_pool as service_edit_delay_pool,
+    delete_delay_pool as service_delete_delay_pool,
+)
 
 
 @admin_bp.route("/")
@@ -174,59 +143,11 @@ def add_acl():
     options = request.form.getlist("options[]")
     comment = request.form.get("comment", "").strip()
 
-    if not name or not acl_type or not values:
-        flash("Debe proporcionar nombre, tipo y al menos un valor para la ACL", "error")
-        return redirect(url_for("admin.manage_acls"))
-
-    # Build ACL line: acl name [options] type values...
-    acl_parts = ["acl", name]
-    if options:
-        acl_parts.extend(options)
-    acl_parts.append(acl_type)
-    acl_parts.extend(values)
-    new_acl = " ".join(acl_parts)
-
-    # Check if using modular configuration
-    if config_manager.is_modular:
-        acl_content = config_manager.read_modular_config("100_acls.conf")
-        if acl_content is not None:
-            lines = acl_content.split("\n")
-
-            # Add comment if provided
-            if comment:
-                lines.append(f"# {comment}")
-
-            # Add the new ACL
-            lines.append(new_acl)
-
-            new_content = "\n".join(lines)
-            if config_manager.save_modular_config("100_acls.conf", new_content):
-                flash(f"ACL '{name}' agregada exitosamente", "success")
-            else:
-                flash("Error al guardar la ACL", "error")
-            return redirect(url_for("admin.manage_acls"))
-
-    # Fallback to main config
-    lines = config_manager.config_content.split("\n")
-    acl_section_end = -1
-    for i, line in enumerate(lines):
-        if line.strip().startswith("acl "):
-            acl_section_end = i
-
-    if acl_section_end != -1:
-        if comment:
-            lines.insert(acl_section_end + 1, f"# {comment}")
-            lines.insert(acl_section_end + 2, new_acl)
-        else:
-            lines.insert(acl_section_end + 1, new_acl)
-    else:
-        if comment:
-            lines.append(f"# {comment}")
-        lines.append(new_acl)
-
-    new_content = "\n".join(lines)
-    config_manager.save_config(new_content)
-    flash(f"ACL '{name}' agregada exitosamente", "success")
+    success, message = service_add_acl(name, acl_type, values, options, comment, config_manager)
+    flash(message, "success" if success else "error")
+    return redirect(url_for("admin.manage_acls"))
+    success, message = service_add_acl(name, acl_type, values, options, comment, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_acls"))
 
 
@@ -241,94 +162,14 @@ def edit_acl():
     options = request.form.getlist("options[]")
     comment = request.form.get("comment", "").strip()
 
-    if not acl_id or not new_name or not acl_type or not values:
-        flash("Datos incompletos para editar la ACL", "error")
-        return redirect(url_for("admin.manage_acls"))
-
     try:
         acl_index = int(acl_id)
-        acls = config_manager.get_acls()
+    except (ValueError, TypeError):
+        flash("ID de ACL inválido", "error")
+        return redirect(url_for("admin.manage_acls"))
 
-        if 0 <= acl_index < len(acls):
-            target_acl = acls[acl_index]
-            # line_number from parser is 1-based, convert to 0-based index
-            target_line = target_acl["line_number"] - 1
-
-            # Build new ACL line
-            acl_parts = ["acl", new_name]
-            if options:
-                acl_parts.extend(options)
-            acl_parts.append(acl_type)
-            acl_parts.extend(values)
-            new_acl_line = " ".join(acl_parts)
-
-            # Check if using modular configuration
-            if config_manager.is_modular:
-                acl_content = config_manager.read_modular_config("100_acls.conf")
-                if acl_content is not None:
-                    lines = acl_content.split("\n")
-
-                    # Replace the ACL line (line_number is 1-based, list index is 0-based)
-                    if 0 <= target_line < len(lines):
-                        # Check if there's a comment before this ACL
-                        has_comment = target_line > 0 and lines[
-                            target_line - 1
-                        ].strip().startswith("#")
-
-                        # Replace the ACL line
-                        lines[target_line] = new_acl_line
-
-                        # Handle comment
-                        if has_comment:
-                            if comment:
-                                # Update existing comment
-                                lines[target_line - 1] = f"# {comment}"
-                            else:
-                                # Remove existing comment
-                                lines.pop(target_line - 1)
-                        else:
-                            if comment:
-                                # Insert new comment before the ACL
-                                lines.insert(target_line, f"# {comment}")
-
-                        new_content = "\n".join(lines)
-                        if config_manager.save_modular_config(
-                            "100_acls.conf", new_content
-                        ):
-                            flash(
-                                f"ACL '{new_name}' actualizada exitosamente", "success"
-                            )
-                        else:
-                            flash("Error al guardar la ACL", "error")
-                    else:
-                        flash("Línea de ACL no encontrada", "error")
-                    return redirect(url_for("admin.manage_acls"))
-
-            # Fallback to main config
-            lines = config_manager.config_content.split("\n")
-            if 0 <= target_line < len(lines):
-                lines[target_line] = new_acl_line
-
-                # Handle comment
-                if target_line > 0 and lines[target_line - 1].strip().startswith("#"):
-                    if comment:
-                        lines[target_line - 1] = f"# {comment}"
-                    else:
-                        lines.pop(target_line - 1)
-                else:
-                    if comment:
-                        lines.insert(target_line, f"# {comment}")
-
-                new_content = "\n".join(lines)
-                config_manager.save_config(new_content)
-                flash(f"ACL '{new_name}' actualizada exitosamente", "success")
-            else:
-                flash("Línea de ACL no encontrada", "error")
-        else:
-            flash("ACL no encontrada", "error")
-    except (ValueError, IndexError) as e:
-        flash(f"Error al actualizar la ACL: {str(e)}", "error")
-
+    success, message = service_edit_acl(acl_index, new_name, acl_type, values, options, comment, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_acls"))
 
 
@@ -337,73 +178,14 @@ def edit_acl():
 def delete_acl():
     """Delete an ACL using its ID (index) and line number."""
     acl_id = request.form.get("id")
-
     try:
         acl_index = int(acl_id)
-        acls = config_manager.get_acls()
+    except (ValueError, TypeError):
+        flash("ID de ACL inválido", "error")
+        return redirect(url_for("admin.manage_acls"))
 
-        if 0 <= acl_index < len(acls):
-            acl_to_delete = acls[acl_index]
-            # line_number from parser is 1-based, convert to 0-based index
-            target_line = acl_to_delete["line_number"] - 1
-
-            # Check if using modular configuration
-            if config_manager.is_modular:
-                acl_content = config_manager.read_modular_config("100_acls.conf")
-                if acl_content is not None:
-                    lines = acl_content.split("\n")
-
-                    # Check if there's a comment before this ACL (line_number is 1-based, we need 0-based)
-                    comment_to_remove = None
-                    if target_line > 0 and lines[target_line - 1].strip().startswith(
-                        "#"
-                    ):
-                        comment_to_remove = target_line - 1
-
-                    # Remove lines (comment + ACL or just ACL)
-                    new_lines = []
-                    for i, line in enumerate(lines):
-                        if i == target_line:
-                            continue  # Skip the ACL line
-                        if comment_to_remove is not None and i == comment_to_remove:
-                            continue  # Skip the comment line
-                        new_lines.append(line)
-
-                    new_content = "\n".join(new_lines)
-                    if config_manager.save_modular_config("100_acls.conf", new_content):
-                        flash(
-                            f"ACL '{acl_to_delete['name']}' eliminada exitosamente",
-                            "success",
-                        )
-                    else:
-                        flash("Error al eliminar la ACL", "error")
-                    return redirect(url_for("admin.manage_acls"))
-
-            # Fallback to main config
-            lines = config_manager.config_content.split("\n")
-
-            # Check if there's a comment before this ACL (convert to 0-based index)
-            comment_to_remove = None
-            if target_line > 0 and lines[target_line - 1].strip().startswith("#"):
-                comment_to_remove = target_line - 1
-
-            # Remove lines (comment + ACL or just ACL)
-            new_lines = []
-            for i, line in enumerate(lines):
-                if i == target_line:
-                    continue  # Skip the ACL line
-                if comment_to_remove is not None and i == comment_to_remove:
-                    continue  # Skip the comment line
-                new_lines.append(line)
-
-            new_content = "\n".join(new_lines)
-            config_manager.save_config(new_content)
-            flash(f"ACL '{acl_to_delete['name']}' eliminada exitosamente", "success")
-        else:
-            flash("ACL no encontrada", "error")
-    except (ValueError, IndexError):
-        flash("Error al eliminar la ACL", "error")
-
+    success, message = service_delete_acl(acl_index, config_manager)
+    flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_acls"))
 
 
@@ -439,31 +221,8 @@ def blacklist_test_connection():
     if not host:
         flash("Host de Pi-hole no proporcionado", "error")
         return redirect(url_for("admin.manage_blacklist"))
-
-    import requests
-
-    try:
-        url = host
-        # Normalize host to include scheme if missing
-        if not url.startswith("http://") and not url.startswith("https://"):
-            url = f"http://{url}"
-
-        # Try a basic request to the Pi-hole admin API endpoint
-        params = {}
-        headers = {}
-        if token:
-            # many Pi-hole setups accept 'Authorization' header or 'auth' param; try both
-            headers["Authorization"] = token
-            params["auth"] = token
-
-        resp = requests.get(f"{url}/admin/api.php", params=params, headers=headers, timeout=6)
-        if resp.status_code == 200:
-            flash("Conexión a Pi-hole exitosa", "success")
-        else:
-            flash(f"Respuesta inesperada de Pi-hole: {resp.status_code}", "error")
-    except Exception as e:
-        logger.exception("Error probando conexión Pi-hole")
-        flash(f"Error al conectar con Pi-hole: {str(e)}", "error")
+    success, msg = test_pihole_connection(host, token)
+    flash(msg, "success" if success else "error")
 
     return redirect(url_for("admin.manage_blacklist"))
 
@@ -482,26 +241,14 @@ def blacklist_sync():
 def blacklist_import():
     # Import domains from uploaded file or URL and append to BLACKLIST_DOMAINS
     env_vars = load_env_vars()
-    existing = [d.strip() for d in env_vars.get("BLACKLIST_DOMAINS", "").split(",") if d.strip()]
-
-    domains = set(existing)
+    domains = set()
 
     # Handle file upload
     uploaded = request.files.get("file")
     if uploaded and uploaded.filename:
         try:
-            content = uploaded.read().decode("utf-8", errors="ignore")
-            for line in content.splitlines():
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                # support hosts-like files and plain domains
-                if " " in line:
-                    parts = line.split()
-                    domain = parts[-1]
-                else:
-                    domain = line
-                domains.add(domain)
+            file_domains = import_domains_from_file(uploaded)
+            domains.update(file_domains)
             flash("Archivo importado correctamente", "success")
         except Exception as e:
             logger.exception("Error importando archivo de blacklist")
@@ -511,31 +258,16 @@ def blacklist_import():
     # Handle URL import
     url = request.form.get("url")
     if url:
-        import requests
-        try:
-            resp = requests.get(url, timeout=8)
-            if resp.status_code == 200:
-                for line in resp.text.splitlines():
-                    line = line.strip()
-                    if not line or line.startswith("#"):
-                        continue
-                    if " " in line:
-                        parts = line.split()
-                        domain = parts[-1]
-                    else:
-                        domain = line
-                    domains.add(domain)
-                flash("Lista importada desde URL correctamente", "success")
-            else:
-                flash(f"Error al descargar la lista: {resp.status_code}", "error")
-        except Exception as e:
-            logger.exception("Error descargando lista desde URL")
-            flash(f"Error descargando la lista: {str(e)}", "error")
+        ok, url_domains, err = import_domains_from_url(url)
+        if ok:
+            domains.update(url_domains)
+            flash("Lista importada desde URL correctamente", "success")
+        else:
+            flash(f"Error importando desde URL: {err}", "error")
 
-    # Save merged domains back to .env
+    # Merge with existing and save
     try:
-        env_vars["BLACKLIST_DOMAINS"] = ",".join(sorted(domains))
-        save_env_vars(env_vars)
+        merge_and_save_blacklist(env_vars, domains)
         flash("Blacklist actualizada exitosamente", "success")
     except Exception as e:
         logger.exception("Error guardando BLACKLIST_DOMAINS")
@@ -561,9 +293,7 @@ def blacklist_save_custom():
                 items.append(d)
 
     try:
-        env_vars = load_env_vars()
-        env_vars["BLACKLIST_DOMAINS"] = ",".join(sorted(set(items)))
-        save_env_vars(env_vars)
+        save_custom_list(items)
         flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
     except Exception as e:
         logger.exception("Error guardando lista personalizada")
