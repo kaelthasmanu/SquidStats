@@ -18,117 +18,31 @@ from sqlalchemy import (
     inspect,
     text,
 )
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from alembic import command
 from config import Config
 
-Base = declarative_base()
+from database.base import Base
+
 _engine = None
 _Session = None
 dynamic_model_cache: dict[str, Any] = {}
 
+from database.models import (
+    DailyBase,
+    User,
+    Log,
+    LogMetadata,
+    DeniedLog,
+    SystemMetrics,
+    Notification,
+    AdminUser,
+)
+
 
 def get_table_suffix() -> str:
     return date.today().strftime("%Y%m%d")
-
-
-class DailyBase(Base):
-    __abstract__ = True
-
-    @declared_attr
-    def __tablename__(cls):
-        return None
-
-
-class User(DailyBase):
-    __tablename__ = "user_base"
-    id = Column(Integer, primary_key=True)
-    username = Column(String(255), nullable=False)
-    ip = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=datetime.now)
-
-
-class Log(DailyBase):
-    __tablename__ = "log_base"
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, nullable=False)
-    url = Column(Text, nullable=False)
-    response = Column(Integer, nullable=False)
-    request_count = Column(Integer, default=1)
-    data_transmitted = Column(BigInteger, default=0)
-    created_at = Column(DateTime, default=datetime.now)
-
-
-class LogMetadata(Base):
-    __tablename__ = "log_metadata"
-    id = Column(Integer, primary_key=True)
-    last_position = Column(BigInteger, default=0)
-    last_inode = Column(BigInteger, default=0)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-
-class DeniedLog(Base):
-    __tablename__ = "denied_logs"
-    id = Column(Integer, primary_key=True)
-    username = Column(String(255), nullable=False)
-    ip = Column(String(255), nullable=False)
-    url = Column(Text, nullable=False)
-    method = Column(String(255), nullable=False)
-    status = Column(String(255), nullable=False)
-    response = Column(Integer, nullable=True)
-    data_transmitted = Column(BigInteger, default=0)
-    created_at = Column(DateTime, default=datetime.now)
-
-
-class SystemMetrics(Base):
-    __tablename__ = "system_metrics"
-    id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime, default=datetime.now, nullable=False)
-    cpu_usage = Column(String(255), nullable=False)  # Ejemplo: "25.5%"
-    ram_usage_bytes = Column(BigInteger, nullable=False)
-    swap_usage_bytes = Column(BigInteger, nullable=False)
-    net_sent_bytes_sec = Column(BigInteger, nullable=False)
-    net_recv_bytes_sec = Column(BigInteger, nullable=False)
-    created_at = Column(DateTime, default=datetime.now)
-
-
-class Notification(Base):
-    __tablename__ = "notifications"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    type = Column(String(50), nullable=False)  # 'info', 'warning', 'error', 'success'
-    message = Column(Text, nullable=False)
-    message_hash = Column(
-        String(64), nullable=False, index=True
-    )  # SHA256 hash for deduplication
-    icon = Column(String(100), nullable=True)
-    source = Column(
-        String(50), nullable=False, index=True
-    )  # 'squid', 'system', 'security', 'users', 'git'
-    read = Column(Integer, default=0)  # 0 = unread, 1 = read
-    created_at = Column(DateTime, default=datetime.now, nullable=False, index=True)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    expires_at = Column(DateTime, nullable=True)  # Optional expiration date
-    count = Column(
-        Integer, default=1
-    )  # Number of times this notification was triggered
-
-
-class AdminUser(Base):
-    """Model for admin users with encrypted passwords."""
-
-    __tablename__ = "admin_users"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(100), nullable=False, unique=True, index=True)
-    password_hash = Column(String(255), nullable=False)  # bcrypt hash
-    salt = Column(String(64), nullable=False)  # Salt used for hashing
-    role = Column(String(50), nullable=False, default="admin")
-    is_active = Column(Integer, default=1)  # 1 = active, 0 = inactive
-    last_login = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
 def get_database_url() -> str:
