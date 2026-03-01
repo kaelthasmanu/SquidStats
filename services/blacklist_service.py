@@ -10,6 +10,59 @@ from loguru import logger
 from database.database import get_session
 from database.models.models import BlacklistDomain
 
+from requests.exceptions import SSLError, RequestException
+
+
+def _requests_get_pinned(url: str, resolved_ips: list[str], timeout: int = 8) -> requests.Response:
+    """Make an HTTP(S) request to one of the validated IPs while preserving the original Host header.
+
+    - Picks the first resolved IP from `resolved_ips`.
+    - Builds a URL with the IP as netloc (including port when present).
+    - Sets `Host` header to the original hostname (with port if specified) so virtual hosts still work.
+    - Disables redirects to avoid redirection to internal addresses.
+
+    Notes:
+    - For HTTPS, certificate validation may fail if the cert is not valid for the IP; in that case we return the raised exception to the caller.
+    """
+    parsed = urllib.parse.urlparse(url)
+    if not resolved_ips:
+        raise ValueError("No resolved IPs provided")
+
+    chosen_ip = resolved_ips[0]
+
+    # Determine port
+    if parsed.port:
+        port = parsed.port
+    else:
+        port = 443 if parsed.scheme == "https" else 80
+
+    # Build netloc pointing to the IP:port
+    netloc_ip = f"{chosen_ip}:{port}" if port else chosen_ip
+    new_parsed = parsed._replace(netloc=netloc_ip)
+    new_url = urllib.parse.urlunparse(new_parsed)
+
+    # Build Host header with original hostname (and port if non-default)
+    host_header = parsed.hostname
+    if parsed.port and not (
+        (parsed.scheme == "http" and parsed.port == 80)
+        or (parsed.scheme == "https" and parsed.port == 443)
+    ):
+        host_header = f"{parsed.hostname}:{parsed.port}"
+
+    session = requests.Session()
+    # Preserve other headers but ensure Host is set to original host
+    session.headers.update({"Host": host_header})
+
+    try:
+        resp = session.get(new_url, timeout=timeout, allow_redirects=False)
+        return resp
+    except SSLError:
+        # Let caller decide how to handle SSL issues for pinned IPs
+        raise
+    except RequestException:
+        # wrap other request exceptions
+        raise
+
 
 def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, str]:
     if not host:
@@ -56,7 +109,7 @@ def import_domains_from_file(file_storage) -> set:
     return domains
 
 
-def _validate_import_url(url: str) -> str:
+def _validate_import_url(url: str) -> tuple[str, list[str]]:
     """Validate a user-provided URL to prevent SSRF.
 
     - allow only http/https schemes
@@ -88,6 +141,7 @@ def _validate_import_url(url: str) -> str:
     except Exception:
         raise ValueError("No se pudo resolver el host")
 
+    resolved_ips: list[str] = []
     for info in infos:
         addr = info[4][0]
         try:
@@ -106,17 +160,22 @@ def _validate_import_url(url: str) -> str:
         ):
             raise ValueError("URLs hacia direcciones internas no están permitidas")
 
+        resolved_ips.append(str(ip))
+
+    if not resolved_ips:
+        raise ValueError("No se resolvieron direcciones válidas para el host")
+
     # Passed all checks
-    return url
+    return url, resolved_ips
 
 
 def import_domains_from_url(url: str) -> tuple[bool, set, str]:
     domains = set()
     try:
-        # Validate URL to prevent SSRF targeting internal addresses
-        safe_url = _validate_import_url(url)
-        # Disable redirects to avoid being redirected to internal addresses
-        resp = requests.get(safe_url, timeout=8, allow_redirects=False)
+        # Validate URL and obtain resolved IPs to prevent SSRF targeting internal addresses
+        safe_url, resolved_ips = _validate_import_url(url)
+        # Perform an IP-pinned request to the verified IP while preserving Host header
+        resp = _requests_get_pinned(safe_url, resolved_ips, timeout=8)
         if resp.status_code != 200:
             return False, domains, f"Error al descargar la lista: {resp.status_code}"
 
