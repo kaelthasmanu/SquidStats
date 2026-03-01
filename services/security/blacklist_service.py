@@ -26,11 +26,11 @@ from database.models.models import BlacklistDomain
 class _ValidatedURL(NamedTuple):
     """Immutable container for URL components validated against SSRF."""
 
-    scheme: str       # Always literal "http" or "https"
-    hostname: str     # Reconstructed via character allowlist
+    scheme: str  # Always literal "http" or "https"
+    hostname: str  # Reconstructed via character allowlist
     port: int | None  # Converted to int (or None)
-    path: str         # Percent-encoding normalised
-    query: str        # Percent-encoding normalised
+    path: str  # Percent-encoding normalised
+    query: str  # Percent-encoding normalised
     resolved_ips: list[str]  # Only public/global IP addresses
 
     @property
@@ -41,15 +41,20 @@ class _ValidatedURL(NamedTuple):
 
     def to_url(self) -> str:
         """Reconstruct a full URL from validated components."""
-        return urllib.parse.urlunparse((
-            self.scheme, self.netloc, self.path, "", self.query, "",
-        ))
+        return urllib.parse.urlunparse(
+            (
+                self.scheme,
+                self.netloc,
+                self.path,
+                "",
+                self.query,
+                "",
+            )
+        )
 
 
 # Hostname character allowlist (RFC 952 / RFC 1123 / RFC 5891 for IDN).
-_HOSTNAME_CHARS = frozenset(
-    "abcdefghijklmnopqrstuvwxyz0123456789.-"
-)
+_HOSTNAME_CHARS = frozenset("abcdefghijklmnopqrstuvwxyz0123456789.-")
 _HOSTNAME_RE = re.compile(
     r"^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?"
     r"(\.[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)*$"
@@ -168,14 +173,16 @@ def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, s
         return False, "URLs con credenciales no permitidas"
 
     # Build the API URL from validated components (fixed path)
-    api_url = urllib.parse.urlunparse((
-        parsed.scheme,
-        parsed.netloc,
-        "/admin/api.php",
-        "",
-        "",
-        "",
-    ))
+    api_url = urllib.parse.urlunparse(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            "/admin/api.php",
+            "",
+            "",
+            "",
+        )
+    )
 
     params = {}
     headers = {}
@@ -184,9 +191,7 @@ def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, s
         params["auth"] = token
 
     try:
-        resp = requests.get(
-            api_url, params=params, headers=headers, timeout=6
-        )
+        resp = requests.get(api_url, params=params, headers=headers, timeout=6)
         if resp.status_code == 200:
             return True, "Conexión a Pi-hole exitosa"
         return False, f"Respuesta inesperada de Pi-hole: {resp.status_code}"
