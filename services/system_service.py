@@ -1,5 +1,6 @@
-from loguru import logger
 import subprocess
+
+from loguru import logger
 
 
 def restart_squid() -> tuple[bool, str, str]:

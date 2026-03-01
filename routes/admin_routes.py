@@ -1,5 +1,3 @@
-import os
-
 from flask import (
     Blueprint,
     current_app,
@@ -11,30 +9,40 @@ from flask import (
     url_for,
 )
 from loguru import logger
-from sqlalchemy import MetaData, Table, func, inspect, select, text
 
 from config import Config
-from database.database import get_engine, get_session
 from services.auth_service import AuthService, admin_required, api_auth_required
-from services.squid_config_splitter import SquidConfigSplitter
-from services.db_info_service import get_tables_info as service_get_tables_info
 from services.config_service import save_config as service_save_config
-from services.user_service import (
-    get_all_users as service_get_all_users,
-    create_user as service_create_user,
-    update_user as service_update_user,
-    delete_user as service_delete_user,
-)
-from services.logs_service import read_logs as service_read_logs
-from services.system_service import (
-    restart_squid as service_restart_squid,
-    reload_squid as service_reload_squid,
-)
 from services.db_admin_service import delete_table_data as service_delete_table_data
+from services.db_info_service import get_tables_info as service_get_tables_info
+from services.logs_service import read_logs as service_read_logs
+from services.split_config_service import (
+    get_split_files_info as service_get_split_files_info,
+)
+from services.split_config_service import (
+    get_split_view_data as service_get_split_view_data,
+)
 from services.split_config_service import (
     split_config as service_split_config,
-    get_split_view_data as service_get_split_view_data,
-    get_split_files_info as service_get_split_files_info,
+)
+from services.squid_config_splitter import SquidConfigSplitter
+from services.system_service import (
+    reload_squid as service_reload_squid,
+)
+from services.system_service import (
+    restart_squid as service_restart_squid,
+)
+from services.user_service import (
+    create_user as service_create_user,
+)
+from services.user_service import (
+    delete_user as service_delete_user,
+)
+from services.user_service import (
+    get_all_users as service_get_all_users,
+)
+from services.user_service import (
+    update_user as service_update_user,
 )
 from utils.admin import SquidConfigManager
 
@@ -42,31 +50,40 @@ admin_bp = Blueprint("admin", __name__)
 
 # Global manager instance
 config_manager = SquidConfigManager()
+from services.acls_service import add_acl as service_add_acl
+from services.acls_service import delete_acl as service_delete_acl
+from services.acls_service import edit_acl as service_edit_acl
 from services.admin_helpers import (
     load_env_vars,
     save_env_vars,
-    get_table_row_count,
-    get_table_size,
 )
-
 from services.blacklist_service import (
-    test_pihole_connection,
     import_domains_from_file,
     import_domains_from_url,
     merge_and_save_blacklist,
     save_custom_list,
-)
-from services.acls_service import add_acl as service_add_acl, edit_acl as service_edit_acl, delete_acl as service_delete_acl
-from services.http_access_service import (
-    add_http_access as service_add_http_access,
-    edit_http_access as service_edit_http_access,
-    delete_http_access as service_delete_http_access,
-    move_http_access as service_move_http_access,
+    test_pihole_connection,
 )
 from services.delay_pools_service import (
     add_delay_pool as service_add_delay_pool,
-    edit_delay_pool as service_edit_delay_pool,
+)
+from services.delay_pools_service import (
     delete_delay_pool as service_delete_delay_pool,
+)
+from services.delay_pools_service import (
+    edit_delay_pool as service_edit_delay_pool,
+)
+from services.http_access_service import (
+    add_http_access as service_add_http_access,
+)
+from services.http_access_service import (
+    delete_http_access as service_delete_http_access,
+)
+from services.http_access_service import (
+    edit_http_access as service_edit_http_access,
+)
+from services.http_access_service import (
+    move_http_access as service_move_http_access,
 )
 
 
@@ -160,10 +177,14 @@ def add_acl():
     options = request.form.getlist("options[]")
     comment = request.form.get("comment", "").strip()
 
-    success, message = service_add_acl(name, acl_type, values, options, comment, config_manager)
+    success, message = service_add_acl(
+        name, acl_type, values, options, comment, config_manager
+    )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_acls"))
-    success, message = service_add_acl(name, acl_type, values, options, comment, config_manager)
+    success, message = service_add_acl(
+        name, acl_type, values, options, comment, config_manager
+    )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_acls"))
 
@@ -185,7 +206,9 @@ def edit_acl():
         flash("ID de ACL inválido", "error")
         return redirect(url_for("admin.manage_acls"))
 
-    success, message = service_edit_acl(acl_index, new_name, acl_type, values, options, comment, config_manager)
+    success, message = service_edit_acl(
+        acl_index, new_name, acl_type, values, options, comment, config_manager
+    )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_acls"))
 
@@ -220,14 +243,16 @@ def manage_http_access():
     return render_template("admin/http_access.html", rules=rules)
 
 
-@admin_bp.route("/blacklist", methods=["GET"]) 
+@admin_bp.route("/blacklist", methods=["GET"])
 @admin_required
 def manage_blacklist():
     """Render the blacklist management UI."""
     env_vars = load_env_vars()
     # Provide current blacklist domains to the template
     blacklist = env_vars.get("BLACKLIST_DOMAINS", "")
-    return render_template("admin/blacklist.html", env_vars=env_vars, blacklist=blacklist)
+    return render_template(
+        "admin/blacklist.html", env_vars=env_vars, blacklist=blacklist
+    )
 
 
 @admin_bp.route("/blacklist/test-connection", methods=["POST"])
@@ -349,7 +374,9 @@ def edit_http_access():
         flash("Índice de regla inválido", "error")
         return redirect(url_for("admin.manage_http_access"))
 
-    success, message = service_edit_http_access(rule_index, action, acls, description, config_manager)
+    success, message = service_edit_http_access(
+        rule_index, action, acls, description, config_manager
+    )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_http_access"))
 
@@ -362,7 +389,9 @@ def add_http_access():
     acls = request.form.getlist("acls[]")
     description = request.form.get("description", "").strip()
 
-    success, message = service_add_http_access(action, acls, description, config_manager)
+    success, message = service_add_http_access(
+        action, acls, description, config_manager
+    )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_http_access"))
 
@@ -406,7 +435,9 @@ def edit_delay_pool():
     access_actions = request.form.getlist("access_action[]")
     access_acls = request.form.getlist("access_acl[]")
 
-    success, message = service_edit_delay_pool(pool_number, pool_class, parameters, access_actions, access_acls, config_manager)
+    success, message = service_edit_delay_pool(
+        pool_number, pool_class, parameters, access_actions, access_acls, config_manager
+    )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_delay_pools"))
 
@@ -421,7 +452,9 @@ def add_delay_pool():
     access_actions = request.form.getlist("access_action[]")
     access_acls = request.form.getlist("access_acl[]")
 
-    success, message = service_add_delay_pool(pool_number, pool_class, parameters, access_actions, access_acls, config_manager)
+    success, message = service_add_delay_pool(
+        pool_number, pool_class, parameters, access_actions, access_acls, config_manager
+    )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_delay_pools"))
 

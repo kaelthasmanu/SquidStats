@@ -2,7 +2,11 @@ from loguru import logger
 
 
 def _find_http_lines(lines):
-    return [i for i, line in enumerate(lines) if line.strip().startswith("http_access ") and not line.strip().startswith("#")]
+    return [
+        i
+        for i, line in enumerate(lines)
+        if line.strip().startswith("http_access ") and not line.strip().startswith("#")
+    ]
 
 
 def delete_http_access(rule_index: int, config_manager) -> tuple[bool, str]:
@@ -17,7 +21,9 @@ def delete_http_access(rule_index: int, config_manager) -> tuple[bool, str]:
                 # remove the line
                 del lines[http_lines_indices[rule_index]]
                 new_content = "\n".join(lines)
-                if config_manager.save_modular_config("120_http_access.conf", new_content):
+                if config_manager.save_modular_config(
+                    "120_http_access.conf", new_content
+                ):
                     return True, "Regla HTTP Access eliminada exitosamente"
                 else:
                     return False, "Error al eliminar la regla modular"
@@ -36,7 +42,9 @@ def delete_http_access(rule_index: int, config_manager) -> tuple[bool, str]:
         return False, str(e)
 
 
-def edit_http_access(rule_index: int, action: str, acls: list, description: str, config_manager) -> tuple[bool, str]:
+def edit_http_access(
+    rule_index: int, action: str, acls: list, description: str, config_manager
+) -> tuple[bool, str]:
     try:
         acl_string = " ".join([acl.strip() for acl in acls if acl.strip()])
         if not acl_string:
@@ -60,7 +68,9 @@ def edit_http_access(rule_index: int, action: str, acls: list, description: str,
                         i += 1
                 lines[i] = new_rule
                 new_content = "\n".join(lines)
-                if config_manager.save_modular_config("120_http_access.conf", new_content):
+                if config_manager.save_modular_config(
+                    "120_http_access.conf", new_content
+                ):
                     return True, "Regla HTTP Access actualizada exitosamente"
                 else:
                     return False, "Error al guardar regla modular"
@@ -86,7 +96,9 @@ def edit_http_access(rule_index: int, action: str, acls: list, description: str,
         return False, str(e)
 
 
-def add_http_access(action: str, acls: list, description: str, config_manager) -> tuple[bool, str]:
+def add_http_access(
+    action: str, acls: list, description: str, config_manager
+) -> tuple[bool, str]:
     try:
         acl_string = " ".join([acl.strip() for acl in acls if acl.strip()])
         if not acl_string:
@@ -103,7 +115,9 @@ def add_http_access(action: str, acls: list, description: str, config_manager) -
                 lines = http_content.split("\n")
                 lines.extend(lines_to_add)
                 new_content = "\n".join(lines)
-                if config_manager.save_modular_config("120_http_access.conf", new_content):
+                if config_manager.save_modular_config(
+                    "120_http_access.conf", new_content
+                ):
                     return True, "Regla HTTP Access agregada exitosamente"
                 else:
                     return False, "Error al guardar regla modular"
@@ -118,7 +132,9 @@ def add_http_access(action: str, acls: list, description: str, config_manager) -
         return False, str(e)
 
 
-def move_http_access(rule_index: int, direction: str, config_manager) -> tuple[bool, str]:
+def move_http_access(
+    rule_index: int, direction: str, config_manager
+) -> tuple[bool, str]:
     try:
         if config_manager.is_modular:
             http_content = config_manager.read_modular_config("120_http_access.conf")

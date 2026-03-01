@@ -1,7 +1,9 @@
 from loguru import logger
 
 
-def add_acl(name: str, acl_type: str, values: list, options: list, comment: str, config_manager) -> tuple[bool, str]:
+def add_acl(
+    name: str, acl_type: str, values: list, options: list, comment: str, config_manager
+) -> tuple[bool, str]:
     if not name or not acl_type or not values:
         return False, "Debe proporcionar nombre, tipo y al menos un valor para la ACL"
 
@@ -52,7 +54,15 @@ def add_acl(name: str, acl_type: str, values: list, options: list, comment: str,
         return False, str(e)
 
 
-def edit_acl(acl_index: int, new_name: str, acl_type: str, values: list, options: list, comment: str, config_manager) -> tuple[bool, str]:
+def edit_acl(
+    acl_index: int,
+    new_name: str,
+    acl_type: str,
+    values: list,
+    options: list,
+    comment: str,
+    config_manager,
+) -> tuple[bool, str]:
     try:
         acls = config_manager.get_acls()
         if not (0 <= acl_index < len(acls)):
@@ -73,7 +83,9 @@ def edit_acl(acl_index: int, new_name: str, acl_type: str, values: list, options
             if acl_content is not None:
                 lines = acl_content.split("\n")
                 if 0 <= target_line < len(lines):
-                    has_comment = target_line > 0 and lines[target_line - 1].strip().startswith("#")
+                    has_comment = target_line > 0 and lines[
+                        target_line - 1
+                    ].strip().startswith("#")
                     lines[target_line] = new_acl_line
                     if has_comment:
                         if comment:

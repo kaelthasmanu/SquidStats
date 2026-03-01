@@ -1,11 +1,12 @@
 from loguru import logger
+
 from services.auth_service import AuthService
 
 
 def get_all_users():
     try:
         return AuthService.get_all_users()
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting users")
         return []
 
@@ -26,7 +27,9 @@ def create_user(username: str, password: str, role: str = "admin") -> tuple[bool
         return False, str(e)
 
 
-def update_user(user_id: int, username: str, password: str, role: str, is_active: int) -> tuple[bool, str]:
+def update_user(
+    user_id: int, username: str, password: str, role: str, is_active: int
+) -> tuple[bool, str]:
     if password and len(password) < 8:
         return False, "La contraseña debe tener al menos 8 caracteres"
 
@@ -49,7 +52,10 @@ def delete_user(user_id: int) -> tuple[bool, str]:
         ok = AuthService.delete_user(user_id)
         if ok:
             return True, "Usuario eliminado exitosamente"
-        return False, "Error al eliminar usuario. No se puede eliminar el usuario admin."
+        return (
+            False,
+            "Error al eliminar usuario. No se puede eliminar el usuario admin.",
+        )
     except Exception as e:
         logger.exception("Error deleting user")
         return False, str(e)
