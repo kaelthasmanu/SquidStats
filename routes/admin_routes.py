@@ -302,14 +302,14 @@ def blacklist_sync():
 @admin_required
 def blacklist_import():
     # Import domains from uploaded file or URL and append to BLACKLIST_DOMAINS
-    domains = set()
+    file_domains = set()
+    url_domains = set()
 
     # Handle file upload
     uploaded = request.files.get("file")
     if uploaded and uploaded.filename:
         try:
             file_domains = import_domains_from_file(uploaded)
-            domains.update(file_domains)
             flash("Archivo importado correctamente", "success")
         except Exception as e:
             logger.exception("Error importando archivo de blacklist")
@@ -326,17 +326,25 @@ def blacklist_import():
     # Handle URL import
     url = request.form.get("url")
     if url:
-        ok, url_domains, err = import_domains_from_url(url)
+        ok, imported_url_domains, err = import_domains_from_url(url)
         if ok:
-            domains.update(url_domains)
+            url_domains.update(imported_url_domains)
             flash("Lista importada desde URL correctamente", "success")
         else:
             flash(f"Error importando desde URL: {err}", "error")
 
-    # Merge with existing and save
+    # Merge with existing and save, preserving source metadata
     try:
-        merge_and_save_blacklist(domains)
-        flash("Blacklist actualizada exitosamente", "success")
+        if file_domains:
+            merge_and_save_blacklist(file_domains, source="file")
+
+        if url_domains:
+            merge_and_save_blacklist(url_domains, source="url", source_url=url)
+
+        if not file_domains and not url_domains:
+            flash("No se encontraron dominios para importar", "warning")
+        else:
+            flash("Blacklist actualizada exitosamente", "success")
     except Exception as e:
         logger.exception("Error guardando BLACKLIST_DOMAINS")
         try:

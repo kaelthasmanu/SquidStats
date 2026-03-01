@@ -1,83 +1,117 @@
 import ipaddress
 import socket
+import threading
 import urllib.parse
 from datetime import datetime
 
 import requests
+import requests.adapters
 from loguru import logger
 from requests.exceptions import RequestException, SSLError
 
 from database.database import get_session
 from database.models.models import BlacklistDomain
 
+# ---------------------------------------------------------------------------
+# Thread-local DNS pinning infrastructure
+# ---------------------------------------------------------------------------
+# We patch socket.create_connection once at import time.  The actual IP
+# substitution is stored per-thread so concurrent requests never interfere.
+
+_pinned_dns = threading.local()
+_original_create_connection = socket.create_connection
+
+
+def _create_connection_with_pin(address, *args, **kwargs):
+    """Drop-in replacement for socket.create_connection that honours per-thread
+    DNS overrides set by _PinnedDNSAdapter."""
+    host, port = address
+    overrides: dict = getattr(_pinned_dns, "overrides", {})
+    if host in overrides:
+        host = overrides[host]
+    return _original_create_connection((host, port), *args, **kwargs)
+
+
+socket.create_connection = _create_connection_with_pin
+
+
+class _PinnedDNSAdapter(requests.adapters.HTTPAdapter):
+    """HTTPAdapter that forces all connections to a pre-validated IP address
+    while keeping the original hostname in the URL.
+
+    Keeping the original hostname means:
+    - TLS SNI is sent correctly (e.g. 'github.com', not '140.82.112.3').
+    - Certificate CN/SAN is verified against the hostname, not the raw IP.
+    - SSRF is still prevented because the TCP socket connects to the validated
+      public IP, not whatever DNS would return at connection time.
+
+    Thread-safety: overrides are stored in threading.local() so concurrent
+    requests in different threads never see each other's pinned IPs.
+    """
+
+    def __init__(self, hostname: str, pinned_ip: str, *args, **kwargs):
+        self._hostname = hostname
+        self._pinned_ip = pinned_ip
+        super().__init__(*args, **kwargs)
+
+    def send(self, request, *args, **kwargs):
+        # Install the thread-local override for the duration of this request.
+        if not hasattr(_pinned_dns, "overrides"):
+            _pinned_dns.overrides = {}
+        _pinned_dns.overrides[self._hostname] = self._pinned_ip
+        try:
+            return super().send(request, *args, **kwargs)
+        finally:
+            _pinned_dns.overrides.pop(self._hostname, None)
+
 
 def _requests_get_pinned(
     url: str, resolved_ips: list[str], timeout: int = 8
 ) -> requests.Response:
-    """Make an HTTP(S) request to one of the validated IPs while preserving the original Host header.
+    """Make an HTTP(S) request to a pre-validated IP while keeping the original
+    hostname for TLS SNI and certificate verification.
 
-    - Picks the first resolved IP from `resolved_ips`.
-    - Builds a URL with the IP as netloc (including port when present).
-    - Sets `Host` header to the original hostname (with port if specified) so virtual hosts still work.
-    - Disables redirects to avoid redirection to internal addresses.
+    Strategy
+    --------
+    Rather than rewriting the URL to use the raw IP (which breaks HTTPS because
+    the server certificate is issued for the hostname, not the IP), we keep the
+    original URL and redirect the TCP connection to the validated IP via a
+    thread-local socket patch (_PinnedDNSAdapter).  This gives us:
 
-    Notes:
-    - For HTTPS, certificate validation may fail if the cert is not valid for the IP; in that case we return the raised exception to the caller.
+    * SSRF protection  – the socket never performs a fresh DNS look-up; it
+      connects straight to the IP we validated before calling this function.
+    * Correct TLS       – SNI and certificate CN/SAN are matched against the
+      original hostname, so valid certificates are accepted as normal.
+    * Thread-safety     – overrides live in threading.local(); parallel requests
+      in other threads are unaffected.
     """
     parsed = urllib.parse.urlparse(url)
     if not resolved_ips:
         raise ValueError("No resolved IPs provided")
 
-    chosen_ip = resolved_ips[0]
-    # Choose the first validated public IP (resolved_ips already filtered)
-    # and ensure correct formatting for IPv6 addresses in netloc
     chosen_ip = None
     for candidate in resolved_ips:
         try:
             ip_obj = ipaddress.ip_address(candidate)
         except Exception:
             continue
-        # pick the first usable IP; prefer IPv4 over IPv6 by ordering
         chosen_ip = ip_obj
         break
 
     if chosen_ip is None:
         raise ValueError("No valid IP to connect to")
 
-    # Determine port
-    port = parsed.port if parsed.port else (443 if parsed.scheme == "https" else 80)
-
-    # Format host part correctly for IPv6 (requires brackets)
-    if chosen_ip.version == 6:
-        host_part = f"[{chosen_ip.compressed}]"
-    else:
-        host_part = chosen_ip.compressed
-
-    netloc_ip = f"{host_part}:{port}" if port else host_part
-    new_parsed = parsed._replace(netloc=netloc_ip)
-    new_url = urllib.parse.urlunparse(new_parsed)
-
-    # Build Host header with original hostname (and port if non-default)
-    host_header = parsed.hostname
-    if parsed.port and not (
-        (parsed.scheme == "http" and parsed.port == 80)
-        or (parsed.scheme == "https" and parsed.port == 443)
-    ):
-        host_header = f"{parsed.hostname}:{parsed.port}"
-
+    hostname = parsed.hostname
     session = requests.Session()
-    # Preserve other headers but ensure Host is set to original host
-    session.headers.update({"Host": host_header})
+    session.mount("https://", _PinnedDNSAdapter(hostname, chosen_ip.compressed))
+    session.mount("http://", _PinnedDNSAdapter(hostname, chosen_ip.compressed))
 
     try:
-        # URL has been fully validated and IP-pinned to prevent SSRF (CodeQL false positive)
-        resp = session.get(new_url, timeout=timeout, allow_redirects=False)
+        resp = session.get(url, timeout=timeout, allow_redirects=False)
         return resp
     except SSLError:
-        # Let caller decide how to handle SSL issues for pinned IPs
         raise
     except RequestException:
-        # wrap other request exceptions
         raise
 
 
