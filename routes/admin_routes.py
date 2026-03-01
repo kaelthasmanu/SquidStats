@@ -256,7 +256,10 @@ def manage_blacklist():
         # Only show entries that were added via the 'custom' source
         rows = (
             session.query(BlacklistDomain)
-            .filter(BlacklistDomain.active == 1, BlacklistDomain.source == "custom")
+            .filter(
+                BlacklistDomain.active == 1,
+                BlacklistDomain.source.in_(["custom", "env_migration"]),
+            )
             .order_by(BlacklistDomain.domain)
             .all()
         )
