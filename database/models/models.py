@@ -8,7 +8,6 @@ from sqlalchemy import (
     String,
     Text,
 )
-
 from sqlalchemy.ext.declarative import declared_attr
 
 from database.base import Base

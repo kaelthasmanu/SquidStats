@@ -30,14 +30,11 @@ _Session = None
 dynamic_model_cache: dict[str, Any] = {}
 
 from database.models import (
-    DailyBase,
-    User,
-    Log,
-    LogMetadata,
-    DeniedLog,
-    SystemMetrics,
-    Notification,
     AdminUser,
+    DeniedLog,
+    LogMetadata,
+    Notification,
+    SystemMetrics,
 )
 
 

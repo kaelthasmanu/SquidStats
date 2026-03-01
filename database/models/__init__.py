@@ -1,12 +1,12 @@
 from .models import (
+    AdminUser,
     DailyBase,
-    User,
+    DeniedLog,
     Log,
     LogMetadata,
-    DeniedLog,
-    SystemMetrics,
     Notification,
-    AdminUser,
+    SystemMetrics,
+    User,
 )
 
 __all__ = [
