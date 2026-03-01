@@ -16,6 +16,19 @@ def find_blacklisted_sites(
     results = []
     total_results = 0
 
+    # If the blacklist is empty, return empty results immediately to avoid
+    # building invalid ORM `or_()` expressions.
+    if not blacklist:
+        return {
+            "results": [],
+            "pagination": {
+                "total": 0,
+                "page": page,
+                "per_page": per_page,
+                "total_pages": 0,
+            },
+        }
+
     try:
         all_tables = inspector.get_table_names()
         # Cambiar logs_ por log_ y ajustar longitud
@@ -139,6 +152,9 @@ def find_blacklisted_sites_by_date(
     results = []
 
     try:
+        # If no blacklist patterns provided, return empty list
+        if not blacklist:
+            return []
         date_suffix = specific_date.strftime("%Y%m%d")
         user_table = f"user_{date_suffix}"
         log_table = f"log_{date_suffix}"
