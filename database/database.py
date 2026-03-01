@@ -23,8 +23,6 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from alembic import command
 from config import Config
 
-from database.base import Base
-
 _engine = None
 _Session = None
 dynamic_model_cache: dict[str, Any] = {}
