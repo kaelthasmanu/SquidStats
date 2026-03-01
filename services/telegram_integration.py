@@ -339,12 +339,13 @@ async def telegram_health_check() -> dict[str, Any]:
         health = await _telegram_service.health_check()
         return health
     except Exception as e:
-        logger.error(f"Telegram health check failed: {e}")
+        logger.exception("Telegram health check failed")
+        err = str(e) if getattr(Config, "DEBUG", False) else "Internal error"
         return {
             "enabled": Config.TELEGRAM_ENABLED,
             "initialized": True,
             "connected": False,
-            "error": str(e),
+            "error": err,
         }
 
 

@@ -4,6 +4,7 @@ import tempfile
 
 import requests
 from dotenv import load_dotenv
+from loguru import logger
 
 load_dotenv()
 
@@ -35,12 +36,14 @@ def updateSquidStats():
             subprocess.run(["bash", tmp_script_path, "--update"], env=env)
             os.unlink(tmp_script_path)
             return True
-        except Exception as e:
-            print(f"Error descargando el script de actualizacion: {str(e)}", "error")
+        except Exception:
+
+            logger.exception("Error descargando el script de actualización")
             if "tmp_script_path" in locals() and os.path.exists(tmp_script_path):
                 os.unlink(tmp_script_path)
             return False
 
-    except Exception as e:
-        print(f"Error crítico: {str(e)}", "error")
+    except Exception:
+
+        logger.exception("Error crítico en updateSquidStats")
         return False

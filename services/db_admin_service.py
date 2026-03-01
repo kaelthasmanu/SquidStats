@@ -41,10 +41,6 @@ def delete_table_data(table_name: str):
             "message": f"Datos de la tabla '{table_name}' eliminados correctamente",
         }, 200
 
-    except Exception as e:
+    except Exception:
         logger.exception("Error deleting data from table %s", table_name)
-        return {
-            "status": "error",
-            "message": "Error interno del servidor",
-            "details": str(e),
-        }, 500
+        return {"status": "error", "message": "Error interno del servidor"}, 500

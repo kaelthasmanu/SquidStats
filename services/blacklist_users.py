@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from database.database import get_dynamic_models, get_engine
+from loguru import logger
 
 
 def find_blacklisted_sites(
@@ -132,8 +133,10 @@ def find_blacklisted_sites(
                 total_results += table_count
 
     except SQLAlchemyError as e:
-        print(f"Database error: {e}")
-        return {"error": str(e)}
+
+
+        logger.exception("Database error while searching blacklisted sites")
+        return {"error": "Error interno del servidor"}
 
     return {
         "results": results,

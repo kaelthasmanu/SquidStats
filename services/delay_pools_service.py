@@ -42,7 +42,7 @@ def delete_delay_pool(pool_number: str, config_manager) -> tuple[bool, str]:
         return True, f"Delay Pool #{pool_number} eliminado exitosamente"
     except Exception as e:
         logger.exception("Error eliminando delay pool")
-        return False, str(e)
+        return False, "Error interno al eliminar delay pool"
 
 
 def edit_delay_pool(
@@ -121,7 +121,7 @@ def edit_delay_pool(
         return True, f"Delay Pool #{pool_number} actualizado exitosamente"
     except Exception as e:
         logger.exception("Error actualizando delay pool")
-        return False, str(e)
+        return False, "Error interno al actualizar delay pool"
 
 
 def add_delay_pool(
@@ -160,4 +160,4 @@ def add_delay_pool(
         return True, f"Delay Pool #{pool_number} creado exitosamente"
     except Exception as e:
         logger.exception("Error creando delay pool")
-        return False, str(e)
+        return False, "Error interno al crear delay pool"

@@ -311,7 +311,14 @@ def blacklist_import():
             flash("Archivo importado correctamente", "success")
         except Exception as e:
             logger.exception("Error importando archivo de blacklist")
-            flash(f"Error al procesar el archivo: {str(e)}", "error")
+            try:
+                show_details = bool(current_app.debug)
+            except RuntimeError:
+                show_details = False
+            if show_details:
+                flash(f"Error al procesar el archivo: {str(e)}", "error")
+            else:
+                flash("Error al procesar el archivo", "error")
             return redirect(url_for("admin.manage_blacklist"))
 
     # Handle URL import
@@ -330,7 +337,14 @@ def blacklist_import():
         flash("Blacklist actualizada exitosamente", "success")
     except Exception as e:
         logger.exception("Error guardando BLACKLIST_DOMAINS")
-        flash(f"Error al guardar blacklist: {str(e)}", "error")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+        if show_details:
+            flash(f"Error al guardar blacklist: {str(e)}", "error")
+        else:
+            flash("Error al guardar blacklist", "error")
 
     return redirect(url_for("admin.manage_blacklist"))
 
@@ -356,7 +370,14 @@ def blacklist_save_custom():
         flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
     except Exception as e:
         logger.exception("Error guardando lista personalizada")
-        flash(f"Error al guardar la lista: {str(e)}", "error")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+        if show_details:
+            flash(f"Error al guardar la lista: {str(e)}", "error")
+        else:
+            flash("Error al guardar la lista", "error")
 
     return redirect(url_for("admin.manage_blacklist"))
 
@@ -642,7 +663,14 @@ def split_config_view():
         )
     except Exception as e:
         logger.exception("Error al cargar la vista de división de configuración")
-        flash(f"Error al cargar la vista: {str(e)}", "error")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+        if show_details:
+            flash(f"Error al cargar la vista: {str(e)}", "error")
+        else:
+            flash("Error al cargar la vista", "error")
         return redirect(url_for("admin.admin_dashboard"))
 
 

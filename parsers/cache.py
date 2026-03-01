@@ -6,6 +6,7 @@ import traceback
 from dotenv import load_dotenv
 
 from config import Config
+from loguru import logger
 
 # Load environment variables from .env file
 load_dotenv()
@@ -195,16 +196,18 @@ def fetch_squid_cache_stats():
         default_stats["error"] = f"Connection refused to {SQUID_HOST}:{SQUID_PORT}"
         default_stats["connection_status"] = "connection_refused"
         return default_stats
-    except socket.gaierror as e:
-        default_stats["error"] = f"DNS resolution error for {SQUID_HOST}: {str(e)}"
+    except socket.gaierror:
+        logger.exception("DNS resolution error when contacting Squid host")
+        default_stats["error"] = "DNS resolution error"
         default_stats["connection_status"] = "dns_error"
         return default_stats
     except UnicodeDecodeError:
         default_stats["error"] = "Error decoding response from Squid"
         default_stats["connection_status"] = "decode_error"
         return default_stats
-    except Exception as e:
-        default_stats["error"] = f"Unexpected error: {str(e)}"
+    except Exception:
+        logger.exception("Unexpected error fetching cache stats")
+        default_stats["error"] = "Unexpected error"
         default_stats["connection_status"] = "unknown_error"
         return default_stats
 

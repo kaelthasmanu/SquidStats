@@ -51,7 +51,7 @@ def add_acl(
         return True, f"ACL '{name}' agregada exitosamente"
     except Exception as e:
         logger.exception("Error agregando ACL")
-        return False, str(e)
+        return False, "Error interno al agregar ACL"
 
 
 def edit_acl(
@@ -119,7 +119,7 @@ def edit_acl(
         return False, "Línea de ACL no encontrada"
     except Exception as e:
         logger.exception("Error editando ACL")
-        return False, str(e)
+        return False, "Error interno al editar ACL"
 
 
 def delete_acl(acl_index: int, config_manager) -> tuple[bool, str]:
@@ -167,4 +167,4 @@ def delete_acl(acl_index: int, config_manager) -> tuple[bool, str]:
         return True, f"ACL '{acl_to_delete['name']}' eliminada exitosamente"
     except Exception as e:
         logger.exception("Error eliminando ACL")
-        return False, str(e)
+        return False, "Error interno al eliminar ACL"

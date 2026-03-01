@@ -24,7 +24,7 @@ def create_user(username: str, password: str, role: str = "admin") -> tuple[bool
         return False, "Error al crear usuario. El nombre de usuario puede existir."
     except Exception as e:
         logger.exception("Error creating user")
-        return False, str(e)
+        return False, "Error interno al crear usuario"
 
 
 def update_user(
@@ -44,7 +44,7 @@ def update_user(
         return False, "Error al actualizar usuario"
     except Exception as e:
         logger.exception("Error updating user")
-        return False, str(e)
+        return False, "Error interno al actualizar usuario"
 
 
 def delete_user(user_id: int) -> tuple[bool, str]:
@@ -58,4 +58,4 @@ def delete_user(user_id: int) -> tuple[bool, str]:
         )
     except Exception as e:
         logger.exception("Error deleting user")
-        return False, str(e)
+        return False, "Error interno al eliminar usuario"

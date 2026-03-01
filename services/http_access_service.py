@@ -39,7 +39,7 @@ def delete_http_access(rule_index: int, config_manager) -> tuple[bool, str]:
         return True, "Regla HTTP Access eliminada exitosamente"
     except Exception as e:
         logger.exception("Error eliminando http_access")
-        return False, str(e)
+        return False, "Error interno al eliminar regla http_access"
 
 
 def edit_http_access(
@@ -93,7 +93,7 @@ def edit_http_access(
         return True, "Regla HTTP Access actualizada exitosamente"
     except Exception as e:
         logger.exception("Error actualizando http_access")
-        return False, str(e)
+        return False, "Error interno al actualizar regla http_access"
 
 
 def add_http_access(
@@ -129,7 +129,7 @@ def add_http_access(
         return True, "Regla HTTP Access agregada exitosamente"
     except Exception as e:
         logger.exception("Error agregando http_access")
-        return False, str(e)
+        return False, "Error interno al agregar regla http_access"
 
 
 def move_http_access(
@@ -170,4 +170,4 @@ def move_http_access(
         return True, "Regla movida exitosamente"
     except Exception as e:
         logger.exception("Error moviendo http_access")
-        return False, str(e)
+        return False, "Error interno al mover regla http_access"

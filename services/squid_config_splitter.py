@@ -216,14 +216,12 @@ class SquidConfigSplitter:
         try:
             shutil.copy2(self.input_file, backup_file)
             logger.info(f"Backup created: {backup_file}")
-        except PermissionError as e:
-            error_msg = f"Permission denied to create backup file: {backup_file}. Error: {str(e)}"
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
+        except PermissionError:
+            logger.exception("Permission denied to create backup file: %s", backup_file)
+            raise RuntimeError("Permission denied to create backup file")
         except Exception as e:
-            error_msg = f"Failed to create backup: {backup_file}. Error: {str(e)}"
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
+            logger.exception("Failed to create backup file: %s", backup_file)
+            raise RuntimeError("Failed to create backup file")
 
         # Create the output directory if it doesn't exist
         try:
@@ -267,18 +265,14 @@ class SquidConfigSplitter:
                     try:
                         target = self._classify_line(stripped)
                     except ValueError as e:
-                        error_msg = f"Error classifying line {lineno}: {stripped}\nError: {str(e)}"
-                        logger.error(error_msg)
-                        raise RuntimeError(error_msg)
+                        logger.exception("Error classifying line %s: %s", lineno, stripped)
+                        raise RuntimeError("Error classifying configuration line")
 
                     if target == self.unknown_file and self.strict:
-                        error_msg = (
-                            f"Unknown directive at line {lineno}: '{stripped}'\n"
-                            f"This directive is not recognized by the splitter rules. "
-                            f"Consider adding a rule for it or disable strict mode."
+                        logger.error("Unknown directive at line %s: %s", lineno, stripped)
+                        raise RuntimeError(
+                            "Unknown directive found in strict mode. Review configuration."
                         )
-                        logger.error(error_msg)
-                        raise RuntimeError(error_msg)
 
                     buffers.setdefault(target, [])
                     buffers[target].extend(pending_comments)
@@ -300,16 +294,12 @@ class SquidConfigSplitter:
                         f.writelines(content)
                     results[filename] = len(content)
                     logger.info(f"[OK] {path} ({len(content)} lines)")
-                except PermissionError as e:
-                    error_msg = (
-                        f"Permission denied writing to file: {path}. Error: {str(e)}"
-                    )
-                    logger.error(error_msg)
-                    raise RuntimeError(error_msg)
-                except Exception as e:
-                    error_msg = f"Failed to write file: {path}. Error: {str(e)}"
-                    logger.error(error_msg)
-                    raise RuntimeError(error_msg)
+                except PermissionError:
+                    logger.exception("Permission denied writing to file: %s", path)
+                    raise RuntimeError("Permission denied writing generated file")
+                except Exception:
+                    logger.exception("Failed to write file: %s", path)
+                    raise RuntimeError("Failed to write generated file")
 
             # Generate the new main squid.conf with includes
             self._generate_main_config(buffers)
@@ -320,19 +310,19 @@ class SquidConfigSplitter:
             if not validation_result["success"]:
                 error_details = validation_result.get("error_message", "Unknown error")
                 logger.error(
-                    f"Squid configuration validation failed. Rolling back changes. Error: {error_details}"
+                    "Squid configuration validation failed. Rolling back changes. Error: %s",
+                    error_details,
                 )
                 self._rollback_changes(backup_file, list(buffers.keys()))
                 raise RuntimeError(
-                    f"Squid configuration validation failed. Changes have been reverted.\n"
-                    f"Error details: {error_details}"
+                    "Squid configuration validation failed. Changes have been reverted."
                 )
 
             logger.info("Squid configuration validated successfully.")
             return results
 
-        except Exception as e:
-            logger.exception(f"Error splitting configuration file: {e}")
+        except Exception:
+            logger.exception("Error splitting configuration file")
             raise
 
     def _validate_squid_config(self) -> dict:
@@ -431,9 +421,9 @@ class SquidConfigSplitter:
 
             logger.info("Rollback completed successfully.")
 
-        except Exception as e:
-            logger.error(f"Error during rollback: {e}")
-            raise RuntimeError(f"Rollback failed: {e}")
+        except Exception:
+            logger.exception("Error during rollback")
+            raise RuntimeError("Rollback failed")
 
     def _generate_main_config(self, buffers: dict[str, list[str]]) -> None:
         header = [
@@ -459,9 +449,9 @@ class SquidConfigSplitter:
             logger.info(
                 f"Main configuration file regenerated with {len(includes)} includes in correct dependency order"
             )
-        except Exception as e:
-            logger.error(f"Failed to generate main config: {e}")
-            raise RuntimeError(f"Failed to generate main config: {e}")
+        except Exception:
+            logger.exception("Failed to generate main config")
+            raise RuntimeError("Failed to generate main config")
 
     def _ensure_auth_file(self, buffers: dict[str, list[str]]) -> None:
         """

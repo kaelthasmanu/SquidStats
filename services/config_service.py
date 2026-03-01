@@ -7,4 +7,4 @@ def save_config(new_content: str, config_manager) -> tuple[bool, str]:
         return True, "Configuration saved successfully"
     except Exception as e:
         logger.exception("Error saving configuration")
-        return False, str(e)
+        return False, "Error interno al guardar la configuración"
