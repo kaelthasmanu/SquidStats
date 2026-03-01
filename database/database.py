@@ -16,6 +16,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from alembic import command
 from config import Config
+from database.base import Base  # noqa: F401
 from database.models import (
     AdminUser,
     DeniedLog,
