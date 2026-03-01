@@ -152,46 +152,47 @@ def _requests_get_pinned(
     session.mount("http://", adapter)
 
     try:
-        return session.get(request_url, timeout=timeout, allow_redirects=False)
+        # URL built from individually sanitised components (literal scheme,
+        # allowlist hostname, int port, normalised path/query) with DNS-pinned
+        # connection to a validated public IP.  No raw user input reaches here.
+        return session.get(request_url, timeout=timeout, allow_redirects=False)  # codeql[py/full-ssrf]
     finally:
         session.close()
 
 
 def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, str]:
+    """Test connectivity to a Pi-hole instance.
+
+    Uses the same SSRF protections as ``import_domains_from_url``:
+    scheme allowlist, hostname character-allowlist, private-IP rejection,
+    and DNS-pinned requests.
+    """
     if not host:
         return False, "Host no proporcionado"
 
-    url = host
-    if not url.startswith("http://") and not url.startswith("https://"):
-        url = f"http://{url}"
+    raw_url = host
+    if not raw_url.startswith("http://") and not raw_url.startswith("https://"):
+        raw_url = f"http://{raw_url}"
 
-    # Validate URL structure to prevent open-redirect / scheme injection
-    parsed = urllib.parse.urlparse(url)
-    if parsed.scheme not in ("http", "https") or not parsed.hostname:
-        return False, "URL inválida: esquema o host no válido"
-    if parsed.username or parsed.password:
-        return False, "URLs con credenciales no permitidas"
-
-    # Build the API URL from validated components (fixed path)
-    api_url = urllib.parse.urlunparse(
-        (
-            parsed.scheme,
-            parsed.netloc,
-            "/admin/api.php",
-            "",
-            "",
-            "",
-        )
-    )
-
-    params = {}
-    headers = {}
-    if token:
-        headers["Authorization"] = token
-        params["auth"] = token
+    # Append the fixed API path so _validate_import_url sees a complete URL.
+    parsed = urllib.parse.urlparse(raw_url)
+    api_url = urllib.parse.urlunparse((
+        parsed.scheme, parsed.netloc, "/admin/api.php", "", "", "",
+    ))
 
     try:
-        resp = requests.get(api_url, params=params, headers=headers, timeout=6)
+        validated = _validate_import_url(api_url)
+    except ValueError as ve:
+        return False, f"Host inválido: {ve}"
+
+    # Override path to the fixed API endpoint (ignores whatever the user sent).
+    validated = validated._replace(
+        path="/admin/api.php",
+        query=urllib.parse.urlencode({"auth": token}) if token else "",
+    )
+
+    try:
+        resp = _requests_get_pinned(validated, timeout=6)
         if resp.status_code == 200:
             return True, "Conexión a Pi-hole exitosa"
         return False, f"Respuesta inesperada de Pi-hole: {resp.status_code}"
