@@ -7,7 +7,6 @@ from datetime import datetime
 import requests
 import requests.adapters
 from loguru import logger
-from requests.exceptions import RequestException, SSLError
 
 from database.database import get_session
 from database.models.models import BlacklistDomain
@@ -102,17 +101,26 @@ def _requests_get_pinned(
         raise ValueError("No valid IP to connect to")
 
     hostname = parsed.hostname
+
+    # Reconstruct URL from pre-validated components instead of forwarding
+    # the raw user-supplied string (SSRF mitigation — CWE-918).
+    sanitized_url = urllib.parse.urlunparse((
+        parsed.scheme,
+        parsed.netloc,
+        parsed.path or "/",
+        parsed.params,
+        parsed.query,
+        "",  # fragment is irrelevant for HTTP requests
+    ))
+
     session = requests.Session()
     session.mount("https://", _PinnedDNSAdapter(hostname, chosen_ip.compressed))
     session.mount("http://", _PinnedDNSAdapter(hostname, chosen_ip.compressed))
 
     try:
-        resp = session.get(url, timeout=timeout, allow_redirects=False)
-        return resp
-    except SSLError:
-        raise
-    except RequestException:
-        raise
+        return session.get(sanitized_url, timeout=timeout, allow_redirects=False)
+    finally:
+        session.close()
 
 
 def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, str]:
@@ -123,6 +131,23 @@ def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, s
     if not url.startswith("http://") and not url.startswith("https://"):
         url = f"http://{url}"
 
+    # Validate URL structure to prevent open-redirect / scheme injection
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        return False, "URL inválida: esquema o host no válido"
+    if parsed.username or parsed.password:
+        return False, "URLs con credenciales no permitidas"
+
+    # Build the API URL from validated components (fixed path)
+    api_url = urllib.parse.urlunparse((
+        parsed.scheme,
+        parsed.netloc,
+        "/admin/api.php",
+        "",
+        "",
+        "",
+    ))
+
     params = {}
     headers = {}
     if token:
@@ -131,7 +156,7 @@ def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, s
 
     try:
         resp = requests.get(
-            f"{url}/admin/api.php", params=params, headers=headers, timeout=6
+            api_url, params=params, headers=headers, timeout=6
         )
         if resp.status_code == 200:
             return True, "Conexión a Pi-hole exitosa"
@@ -228,8 +253,16 @@ def _validate_import_url(url: str) -> tuple[str, list[str]]:
     if not public_ips:
         raise ValueError("No se encontraron direcciones públicas válidas para el host")
 
-    # Passed all checks — return original URL and list of validated public IPs (preserved order)
-    return url, public_ips
+    # Reconstruct URL from validated components instead of returning raw user input
+    sanitized_url = urllib.parse.urlunparse((
+        scheme,
+        parsed.netloc,
+        parsed.path or "/",
+        parsed.params,
+        parsed.query,
+        "",  # fragment is irrelevant for server requests
+    ))
+    return sanitized_url, public_ips
 
 
 def import_domains_from_url(url: str) -> tuple[bool, set, str]:
