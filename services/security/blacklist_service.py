@@ -155,7 +155,9 @@ def _requests_get_pinned(
         # URL built from individually sanitised components (literal scheme,
         # allowlist hostname, int port, normalised path/query) with DNS-pinned
         # connection to a validated public IP.  No raw user input reaches here.
-        return session.get(request_url, timeout=timeout, allow_redirects=False)  # codeql[py/full-ssrf]
+        return session.get(
+            request_url, timeout=timeout, allow_redirects=False
+        )  # codeql[py/full-ssrf]
     finally:
         session.close()
 
@@ -176,9 +178,16 @@ def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, s
 
     # Append the fixed API path so _validate_import_url sees a complete URL.
     parsed = urllib.parse.urlparse(raw_url)
-    api_url = urllib.parse.urlunparse((
-        parsed.scheme, parsed.netloc, "/admin/api.php", "", "", "",
-    ))
+    api_url = urllib.parse.urlunparse(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            "/admin/api.php",
+            "",
+            "",
+            "",
+        )
+    )
 
     try:
         validated = _validate_import_url(api_url)
