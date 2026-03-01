@@ -22,11 +22,6 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from alembic import command
 from config import Config
-
-_engine = None
-_Session = None
-dynamic_model_cache: dict[str, Any] = {}
-
 from database.models import (
     AdminUser,
     DeniedLog,
@@ -34,6 +29,10 @@ from database.models import (
     Notification,
     SystemMetrics,
 )
+
+_engine = None
+_Session = None
+dynamic_model_cache: dict[str, Any] = {}
 
 
 def get_table_suffix() -> str:
