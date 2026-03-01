@@ -4,9 +4,9 @@ import socket
 import traceback
 
 from dotenv import load_dotenv
+from loguru import logger
 
 from config import Config
-from loguru import logger
 
 # Load environment variables from .env file
 load_dotenv()

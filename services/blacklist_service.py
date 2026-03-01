@@ -1,19 +1,19 @@
-from datetime import datetime
-
 import ipaddress
 import socket
 import urllib.parse
+from datetime import datetime
 
 import requests
 from loguru import logger
+from requests.exceptions import RequestException, SSLError
 
 from database.database import get_session
 from database.models.models import BlacklistDomain
 
-from requests.exceptions import SSLError, RequestException
 
-
-def _requests_get_pinned(url: str, resolved_ips: list[str], timeout: int = 8) -> requests.Response:
+def _requests_get_pinned(
+    url: str, resolved_ips: list[str], timeout: int = 8
+) -> requests.Response:
     """Make an HTTP(S) request to one of the validated IPs while preserving the original Host header.
 
     - Picks the first resolved IP from `resolved_ips`.

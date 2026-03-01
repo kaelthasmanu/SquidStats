@@ -1,11 +1,11 @@
 import datetime
 from datetime import timedelta
 
+from loguru import logger
 from sqlalchemy import Column, Integer, String, desc, func, inspect
 from sqlalchemy.orm import Session, relationship
 
 from database.database import get_concat_function, get_dynamic_models
-from loguru import logger
 
 
 def get_important_metrics(db: Session, UserModel, LogModel):
@@ -134,7 +134,6 @@ def get_important_metrics(db: Session, UserModel, LogModel):
 
     except Exception:
         # Log error but return empty structure
-
 
         logger.exception("Error in get_important_metrics")
         return {}

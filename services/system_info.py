@@ -30,7 +30,7 @@ def get_network_info():
                             "version": "IPv4",
                         }
                     )
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting network interfaces")
         return []
 
@@ -63,7 +63,7 @@ def get_uptime():
         hours = int((uptime_seconds % 86400) // 3600)
         minutes = int((uptime_seconds % 3600) // 60)
         return f"{days}d {hours}h {minutes}m"
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting uptime")
         return "Unknown"
 
@@ -77,7 +77,7 @@ def get_ram_info():
             "used": f"{ram.used / (1024**3):.2f} GB",
             "percent": f"{ram.percent}%",
         }
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting RAM info")
         return {}
 
@@ -93,7 +93,7 @@ def get_swap_info():
                 "percent": f"{swap.percent}%",
             }
         return "Not available"
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting swap info")
         return "Not available"
 
@@ -106,7 +106,7 @@ def get_cpu_info():
             freq_current = cpu_freq.current
             freq_min = cpu_freq.min
             freq_max = cpu_freq.max
-        except Exception as e:
+        except Exception:
             freq_current = freq_min = freq_max = "N/A"
             logger.exception("Error getting CPU frequency info")
 
@@ -128,7 +128,7 @@ def get_cpu_info():
             "system_time": f"{cpu_times.system}%",
             "idle_time": f"{cpu_times.idle}%",
         }
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting CPU info")
         return {}
 
@@ -178,7 +178,7 @@ def get_network_stats():
             "packets_sent": current_net_io.packets_sent,
             "packets_recv": current_net_io.packets_recv,
         }
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting network stats")
         return {
             "up_mbps": 0.0,
@@ -206,7 +206,7 @@ def get_timezone():
         if match:
             return f"{match.group(1)} {match.group(2)}"
         return "Unknown"
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting timezone")
         return "Unknown"
 

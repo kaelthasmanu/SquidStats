@@ -219,7 +219,7 @@ class SquidConfigSplitter:
         except PermissionError:
             logger.exception("Permission denied to create backup file: %s", backup_file)
             raise RuntimeError("Permission denied to create backup file")
-        except Exception as e:
+        except Exception:
             logger.exception("Failed to create backup file: %s", backup_file)
             raise RuntimeError("Failed to create backup file")
 
@@ -264,12 +264,16 @@ class SquidConfigSplitter:
 
                     try:
                         target = self._classify_line(stripped)
-                    except ValueError as e:
-                        logger.exception("Error classifying line %s: %s", lineno, stripped)
+                    except ValueError:
+                        logger.exception(
+                            "Error classifying line %s: %s", lineno, stripped
+                        )
                         raise RuntimeError("Error classifying configuration line")
 
                     if target == self.unknown_file and self.strict:
-                        logger.error("Unknown directive at line %s: %s", lineno, stripped)
+                        logger.error(
+                            "Unknown directive at line %s: %s", lineno, stripped
+                        )
                         raise RuntimeError(
                             "Unknown directive found in strict mode. Review configuration."
                         )

@@ -40,7 +40,7 @@ def delete_delay_pool(pool_number: str, config_manager) -> tuple[bool, str]:
         new_content = "\n".join(new_lines)
         config_manager.save_config(new_content)
         return True, f"Delay Pool #{pool_number} eliminado exitosamente"
-    except Exception as e:
+    except Exception:
         logger.exception("Error eliminando delay pool")
         return False, "Error interno al eliminar delay pool"
 
@@ -119,7 +119,7 @@ def edit_delay_pool(
         new_content = "\n".join(new_lines)
         config_manager.save_config(new_content)
         return True, f"Delay Pool #{pool_number} actualizado exitosamente"
-    except Exception as e:
+    except Exception:
         logger.exception("Error actualizando delay pool")
         return False, "Error interno al actualizar delay pool"
 
@@ -158,6 +158,6 @@ def add_delay_pool(
         new_content = "\n".join(lines)
         config_manager.save_config(new_content)
         return True, f"Delay Pool #{pool_number} creado exitosamente"
-    except Exception as e:
+    except Exception:
         logger.exception("Error creando delay pool")
         return False, "Error interno al crear delay pool"

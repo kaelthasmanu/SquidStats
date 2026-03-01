@@ -419,7 +419,7 @@ class TelegramService:
                 status["connected"] = True
                 status["user_id"] = me.id
                 status["username"] = getattr(me, "username", None)
-        except Exception as e:
+        except Exception:
             logger.exception("Health check failed")
             status["error"] = "Health check failed"
 

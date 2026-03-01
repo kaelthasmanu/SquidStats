@@ -37,13 +37,11 @@ def updateSquidStats():
             os.unlink(tmp_script_path)
             return True
         except Exception:
-
             logger.exception("Error descargando el script de actualización")
             if "tmp_script_path" in locals() and os.path.exists(tmp_script_path):
                 os.unlink(tmp_script_path)
             return False
 
     except Exception:
-
         logger.exception("Error crítico en updateSquidStats")
         return False

@@ -51,7 +51,7 @@ def split_config(strict=False):
             "status": "error",
             "message": "Error de validación de la configuración",
         }, 400
-    except Exception as e:
+    except Exception:
         logger.exception("Error al dividir el archivo de configuración")
         return {
             "status": "error",

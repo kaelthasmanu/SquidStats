@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import func, inspect, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from database.database import get_dynamic_models, get_engine
-from loguru import logger
 
 
 def find_blacklisted_sites(
@@ -132,9 +132,7 @@ def find_blacklisted_sites(
 
                 total_results += table_count
 
-    except SQLAlchemyError as e:
-
-
+    except SQLAlchemyError:
         logger.exception("Database error while searching blacklisted sites")
         return {"error": "Error interno del servidor"}
 

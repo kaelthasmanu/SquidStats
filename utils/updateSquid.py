@@ -3,8 +3,9 @@ import os
 import platform
 import subprocess
 import tempfile
-from loguru import logger
+
 from dotenv import load_dotenv
+from loguru import logger
 
 load_dotenv()
 
@@ -16,14 +17,14 @@ def update_squid():
     except FileNotFoundError:
         squid_instalado = False
         try:
-
-            logger.info("El binario de Squid no se encontró en el sistema (aún no instalado)")
+            logger.info(
+                "El binario de Squid no se encontró en el sistema (aún no instalado)"
+            )
         except Exception:
             pass
 
     if squid_instalado:
         try:
-
             logger.info(f"Squid ya está instalado: {pre_check.stdout.strip()}")
         except Exception:
             pass
@@ -62,7 +63,6 @@ def update_squid():
         try:
             latest_version = json.loads(version_info.stdout)["tag_name"]
         except (json.JSONDecodeError, KeyError):
-
             logger.error("Error procesando versión")
             return False
 
@@ -73,8 +73,9 @@ def update_squid():
             ["wget", "--spider", download_url], capture_output=True, text=True, env=env
         )
         if check_package.returncode != 0:
-
-            logger.error(f"Paquete no disponible para {os_id.capitalize()} {codename.capitalize()}")
+            logger.error(
+                f"Paquete no disponible para {os_id.capitalize()} {codename.capitalize()}"
+            )
             return False
 
         with tempfile.NamedTemporaryFile(
@@ -88,7 +89,6 @@ def update_squid():
                 env=env,
             )
         if download.returncode != 0:
-            
             logger.error("Error descargando el paquete")
             return False
 
@@ -103,7 +103,6 @@ def update_squid():
 
         install = subprocess.run(["dpkg", "-i", "--force-overwrite", package_path])
         if install.returncode != 0:
-
             logger.error("Error instalando el paquete")
             subprocess.run(["apt", "install", "-f", "-y"], env=apt_env)
 
@@ -115,17 +114,14 @@ def update_squid():
         squid_check = subprocess.run(["squid", "-v"], capture_output=True, text=True)
 
         if squid_check.returncode != 0:
-
             logger.error("Error en instalación final")
             return False
 
         try:
-
             logger.info(f"Actualización a {latest_version} completada exitosamente")
         except Exception:
             pass
         return True
-    except Exception as e:
-
+    except Exception:
         logger.exception("Error crítico durante la actualización de Squid")
         return False

@@ -5,9 +5,9 @@ import socket
 from datetime import datetime
 
 from dotenv import load_dotenv
+from loguru import logger
 
 from config import Config
-from loguru import logger
 
 load_dotenv()
 
