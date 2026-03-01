@@ -300,7 +300,6 @@ def blacklist_sync():
 @admin_required
 def blacklist_import():
     # Import domains from uploaded file or URL and append to BLACKLIST_DOMAINS
-    env_vars = load_env_vars()
     domains = set()
 
     # Handle file upload
