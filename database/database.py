@@ -1,5 +1,5 @@
 import os
-from datetime import date, datetime
+from datetime import date
 from typing import Any
 from urllib.parse import urlparse
 
@@ -7,12 +7,6 @@ from alembic.config import Config as AlembicConfig
 from alembic.runtime.migration import MigrationContext
 from loguru import logger
 from sqlalchemy import (
-    BigInteger,
-    Column,
-    DateTime,
-    Integer,
-    String,
-    Text,
     create_engine,
     func,
     inspect,
@@ -29,6 +23,7 @@ from database.models import (
     Notification,
     SystemMetrics,
 )
+from database.models.models import create_dynamic_models
 
 _engine = None
 _Session = None
@@ -232,23 +227,6 @@ def create_dynamic_tables(engine, date_suffix: str = None):
         )
         DynamicBase = declarative_base()
 
-        class DynamicUser(DynamicBase):
-            __tablename__ = user_table_name
-            id = Column(Integer, primary_key=True)
-            username = Column(String(255), nullable=False)
-            ip = Column(String(255), nullable=False)
-            created_at = Column(DateTime, default=datetime.now)
-
-        class DynamicLog(DynamicBase):
-            __tablename__ = log_table_name
-            id = Column(Integer, primary_key=True)
-            user_id = Column(Integer, nullable=False)
-            url = Column(Text, nullable=False)
-            response = Column(Integer, nullable=False)
-            request_count = Column(Integer, default=1)
-            data_transmitted = Column(BigInteger, default=0)
-            created_at = Column(DateTime, default=datetime.now)
-
         DynamicBase.metadata.create_all(engine, checkfirst=True)
 
 
@@ -281,24 +259,9 @@ def get_dynamic_models(date_suffix: str):
             )
             return None, None
 
-    DynamicBase = declarative_base()
-
-    class DynamicUser(DynamicBase):
-        __tablename__ = user_table_name
-        id = Column(Integer, primary_key=True, autoincrement=True)
-        username = Column(String(255), nullable=False)
-        ip = Column(String(255), nullable=False)
-        created_at = Column(DateTime, default=datetime.now)
-
-    class DynamicLog(DynamicBase):
-        __tablename__ = log_table_name
-        id = Column(Integer, primary_key=True, autoincrement=True)
-        user_id = Column(Integer, nullable=False)
-        url = Column(Text, nullable=False)
-        response = Column(Integer, nullable=False)
-        request_count = Column(Integer, default=1)
-        data_transmitted = Column(BigInteger, default=0)
-        created_at = Column(DateTime, default=datetime.now)
+    DynamicUser, DynamicLog = create_dynamic_models(
+        engine, user_table_name, log_table_name
+    )
 
     dynamic_model_cache[cache_key] = (DynamicUser, DynamicLog)
     return DynamicUser, DynamicLog

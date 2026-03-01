@@ -9,6 +9,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import declarative_base
 
 from database.base import Base
 
@@ -100,3 +101,31 @@ class AdminUser(Base):
     last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+def create_dynamic_models(engine, user_table_name: str, log_table_name: str):
+    """Factory to create dynamic user/log models bound to a fresh declarative base.
+
+    Returns (DynamicUser, DynamicLog) and ensures tables are created on the given engine.
+    """
+    DynamicBase = declarative_base()
+
+    class DynamicUser(DynamicBase):
+        __tablename__ = user_table_name
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        username = Column(String(255), nullable=False)
+        ip = Column(String(255), nullable=False)
+        created_at = Column(DateTime, default=datetime.now)
+
+    class DynamicLog(DynamicBase):
+        __tablename__ = log_table_name
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        user_id = Column(Integer, nullable=False)
+        url = Column(Text, nullable=False)
+        response = Column(Integer, nullable=False)
+        request_count = Column(Integer, default=1)
+        data_transmitted = Column(BigInteger, default=0)
+        created_at = Column(DateTime, default=datetime.now)
+
+    DynamicBase.metadata.create_all(engine, checkfirst=True)
+    return DynamicUser, DynamicLog
