@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, jsonify, request
 from loguru import logger
 
 from database.database import get_session
-from services.auditoria_service import (
+from services.analytics.auditoria_service import (
     find_by_ip,
     find_by_keyword,
     find_by_response_code,
@@ -17,13 +17,13 @@ from services.auditoria_service import (
     get_total_data_consumed,
     get_user_activity_summary,
 )
-from services.metrics_service import MetricsService
-from services.notifications import (
+from services.notifications.notifications import (
     delete_all_notifications,
     delete_notification,
     get_all_notifications,
     mark_notifications_read,
 )
+from services.system.metrics_service import MetricsService
 
 api_bp = Blueprint("api", __name__)
 

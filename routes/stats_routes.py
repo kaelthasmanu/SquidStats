@@ -6,10 +6,10 @@ from threading import Lock
 from flask import Blueprint, render_template  # , request, jsonify
 from loguru import logger
 
-# from services.icap_service import scan_file_with_icap
+# from services.security.icap_service import scan_file_with_icap
 from parsers.cache import fetch_squid_cache_stats
-from services.metrics_service import MetricsService
-from services.system_info import (
+from services.system.metrics_service import MetricsService
+from services.system.system_info import (
     get_cpu_info,
     get_network_info,
     get_network_stats,

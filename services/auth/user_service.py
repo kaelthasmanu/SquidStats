@@ -1,6 +1,6 @@
 from loguru import logger
 
-from services.auth_service import AuthService
+from services.auth.auth_service import AuthService
 
 
 def get_all_users():

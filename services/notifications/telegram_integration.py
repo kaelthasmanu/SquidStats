@@ -12,7 +12,7 @@ from typing import Any
 from loguru import logger
 
 from config import Config
-from services.telegram_service import (
+from services.notifications.telegram_service import (
     NotificationPriority,
     TelegramService,
     get_telegram_service,

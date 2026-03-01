@@ -25,7 +25,7 @@ from sqlalchemy import inspect
 from alembic import command
 from database.database import get_engine
 from database.models.models import BlacklistDomain
-from services.blacklist_service import merge_and_save_blacklist
+from services.security.blacklist_service import merge_and_save_blacklist
 
 # Delay import of project modules until runtime (project root added to sys.path above)
 
@@ -169,7 +169,7 @@ def migrate_env_blacklist(auto_confirm: bool = False):
     - Reads `BLACKLIST_DOMAINS` environment variable (comma separated)
     - Checks that the `blacklist_domains` table exists in the DB
     - Skips if the env var is empty or not set
-    - Uses `services.blacklist_service.merge_and_save_blacklist` to insert/update rows
+    - Uses `services.security.blacklist_service.merge_and_save_blacklist` to insert/update rows
     """
 
     val = os.getenv("BLACKLIST_DOMAINS")

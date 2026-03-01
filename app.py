@@ -18,22 +18,22 @@ from parsers.log import process_logs
 from routes import register_routes
 from routes.auth_routes import csrf
 from routes.stats_routes import realtime_data_thread
-from services.auth_service import AuthConfig
-from services.metrics_service import MetricsService
-from services.notifications import (
+from services.auth.auth_service import AuthConfig
+from services.notifications.notifications import (
     has_remote_commits_with_messages,
     set_commit_notifications,
     set_socketio_instance,
     start_notification_monitor,
     stop_notification_monitor,
 )
+from services.system.metrics_service import MetricsService
 from utils.filters import register_filters
 
 logger.add("logs/app.log", rotation="100 MB", retention="31 days", level="INFO")
 
 # Import Telegram integration (optional)
 try:
-    from services.telegram_integration import (
+    from services.notifications.telegram_integration import (
         cleanup_telegram,
         initialize_telegram_service,
     )

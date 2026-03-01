@@ -8,9 +8,9 @@ from loguru import logger
 from config import Config
 from parsers.connections import group_by_user, parse_raw_data
 from parsers.squid_info import fetch_squid_info_stats
-from services.fetch_data import fetch_squid_data
-from services.notifications import get_all_notifications
-from services.system_info import get_system_type
+from services.notifications.notifications import get_all_notifications
+from services.squid.fetch_data import fetch_squid_data
+from services.system.system_info import get_system_type
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
 

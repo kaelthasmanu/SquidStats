@@ -18,7 +18,7 @@ load_dotenv()
 
 # Now import project modules (they may depend on env vars)
 from config import Config  # noqa: E402
-from services.telegram_integration import (  # noqa: E402
+from services.notifications.telegram_integration import (  # noqa: E402
     initialize_telegram_service,
     send_security_alert_telegram,
     send_system_alert_telegram,
@@ -26,7 +26,7 @@ from services.telegram_integration import (  # noqa: E402
     send_user_activity_alert_telegram,
     telegram_health_check,
 )
-from services.telegram_service import (  # noqa: E402
+from services.notifications.telegram_service import (  # noqa: E402
     NotificationPriority,
     get_telegram_service,
     parse_http_proxy_url,
