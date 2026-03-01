@@ -9,7 +9,8 @@ def restart_squid() -> tuple[bool, str, str]:
         return True, "Squid restarted successfully", None
     except Exception as e:
         logger.exception("Error restarting squid")
-        return False, "Internal server error", str(e)
+        # Do not expose raw exception details to callers; log only.
+        return False, "Internal server error", None
 
 
 def reload_squid() -> tuple[bool, str, str]:
@@ -18,4 +19,5 @@ def reload_squid() -> tuple[bool, str, str]:
         return True, "Configuration reloaded successfully", None
     except Exception as e:
         logger.exception("Error reloading squid configuration")
-        return False, "Internal server error", str(e)
+        # Do not expose raw exception details to callers; log only.
+        return False, "Internal server error", None
