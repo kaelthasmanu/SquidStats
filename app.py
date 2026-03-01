@@ -64,6 +64,15 @@ def create_app():
         )
         # Continue anyway - the app might still work with existing schema
 
+    # Migrate legacy BLACKLIST_DOMAINS from .env into DB (non-interactive)
+    try:
+        from manage_db import migrate_env_blacklist
+
+        logger.info("Checking for legacy BLACKLIST_DOMAINS to migrate into DB...")
+        migrate_env_blacklist(auto_confirm=True)
+    except Exception as e:
+        logger.error(f"Error migrating BLACKLIST_DOMAINS into DB: {e}")
+
     app = Flask(__name__, static_folder="./static")
     app.config.from_object(Config())
 

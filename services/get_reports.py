@@ -1,6 +1,7 @@
 import datetime
 from datetime import timedelta
 
+from loguru import logger
 from sqlalchemy import Column, Integer, String, desc, func, inspect
 from sqlalchemy.orm import Session, relationship
 
@@ -131,9 +132,10 @@ def get_important_metrics(db: Session, UserModel, LogModel):
 
         return results
 
-    except Exception as e:
+    except Exception:
         # Log error but return empty structure
-        print(f"Error in get_important_metrics: {str(e)}")
+
+        logger.exception("Error in get_important_metrics")
         return {}
 
 
@@ -203,8 +205,8 @@ def get_metrics_by_date_range(start_date: str, end_date: str, db: Session):
             # ...
 
             current_dt += timedelta(days=1)
-        except Exception as e:
-            print(f"Error processing {date_suffix}: {str(e)}")
+        except Exception:
+            logger.exception(f"Error processing date {date_suffix}")
             current_dt += timedelta(days=1)
 
     return consolidated_results
@@ -215,8 +217,8 @@ def has_table(db: Session, table_name: str) -> bool:
         # Usar el inspector para verificar existencia de tabla
         inspector = inspect(db.get_bind())
         return inspector.has_table(table_name)
-    except Exception as e:
-        print(f"Error checking table {table_name}: {str(e)}")
+    except Exception:
+        logger.exception(f"Error checking table {table_name}")
         return False
 
 

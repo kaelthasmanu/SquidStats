@@ -89,6 +89,20 @@ class Notification(Base):
     count = Column(Integer, default=1)
 
 
+class BlacklistDomain(Base):
+    __tablename__ = "blacklist_domains"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    domain = Column(String(255), nullable=False, unique=True, index=True)
+    source = Column(String(50), nullable=True)  # e.g. 'file', 'url', 'custom'
+    source_url = Column(String(512), nullable=True)
+    added_by = Column(String(100), nullable=True)
+    notes = Column(Text, nullable=True)
+    active = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
 class AdminUser(Base):
     __tablename__ = "admin_users"
 

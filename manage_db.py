@@ -13,14 +13,21 @@ Usage:
     python manage_db.py create     # Create a new migration
 """
 
+import os
 import sys
 from pathlib import Path
 
 from alembic.config import Config as AlembicConfig
 from dotenv import load_dotenv
 from loguru import logger
+from sqlalchemy import inspect
 
 from alembic import command
+from database.database import get_engine
+from database.models.models import BlacklistDomain
+from services.blacklist_service import merge_and_save_blacklist
+
+# Delay import of project modules until runtime (project root added to sys.path above)
 
 # Add project root to path
 project_root = Path(__file__).parent
@@ -156,6 +163,60 @@ def create_migration(message=None):
         sys.exit(1)
 
 
+def migrate_env_blacklist(auto_confirm: bool = False):
+    """Migrate domains listed in BLACKLIST_DOMAINS (from .env) into DB table.
+
+    - Reads `BLACKLIST_DOMAINS` environment variable (comma separated)
+    - Checks that the `blacklist_domains` table exists in the DB
+    - Skips if the env var is empty or not set
+    - Uses `services.blacklist_service.merge_and_save_blacklist` to insert/update rows
+    """
+
+    val = os.getenv("BLACKLIST_DOMAINS")
+    if not val:
+        logger.info("No BLACKLIST_DOMAINS found in environment; nothing to migrate.")
+        return
+
+    # Trim surrounding quotes if present
+    if (val.startswith('"') and val.endswith('"')) or (
+        val.startswith("'") and val.endswith("'")
+    ):
+        val = val[1:-1]
+
+    items = [d.strip() for d in val.split(",") if d.strip()]
+    if not items:
+        logger.info("BLACKLIST_DOMAINS is empty after parsing; nothing to migrate.")
+        return
+
+    # Verify table exists
+    engine = get_engine()
+    inspector = inspect(engine)
+    table_name = BlacklistDomain.__tablename__
+    if not inspector.has_table(table_name):
+        logger.error(
+            f"Table '{table_name}' does not exist in the database. Run migrations first."
+        )
+        return
+
+    # Confirm with user (or auto-confirm)
+    logger.info(f"Found {len(items)} domains to migrate into '{table_name}'.")
+    if not auto_confirm:
+        ans = input("Proceed with migration? (yes/no): ").strip().lower()
+        if ans != "yes":
+            logger.info("Migration cancelled by user.")
+            return
+
+    # Use merge function which will avoid duplicates and reactivate entries
+    try:
+        merge_and_save_blacklist(
+            set(items), source="env_migration", added_by="migrate_env"
+        )
+        logger.info("✓ BLACKLIST_DOMAINS migrated into database successfully.")
+    except Exception:
+        logger.exception("Failed migrating BLACKLIST_DOMAINS into DB")
+        return
+
+
 def show_help():
     """Show help message."""
     help_text = """
@@ -175,6 +236,8 @@ Examples:
   python manage_db.py upgrade        # Apply all pending migrations
   python manage_db.py current        # Check current version
   python manage_db.py create "add user email field"  # Create new migration
+
+  python manage_db.py migrate-env-blacklist   # Migrate BLACKLIST_DOMAINS from .env to DB
 
 For more information, see the Alembic documentation:
 https://alembic.sqlalchemy.org/
@@ -197,6 +260,7 @@ def main():
         "current": show_current,
         "history": show_history,
         "create": lambda: create_migration(sys.argv[2] if len(sys.argv) > 2 else None),
+        "migrate-env-blacklist": migrate_env_blacklist,
         "help": show_help,
     }
 

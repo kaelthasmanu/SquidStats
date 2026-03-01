@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import func, inspect, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -15,6 +16,19 @@ def find_blacklisted_sites(
     inspector = inspect(engine)
     results = []
     total_results = 0
+
+    # If the blacklist is empty, return empty results immediately to avoid
+    # building invalid ORM `or_()` expressions.
+    if not blacklist:
+        return {
+            "results": [],
+            "pagination": {
+                "total": 0,
+                "page": page,
+                "per_page": per_page,
+                "total_pages": 0,
+            },
+        }
 
     try:
         all_tables = inspector.get_table_names()
@@ -118,9 +132,9 @@ def find_blacklisted_sites(
 
                 total_results += table_count
 
-    except SQLAlchemyError as e:
-        print(f"Database error: {e}")
-        return {"error": str(e)}
+    except SQLAlchemyError:
+        logger.exception("Database error while searching blacklisted sites")
+        return {"error": "Error interno del servidor"}
 
     return {
         "results": results,
@@ -139,6 +153,9 @@ def find_blacklisted_sites_by_date(
     results = []
 
     try:
+        # If no blacklist patterns provided, return empty list
+        if not blacklist:
+            return []
         date_suffix = specific_date.strftime("%Y%m%d")
         user_table = f"user_{date_suffix}"
         log_table = f"log_{date_suffix}"

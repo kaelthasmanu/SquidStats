@@ -12,7 +12,7 @@ from sqlalchemy import (
     inspect,
     text,
 )
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from alembic import command
 from config import Config
@@ -24,7 +24,7 @@ from database.models import (
     Notification,
     SystemMetrics,
 )
-from database.models.models import create_dynamic_models
+from database.models.models import BlacklistDomain, create_dynamic_models
 
 _engine = None
 _Session = None
@@ -215,6 +215,7 @@ def create_dynamic_tables(engine, date_suffix: str = None):
     DeniedLog.__table__.create(engine, checkfirst=True)
     SystemMetrics.__table__.create(engine, checkfirst=True)
     Notification.__table__.create(engine, checkfirst=True)  # Add notifications table
+    BlacklistDomain.__table__.create(engine, checkfirst=True)
 
     user_table_name, log_table_name = get_dynamic_table_names(date_suffix)
 
@@ -226,9 +227,12 @@ def create_dynamic_tables(engine, date_suffix: str = None):
         logger.info(
             f"Creating dynamic tables for date suffix '{date_suffix}': {user_table_name}, {log_table_name}"
         )
-        DynamicBase = declarative_base()
-
-        DynamicBase.metadata.create_all(engine, checkfirst=True)
+        # Use create_dynamic_models to define and create the per-day user/log tables
+        try:
+            create_dynamic_models(engine, user_table_name, log_table_name)
+        except Exception as e:
+            logger.error(f"Error creating dynamic user/log tables: {e}")
+            raise
 
 
 def get_dynamic_table_names(date_suffix: str = None) -> tuple[str, str]:
@@ -319,6 +323,7 @@ def migrate_database():
                     and inspector.has_table("system_metrics")
                     and inspector.has_table("notifications")
                     and inspector.has_table("admin_users")
+                    and inspector.has_table("blacklist_domains")
                 )
 
                 if core_tables_exist:
