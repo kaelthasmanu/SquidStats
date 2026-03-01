@@ -26,6 +26,8 @@ from services.blacklist_service import (
     save_custom_list,
     test_pihole_connection,
 )
+from database.database import get_session
+from database.models.models import BlacklistDomain
 from services.config_service import save_config as service_save_config
 from services.db_admin_service import delete_table_data as service_delete_table_data
 from services.db_info_service import get_tables_info as service_get_tables_info
@@ -248,8 +250,14 @@ def manage_http_access():
 def manage_blacklist():
     """Render the blacklist management UI."""
     env_vars = load_env_vars()
-    # Provide current blacklist domains to the template
-    blacklist = env_vars.get("BLACKLIST_DOMAINS", "")
+    # Provide current blacklist domains to the template — now read from DB
+    session = get_session()
+    try:
+        rows = session.query(BlacklistDomain).filter(BlacklistDomain.active == 1).order_by(BlacklistDomain.domain).all()
+        blacklist = ",".join([r.domain for r in rows])
+    finally:
+        session.close()
+
     return render_template(
         "admin/blacklist.html", env_vars=env_vars, blacklist=blacklist
     )
@@ -309,7 +317,7 @@ def blacklist_import():
 
     # Merge with existing and save
     try:
-        merge_and_save_blacklist(env_vars, domains)
+        merge_and_save_blacklist(domains)
         flash("Blacklist actualizada exitosamente", "success")
     except Exception as e:
         logger.exception("Error guardando BLACKLIST_DOMAINS")

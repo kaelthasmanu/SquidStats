@@ -1,7 +1,9 @@
 import requests
+from datetime import datetime
 from loguru import logger
 
-from services.admin_helpers import load_env_vars, save_env_vars
+from database.database import get_session
+from database.models.models import BlacklistDomain
 
 
 def test_pihole_connection(host: str, token: str | None = None) -> tuple[bool, str]:
@@ -72,19 +74,94 @@ def import_domains_from_url(url: str) -> tuple[bool, set, str]:
         return False, domains, str(e)
 
 
-def merge_and_save_blacklist(existing_env: dict, new_domains: set) -> None:
-    existing = [
-        d.strip()
-        for d in existing_env.get("BLACKLIST_DOMAINS", "").split(",")
-        if d.strip()
-    ]
-    merged = set(existing)
-    merged.update(new_domains)
-    existing_env["BLACKLIST_DOMAINS"] = ",".join(sorted(merged))
-    save_env_vars(existing_env)
+def merge_and_save_blacklist(new_domains: set, source: str = "import", source_url: str | None = None, added_by: str | None = None) -> None:
+    """Merge given domains into the `blacklist_domains` table.
+
+    - new_domains: set of domain strings
+    - source: string describing origin ('file', 'url', 'custom', ...)
+    - source_url: optional url if source is 'url'
+    - added_by: optional username who added the entries
+    """
+    if not new_domains:
+        return
+
+    session = get_session()
+    try:
+        now = datetime.now()
+        for domain in new_domains:
+            domain = domain.strip()
+            if not domain:
+                continue
+            existing = (
+                session.query(BlacklistDomain).filter(BlacklistDomain.domain == domain).one_or_none()
+            )
+            if existing:
+                # reactivate and update metadata if necessary
+                existing.active = 1
+                existing.source = source or existing.source
+                if source_url:
+                    existing.source_url = source_url
+                if added_by:
+                    existing.added_by = added_by
+                existing.updated_at = now
+            else:
+                record = BlacklistDomain(
+                    domain=domain,
+                    source=source,
+                    source_url=source_url,
+                    added_by=added_by,
+                    active=1,
+                    created_at=now,
+                    updated_at=now,
+                )
+                session.add(record)
+        session.commit()
+    except Exception as e:
+        logger.exception("Error guardando blacklist en DB")
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
-def save_custom_list(items: list) -> None:
-    env_vars = load_env_vars()
-    env_vars["BLACKLIST_DOMAINS"] = ",".join(sorted(set(items)))
-    save_env_vars(env_vars)
+def save_custom_list(items: list, added_by: str | None = None) -> None:
+    """Replace existing 'custom' source blacklist entries with `items`.
+
+    This keeps other sources intact.
+    """
+    session = get_session()
+    try:
+        # Deactivate previous custom entries
+        session.query(BlacklistDomain).filter(BlacklistDomain.source == "custom").update({"active": 0})
+
+        now = datetime.now()
+        for d in sorted(set(items)):
+            domain = d.strip()
+            if not domain:
+                continue
+            existing = (
+                session.query(BlacklistDomain).filter(BlacklistDomain.domain == domain).one_or_none()
+            )
+            if existing:
+                existing.active = 1
+                existing.source = "custom"
+                if added_by:
+                    existing.added_by = added_by
+                existing.updated_at = now
+            else:
+                record = BlacklistDomain(
+                    domain=domain,
+                    source="custom",
+                    added_by=added_by,
+                    active=1,
+                    created_at=now,
+                    updated_at=now,
+                )
+                session.add(record)
+        session.commit()
+    except Exception as e:
+        logger.exception("Error guardando lista personalizada en DB")
+        session.rollback()
+        raise
+    finally:
+        session.close()
