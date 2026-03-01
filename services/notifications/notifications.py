@@ -14,7 +14,7 @@ from database.database import Notification, get_session
 
 # Import Telegram integration (optional - fails gracefully if not configured)
 try:
-    from services.telegram_integration import send_telegram_notification
+    from services.notifications.telegram_integration import send_telegram_notification
 
     TELEGRAM_AVAILABLE = True
 except Exception as e:
@@ -610,7 +610,7 @@ def notify_squid_high_usage(warning_message: str):
 def check_security_events():
     """Checks security events from the database"""
     try:
-        from services.auditoria_service import (
+        from services.analytics.auditoria_service import (
             # find_suspicious_activity,
             get_denied_requests,
             get_failed_auth_attempts,
@@ -684,7 +684,7 @@ def check_security_events():
 def check_user_activity():
     """Checks user activity from the database"""
     try:
-        from services.auditoria_service import (
+        from services.analytics.auditoria_service import (
             get_active_users_count,
             get_high_usage_users,
         )

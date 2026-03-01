@@ -3,7 +3,7 @@ from sqlalchemy import inspect
 
 from config import Config
 from database.database import get_engine, get_session
-from services.admin_helpers import get_table_row_count, get_table_size
+from services.database.admin_helpers import get_table_row_count, get_table_size
 
 
 def get_tables_info():

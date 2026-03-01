@@ -5,8 +5,8 @@ from loguru import logger
 
 from database.database import get_session
 from database.models.models import BlacklistDomain
-from services.blacklist_users import find_blacklisted_sites
-from services.fetch_data_logs import get_users_logs
+from services.analytics.blacklist_users import find_blacklisted_sites
+from services.analytics.fetch_data_logs import get_users_logs
 
 logs_bp = Blueprint("logs", __name__)
 

@@ -2,49 +2,58 @@ name: Code Quality & Security
 
 on:
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
   push:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
   schedule:
-    - cron: '0 2 * * 1' # Weekly on Monday at 2 AM
+    - cron: "0 2 * * 1" # Weekly Monday 2 AM
 
-# Set permissions for security scanning
 permissions:
   contents: read
   security-events: write
   pull-requests: write
 
-# Cancel previous runs if a new one is triggered
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  PYTHONUNBUFFERED: 1
+
 jobs:
+
+  # =========================
+  # 🔍 QUALITY CHECK
+  # =========================
   quality-check:
     name: Quality Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
-    
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: pip
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libicapapi-dev python3-dev libpq-dev
+          sudo apt-get install -y \
+            build-essential \
+            libssl-dev \
+            libicapapi-dev \
+            python3-dev \
+            libpq-dev
 
       - name: Install dependencies
         run: |
@@ -52,69 +61,66 @@ jobs:
           pip install ruff mypy
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run Ruff linter
+      - name: Run Ruff Linter
         run: ruff check . --output-format=github
 
-      - name: Run Ruff formatter check
+      - name: Run Ruff Formatter Check
         run: ruff format . --check
 
-      - name: Run MyPy type checker
-        run: mypy . --ignore-missing-imports || true
+      - name: Run MyPy
+        run: mypy . --ignore-missing-imports
 
-      - name: Test import structure
+      - name: Validate Critical Imports
         run: |
-          python -c "
-          import sys
-          import os
-          sys.path.insert(0, os.getcwd())
-          
-          # Test core imports
-          try:
-              from database.database import get_session, SystemMetrics
-              from services.system_info import get_cpu_info, get_ram_info, get_network_stats
-              from parsers.log import parse_log_line, process_logs
-              from services.metrics_service import MetricsService
-          except Exception as e:
-              print(f'❌ Core import error: {e}')
-              sys.exit(1)
-          
-          # Test optional imports
-          try:
-              from services.auditoria_service import get_all_usernames
-              from services.blacklist_users import find_blacklisted_sites
-          except Exception as e:
-              print(f'⚠️ Optional import warning: {e}')
-              # No exit here, just warning
-          
-          print('✅ All critical imports successful')
-          "
+          python << 'EOF'
+import sys, os
+sys.path.insert(0, os.getcwd())
 
+try:
+    from database.database import get_session, SystemMetrics
+    from database.models.models import BlacklistDomain
+    from services.system.system_info import get_cpu_info, get_ram_info, get_network_stats
+    from services.system.metrics_service import MetricsService
+    from parsers.log import parse_log_line, process_logs
+    print("✅ Core imports OK")
+except Exception as e:
+    print(f"❌ Core import error: {e}")
+    sys.exit(1)
+
+print("✔ Import validation completed")
+EOF
+
+  # =========================
+  # 🧪 TEST SUITE
+  # =========================
   test-suite:
     name: Test Suite
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: quality-check
+
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: pip
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libicapapi-dev python3-dev libpq-dev
+          sudo apt-get install -y \
+            build-essential \
+            libssl-dev \
+            libicapapi-dev \
+            python3-dev \
+            libpq-dev
 
       - name: Install dependencies
         run: |
@@ -122,175 +128,154 @@ jobs:
           pip install pytest pytest-cov pytest-xdist
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run tests
+      - name: Run Tests
         run: |
           if [ -d "tests" ]; then
-            pytest tests/ -v --cov=. --cov-report=xml --cov-report=html --tb=short || true
+            pytest tests/ -v \
+              --cov=. \
+              --cov-report=xml \
+              --cov-report=html \
+              --tb=short
           else
-            echo "No tests directory found, skipping tests"
+            echo "No tests directory found, skipping."
           fi
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+      - name: Upload Coverage (only 3.11)
         if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           fail_ci_if_error: false
-          verbose: true
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+      - name: Upload Coverage Artifact
         if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: htmlcov/
           retention-days: 30
 
+  # =========================
+  # 🗄 DATABASE VALIDATION
+  # =========================
   database-check:
     name: Database Validation
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: quality-check
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: 'pip'
-      
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libicapapi-dev python3-dev
+          cache: pip
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Test database creation
+      - name: Validate Database Creation
         run: |
-          python -c "
-          import sys
-          import os
-          sys.path.insert(0, os.getcwd())
-          
-          try:
-              from database.database import get_engine, create_dynamic_tables
-              engine = get_engine()
-              create_dynamic_tables(engine)
-          except Exception as e:
-              print(f'❌ Database test error: {e}')
-              sys.exit(1)
-          "
+          python << 'EOF'
+import sys, os
+sys.path.insert(0, os.getcwd())
 
+try:
+    from database.database import get_engine, create_dynamic_tables
+    engine = get_engine()
+    create_dynamic_tables(engine)
+    print("✅ Database validation successful")
+except Exception as e:
+    print(f"❌ Database error: {e}")
+    sys.exit(1)
+EOF
+
+  # =========================
+  # ⚙ CONFIG VALIDATION
+  # =========================
   config-validation:
     name: Configuration Validation
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: quality-check
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install validation deps
+        run: pip install pyyaml
+
+      - name: Validate YAML & JSON
         run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
+          python << 'EOF'
+import yaml, json, os, sys
 
-      - name: Validate YAML files
-        run: |
-          python -c "
-          import yaml
-          import os
-          
-          yaml_files = []
-          for root, dirs, files in os.walk('.'):
-              for file in files:
-                  if file.endswith('.yml') or file.endswith('.yaml'):
-                      yaml_files.append(os.path.join(root, file))
-          
-          for yaml_file in yaml_files:
-              try:
-                  with open(yaml_file, 'r') as f:
-                      yaml.safe_load(f)
-              except yaml.YAMLError as e:
-                  print(f'❌ {yaml_file} is invalid: {e}')
-                  exit(1)
-          "
+for root, _, files in os.walk('.'):
+    for file in files:
+        path = os.path.join(root, file)
 
-      - name: Validate JSON files
-        run: |
-          python -c "
-          import json
-          import os
-          
-          json_files = []
-          for root, dirs, files in os.walk('.'):
-              for file in files:
-                  if file.endswith('.json'):
-                      json_files.append(os.path.join(root, file))
-          
-          for json_file in json_files:
-              try:
-                  with open(json_file, 'r') as f:
-                      json.load(f)
-              except json.JSONDecodeError as e:
-                  print(f'❌ {json_file} is invalid: {e}')
-                  exit(1)
-          "
+        if file.endswith(('.yml', '.yaml')):
+            try:
+                with open(path) as f:
+                    yaml.safe_load(f)
+            except Exception as e:
+                print(f"❌ Invalid YAML: {path} -> {e}")
+                sys.exit(1)
 
+        if file.endswith('.json'):
+            try:
+                with open(path) as f:
+                    json.load(f)
+            except Exception as e:
+                print(f"❌ Invalid JSON: {path} -> {e}")
+                sys.exit(1)
+
+print("✅ Configuration files valid")
+EOF
+
+  # =========================
+  # 🔐 SECURITY SCAN
+  # =========================
   security-check:
     name: Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: quality-check
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: 'pip'
 
       - name: Install security tools
         run: |
           python -m pip install --upgrade pip
           pip install bandit safety
 
-      - name: Run Bandit security scan
+      - name: Run Bandit
         run: |
           bandit -r . -x tests/ -f json -o bandit-report.json || true
           bandit -r . -x tests/ -f txt || true
-        continue-on-error: true
 
-      - name: Check for known vulnerabilities
+      - name: Run Safety
         run: |
           if [ -f requirements.txt ]; then
-            safety check -r requirements.txt --json --output safety-report.json || true
-            safety check -r requirements.txt || true
-          else
-            echo "No requirements.txt found, skipping safety check"
+            safety check -r requirements.txt \
+              --json --output safety-report.json || true
           fi
-        continue-on-error: true
 
-      - name: Upload security reports
-        uses: actions/upload-artifact@v4
+      - name: Upload Security Reports
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: security-reports
           path: |

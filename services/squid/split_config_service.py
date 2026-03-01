@@ -2,7 +2,7 @@ import os
 
 from loguru import logger
 
-from services.squid_config_splitter import SquidConfigSplitter
+from services.squid.squid_config_splitter import SquidConfigSplitter
 
 
 def get_split_view_data():
