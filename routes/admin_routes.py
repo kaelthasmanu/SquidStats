@@ -11,10 +11,45 @@ from flask import (
 from loguru import logger
 
 from config import Config
+from services.acls_service import add_acl as service_add_acl
+from services.acls_service import delete_acl as service_delete_acl
+from services.acls_service import edit_acl as service_edit_acl
+from services.admin_helpers import (
+    load_env_vars,
+    save_env_vars,
+)
 from services.auth_service import AuthService, admin_required, api_auth_required
+from services.blacklist_service import (
+    import_domains_from_file,
+    import_domains_from_url,
+    merge_and_save_blacklist,
+    save_custom_list,
+    test_pihole_connection,
+)
 from services.config_service import save_config as service_save_config
 from services.db_admin_service import delete_table_data as service_delete_table_data
 from services.db_info_service import get_tables_info as service_get_tables_info
+from services.delay_pools_service import (
+    add_delay_pool as service_add_delay_pool,
+)
+from services.delay_pools_service import (
+    delete_delay_pool as service_delete_delay_pool,
+)
+from services.delay_pools_service import (
+    edit_delay_pool as service_edit_delay_pool,
+)
+from services.http_access_service import (
+    add_http_access as service_add_http_access,
+)
+from services.http_access_service import (
+    delete_http_access as service_delete_http_access,
+)
+from services.http_access_service import (
+    edit_http_access as service_edit_http_access,
+)
+from services.http_access_service import (
+    move_http_access as service_move_http_access,
+)
 from services.logs_service import read_logs as service_read_logs
 from services.split_config_service import (
     get_split_files_info as service_get_split_files_info,
@@ -50,41 +85,6 @@ admin_bp = Blueprint("admin", __name__)
 
 # Global manager instance
 config_manager = SquidConfigManager()
-from services.acls_service import add_acl as service_add_acl
-from services.acls_service import delete_acl as service_delete_acl
-from services.acls_service import edit_acl as service_edit_acl
-from services.admin_helpers import (
-    load_env_vars,
-    save_env_vars,
-)
-from services.blacklist_service import (
-    import_domains_from_file,
-    import_domains_from_url,
-    merge_and_save_blacklist,
-    save_custom_list,
-    test_pihole_connection,
-)
-from services.delay_pools_service import (
-    add_delay_pool as service_add_delay_pool,
-)
-from services.delay_pools_service import (
-    delete_delay_pool as service_delete_delay_pool,
-)
-from services.delay_pools_service import (
-    edit_delay_pool as service_edit_delay_pool,
-)
-from services.http_access_service import (
-    add_http_access as service_add_http_access,
-)
-from services.http_access_service import (
-    delete_http_access as service_delete_http_access,
-)
-from services.http_access_service import (
-    edit_http_access as service_edit_http_access,
-)
-from services.http_access_service import (
-    move_http_access as service_move_http_access,
-)
 
 
 @admin_bp.route("/")

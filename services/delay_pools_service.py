@@ -57,7 +57,7 @@ def edit_delay_pool(
         new_directives = []
         new_directives.append(f"delay_class {pool_number} {pool_class}")
         new_directives.append(f"delay_parameters {pool_number} {parameters}")
-        for action, acl in zip(access_actions, access_acls):
+        for action, acl in zip(access_actions, access_acls, strict=False):
             if acl.strip():
                 new_directives.append(f"delay_access {pool_number} {action} {acl}")
 
@@ -136,7 +136,7 @@ def add_delay_pool(
         new_directives = []
         new_directives.append(f"delay_class {pool_number} {pool_class}")
         new_directives.append(f"delay_parameters {pool_number} {parameters}")
-        for action, acl in zip(access_actions, access_acls):
+        for action, acl in zip(access_actions, access_acls, strict=False):
             if acl.strip():
                 new_directives.append(f"delay_access {pool_number} {action} {acl}")
 
