@@ -56,7 +56,6 @@ def split_config(strict=False):
         return {
             "status": "error",
             "message": "Error interno al dividir la configuración",
-            "details": str(e),
         }, 500
 
 
