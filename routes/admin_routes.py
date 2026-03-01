@@ -11,6 +11,8 @@ from flask import (
 from loguru import logger
 
 from config import Config
+from database.database import get_session
+from database.models.models import BlacklistDomain
 from services.acls_service import add_acl as service_add_acl
 from services.acls_service import delete_acl as service_delete_acl
 from services.acls_service import edit_acl as service_edit_acl
@@ -26,8 +28,6 @@ from services.blacklist_service import (
     save_custom_list,
     test_pihole_connection,
 )
-from database.database import get_session
-from database.models.models import BlacklistDomain
 from services.config_service import save_config as service_save_config
 from services.db_admin_service import delete_table_data as service_delete_table_data
 from services.db_info_service import get_tables_info as service_get_tables_info

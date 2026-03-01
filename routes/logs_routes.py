@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from flask import Blueprint, jsonify, render_template, request
@@ -83,7 +82,7 @@ def blacklist_logs():
                 .all()
             )
             blacklist = [r.domain for r in rows]
-        except Exception as e:
+        except Exception:
             logger.exception("Error leyendo blacklist desde DB")
             return render_template(
                 "error.html", message="Error leyendo blacklist desde la base de datos"

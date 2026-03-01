@@ -12,7 +12,7 @@ from sqlalchemy import (
     inspect,
     text,
 )
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from alembic import command
 from config import Config
@@ -24,8 +24,7 @@ from database.models import (
     Notification,
     SystemMetrics,
 )
-from database.models.models import BlacklistDomain
-from database.models.models import create_dynamic_models
+from database.models.models import BlacklistDomain, create_dynamic_models
 
 _engine = None
 _Session = None

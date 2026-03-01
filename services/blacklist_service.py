@@ -1,5 +1,6 @@
-import requests
 from datetime import datetime
+
+import requests
 from loguru import logger
 
 from database.database import get_session
@@ -74,7 +75,12 @@ def import_domains_from_url(url: str) -> tuple[bool, set, str]:
         return False, domains, str(e)
 
 
-def merge_and_save_blacklist(new_domains: set, source: str = "import", source_url: str | None = None, added_by: str | None = None) -> None:
+def merge_and_save_blacklist(
+    new_domains: set,
+    source: str = "import",
+    source_url: str | None = None,
+    added_by: str | None = None,
+) -> None:
     """Merge given domains into the `blacklist_domains` table.
 
     - new_domains: set of domain strings
@@ -93,7 +99,9 @@ def merge_and_save_blacklist(new_domains: set, source: str = "import", source_ur
             if not domain:
                 continue
             existing = (
-                session.query(BlacklistDomain).filter(BlacklistDomain.domain == domain).one_or_none()
+                session.query(BlacklistDomain)
+                .filter(BlacklistDomain.domain == domain)
+                .one_or_none()
             )
             if existing:
                 # reactivate and update metadata if necessary
@@ -116,7 +124,7 @@ def merge_and_save_blacklist(new_domains: set, source: str = "import", source_ur
                 )
                 session.add(record)
         session.commit()
-    except Exception as e:
+    except Exception:
         logger.exception("Error guardando blacklist en DB")
         session.rollback()
         raise
@@ -132,7 +140,9 @@ def save_custom_list(items: list, added_by: str | None = None) -> None:
     session = get_session()
     try:
         # Deactivate previous custom entries
-        session.query(BlacklistDomain).filter(BlacklistDomain.source == "custom").update({"active": 0})
+        session.query(BlacklistDomain).filter(
+            BlacklistDomain.source == "custom"
+        ).update({"active": 0})
 
         now = datetime.now()
         for d in sorted(set(items)):
@@ -140,7 +150,9 @@ def save_custom_list(items: list, added_by: str | None = None) -> None:
             if not domain:
                 continue
             existing = (
-                session.query(BlacklistDomain).filter(BlacklistDomain.domain == domain).one_or_none()
+                session.query(BlacklistDomain)
+                .filter(BlacklistDomain.domain == domain)
+                .one_or_none()
             )
             if existing:
                 existing.active = 1
@@ -159,7 +171,7 @@ def save_custom_list(items: list, added_by: str | None = None) -> None:
                 )
                 session.add(record)
         session.commit()
-    except Exception as e:
+    except Exception:
         logger.exception("Error guardando lista personalizada en DB")
         session.rollback()
         raise
