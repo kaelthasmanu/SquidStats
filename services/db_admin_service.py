@@ -38,7 +38,7 @@ def delete_table_data(table_name: str):
 
         return {
             "status": "success",
-            "message": f"Datos de la tabla '{table_name}' eliminados correctamente",
+            "message": "Datos de la tabla eliminados correctamente",
         }, 200
 
     except Exception:

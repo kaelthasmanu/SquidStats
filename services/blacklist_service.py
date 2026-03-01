@@ -1,5 +1,9 @@
 from datetime import datetime
 
+import ipaddress
+import socket
+import urllib.parse
+
 import requests
 from loguru import logger
 
@@ -52,10 +56,67 @@ def import_domains_from_file(file_storage) -> set:
     return domains
 
 
+def _validate_import_url(url: str) -> str:
+    """Validate a user-provided URL to prevent SSRF.
+
+    - allow only http/https schemes
+    - require a hostname (netloc)
+    - disallow embedded credentials
+    - resolve hostname and reject private/loopback/link-local/multicast/reserved/unspecified IPs
+
+    Returns the original URL if validation passes, otherwise raises ValueError.
+    """
+    parsed = urllib.parse.urlparse(url)
+
+    scheme = (parsed.scheme or "").lower()
+    if scheme not in ("http", "https"):
+        raise ValueError("Esquema inválido: solo se permiten http/https")
+
+    if not parsed.netloc:
+        raise ValueError("URL inválida: falta host")
+
+    # Disallow URLs containing credentials
+    if parsed.username or parsed.password:
+        raise ValueError("URLs con credenciales no permitidas")
+
+    hostname = parsed.hostname
+    if not hostname:
+        raise ValueError("URL inválida: hostname no encontrado")
+
+    try:
+        infos = socket.getaddrinfo(hostname, None)
+    except Exception:
+        raise ValueError("No se pudo resolver el host")
+
+    for info in infos:
+        addr = info[4][0]
+        try:
+            ip = ipaddress.ip_address(addr)
+        except Exception:
+            # If we can't parse the IP, be conservative and reject
+            raise ValueError("Dirección de host inválida")
+
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_multicast
+            or ip.is_reserved
+            or ip.is_unspecified
+        ):
+            raise ValueError("URLs hacia direcciones internas no están permitidas")
+
+    # Passed all checks
+    return url
+
+
 def import_domains_from_url(url: str) -> tuple[bool, set, str]:
     domains = set()
     try:
-        resp = requests.get(url, timeout=8)
+        # Validate URL to prevent SSRF targeting internal addresses
+        safe_url = _validate_import_url(url)
+        # Disable redirects to avoid being redirected to internal addresses
+        resp = requests.get(safe_url, timeout=8, allow_redirects=False)
         if resp.status_code != 200:
             return False, domains, f"Error al descargar la lista: {resp.status_code}"
 
@@ -70,9 +131,12 @@ def import_domains_from_url(url: str) -> tuple[bool, set, str]:
                 domain = line
             domains.add(domain)
         return True, domains, ""
-    except Exception as e:
+    except ValueError as ve:
+        logger.warning("Blocked unsafe import URL: %s", url)
+        return False, domains, str(ve)
+    except Exception:
         logger.exception("Error descargando lista desde URL")
-        return False, domains, str(e)
+        return False, domains, "Error descargando lista desde URL"
 
 
 def merge_and_save_blacklist(
