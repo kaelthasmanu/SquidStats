@@ -80,7 +80,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <textarea name="custom_list" rows="6" class="w-full p-3 border rounded" placeholder="example.com
 example.org
-"></textarea>
+">{{ blacklist }}</textarea>
             <div class="flex gap-2">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar</button>
                 <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>

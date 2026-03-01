@@ -253,8 +253,15 @@ def manage_blacklist():
     # Provide current blacklist domains to the template — now read from DB
     session = get_session()
     try:
-        rows = session.query(BlacklistDomain).filter(BlacklistDomain.active == 1).order_by(BlacklistDomain.domain).all()
-        blacklist = ",".join([r.domain for r in rows])
+        # Only show entries that were added via the 'custom' source
+        rows = (
+            session.query(BlacklistDomain)
+            .filter(BlacklistDomain.active == 1, BlacklistDomain.source == "custom")
+            .order_by(BlacklistDomain.domain)
+            .all()
+        )
+        # Provide domains separated by newlines so the custom textarea can be pre-filled
+        blacklist = "\n".join([r.domain for r in rows])
     finally:
         session.close()
 
