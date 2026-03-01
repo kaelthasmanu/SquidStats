@@ -64,17 +64,18 @@ jobs:
       - name: Test import structure
         run: |
           python -c "
-          import sys
-          import os
-          sys.path.insert(0, os.getcwd())
-          
-          # Test core imports
-          try:
+            import sys
+            import os
+            sys.path.insert(0, os.getcwd())
+
+            # Test core imports
+            try:
               from database.database import get_session, SystemMetrics
-              from services.system_info import get_cpu_info, get_ram_info, get_network_stats
+              from database.models.models import BlacklistDomain
+              from services.system.system_info import get_cpu_info, get_ram_info, get_network_stats
+              from services.system.metrics_service import MetricsService
               from parsers.log import parse_log_line, process_logs
-              from services.metrics_service import MetricsService
-          except Exception as e:
+            except Exception as e:
               print(f'❌ Core import error: {e}')
               sys.exit(1)
           
