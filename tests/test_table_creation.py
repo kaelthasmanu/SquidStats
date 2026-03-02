@@ -7,9 +7,9 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import unittest
 
-from sqlalchemy import inspect
+from sqlalchemy import MetaData, inspect
 
-from database.database import Base, get_dynamic_table_names, get_engine
+from database.database import get_dynamic_table_names, get_engine
 from parsers.log import DatabaseManager
 
 
@@ -29,8 +29,10 @@ class TestTableCreation(unittest.TestCase):
         self.connection.close()
 
     def test_table_creation(self):
-        # Drop all tables to simulate a fresh database
-        Base.metadata.drop_all(self.engine)
+        # Drop ALL tables (static + dynamic) to simulate a fresh database
+        meta = MetaData()
+        meta.reflect(bind=self.engine)
+        meta.drop_all(bind=self.engine)
 
         # Verify tables do not exist initially
         inspector = inspect(self.engine)
