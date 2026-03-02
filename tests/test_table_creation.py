@@ -9,7 +9,7 @@ import unittest
 
 from sqlalchemy import inspect
 
-from database.database import Base, get_engine, get_table_names
+from database.database import Base, get_engine, get_dynamic_table_names
 from parsers.log import DatabaseManager
 
 
@@ -35,7 +35,7 @@ class TestTableCreation(unittest.TestCase):
         # Verify tables do not exist initially
         inspector = inspect(self.engine)
         current_tables = inspector.get_table_names()
-        table_names = get_table_names()
+        table_names = get_dynamic_table_names()
         for table in table_names:
             self.assertNotIn(table, current_tables)
 
