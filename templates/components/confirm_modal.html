@@ -7,10 +7,10 @@
         </div>
         <p id="confirmMessage" class="text-gray-600 mb-6"></p>
         <div class="flex justify-end space-x-3">
-            <button onclick="hideConfirmModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors">
+            <button id="confirmCancelBtn" onclick="hideConfirmModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors">
                 Cancelar
             </button>
-            <button onclick="executeConfirmCallback()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+            <button id="confirmConfirmBtn" onclick="executeConfirmCallback()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
                 Confirmar
             </button>
         </div>

@@ -35,6 +35,8 @@ from services.database.db_admin_service import (
 )
 from services.database.db_info_service import get_tables_info as service_get_tables_info
 from services.security.blacklist_service import (
+    delete_blacklist_by_source_url,
+    get_url_blacklists_with_counts,
     import_domains_from_file,
     import_domains_from_url,
     merge_and_save_blacklist,
@@ -270,8 +272,12 @@ def manage_blacklist():
     finally:
         session.close()
 
+    url_lists = get_url_blacklists_with_counts()
     return render_template(
-        "admin/blacklist.html", env_vars=env_vars, blacklist=blacklist
+        "admin/blacklist.html",
+        env_vars=env_vars,
+        blacklist=blacklist,
+        url_lists=url_lists,
     )
 
 
@@ -755,3 +761,15 @@ def get_split_files():
     if result.get("status") == "success":
         return jsonify(result)
     return jsonify(result), result.get("code", 500)
+
+
+@admin_bp.route("/blacklist/delete-list", methods=["POST"])
+@admin_required
+def blacklist_delete_list():
+    url = request.form.get("source_url")
+    if not url:
+        flash("URL no proporcionada", "error")
+        return redirect(url_for("admin.manage_blacklist"))
+    count = delete_blacklist_by_source_url(url)
+    flash(f"Lista eliminada: {url} ({count} dominios)", "success")
+    return redirect(url_for("admin.manage_blacklist"))

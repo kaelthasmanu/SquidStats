@@ -1,6 +1,7 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
+{% include 'components/confirm_modal.html' %}
 <div x-data="{ activeTab: 'pihole' }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Blacklist - Gestor de Listas</h2>
 
@@ -61,7 +62,95 @@
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Agregar Lista</button>
             </div>
         </form>
+        {% if url_lists %}
+        <div class="mt-6">
+            <h4 class="text-md font-semibold mb-2 text-gray-700">Listas importadas</h4>
+            <ul class="divide-y divide-gray-200 bg-white rounded shadow">
+                {% for item in url_lists %}
+                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                    <div class="flex flex-col">
+                        <span class="font-mono text-blue-700 text-sm truncate max-w-xs md:max-w-md" title="{{ item.source_url }}">{{ item.source_url }}</span>
+                        <span class="text-xs text-gray-500">{{ item.count }} dominios</span>
+                    </div>
+                    <form method="POST" action="/admin/blacklist/delete-list" class="ml-4 delete-list-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="source_url" value="{{ item.source_url }}"/>
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-semibold shadow delete-list-btn">Eliminar</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
+
+
+
+    <!-- Modal de confirmación para eliminar lista -->
+    <div id="deleteListModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h3 class="text-lg font-semibold text-red-600 mb-2 flex items-center gap-2">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/></svg>
+                Confirmar eliminación
+            </h3>
+            <div class="mb-4">
+                <p class="text-gray-700">¿Estás seguro de que deseas eliminar la siguiente lista?</p>
+                <div class="bg-gray-100 rounded p-2 mt-2">
+                    <span id="modalListUrl" class="font-mono text-blue-700 text-sm break-all"></span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Esta acción es irreversible y eliminará todos los dominios asociados.</p>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button id="cancelDeleteListBtn" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancelar</button>
+                <button id="confirmDeleteListBtn" class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white font-semibold">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Reutiliza el modal de confirmación global
+    document.addEventListener('DOMContentLoaded', function() {
+        let pendingDeleteForm = null;
+        document.querySelectorAll('.delete-list-form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                pendingDeleteForm = form;
+                const url = form.querySelector('input[name="source_url"]').value;
+                showCustomConfirm(
+                    `¿Estás seguro de que deseas eliminar la siguiente lista?\n\nURL: ${url}\n\nEsta acción es irreversible y eliminará todos los dominios asociados.`,
+                    function() {
+                        if (pendingDeleteForm) {
+                            pendingDeleteForm.submit();
+                            pendingDeleteForm = null;
+                        }
+                    }
+                );
+            });
+        });
+
+        // Validación para evitar agregar listas duplicadas
+        const addListForm = document.querySelector('form[action="/admin/blacklist/import"]');
+        if (addListForm) {
+            addListForm.addEventListener('submit', function(e) {
+                const input = addListForm.querySelector('input[name="url"]');
+                if (!input) return;
+                const newUrl = input.value.trim();
+                if (!newUrl) return;
+                // Recolectar URLs ya existentes
+                const existingUrls = Array.from(document.querySelectorAll('input[name="source_url"]'))
+                    .map(el => el.value.trim());
+                if (existingUrls.includes(newUrl)) {
+                    showCustomConfirm(
+                        'La lista ya existe en el sistema. No puedes agregar la misma URL dos veces.',
+                        function() {}, // Solo cerrar
+                        { onlyClose: true }
+                    );
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+    </script>
 
     <!-- DNSmasq Tab -->
     <div x-show="activeTab === 'dnsmasq'" class="mt-6">
