@@ -1,0 +1,22 @@
+<!-- components/loading_spinner.html -->
+<div id="importLoadingOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-sm" role="status" aria-live="polite" aria-label="Importando lista">
+    <div class="w-full max-w-sm mx-4 rounded-2xl border border-white/20 bg-white/95 shadow-2xl p-6 text-center">
+        <div class="relative mx-auto mb-5 h-20 w-20">
+            <div class="absolute inset-0 rounded-full border-4 border-blue-200"></div>
+            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 border-r-blue-500 animate-spin"></div>
+            <div class="absolute inset-2 rounded-full border-4 border-transparent border-b-cyan-500 border-l-cyan-400 animate-spin" style="animation-direction: reverse; animation-duration: 1.2s;"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="h-3 w-3 rounded-full bg-blue-600 animate-pulse"></div>
+            </div>
+        </div>
+
+        <p id="importLoadingTitle" class="text-base sm:text-lg font-semibold text-slate-800">Importando lista de bloqueo</p>
+        <p id="importLoadingSubtitle" class="mt-1 text-sm text-slate-500">Validando URL y procesando dominios...</p>
+
+        <div class="mt-4 flex items-center justify-center gap-1.5">
+            <span class="h-2 w-2 rounded-full bg-blue-600 animate-bounce"></span>
+            <span class="h-2 w-2 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 150ms;"></span>
+            <span class="h-2 w-2 rounded-full bg-cyan-500 animate-bounce" style="animation-delay: 300ms;"></span>
+        </div>
+    </div>
+</div>

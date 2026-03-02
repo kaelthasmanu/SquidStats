@@ -1,9 +1,23 @@
 // Confirm Modal Component Logic
 let confirmCallback = null;
 
-function showCustomConfirm(message, callback) {
-    document.getElementById('confirmMessage').innerHTML = message;
+function showCustomConfirm(message, callback, options = {}) {
+    document.getElementById('confirmMessage').textContent = message;
     confirmCallback = callback;
+    // Polimorfismo visual: solo botón cerrar
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+    const confirmBtn = document.getElementById('confirmConfirmBtn');
+    if (options.onlyClose) {
+        cancelBtn.classList.add('hidden');
+        confirmBtn.textContent = 'Cerrar';
+        confirmBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+        confirmBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+    } else {
+        cancelBtn.classList.remove('hidden');
+        confirmBtn.textContent = 'Confirmar';
+        confirmBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        confirmBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+    }
     document.getElementById('confirmModal').classList.remove('hidden');
 }
 
