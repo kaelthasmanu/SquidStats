@@ -27,7 +27,10 @@
 
     <!-- Pi-hole Tab -->
     <div x-show="activeTab === 'pihole'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Integración Pi-hole</h3>
+        <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+            Integración Pi-hole
+            <span class="inline-block bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-0.5 rounded align-middle border border-yellow-300 shadow-sm animate-pulse" title="Funcionalidad en Beta">BETA</span>
+        </h3>
         <p class="text-sm text-gray-600 mb-4">Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí puedes configurar conexión y ver el estado.</p>
 
         <form method="POST" action="/admin/blacklist/test-connection" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -170,7 +173,10 @@
 
     <!-- DNSmasq Tab -->
     <div x-show="activeTab === 'dnsmasq'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">DNSmasq</h3>
+        <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+            DNSmasq
+            <span class="inline-block bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-0.5 rounded align-middle border border-yellow-300 shadow-sm animate-pulse" title="Funcionalidad en Beta">BETA</span>
+        </h3>
         <p class="text-sm text-gray-600 mb-4">Exporta o importa reglas en formato compatible con dnsmasq.</p>
         <div class="bg-gray-50 p-4 rounded border">
             <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Exportar archivo hosts</button>
