@@ -1,4 +1,3 @@
-from sqlalchemy import func
 import ipaddress
 import re
 import socket
@@ -10,6 +9,7 @@ from typing import NamedTuple
 import requests
 import requests.adapters
 from loguru import logger
+from sqlalchemy import func
 
 from database.database import get_session
 from database.models.models import BlacklistDomain
@@ -478,6 +478,7 @@ def save_custom_list(items: list, added_by: str | None = None) -> None:
     finally:
         session.close()
 
+
 def get_url_blacklists_with_counts() -> list[dict]:
     session = get_session()
     try:
@@ -487,21 +488,22 @@ def get_url_blacklists_with_counts() -> list[dict]:
             .group_by(BlacklistDomain.source_url)
             .all()
         )
-        return [
-            {"source_url": url, "count": count}
-            for url, count in results
-        ]
+        return [{"source_url": url, "count": count} for url, count in results]
     except Exception:
         logger.exception("Error obteniendo conteos de blacklists por URL")
         return []
     finally:
         session.close()
+
+
 def delete_blacklist_by_source_url(source_url: str) -> int:
     session = get_session()
     try:
-        count = session.query(BlacklistDomain).filter(
-            BlacklistDomain.source_url == source_url
-        ).delete(synchronize_session=False)
+        count = (
+            session.query(BlacklistDomain)
+            .filter(BlacklistDomain.source_url == source_url)
+            .delete(synchronize_session=False)
+        )
         session.commit()
         return count
     except Exception:
