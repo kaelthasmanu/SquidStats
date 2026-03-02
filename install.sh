@@ -343,7 +343,6 @@ SQUID_LOG=/var/log/squid/access.log
 SQUID_CACHE_LOG=/var/log/squid/cache.log
 DATABASE_STRING_CONNECTION=$install_dir/squidstats.db
 REFRESH_INTERVAL=60
-BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
 HTTP_PROXY=""
 HTTPS_PROXY=
 NO_PROXY=
@@ -352,28 +351,6 @@ ACL_FILES_DIR=/etc/squid/config/acls
 LISTEN_HOST=0.0.0.0
 LISTEN_PORT=5000
 FIRST_PASSWORD="admin"else
-        echo "Instalando aplicación web..."
-        checkPackages
-
-        # Detectar si ya estamos en el directorio del repo (CI/desarrollo local)
-        if [ "$NON_INTERACTIVE" = true ] && [ -f "app.py" ] && [ -f "requirements.txt" ]; then
-            echo "Modo CI/local detectado: usando repositorio actual en $(pwd)"
-            install_dir="$(pwd)"
-        else
-            if ! updateOrCloneRepo; then
-                error "Error al obtener el repositorio"
-                exit 1
-            fi
-            install_dir="/opt/SquidStats"
-        fi
-
-        checkSquidLog || true
-        installDependencies "$install_dir"
-        createEnvFile "$install_dir"
-        configureDatabase "$install_dir"
-        createService "$install_dir"
-
-        ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
 JWT_EXPIRY_HOURS=24
 MAX_LOGIN_ATTEMPTS=5
 LOCKOUT_DURATION_MINUTES=15
