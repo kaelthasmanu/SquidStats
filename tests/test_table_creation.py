@@ -9,7 +9,7 @@ import unittest
 
 from sqlalchemy import inspect
 
-from database.database import Base, get_engine, get_dynamic_table_names
+from database.database import Base, get_dynamic_table_names, get_engine
 from parsers.log import DatabaseManager
 
 
