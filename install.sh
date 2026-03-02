@@ -542,9 +542,7 @@ main() {
         echo "Verificando paquetes instalados..."
         checkPackages
         echo "Actualizando Servicio..."
-        if ! updateOrCloneRepo; then
-            return 1
-        fi
+        updateOrCloneRepo
         
         # Find the installation directory
         local install_dir=$(findInstallDir)
