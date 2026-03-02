@@ -2,6 +2,7 @@
 
 {% block content %}
 {% include 'components/confirm_modal.html' %}
+{% include 'components/loading_spinner.html' %}
 <div x-data="{ activeTab: 'pihole' }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Blacklist - Gestor de Listas</h2>
 
@@ -54,7 +55,7 @@
     <div x-show="activeTab === 'adguard'" class="mt-6">
         <h3 class="text-lg font-semibold mb-3">Integración AdGuard</h3>
         <p class="text-sm text-gray-600 mb-4">Soporte para fuentes y listas públicas compatibles con AdGuard.</p>
-        <form method="POST" action="/admin/blacklist/import" class="bg-gray-50 p-4 rounded border">
+        <form id="importUrlForm" method="POST" action="/admin/blacklist/import" class="bg-gray-50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label class="text-sm font-medium text-gray-700">URL de la lista</label>
             <input name="url" type="text" class="w-full mt-2 p-2 border rounded" placeholder="https://example.com/list.txt" />
@@ -84,32 +85,23 @@
         {% endif %}
     </div>
 
-
-
-    <!-- Modal de confirmación para eliminar lista -->
-    <div id="deleteListModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-        <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 class="text-lg font-semibold text-red-600 mb-2 flex items-center gap-2">
-                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/></svg>
-                Confirmar eliminación
-            </h3>
-            <div class="mb-4">
-                <p class="text-gray-700">¿Estás seguro de que deseas eliminar la siguiente lista?</p>
-                <div class="bg-gray-100 rounded p-2 mt-2">
-                    <span id="modalListUrl" class="font-mono text-blue-700 text-sm break-all"></span>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">Esta acción es irreversible y eliminará todos los dominios asociados.</p>
-            </div>
-            <div class="flex justify-end gap-2">
-                <button id="cancelDeleteListBtn" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancelar</button>
-                <button id="confirmDeleteListBtn" class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white font-semibold">Eliminar</button>
-            </div>
-        </div>
-    </div>
-
     <script>
     // Reutiliza el modal de confirmación global
     document.addEventListener('DOMContentLoaded', function() {
+        function showImportLoading(title, subtitle) {
+            const overlay = document.getElementById('importLoadingOverlay');
+            const loadingTitle = document.getElementById('importLoadingTitle');
+            const loadingSubtitle = document.getElementById('importLoadingSubtitle');
+
+            if (loadingTitle && title) loadingTitle.textContent = title;
+            if (loadingSubtitle && subtitle) loadingSubtitle.textContent = subtitle;
+
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            }
+        }
+
         let pendingDeleteForm = null;
         document.querySelectorAll('.delete-list-form').forEach(function(form) {
             form.addEventListener('submit', function(e) {
@@ -129,7 +121,7 @@
         });
 
         // Validación para evitar agregar listas duplicadas
-        const addListForm = document.querySelector('form[action="/admin/blacklist/import"]');
+        const addListForm = document.getElementById('importUrlForm');
         if (addListForm) {
             addListForm.addEventListener('submit', function(e) {
                 const input = addListForm.querySelector('input[name="url"]');
@@ -146,9 +138,33 @@
                         { onlyClose: true }
                     );
                     e.preventDefault();
+                    return;
                 }
+
+                showImportLoading(
+                    'Importando lista desde URL',
+                    'Validando enlace y procesando dominios...'
+                );
             });
         }
+
+        const importFileForm = document.getElementById('importFileForm');
+        if (importFileForm) {
+            importFileForm.addEventListener('submit', function() {
+                showImportLoading(
+                    'Importando archivo de listas',
+                    'Leyendo archivo y aplicando reglas de bloqueo...'
+                );
+            });
+        }
+
+        window.addEventListener('pageshow', function() {
+            const overlay = document.getElementById('importLoadingOverlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+        });
     });
     </script>
 
@@ -182,7 +198,7 @@ example.org
         <h3 class="text-lg font-semibold mb-3">Importar listas</h3>
         <p class="text-sm text-gray-600 mb-4">Importa desde archivos locales o pega URLs de listas públicas.</p>
 
-        <form method="POST" action="/admin/blacklist/import" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded border">
+        <form id="importFileForm" method="POST" action="/admin/blacklist/import" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label class="text-sm font-medium text-gray-700">Subir archivo</label>
             <input name="file" type="file" class="w-full mt-2" />
