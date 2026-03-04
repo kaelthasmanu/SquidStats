@@ -451,7 +451,7 @@ def add_acl_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
         # Resolve to real path to prevent path traversal
         safe_path = os.path.realpath(filepath)
         safe_dir = os.path.realpath(blocklists_dir)
-        if not safe_path.startswith(safe_dir + os.sep):
+        if not safe_path.startswith(safe_dir + os.sep) and safe_path != safe_dir:
             logger.error("Path traversal blocked for source: %s", label)
             return False, f"Nombre de archivo inválido para: {label}"
         ok, written_count = _write_domains_file(safe_path, domains, blocklists_dir)

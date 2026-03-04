@@ -1019,14 +1019,17 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     - If no blocklist ACLs remain, also removes the http_access deny rule.
     """
     from services.squid.acls_service import (
-        BLOCKLIST_DIR_NAME,
         BLOCKLIST_PREFIX,
+        _get_blocklists_dir,
         _sanitize_filename,
     )
 
     # Validate source_url if provided
-    if not _validate_source_url(source_url):
-        return False, "URL de fuente inválida"
+    if source_url is not None:
+        if not isinstance(source_url, str):
+            return False, "Formato de URL inválido"
+        if not _validate_source_url(source_url):
+            return False, "URL de fuente inválida"
 
     if source_url:
         filename = _sanitize_filename(source_url)
@@ -1035,7 +1038,7 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         filename = f"{BLOCKLIST_PREFIX}custom.txt"
         label = "custom"
 
-    blocklists_dir = os.path.join(cm.config_dir, BLOCKLIST_DIR_NAME)
+    blocklists_dir = _get_blocklists_dir(cm)
     safe_path = _resolve_safe_blocklist_path(blocklists_dir, filename)
     if not safe_path:
         logger.error("Path traversal blocked for source: %s", label)
