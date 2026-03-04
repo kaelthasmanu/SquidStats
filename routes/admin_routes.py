@@ -1133,7 +1133,9 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         label = "custom"
 
     try:
-        candidate_filename = _build_blocklist_filename(source_url if source_url else None)
+        candidate_filename = _build_blocklist_filename(
+            source_url if source_url else None
+        )
     except ValueError:
         return False, "URL de fuente inválida"
 
