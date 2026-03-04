@@ -359,7 +359,9 @@ def _remove_old_blocklist_acls(lines: list[str], acl_name: str) -> list[str]:
     return filtered
 
 
-def _build_acl_lines(acl_name: str, file_paths: list[tuple[str, str, int]]) -> list[str]:
+def _build_acl_lines(
+    acl_name: str, file_paths: list[tuple[str, str, int]]
+) -> list[str]:
     """Build comment + acl directive lines for each blocklist file.
 
     *file_paths* is a list of ``(label, filepath, domain_count)`` tuples.
@@ -371,9 +373,7 @@ def _build_acl_lines(acl_name: str, file_paths: list[tuple[str, str, int]]) -> l
     return new_lines
 
 
-def add_acl_blocklist(
-    acl_name: str, config_manager
-) -> tuple[bool, str]:
+def add_acl_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
     """Create dstdomain ACLs backed by files with active blacklist domains.
 
     One file is created **per source list** (``source_url``).  Domains that
@@ -498,9 +498,7 @@ def add_acl_blocklist(
         return False, "Error interno al agregar ACL blocklist"
 
 
-def remove_acl_blocklist(
-    acl_name: str, config_manager
-) -> tuple[bool, str]:
+def remove_acl_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
     """Remove all blocklist ACL directives and their domain files.
 
     1. Remove all ``acl <acl_name> dstdomain …blocklist_…`` lines from Squid

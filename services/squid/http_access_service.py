@@ -132,9 +132,7 @@ def add_http_access(
         return False, "Error interno al agregar regla http_access"
 
 
-def add_http_deny_blocklist(
-    acl_name: str, config_manager
-) -> tuple[bool, str]:
+def add_http_deny_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
     """Add an ``http_access deny <acl_name>`` rule for the blocklist.
 
     The deny rule is inserted **before** the first ``http_access allow`` rule
@@ -157,9 +155,7 @@ def add_http_deny_blocklist(
 
     try:
         if config_manager.is_modular:
-            http_content = config_manager.read_modular_config(
-                "120_http_access.conf"
-            )
+            http_content = config_manager.read_modular_config("120_http_access.conf")
             if http_content is not None:
                 lines = http_content.split("\n")
 
@@ -216,9 +212,7 @@ def add_http_deny_blocklist(
         return False, "Error interno al agregar regla http_access deny"
 
 
-def remove_http_deny_blocklist(
-    acl_name: str, config_manager
-) -> tuple[bool, str]:
+def remove_http_deny_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
     """Remove the ``http_access deny <acl_name>`` rule and its comment.
 
     Supports both modular (``120_http_access.conf``) and monolithic config.
@@ -259,9 +253,7 @@ def remove_http_deny_blocklist(
         removed = False
 
         if config_manager.is_modular:
-            http_content = config_manager.read_modular_config(
-                "120_http_access.conf"
-            )
+            http_content = config_manager.read_modular_config("120_http_access.conf")
             if http_content is not None:
                 lines = http_content.split("\n")
                 cleaned = _strip_deny(lines)

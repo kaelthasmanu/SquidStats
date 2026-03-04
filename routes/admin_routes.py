@@ -927,14 +927,13 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
                 lines = [
                     ln
                     for ln in lines
-                    if not (ln.strip() == acl_line or ln.strip() == acl_line.replace('"', "'"))
+                    if not (
+                        ln.strip() == acl_line
+                        or ln.strip() == acl_line.replace('"', "'")
+                    )
                 ]
                 # Remove orphaned comments for this label
-                lines = [
-                    ln
-                    for ln in lines
-                    if not ln.strip() == comment_line
-                ]
+                lines = [ln for ln in lines if not ln.strip() == comment_line]
                 lines.append(comment_line)
                 lines.append(acl_line)
                 new_content = "\n".join(lines)
@@ -947,13 +946,11 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
             lines = [
                 ln
                 for ln in lines
-                if not (ln.strip() == acl_line or ln.strip() == acl_line.replace('"', "'"))
+                if not (
+                    ln.strip() == acl_line or ln.strip() == acl_line.replace('"', "'")
+                )
             ]
-            lines = [
-                ln
-                for ln in lines
-                if not ln.strip() == comment_line
-            ]
+            lines = [ln for ln in lines if not ln.strip() == comment_line]
             acl_section_end = -1
             for i, line in enumerate(lines):
                 if line.strip().startswith("acl "):
@@ -1013,7 +1010,9 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
                     stripped = ln.strip()
                     if stripped == acl_line or stripped == acl_line.replace('"', "'"):
                         # Also remove the comment above
-                        if new_lines and new_lines[-1].strip().startswith("# Blocklist:"):
+                        if new_lines and new_lines[-1].strip().startswith(
+                            "# Blocklist:"
+                        ):
                             new_lines.pop()
                         continue
                     new_lines.append(ln)
@@ -1080,7 +1079,10 @@ def blocklist_toggle():
             show_details = bool(current_app.debug)
         except RuntimeError:
             show_details = False
-        resp = {"status": "error", "message": "Error interno al cambiar estado de blocklist"}
+        resp = {
+            "status": "error",
+            "message": "Error interno al cambiar estado de blocklist",
+        }
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
