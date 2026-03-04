@@ -1,6 +1,7 @@
 import hashlib
 import os
 import re
+import stat
 
 from flask import (
     Blueprint,
@@ -1181,6 +1182,10 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     # Delete file
     if os.path.isfile(safe_path):
         try:
+            st = os.lstat(safe_path)
+            if not stat.S_ISREG(st.st_mode):
+                logger.error(f"Archivo no regular: {safe_path}")
+                return False, "Archivo no regular"
             os.remove(safe_path)
         except OSError:
             logger.exception(f"Error eliminando archivo: {safe_path}")
