@@ -1,4 +1,6 @@
 import os
+import re
+import hashlib
 
 from flask import (
     Blueprint,
@@ -795,12 +797,50 @@ def blacklist_delete_list():
 BLOCKLIST_ACL_NAME = "squidstats_blocklist"
 
 
+def _is_allowed_blocklist_filename(filename: str) -> bool:
+    """Allow only expected generated blocklist filenames."""
+    from services.squid.acls_service import BLOCKLIST_PREFIX
+
+    if not filename:
+        return False
+
+    # Never allow path separators or traversal sequences in filenames
+    if os.path.basename(filename) != filename:
+        return False
+    if "/" in filename or "\\" in filename or ".." in filename:
+        return False
+
+    pattern = rf"^{re.escape(BLOCKLIST_PREFIX)}(?:custom|[a-f0-9]{{64}})\.txt$"
+    return bool(re.fullmatch(pattern, filename))
+
+
+def _build_blocklist_filename(source_url: str | None) -> str:
+    """Build a deterministic safe filename for a blocklist source URL."""
+    from services.squid.acls_service import BLOCKLIST_PREFIX
+
+    if source_url is None:
+        filename = f"{BLOCKLIST_PREFIX}custom.txt"
+    else:
+        if not _validate_source_url(source_url):
+            raise ValueError("Invalid source URL")
+        digest = hashlib.sha256(source_url.encode("utf-8")).hexdigest().lower()
+        filename = f"{BLOCKLIST_PREFIX}{digest}.txt"
+
+    if not _is_allowed_blocklist_filename(filename):
+        raise ValueError("Invalid blocklist filename")
+
+    return filename
+
+
 def _resolve_safe_blocklist_path(base_dir: str, filename: str) -> str | None:
     """Resolve and validate a blocklist file path to prevent path traversal.
 
     Ensures the resolved path is within base_dir using os.path.commonpath.
     Returns the safe path or None if traversal is detected.
     """
+    if not _is_allowed_blocklist_filename(filename):
+        return None
+
     base_dir = os.path.realpath(base_dir)
     candidate = os.path.realpath(os.path.join(base_dir, filename))
 
@@ -874,6 +914,12 @@ def _get_enforced_blocklist_urls(cm) -> set[str]:
         for (url,) in urls:
             from services.squid.acls_service import _sanitize_filename
 
+            # Current safe naming (hash-based)
+            try:
+                url_to_filename[_build_blocklist_filename(url)] = url
+            except ValueError:
+                logger.warning("Skipping invalid blacklist source_url in DB mapping")
+            # Legacy naming fallback for previously generated ACL entries
             url_to_filename[_sanitize_filename(url)] = url
     finally:
         session.close()
@@ -910,9 +956,7 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     - Ensures the http_access deny rule exists.
     """
     from services.squid.acls_service import (
-        BLOCKLIST_PREFIX,
         _get_blocklists_dir,
-        _sanitize_filename,
         _write_domains_file,
     )
 
@@ -933,7 +977,6 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
                 .all()
             )
             label = source_url
-            filename = _sanitize_filename(source_url)
         else:
             rows = (
                 session.query(BlacklistDomain.domain)
@@ -945,12 +988,16 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
                 .all()
             )
             label = "custom"
-            filename = f"{BLOCKLIST_PREFIX}custom.txt"
     except Exception:
         logger.exception("Error consultando dominios para activar blocklist")
         return False, "Error al consultar dominios"
     finally:
         session.close()
+
+    try:
+        filename = _build_blocklist_filename(source_url if source_url else None)
+    except ValueError:
+        return False, "URL de fuente inválida"
 
     domains = [d[0] for d in rows]
     if not domains:
@@ -1035,9 +1082,7 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     - If no blocklist ACLs remain, also removes the http_access deny rule.
     """
     from services.squid.acls_service import (
-        BLOCKLIST_PREFIX,
         _get_blocklists_dir,
-        _sanitize_filename,
     )
 
     # Validate source_url if provided
@@ -1048,11 +1093,14 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
             return False, "URL de fuente inválida"
 
     if source_url:
-        filename = _sanitize_filename(source_url)
         label = source_url
     else:
-        filename = f"{BLOCKLIST_PREFIX}custom.txt"
         label = "custom"
+
+    try:
+        filename = _build_blocklist_filename(source_url if source_url else None)
+    except ValueError:
+        return False, "URL de fuente inválida"
 
     blocklists_dir = _get_blocklists_dir(cm)
     safe_path = _resolve_safe_blocklist_path(blocklists_dir, filename)
