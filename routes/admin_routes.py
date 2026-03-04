@@ -1030,6 +1030,9 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
             return False, "Formato de URL inválido"
         if not _validate_source_url(source_url):
             return False, "URL de fuente inválida"
+        # Additional validation: ensure source_url doesn't contain path traversal characters
+        if ".." in source_url or source_url.startswith("/") or "\\" in source_url:
+            return False, "URL de fuente inválida"
 
     if source_url:
         filename = _sanitize_filename(source_url)
