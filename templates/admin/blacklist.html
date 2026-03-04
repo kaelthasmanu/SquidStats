@@ -71,16 +71,48 @@
             <h4 class="text-md font-semibold mb-2 text-gray-700">Listas importadas</h4>
             <ul class="divide-y divide-gray-200 bg-white rounded shadow">
                 {% for item in url_lists %}
-                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                    <div class="flex flex-col">
+                <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 gap-3" x-data="{ enforced: {{ 'true' if item.enforced else 'false' }}, loading: false }">
+                    <div class="flex flex-col min-w-0 flex-1">
                         <span class="font-mono text-blue-700 text-sm truncate max-w-xs md:max-w-md" title="{{ item.source_url }}">{{ item.source_url }}</span>
-                        <span class="text-xs text-gray-500">{{ item.count }} dominios</span>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-xs text-gray-500">{{ item.count }} dominios</span>
+                            <span x-show="enforced" class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">
+                                <i class="fas fa-shield-alt text-[10px]"></i> Activa en Squid
+                            </span>
+                            <span x-show="!enforced" class="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded-full">
+                                <i class="fas fa-ban text-[10px]"></i> Inactiva
+                            </span>
+                        </div>
                     </div>
-                    <form method="POST" action="/admin/blacklist/delete-list" class="ml-4 delete-list-form">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <input type="hidden" name="source_url" value="{{ item.source_url }}"/>
-                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-semibold shadow delete-list-btn">Eliminar</button>
-                    </form>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <!-- Toggle enforcement -->
+                        <button
+                            @click="toggleBlocklist('{{ item.source_url }}', !enforced, $el, (ok) => { if(ok) enforced = !enforced })"
+                            :disabled="loading"
+                            :class="enforced
+                                ? 'bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-300'
+                                : 'bg-gray-400 hover:bg-gray-500 focus:ring-gray-300'"
+                            class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-wait"
+                            role="switch"
+                            :aria-checked="enforced.toString()"
+                            :title="enforced ? 'Desactivar bloqueo en Squid' : 'Activar bloqueo en Squid'"
+                        >
+                            <span
+                                :class="enforced ? 'translate-x-5' : 'translate-x-0'"
+                                class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center"
+                            >
+                                <i x-show="loading" class="fas fa-spinner fa-spin text-gray-400 text-xs"></i>
+                            </span>
+                        </button>
+                        <!-- Delete list -->
+                        <form method="POST" action="/admin/blacklist/delete-list" class="delete-list-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" name="source_url" value="{{ item.source_url }}"/>
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-semibold shadow delete-list-btn" title="Eliminar lista y dominios">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
                 </li>
                 {% endfor %}
             </ul>
@@ -89,6 +121,88 @@
     </div>
 
     <script>
+    /**
+     * Toggle Squid enforcement for a blocklist via the API.
+     *
+     * @param {string|null} sourceUrl  The source_url (null for custom list)
+     * @param {boolean}     enable     true = activate, false = deactivate
+     * @param {HTMLElement}  el        The toggle button element (for loading state)
+     * @param {function}    callback   Called with (true) on success, (false) on error
+     */
+    function toggleBlocklist(sourceUrl, enable, el, callback) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Disable button while processing
+        el.disabled = true;
+
+        fetch('/admin/api/blocklist/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                source_url: sourceUrl,
+                enable: enable
+            })
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(result) {
+            el.disabled = false;
+            if (result.ok && result.data.status === 'success') {
+                showToast(result.data.message, 'success');
+                callback(true);
+            } else {
+                showToast(result.data.message || 'Error al cambiar estado', 'error');
+                callback(false);
+            }
+        })
+        .catch(function(err) {
+            el.disabled = false;
+            showToast('Error de conexión al servidor', 'error');
+            callback(false);
+        });
+    }
+
+    /**
+     * Lightweight toast notification.
+     */
+    function showToast(message, type) {
+        var container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'fixed top-4 right-4 z-[60] flex flex-col gap-2 max-w-sm';
+            document.body.appendChild(container);
+        }
+
+        var colorClasses = type === 'success'
+            ? 'bg-emerald-600 text-white'
+            : type === 'error'
+                ? 'bg-red-600 text-white'
+                : 'bg-gray-700 text-white';
+
+        var icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+
+        var toast = document.createElement('div');
+        toast.className = 'flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-sm font-medium transform translate-x-full transition-transform duration-300 ' + colorClasses;
+        toast.innerHTML = '<i class="fas ' + icon + '"></i><span>' + message + '</span>';
+        container.appendChild(toast);
+
+        // Animate in
+        requestAnimationFrame(function() {
+            toast.classList.remove('translate-x-full');
+            toast.classList.add('translate-x-0');
+        });
+
+        // Auto-dismiss
+        setTimeout(function() {
+            toast.classList.remove('translate-x-0');
+            toast.classList.add('translate-x-full');
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 4000);
+    }
+
     // Reutiliza el modal de confirmación global
     document.addEventListener('DOMContentLoaded', function() {
         function showImportLoading(title, subtitle) {
@@ -184,9 +298,41 @@
     </div>
 
     <!-- Custom Tab -->
-    <div x-show="activeTab === 'custom'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Lista Personalizada</h3>
-        <p class="text-sm text-gray-600 mb-4">Añade dominios manualmente o pega una lista separada por comas/lineas.</p>
+    <div x-show="activeTab === 'custom'" x-data="{ customEnforced: {{ 'true' if custom_enforced else 'false' }}, customLoading: false }" class="mt-6">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <h3 class="text-lg font-semibold">Lista Personalizada</h3>
+                <p class="text-sm text-gray-600">Añade dominios manualmente o pega una lista separada por comas/lineas.</p>
+            </div>
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <span x-show="customEnforced" class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full">
+                        <i class="fas fa-shield-alt text-[10px]"></i> Activa en Squid
+                    </span>
+                    <span x-show="!customEnforced" class="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2 py-1 rounded-full">
+                        <i class="fas fa-ban text-[10px]"></i> Inactiva
+                    </span>
+                </div>
+                <button
+                    @click="toggleBlocklist(null, !customEnforced, $el, (ok) => { if(ok) customEnforced = !customEnforced })"
+                    :disabled="customLoading"
+                    :class="customEnforced
+                        ? 'bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-300'
+                        : 'bg-gray-400 hover:bg-gray-500 focus:ring-gray-300'"
+                    class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-wait"
+                    role="switch"
+                    :aria-checked="customEnforced.toString()"
+                    :title="customEnforced ? 'Desactivar bloqueo en Squid' : 'Activar bloqueo en Squid'"
+                >
+                    <span
+                        :class="customEnforced ? 'translate-x-5' : 'translate-x-0'"
+                        class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center"
+                    >
+                        <i x-show="customLoading" class="fas fa-spinner fa-spin text-gray-400 text-xs"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
         <form method="POST" action="/admin/blacklist/save-custom" class="grid grid-cols-1 gap-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <textarea name="custom_list" rows="6" class="w-full p-3 border rounded" placeholder="example.com
