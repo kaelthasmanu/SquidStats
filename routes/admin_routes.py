@@ -822,7 +822,23 @@ def _validate_source_url(source_url: str | None) -> bool:
     from urllib.parse import urlparse
 
     parsed = urlparse(source_url)
-    return bool(parsed.scheme and parsed.netloc)
+    # Ensure it's a proper URL with scheme and netloc
+    if not (parsed.scheme and parsed.netloc):
+        return False
+
+    # Reject URLs with suspicious path traversal patterns
+    if ".." in source_url or source_url.startswith("/") or "\\" in source_url:
+        return False
+
+    # Additional validation: reject control characters and other suspicious patterns
+    if any(c in source_url for c in ["\x00", "\n", "\r", "\t"]):
+        return False
+
+    # Ensure URL is reasonably sized to prevent DoS
+    if len(source_url) > 2048:
+        return False
+
+    return True
 
 
 def _get_enforced_blocklist_urls(cm) -> set[str]:
@@ -901,7 +917,7 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     )
 
     # Validate source_url if provided
-    if not _validate_source_url(source_url):
+    if source_url is not None and not _validate_source_url(source_url):
         return False, "URL de fuente inválida"
 
     session = get_session()
@@ -1029,9 +1045,6 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         if not isinstance(source_url, str):
             return False, "Formato de URL inválido"
         if not _validate_source_url(source_url):
-            return False, "URL de fuente inválida"
-        # Additional validation: ensure source_url doesn't contain path traversal characters
-        if ".." in source_url or source_url.startswith("/") or "\\" in source_url:
             return False, "URL de fuente inválida"
 
     if source_url:
