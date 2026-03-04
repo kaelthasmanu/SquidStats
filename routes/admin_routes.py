@@ -1,3 +1,8 @@
+import hashlib
+import os
+import re
+import stat
+
 from flask import (
     Blueprint,
     current_app,
@@ -60,6 +65,9 @@ from services.squid.http_access_service import (
     add_http_access as service_add_http_access,
 )
 from services.squid.http_access_service import (
+    add_http_deny_blocklist as service_add_http_deny_blocklist,
+)
+from services.squid.http_access_service import (
     delete_http_access as service_delete_http_access,
 )
 from services.squid.http_access_service import (
@@ -67,6 +75,9 @@ from services.squid.http_access_service import (
 )
 from services.squid.http_access_service import (
     move_http_access as service_move_http_access,
+)
+from services.squid.http_access_service import (
+    remove_http_deny_blocklist as service_remove_http_deny_blocklist,
 )
 from services.squid.split_config_service import (
     get_split_files_info as service_get_split_files_info,
@@ -188,11 +199,6 @@ def add_acl():
     )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_acls"))
-    success, message = service_add_acl(
-        name, acl_type, values, options, comment, config_manager
-    )
-    flash(message, "success" if success else "error")
-    return redirect(url_for("admin.manage_acls"))
 
 
 @admin_bp.route("/acls/edit", methods=["POST"])
@@ -273,11 +279,19 @@ def manage_blacklist():
         session.close()
 
     url_lists = get_url_blacklists_with_counts()
+
+    # Determine which lists are currently enforced in Squid config
+    enforced_urls = _get_enforced_blocklist_urls(config_manager)
+    for item in url_lists:
+        item["enforced"] = item["source_url"] in enforced_urls
+    custom_enforced = "__custom__" in enforced_urls
+
     return render_template(
         "admin/blacklist.html",
         env_vars=env_vars,
         blacklist=blacklist,
         url_lists=url_lists,
+        custom_enforced=custom_enforced,
     )
 
 
@@ -771,5 +785,455 @@ def blacklist_delete_list():
         flash("URL no proporcionada", "error")
         return redirect(url_for("admin.manage_blacklist"))
     count = delete_blacklist_by_source_url(url)
+    # Also disable enforcement if the list was enforced
+    _disable_single_blocklist(url, config_manager)
     flash(f"Lista eliminada: {url} ({count} dominios)", "success")
     return redirect(url_for("admin.manage_blacklist"))
+
+
+# ---------------------------------------------------------------------------
+# Blocklist enforcement helpers & API
+# ---------------------------------------------------------------------------
+
+BLOCKLIST_ACL_NAME = "squidstats_blocklist"
+
+
+def _is_allowed_blocklist_filename(filename: str) -> bool:
+    """Allow only expected generated blocklist filenames."""
+    from services.squid.acls_service import BLOCKLIST_PREFIX
+
+    if not filename:
+        return False
+
+    # Never allow path separators or traversal sequences in filenames
+    if os.path.basename(filename) != filename:
+        return False
+    if "/" in filename or "\\" in filename or ".." in filename:
+        return False
+
+    pattern = rf"^{re.escape(BLOCKLIST_PREFIX)}(?:custom|[a-f0-9]{{64}})\.txt$"
+    return bool(re.fullmatch(pattern, filename))
+
+
+def _build_blocklist_filename(source_url: str | None) -> str:
+    """Build a deterministic safe filename for a blocklist source URL."""
+    from services.squid.acls_service import BLOCKLIST_PREFIX
+
+    if source_url is None:
+        filename = f"{BLOCKLIST_PREFIX}custom.txt"
+    else:
+        if not _validate_source_url(source_url):
+            raise ValueError("Invalid source URL")
+        digest = hashlib.sha256(source_url.encode("utf-8")).hexdigest().lower()
+        filename = f"{BLOCKLIST_PREFIX}{digest}.txt"
+
+    if not _is_allowed_blocklist_filename(filename):
+        raise ValueError("Invalid blocklist filename")
+
+    return filename
+
+
+def _resolve_safe_blocklist_path(base_dir: str, filename: str) -> str | None:
+    """Resolve and validate a blocklist file path to prevent path traversal.
+
+    Ensures the resolved path is within base_dir using os.path.commonpath.
+    Returns the safe path or None if traversal is detected.
+    """
+    if not _is_allowed_blocklist_filename(filename):
+        return None
+
+    base_dir = os.path.realpath(base_dir)
+    candidate = os.path.realpath(os.path.join(base_dir, filename))
+
+    try:
+        if os.path.commonpath([base_dir, candidate]) != base_dir:
+            return None
+    except ValueError:
+        # commonpath raises ValueError if paths are on different drives (Windows)
+        return None
+
+    return candidate
+
+
+def _validate_source_url(source_url: str | None) -> bool:
+    """Validate that source_url is a well-formed URL."""
+    if not source_url:
+        return True  # None is allowed for custom lists
+
+    from urllib.parse import urlparse
+
+    parsed = urlparse(source_url)
+    # Ensure it's a proper URL with scheme and netloc
+    if not (parsed.scheme and parsed.netloc):
+        return False
+
+    # Reject URLs with suspicious path traversal patterns
+    if ".." in source_url or source_url.startswith("/") or "\\" in source_url:
+        return False
+
+    # Additional validation: reject control characters and other suspicious patterns
+    if any(c in source_url for c in ["\x00", "\n", "\r", "\t"]):
+        return False
+
+    # Ensure URL is reasonably sized to prevent DoS
+    if len(source_url) > 2048:
+        return False
+
+    return True
+
+
+def _get_enforced_blocklist_urls(cm) -> set[str]:
+    """Return the set of source_url values currently enforced as Squid ACLs.
+
+    Parses the ACL config to find ``acl squidstats_blocklist dstdomain "..."``
+    lines and maps each file back to its source_url.  Custom lists are
+    represented by the sentinel ``__custom__``.
+    """
+    from services.squid.acls_service import BLOCKLIST_PREFIX
+
+    enforced: set[str] = set()
+
+    # Read configuration
+    if cm.is_modular:
+        content = cm.read_modular_config("100_acls.conf")
+    else:
+        content = cm.config_content
+
+    if not content:
+        return enforced
+
+    # Pre-fetch all source URLs from DB to avoid queries in loop
+    session = get_session()
+    try:
+        url_to_filename = {}
+        urls = (
+            session.query(BlacklistDomain.source_url)
+            .filter(BlacklistDomain.source_url.isnot(None))
+            .distinct()
+            .all()
+        )
+        for (url,) in urls:
+            from services.squid.acls_service import _sanitize_filename
+
+            # Current safe naming (hash-based)
+            try:
+                url_to_filename[_build_blocklist_filename(url)] = url
+            except ValueError:
+                logger.warning("Skipping invalid blacklist source_url in DB mapping")
+            # Legacy naming fallback for previously generated ACL entries
+            url_to_filename[_sanitize_filename(url)] = url
+    finally:
+        session.close()
+
+    for line in content.split("\n"):
+        stripped = line.strip()
+        if (
+            stripped.startswith(f"acl {BLOCKLIST_ACL_NAME} ")
+            and "dstdomain" in stripped
+            and BLOCKLIST_PREFIX in stripped
+        ):
+            # Extract file path between quotes
+            start = stripped.find('"')
+            end = stripped.rfind('"')
+            if start != -1 and end > start:
+                filepath = stripped[start + 1 : end]
+                fname = os.path.basename(filepath)
+                if fname == f"{BLOCKLIST_PREFIX}custom.txt":
+                    enforced.add("__custom__")
+                else:
+                    # Lookup source_url from pre-fetched mapping
+                    source_url = url_to_filename.get(fname)
+                    if source_url:
+                        enforced.add(source_url)
+
+    return enforced
+
+
+def _get_enforced_blocklist_paths(cm) -> dict[str, str]:
+    """Return validated enforced blocklist paths keyed by filename."""
+    from services.squid.acls_service import (
+        BLOCKLIST_PREFIX,
+        _get_blocklists_dir,
+    )
+
+    enforced_paths: dict[str, str] = {}
+    blocklists_dir = _get_blocklists_dir(cm)
+
+    if cm.is_modular:
+        content = cm.read_modular_config("100_acls.conf")
+    else:
+        content = cm.config_content
+
+    if not content:
+        return enforced_paths
+
+    for line in content.split("\n"):
+        stripped = line.strip()
+        if (
+            stripped.startswith(f"acl {BLOCKLIST_ACL_NAME} ")
+            and "dstdomain" in stripped
+            and BLOCKLIST_PREFIX in stripped
+        ):
+            match = re.search(r"""dstdomain\s+["']([^"']+)["']""", stripped)
+            if not match:
+                continue
+
+            filepath = match.group(1)
+            filename = os.path.basename(filepath)
+            safe_path = _resolve_safe_blocklist_path(blocklists_dir, filename)
+            if safe_path:
+                enforced_paths[filename] = safe_path
+
+    return enforced_paths
+
+
+def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
+    """Enable Squid enforcement for a single blocklist (by source_url).
+
+    - Writes the domain file for that source.
+    - Adds the ACL directive.
+    - Ensures the http_access deny rule exists.
+    """
+    from services.squid.acls_service import (
+        _get_blocklists_dir,
+        _write_domains_file,
+    )
+
+    # Validate source_url if provided
+    if source_url is not None and not _validate_source_url(source_url):
+        return False, "URL de fuente inválida"
+
+    session = get_session()
+    try:
+        if source_url:
+            rows = (
+                session.query(BlacklistDomain.domain)
+                .filter(
+                    BlacklistDomain.active == 1,
+                    BlacklistDomain.source_url == source_url,
+                )
+                .order_by(BlacklistDomain.domain)
+                .all()
+            )
+            label = source_url
+        else:
+            rows = (
+                session.query(BlacklistDomain.domain)
+                .filter(
+                    BlacklistDomain.active == 1,
+                    BlacklistDomain.source_url.is_(None),
+                )
+                .order_by(BlacklistDomain.domain)
+                .all()
+            )
+            label = "custom"
+    except Exception:
+        logger.exception("Error consultando dominios para activar blocklist")
+        return False, "Error al consultar dominios"
+    finally:
+        session.close()
+
+    try:
+        filename = _build_blocklist_filename(source_url if source_url else None)
+    except ValueError:
+        return False, "URL de fuente inválida"
+
+    domains = [d[0] for d in rows]
+    if not domains:
+        return False, f"No hay dominios activos para '{label}'"
+
+    # Write file
+    blocklists_dir = _get_blocklists_dir(cm)
+    safe_path = _resolve_safe_blocklist_path(blocklists_dir, filename)
+    if not safe_path:
+        logger.error("Path traversal blocked for source: %s", label)
+        return False, f"Nombre de archivo inválido para: '{label}'"
+    ok, written_count = _write_domains_file(safe_path, domains, blocklists_dir)
+    if not ok:
+        return False, f"Error escribiendo archivo para '{label}'"
+
+    # Add ACL directive (append without removing others)
+    acl_line = f'acl {BLOCKLIST_ACL_NAME} dstdomain "{safe_path}"'
+    comment_line = f"# Blocklist: {label} ({written_count} dominios)"
+
+    try:
+        if cm.is_modular:
+            acl_content = cm.read_modular_config("100_acls.conf")
+            if acl_content is not None:
+                lines = acl_content.split("\n")
+                # Remove only this specific file's ACL if it exists already
+                lines = [
+                    ln
+                    for ln in lines
+                    if not (
+                        ln.strip() == acl_line
+                        or ln.strip() == acl_line.replace('"', "'")
+                    )
+                ]
+                # Remove orphaned comments for this label
+                lines = [ln for ln in lines if not ln.strip() == comment_line]
+                lines.append(comment_line)
+                lines.append(acl_line)
+                new_content = "\n".join(lines)
+                if not cm.save_modular_config("100_acls.conf", new_content):
+                    return False, "Error guardando ACL en config modular"
+            else:
+                return False, "No se pudo leer la config modular"
+        else:
+            lines = cm.config_content.split("\n")
+            lines = [
+                ln
+                for ln in lines
+                if not (
+                    ln.strip() == acl_line or ln.strip() == acl_line.replace('"', "'")
+                )
+            ]
+            lines = [ln for ln in lines if not ln.strip() == comment_line]
+            acl_section_end = -1
+            for i, line in enumerate(lines):
+                if line.strip().startswith("acl "):
+                    acl_section_end = i
+            if acl_section_end != -1:
+                lines.insert(acl_section_end + 1, comment_line)
+                lines.insert(acl_section_end + 2, acl_line)
+            else:
+                lines.append(comment_line)
+                lines.append(acl_line)
+            new_content = "\n".join(lines)
+            cm.save_config(new_content)
+    except Exception:
+        logger.exception("Error agregando ACL para blocklist individual")
+        return False, "Error al agregar ACL"
+
+    # Ensure http_access deny rule exists
+    ok, msg = service_add_http_deny_blocklist(BLOCKLIST_ACL_NAME, cm)
+    if not ok:
+        return False, msg
+
+    return True, f"Blocklist '{label}' activada con {len(domains)} dominios"
+
+
+def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
+    """Disable Squid enforcement for a single blocklist.
+
+    - Removes the ACL line for this source.
+    - Deletes the domain file.
+    - If no blocklist ACLs remain, also removes the http_access deny rule.
+    """
+    # Validate source_url if provided
+    if source_url is not None:
+        if not isinstance(source_url, str):
+            return False, "Formato de URL inválido"
+        if not _validate_source_url(source_url):
+            return False, "URL de fuente inválida"
+
+    if source_url:
+        label = source_url
+    else:
+        label = "custom"
+
+    try:
+        candidate_filename = _build_blocklist_filename(
+            source_url if source_url else None
+        )
+    except ValueError:
+        return False, "URL de fuente inválida"
+
+    enforced_paths = _get_enforced_blocklist_paths(cm)
+    safe_path = enforced_paths.get(candidate_filename)
+    if not safe_path:
+        return False, f"Blocklist '{label}' no está activada"
+
+    acl_line = f'acl {BLOCKLIST_ACL_NAME} dstdomain "{safe_path}"'
+
+    # Remove ACL directive
+    try:
+        if cm.is_modular:
+            acl_content = cm.read_modular_config("100_acls.conf")
+            if acl_content is not None:
+                lines = acl_content.split("\n")
+                new_lines = []
+                for ln in lines:
+                    stripped = ln.strip()
+                    if stripped == acl_line or stripped == acl_line.replace('"', "'"):
+                        # Also remove the comment above
+                        if new_lines and new_lines[-1].strip().startswith(
+                            "# Blocklist:"
+                        ):
+                            new_lines.pop()
+                        continue
+                    new_lines.append(ln)
+                new_content = "\n".join(new_lines)
+                cm.save_modular_config("100_acls.conf", new_content)
+
+        lines = cm.config_content.split("\n")
+        new_lines = []
+        for ln in lines:
+            stripped = ln.strip()
+            if stripped == acl_line or stripped == acl_line.replace('"', "'"):
+                if new_lines and new_lines[-1].strip().startswith("# Blocklist:"):
+                    new_lines.pop()
+                continue
+            new_lines.append(ln)
+        new_content = "\n".join(new_lines)
+        cm.save_config(new_content)
+    except Exception:
+        logger.exception("Error eliminando ACL de blocklist individual")
+        return False, "Error al eliminar ACL"
+
+    # Delete file
+    if os.path.isfile(safe_path):
+        try:
+            st = os.lstat(safe_path)
+            if not stat.S_ISREG(st.st_mode):
+                logger.error(f"Archivo no regular: {safe_path}")
+                return False, "Archivo no regular"
+            os.remove(safe_path)
+        except OSError:
+            logger.exception(f"Error eliminando archivo: {safe_path}")
+
+    # Check if any blocklist ACLs remain; if not, remove http_access deny rule too
+    remaining = _get_enforced_blocklist_urls(cm)
+    if not remaining:
+        service_remove_http_deny_blocklist(BLOCKLIST_ACL_NAME, cm)
+
+    return True, f"Blocklist '{label}' desactivada"
+
+
+@admin_bp.route("/api/blocklist/toggle", methods=["POST"])
+@api_auth_required
+def blocklist_toggle():
+    """Toggle Squid enforcement for a single blocklist.
+
+    Expects JSON: ``{"source_url": "...", "enable": true/false}``
+    Use ``source_url: null`` for the custom/manual list.
+    """
+    data = request.get_json()
+    if data is None:
+        return jsonify({"status": "error", "message": "JSON inválido"}), 400
+
+    source_url = data.get("source_url")  # None for custom
+    enable = data.get("enable", False)
+
+    try:
+        if enable:
+            ok, msg = _enable_single_blocklist(source_url, config_manager)
+        else:
+            ok, msg = _disable_single_blocklist(source_url, config_manager)
+
+        if ok:
+            return jsonify({"status": "success", "message": msg})
+        return jsonify({"status": "error", "message": msg}), 400
+    except Exception as e:
+        logger.exception("Error en toggle de blocklist")
+        try:
+            show_details = bool(current_app.debug)
+        except RuntimeError:
+            show_details = False
+        resp = {
+            "status": "error",
+            "message": "Error interno al cambiar estado de blocklist",
+        }
+        if show_details:
+            resp["details"] = str(e)
+        return jsonify(resp), 500

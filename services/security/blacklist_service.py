@@ -216,17 +216,13 @@ def import_domains_from_file(file_storage) -> set:
     if not file_storage:
         return domains
 
+    from services.squid.acls_service import sanitize_domain_entry
+
     content = file_storage.read().decode("utf-8", errors="ignore")
     for line in content.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if " " in line:
-            parts = line.split()
-            domain = parts[-1]
-        else:
-            domain = line
-        domains.add(domain)
+        domain = sanitize_domain_entry(line)
+        if domain:
+            domains.add(domain)
     return domains
 
 
@@ -356,16 +352,12 @@ def import_domains_from_url(url: str) -> tuple[bool, set, str]:
         if resp.status_code != 200:
             return False, domains, f"Error al descargar la lista: {resp.status_code}"
 
+        from services.squid.acls_service import sanitize_domain_entry
+
         for line in resp.text.splitlines():
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            if " " in line:
-                parts = line.split()
-                domain = parts[-1]
-            else:
-                domain = line
-            domains.add(domain)
+            domain = sanitize_domain_entry(line)
+            if domain:
+                domains.add(domain)
         return True, domains, ""
     except ValueError as ve:
         logger.warning("Blocked unsafe import URL: %s", url)
