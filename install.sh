@@ -4,13 +4,44 @@
 NON_INTERACTIVE=false
 # Tipo de distribución detectada: debian | alpine
 DISTRO_TYPE=""
+# Archivo de log
+LOG_FILE="/tmp/squidstats_install.log"
+
+init_log() {
+    local install_dir="${1:-}"
+    # Si tenemos directorio de instalación, mover el log ahí
+    if [ -n "$install_dir" ] && [ -d "$install_dir" ]; then
+        mkdir -p "$install_dir/logs"
+        local new_log="$install_dir/logs/install.log"
+        if [ -f "$LOG_FILE" ] && [ "$LOG_FILE" != "$new_log" ]; then
+            cat "$LOG_FILE" >> "$new_log"
+            rm -f "$LOG_FILE"
+        fi
+        LOG_FILE="$new_log"
+    fi
+    echo "" >> "$LOG_FILE"
+    echo "========================================" >> "$LOG_FILE"
+    echo "  SquidStats Installer - $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE"
+    echo "  Argumentos: $*" >> "$LOG_FILE"
+    echo "========================================" >> "$LOG_FILE"
+}
+
+log_msg() {
+    local level="$1"
+    shift
+    local msg="$*"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] [$level] $msg" >> "$LOG_FILE"
+}
 
 error() {
     echo -e "\n\033[1;41m$1\033[0m\n"
+    log_msg "ERROR" "$1"
 }
 
 ok() {
     echo -e "\n\033[1;42m$1\033[0m\n"
+    log_msg "OK" "$1"
 }
 
 isContainer() {
@@ -20,6 +51,7 @@ isContainer() {
 }
 
 detectDistro() {
+    log_msg "INFO" "Detectando distribución del sistema..."
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         case "$ID" in
@@ -49,6 +81,7 @@ detectDistro() {
         error "No se pudo detectar la distribución del sistema operativo"
         exit 1
     fi
+    log_msg "INFO" "Distribución detectada: $DISTRO_TYPE"
     echo "Distribución detectada: $DISTRO_TYPE"
 }
 
@@ -63,8 +96,11 @@ installDependencies() {
     local install_dir="${1:-/opt/SquidStats}"
     local venv_dir="$install_dir/venv"
 
+    log_msg "INFO" "Iniciando instalación de dependencias en $install_dir"
+
     if [ ! -d "$venv_dir" ]; then
         echo "El entorno virtual no existe en $venv_dir, creándolo..."
+        log_msg "INFO" "Creando entorno virtual en $venv_dir"
         python3 -m venv "$venv_dir" || {
             error "Error al crear el entorno virtual en $venv_dir"
             return 1
@@ -74,7 +110,12 @@ installDependencies() {
 
     echo "Instalando dependencias en el entorno virtual..."
 
-    "$venv_dir/bin/pip" install --upgrade pip || return 1
+    log_msg "INFO" "Actualizando pip..."
+    "$venv_dir/bin/pip" install --upgrade pip || {
+        log_msg "ERROR" "Error al actualizar pip"
+        return 1
+    }
+    log_msg "INFO" "Instalando paquetes desde requirements.txt"
     "$venv_dir/bin/pip" install -r "$install_dir/requirements.txt" || {
         error "Error al instalar dependencias"
         return 1
@@ -89,6 +130,8 @@ checkPackages() {
     local packages=""
     local missing=""
 
+    log_msg "INFO" "Verificando paquetes del sistema ($DISTRO_TYPE)"
+
     if [ "$DISTRO_TYPE" = "alpine" ]; then
         packages="git python3 py3-pip py3-virtualenv mariadb-dev curl build-base openssl-dev python3-dev postgresql-dev openrc"
 
@@ -99,6 +142,7 @@ checkPackages() {
         done
 
         if [ -n "$missing" ]; then
+            log_msg "INFO" "Paquetes faltantes (alpine):$missing"
             echo "Instalando paquetes faltantes:$missing"
             apk update
 
@@ -109,6 +153,7 @@ checkPackages() {
 
             ok "Paquetes instalados correctamente"
         else
+            log_msg "INFO" "Todos los paquetes del sistema ya están instalados"
             echo "Todos los paquetes necesarios ya están instalados"
         fi
     else
@@ -121,6 +166,7 @@ checkPackages() {
         done
 
         if [ -n "$missing" ]; then
+            log_msg "INFO" "Paquetes faltantes (debian):$missing"
             echo "Instalando paquetes faltantes:$missing"
             export DEBIAN_FRONTEND=noninteractive
             apt-get update
@@ -132,6 +178,7 @@ checkPackages() {
 
             ok "Paquetes instalados correctamente"
         else
+            log_msg "INFO" "Todos los paquetes del sistema ya están instalados"
             echo "Todos los paquetes necesarios ya están instalados"
         fi
     fi
@@ -139,11 +186,13 @@ checkPackages() {
 
 checkSquidLog() {
     local log_file="/var/log/squid/access.log"
+    log_msg "INFO" "Verificando log de Squid en $log_file"
 
     if [ ! -f "$log_file" ]; then
         error "¡ADVERTENCIA!: No hemos encontrado el log en la ruta por defecto. Recargue su squid, navegue y genere logs para crearlo"
         return 1
     else
+        log_msg "INFO" "Archivo de log de Squid encontrado: $log_file"
         echo "Archivo de log de Squid encontrado: $log_file"
         return 0
     fi
@@ -159,11 +208,13 @@ findInstallDir() {
 
     for dir in $destinos; do
         if [ -d "$dir" ]; then
+            log_msg "INFO" "Directorio de instalación encontrado: $dir"
             echo "$dir"
             return 0
         fi
     done
 
+    log_msg "WARN" "No se encontró directorio de instalación"
     return 1
 }
 
@@ -173,44 +224,54 @@ updateOrCloneRepo() {
     local env_exists=false
     local found_dir=""
 
+    log_msg "INFO" "Iniciando actualización/clonación del repositorio"
     found_dir=$(findInstallDir)
 
     if [ -z "$found_dir" ]; then
+        log_msg "INFO" "No se encontró instalación existente, clonando repositorio en /opt/SquidStats"
         echo "No se encontró instalación existente, clonando repositorio en /opt/SquidStats..."
         if git clone "$repo_url" /opt/SquidStats && cd /opt/SquidStats && git checkout "$branch"; then
+            log_msg "OK" "Repositorio clonado exitosamente en /opt/SquidStats"
             echo "✅ Repositorio clonado exitosamente en /opt/SquidStats"
             return 0
         else
+            log_msg "ERROR" "Error al clonar el repositorio"
             echo "❌ Error al clonar el repositorio."
             return 1
         fi
     fi
 
     if [ "$found_dir" = "/usr/share/squidstats" ]; then
+        log_msg "WARN" "Instalación .deb detectada en /usr/share/squidstats, no se puede actualizar con git"
         echo "ℹ️ Instalación detectada en /usr/share/squidstats. Esta versión fue instalada desde un .deb y no puede actualizarse con git."
         echo "Por favor, use el gestor de paquetes de su distribución para actualizar."
         return 1
     fi
 
+    log_msg "INFO" "Actualizando repositorio en $found_dir"
     echo "El directorio $found_dir ya existe, intentando actualizar con git pull..."
     cd "$found_dir"
 
     if [ -d ".git" ]; then
         if [ -f ".env" ]; then
             env_exists=true
+            log_msg "INFO" "Respaldando archivo .env"
             echo ".env existente detectado, se preservará"
             cp .env /tmp/.env.backup
         fi
 
         if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
             [ "$env_exists" = true ] && mv /tmp/.env.backup .env
+            log_msg "OK" "Repositorio actualizado exitosamente en la rama '$branch'"
             echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
             return 0
         else
+            log_msg "ERROR" "Error al actualizar el repositorio con git pull"
             echo "❌ Error al actualizar el repositorio."
             return 1
         fi
     else
+        log_msg "ERROR" "El directorio $found_dir no es un repositorio git"
         echo "⚠️ El directorio $found_dir existe pero no es un repositorio git. No se puede actualizar automáticamente."
         return 1
     fi
@@ -221,7 +282,10 @@ updateEnvVersion() {
     local CURRENT_VERSION="2.3"  # Variable de versión actual del script
     local env_file="$install_dir/.env"
     
+    log_msg "INFO" "Verificando versión en .env ($env_file)"
+    
     if [ ! -f "$env_file" ]; then
+        log_msg "WARN" "Archivo .env no encontrado en $env_file"
         echo "⚠️ Archivo .env no encontrado en $env_file"
         return 1
     fi
@@ -231,19 +295,23 @@ updateEnvVersion() {
     
     # Comparar versiones
     if [ "$env_version" != "$CURRENT_VERSION" ]; then
+        log_msg "INFO" "Actualizando VERSION de $env_version a $CURRENT_VERSION"
         echo "Actualizando VERSION de $env_version a $CURRENT_VERSION en .env..."
         
         # Verificar si existe la línea VERSION en .env
         if grep -q "^VERSION=" "$env_file"; then
             # Actualizar VERSION existente
             sed -i "s/^VERSION=.*/VERSION=$CURRENT_VERSION/" "$env_file"
+            log_msg "OK" "VERSION actualizada a $CURRENT_VERSION en .env"
             echo "✅ VERSION actualizada a $CURRENT_VERSION en .env"
         else
             # Agregar VERSION al inicio del archivo si no existe
             sed -i "1iVERSION=$CURRENT_VERSION" "$env_file"
+            log_msg "OK" "VERSION agregada: $CURRENT_VERSION en .env"
             echo "✅ VERSION agregada: $CURRENT_VERSION en .env"
         fi
     else
+        log_msg "INFO" "VERSION ya está actualizada ($CURRENT_VERSION)"
         echo "✓ VERSION ya está actualizada ($CURRENT_VERSION)"
     fi
     
@@ -254,10 +322,14 @@ createEnvFile() {
     local install_dir="${1:-/opt/SquidStats}"
     local env_file="$install_dir/.env"
 
+    log_msg "INFO" "Verificando archivo .env en $env_file"
+
     if [ -f "$env_file" ]; then
+        log_msg "INFO" "El archivo .env ya existe en $env_file"
         echo "El archivo .env ya existe en $env_file."
         return 0
     else
+        log_msg "INFO" "Creando archivo .env en $env_file"
         echo "Creando archivo de configuración .env..."
         cat >"$env_file" <<EOF
 VERSION=2.3
@@ -271,7 +343,6 @@ SQUID_LOG=/var/log/squid/access.log
 SQUID_CACHE_LOG=/var/log/squid/cache.log
 DATABASE_STRING_CONNECTION=$install_dir/squidstats.db
 REFRESH_INTERVAL=60
-BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
 HTTP_PROXY=""
 HTTPS_PROXY=
 NO_PROXY=
@@ -279,7 +350,7 @@ SQUID_CONFIG_PATH=/etc/squid/squid.conf
 ACL_FILES_DIR=/etc/squid/config/acls
 LISTEN_HOST=0.0.0.0
 LISTEN_PORT=5000
-FIRST_PASSWORD="admin"
+FIRST_PASSWORD="admin"else
 JWT_EXPIRY_HOURS=24
 MAX_LOGIN_ATTEMPTS=5
 LOCKOUT_DURATION_MINUTES=15
@@ -299,7 +370,10 @@ EOF
 createService() {
     local install_dir="${1:-/opt/SquidStats}"
 
+    log_msg "INFO" "Creando servicio del sistema en $install_dir"
+
     if isContainer; then
+        log_msg "WARN" "Entorno contenedor detectado, no se creará servicio"
         echo "⚠️ Entorno contenedor detectado. No se creará servicio."
         echo "Para iniciar manualmente:"
         echo "$install_dir/venv/bin/python3 $install_dir/app.py"
@@ -313,6 +387,7 @@ createService() {
         local template="$install_dir/utils/openRC"
 
         if [ -f "$service_file" ]; then
+            log_msg "INFO" "El servicio ya existe en $service_file"
             echo "El servicio ya existe en $service_file, no se realizan cambios."
             return 0
         fi
@@ -325,6 +400,7 @@ createService() {
         mkdir -p /etc/init.d
 
         echo "Creando servicio OpenRC en $service_file..."
+        log_msg "INFO" "Creando servicio OpenRC en $service_file"
         sed "s|__INSTALL_DIR__|$install_dir|g" "$template" > "$service_file"
         chmod +x "$service_file"
 
@@ -354,6 +430,7 @@ createService() {
         local template="$install_dir/utils/squidstats.service"
 
         if [ -f "$service_file" ]; then
+            log_msg "INFO" "El servicio ya existe en $service_file"
             echo "El servicio ya existe en $service_file, no se realizan cambios."
             return 0
         fi
@@ -364,6 +441,7 @@ createService() {
         fi
 
         echo "Creando servicio systemd en $service_file..."
+        log_msg "INFO" "Creando servicio systemd en $service_file"
         sed "s|__INSTALL_DIR__|$install_dir|g" "$template" > "$service_file"
 
         systemctl daemon-reload
@@ -377,8 +455,11 @@ configureDatabase() {
     local install_dir="${1:-/opt/SquidStats}"
     local env_file="$install_dir/.env"
 
+    log_msg "INFO" "Iniciando configuración de base de datos"
+
     # En modo no interactivo, usar SQLite por defecto
     if [ "$NON_INTERACTIVE" = true ]; then
+        log_msg "INFO" "Modo no interactivo: configurando SQLite por defecto"
         echo "Modo no interactivo: configurando SQLite por defecto"
         choice=1
     else
@@ -435,6 +516,7 @@ configureDatabase() {
 }
 
 stopAndRemoveService() {
+    log_msg "INFO" "Deteniendo y eliminando servicio"
     if [ "$DISTRO_TYPE" = "alpine" ]; then
         local service_file="/etc/init.d/squidstats"
         if [ -f "$service_file" ]; then
@@ -474,20 +556,25 @@ stopAndRemoveService() {
 }
 
 restartService() {
+    log_msg "INFO" "Reiniciando servicio squidstats"
     if [ "$DISTRO_TYPE" = "alpine" ]; then
         if command -v rc-service >/dev/null 2>&1; then
             rc-service squidstats restart
+            log_msg "OK" "Servicio reiniciado (OpenRC)"
         else
+            log_msg "WARN" "OpenRC no disponible"
             echo "⚠️ OpenRC no disponible, reinicie manualmente la aplicación"
         fi
     else
         systemctl restart squidstats.service
+        log_msg "OK" "Servicio reiniciado (systemd)"
     fi
 }
 
 uninstallSquidStats() {
     local destino="/opt/SquidStats"
 
+    log_msg "INFO" "Iniciando proceso de desinstalación"
     echo -e "\n\033[1;43mDESINSTALACIÓN DE SQUIDSTATS\033[0m"
     echo "Esta operación eliminará completamente SquidStats del sistema."
     
@@ -501,10 +588,12 @@ uninstallSquidStats() {
     fi
 
     if [ "$confirm" != "s" ] && [ "$confirm" != "S" ]; then
+        log_msg "INFO" "Desinstalación cancelada por el usuario"
         echo "Desinstalación cancelada."
         return 0
     fi
 
+    log_msg "INFO" "Confirmada desinstalación, procediendo..."
     echo "Iniciando desinstalación..."
 
     stopAndRemoveService
@@ -523,6 +612,7 @@ uninstallSquidStats() {
 main() {
     checkSudo
     detectDistro
+    init_log "$@"
 
     # Procesar parámetros de modo no interactivo
     local action=""
@@ -530,6 +620,7 @@ main() {
         case "$arg" in
             --non-interactive|-y)
                 NON_INTERACTIVE=true
+                log_msg "INFO" "Modo no interactivo activado"
                 echo "Modo no interactivo activado"
                 ;;
             --update|--uninstall)
@@ -538,13 +629,14 @@ main() {
         esac
     done
 
+    log_msg "INFO" "Acción seleccionada: ${action:-instalación nueva}"
+
     if [ "$action" = "--update" ]; then
+        log_msg "INFO" "=== INICIO ACTUALIZACIÓN ==="
         echo "Verificando paquetes instalados..."
         checkPackages
         echo "Actualizando Servicio..."
-        if ! updateOrCloneRepo; then
-            return 1
-        fi
+        updateOrCloneRepo
         
         # Find the installation directory
         local install_dir=$(findInstallDir)
@@ -553,6 +645,9 @@ main() {
             error "No se pudo determinar el directorio de instalación"
             return 1
         fi
+
+        # Mover log al directorio de instalación
+        init_log "$install_dir"
         
         echo "Verificando Dependecias de python..."
         installDependencies "$install_dir"
@@ -563,19 +658,25 @@ main() {
             echo "Reiniciando Servicio..."
             restartService
         else
+            log_msg "INFO" "Instalación de desarrollo detectada en $install_dir, no se reinicia el servicio"
             echo "Instalación de desarrollo detectada en $install_dir. No se reinicia el servicio del sistema."
             echo "Para ejecutar en modo desarrollo, use: python3 app.py"
         fi
 
+        log_msg "OK" "=== ACTUALIZACIÓN COMPLETADA ==="
         ok "Actualizacion completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     elif [ "$action" = "--uninstall" ]; then
+        log_msg "INFO" "=== INICIO DESINSTALACIÓN ==="
         uninstallSquidStats
+        log_msg "OK" "=== DESINSTALACIÓN COMPLETADA ==="
     else
+        log_msg "INFO" "=== INICIO INSTALACIÓN ==="
         echo "Instalando aplicación web..."
         checkPackages
 
         # Detectar si ya estamos en el directorio del repo (CI/desarrollo local)
         if [ "$NON_INTERACTIVE" = true ] && [ -f "app.py" ] && [ -f "requirements.txt" ]; then
+            log_msg "INFO" "Modo CI/local detectado: usando repositorio actual en $(pwd)"
             echo "Modo CI/local detectado: usando repositorio actual en $(pwd)"
             install_dir="$(pwd)"
         else
@@ -586,14 +687,20 @@ main() {
             install_dir="/opt/SquidStats"
         fi
 
+        # Mover log al directorio de instalación
+        init_log "$install_dir"
+
         checkSquidLog || true
         installDependencies "$install_dir"
         createEnvFile "$install_dir"
         configureDatabase "$install_dir"
         createService "$install_dir"
 
+        log_msg "OK" "=== INSTALACIÓN COMPLETADA ==="
         ok "Instalación completada! Acceda en: \033[1;37mhttp://IP:5000\033[0m"
     fi
+
+    echo "Log del instalador guardado en: $LOG_FILE"
 }
 
 # Procesar argumentos
