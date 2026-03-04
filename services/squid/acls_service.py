@@ -299,7 +299,7 @@ def _sanitize_filename(source_url: str) -> str:
     Uses a short hash + a sanitised portion of the URL to keep filenames
     unique and human-readable.
     """
-    url_hash = hashlib.md5(source_url.encode()).hexdigest()[:8]
+    url_hash = hashlib.sha256(source_url.encode()).hexdigest()[:8]
     clean = re.sub(r"[^a-zA-Z0-9_-]", "_", source_url.split("//")[-1])[:60]
     return f"{BLOCKLIST_PREFIX}{clean}_{url_hash}.txt"
 
@@ -311,45 +311,38 @@ def _get_blocklists_dir(config_manager) -> str:
     return blocklists_dir
 
 
-def _validate_blocklist_path(filepath: str, expected_dir: str) -> bool:
-    """Ensure *filepath* resolves to a location inside *expected_dir*.
-
-    Prevents path-traversal attacks by resolving symlinks and relative
-    components (e.g. ``..``) before checking containment.
-    """
-    real_filepath = os.path.realpath(filepath)
-    real_dir = os.path.realpath(expected_dir)
-    # Ensure the resolved path starts with the directory (+ separator)
-    return real_filepath.startswith(real_dir + os.sep)
-
-
 def _write_domains_file(
-    filepath: str, domains: list[str], expected_dir: str | None = None
+    filepath: str, domains: list[str], expected_dir: str
 ) -> tuple[bool, int]:
     """Write a list of domains to a flat file for Squid ``dstdomain``.
 
     Domains are sanitized through :func:`sanitize_domain_list` to ensure
     AdGuard/ABP format entries are converted to plain domains.
 
-    If *expected_dir* is provided the function validates that *filepath*
-    resolves inside that directory, rejecting path-traversal attempts.
+    The function validates that *filepath* resolves inside *expected_dir*,
+    rejecting path-traversal attempts.
 
     Returns:
         ``(success, written_count)`` tuple.
     """
     try:
-        if expected_dir and not _validate_blocklist_path(filepath, expected_dir):
+        # Resolve symlinks / relative components to prevent path traversal
+        safe_path = os.path.realpath(filepath)
+        safe_dir = os.path.realpath(expected_dir)
+        if not safe_path.startswith(safe_dir + os.sep):
             logger.error(
-                "Path traversal blocked: %s is outside %s", filepath, expected_dir
+                "Path traversal blocked: %s is outside %s",
+                safe_path,
+                safe_dir,
             )
             return False, 0
         clean = sanitize_domain_list(domains)
         if not clean:
             logger.warning(
-                f"No valid domains remaining after sanitization for {filepath}"
+                f"No valid domains remaining after sanitization for {safe_path}"
             )
             return False, 0
-        with open(filepath, "w", encoding="utf-8") as f:
+        with open(safe_path, "w", encoding="utf-8") as f:
             f.write("\n".join(clean) + "\n")
         return True, len(clean)
     except Exception:
@@ -360,7 +353,6 @@ def _write_domains_file(
 def _remove_old_blocklist_acls(lines: list[str], acl_name: str) -> list[str]:
     """Remove existing blocklist ACL lines and their comments for *acl_name*."""
     filtered: list[str] = []
-    skip_comment = False
     for _i, line in enumerate(lines):
         stripped = line.strip()
         is_blocklist_acl = (
@@ -372,10 +364,6 @@ def _remove_old_blocklist_acls(lines: list[str], acl_name: str) -> list[str]:
             # Also remove the comment immediately above if it's ours
             if filtered and filtered[-1].strip().startswith("# Blocklist"):
                 filtered.pop()
-            continue
-        # Remove standalone blocklist comment lines that precede a removed ACL
-        if skip_comment:
-            skip_comment = False
             continue
         filtered.append(line)
     return filtered
@@ -460,17 +448,20 @@ def add_acl_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
             label = "custom"
 
         filepath = os.path.join(blocklists_dir, filename)
-        if not _validate_blocklist_path(filepath, blocklists_dir):
+        # Resolve to real path to prevent path traversal
+        safe_path = os.path.realpath(filepath)
+        safe_dir = os.path.realpath(blocklists_dir)
+        if not safe_path.startswith(safe_dir + os.sep):
             logger.error("Path traversal blocked for source: %s", label)
             return False, f"Nombre de archivo inválido para: {label}"
-        ok, written_count = _write_domains_file(filepath, domains, blocklists_dir)
+        ok, written_count = _write_domains_file(safe_path, domains, blocklists_dir)
         if not ok:
             return False, f"Error al escribir archivo de blocklist para: {label}"
 
-        file_info.append((label, filepath, written_count))
+        file_info.append((label, safe_path, written_count))
         total_domains += written_count
         logger.info(
-            f"Blocklist '{label}' escrita en {filepath} con {written_count} dominios "
+            f"Blocklist '{label}' escrita en {safe_path} con {written_count} dominios "
             f"({len(domains)} entradas originales)"
         )
 

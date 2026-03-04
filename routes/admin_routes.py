@@ -196,11 +196,6 @@ def add_acl():
     )
     flash(message, "success" if success else "error")
     return redirect(url_for("admin.manage_acls"))
-    success, message = service_add_acl(
-        name, acl_type, values, options, comment, config_manager
-    )
-    flash(message, "success" if success else "error")
-    return redirect(url_for("admin.manage_acls"))
 
 
 @admin_bp.route("/acls/edit", methods=["POST"])
@@ -800,6 +795,35 @@ def blacklist_delete_list():
 BLOCKLIST_ACL_NAME = "squidstats_blocklist"
 
 
+def _resolve_safe_blocklist_path(base_dir: str, filename: str) -> str | None:
+    """Resolve and validate a blocklist file path to prevent path traversal.
+
+    Ensures the resolved path is within base_dir using os.path.commonpath.
+    Returns the safe path or None if traversal is detected.
+    """
+    base_dir = os.path.realpath(base_dir)
+    candidate = os.path.realpath(os.path.join(base_dir, filename))
+
+    try:
+        if os.path.commonpath([base_dir, candidate]) != base_dir:
+            return None
+    except ValueError:
+        # commonpath raises ValueError if paths are on different drives (Windows)
+        return None
+
+    return candidate
+
+
+def _validate_source_url(source_url: str | None) -> bool:
+    """Validate that source_url is a well-formed URL."""
+    if not source_url:
+        return True  # None is allowed for custom lists
+
+    from urllib.parse import urlparse
+    parsed = urlparse(source_url)
+    return bool(parsed.scheme and parsed.netloc)
+
+
 def _get_enforced_blocklist_urls(cm) -> set[str]:
     """Return the set of source_url values currently enforced as Squid ACLs.
 
@@ -820,6 +844,22 @@ def _get_enforced_blocklist_urls(cm) -> set[str]:
     if not content:
         return enforced
 
+    # Pre-fetch all source URLs from DB to avoid queries in loop
+    session = get_session()
+    try:
+        url_to_filename = {}
+        urls = (
+            session.query(BlacklistDomain.source_url)
+            .filter(BlacklistDomain.source_url.isnot(None))
+            .distinct()
+            .all()
+        )
+        for (url,) in urls:
+            from services.squid.acls_service import _sanitize_filename
+            url_to_filename[_sanitize_filename(url)] = url
+    finally:
+        session.close()
+
     for line in content.split("\n"):
         stripped = line.strip()
         if (
@@ -836,23 +876,10 @@ def _get_enforced_blocklist_urls(cm) -> set[str]:
                 if fname == f"{BLOCKLIST_PREFIX}custom.txt":
                     enforced.add("__custom__")
                 else:
-                    # Reverse-lookup: check DB for source_url that hashes to this file
-                    session = get_session()
-                    try:
-                        urls = (
-                            session.query(BlacklistDomain.source_url)
-                            .filter(BlacklistDomain.source_url.isnot(None))
-                            .distinct()
-                            .all()
-                        )
-                        for (url,) in urls:
-                            from services.squid.acls_service import _sanitize_filename
-
-                            if _sanitize_filename(url) == fname:
-                                enforced.add(url)
-                                break
-                    finally:
-                        session.close()
+                    # Lookup source_url from pre-fetched mapping
+                    source_url = url_to_filename.get(fname)
+                    if source_url:
+                        enforced.add(source_url)
 
     return enforced
 
@@ -868,9 +895,12 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         BLOCKLIST_PREFIX,
         _get_blocklists_dir,
         _sanitize_filename,
-        _validate_blocklist_path,
         _write_domains_file,
     )
+
+    # Validate source_url if provided
+    if not _validate_source_url(source_url):
+        return False, "URL de fuente inválida"
 
     session = get_session()
     try:
@@ -910,16 +940,16 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
 
     # Write file
     blocklists_dir = _get_blocklists_dir(cm)
-    filepath = os.path.join(blocklists_dir, filename)
-    if not _validate_blocklist_path(filepath, blocklists_dir):
+    safe_path = _resolve_safe_blocklist_path(blocklists_dir, filename)
+    if not safe_path:
         logger.error("Path traversal blocked for source: %s", label)
         return False, f"Nombre de archivo inválido para: '{label}'"
-    ok, written_count = _write_domains_file(filepath, domains, blocklists_dir)
+    ok, written_count = _write_domains_file(safe_path, domains, blocklists_dir)
     if not ok:
         return False, f"Error escribiendo archivo para '{label}'"
 
     # Add ACL directive (append without removing others)
-    acl_line = f'acl {BLOCKLIST_ACL_NAME} dstdomain "{filepath}"'
+    acl_line = f'acl {BLOCKLIST_ACL_NAME} dstdomain "{safe_path}"'
     comment_line = f"# Blocklist: {label} ({written_count} dominios)"
 
     try:
@@ -990,8 +1020,11 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         BLOCKLIST_DIR_NAME,
         BLOCKLIST_PREFIX,
         _sanitize_filename,
-        _validate_blocklist_path,
     )
+
+    # Validate source_url if provided
+    if not _validate_source_url(source_url):
+        return False, "URL de fuente inválida"
 
     if source_url:
         filename = _sanitize_filename(source_url)
@@ -1001,11 +1034,11 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         label = "custom"
 
     blocklists_dir = os.path.join(cm.config_dir, BLOCKLIST_DIR_NAME)
-    filepath = os.path.join(blocklists_dir, filename)
-    if not _validate_blocklist_path(filepath, blocklists_dir):
+    safe_path = _resolve_safe_blocklist_path(blocklists_dir, filename)
+    if not safe_path:
         logger.error("Path traversal blocked for source: %s", label)
         return False, f"Nombre de archivo inválido para: '{label}'"
-    acl_line = f'acl {BLOCKLIST_ACL_NAME} dstdomain "{filepath}"'
+    acl_line = f'acl {BLOCKLIST_ACL_NAME} dstdomain "{safe_path}"'
 
     # Remove ACL directive
     try:
@@ -1043,11 +1076,11 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         return False, "Error al eliminar ACL"
 
     # Delete file
-    if os.path.isfile(filepath):
+    if os.path.isfile(safe_path):
         try:
-            os.remove(filepath)
+            os.remove(safe_path)
         except OSError:
-            logger.exception(f"Error eliminando archivo: {filepath}")
+            logger.exception(f"Error eliminando archivo: {safe_path}")
 
     # Check if any blocklist ACLs remain; if not, remove http_access deny rule too
     remaining = _get_enforced_blocklist_urls(cm)
