@@ -820,6 +820,7 @@ def _validate_source_url(source_url: str | None) -> bool:
         return True  # None is allowed for custom lists
 
     from urllib.parse import urlparse
+
     parsed = urlparse(source_url)
     return bool(parsed.scheme and parsed.netloc)
 
@@ -856,6 +857,7 @@ def _get_enforced_blocklist_urls(cm) -> set[str]:
         )
         for (url,) in urls:
             from services.squid.acls_service import _sanitize_filename
+
             url_to_filename[_sanitize_filename(url)] = url
     finally:
         session.close()

@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, jsonify, request
 from loguru import logger
+from werkzeug.exceptions import BadRequest
 
 from database.database import get_session
 from services.analytics.auditoria_service import (
@@ -26,6 +27,64 @@ from services.notifications.notifications import (
 from services.system.metrics_service import MetricsService
 
 api_bp = Blueprint("api", __name__)
+
+
+REQUIRED_FIELDS = {
+    "user_summary": ["username"],
+    "daily_activity": ["start_date", "end_date"],
+    "keyword_search": ["keyword"],
+    "social_media_activity": ["social_media_sites"],
+    "ip_activity": ["ip_address"],
+    "response_code_search": ["response_code"],
+    "total_data_consumed": ["start_date", "end_date"],
+}
+
+AUDIT_HANDLERS = {
+    "user_summary": lambda db, d: get_user_activity_summary(
+        db, d["username"], d.get("start_date"), d.get("end_date")
+    ),
+    "top_users_data": lambda db, d: get_top_users_by_data(
+        db, d.get("start_date"), d.get("end_date")
+    ),
+    "top_urls_data": lambda db, d: get_top_urls_by_data(
+        db, d.get("start_date"), d.get("end_date")
+    ),
+    "top_users_requests": lambda db, d: get_top_users_by_requests(
+        db, d.get("start_date"), d.get("end_date")
+    ),
+    "top_ips_data": lambda db, d: get_top_ips_by_data(
+        db, d.get("start_date"), d.get("end_date")
+    ),
+    "daily_activity": lambda db, d: get_daily_activity(
+        db, d["start_date"], d.get("username")
+    ),
+    "denied_access": lambda db, d: find_denied_access(
+        db, d.get("start_date"), d.get("end_date"), d.get("username")
+    ),
+    "keyword_search": lambda db, d: find_by_keyword(
+        db, d.get("start_date"), d.get("end_date"), d["keyword"], d.get("username")
+    ),
+    "social_media_activity": lambda db, d: find_social_media_activity(
+        db,
+        d.get("start_date"),
+        d.get("end_date"),
+        d["social_media_sites"],
+        d.get("username"),
+    ),
+    "ip_activity": lambda db, d: find_by_ip(
+        db, d.get("start_date"), d.get("end_date"), d["ip_address"]
+    ),
+    "response_code_search": lambda db, d: find_by_response_code(
+        db,
+        d.get("start_date"),
+        d.get("end_date"),
+        int(d["response_code"]),
+        d.get("username"),
+    ),
+    "total_data_consumed": lambda db, d: get_total_data_consumed(
+        db, d["start_date"], d["end_date"]
+    ),
+}
 
 
 @api_bp.route("/metrics/today")
@@ -82,73 +141,32 @@ def api_get_all_users():
 @api_bp.route("/run-audit", methods=["POST"])
 def api_run_audit():
     data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Invalid JSON body"}), 400
+
     audit_type = data.get("audit_type")
-    start_date = data.get("start_date")
-    end_date = data.get("end_date")
-    username = data.get("username")
-    keyword = data.get("keyword")
-    ip_address = data.get("ip_address")
-    response_code = data.get("response_code")
-    social_media_sites = data.get("social_media_sites")
+
+    if audit_type not in AUDIT_HANDLERS:
+        return jsonify({"error": "Invalid audit type"}), 400
 
     db = get_session()
-    try:
-        if audit_type == "user_summary":
-            if not username:
-                return jsonify({"error": "Username is required."}), 400
-            result = get_user_activity_summary(db, username, start_date, end_date)
-        elif audit_type == "top_users_data":
-            result = get_top_users_by_data(db, start_date, end_date)
-        elif audit_type == "top_urls_data":
-            result = get_top_urls_by_data(db, start_date, end_date)
-        elif audit_type == "top_users_requests":
-            result = get_top_users_by_requests(db, start_date, end_date)
-        elif audit_type == "top_ips_data":
-            result = get_top_ips_by_data(db, start_date, end_date)
-        elif audit_type == "daily_activity":
-            if not start_date:
-                return jsonify({"error": "Start date is required."}), 400
-            if not end_date:
-                return jsonify({"error": "End date is required."}), 400
-            result = get_daily_activity(db, start_date, username)
-        elif audit_type == "denied_access":
-            result = find_denied_access(db, start_date, end_date, username)
-        elif audit_type == "keyword_search":
-            if not keyword:
-                return jsonify({"error": "Keyword is required."}), 400
-            result = find_by_keyword(db, start_date, end_date, keyword, username)
-        elif audit_type == "social_media_activity":
-            if not social_media_sites:
-                return jsonify(
-                    {"error": "At least one social media site must be selected."}
-                ), 400
-            result = find_social_media_activity(
-                db, start_date, end_date, social_media_sites, username
-            )
-        elif audit_type == "ip_activity":
-            if not ip_address:
-                return jsonify({"error": "IP address is required."}), 400
-            result = find_by_ip(db, start_date, end_date, ip_address)
-        elif audit_type == "response_code_search":
-            if not response_code:
-                return jsonify({"error": "Response code is required."}), 400
-            result = find_by_response_code(
-                db, start_date, end_date, int(response_code), username
-            )
-        elif audit_type == "total_data_consumed":
-            if not start_date:
-                return jsonify({"error": "Start date is required."}), 400
-            if not end_date:
-                return jsonify({"error": "End date is required."}), 400
-            result = get_total_data_consumed(db, start_date, end_date)
-        else:
-            return jsonify({"error": "Invalid audit type."}), 400
 
+    try:
+        validate_required_fields(audit_type, data)
+        result = AUDIT_HANDLERS[audit_type](db, data)
         return jsonify(result)
 
-    except Exception as e:
-        logger.error(f"Error en la API de auditoría: {e}")
+    except BadRequest as e:
+        return jsonify({"error": str(e)}), 400
+
+    except ValueError:
+        return jsonify({"error": "Invalid numeric value"}), 400
+
+    except Exception:
+        logger.exception("Audit API error")
         return jsonify({"error": "Internal server error"}), 500
+
     finally:
         db.close()
 
@@ -206,3 +224,10 @@ def api_delete_all_notifications():
     except Exception as e:
         logger.error(f"Error deleting all notifications: {e}")
         return jsonify({"success": False, "error": "Internal server error"}), 500
+
+
+def validate_required_fields(audit_type, data):
+    required = REQUIRED_FIELDS.get(audit_type, [])
+    missing = [field for field in required if not data.get(field)]
+    if missing:
+        raise BadRequest(f"Missing required fields: {', '.join(missing)}")
