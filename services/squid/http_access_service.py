@@ -232,7 +232,7 @@ def remove_http_deny_blocklist(acl_name: str, config_manager) -> tuple[bool, str
     def _strip_deny(lines: list[str]) -> list[str]:
         """Return lines without the deny rule and its preceding comment."""
         result: list[str] = []
-        skip_next = False
+        #skip_next = False
         i = 0
         while i < len(lines):
             stripped = lines[i].strip()

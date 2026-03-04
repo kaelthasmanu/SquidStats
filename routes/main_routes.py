@@ -69,11 +69,9 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
 
         try:
             connections = parse_raw_data(raw_data)
-        except Exception as parse_err:
+        except Exception:
             logger.exception("Error parsing Squid connections")
-            return None, _build_error_page(
-                "Error processing Squid data", 500, str(parse_err)
-            )
+            return None, _build_error_page("Error processing Squid data", 500)
 
         if not connections:
             logger.warning("No active connections detected in Squid output")
