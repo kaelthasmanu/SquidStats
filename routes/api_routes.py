@@ -158,7 +158,8 @@ def api_run_audit():
         return jsonify(result)
 
     except BadRequest as e:
-        return jsonify({"error": str(e)}), 400
+        logger.warning(f"Bad request in audit API: {e}")
+        return jsonify({"error": "Bad request"}), 400
 
     except ValueError:
         return jsonify({"error": "Invalid numeric value"}), 400
