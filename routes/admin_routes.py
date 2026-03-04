@@ -1,6 +1,6 @@
+import hashlib
 import os
 import re
-import hashlib
 
 from flask import (
     Blueprint,
@@ -948,6 +948,44 @@ def _get_enforced_blocklist_urls(cm) -> set[str]:
     return enforced
 
 
+def _get_enforced_blocklist_paths(cm) -> dict[str, str]:
+    """Return validated enforced blocklist paths keyed by filename."""
+    from services.squid.acls_service import (
+        BLOCKLIST_PREFIX,
+        _get_blocklists_dir,
+    )
+
+    enforced_paths: dict[str, str] = {}
+    blocklists_dir = _get_blocklists_dir(cm)
+
+    if cm.is_modular:
+        content = cm.read_modular_config("100_acls.conf")
+    else:
+        content = cm.config_content
+
+    if not content:
+        return enforced_paths
+
+    for line in content.split("\n"):
+        stripped = line.strip()
+        if (
+            stripped.startswith(f"acl {BLOCKLIST_ACL_NAME} ")
+            and "dstdomain" in stripped
+            and BLOCKLIST_PREFIX in stripped
+        ):
+            match = re.search(r"""dstdomain\s+["']([^"']+)["']""", stripped)
+            if not match:
+                continue
+
+            filepath = match.group(1)
+            filename = os.path.basename(filepath)
+            safe_path = _resolve_safe_blocklist_path(blocklists_dir, filename)
+            if safe_path:
+                enforced_paths[filename] = safe_path
+
+    return enforced_paths
+
+
 def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     """Enable Squid enforcement for a single blocklist (by source_url).
 
@@ -1081,10 +1119,6 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     - Deletes the domain file.
     - If no blocklist ACLs remain, also removes the http_access deny rule.
     """
-    from services.squid.acls_service import (
-        _get_blocklists_dir,
-    )
-
     # Validate source_url if provided
     if source_url is not None:
         if not isinstance(source_url, str):
@@ -1098,15 +1132,15 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         label = "custom"
 
     try:
-        filename = _build_blocklist_filename(source_url if source_url else None)
+        candidate_filename = _build_blocklist_filename(source_url if source_url else None)
     except ValueError:
         return False, "URL de fuente inválida"
 
-    blocklists_dir = _get_blocklists_dir(cm)
-    safe_path = _resolve_safe_blocklist_path(blocklists_dir, filename)
+    enforced_paths = _get_enforced_blocklist_paths(cm)
+    safe_path = enforced_paths.get(candidate_filename)
     if not safe_path:
-        logger.error("Path traversal blocked for source: %s", label)
-        return False, f"Nombre de archivo inválido para: '{label}'"
+        return False, f"Blocklist '{label}' no está activada"
+
     acl_line = f'acl {BLOCKLIST_ACL_NAME} dstdomain "{safe_path}"'
 
     # Remove ACL directive
