@@ -868,6 +868,7 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         BLOCKLIST_PREFIX,
         _get_blocklists_dir,
         _sanitize_filename,
+        _validate_blocklist_path,
         _write_domains_file,
     )
 
@@ -910,7 +911,10 @@ def _enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     # Write file
     blocklists_dir = _get_blocklists_dir(cm)
     filepath = os.path.join(blocklists_dir, filename)
-    ok, written_count = _write_domains_file(filepath, domains)
+    if not _validate_blocklist_path(filepath, blocklists_dir):
+        logger.error("Path traversal blocked for source: %s", label)
+        return False, f"Nombre de archivo inválido para: '{label}'"
+    ok, written_count = _write_domains_file(filepath, domains, blocklists_dir)
     if not ok:
         return False, f"Error escribiendo archivo para '{label}'"
 
@@ -986,6 +990,7 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
         BLOCKLIST_DIR_NAME,
         BLOCKLIST_PREFIX,
         _sanitize_filename,
+        _validate_blocklist_path,
     )
 
     if source_url:
@@ -997,6 +1002,9 @@ def _disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
 
     blocklists_dir = os.path.join(cm.config_dir, BLOCKLIST_DIR_NAME)
     filepath = os.path.join(blocklists_dir, filename)
+    if not _validate_blocklist_path(filepath, blocklists_dir):
+        logger.error("Path traversal blocked for source: %s", label)
+        return False, f"Nombre de archivo inválido para: '{label}'"
     acl_line = f'acl {BLOCKLIST_ACL_NAME} dstdomain "{filepath}"'
 
     # Remove ACL directive

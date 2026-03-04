@@ -311,16 +311,38 @@ def _get_blocklists_dir(config_manager) -> str:
     return blocklists_dir
 
 
-def _write_domains_file(filepath: str, domains: list[str]) -> tuple[bool, int]:
+def _validate_blocklist_path(filepath: str, expected_dir: str) -> bool:
+    """Ensure *filepath* resolves to a location inside *expected_dir*.
+
+    Prevents path-traversal attacks by resolving symlinks and relative
+    components (e.g. ``..``) before checking containment.
+    """
+    real_filepath = os.path.realpath(filepath)
+    real_dir = os.path.realpath(expected_dir)
+    # Ensure the resolved path starts with the directory (+ separator)
+    return real_filepath.startswith(real_dir + os.sep)
+
+
+def _write_domains_file(
+    filepath: str, domains: list[str], expected_dir: str | None = None
+) -> tuple[bool, int]:
     """Write a list of domains to a flat file for Squid ``dstdomain``.
 
     Domains are sanitized through :func:`sanitize_domain_list` to ensure
     AdGuard/ABP format entries are converted to plain domains.
 
+    If *expected_dir* is provided the function validates that *filepath*
+    resolves inside that directory, rejecting path-traversal attempts.
+
     Returns:
         ``(success, written_count)`` tuple.
     """
     try:
+        if expected_dir and not _validate_blocklist_path(filepath, expected_dir):
+            logger.error(
+                "Path traversal blocked: %s is outside %s", filepath, expected_dir
+            )
+            return False, 0
         clean = sanitize_domain_list(domains)
         if not clean:
             logger.warning(
@@ -438,7 +460,10 @@ def add_acl_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
             label = "custom"
 
         filepath = os.path.join(blocklists_dir, filename)
-        ok, written_count = _write_domains_file(filepath, domains)
+        if not _validate_blocklist_path(filepath, blocklists_dir):
+            logger.error("Path traversal blocked for source: %s", label)
+            return False, f"Nombre de archivo inválido para: {label}"
+        ok, written_count = _write_domains_file(filepath, domains, blocklists_dir)
         if not ok:
             return False, f"Error al escribir archivo de blocklist para: {label}"
 
