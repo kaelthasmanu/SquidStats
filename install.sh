@@ -199,7 +199,7 @@ checkSquidLog() {
 }
 
 findInstallDir() {
-    local destinos="/opt/SquidStats /usr/share/squidstats"
+    local destinos="/opt/SquidStats /usr/share/squidstats /opt/squidstats"
 
     # Agregar el directorio actual si contiene archivos de SquidStats
     if [ -f "app.py" ] && [ -f "requirements.txt" ] && [ -d ".git" ]; then
@@ -350,7 +350,7 @@ SQUID_CONFIG_PATH=/etc/squid/squid.conf
 ACL_FILES_DIR=/etc/squid/config/acls
 LISTEN_HOST=0.0.0.0
 LISTEN_PORT=5000
-FIRST_PASSWORD="admin"else
+FIRST_PASSWORD="admin"
 JWT_EXPIRY_HOURS=24
 MAX_LOGIN_ATTEMPTS=5
 LOCKOUT_DURATION_MINUTES=15
@@ -572,11 +572,20 @@ restartService() {
 }
 
 uninstallSquidStats() {
-    local destino="/opt/SquidStats"
+    local destino
+    destino=$(findInstallDir)
 
     log_msg "INFO" "Iniciando proceso de desinstalación"
     echo -e "\n\033[1;43mDESINSTALACIÓN DE SQUIDSTATS\033[0m"
     echo "Esta operación eliminará completamente SquidStats del sistema."
+
+    if [ -z "$destino" ]; then
+        echo "No se encontró ninguna instalación de SquidStats."
+        log_msg "WARN" "No se encontró directorio de instalación para desinstalar"
+        return 1
+    fi
+
+    echo "Instalación detectada en: $destino"
     
     # En modo no interactivo, proceder sin confirmación
     if [ "$NON_INTERACTIVE" = true ]; then
@@ -593,7 +602,7 @@ uninstallSquidStats() {
         return 0
     fi
 
-    log_msg "INFO" "Confirmada desinstalación, procediendo..."
+    log_msg "INFO" "Confirmada desinstalación de $destino, procediendo..."
     echo "Iniciando desinstalación..."
 
     stopAndRemoveService
@@ -601,7 +610,7 @@ uninstallSquidStats() {
     if [ -d "$destino" ]; then
         echo "Eliminando directorio de instalación $destino..."
         rm -rf "$destino"
-        ok "Directorio de instalación eliminado"
+        ok "Directorio de instalación eliminado: $destino"
     else
         echo "Directorio de instalación no encontrado"
     fi
@@ -654,7 +663,7 @@ main() {
         echo "Actualizando versión en .env..."
         updateEnvVersion "$install_dir"
         
-        if [ "$install_dir" = "/opt/SquidStats" ] || [ "$install_dir" = "/usr/share/squidstats" ]; then
+        if [ "$install_dir" = "/opt/SquidStats" ] || [ "$install_dir" = "/usr/share/squidstats" ] || [ "$install_dir" = "/opt/squidstats" ]; then
             echo "Reiniciando Servicio..."
             restartService
         else
@@ -684,7 +693,10 @@ main() {
                 error "Error al obtener el repositorio"
                 exit 1
             fi
-            install_dir="/opt/SquidStats"
+            install_dir=$(findInstallDir)
+            if [ -z "$install_dir" ]; then
+                install_dir="/opt/SquidStats"
+            fi
         fi
 
         # Mover log al directorio de instalación
