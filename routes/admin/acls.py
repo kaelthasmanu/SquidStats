@@ -5,7 +5,11 @@ from flask import flash, redirect, render_template, request, url_for
 from services.auth.auth_service import admin_required
 from services.squid.acls_service import (
     add_acl as service_add_acl,
+)
+from services.squid.acls_service import (
     delete_acl as service_delete_acl,
+)
+from services.squid.acls_service import (
     edit_acl as service_edit_acl,
 )
 
@@ -32,9 +36,7 @@ def register_routes(bp):
         options = request.form.getlist("options[]")
         comment = request.form.get("comment", "").strip()
 
-        success, message = service_add_acl(
-            name, acl_type, values, options, comment, cm
-        )
+        success, message = service_add_acl(name, acl_type, values, options, comment, cm)
         return flash_and_redirect(success, message, "admin.manage_acls")
 
     @bp.route("/acls/edit", methods=["POST"])

@@ -5,8 +5,14 @@ from flask import flash, redirect, render_template, request, url_for
 from services.auth.auth_service import admin_required
 from services.squid.http_access_service import (
     add_http_access as service_add_http_access,
+)
+from services.squid.http_access_service import (
     delete_http_access as service_delete_http_access,
+)
+from services.squid.http_access_service import (
     edit_http_access as service_edit_http_access,
+)
+from services.squid.http_access_service import (
     move_http_access as service_move_http_access,
 )
 

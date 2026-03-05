@@ -5,7 +5,11 @@ from flask import render_template, request
 from services.auth.auth_service import admin_required
 from services.squid.delay_pools_service import (
     add_delay_pool as service_add_delay_pool,
+)
+from services.squid.delay_pools_service import (
     delete_delay_pool as service_delete_delay_pool,
+)
+from services.squid.delay_pools_service import (
     edit_delay_pool as service_edit_delay_pool,
 )
 

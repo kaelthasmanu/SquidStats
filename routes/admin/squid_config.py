@@ -8,18 +8,19 @@ from services.database.admin_helpers import load_env_vars, save_env_vars
 from services.squid.config_service import save_config as service_save_config
 from services.squid.split_config_service import (
     get_split_files_info as service_get_split_files_info,
+)
+from services.squid.split_config_service import (
     get_split_view_data as service_get_split_view_data,
+)
+from services.squid.split_config_service import (
     split_config as service_split_config,
 )
 from services.squid.squid_config_splitter import SquidConfigSplitter
 
 from .helpers import (
-    flash_and_redirect,
     flash_error_with_details,
     get_config_manager,
-    is_debug,
     json_error,
-    json_success,
     reload_config_manager,
 )
 
@@ -51,7 +52,9 @@ def register_routes(bp):
                 flash(message, "success")
                 return redirect(url_for("admin.view_config"))
             else:
-                flash_error_with_details("Error saving configuration", Exception(message))
+                flash_error_with_details(
+                    "Error saving configuration", Exception(message)
+                )
         return render_template(
             "admin/edit_config.html", config_content=cm.config_content
         )
@@ -129,9 +132,7 @@ def register_routes(bp):
             )
         except RuntimeError as e:
             logger.error(f"Error de validación: {e}")
-            return json_error(
-                "Error de validación de la configuración", 400
-            )
+            return json_error("Error de validación de la configuración", 400)
         except Exception as e:
             logger.exception("Error al dividir el archivo de configuración")
             return json_error(

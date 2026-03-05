@@ -15,7 +15,5 @@ def register_routes(bp):
         max_lines = min(max(max_lines, 10), 1000)
 
         log_files = [Config.SQUID_LOG, Config.SQUID_CACHE_LOG]
-        logs = service_read_logs(
-            log_files, max_lines, debug=bool(current_app.debug)
-        )
+        logs = service_read_logs(log_files, max_lines, debug=bool(current_app.debug))
         return render_template("admin/logs.html", logs=logs, max_lines=max_lines)

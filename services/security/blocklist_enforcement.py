@@ -39,6 +39,7 @@ BLOCKLIST_ACL_NAME = "squidstats_blocklist"
 # URL / filename validation helpers
 # ---------------------------------------------------------------------------
 
+
 def validate_source_url(source_url: str | None) -> bool:
     """Validate that *source_url* is a well-formed URL.
 
@@ -109,6 +110,7 @@ def resolve_safe_blocklist_path(base_dir: str, filename: str) -> str | None:
 # Enforcement state queries
 # ---------------------------------------------------------------------------
 
+
 def get_enforced_blocklist_urls(cm) -> set[str]:
     """Return the set of source_url values currently enforced as Squid ACLs.
 
@@ -165,6 +167,7 @@ def get_enforced_blocklist_paths(cm) -> dict[str, str]:
 # ---------------------------------------------------------------------------
 # Enable / disable single blocklist
 # ---------------------------------------------------------------------------
+
 
 def enable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
     """Enable Squid enforcement for a single blocklist (by source_url).
@@ -266,6 +269,7 @@ def disable_single_blocklist(source_url: str | None, cm) -> tuple[bool, str]:
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _read_acl_content(cm) -> str | None:
     """Read ACL content respecting modular vs monolithic config."""
     if cm.is_modular:
@@ -348,9 +352,7 @@ def _upsert_acl_line(cm, acl_line: str, comment_line: str):
         if not cm.save_modular_config("100_acls.conf", "\n".join(lines)):
             raise RuntimeError("Error guardando ACL en config modular")
     else:
-        lines = _filter_acl_lines(
-            cm.config_content.split("\n"), acl_line, comment_line
-        )
+        lines = _filter_acl_lines(cm.config_content.split("\n"), acl_line, comment_line)
         acl_section_end = -1
         for i, line in enumerate(lines):
             if line.strip().startswith("acl "):
@@ -378,9 +380,7 @@ def _remove_acl_line(cm, acl_line: str):
     cm.save_config("\n".join(new_lines))
 
 
-def _filter_acl_lines(
-    lines: list[str], acl_line: str, comment_line: str
-) -> list[str]:
+def _filter_acl_lines(lines: list[str], acl_line: str, comment_line: str) -> list[str]:
     """Remove existing occurrences of an ACL line and its comment."""
     lines = [
         ln

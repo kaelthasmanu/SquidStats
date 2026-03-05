@@ -10,10 +10,10 @@ from loguru import logger
 
 from utils.admin import SquidConfigManager
 
-
 # ---------------------------------------------------------------------------
 # Config manager accessor (replaces global mutable)
 # ---------------------------------------------------------------------------
+
 
 def get_config_manager() -> SquidConfigManager:
     """Return the shared :class:`SquidConfigManager` instance.
@@ -40,6 +40,7 @@ def reload_config_manager() -> SquidConfigManager:
 # Flash + Redirect helper
 # ---------------------------------------------------------------------------
 
+
 def flash_and_redirect(success: bool, message: str, endpoint: str, **kwargs):
     """Flash a message and redirect to *endpoint* in a single call."""
     flash(message, "success" if success else "error")
@@ -49,6 +50,7 @@ def flash_and_redirect(success: bool, message: str, endpoint: str, **kwargs):
 # ---------------------------------------------------------------------------
 # Debug mode helper
 # ---------------------------------------------------------------------------
+
 
 def is_debug() -> bool:
     """Return ``True`` when the Flask app is running in debug mode.
@@ -65,6 +67,7 @@ def is_debug() -> bool:
 # Form field parsing helpers
 # ---------------------------------------------------------------------------
 
+
 def get_int_form_field(name: str) -> int | None:
     """Parse an integer from ``request.form[name]``.
 
@@ -79,6 +82,7 @@ def get_int_form_field(name: str) -> int | None:
 # ---------------------------------------------------------------------------
 # JSON error response helpers
 # ---------------------------------------------------------------------------
+
 
 def json_error(message: str, status_code: int = 400, *, details: str | None = None):
     """Build a standard JSON error response.
@@ -104,9 +108,8 @@ def json_success(message: str, *, extra: dict | None = None):
 # Flash error with debug details
 # ---------------------------------------------------------------------------
 
-def flash_error_with_details(
-    user_message: str, exception: Exception | None = None
-):
+
+def flash_error_with_details(user_message: str, exception: Exception | None = None):
     """Flash an error message; include exception details in debug mode."""
     if is_debug() and exception is not None:
         flash(f"{user_message}: {exception}", "error")

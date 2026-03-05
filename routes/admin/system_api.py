@@ -14,10 +14,12 @@ from services.database.db_info_service import (
 )
 from services.system.system_service import (
     reload_squid as service_reload_squid,
+)
+from services.system.system_service import (
     restart_squid as service_restart_squid,
 )
 
-from .helpers import is_debug, json_error, json_success
+from .helpers import json_error, json_success
 
 
 def register_routes(bp):
@@ -79,6 +81,4 @@ def register_routes(bp):
 
         except Exception as e:
             logger.exception("Error deleting data from table")
-            return json_error(
-                "Error interno del servidor", 500, details=str(e)
-            )
+            return json_error("Error interno del servidor", 500, details=str(e))
