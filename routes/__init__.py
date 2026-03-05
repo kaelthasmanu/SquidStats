@@ -3,7 +3,7 @@ Routes package for SquidStats application.
 Contains all route blueprints organized by functionality.
 """
 
-from .admin_routes import admin_bp
+from .admin import admin_bp
 from .api_routes import api_bp
 from .auth_routes import auth_bp
 from .logs_routes import logs_bp
