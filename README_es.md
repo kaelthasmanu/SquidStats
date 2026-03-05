@@ -326,7 +326,8 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    
    # Configuración de Base de Datos
    DATABASE_TYPE="SQLITE"  # Opciones: SQLITE o MARIADB
-   DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db"  # Para SQLite: ruta del directorio, Para MariaDB: cadena de conexión
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db"  # Para SQLite: ruta del directorio
+   # Para MariaDB: cadena de conexión mysql+pymysql://user:clave@host:port/db
    
    # Configuración de la Aplicación Flask
    FLASK_DEBUG="False"  # Establecer a True solo para desarrollo
