@@ -49,7 +49,7 @@ def split_config(strict=False):
         logger.error("Error de validación: %s", e)
         return {
             "status": "error",
-            "message": str(e),
+            "message": "Error de validación de la configuración",
         }, 400
     except Exception:
         logger.exception("Error al dividir el archivo de configuración")
