@@ -358,77 +358,91 @@ class SquidConfigSplitter:
     def _validate_squid_config(self) -> dict:
         """
         Validate Squid configuration using 'squid -k parse'.
+        First tries the system squid command; if not found, falls back to Docker.
         Returns dict with 'success' (bool), 'output' (str), and 'error_message' (str) if failed.
         """
-        try:
-            logger.info("Validating Squid configuration with 'squid -k parse'...")
-            result = subprocess.run(
-                ["squid", "-k", "parse"],
-                # ["docker", "exec", "squid_proxy", "squid", "-k", "parse"],
-                capture_output=True,
-                text=True,
-                timeout=30,
+
+        def _run_command(cmd: list[str]) -> dict:
+            """Run a validation command and return a result dict."""
+            try:
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                stdout_output = result.stdout.strip() if result.stdout else ""
+                stderr_output = result.stderr.strip() if result.stderr else ""
+                full_output = ""
+                if stdout_output:
+                    full_output += f"STDOUT:\n{stdout_output}\n"
+                if stderr_output:
+                    full_output += f"STDERR:\n{stderr_output}\n"
+                if not full_output:
+                    full_output = "No output from squid command"
+                return {
+                    "ran": True,
+                    "returncode": result.returncode,
+                    "output": full_output,
+                }
+            except subprocess.TimeoutExpired as e:
+                stdout_partial = e.stdout.strip() if e.stdout else ""
+                stderr_partial = e.stderr.strip() if e.stderr else ""
+                partial_output = ""
+                if stdout_partial:
+                    partial_output += f"STDOUT (partial):\n{stdout_partial}\n"
+                if stderr_partial:
+                    partial_output += f"STDERR (partial):\n{stderr_partial}\n"
+                return {
+                    "ran": True,
+                    "returncode": -1,
+                    "output": partial_output,
+                    "timeout": True,
+                }
+            except FileNotFoundError:
+                return {"ran": False, "output": ""}
+            except Exception as e:
+                return {"ran": True, "returncode": -1, "output": str(e)}
+
+        # --- Try system squid first ---
+        logger.info("Validating Squid configuration with 'squid -k parse'...")
+        res = _run_command(["squid", "-k", "parse"])
+
+        if not res["ran"]:
+            # squid binary not found on the system, try Docker
+            logger.warning(
+                "'squid' not found on system. Trying Docker fallback "
+                "('docker exec squid_proxy squid -k parse')..."
             )
+            res = _run_command(["docker", "exec", "squid_proxy", "squid", "-k", "parse"])
 
-            # Capture all output
-            stdout_output = result.stdout.strip() if result.stdout else ""
-            stderr_output = result.stderr.strip() if result.stderr else ""
-
-            full_output = ""
-            if stdout_output:
-                full_output += f"STDOUT:\n{stdout_output}\n"
-            if stderr_output:
-                full_output += f"STDERR:\n{stderr_output}\n"
-
-            if not full_output:
-                full_output = "No output from squid command"
-
-            if result.returncode == 0:
-                logger.info(
-                    f"Squid configuration is valid.\nCommand output:\n{full_output}"
-                )
-                return {
-                    "success": True,
-                    "output": full_output,
-                    "return_code": result.returncode,
-                }
-            else:
+            if not res["ran"]:
                 error_msg = (
-                    f"Validation failed with return code {result.returncode}\n"
-                    f"{full_output}"
+                    "Neither 'squid' nor 'docker' command found. "
+                    "Cannot validate configuration. "
+                    "Please ensure Squid is installed (system or Docker)."
                 )
-                logger.error(f"Squid configuration validation failed:\n{error_msg}")
-                return {
-                    "success": False,
-                    "error_message": error_msg,
-                    "output": full_output,
-                    "return_code": result.returncode,
-                }
+                logger.error(error_msg)
+                return {"success": False, "error_message": error_msg}
 
-        except subprocess.TimeoutExpired as e:
-            # Capture partial output if available
-            stdout_partial = e.stdout.strip() if e.stdout else ""
-            stderr_partial = e.stderr.strip() if e.stderr else ""
-            partial_output = ""
-            if stdout_partial:
-                partial_output += f"STDOUT (partial):\n{stdout_partial}\n"
-            if stderr_partial:
-                partial_output += f"STDERR (partial):\n{stderr_partial}\n"
-            error_msg = f"Squid configuration validation timed out after 30 seconds.\n{partial_output}"
+        # --- Evaluate result ---
+        if res.get("timeout"):
+            error_msg = f"Squid configuration validation timed out after 30 seconds.\n{res['output']}"
             logger.error(error_msg)
-            return {
-                "success": False,
-                "error_message": error_msg,
-                "output": partial_output,
-            }
-        except FileNotFoundError:
-            error_msg = "squid command not found. Cannot validate configuration. Please ensure Squid is installed."
-            logger.error(error_msg)
-            return {"success": False, "error_message": error_msg}
-        except Exception as e:
-            error_msg = f"Unexpected error validating Squid configuration: {str(e)}"
-            logger.error(error_msg)
-            return {"success": False, "error_message": error_msg}
+            return {"success": False, "error_message": error_msg, "output": res["output"]}
+
+        if res["returncode"] == 0:
+            logger.info(f"Squid configuration is valid.\nCommand output:\n{res['output']}")
+            return {"success": True, "output": res["output"], "return_code": res["returncode"]}
+
+        error_msg = f"Validation failed with return code {res['returncode']}\n{res['output']}"
+        logger.error(f"Squid configuration validation failed:\n{error_msg}")
+        return {
+            "success": False,
+            "error_message": error_msg,
+            "output": res["output"],
+            "return_code": res["returncode"],
+        }
 
     def _rollback_changes(self, backup_file: str, generated_files: list[str]) -> None:
         """
