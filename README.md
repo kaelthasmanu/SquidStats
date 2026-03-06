@@ -310,7 +310,7 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
     Note: for use MARIADB need your own database running
    ```bash
    # Application Version
-   VERSION="2"
+   VERSION="2.3"
    
    # Security Keys
    SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
@@ -326,7 +326,8 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
    
    # Database Configuration
    DATABASE_TYPE="SQLITE"  # Options: SQLITE or MARIADB
-   DATABASE_STRING_CONNECTION="/opt/SquidStats/"  # For SQLite: directory path, For MariaDB: connection string
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db"  # For SQLite: directory path
+   # For MariaDB: connection string mysql+pymysql://user:clave@host:port/db
    
    # Flask Application Settings
    FLASK_DEBUG="False"  # Set to True only for development

@@ -2,7 +2,7 @@
 let confirmCallback = null;
 
 function showCustomConfirm(message, callback, options = {}) {
-    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmMessage').innerHTML = message;
     confirmCallback = callback;
     // Polimorfismo visual: solo botón cerrar
     const cancelBtn = document.getElementById('confirmCancelBtn');
