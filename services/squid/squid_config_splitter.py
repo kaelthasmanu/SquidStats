@@ -414,7 +414,9 @@ class SquidConfigSplitter:
                 "'squid' not found on system. Trying Docker fallback "
                 "('docker exec squid_proxy squid -k parse')..."
             )
-            res = _run_command(["docker", "exec", "squid_proxy", "squid", "-k", "parse"])
+            res = _run_command(
+                ["docker", "exec", "squid_proxy", "squid", "-k", "parse"]
+            )
 
             if not res["ran"]:
                 error_msg = (
@@ -429,13 +431,25 @@ class SquidConfigSplitter:
         if res.get("timeout"):
             error_msg = f"Squid configuration validation timed out after 30 seconds.\n{res['output']}"
             logger.error(error_msg)
-            return {"success": False, "error_message": error_msg, "output": res["output"]}
+            return {
+                "success": False,
+                "error_message": error_msg,
+                "output": res["output"],
+            }
 
         if res["returncode"] == 0:
-            logger.info(f"Squid configuration is valid.\nCommand output:\n{res['output']}")
-            return {"success": True, "output": res["output"], "return_code": res["returncode"]}
+            logger.info(
+                f"Squid configuration is valid.\nCommand output:\n{res['output']}"
+            )
+            return {
+                "success": True,
+                "output": res["output"],
+                "return_code": res["returncode"],
+            }
 
-        error_msg = f"Validation failed with return code {res['returncode']}\n{res['output']}"
+        error_msg = (
+            f"Validation failed with return code {res['returncode']}\n{res['output']}"
+        )
         logger.error(f"Squid configuration validation failed:\n{error_msg}")
         return {
             "success": False,
