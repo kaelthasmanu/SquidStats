@@ -138,6 +138,7 @@ class SquidConfigSplitter:
                 "100_acls.conf",
                 [
                     re.compile(r"^acl(?! auth\b)"),
+                    re.compile(r"^external_acl_type\b"),
                 ],
             ),
             Rule(
@@ -162,6 +163,12 @@ class SquidConfigSplitter:
                     re.compile(r"^deny_info\b"),
                 ],
             ),
+            Rule(
+                "90_includes.conf",
+                [
+                    re.compile(r"^include\b"),
+                ],
+            ),
         ]
 
     def _get_load_order(self) -> list[str]:
@@ -184,6 +191,7 @@ class SquidConfigSplitter:
             "115_cache_control.conf",
             "120_http_access.conf",  # Uses all ACLs
             "55_ssl_bump.conf",  # Can go anywhere but typically after ACLs
+            "90_includes.conf",  # Additional includes
             self.unknown_file,  # Catch-all for unclassified
         ]
 
@@ -248,9 +256,22 @@ class SquidConfigSplitter:
 
         try:
             with open(self.input_file, encoding="utf-8") as f:
+                in_continuation = False
+                continuation_target = None
                 for lineno, raw_line in enumerate(f, start=1):
                     line = raw_line.rstrip("\n")
                     stripped = line.strip()
+
+                    # Handle backslash continuation lines
+                    if in_continuation:
+                        buffers.setdefault(continuation_target, [])
+                        buffers[continuation_target].extend(pending_comments)
+                        pending_comments.clear()
+                        buffers[continuation_target].append(raw_line)
+                        if not line.rstrip().endswith("\\"):
+                            in_continuation = False
+                            continuation_target = None
+                        continue
 
                     # Comments and empty lines
                     if not stripped or stripped.startswith("#"):
@@ -282,6 +303,11 @@ class SquidConfigSplitter:
                     buffers[target].extend(pending_comments)
                     pending_comments.clear()
                     buffers[target].append(raw_line)
+
+                    # Start tracking continuation if line ends with backslash
+                    if line.rstrip().endswith("\\"):
+                        in_continuation = True
+                        continuation_target = target
 
             # Orphaned final comments
             if pending_comments:
@@ -319,7 +345,7 @@ class SquidConfigSplitter:
                 )
                 self._rollback_changes(backup_file, list(buffers.keys()))
                 raise RuntimeError(
-                    "Squid configuration validation failed. Changes have been reverted."
+                    f"Squid configuration validation failed. Changes have been reverted.\n\nSquid output:\n{error_details}"
                 )
 
             logger.info("Squid configuration validated successfully.")
@@ -489,6 +515,7 @@ class SquidConfigSplitter:
             "110_delay_pools.conf": "Delay pools configuration",
             "115_cache_control.conf": "Cache control and peering",
             "120_http_access.conf": "HTTP access rules",
+            "90_includes.conf": "Additional include directives",
             "999_unknown.conf": "Unclassified directives",
         }
 
