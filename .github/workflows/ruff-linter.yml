@@ -6,6 +6,9 @@ on:
   push:
     branches: [ "main", "develop" ]
 
+permissions:
+  contents: read
+
 # Cancel previous runs if a new one is triggered
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
