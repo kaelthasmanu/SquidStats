@@ -5,6 +5,8 @@ instance/*
 .env
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 
 ### Python template
 # Byte-compiled / optimized / DLL files
