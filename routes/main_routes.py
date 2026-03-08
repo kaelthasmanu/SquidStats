@@ -36,13 +36,10 @@ def inject_app_version():
     return {"app_version": version}
 
 
-def _build_error_page(message: str, status: int = 500, details: str | None = None):
+def _build_error_page(message: str, status: int = 500):
     """
     Build a standardized error page
     """
-    if details:
-        logger.debug("Error details (server-only): %s", details)
-
     return (
         render_template(
             "error.html",
@@ -65,7 +62,7 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
             return None, _build_error_page("No data from Squid", 502)
         if isinstance(raw_data, str) and raw_data.strip().lower().startswith("error"):
             logger.error(f"Failed to fetch Squid data: {raw_data}")
-            return None, _build_error_page("Error connecting to Squid", 502, raw_data)
+            return None, _build_error_page("Error connecting to Squid", 502)
 
         try:
             connections = parse_raw_data(raw_data)
