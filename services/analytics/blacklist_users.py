@@ -38,7 +38,12 @@ def find_blacklisted_sites(
     total_results = 0
 
     # Early-exit if the blacklist table has no active entries.
-    if not db.query(BlacklistDomain).filter(BlacklistDomain.active == 1).limit(1).first():
+    if (
+        not db.query(BlacklistDomain)
+        .filter(BlacklistDomain.active == 1)
+        .limit(1)
+        .first()
+    ):
         return {
             "results": [],
             "pagination": {
@@ -156,9 +161,7 @@ def find_blacklisted_sites(
     }
 
 
-def find_blacklisted_sites_by_date(
-    db: Session, specific_date: datetime.date
-):
+def find_blacklisted_sites_by_date(db: Session, specific_date: datetime.date):
     results = []
 
     try:

@@ -52,6 +52,7 @@ class MetricsService:
                     session = None
                 if "database is locked" in str(e).lower() and attempt < _LOCK_RETRIES:
                     import time
+
                     logger.warning(
                         f"Database locked saving metrics, retry {attempt}/{_LOCK_RETRIES}..."
                     )
