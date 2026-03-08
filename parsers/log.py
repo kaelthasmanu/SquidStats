@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 
 from loguru import logger
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
 
 from config import Config
 from database.database import (
@@ -345,6 +345,18 @@ def process_logs(log_file):
                                 key = (user.username, user.ip)
                                 if key in user_cache:
                                     del user_cache[key]
+                    except OperationalError as e:
+                        if "database is locked" in str(e).lower():
+                            retry_count += 1
+                            logger.warning(
+                                f"Database locked, retrying ({retry_count}/{MAX_RETRIES})..."
+                            )
+                            session.rollback()
+                            time.sleep(0.5 * retry_count)
+                        else:
+                            logger.error(f"Database error: {e}")
+                            session.rollback()
+                            break
                     except SQLAlchemyError as e:
                         logger.error(f"Database error: {e}")
                         session.rollback()

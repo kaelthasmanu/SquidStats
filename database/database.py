@@ -8,6 +8,7 @@ from alembic.runtime.migration import MigrationContext
 from loguru import logger
 from sqlalchemy import (
     create_engine,
+    event,
     func,
     inspect,
     text,
@@ -192,7 +193,27 @@ def get_engine():
         return _engine
     create_database_if_not_exists()
     db_url = get_database_url()
-    _engine = create_engine(db_url, echo=False, future=True)
+    db_type = Config.DATABASE_TYPE
+    if db_type == "SQLITE":
+        _engine = create_engine(
+            db_url,
+            echo=False,
+            future=True,
+            connect_args={"timeout": 30, "check_same_thread": False},
+        )
+
+        # Enable WAL journal mode and set synchronous=NORMAL for the connection.
+        # WAL allows concurrent reads while a write is in progress and dramatically
+        # reduces "database is locked" errors in multi-threaded apps.
+        @event.listens_for(_engine, "connect")
+        def set_sqlite_pragmas(dbapi_conn, _connection_record):
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA busy_timeout=30000")
+            cursor.close()
+    else:
+        _engine = create_engine(db_url, echo=False, future=True)
     return _engine
 
 

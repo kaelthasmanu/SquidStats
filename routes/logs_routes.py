@@ -4,7 +4,6 @@ from flask import Blueprint, jsonify, render_template, request
 from loguru import logger
 
 from database.database import get_session
-from database.models.models import BlacklistDomain
 from services.analytics.blacklist_users import find_blacklisted_sites
 from services.analytics.fetch_data_logs import get_users_logs
 
@@ -73,23 +72,8 @@ def blacklist_logs():
 
         db = get_session()
 
-        # Obtener blacklist desde la tabla `blacklist_domains` en la base de datos
-        try:
-            rows = (
-                db.query(BlacklistDomain)
-                .filter(BlacklistDomain.active == 1)
-                .order_by(BlacklistDomain.domain)
-                .all()
-            )
-            blacklist = [r.domain for r in rows]
-        except Exception:
-            logger.exception("Error leyendo blacklist desde DB")
-            return render_template(
-                "error.html", message="Error leyendo blacklist desde la base de datos"
-            ), 500
-
         # Obtener resultados paginados
-        result_data = find_blacklisted_sites(db, blacklist, page, per_page)
+        result_data = find_blacklisted_sites(db, page, per_page)
 
         if "error" in result_data:
             return render_template("error.html", message=result_data["error"]), 500

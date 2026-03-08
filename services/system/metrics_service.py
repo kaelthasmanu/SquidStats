@@ -3,8 +3,12 @@ from typing import Any
 
 from loguru import logger
 from sqlalchemy import desc
+from sqlalchemy.exc import OperationalError
 
 from database.database import SystemMetrics, get_session
+
+_LOCK_RETRIES = 5
+_LOCK_RETRY_DELAY = 1.0  # seconds
 
 
 class MetricsService:
@@ -16,36 +20,54 @@ class MetricsService:
         net_sent_bytes_sec: int,
         net_recv_bytes_sec: int,
     ) -> bool:
-        try:
-            session = get_session()
+        session = None
+        for attempt in range(1, _LOCK_RETRIES + 1):
+            try:
+                session = get_session()
 
-            # Crear nueva métrica con timestamp local
-            local_tz = datetime.now().astimezone().tzinfo
-            metric = SystemMetrics(
-                timestamp=datetime.now(local_tz),
-                cpu_usage=cpu_usage,
-                ram_usage_bytes=ram_usage_bytes,
-                swap_usage_bytes=swap_usage_bytes,
-                net_sent_bytes_sec=net_sent_bytes_sec,
-                net_recv_bytes_sec=net_recv_bytes_sec,
-            )
+                local_tz = datetime.now().astimezone().tzinfo
+                metric = SystemMetrics(
+                    timestamp=datetime.now(local_tz),
+                    cpu_usage=cpu_usage,
+                    ram_usage_bytes=ram_usage_bytes,
+                    swap_usage_bytes=swap_usage_bytes,
+                    net_sent_bytes_sec=net_sent_bytes_sec,
+                    net_recv_bytes_sec=net_recv_bytes_sec,
+                )
 
-            session.add(metric)
-            session.commit()
-            session.close()
-
-            # Limpiar métricas antiguas (más de 24 horas)
-            MetricsService.cleanup_old_metrics()
-
-            logger.info("System metrics saved successfully")
-            return True
-
-        except Exception as e:
-            logger.error(f"Error saving system metrics: {e}")
-            if session:
-                session.rollback()
+                session.add(metric)
+                session.commit()
                 session.close()
-            return False
+
+                # Limpiar métricas antiguas (más de 24 horas)
+                MetricsService.cleanup_old_metrics()
+
+                logger.info("System metrics saved successfully")
+                return True
+
+            except OperationalError as e:
+                if session:
+                    session.rollback()
+                    session.close()
+                    session = None
+                if "database is locked" in str(e).lower() and attempt < _LOCK_RETRIES:
+                    import time
+                    logger.warning(
+                        f"Database locked saving metrics, retry {attempt}/{_LOCK_RETRIES}..."
+                    )
+                    time.sleep(_LOCK_RETRY_DELAY * attempt)
+                else:
+                    logger.error(f"Error saving system metrics: {e}")
+                    return False
+
+            except Exception as e:
+                logger.error(f"Error saving system metrics: {e}")
+                if session:
+                    session.rollback()
+                    session.close()
+                return False
+
+        return False
 
     @staticmethod
     def get_metrics_last_24_hours() -> list[dict[str, Any]]:
