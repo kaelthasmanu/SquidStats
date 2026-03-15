@@ -12,15 +12,15 @@ from services.database.db_admin_service import (
 from services.database.db_info_service import (
     get_tables_info as service_get_tables_info,
 )
+from services.squid.ssl_bump_service import get_ssl_bump_status
 from services.system.system_service import (
     reload_squid as service_reload_squid,
 )
 from services.system.system_service import (
     restart_squid as service_restart_squid,
 )
-from services.squid.ssl_bump_service import get_ssl_bump_status
 
-from .helpers import json_error, json_success, get_config_manager
+from .helpers import get_config_manager, json_error, json_success
 
 
 def register_routes(bp):

@@ -11,9 +11,8 @@ from config import Config
 load_dotenv()
 
 SQUID_CONFIG_PATH = Config.SQUID_CONFIG_PATH or "/etc/squid/squid.conf"
-ACL_FILES_DIR = (
-    os.getenv("ACL_FILES_DIR") or
-    os.path.join(os.path.dirname(SQUID_CONFIG_PATH), "squid.d", "")
+ACL_FILES_DIR = os.getenv("ACL_FILES_DIR") or os.path.join(
+    os.path.dirname(SQUID_CONFIG_PATH), "squid.d", ""
 )
 
 
@@ -1026,12 +1025,8 @@ class SquidConfigManager:
 
         # --- determine mode ---
         if result["enabled"]:
-            has_bump = any(
-                re.match(r"^ssl_bump\s+bump\b", r) for r in ssl_bump_rules
-            )
-            has_peek = any(
-                re.match(r"^ssl_bump\s+peek\b", r) for r in ssl_bump_rules
-            )
+            has_bump = any(re.match(r"^ssl_bump\s+bump\b", r) for r in ssl_bump_rules)
+            has_peek = any(re.match(r"^ssl_bump\s+peek\b", r) for r in ssl_bump_rules)
             has_splice = any(
                 re.match(r"^ssl_bump\s+splice\b", r) for r in ssl_bump_rules
             )
