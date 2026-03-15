@@ -1,10 +1,9 @@
 // Confirm Modal Component Logic
 let confirmCallback = null;
 
-function showCustomConfirm(message, callback, options = {}) {
-    document.getElementById('confirmMessage').textContent = message;
+// Low-level: open the modal assuming confirmMessage is already populated.
+function openConfirmModal(callback, options = {}) {
     confirmCallback = callback;
-    // Polimorfismo visual: solo botón cerrar
     const cancelBtn = document.getElementById('confirmCancelBtn');
     const confirmBtn = document.getElementById('confirmConfirmBtn');
     if (options.onlyClose) {
@@ -19,6 +18,12 @@ function showCustomConfirm(message, callback, options = {}) {
         confirmBtn.classList.add('bg-red-500', 'hover:bg-red-600');
     }
     document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+// High-level: set a plain-text message and open the modal.
+function showCustomConfirm(message, callback, options = {}) {
+    document.getElementById('confirmMessage').textContent = message;
+    openConfirmModal(callback, options);
 }
 
 function hideConfirmModal() {

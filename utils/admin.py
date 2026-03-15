@@ -1,19 +1,46 @@
 import os
+import re
 import shutil
 from datetime import datetime
 
 from dotenv import load_dotenv
 from loguru import logger
 
+from config import Config
+
 load_dotenv()
 
-# SQUID_CONFIG_PATH = os.getenv("SQUID_CONFIG_PATH", "/etc/squid/squid.conf")
-# ACL_FILES_DIR = os.getenv("ACL_FILES_DIR", "/etc/squid/acls")
-SQUID_CONFIG_PATH = "/etc/squid/squid.conf"
-ACL_FILES_DIR = "/etc/squid/squid.d/"
+SQUID_CONFIG_PATH = Config.SQUID_CONFIG_PATH or "/etc/squid/squid.conf"
+ACL_FILES_DIR = os.getenv("ACL_FILES_DIR") or os.path.join(
+    os.path.dirname(SQUID_CONFIG_PATH), "squid.d", ""
+)
+
+
+def _join_continuation_lines(content: str) -> str:
+    """Join lines ending with a backslash with the following line."""
+    lines = content.splitlines()
+    result = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        while line.rstrip().endswith("\\"):
+            line = line.rstrip()[:-1]
+            i += 1
+            if i < len(lines):
+                line += " " + lines[i].strip()
+        result.append(line)
+        i += 1
+    return "\n".join(result)
 
 
 def validate_paths():
+    """Validate the squid.conf path (hard errors) and the ACL directory (warnings only).
+
+    Returns a list of *hard* error strings that block SquidConfigManager
+    initialization.  Missing or inaccessible ACL directories are logged as
+    warnings but do NOT appear in the returned list — they only disable
+    modular-config support.
+    """
     errors = []
 
     cfg = os.path.abspath(os.path.expanduser(SQUID_CONFIG_PATH))
@@ -47,13 +74,17 @@ def validate_paths():
                 if not os.access(squid_conf, os.W_OK):
                     errors.append(f"No write permissions for: {squid_conf}")
 
+    # ACL / modular-config directory — warnings only, never a hard error
     acl_dir = os.path.abspath(os.path.expanduser(ACL_FILES_DIR))
     if not os.path.exists(acl_dir):
-        errors.append(f"ACL directory not found: {acl_dir}")
+        logger.warning(
+            f"ACL/modular config directory not found: {acl_dir} — "
+            "modular configuration will be disabled."
+        )
     elif not os.path.isdir(acl_dir):
-        errors.append(f"ACL path is not a directory: {acl_dir}")
+        logger.warning(f"ACL path is not a directory: {acl_dir}")
     elif not os.access(acl_dir, os.W_OK):
-        errors.append(f"No write permissions in ACL directory: {acl_dir}")
+        logger.warning(f"No write permissions in ACL directory: {acl_dir}")
 
     return errors
 
@@ -893,6 +924,123 @@ class SquidConfigManager:
             "config_files_count": len(self.list_modular_configs()),
             "main_config_path": self.config_path,
         }
+
+    def detect_ssl_bump(self) -> dict:
+        """Detect whether SSL Bump is enabled in the Squid configuration.
+
+        Inspects ``http_port`` directives (with backslash-continuation support),
+        ``ssl_bump`` action rules, and ``sslcrtd_*`` directives.
+
+        Returns a dict::
+
+            {
+                "enabled": bool,
+                "mode": "peek-and-splice" | "bump-all" | "custom" | "basic" | None,
+                "cert": str | None,          # path in cert= option
+                "generate_certs": bool,
+                "sslcrtd_configured": bool,
+                "sslcrtd_children": int | None,
+                "http_port_entry": str | None,
+                "ssl_bump_rules": list[str],
+                "source": "main" | "modular",
+            }
+        """
+        result: dict = {
+            "enabled": False,
+            "mode": None,
+            "cert": None,
+            "generate_certs": False,
+            "sslcrtd_configured": False,
+            "sslcrtd_children": None,
+            "http_port_entry": None,
+            "ssl_bump_rules": [],
+            "source": "main",
+        }
+
+        if not self.is_valid:
+            return result
+
+        ports_content = self.config_content
+        ssl_content = self.config_content
+
+        if self.is_modular:
+            # Use os.path.exists to avoid ERROR logs for optional modular files
+            ports_path = os.path.join(self.config_dir, "00_ports.conf")
+            ssl_path = os.path.join(self.config_dir, "55_ssl_bump.conf")
+            if os.path.exists(ports_path):
+                mc_ports = self.read_modular_config("00_ports.conf")
+                if mc_ports:
+                    ports_content = mc_ports
+                    result["source"] = "modular"
+            if os.path.exists(ssl_path):
+                mc_ssl = self.read_modular_config("55_ssl_bump.conf")
+                if mc_ssl:
+                    ssl_content = mc_ssl
+                    result["source"] = "modular"
+
+        # --- http_port: join continuation lines then scan ---
+        joined_ports = _join_continuation_lines(ports_content)
+        for line in joined_ports.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            if re.match(r"^http_port\b", stripped):
+                tokens = stripped.split()
+                if "ssl-bump" in tokens:
+                    result["enabled"] = True
+                    result["http_port_entry"] = stripped
+
+                    cert_m = re.search(r"\bcert=(\S+)", stripped)
+                    if cert_m:
+                        result["cert"] = cert_m.group(1)
+
+                    gen_m = re.search(
+                        r"\bgenerate-host-certificates=(on|off)\b", stripped
+                    )
+                    if gen_m:
+                        result["generate_certs"] = gen_m.group(1) == "on"
+                    break
+
+        # --- ssl_bump action rules ---
+        ssl_bump_rules = []
+        for line in ssl_content.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            if re.match(r"^ssl_bump\b", stripped):
+                ssl_bump_rules.append(stripped)
+        result["ssl_bump_rules"] = ssl_bump_rules
+
+        # --- sslcrtd_* directives ---
+        for line in ssl_content.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            if re.match(r"^sslcrtd_program\b", stripped):
+                result["sslcrtd_configured"] = True
+            elif re.match(r"^sslcrtd_children\b", stripped):
+                m = re.match(r"^sslcrtd_children\s+(\d+)", stripped)
+                if m:
+                    result["sslcrtd_children"] = int(m.group(1))
+
+        # --- determine mode ---
+        if result["enabled"]:
+            has_bump = any(re.match(r"^ssl_bump\s+bump\b", r) for r in ssl_bump_rules)
+            has_peek = any(re.match(r"^ssl_bump\s+peek\b", r) for r in ssl_bump_rules)
+            has_splice = any(
+                re.match(r"^ssl_bump\s+splice\b", r) for r in ssl_bump_rules
+            )
+
+            if has_peek or has_splice:
+                result["mode"] = "peek-and-splice"
+            elif has_bump:
+                result["mode"] = "bump-all"
+            elif ssl_bump_rules:
+                result["mode"] = "custom"
+            else:
+                result["mode"] = "basic"
+
+        return result
 
     def get_status(self):
         return {
