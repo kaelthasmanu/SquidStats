@@ -3,8 +3,9 @@ let confirmCallback = null;
 
 function showCustomConfirm(message, callback, options = {}) {
     const msgEl = document.getElementById('confirmMessage');
-    if (options.isHtml) {
-        msgEl.innerHTML = message;
+    msgEl.replaceChildren();
+    if (message instanceof Node) {
+        msgEl.appendChild(message);
     } else {
         msgEl.textContent = message;
     }
