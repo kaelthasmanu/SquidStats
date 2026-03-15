@@ -106,7 +106,7 @@ class SquidConfigSplitter:
                 [
                     re.compile(r"^ssl_"),
                     re.compile(r"^sslcrtd_"),
-                    re.compile(r"SslBump"),
+                    re.compile(r"^acl\s+\S+\s+at_step\b"),
                     re.compile(r"sslproxy_"),
                 ],
             ),
@@ -137,7 +137,7 @@ class SquidConfigSplitter:
             Rule(
                 "100_acls.conf",
                 [
-                    re.compile(r"^acl(?! auth\b)"),
+                    re.compile(r"^acl(?! auth\b)(?!.*\bat_step\b)"),
                     re.compile(r"^external_acl_type\b"),
                 ],
             ),
