@@ -231,6 +231,9 @@
     function confirmSplit() {
         const backupFilename = `squid.conf.bak${getCurrentDate()}`;
 
+        const msgEl = document.getElementById('confirmMessage');
+        msgEl.replaceChildren();
+
         const wrapper = document.createElement('div');
         wrapper.className = 'space-y-3';
 
@@ -268,8 +271,9 @@
         infoBox.appendChild(p2);
         infoBox.appendChild(p3);
         wrapper.appendChild(infoBox);
+        msgEl.appendChild(wrapper);
 
-        showCustomConfirm(wrapper, executeSplit);
+        openConfirmModal(executeSplit);
     }
 
     async function executeSplit() {
