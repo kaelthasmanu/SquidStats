@@ -3,6 +3,7 @@
 from flask import render_template
 
 from services.auth.auth_service import admin_required
+from services.squid.ssl_bump_service import get_ssl_bump_status
 
 from .helpers import get_config_manager
 
@@ -21,4 +22,10 @@ def register_routes(bp):
             "total_http_rules": len(http_access_rules),
         }
         status = cm.get_status()
-        return render_template("admin/dashboardAdmin.html", stats=stats, status=status)
+        ssl_bump = get_ssl_bump_status(cm)
+        return render_template(
+            "admin/dashboardAdmin.html",
+            stats=stats,
+            status=status,
+            ssl_bump=ssl_bump,
+        )

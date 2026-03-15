@@ -18,8 +18,9 @@ from services.system.system_service import (
 from services.system.system_service import (
     restart_squid as service_restart_squid,
 )
+from services.squid.ssl_bump_service import get_ssl_bump_status
 
-from .helpers import json_error, json_success
+from .helpers import json_error, json_success, get_config_manager
 
 
 def register_routes(bp):
@@ -42,6 +43,18 @@ def register_routes(bp):
         if success:
             return json_success(message)
         return json_error(message, 500, details=details)
+
+    # ------------------------------------------------------------------
+    # SSL Bump detection
+    # ------------------------------------------------------------------
+
+    @bp.route("/api/ssl-bump-status", methods=["GET"])
+    @api_auth_required
+    def ssl_bump_status():
+        cm = get_config_manager()
+        data = get_ssl_bump_status(cm)
+        print("SSL Bump status:", data)  # Debug log
+        return jsonify(data), 200
 
     # ------------------------------------------------------------------
     # Database management

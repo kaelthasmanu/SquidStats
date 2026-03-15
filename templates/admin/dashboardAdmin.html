@@ -6,7 +6,7 @@
         <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Dashboard - Resumen del Sistema</h2>
         
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
 
             <!-- ACLs Card -->
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg">
@@ -83,6 +83,28 @@
                         {% endif %}
                     </div>
                     <i class="fas fa-key text-4xl text-purple-200"></i>
+                </div>
+            </div>
+
+            <!-- SSL Bump Card -->
+            {% if ssl_bump.enabled %}
+            <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-lg">
+            {% else %}
+            <div class="bg-gradient-to-r from-gray-400 to-gray-500 text-white p-6 rounded-lg">
+            {% endif %}
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="{% if ssl_bump.enabled %}text-yellow-100{% else %}text-gray-200{% endif %}">SSL Bump</p>
+                        {% if ssl_bump.enabled %}
+                            <p class="text-2xl font-bold">Activo</p>
+                            {% if ssl_bump.mode %}
+                                <p class="text-xs mt-1 {% if ssl_bump.enabled %}text-yellow-200{% else %}text-gray-300{% endif %}">{{ ssl_bump.mode }}</p>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-2xl font-bold">Inactivo</p>
+                        {% endif %}
+                    </div>
+                    <i class="fas fa-user-secret text-4xl {% if ssl_bump.enabled %}text-yellow-200{% else %}text-gray-300{% endif %}"></i>
                 </div>
             </div>
 
@@ -179,6 +201,26 @@
                     {% else %}
                         <span class="text-blue-600 font-semibold">Cargada</span>
                     {% endif %}
+                </div>
+
+                <div class="flex items-center justify-between p-3 {% if ssl_bump.enabled %}bg-yellow-50{% else %}bg-gray-50{% endif %} rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-secret {% if ssl_bump.enabled %}text-yellow-500{% else %}text-gray-400{% endif %} mr-3"></i>
+                        <span class="font-medium">SSL Bump (MITM)</span>
+                    </div>
+                    <div class="text-right">
+                        {% if ssl_bump.enabled %}
+                            <span class="text-yellow-600 font-semibold">Activo</span>
+                            {% if ssl_bump.mode %}
+                                <span class="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">{{ ssl_bump.mode }}</span>
+                            {% endif %}
+                            {% if ssl_bump.cert %}
+                                <br><span class="text-xs text-gray-500">cert: {{ ssl_bump.cert }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-500 font-semibold">Inactivo</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
