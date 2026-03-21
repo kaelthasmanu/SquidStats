@@ -255,6 +255,20 @@ def manage_http_access():
     return render_template("admin/http_access.html", rules=rules)
 
 
+@admin_bp.route("/quota", methods=["GET"])
+@admin_required
+def manage_quota():
+    """Render the quota management UI."""
+    env_vars = load_env_vars()
+    delay_pools = config_manager.get_delay_pools()
+
+    return render_template(
+        "admin/quota.html",
+        env_vars=env_vars,
+        delay_pools=delay_pools,
+    )
+
+
 @admin_bp.route("/blacklist", methods=["GET"])
 @admin_required
 def manage_blacklist():
