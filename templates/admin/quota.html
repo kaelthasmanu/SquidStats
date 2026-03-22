@@ -4,7 +4,7 @@
 {% include 'components/confirm_modal.html' %}
 {% include 'components/loading_spinner.html' %}
 
-<div x-data="{ activeTab: '{{ active_tab|default('overview') }}', userForm: { username: '', quota_mb: '' }, groupForm: { group_name: '', quota_mb: '' }, editModal: { isOpen: false, type: '', username: '', group_name: '', quota_mb: '' } }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+<div x-data="{ activeTab: '{{ active_tab|default('overview') }}', overview_user_filter: '', overview_blocked_filter: '', userForm: { username: '', quota_mb: '' }, groupForm: { group_name: '', quota_mb: '' }, editModal: { isOpen: false, type: '', username: '', group_name: '', quota_mb: '' } }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Cuotas de Usuario - Administración Squid</h2>
 
     <!-- Tabs -->
@@ -67,6 +67,82 @@
             <div class="p-4 bg-gray-50 rounded border">
                 <p class="text-sm text-gray-500">Incidentes de exceso</p>
                 <p class="text-2xl font-bold text-blue-700">{{ quota_exceeded_count or 0 }}</p>
+            </div>
+        </div>
+
+        <div class="mt-8 bg-white p-4 rounded-lg border shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
+                <div>
+                    <h4 class="text-lg font-semibold">Usuarios con cuota</h4>
+                    <p class="text-sm text-gray-500">Ver y filtrar en tiempo real por nombre de usuario.</p>
+                </div>
+                <input type="text" x-model="overview_user_filter" placeholder="Buscar usuario..." class="w-full sm:w-64 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2 border">Usuario</th>
+                            <th class="p-2 border">Cuota (MB)</th>
+                            <th class="p-2 border">Usado (MB)</th>
+                            <th class="p-2 border">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if user_quotas %}
+                            {% for q in user_quotas %}
+                                <tr x-show="overview_user_filter === '' || '{{ q.username|lower }}'.includes(overview_user_filter.toLowerCase())" class="hover:bg-blue-50">
+                                    <td class="p-2 border">{{ q.username }}</td>
+                                    <td class="p-2 border">{{ q.quota_mb }}</td>
+                                    <td class="p-2 border">{{ q.used_mb }}</td>
+                                    <td class="p-2 border">{% if q.quota_mb > 0 and q.used_mb > q.quota_mb %}<span class="text-red-600 font-semibold">Excedido</span>{% else %}<span class="text-green-600">Normal</span>{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td class="p-2 border" colspan="4">No hay usuarios con cuota configurada</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-6 bg-white p-4 rounded-lg border shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
+                <div>
+                    <h4 class="text-lg font-semibold">Usuarios bloqueados (archivo blockUsersQuota)</h4>
+                    <p class="text-sm text-gray-500">Datos extraídos del archivo de bloqueos de quota.</p>
+                </div>
+                <input type="text" x-model="overview_blocked_filter" placeholder="Buscar bloqueado..." class="w-full sm:w-64 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2 border">Usuario</th>
+                            <th class="p-2 border">Detalle</th>
+                            <th class="p-2 border">Registro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if blocked_users %}
+                            {% for b in blocked_users %}
+                                <tr x-show="overview_blocked_filter === '' || '{{ b.username|lower }}'.includes(overview_blocked_filter.toLowerCase())" class="hover:bg-yellow-50">
+                                    <td class="p-2 border font-medium">{{ b.username }}</td>
+                                    <td class="p-2 border">{{ b.detail or '-' }}</td>
+                                    <td class="p-2 border">{{ b.raw }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td class="p-2 border" colspan="3">No se encontraron bloqueos (archivo vacío o no existe).</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -1,5 +1,7 @@
 """Admin quota management routes."""
 
+import os
+
 from flask import render_template, request
 
 from database.database import get_session
@@ -45,6 +47,25 @@ def register_routes(bp):
                 1 for u in user_quotas if u.quota_mb > 0 and u.used_mb > u.quota_mb
             )
 
+            blocked_users = []
+            block_file = os.path.join(os.getcwd(), "blockUsersQuota")
+            if os.path.exists(block_file):
+                with open(block_file, encoding="utf-8") as f:
+                    for line in f:
+                        raw = line.strip()
+                        if not raw:
+                            continue
+                        parts = [p.strip() for p in raw.split(" - ")]
+                        if len(parts) >= 2:
+                            username = parts[1]
+                            detail = " - ".join(parts[2:]) if len(parts) > 2 else ""
+                        else:
+                            username = raw
+                            detail = ""
+                        blocked_users.append(
+                            {"username": username, "detail": detail, "raw": raw}
+                        )
+
         finally:
             session.close()
 
@@ -58,6 +79,7 @@ def register_routes(bp):
             quota_events=events,
             users_with_quota=users_with_quota,
             quota_exceeded_count=quota_exceeded_count,
+            blocked_users=blocked_users,
             active_tab=target_tab,
         )
 
