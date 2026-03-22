@@ -14,20 +14,17 @@ from loguru import logger
 
 from config import Config
 from database.database import migrate_database
-from parsers.log import process_logs
 from routes import register_routes
 from routes.auth_routes import csrf
 from routes.stats_routes import realtime_data_thread
 from services.auth.auth_service import AuthConfig
 from services.notifications.notifications import (
-    has_remote_commits_with_messages,
-    set_commit_notifications,
     set_socketio_instance,
     start_notification_monitor,
     stop_notification_monitor,
 )
-from services.system.metrics_service import MetricsService
 from utils.filters import register_filters
+from services.scheduler.scheduler_tasks import register_scheduler_tasks
 
 logger.add("logs/app.log", rotation="100 MB", retention="31 days", level="INFO")
 
@@ -136,35 +133,8 @@ def create_app():
 
 
 def setup_scheduler_tasks(scheduler):
-    @scheduler.task(
-        "interval", id="check_notifications", minutes=30, misfire_grace_time=1800
-    )
-    def check_notifications_task():
-        repo_path = os.path.dirname(os.path.abspath(__file__))
-        has_updates, messages = has_remote_commits_with_messages(repo_path)
-        set_commit_notifications(has_updates, messages)
-
-    @scheduler.task("interval", id="do_job_1", seconds=30, misfire_grace_time=900)
-    def init_scheduler():
-        log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
-        logger.info(f"Scheduler for file log: {log_file}")
-
-        if not os.path.exists(log_file):
-            logger.error(f"Log file not found: {log_file}")
-            return
-        else:
-            process_logs(log_file)
-
-    @scheduler.task("interval", id="cleanup_metrics", hours=1, misfire_grace_time=3600)
-    def cleanup_old_metrics():
-        try:
-            success = MetricsService.cleanup_old_metrics()
-            if success:
-                logger.info("Cleanup of old metrics completed successfully")
-            else:
-                logger.warning("Error during cleanup of old metrics")
-        except Exception as e:
-            logger.error(f"Error in metrics cleanup task: {e}")
+    # Register all scheduler tasks from services.scheduler.scheduler_tasks and plugins.
+    register_scheduler_tasks(scheduler)
 
 
 def shutdown_app(scheduler, socketio):
