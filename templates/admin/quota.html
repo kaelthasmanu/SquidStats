@@ -4,7 +4,7 @@
 {% include 'components/confirm_modal.html' %}
 {% include 'components/loading_spinner.html' %}
 
-<div x-data="{ activeTab: '{{ active_tab|default('overview') }}' }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+<div x-data="{ activeTab: '{{ active_tab|default('overview') }}', userForm: { username: '', quota_mb: '' }, groupForm: { group_name: '', quota_mb: '' }, editModal: { isOpen: false, type: '', username: '', group_name: '', quota_mb: '' } }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Cuotas de Usuario - Administración Squid</h2>
 
     <!-- Tabs -->
@@ -14,6 +14,41 @@
         <button @click="activeTab = 'group'" :class="activeTab === 'group' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">Por Grupo</button>
         <button @click="activeTab = 'rules'" :class="activeTab === 'rules' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">Reglas</button>
         <button @click="activeTab = 'history'" :class="activeTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">Histórico</button>
+    </div>
+
+    <!-- Modal for edit -->
+    <div x-show="editModal.isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display: none;">
+        <div class="bg-white rounded-lg w-full max-w-lg p-6 shadow-xl" @click.away="editModal.isOpen = false">
+            <h3 class="text-lg font-bold mb-4">Editar cuota <span x-text="editModal.type === 'user' ? 'usuario' : 'grupo'"></span></h3>
+
+            <form :action="editModal.type === 'user' ? '/admin/quota/user/save' : '/admin/quota/group/save'" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                <template x-if="editModal.type === 'user'">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Usuario</label>
+                        <input type="text" name="username" x-model="editModal.username" readonly class="w-full mt-2 p-2 border rounded bg-gray-100" />
+                    </div>
+                </template>
+
+                <template x-if="editModal.type === 'group'">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Grupo</label>
+                        <input type="text" name="group_name" x-model="editModal.group_name" readonly class="w-full mt-2 p-2 border rounded bg-gray-100" />
+                    </div>
+                </template>
+
+                <div>
+                    <label class="text-sm font-medium text-gray-700">Cuota (MB)</label>
+                    <input type="number" name="quota_mb" x-model="editModal.quota_mb" min="0" class="w-full mt-2 p-2 border rounded" required />
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button type="button" @click="editModal.isOpen = false" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white">Guardar</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <div x-show="activeTab === 'overview'" class="mt-6">
@@ -40,19 +75,19 @@
         <h3 class="text-lg font-semibold mb-3">Cuotas por Usuario</h3>
         <p class="text-sm text-gray-600 mb-4">Configura y revisa cuotas específicas por usuario de Squid.</p>
 
-        <form method="POST" action="/admin/quota/user/save" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
+        <form id="user_quota_form" method="POST" action="/admin/quota/user/save" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
                 <label class="text-sm font-medium text-gray-700">Usuario</label>
-                <input name="username" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de usuario" />
+                <input x-model="userForm.username" name="username" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de usuario" />
             </div>
             <div>
                 <label class="text-sm font-medium text-gray-700">Cuota (MB)</label>
-                <input name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="Ej. 2048" />
+                <input x-model="userForm.quota_mb" name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="Ej. 2048" />
             </div>
             <div class="md:col-span-2 flex gap-2">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Cuota</button>
-                <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+                <button type="button" @click="userForm.username=''; userForm.quota_mb='';" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
             </div>
         </form>
 
@@ -75,6 +110,9 @@
                             <td class="p-2 border">{{ q.quota_mb }}</td>
                             <td class="p-2 border">{{ q.used_mb }}</td>
                             <td class="p-2 border">{% if q.used_mb > q.quota_mb %}Excedido{% else %}-{% endif %}</td>
+                            <td class="p-2 border">
+                                <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='user'; editModal.username='{{ q.username }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='user';">Editar</button>
+                            </td>
                         </tr>
                         {% endfor %}
                     {% else %}
@@ -91,19 +129,19 @@
         <h3 class="text-lg font-semibold mb-3">Cuotas por Grupo</h3>
         <p class="text-sm text-gray-600 mb-4">Define límites grupales para los usuarios conectados al proxy.</p>
 
-        <form method="POST" action="/admin/quota/group/save" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
+        <form id="group_quota_form" method="POST" action="/admin/quota/group/save" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
                 <label class="text-sm font-medium text-gray-700">Grupo</label>
-                <input name="group_name" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre del grupo" />
+                <input x-model="groupForm.group_name" name="group_name" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre del grupo" />
             </div>
             <div>
                 <label class="text-sm font-medium text-gray-700">Cuota (MB)</label>
-                <input name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="Ej. 10240" />
+                <input x-model="groupForm.quota_mb" name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="Ej. 10240" />
             </div>
             <div class="md:col-span-2 flex gap-2">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Grupo</button>
-                <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+                <button type="button" @click="groupForm.group_name=''; groupForm.quota_mb='';" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
             </div>
         </form>
 
@@ -114,6 +152,7 @@
                     <tr class="bg-gray-100">
                         <th class="p-2 border">Grupo</th>
                         <th class="p-2 border">Cuota (MB)</th>
+                        <th class="p-2 border">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -122,6 +161,9 @@
                             <tr>
                                 <td class="p-2 border">{{ q.group_name }}</td>
                                 <td class="p-2 border">{{ q.quota_mb }}</td>
+                                <td class="p-2 border">
+                                    <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='group'; editModal.group_name='{{ q.group_name }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='group';">Editar</button>
+                                </td>
                             </tr>
                         {% endfor %}
                     {% else %}
