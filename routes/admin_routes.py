@@ -254,6 +254,7 @@ def manage_http_access():
     rules = config_manager.get_http_access_rules()
     return render_template("admin/http_access.html", rules=rules)
 
+
 @admin_bp.route("/blacklist", methods=["GET"])
 @admin_required
 def manage_blacklist():

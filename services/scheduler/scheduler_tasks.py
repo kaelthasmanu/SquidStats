@@ -1,4 +1,5 @@
 import os
+
 from loguru import logger
 
 from parsers.log import process_logs
@@ -6,14 +7,16 @@ from services.notifications.notifications import (
     has_remote_commits_with_messages,
     set_commit_notifications,
 )
-from services.system.metrics_service import MetricsService
 from services.quota.quota_scheduler import register_quota_scheduler_tasks
+from services.system.metrics_service import MetricsService
 
 
 def register_scheduler_tasks(scheduler):
     """Registers global scheduler tasks for the app."""
 
-    @scheduler.task("interval", id="check_notifications", minutes=30, misfire_grace_time=1800)
+    @scheduler.task(
+        "interval", id="check_notifications", minutes=30, misfire_grace_time=1800
+    )
     def check_notifications_task():
         repo_path = os.path.dirname(os.path.abspath(__file__))
         has_updates, messages = has_remote_commits_with_messages(repo_path)

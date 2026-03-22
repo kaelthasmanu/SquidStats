@@ -1,10 +1,12 @@
 """Admin quota management routes."""
 
-from flask import request, render_template
+from flask import render_template, request
+
 from database.database import get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
 from services.auth.auth_service import admin_required
 from services.database.admin_helpers import load_env_vars
+
 from .helpers import flash_and_redirect, get_config_manager
 
 
@@ -22,8 +24,15 @@ def register_routes(bp):
         session = get_session()
         try:
             user_quotas = session.query(QuotaUser).order_by(QuotaUser.username).all()
-            group_quotas = session.query(QuotaGroup).order_by(QuotaGroup.group_name).all()
-            active_rule = session.query(QuotaRule).filter_by(active=1).order_by(QuotaRule.id.desc()).first()
+            group_quotas = (
+                session.query(QuotaGroup).order_by(QuotaGroup.group_name).all()
+            )
+            active_rule = (
+                session.query(QuotaRule)
+                .filter_by(active=1)
+                .order_by(QuotaRule.id.desc())
+                .first()
+            )
             events = (
                 session.query(QuotaEvent)
                 .order_by(QuotaEvent.created_at.desc())
@@ -32,7 +41,9 @@ def register_routes(bp):
             )
 
             users_with_quota = len(user_quotas)
-            quota_exceeded_count = sum(1 for u in user_quotas if u.quota_mb > 0 and u.used_mb > u.quota_mb)
+            quota_exceeded_count = sum(
+                1 for u in user_quotas if u.quota_mb > 0 and u.used_mb > u.quota_mb
+            )
 
         finally:
             session.close()
@@ -57,14 +68,18 @@ def register_routes(bp):
         quota_mb_str = request.form.get("quota_mb", "").strip()
 
         if not username or not quota_mb_str:
-            return flash_and_redirect(False, "Usuario y cuota son obligatorios", "admin.manage_quota")
+            return flash_and_redirect(
+                False, "Usuario y cuota son obligatorios", "admin.manage_quota"
+            )
 
         try:
             quota_mb = int(quota_mb_str)
             if quota_mb < 0:
                 raise ValueError("Cuota no puede ser negativa")
         except Exception:
-            return flash_and_redirect(False, "Cuota debe ser un número entero válido", "admin.manage_quota")
+            return flash_and_redirect(
+                False, "Cuota debe ser un número entero válido", "admin.manage_quota"
+            )
 
         session = get_session()
         try:
@@ -85,11 +100,18 @@ def register_routes(bp):
             session.commit()
         except Exception as e:
             session.rollback()
-            return flash_and_redirect(False, f"Error guardando cuota de usuario: {e}", "admin.manage_quota")
+            return flash_and_redirect(
+                False, f"Error guardando cuota de usuario: {e}", "admin.manage_quota"
+            )
         finally:
             session.close()
 
-        return flash_and_redirect(True, f"Cuota guardada para usuario {username}", "admin.manage_quota", tab="user")
+        return flash_and_redirect(
+            True,
+            f"Cuota guardada para usuario {username}",
+            "admin.manage_quota",
+            tab="user",
+        )
 
     @bp.route("/quota/group/save", methods=["POST"])
     @admin_required
@@ -98,14 +120,18 @@ def register_routes(bp):
         quota_mb_str = request.form.get("quota_mb", "").strip()
 
         if not group_name or not quota_mb_str:
-            return flash_and_redirect(False, "Grupo y cuota son obligatorios", "admin.manage_quota")
+            return flash_and_redirect(
+                False, "Grupo y cuota son obligatorios", "admin.manage_quota"
+            )
 
         try:
             quota_mb = int(quota_mb_str)
             if quota_mb < 0:
                 raise ValueError("Cuota no puede ser negativa")
         except Exception:
-            return flash_and_redirect(False, "Cuota debe ser un número entero válido", "admin.manage_quota")
+            return flash_and_redirect(
+                False, "Cuota debe ser un número entero válido", "admin.manage_quota"
+            )
 
         session = get_session()
         try:
@@ -126,18 +152,27 @@ def register_routes(bp):
             session.commit()
         except Exception as e:
             session.rollback()
-            return flash_and_redirect(False, f"Error guardando cuota de grupo: {e}", "admin.manage_quota")
+            return flash_and_redirect(
+                False, f"Error guardando cuota de grupo: {e}", "admin.manage_quota"
+            )
         finally:
             session.close()
 
-        return flash_and_redirect(True, f"Cuota guardada para grupo {group_name}", "admin.manage_quota", tab="group")
+        return flash_and_redirect(
+            True,
+            f"Cuota guardada para grupo {group_name}",
+            "admin.manage_quota",
+            tab="group",
+        )
 
     @bp.route("/quota/rules/save", methods=["POST"])
     @admin_required
     def save_quota_rules():
         policy = request.form.get("policy", "")
         if policy not in ("block", "throttle", "notify"):
-            return flash_and_redirect(False, "Política de cuota inválida", "admin.manage_quota")
+            return flash_and_redirect(
+                False, "Política de cuota inválida", "admin.manage_quota"
+            )
 
         session = get_session()
         try:
@@ -159,11 +194,18 @@ def register_routes(bp):
             session.commit()
         except Exception as e:
             session.rollback()
-            return flash_and_redirect(False, f"Error guardando regla de cuota: {e}", "admin.manage_quota")
+            return flash_and_redirect(
+                False, f"Error guardando regla de cuota: {e}", "admin.manage_quota"
+            )
         finally:
             session.close()
 
-        return flash_and_redirect(True, f"Regla de cuota '{policy}' guardada", "admin.manage_quota", tab="rules")
+        return flash_and_redirect(
+            True,
+            f"Regla de cuota '{policy}' guardada",
+            "admin.manage_quota",
+            tab="rules",
+        )
 
     @bp.route("/quota/user/delete", methods=["POST"])
     @admin_required
@@ -171,13 +213,20 @@ def register_routes(bp):
         username = request.form.get("username", "").strip()
 
         if not username:
-            return flash_and_redirect(False, "Usuario no proporcionado", "admin.manage_quota", tab="user")
+            return flash_and_redirect(
+                False, "Usuario no proporcionado", "admin.manage_quota", tab="user"
+            )
 
         session = get_session()
         try:
             quota = session.query(QuotaUser).filter_by(username=username).first()
             if not quota:
-                return flash_and_redirect(False, f"Usuario {username} no encontrado", "admin.manage_quota", tab="user")
+                return flash_and_redirect(
+                    False,
+                    f"Usuario {username} no encontrado",
+                    "admin.manage_quota",
+                    tab="user",
+                )
 
             session.delete(quota)
             session.add(
@@ -190,11 +239,21 @@ def register_routes(bp):
             session.commit()
         except Exception as e:
             session.rollback()
-            return flash_and_redirect(False, f"Error eliminando cuota de usuario: {e}", "admin.manage_quota", tab="user")
+            return flash_and_redirect(
+                False,
+                f"Error eliminando cuota de usuario: {e}",
+                "admin.manage_quota",
+                tab="user",
+            )
         finally:
             session.close()
 
-        return flash_and_redirect(True, f"Cuota eliminada para usuario {username}", "admin.manage_quota", tab="user")
+        return flash_and_redirect(
+            True,
+            f"Cuota eliminada para usuario {username}",
+            "admin.manage_quota",
+            tab="user",
+        )
 
     @bp.route("/quota/group/delete", methods=["POST"])
     @admin_required
@@ -202,13 +261,20 @@ def register_routes(bp):
         group_name = request.form.get("group_name", "").strip()
 
         if not group_name:
-            return flash_and_redirect(False, "Grupo no proporcionado", "admin.manage_quota", tab="group")
+            return flash_and_redirect(
+                False, "Grupo no proporcionado", "admin.manage_quota", tab="group"
+            )
 
         session = get_session()
         try:
             quota = session.query(QuotaGroup).filter_by(group_name=group_name).first()
             if not quota:
-                return flash_and_redirect(False, f"Grupo {group_name} no encontrado", "admin.manage_quota", tab="group")
+                return flash_and_redirect(
+                    False,
+                    f"Grupo {group_name} no encontrado",
+                    "admin.manage_quota",
+                    tab="group",
+                )
 
             session.delete(quota)
             session.add(
@@ -221,8 +287,18 @@ def register_routes(bp):
             session.commit()
         except Exception as e:
             session.rollback()
-            return flash_and_redirect(False, f"Error eliminando cuota de grupo: {e}", "admin.manage_quota", tab="group")
+            return flash_and_redirect(
+                False,
+                f"Error eliminando cuota de grupo: {e}",
+                "admin.manage_quota",
+                tab="group",
+            )
         finally:
             session.close()
 
-        return flash_and_redirect(True, f"Cuota eliminada para grupo {group_name}", "admin.manage_quota", tab="group")
+        return flash_and_redirect(
+            True,
+            f"Cuota eliminada para grupo {group_name}",
+            "admin.manage_quota",
+            tab="group",
+        )

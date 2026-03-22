@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+
 from loguru import logger
 
 from database.database import get_session
@@ -9,7 +10,9 @@ from database.models.models import QuotaEvent, QuotaUser
 def register_quota_scheduler_tasks(scheduler):
     """Registra tareas programadas relacionadas con cuotas."""
 
-    @scheduler.task("interval", id="check_quota_users", minutes=5, misfire_grace_time=300)
+    @scheduler.task(
+        "interval", id="check_quota_users", minutes=5, misfire_grace_time=300
+    )
     def check_quota_users():
         try:
             session = get_session()
@@ -19,15 +22,17 @@ def register_quota_scheduler_tasks(scheduler):
 
             users = session.query(QuotaUser).all()
             for user in users:
-                if user.quota_mb and user.used_mb is not None and user.used_mb > user.quota_mb:
+                if (
+                    user.quota_mb
+                    and user.used_mb is not None
+                    and user.used_mb > user.quota_mb
+                ):
                     exceeded.append(user)
 
             if exceeded:
                 with open(file_path, "a", encoding="utf-8") as f:
                     for user in exceeded:
-                        line = (
-                            f"{now} - {user.username} - quota: {user.quota_mb}MB - used: {user.used_mb}MB\n"
-                        )
+                        line = f"{now} - {user.username} - quota: {user.quota_mb}MB - used: {user.used_mb}MB\n"
                         f.write(line)
 
                 for user in exceeded:

@@ -1,5 +1,4 @@
 import atexit
-import os
 import signal
 import sys
 import threading
@@ -23,10 +22,12 @@ from services.notifications.notifications import (
     start_notification_monitor,
     stop_notification_monitor,
 )
-from utils.filters import register_filters
 from services.scheduler.scheduler_tasks import register_scheduler_tasks
+from utils.filters import register_filters
 
-logger.add("logs/app.log", rotation="100 MB",colorize=True, retention="31 days", level="INFO")
+logger.add(
+    "logs/app.log", rotation="100 MB", colorize=True, retention="31 days", level="INFO"
+)
 
 # Import Telegram integration (optional)
 try:
