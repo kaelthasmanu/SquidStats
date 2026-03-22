@@ -4,7 +4,7 @@
 {% include 'components/confirm_modal.html' %}
 {% include 'components/loading_spinner.html' %}
 
-<div x-data="{ activeTab: 'overview' }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+<div x-data="{ activeTab: '{{ active_tab|default('overview') }}' }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Cuotas de Usuario - Administración Squid</h2>
 
     <!-- Tabs -->
@@ -27,11 +27,11 @@
             </div>
             <div class="p-4 bg-gray-50 rounded border">
                 <p class="text-sm text-gray-500">Usuarios con cuota</p>
-                <p class="text-2xl font-bold text-blue-700">0</p>
+                <p class="text-2xl font-bold text-blue-700">{{ users_with_quota or 0 }}</p>
             </div>
             <div class="p-4 bg-gray-50 rounded border">
                 <p class="text-sm text-gray-500">Incidentes de exceso</p>
-                <p class="text-2xl font-bold text-blue-700">0</p>
+                <p class="text-2xl font-bold text-blue-700">{{ quota_exceeded_count or 0 }}</p>
             </div>
         </div>
     </div>
@@ -57,7 +57,7 @@
         </form>
 
         <div class="mt-5">
-            <h4 class="font-semibold">Ejemplo: usuarios actuales</h4>
+            <h4 class="font-semibold">Usuarios con cuota</h4>
             <table class="w-full text-left text-sm border-collapse">
                 <thead>
                     <tr class="bg-gray-100">
@@ -68,12 +68,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="p-2 border">usuario1</td>
-                        <td class="p-2 border">2048</td>
-                        <td class="p-2 border">980</td>
-                        <td class="p-2 border">-</td>
-                    </tr>
+                    {% if user_quotas %}
+                        {% for q in user_quotas %}
+                        <tr>
+                            <td class="p-2 border">{{ q.username }}</td>
+                            <td class="p-2 border">{{ q.quota_mb }}</td>
+                            <td class="p-2 border">{{ q.used_mb }}</td>
+                            <td class="p-2 border">{% if q.used_mb > q.quota_mb %}Excedido{% else %}-{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td class="p-2 border" colspan="4">No hay usuarios con cuota configurada</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -98,20 +106,48 @@
                 <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
             </div>
         </form>
+
+        <div class="mt-5">
+            <h4 class="font-semibold">Grupos con cuota</h4>
+            <table class="w-full text-left text-sm border-collapse">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="p-2 border">Grupo</th>
+                        <th class="p-2 border">Cuota (MB)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if group_quotas %}
+                        {% for q in group_quotas %}
+                            <tr>
+                                <td class="p-2 border">{{ q.group_name }}</td>
+                                <td class="p-2 border">{{ q.quota_mb }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td class="p-2 border" colspan="2">No hay grupos con cuota configurada</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div x-show="activeTab === 'rules'" class="mt-6">
         <h3 class="text-lg font-semibold mb-3">Reglas de Control</h3>
         <p class="text-sm text-gray-600 mb-4">Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el acceso o degradar la velocidad).</p>
 
+        <p class="mb-3">Regla activa: <strong>{{ active_quota_rule.policy if active_quota_rule else 'Ninguna' }}</strong></p>
+
         <form method="POST" action="/admin/quota/rules/save" class="bg-gray-50 p-4 rounded border space-y-3">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
                 <label class="text-sm font-medium text-gray-700">Política de excedente</label>
                 <select name="policy" class="w-full mt-2 p-2 border rounded">
-                    <option value="block">Bloquear</option>
-                    <option value="throttle">Degradar velocidad</option>
-                    <option value="notify">Solo notificar</option>
+                    <option value="block" {% if active_quota_rule and active_quota_rule.policy == 'block' %}selected{% endif %}>Bloquear</option>
+                    <option value="throttle" {% if active_quota_rule and active_quota_rule.policy == 'throttle' %}selected{% endif %}>Degradar velocidad</option>
+                    <option value="notify" {% if active_quota_rule and active_quota_rule.policy == 'notify' %}selected{% endif %}>Solo notificar</option>
                 </select>
             </div>
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Regla</button>
@@ -127,18 +163,26 @@
                 <thead>
                     <tr class="bg-gray-100">
                         <th class="p-2 border">Fecha</th>
-                        <th class="p-2 border">Usuario</th>
+                        <th class="p-2 border">Usuario/Grupo</th>
                         <th class="p-2 border">Evento</th>
                         <th class="p-2 border">Detalle</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="p-2 border">-</td>
-                        <td class="p-2 border">-</td>
-                        <td class="p-2 border">-</td>
-                        <td class="p-2 border">No hay registros disponibles</td>
-                    </tr>
+                    {% if quota_events %}
+                        {% for ev in quota_events %}
+                        <tr>
+                            <td class="p-2 border">{{ ev.created_at|datetime_format('%d/%m/%Y %H:%M:%S') }}</td>
+                            <td class="p-2 border">{{ ev.username or ev.group_name or '-' }}</td>
+                            <td class="p-2 border">{{ ev.event_type }}</td>
+                            <td class="p-2 border">{{ ev.detail or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td class="p-2 border" colspan="4">No hay registros disponibles</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>

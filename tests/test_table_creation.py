@@ -51,6 +51,15 @@ class TestTableCreation(unittest.TestCase):
         for table in table_names:
             self.assertIn(table, current_tables)
 
+        # New quota tables must also exist
+        for quota_table in [
+            "quota_users",
+            "quota_groups",
+            "quota_rules",
+            "quota_events",
+        ]:
+            self.assertIn(quota_table, current_tables)
+
 
 if __name__ == "__main__":
     unittest.main()

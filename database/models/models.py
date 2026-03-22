@@ -117,6 +117,48 @@ class AdminUser(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
+class QuotaUser(Base):
+    __tablename__ = "quota_users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(255), nullable=False, unique=True, index=True)
+    quota_mb = Column(Integer, nullable=False, default=0)
+    used_mb = Column(BigInteger, nullable=False, default=0)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class QuotaGroup(Base):
+    __tablename__ = "quota_groups"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    group_name = Column(String(255), nullable=False, unique=True, index=True)
+    quota_mb = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class QuotaRule(Base):
+    __tablename__ = "quota_rules"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    policy = Column(String(50), nullable=False)
+    active = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class QuotaEvent(Base):
+    __tablename__ = "quota_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    event_type = Column(String(50), nullable=False)
+    username = Column(String(255), nullable=True)
+    group_name = Column(String(255), nullable=True)
+    detail = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+
+
 def create_dynamic_models(engine, user_table_name: str, log_table_name: str):
     """Factory to create dynamic user/log models bound to a fresh declarative base.
 
