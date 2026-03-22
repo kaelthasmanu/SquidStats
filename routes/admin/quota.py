@@ -1,7 +1,6 @@
 """Admin quota management routes."""
 
-from flask import render_template, request
-
+from flask import request, render_template
 from database.database import get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
 from services.auth.auth_service import admin_required
@@ -165,3 +164,65 @@ def register_routes(bp):
             session.close()
 
         return flash_and_redirect(True, f"Regla de cuota '{policy}' guardada", "admin.manage_quota", tab="rules")
+
+    @bp.route("/quota/user/delete", methods=["POST"])
+    @admin_required
+    def delete_quota_user():
+        username = request.form.get("username", "").strip()
+
+        if not username:
+            return flash_and_redirect(False, "Usuario no proporcionado", "admin.manage_quota", tab="user")
+
+        session = get_session()
+        try:
+            quota = session.query(QuotaUser).filter_by(username=username).first()
+            if not quota:
+                return flash_and_redirect(False, f"Usuario {username} no encontrado", "admin.manage_quota", tab="user")
+
+            session.delete(quota)
+            session.add(
+                QuotaEvent(
+                    event_type="user_quota_deleted",
+                    username=username,
+                    detail=f"Cuota del usuario {username} eliminada",
+                )
+            )
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            return flash_and_redirect(False, f"Error eliminando cuota de usuario: {e}", "admin.manage_quota", tab="user")
+        finally:
+            session.close()
+
+        return flash_and_redirect(True, f"Cuota eliminada para usuario {username}", "admin.manage_quota", tab="user")
+
+    @bp.route("/quota/group/delete", methods=["POST"])
+    @admin_required
+    def delete_quota_group():
+        group_name = request.form.get("group_name", "").strip()
+
+        if not group_name:
+            return flash_and_redirect(False, "Grupo no proporcionado", "admin.manage_quota", tab="group")
+
+        session = get_session()
+        try:
+            quota = session.query(QuotaGroup).filter_by(group_name=group_name).first()
+            if not quota:
+                return flash_and_redirect(False, f"Grupo {group_name} no encontrado", "admin.manage_quota", tab="group")
+
+            session.delete(quota)
+            session.add(
+                QuotaEvent(
+                    event_type="group_quota_deleted",
+                    group_name=group_name,
+                    detail=f"Cuota del grupo {group_name} eliminada",
+                )
+            )
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            return flash_and_redirect(False, f"Error eliminando cuota de grupo: {e}", "admin.manage_quota", tab="group")
+        finally:
+            session.close()
+
+        return flash_and_redirect(True, f"Cuota eliminada para grupo {group_name}", "admin.manage_quota", tab="group")

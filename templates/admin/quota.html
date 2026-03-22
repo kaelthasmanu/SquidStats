@@ -99,7 +99,8 @@
                         <th class="p-2 border">Usuario</th>
                         <th class="p-2 border">Cuota (MB)</th>
                         <th class="p-2 border">Uso (MB)</th>
-                        <th class="p-2 border">Acción</th>
+                        <th class="p-2 border">Estado</th>
+                        <th class="p-2 border">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -110,8 +111,13 @@
                             <td class="p-2 border">{{ q.quota_mb }}</td>
                             <td class="p-2 border">{{ q.used_mb }}</td>
                             <td class="p-2 border">{% if q.used_mb > q.quota_mb %}Excedido{% else %}-{% endif %}</td>
-                            <td class="p-2 border">
+                            <td class="p-2 border flex gap-2">
                                 <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='user'; editModal.username='{{ q.username }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='user';">Editar</button>
+                                <form method="POST" action="/admin/quota/user/delete" onsubmit="return confirm('¿Eliminar la cuota del usuario {{ q.username }}?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <input type="hidden" name="username" value="{{ q.username }}" />
+                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">Eliminar</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}
@@ -161,8 +167,13 @@
                             <tr>
                                 <td class="p-2 border">{{ q.group_name }}</td>
                                 <td class="p-2 border">{{ q.quota_mb }}</td>
-                                <td class="p-2 border">
+                                <td class="p-2 border flex gap-2">
                                     <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='group'; editModal.group_name='{{ q.group_name }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='group';">Editar</button>
+                                    <form method="POST" action="/admin/quota/group/delete" onsubmit="return confirm('¿Eliminar la cuota del grupo {{ q.group_name }}?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                        <input type="hidden" name="group_name" value="{{ q.group_name }}" />
+                                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">Eliminar</button>
+                                    </form>
                                 </td>
                             </tr>
                         {% endfor %}
