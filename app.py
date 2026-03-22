@@ -29,7 +29,7 @@ from services.notifications.notifications import (
 from services.system.metrics_service import MetricsService
 from utils.filters import register_filters
 
-logger.add("logs/app.log", rotation="100 MB", retention="31 days", level="INFO")
+logger.add("logs/app.log", rotation="100 MB",colorize=True, retention="31 days", level="INFO")
 
 # Import Telegram integration (optional)
 try:
