@@ -4,7 +4,8 @@ import os
 
 from flask import render_template, request
 
-from database.database import get_session
+from sqlalchemy import func, inspect as sqlalchemy_inspect
+from database.database import get_session, get_dynamic_models
 from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
 from services.auth.auth_service import admin_required
 from services.database.admin_helpers import load_env_vars
@@ -41,6 +42,49 @@ def register_routes(bp):
                 .limit(50)
                 .all()
             )
+
+            # Map usage from daily log tables into QuotaUser.used_mb to reflect real data
+            quota_usernames = [q.username for q in user_quotas]
+            usage_by_username = {}
+            inspector = sqlalchemy_inspect(session.get_bind())
+            all_tables = inspector.get_table_names()
+
+            for table_name in all_tables:
+                if not table_name.startswith("user_"):
+                    continue
+
+                suffix = table_name.split("_", 1)[1]
+                log_table_name = f"log_{suffix}"
+                if log_table_name not in all_tables:
+                    continue
+
+                UserModel, LogModel = get_dynamic_models(suffix)
+                if not UserModel or not LogModel:
+                    continue
+
+                if not quota_usernames:
+                    break
+
+                usage_rows = (
+                    session.query(
+                        UserModel.username.label("username"),
+                        func.coalesce(func.sum(LogModel.data_transmitted), 0).label("total_bytes"),
+                    )
+                    .join(LogModel, UserModel.id == LogModel.user_id)
+                    .filter(UserModel.username.in_(quota_usernames))
+                    .group_by(UserModel.username)
+                    .all()
+                )
+
+                for row in usage_rows:
+                    usage_by_username[row.username] = usage_by_username.get(
+                        row.username, 0
+                    ) + (row.total_bytes or 0)
+
+            for quota in user_quotas:
+                total_bytes = usage_by_username.get(quota.username, None)
+                if total_bytes is not None:
+                    quota.used_mb = int(total_bytes / 1024 / 1024)
 
             users_with_quota = len(user_quotas)
             quota_exceeded_count = sum(
