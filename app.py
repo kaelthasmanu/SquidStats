@@ -26,7 +26,7 @@ from services.notifications.notifications import (
 from utils.filters import register_filters
 from services.scheduler.scheduler_tasks import register_scheduler_tasks
 
-logger.add("logs/app.log", rotation="100 MB", retention="31 days", level="INFO")
+logger.add("logs/app.log", rotation="100 MB",colorize=True, retention="31 days", level="INFO")
 
 # Import Telegram integration (optional)
 try:
