@@ -3,9 +3,10 @@
 import os
 
 from flask import render_template, request
+from sqlalchemy import func
+from sqlalchemy import inspect as sqlalchemy_inspect
 
-from sqlalchemy import func, inspect as sqlalchemy_inspect
-from database.database import get_session, get_dynamic_models
+from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
 from services.auth.auth_service import admin_required
 from services.database.admin_helpers import load_env_vars
@@ -68,7 +69,9 @@ def register_routes(bp):
                 usage_rows = (
                     session.query(
                         UserModel.username.label("username"),
-                        func.coalesce(func.sum(LogModel.data_transmitted), 0).label("total_bytes"),
+                        func.coalesce(func.sum(LogModel.data_transmitted), 0).label(
+                            "total_bytes"
+                        ),
                     )
                     .join(LogModel, UserModel.id == LogModel.user_id)
                     .filter(UserModel.username.in_(quota_usernames))
