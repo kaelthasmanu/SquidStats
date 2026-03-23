@@ -1,7 +1,7 @@
 """Admin quota management routes."""
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import render_template, request
 from sqlalchemy import func
@@ -50,7 +50,7 @@ def register_routes(bp):
             usage_by_username = {}
             inspector = sqlalchemy_inspect(session.get_bind())
             all_tables = inspector.get_table_names()
-            current_month_prefix = datetime.now().strftime("%Y%m")
+            current_month_prefix = datetime.now(timezone.utc).strftime("%Y%m")
 
             for table_name in all_tables:
                 if not table_name.startswith("user_"):

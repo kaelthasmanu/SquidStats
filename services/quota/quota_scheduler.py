@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from loguru import logger
 from sqlalchemy import func
@@ -18,7 +18,7 @@ def register_quota_scheduler_tasks(scheduler):
     def check_quota_users():
         try:
             session = get_session()
-            now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
             file_path = os.path.join(os.getcwd(), "blockUsersQuota")
             exceeded = []
 
