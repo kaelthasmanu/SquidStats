@@ -19,10 +19,14 @@ def _sync_quota_squid_rules(enabled: bool):
     """Sync `usuarios_bloqueados` ACL/http_access in Squid config."""
     cm = SquidConfigManager()
     if not cm.is_valid:
-        logger.warning("SquidConfigManager no válido: no se puede sincronizar reglas de cuota")
+        logger.warning(
+            "SquidConfigManager no válido: no se puede sincronizar reglas de cuota"
+        )
         return
 
-    acl_line = 'acl usuarios_bloqueados proxy_auth -i "/etc/squid/usuarios_bloqueados.txt"'
+    acl_line = (
+        'acl usuarios_bloqueados proxy_auth -i "/etc/squid/usuarios_bloqueados.txt"'
+    )
     http_line = "http_access deny usuarios_bloqueados"
 
     # Modular preferred
@@ -30,7 +34,9 @@ def _sync_quota_squid_rules(enabled: bool):
         if cm.is_modular:
             # 100_acls.conf
             acls_content = cm.read_modular_config("100_acls.conf") or ""
-            acl_lines = [line for line in acls_content.split("\n") if line.strip() != ""]
+            acl_lines = [
+                line for line in acls_content.split("\n") if line.strip() != ""
+            ]
 
             if enabled:
                 if acl_line not in acl_lines:
@@ -42,7 +48,9 @@ def _sync_quota_squid_rules(enabled: bool):
 
             # 120_http_access.conf
             http_content = cm.read_modular_config("120_http_access.conf") or ""
-            http_lines = [line for line in http_content.split("\n") if line.strip() != ""]
+            http_lines = [
+                line for line in http_content.split("\n") if line.strip() != ""
+            ]
 
             if enabled:
                 if http_line not in http_lines:
@@ -61,7 +69,9 @@ def _sync_quota_squid_rules(enabled: bool):
                 if http_line not in lines:
                     lines.append(http_line)
             else:
-                lines = [line for line in lines if line.strip() not in (acl_line, http_line)]
+                lines = [
+                    line for line in lines if line.strip() not in (acl_line, http_line)
+                ]
 
             cm.save_config("\n".join(lines))
 
@@ -71,7 +81,6 @@ def _sync_quota_squid_rules(enabled: bool):
         logger.error(f"Sin permisos para modificar configuración de Squid: {e}")
     except Exception as e:
         logger.error(f"Error sincronizando reglas Squid: {e}")
-
 
 
 def register_quota_scheduler_tasks(scheduler):
@@ -86,7 +95,9 @@ def register_quota_scheduler_tasks(scheduler):
             quota_enabled = not os.path.exists(quota_disabled_flag)
             _sync_quota_squid_rules(quota_enabled)
             if not quota_enabled:
-                logger.debug("check_quota_users: cuota deshabilitada, omitiendo evaluación")
+                logger.debug(
+                    "check_quota_users: cuota deshabilitada, omitiendo evaluación"
+                )
                 return
 
             session = get_session()
