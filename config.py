@@ -85,7 +85,6 @@ class Config:
     SCHEDULER_API_ENABLED = True
 
     # Security settings
-    SECRET_KEY = safe_get_env("SECRET_KEY", os.urandom(24).hex())
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None  # CSRF tokens don't expire
 
@@ -117,7 +116,7 @@ class Config:
     VERSION = safe_get_env("VERSION", "2.3")
 
     # Authentication settings
-    JWT_SECRET_KEY = SECRET_KEY
+    JWT_SECRET_KEY = safe_get_env("JWT_SECRET_KEY", os.urandom(24).hex())
     JWT_EXPIRY_HOURS = safe_get_env("JWT_EXPIRY_HOURS", 24, var_type=int)
     MAX_LOGIN_ATTEMPTS = safe_get_env("MAX_LOGIN_ATTEMPTS", 5, var_type=int)
     LOCKOUT_DURATION_MINUTES = safe_get_env(
