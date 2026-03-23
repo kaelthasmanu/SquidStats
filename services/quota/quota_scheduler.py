@@ -17,6 +17,11 @@ def register_quota_scheduler_tasks(scheduler):
     )
     def check_quota_users():
         try:
+            quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
+            if os.path.exists(quota_disabled_flag):
+                logger.debug("check_quota_users: cuota deshabilitada, omitiendo evaluación")
+                return
+
             session = get_session()
             now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
             file_path = os.path.join(os.getcwd(), "blockUsersQuota")

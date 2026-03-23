@@ -15,6 +15,30 @@ from services.database.admin_helpers import load_env_vars
 from .helpers import flash_and_redirect, get_config_manager
 
 
+QUOTA_DISABLED_FLAG = os.path.join(os.getcwd(), "quota_disabled")
+
+
+def is_quota_enabled() -> bool:
+    """Return True if the quota scheduler/system is enabled."""
+    return not os.path.exists(QUOTA_DISABLED_FLAG)
+
+
+def set_quota_enabled(enabled: bool) -> None:
+    """Persist the quota enabled flag using a file marker."""
+    block_file = os.path.join(os.getcwd(), "blockUsersQuota")
+    try:
+        if enabled:
+            if os.path.exists(QUOTA_DISABLED_FLAG):
+                os.remove(QUOTA_DISABLED_FLAG)
+            if os.path.exists(block_file):
+                os.remove(block_file)
+        else:
+            with open(QUOTA_DISABLED_FLAG, "w", encoding="utf-8") as f:
+                f.write("disabled\n")
+    except Exception:
+        pass
+
+
 def register_routes(bp):
     @bp.route("/quota", methods=["GET"])
     @admin_required
@@ -133,7 +157,16 @@ def register_routes(bp):
             quota_exceeded_count=quota_exceeded_count,
             blocked_users=blocked_users,
             active_tab=target_tab,
+            quota_enabled=is_quota_enabled(),
         )
+
+    @bp.route("/quota/toggle", methods=["POST"])
+    @admin_required
+    def toggle_quota():
+        current = is_quota_enabled()
+        set_quota_enabled(not current)
+        message = "Cuotas activadas" if not current else "Cuotas desactivadas"
+        return flash_and_redirect(True, message, "admin.manage_quota")
 
     @bp.route("/quota/user/save", methods=["POST"])
     @admin_required
