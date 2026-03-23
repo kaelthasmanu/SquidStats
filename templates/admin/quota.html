@@ -29,6 +29,10 @@
                         <label class="text-sm font-medium text-gray-700">Usuario</label>
                         <input type="text" name="username" x-model="editModal.username" readonly class="w-full mt-2 p-2 border rounded bg-gray-100" />
                     </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Grupo (opcional)</label>
+                        <input type="text" name="group_name" x-model="editModal.group_name" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de grupo" />
+                    </div>
                 </template>
 
                 <template x-if="editModal.type === 'group'">
@@ -94,6 +98,7 @@
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="p-2 border">Usuario</th>
+                            <th class="p-2 border">Grupo</th>
                             <th class="p-2 border">Cuota (MB)</th>
                             <th class="p-2 border">Usado (MB)</th>
                             <th class="p-2 border">Estado</th>
@@ -104,6 +109,7 @@
                             {% for q in user_quotas %}
                                 <tr x-show="overview_user_filter === '' || '{{ q.username|lower }}'.includes(overview_user_filter.toLowerCase())" class="hover:bg-blue-50">
                                     <td class="p-2 border">{{ q.username }}</td>
+                                    <td class="p-2 border">{{ q.group_name or '-' }}</td>
                                     <td class="p-2 border">{{ q.quota_mb }}</td>
                                     <td class="p-2 border">{{ q.used_mb }}</td>
                                     <td class="p-2 border">{% if q.quota_mb > 0 and q.used_mb > q.quota_mb %}<span class="text-red-600 font-semibold">Excedido</span>{% else %}<span class="text-green-600">Normal</span>{% endif %}</td>
@@ -168,12 +174,16 @@
                 <input x-model="userForm.username" name="username" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de usuario" />
             </div>
             <div>
+                <label class="text-sm font-medium text-gray-700">Grupo (opcional)</label>
+                <input x-model="userForm.group_name" name="group_name" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de grupo" />
+            </div>
+            <div>
                 <label class="text-sm font-medium text-gray-700">Cuota (MB)</label>
                 <input x-model="userForm.quota_mb" name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="Ej. 2048" />
             </div>
             <div class="md:col-span-2 flex gap-2">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Cuota</button>
-                <button type="button" @click="userForm.username=''; userForm.quota_mb='';" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+                <button type="button" @click="userForm.username=''; userForm.group_name=''; userForm.quota_mb='';" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
             </div>
         </form>
 
@@ -198,7 +208,7 @@
                             <td class="p-2 border">{{ q.used_mb }}</td>
                             <td class="p-2 border">{% if q.used_mb > q.quota_mb %}Excedido{% else %}-{% endif %}</td>
                             <td class="p-2 border flex gap-2">
-                                <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='user'; editModal.username='{{ q.username }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='user';">Editar</button>
+                                <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='user'; editModal.username='{{ q.username }}'; editModal.group_name='{{ q.group_name or '' }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='user';">Editar</button>
                                 <form method="POST" action="/admin/quota/user/delete" onsubmit="return confirm('¿Eliminar la cuota del usuario {{ q.username }}?');">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden" name="username" value="{{ q.username }}" />

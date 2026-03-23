@@ -172,6 +172,7 @@ def register_routes(bp):
     @admin_required
     def save_quota_user():
         username = request.form.get("username", "").strip()
+        group_name = request.form.get("group_name", "").strip() or None
         quota_mb_str = request.form.get("quota_mb", "").strip()
 
         if not username or not quota_mb_str:
@@ -190,11 +191,22 @@ def register_routes(bp):
 
         session = get_session()
         try:
+            if group_name:
+                group = session.query(QuotaGroup).filter_by(group_name=group_name).first()
+                if not group:
+                    return flash_and_redirect(
+                        False,
+                        f"El grupo '{group_name}' no existe",
+                        "admin.manage_quota",
+                        tab="user",
+                    )
+
             quota = session.query(QuotaUser).filter_by(username=username).first()
             if quota:
                 quota.quota_mb = quota_mb
+                quota.group_name = group_name
             else:
-                quota = QuotaUser(username=username, quota_mb=quota_mb, used_mb=0)
+                quota = QuotaUser(username=username, group_name=group_name, quota_mb=quota_mb, used_mb=0)
                 session.add(quota)
 
             session.add(

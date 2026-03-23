@@ -122,6 +122,7 @@ class QuotaUser(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(255), nullable=False, unique=True, index=True)
+    group_name = Column(String(255), nullable=True, index=True)
     quota_mb = Column(Integer, nullable=False, default=0)
     used_mb = Column(BigInteger, nullable=False, default=0)
     created_at = Column(DateTime, default=datetime.now, nullable=False)

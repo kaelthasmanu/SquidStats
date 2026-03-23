@@ -30,6 +30,7 @@ def upgrade() -> None:
             "quota_users",
             sa.Column("id", sa.Integer(), nullable=False),
             sa.Column("username", sa.String(length=255), nullable=False),
+            sa.Column("group_name", sa.String(length=255), nullable=True),
             sa.Column("quota_mb", sa.Integer(), nullable=False, default=0),
             sa.Column("used_mb", sa.BigInteger(), nullable=False, default=0),
             sa.Column("created_at", sa.DateTime(), nullable=False),
@@ -38,6 +39,7 @@ def upgrade() -> None:
             sa.UniqueConstraint("username"),
         )
         op.create_index("ix_quota_users_username", "quota_users", ["username"])
+        op.create_index("ix_quota_users_group_name", "quota_users", ["group_name"])
     else:
         print("Skipping creation of 'quota_users' because it already exists")
 
@@ -113,6 +115,10 @@ def downgrade() -> None:
         op.drop_table("quota_groups")
 
     if inspector.has_table("quota_users"):
+        try:
+            op.drop_index("ix_quota_users_group_name", table_name="quota_users")
+        except Exception:
+            pass
         try:
             op.drop_index("ix_quota_users_username", table_name="quota_users")
         except Exception:
