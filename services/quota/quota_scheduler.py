@@ -1,8 +1,9 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import func, inspect as sqlalchemy_inspect
 from loguru import logger
+from sqlalchemy import func
+from sqlalchemy import inspect as sqlalchemy_inspect
 
 from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaUser
@@ -52,7 +53,9 @@ def register_quota_scheduler_tasks(scheduler):
                 usage_rows = (
                     session.query(
                         UserModel.username.label("username"),
-                        func.coalesce(func.sum(LogModel.data_transmitted), 0).label("total_bytes"),
+                        func.coalesce(func.sum(LogModel.data_transmitted), 0).label(
+                            "total_bytes"
+                        ),
                     )
                     .join(LogModel, UserModel.id == LogModel.user_id)
                     .filter(UserModel.username.in_(quota_usernames))
@@ -71,7 +74,11 @@ def register_quota_scheduler_tasks(scheduler):
 
             exceeded = []
             for user in users:
-                if user.quota_mb and user.used_mb is not None and user.used_mb > user.quota_mb:
+                if (
+                    user.quota_mb
+                    and user.used_mb is not None
+                    and user.used_mb > user.quota_mb
+                ):
                     exceeded.append(user)
 
             if exceeded:
