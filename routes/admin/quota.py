@@ -15,7 +15,6 @@ from services.database.admin_helpers import load_env_vars
 
 from .helpers import flash_and_redirect, get_config_manager
 
-
 QUOTA_DISABLED_FLAG = os.path.join(os.getcwd(), "quota_disabled")
 
 
@@ -193,7 +192,9 @@ def register_routes(bp):
         session = get_session()
         try:
             if group_name:
-                group = session.query(QuotaGroup).filter_by(group_name=group_name).first()
+                group = (
+                    session.query(QuotaGroup).filter_by(group_name=group_name).first()
+                )
                 if not group:
                     return flash_and_redirect(
                         False,
@@ -207,7 +208,12 @@ def register_routes(bp):
                 quota.quota_mb = quota_mb
                 quota.group_name = group_name
             else:
-                quota = QuotaUser(username=username, group_name=group_name, quota_mb=quota_mb, used_mb=0)
+                quota = QuotaUser(
+                    username=username,
+                    group_name=group_name,
+                    quota_mb=quota_mb,
+                    used_mb=0,
+                )
                 session.add(quota)
 
             session.add(
@@ -218,7 +224,7 @@ def register_routes(bp):
                 )
             )
             session.commit()
-        except IntegrityError as e:
+        except IntegrityError:
             session.rollback()
             return flash_and_redirect(
                 False,
@@ -277,7 +283,7 @@ def register_routes(bp):
                 )
             )
             session.commit()
-        except IntegrityError as e:
+        except IntegrityError:
             session.rollback()
             return flash_and_redirect(
                 False,

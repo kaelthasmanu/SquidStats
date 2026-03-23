@@ -1,12 +1,12 @@
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 
 from loguru import logger
 from sqlalchemy import func
 from sqlalchemy import inspect as sqlalchemy_inspect
 
 from database.database import get_dynamic_models, get_session
-from database.models.models import QuotaEvent, QuotaUser
+from database.models.models import QuotaEvent, QuotaGroup, QuotaUser
 
 
 def register_quota_scheduler_tasks(scheduler):
@@ -17,18 +17,17 @@ def register_quota_scheduler_tasks(scheduler):
     )
     def check_quota_users():
         try:
-            #quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
-            #if os.path.exists(quota_disabled_flag):
-                #logger.debug("check_quota_users: cuota deshabilitada, omitiendo evaluación")
-                #return
+            # quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
+            # if os.path.exists(quota_disabled_flag):
+            # logger.debug("check_quota_users: cuota deshabilitada, omitiendo evaluación")
+            # return
 
             session = get_session()
             file_path = os.path.join(os.getcwd(), "blockUsersQuota")
-            exceeded = []
 
             blocked_usernames = set()
             if os.path.exists(file_path):
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     for line in f:
                         username_line = line.strip()
                         if not username_line:
@@ -94,13 +93,23 @@ def register_quota_scheduler_tasks(scheduler):
                 user.used_mb = new_mb
 
             # Group quota checking: sumar uso de usuarios por grupo y comparar contra cuota de grupo.
-            group_quotas = {g.group_name: g.quota_mb for g in session.query(QuotaGroup).all()}
+            group_quotas = {
+                g.group_name: g.quota_mb for g in session.query(QuotaGroup).all()
+            }
             group_usage = {}
             for user in users:
                 if user.group_name:
-                    group_usage[user.group_name] = group_usage.get(user.group_name, 0) + (user.used_mb or 0)
+                    group_usage[user.group_name] = group_usage.get(
+                        user.group_name, 0
+                    ) + (user.used_mb or 0)
 
-            exceeded_groups = [group for group, total in group_usage.items() if group in group_quotas and group_quotas[group] > 0 and total > group_quotas[group]]
+            exceeded_groups = [
+                group
+                for group, total in group_usage.items()
+                if group in group_quotas
+                and group_quotas[group] > 0
+                and total > group_quotas[group]
+            ]
 
             exceeded_users = []
             for user in users:
@@ -124,7 +133,11 @@ def register_quota_scheduler_tasks(scheduler):
                         f.write(f"{user.username}\n")
 
                 for user in new_blocked:
-                    if user.quota_mb and user.used_mb is not None and user.used_mb > user.quota_mb:
+                    if (
+                        user.quota_mb
+                        and user.used_mb is not None
+                        and user.used_mb > user.quota_mb
+                    ):
                         event_type = "user_quota_exceeded"
                         detail = f"Cuota de usuario excedida: {user.used_mb}/{user.quota_mb} MB"
                     else:
@@ -139,7 +152,9 @@ def register_quota_scheduler_tasks(scheduler):
                     event = QuotaEvent(
                         event_type=event_type,
                         username=user.username,
-                        group_name=user.group_name if event_type == "group_quota_exceeded" else None,
+                        group_name=user.group_name
+                        if event_type == "group_quota_exceeded"
+                        else None,
                         detail=detail,
                     )
                     session.add(event)
