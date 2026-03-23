@@ -22,6 +22,23 @@ def register_quota_scheduler_tasks(scheduler):
             file_path = os.path.join(os.getcwd(), "blockUsersQuota")
             exceeded = []
 
+            blocked_usernames = set()
+            if os.path.exists(file_path):
+                with open(file_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        username_line = line.strip()
+                        if not username_line:
+                            continue
+                        if " - " in username_line:
+                            # compatibilidad con viejos formatos
+                            parts = username_line.split(" - ")
+                            if len(parts) > 1:
+                                blocked_usernames.add(parts[1].strip())
+                            else:
+                                blocked_usernames.add(parts[0].strip())
+                        else:
+                            blocked_usernames.add(username_line)
+
             users = session.query(QuotaUser).all()
             # Actualizar used_mb con la suma real desde tablas de logs dinámicas antes de evaluar excedidos
             quota_usernames = [u.username for u in users]
@@ -81,13 +98,17 @@ def register_quota_scheduler_tasks(scheduler):
                 ):
                     exceeded.append(user)
 
-            if exceeded:
-                with open(file_path, "a", encoding="utf-8") as f:
-                    for user in exceeded:
-                        line = f"{now} - {user.username} - quota: {user.quota_mb}MB - used: {user.used_mb}MB\n"
-                        f.write(line)
+            new_blocked = []
+            for user in exceeded:
+                if user.username not in blocked_usernames:
+                    new_blocked.append(user)
 
-                for user in exceeded:
+            if new_blocked:
+                with open(file_path, "a", encoding="utf-8") as f:
+                    for user in new_blocked:
+                        f.write(f"{user.username}\n")
+
+                for user in new_blocked:
                     event = QuotaEvent(
                         event_type="user_quota_exceeded",
                         username=user.username,
@@ -95,11 +116,12 @@ def register_quota_scheduler_tasks(scheduler):
                     )
                     session.add(event)
 
+            if new_blocked:
                 logger.info(
-                    f"check_quota_users: {len(exceeded)} usuarios con cuota excedida escritos en {file_path}"
+                    f"check_quota_users: {len(new_blocked)} nuevos usuarios con cuota excedida escritos en {file_path}"
                 )
             else:
-                logger.debug("check_quota_users: ningún usuario excedió la cuota")
+                logger.debug("check_quota_users: ningún usuario nuevo excedió la cuota")
 
             # Guardar actualizaciones de used_mb y eventos si hay.
             session.commit()
