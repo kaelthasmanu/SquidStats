@@ -18,6 +18,7 @@ from services.analytics.auditoria_service import (
     get_total_data_consumed,
     get_user_activity_summary,
 )
+from services.auth.auth_service import admin_required
 from services.notifications.notifications import (
     delete_all_notifications,
     delete_notification,
@@ -25,8 +26,7 @@ from services.notifications.notifications import (
     mark_notifications_read,
 )
 from services.system.metrics_service import MetricsService
-from services.system.system_service import restart_squid, reload_squid
-from services.auth.auth_service import admin_required
+from services.system.system_service import reload_squid, restart_squid
 
 api_bp = Blueprint("api", __name__)
 
@@ -228,6 +228,7 @@ def api_delete_all_notifications():
         logger.error(f"Error deleting all notifications: {e}")
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
+
 @api_bp.route("/restart-squid", methods=["POST"])
 @admin_required
 def api_restart_squid():
@@ -248,6 +249,7 @@ def api_reload_squid():
     if details:
         response["details"] = details
     return jsonify(response), status_code
+
 
 def validate_required_fields(audit_type, data):
     required = REQUIRED_FIELDS.get(audit_type, [])
