@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from flask import render_template, request
 from sqlalchemy import func
 from sqlalchemy import inspect as sqlalchemy_inspect
+from sqlalchemy.exc import IntegrityError
 
 from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
@@ -217,6 +218,13 @@ def register_routes(bp):
                 )
             )
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            return flash_and_redirect(
+                False,
+                f"Nombre de usuario '{username}' ya existe. Elija otro nombre.",
+                "admin.manage_quota",
+            )
         except Exception as e:
             session.rollback()
             return flash_and_redirect(
@@ -269,6 +277,13 @@ def register_routes(bp):
                 )
             )
             session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            return flash_and_redirect(
+                False,
+                f"El nombre de grupo '{group_name}' ya existe. Elija otro nombre.",
+                "admin.manage_quota",
+            )
         except Exception as e:
             session.rollback()
             return flash_and_redirect(
