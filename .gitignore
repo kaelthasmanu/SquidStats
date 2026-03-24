@@ -173,6 +173,7 @@ cython_debug/
 # Custom
 eicar.com.txt
 .DS_Store
+blockUsersQuota
 
 # Telegram session files
 *.session

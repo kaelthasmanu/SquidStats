@@ -5,6 +5,10 @@ from .models import (
     Log,
     LogMetadata,
     Notification,
+    QuotaEvent,
+    QuotaGroup,
+    QuotaRule,
+    QuotaUser,
     SystemMetrics,
     User,
 )
@@ -18,4 +22,8 @@ __all__ = [
     "SystemMetrics",
     "Notification",
     "AdminUser",
+    "QuotaUser",
+    "QuotaGroup",
+    "QuotaRule",
+    "QuotaEvent",
 ]

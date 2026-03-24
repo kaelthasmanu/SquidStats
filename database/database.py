@@ -237,6 +237,13 @@ def create_dynamic_tables(engine, date_suffix: str = None):
     SystemMetrics.__table__.create(engine, checkfirst=True)
     Notification.__table__.create(engine, checkfirst=True)  # Add notifications table
     BlacklistDomain.__table__.create(engine, checkfirst=True)
+    # New quota tables for the admin quota feature
+    from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
+
+    QuotaUser.__table__.create(engine, checkfirst=True)
+    QuotaGroup.__table__.create(engine, checkfirst=True)
+    QuotaRule.__table__.create(engine, checkfirst=True)
+    QuotaEvent.__table__.create(engine, checkfirst=True)
 
     user_table_name, log_table_name = get_dynamic_table_names(date_suffix)
 
@@ -345,6 +352,10 @@ def migrate_database():
                     and inspector.has_table("notifications")
                     and inspector.has_table("admin_users")
                     and inspector.has_table("blacklist_domains")
+                    and inspector.has_table("quota_users")
+                    and inspector.has_table("quota_groups")
+                    and inspector.has_table("quota_rules")
+                    and inspector.has_table("quota_events")
                 )
 
                 if core_tables_exist:

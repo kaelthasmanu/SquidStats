@@ -122,13 +122,13 @@
 
             <!-- Action buttons -->
             <div class="flex flex-col sm:flex-row gap-4">
-                <button onclick="confirmSplit()" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
+                <button onclick="confirmSplit()" title="Divide squid.conf en archivos modulares y crea respaldo" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
                     <i class="fas fa-code-branch mr-2"></i>
                     Dividir Configuración
                 </button>
                 
                 {% if output_exists %}
-                <button onclick="showFilesModal()" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
+                <button onclick="showFilesModal()" title="Abre un modal con los archivos generados por la división" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
                     <i class="fas fa-folder-open mr-2"></i>
                     Ver Archivos Generados
                 </button>
