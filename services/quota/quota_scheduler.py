@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 from datetime import datetime
 
 from loguru import logger
@@ -11,6 +12,55 @@ from database.models.models import QuotaEvent, QuotaGroup, QuotaUser
 from services.squid.squid_config_splitter import SquidConfigSplitter
 from services.system.system_service import reload_squid
 from utils.admin import SquidConfigManager
+
+
+def _ensure_blocked_file(blocked_path: str):
+    """Crea el archivo de bloqueados si no existe, tanto local como en Docker."""
+    try:
+        if not os.path.exists(blocked_path):
+            open(blocked_path, "a", encoding="utf-8").close()
+            os.chmod(blocked_path, 0o777)
+            logger.info("Creado archivo de usuarios bloqueados: %s", blocked_path)
+        else:
+            os.chmod(blocked_path, 0o777)
+    except Exception as e:
+        logger.warning("No se pudo crear/ajustar permisos locales de %s: %s", blocked_path, e)
+
+    try:
+        subprocess.run(
+            ["docker", "exec", "squid_proxy", "test", "-f", blocked_path],
+            check=True, capture_output=True, timeout=10,
+        )
+    except subprocess.CalledProcessError:
+        try:
+            subprocess.run(
+                ["docker", "exec", "squid_proxy", "touch", blocked_path],
+                check=True, capture_output=True, timeout=10,
+            )
+            subprocess.run(
+                ["docker", "exec", "squid_proxy", "chmod", "777", blocked_path],
+                check=True, capture_output=True, timeout=10,
+            )
+            logger.info("Creado %s dentro del contenedor squid_proxy", blocked_path)
+        except Exception as e:
+            logger.warning("No se pudo crear %s en contenedor Docker: %s", blocked_path, e)
+    except FileNotFoundError:
+        logger.debug("Docker no disponible, omitiendo creación en contenedor")
+    except Exception as e:
+        logger.debug("Error verificando archivo en contenedor: %s", e)
+
+
+def _sync_blocked_file_to_docker(blocked_path: str):
+    """Copia el archivo de bloqueados al contenedor Docker si está disponible."""
+    try:
+        subprocess.run(
+            ["docker", "cp", blocked_path, f"squid_proxy:{blocked_path}"],
+            check=True, capture_output=True, timeout=10,
+        )
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        logger.debug("No se pudo sincronizar %s a Docker: %s", blocked_path, e)
 
 
 def _commit_modular_config(cm: SquidConfigManager, filename: str, lines: list[str]):
@@ -28,15 +78,7 @@ def _sync_quota_squid_rules(enabled: bool):
         return
 
     blocked_path = "/etc/squid/usuarios_bloqueados.txt"
-    try:
-        if not os.path.exists(blocked_path):
-            open(blocked_path, "a", encoding="utf-8").close()
-            os.chmod(blocked_path, 0o777)
-            logger.info("Creado archivo de usuarios bloqueados: %s", blocked_path)
-        else:
-            os.chmod(blocked_path, 0o777)
-    except Exception as e:
-        logger.error("No se pudo crear/ajustar permisos de %s: %s", blocked_path, e)
+    _ensure_blocked_file(blocked_path)
 
     def _normalize_line(line: str) -> str:
         return line.strip().split("#")[0].strip()
@@ -49,10 +91,14 @@ def _sync_quota_squid_rules(enabled: bool):
         text = _normalize_line(line)
         return text.startswith("http_access deny usuarios_bloqueados")
 
+    def _is_include_line(line: str) -> bool:
+        return _normalize_line(line) == f"include {blocked_path}"
+
     def _build_acl_line(use_src: bool) -> str:
         if use_src:
-            # Modo sin auth: bloquear por IP con el mismo archivo usuarios_bloqueados.
-            return f"acl usuarios_bloqueados src {blocked_path}"
+            # Modo sin auth: el archivo contiene las ACL src individuales,
+            # en squid.conf se usa "include" para cargarlo.
+            return f"include {blocked_path}"
         return f"acl usuarios_bloqueados proxy_auth -i {blocked_path}"
 
     auth_configured = bool(
@@ -70,6 +116,10 @@ def _sync_quota_squid_rules(enabled: bool):
         previous_http_content = ""
         config_changed = False
 
+        def _matches_acl_entry(line: str) -> bool:
+            """Coincide con la ACL o include según el modo."""
+            return _is_include_line(line) if use_src else _is_acl_line(line)
+
         try:
             if cm.is_modular:
                 previous_acls_content = cm.read_modular_config("100_acls.conf") or ""
@@ -84,17 +134,21 @@ def _sync_quota_squid_rules(enabled: bool):
                 original_acl_lines = acl_lines.copy()
 
                 if enabled:
-                    if not any(_is_acl_line(line) for line in acl_lines):
-                        inserted = False
-                        for i, line in enumerate(acl_lines):
-                            if line.strip().startswith("acl "):
-                                acl_lines.insert(i, acl_line)
-                                inserted = True
-                                break
-                        if not inserted:
-                            acl_lines.append(acl_line)
+                    if not any(_matches_acl_entry(line) for line in acl_lines):
+                        if use_src:
+                            # include va al principio del bloque
+                            acl_lines.insert(0, acl_line)
+                        else:
+                            inserted = False
+                            for i, line in enumerate(acl_lines):
+                                if line.strip().startswith("acl "):
+                                    acl_lines.insert(i, acl_line)
+                                    inserted = True
+                                    break
+                            if not inserted:
+                                acl_lines.append(acl_line)
                 else:
-                    acl_lines = [line for line in acl_lines if not _is_acl_line(line)]
+                    acl_lines = [line for line in acl_lines if not _matches_acl_entry(line)]
 
                 if acl_lines != original_acl_lines:
                     config_changed = True
@@ -134,15 +188,24 @@ def _sync_quota_squid_rules(enabled: bool):
                 original_lines = lines.copy()
 
                 if enabled:
-                    if not any(_is_acl_line(line) for line in lines):
-                        inserted = False
-                        for i, line in enumerate(lines):
-                            if line.strip().startswith("acl "):
-                                lines.insert(i, acl_line)
-                                inserted = True
-                                break
-                        if not inserted:
-                            lines.append(acl_line)
+                    if not any(_matches_acl_entry(line) for line in lines):
+                        if use_src:
+                            # include antes de la primera línea que no sea comentario
+                            insert_idx = 0
+                            for i, line in enumerate(lines):
+                                if line.strip() and not line.strip().startswith("#"):
+                                    insert_idx = i
+                                    break
+                            lines.insert(insert_idx, acl_line)
+                        else:
+                            inserted = False
+                            for i, line in enumerate(lines):
+                                if line.strip().startswith("acl "):
+                                    lines.insert(i, acl_line)
+                                    inserted = True
+                                    break
+                            if not inserted:
+                                lines.append(acl_line)
 
                     if not any(_is_http_line(line) for line in lines):
                         inserted = False
@@ -157,7 +220,7 @@ def _sync_quota_squid_rules(enabled: bool):
                     lines = [
                         line
                         for line in lines
-                        if not (_is_acl_line(line) or _is_http_line(line))
+                        if not (_matches_acl_entry(line) or _is_http_line(line))
                     ]
 
                 if lines != original_lines:
@@ -260,6 +323,7 @@ def register_quota_scheduler_tasks(scheduler):
                         try:
                             with open(blocked_path, "w", encoding="utf-8") as f:
                                 f.write("")
+                            _sync_blocked_file_to_docker(blocked_path)
                         except Exception as e:
                             logger.warning(
                                 f"No se pudo limpiar archivo de usuarios bloqueados: {e}"
@@ -284,21 +348,38 @@ def register_quota_scheduler_tasks(scheduler):
             session = get_session()
             file_path = "/etc/squid/usuarios_bloqueados.txt"
 
+            # Detectar modo para saber el formato del archivo
+            cm = SquidConfigManager()
+            auth_configured = cm.is_valid and bool(
+                re.search(r"^\s*auth_param\b", cm.config_content or "", re.MULTILINE)
+                and re.search(r"^\s*acl\s+auth\b", cm.config_content or "", re.MULTILINE)
+            )
+            use_src = not auth_configured
+
             blocked_usernames = set()
             if os.path.exists(file_path):
                 with open(file_path, encoding="utf-8") as f:
                     for line in f:
-                        username_line = line.strip()
-                        if not username_line:
+                        text = line.strip()
+                        if not text:
                             continue
-                        if " - " in username_line:
-                            parts = username_line.split(" - ")
-                            if len(parts) > 1:
-                                blocked_usernames.add(parts[1].strip())
-                            else:
-                                blocked_usernames.add(parts[0].strip())
+                        if use_src:
+                            # Formato: acl usuarios_bloqueados src <IP>
+                            m = re.match(
+                                r"^acl\s+usuarios_bloqueados\s+src\s+(\S+)", text
+                            )
+                            if m:
+                                blocked_usernames.add(m.group(1))
                         else:
-                            blocked_usernames.add(username_line)
+                            # Formato plano: username o "algo - username"
+                            if " - " in text:
+                                parts = text.split(" - ")
+                                blocked_usernames.add(
+                                    parts[1].strip() if len(parts) > 1
+                                    else parts[0].strip()
+                                )
+                            else:
+                                blocked_usernames.add(text)
 
             users = session.query(QuotaUser).all()
             quota_usernames = [u.username for u in users]
@@ -380,7 +461,11 @@ def register_quota_scheduler_tasks(scheduler):
             if new_blocked:
                 with open(file_path, "a", encoding="utf-8") as f:
                     for user in new_blocked:
-                        f.write(f"{user.username}\n")
+                        if use_src:
+                            f.write(f"acl usuarios_bloqueados src {user.username}\n")
+                        else:
+                            f.write(f"{user.username}\n")
+                _sync_blocked_file_to_docker(file_path)
 
                 for user in new_blocked:
                     if (
