@@ -90,6 +90,7 @@ def _sync_quota_squid_rules(enabled: bool):
         return
 
     blocked_path = "/etc/squid/usuarios_bloqueados.txt"
+    print(f"[DEBUG] _sync_quota_squid_rules: blocked_path={blocked_path}, enabled={enabled}")
     _ensure_blocked_file(blocked_path)
 
     def _normalize_line(line: str) -> str:
@@ -117,6 +118,7 @@ def _sync_quota_squid_rules(enabled: bool):
         re.search(r"^\s*auth_param\b", cm.config_content, re.MULTILINE)
         and re.search(r"^\s*acl\s+auth\b", cm.config_content, re.MULTILINE)
     )
+    print(f"[DEBUG] auth_configured={auth_configured} (use_src={not auth_configured})")
 
     use_src = not auth_configured
     acl_line = _build_acl_line(use_src)
@@ -148,6 +150,7 @@ def _sync_quota_squid_rules(enabled: bool):
                 if enabled:
                     if not any(_matches_acl_entry(line) for line in acl_lines):
                         if use_src:
+                            print(f"[DEBUG] _apply_changes: modo src detectado, insertar include {acl_line}")
                             # include va al principio del bloque
                             acl_lines.insert(0, acl_line)
                         else:
@@ -178,6 +181,7 @@ def _sync_quota_squid_rules(enabled: bool):
 
                 if enabled:
                     if not any(_is_http_line(line) for line in http_lines):
+                        print("[DEBUG] _apply_changes: insertando http_access deny usuarios_bloqueados")
                         inserted = False
                         for i, line in enumerate(http_lines):
                             if line.strip().startswith("http_access "):
@@ -476,12 +480,17 @@ def register_quota_scheduler_tasks(scheduler):
                     new_blocked.append(user)
 
             if new_blocked:
+                print(f"[DEBUG] check_quota_users: {len(new_blocked)} nuevos bloqueos; use_src={use_src}")
                 with open(file_path, "a", encoding="utf-8") as f:
                     for user in new_blocked:
                         if use_src:
-                            f.write(f"acl usuarios_bloqueados src {user.username}\n")
+                            line = f"acl usuarios_bloqueados src {user.username}\n"
+                            print(f"[DEBUG] appending to blocked file (src): {line.strip()}")
+                            f.write(line)
                         else:
-                            f.write(f"{user.username}\n")
+                            line = f"{user.username}\n"
+                            print(f"[DEBUG] appending to blocked file (proxy_auth): {line.strip()}")
+                            f.write(line)
                 _sync_blocked_file_to_docker(file_path)
 
                 for user in new_blocked:
