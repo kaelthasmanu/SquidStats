@@ -19,10 +19,10 @@ def _ensure_blocked_file(blocked_path: str):
     try:
         if not os.path.exists(blocked_path):
             open(blocked_path, "a", encoding="utf-8").close()
-            os.chmod(blocked_path, 0o777)
+            os.chmod(blocked_path, 0o640)
             logger.info("Creado archivo de usuarios bloqueados: %s", blocked_path)
         else:
-            os.chmod(blocked_path, 0o777)
+            os.chmod(blocked_path, 0o640)
     except Exception as e:
         logger.warning(
             "No se pudo crear/ajustar permisos locales de %s: %s", blocked_path, e
@@ -44,7 +44,7 @@ def _ensure_blocked_file(blocked_path: str):
                 timeout=10,
             )
             subprocess.run(
-                ["docker", "exec", "squid_proxy", "chmod", "777", blocked_path],
+                ["docker", "exec", "squid_proxy", "chmod", "640", blocked_path],
                 check=True,
                 capture_output=True,
                 timeout=10,
