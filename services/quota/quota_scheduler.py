@@ -36,9 +36,7 @@ def _sync_quota_squid_rules(enabled: bool):
         else:
             os.chmod(blocked_path, 0o777)
     except Exception as e:
-        logger.error(
-            "No se pudo crear/ajustar permisos de %s: %s", blocked_path, e
-        )
+        logger.error("No se pudo crear/ajustar permisos de %s: %s", blocked_path, e)
 
     def _normalize_line(line: str) -> str:
         return line.strip().split("#")[0].strip()
@@ -53,8 +51,8 @@ def _sync_quota_squid_rules(enabled: bool):
 
     def _build_acl_line(use_src: bool) -> str:
         if use_src:
-            return f"acl usuarios_bloqueados src \"{blocked_path}\""
-        return f"acl usuarios_bloqueados proxy_auth -i \"{blocked_path}\""
+            return f'acl usuarios_bloqueados src "{blocked_path}"'
+        return f'acl usuarios_bloqueados proxy_auth -i "{blocked_path}"'
 
     auth_configured = bool(
         re.search(r"^\s*auth_param\b", cm.config_content, re.MULTILINE)
@@ -74,10 +72,14 @@ def _sync_quota_squid_rules(enabled: bool):
         try:
             if cm.is_modular:
                 previous_acls_content = cm.read_modular_config("100_acls.conf") or ""
-                previous_http_content = cm.read_modular_config("120_http_access.conf") or ""
+                previous_http_content = (
+                    cm.read_modular_config("120_http_access.conf") or ""
+                )
 
                 acls_content = previous_acls_content
-                acl_lines = [line for line in acls_content.split("\n") if line.strip() != ""]
+                acl_lines = [
+                    line for line in acls_content.split("\n") if line.strip() != ""
+                ]
                 original_acl_lines = acl_lines.copy()
 
                 if enabled:
@@ -100,7 +102,9 @@ def _sync_quota_squid_rules(enabled: bool):
                     raise RuntimeError("No se pudieron guardar 100_acls.conf")
 
                 http_content = previous_http_content
-                http_lines = [line for line in http_content.split("\n") if line.strip() != ""]
+                http_lines = [
+                    line for line in http_content.split("\n") if line.strip() != ""
+                ]
                 original_http_lines = http_lines.copy()
 
                 if enabled:
@@ -114,7 +118,9 @@ def _sync_quota_squid_rules(enabled: bool):
                         if not inserted:
                             http_lines.append(http_line)
                 else:
-                    http_lines = [line for line in http_lines if not _is_http_line(line)]
+                    http_lines = [
+                        line for line in http_lines if not _is_http_line(line)
+                    ]
 
                 if http_lines != original_http_lines:
                     config_changed = True
@@ -147,7 +153,11 @@ def _sync_quota_squid_rules(enabled: bool):
                         if not inserted:
                             lines.append(http_line)
                 else:
-                    lines = [line for line in lines if not (_is_acl_line(line) or _is_http_line(line))]
+                    lines = [
+                        line
+                        for line in lines
+                        if not (_is_acl_line(line) or _is_http_line(line))
+                    ]
 
                 if lines != original_lines:
                     config_changed = True
@@ -175,7 +185,9 @@ def _sync_quota_squid_rules(enabled: bool):
                 # rollback
                 if cm.is_modular:
                     cm.save_modular_config("100_acls.conf", previous_acls_content)
-                    cm.save_modular_config("120_http_access.conf", previous_http_content)
+                    cm.save_modular_config(
+                        "120_http_access.conf", previous_http_content
+                    )
                 cm.save_config(previous_main_content)
                 return False
 
@@ -203,12 +215,17 @@ def _sync_quota_squid_rules(enabled: bool):
 
     # Si falla y no es src, fallback a src (evita vida de proxy_auth mal configurada)
     if not ok and not use_src:
-        logger.warning("Fallo con proxy_auth, reiniciando con ACL src para compatibilidad")
+        logger.warning(
+            "Fallo con proxy_auth, reiniciando con ACL src para compatibilidad"
+        )
         acl_line = _build_acl_line(True)
         ok = _apply_changes(acl_line, http_line)
 
     if ok:
-        logger.info("Reglas de cuota sincronizadas exitosamente con ACL %s", "src" if use_src else "proxy_auth")
+        logger.info(
+            "Reglas de cuota sincronizadas exitosamente con ACL %s",
+            "src" if use_src else "proxy_auth",
+        )
     else:
         logger.error("No se pudo sincronizar las reglas de cuota después de reintentos")
 
@@ -231,7 +248,7 @@ def register_quota_scheduler_tasks(scheduler):
             try:
                 last_reset = ""
                 if os.path.exists(reset_marker):
-                    with open(reset_marker, "r", encoding="utf-8") as f:
+                    with open(reset_marker, encoding="utf-8") as f:
                         last_reset = f.read().strip()
                 if today.day == 1 and last_reset != str(today):
                     session_reset = get_session()
