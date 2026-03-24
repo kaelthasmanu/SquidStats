@@ -24,26 +24,36 @@ def _ensure_blocked_file(blocked_path: str):
         else:
             os.chmod(blocked_path, 0o777)
     except Exception as e:
-        logger.warning("No se pudo crear/ajustar permisos locales de %s: %s", blocked_path, e)
+        logger.warning(
+            "No se pudo crear/ajustar permisos locales de %s: %s", blocked_path, e
+        )
 
     try:
         subprocess.run(
             ["docker", "exec", "squid_proxy", "test", "-f", blocked_path],
-            check=True, capture_output=True, timeout=10,
+            check=True,
+            capture_output=True,
+            timeout=10,
         )
     except subprocess.CalledProcessError:
         try:
             subprocess.run(
                 ["docker", "exec", "squid_proxy", "touch", blocked_path],
-                check=True, capture_output=True, timeout=10,
+                check=True,
+                capture_output=True,
+                timeout=10,
             )
             subprocess.run(
                 ["docker", "exec", "squid_proxy", "chmod", "777", blocked_path],
-                check=True, capture_output=True, timeout=10,
+                check=True,
+                capture_output=True,
+                timeout=10,
             )
             logger.info("Creado %s dentro del contenedor squid_proxy", blocked_path)
         except Exception as e:
-            logger.warning("No se pudo crear %s en contenedor Docker: %s", blocked_path, e)
+            logger.warning(
+                "No se pudo crear %s en contenedor Docker: %s", blocked_path, e
+            )
     except FileNotFoundError:
         logger.debug("Docker no disponible, omitiendo creación en contenedor")
     except Exception as e:
@@ -55,7 +65,9 @@ def _sync_blocked_file_to_docker(blocked_path: str):
     try:
         subprocess.run(
             ["docker", "cp", blocked_path, f"squid_proxy:{blocked_path}"],
-            check=True, capture_output=True, timeout=10,
+            check=True,
+            capture_output=True,
+            timeout=10,
         )
     except FileNotFoundError:
         pass
@@ -148,7 +160,9 @@ def _sync_quota_squid_rules(enabled: bool):
                             if not inserted:
                                 acl_lines.append(acl_line)
                 else:
-                    acl_lines = [line for line in acl_lines if not _matches_acl_entry(line)]
+                    acl_lines = [
+                        line for line in acl_lines if not _matches_acl_entry(line)
+                    ]
 
                 if acl_lines != original_acl_lines:
                     config_changed = True
@@ -352,7 +366,9 @@ def register_quota_scheduler_tasks(scheduler):
             cm = SquidConfigManager()
             auth_configured = cm.is_valid and bool(
                 re.search(r"^\s*auth_param\b", cm.config_content or "", re.MULTILINE)
-                and re.search(r"^\s*acl\s+auth\b", cm.config_content or "", re.MULTILINE)
+                and re.search(
+                    r"^\s*acl\s+auth\b", cm.config_content or "", re.MULTILINE
+                )
             )
             use_src = not auth_configured
 
@@ -375,7 +391,8 @@ def register_quota_scheduler_tasks(scheduler):
                             if " - " in text:
                                 parts = text.split(" - ")
                                 blocked_usernames.add(
-                                    parts[1].strip() if len(parts) > 1
+                                    parts[1].strip()
+                                    if len(parts) > 1
                                     else parts[0].strip()
                                 )
                             else:
