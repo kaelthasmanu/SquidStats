@@ -53,8 +53,8 @@ def _sync_quota_squid_rules(enabled: bool):
 
     def _build_acl_line(use_src: bool) -> str:
         if use_src:
-            return f"acl usuarios_bloqueados src \"{blocked_path}\""
-        return f"acl usuarios_bloqueados proxy_auth -i \"{blocked_path}\""
+            return f"acl usuarios_bloqueados src {blocked_path}"
+        return f"acl usuarios_bloqueados proxy_auth -i {blocked_path}"
 
     auth_configured = bool(
         re.search(r"^\s*auth_param\b", cm.config_content, re.MULTILINE)
