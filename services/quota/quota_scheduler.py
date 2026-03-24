@@ -24,39 +24,68 @@ def _sync_quota_squid_rules(enabled: bool):
         )
         return
 
-    acl_line = (
-        'acl usuarios_bloqueados proxy_auth -i "/etc/squid/usuarios_bloqueados.txt"'
-    )
+    acl_line = 'acl usuarios_bloqueados proxy_auth -i "/etc/squid/usuarios_bloqueados.txt"'
     http_line = "http_access deny usuarios_bloqueados"
+
+    def _normalize_line(line: str) -> str:
+        return line.strip().split("#")[0].strip()
+
+    def _is_acl_line(line: str) -> bool:
+        text = _normalize_line(line)
+        return text.startswith("acl usuarios_bloqueados")
+
+    def _is_http_line(line: str) -> bool:
+        text = _normalize_line(line)
+        return text.startswith("http_access deny usuarios_bloqueados")
+
+    def _insert_or_append(lines: list[str], text: str, match_fn) -> list[str]:
+        # Si ya existe, no hacer nada
+        if any(match_fn(line) for line in lines):
+            return lines
+        # Ubicar el primer elemento del mismo tipo
+        for i, line in enumerate(lines):
+            if match_fn(line):
+                lines.insert(i, text)
+                return lines
+        # Si no hay, al final
+        lines.append(text)
+        return lines
 
     # Modular preferred
     try:
         if cm.is_modular:
             # 100_acls.conf
             acls_content = cm.read_modular_config("100_acls.conf") or ""
-            acl_lines = [
-                line for line in acls_content.split("\n") if line.strip() != ""
-            ]
+            acl_lines = [line for line in acls_content.split("\n") if line.strip() != ""]
 
             if enabled:
-                if acl_line not in acl_lines:
-                    acl_lines.append(acl_line)
+                if not any(_is_acl_line(line) for line in acl_lines):
+                    # Insertar antes de la primera ACL cualquiera, si existe
+                    for i, line in enumerate(acl_lines):
+                        if line.strip().startswith("acl "):
+                            acl_lines.insert(i, acl_line)
+                            break
+                    else:
+                        acl_lines.append(acl_line)
             else:
-                acl_lines = [line for line in acl_lines if line.strip() != acl_line]
+                acl_lines = [line for line in acl_lines if not _is_acl_line(line)]
 
             _commit_modular_config(cm, "100_acls.conf", acl_lines)
 
             # 120_http_access.conf
             http_content = cm.read_modular_config("120_http_access.conf") or ""
-            http_lines = [
-                line for line in http_content.split("\n") if line.strip() != ""
-            ]
+            http_lines = [line for line in http_content.split("\n") if line.strip() != ""]
 
             if enabled:
-                if http_line not in http_lines:
-                    http_lines.append(http_line)
+                if not any(_is_http_line(line) for line in http_lines):
+                    for i, line in enumerate(http_lines):
+                        if line.strip().startswith("http_access "):
+                            http_lines.insert(i, http_line)
+                            break
+                    else:
+                        http_lines.append(http_line)
             else:
-                http_lines = [line for line in http_lines if line.strip() != http_line]
+                http_lines = [line for line in http_lines if not _is_http_line(line)]
 
             _commit_modular_config(cm, "120_http_access.conf", http_lines)
         else:
@@ -64,14 +93,27 @@ def _sync_quota_squid_rules(enabled: bool):
             lines = cm.config_content.split("\n") if cm.config_content else []
 
             if enabled:
-                if acl_line not in lines:
-                    lines.append(acl_line)
-                if http_line not in lines:
-                    lines.append(http_line)
+                if not any(_is_acl_line(line) for line in lines):
+                    inserted = False
+                    for i, line in enumerate(lines):
+                        if line.strip().startswith("acl "):
+                            lines.insert(i, acl_line)
+                            inserted = True
+                            break
+                    if not inserted:
+                        lines.append(acl_line)
+
+                if not any(_is_http_line(line) for line in lines):
+                    inserted = False
+                    for i, line in enumerate(lines):
+                        if line.strip().startswith("http_access "):
+                            lines.insert(i, http_line)
+                            inserted = True
+                            break
+                    if not inserted:
+                        lines.append(http_line)
             else:
-                lines = [
-                    line for line in lines if line.strip() not in (acl_line, http_line)
-                ]
+                lines = [line for line in lines if not (_is_acl_line(line) or _is_http_line(line))]
 
             cm.save_config("\n".join(lines))
 
@@ -94,6 +136,39 @@ def register_quota_scheduler_tasks(scheduler):
             quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
             quota_enabled = not os.path.exists(quota_disabled_flag)
             _sync_quota_squid_rules(quota_enabled)
+
+            # reinicio mensual 1ero del mes
+            today = datetime.now().date()
+            reset_marker = "/etc/squid/.quota_last_reset"
+            try:
+                last_reset = ""
+                if os.path.exists(reset_marker):
+                    with open(reset_marker, "r", encoding="utf-8") as f:
+                        last_reset = f.read().strip()
+                if today.day == 1 and last_reset != str(today):
+                    session_reset = get_session()
+                    try:
+                        session_reset.query(QuotaUser).update({QuotaUser.used_mb: 0})
+                        session_reset.commit()
+                        blocked_path = "/etc/squid/usuarios_bloqueados.txt"
+                        try:
+                            with open(blocked_path, "w", encoding="utf-8") as f:
+                                f.write("")
+                        except Exception as e:
+                            logger.warning(
+                                f"No se pudo limpiar archivo de usuarios bloqueados: {e}"
+                            )
+                        with open(reset_marker, "w", encoding="utf-8") as f:
+                            f.write(str(today))
+                        logger.info("Reinicio mensual de cuotas ejecutado")
+                    except Exception as e:
+                        session_reset.rollback()
+                        logger.error(f"Error en reinicio mensual de cuotas: {e}")
+                    finally:
+                        session_reset.close()
+            except Exception as e:
+                logger.warning(f"Error verificando reinicio mensual de cuotas: {e}")
+
             if not quota_enabled:
                 logger.debug(
                     "check_quota_users: cuota deshabilitada, omitiendo evaluación"
@@ -101,7 +176,7 @@ def register_quota_scheduler_tasks(scheduler):
                 return
 
             session = get_session()
-            file_path = os.path.join(os.getcwd(), "blockUsersQuota")
+            file_path = "/etc/squid/usuarios_bloqueados.txt"
 
             blocked_usernames = set()
             if os.path.exists(file_path):
