@@ -26,7 +26,9 @@ def _sync_quota_squid_rules(enabled: bool):
         )
         return
 
-    acl_line = 'acl usuarios_bloqueados proxy_auth -i "/etc/squid/usuarios_bloqueados.txt"'
+    acl_line = (
+        'acl usuarios_bloqueados proxy_auth -i "/etc/squid/usuarios_bloqueados.txt"'
+    )
     http_line = "http_access deny usuarios_bloqueados"
 
     def _normalize_line(line: str) -> str:
@@ -52,7 +54,9 @@ def _sync_quota_squid_rules(enabled: bool):
             previous_http_content = cm.read_modular_config("120_http_access.conf") or ""
 
             acls_content = previous_acls_content
-            acl_lines = [line for line in acls_content.split("\n") if line.strip() != ""]
+            acl_lines = [
+                line for line in acls_content.split("\n") if line.strip() != ""
+            ]
             original_acl_lines = acl_lines.copy()
 
             if enabled:
@@ -72,7 +76,9 @@ def _sync_quota_squid_rules(enabled: bool):
             success_acl = _commit_modular_config(cm, "100_acls.conf", acl_lines)
 
             http_content = previous_http_content
-            http_lines = [line for line in http_content.split("\n") if line.strip() != ""]
+            http_lines = [
+                line for line in http_content.split("\n") if line.strip() != ""
+            ]
             original_http_lines = http_lines.copy()
 
             if enabled:
@@ -89,10 +95,14 @@ def _sync_quota_squid_rules(enabled: bool):
             if http_lines != original_http_lines:
                 config_changed = True
 
-            success_http = _commit_modular_config(cm, "120_http_access.conf", http_lines)
+            success_http = _commit_modular_config(
+                cm, "120_http_access.conf", http_lines
+            )
 
             if not (success_acl and success_http):
-                raise RuntimeError("No se pudieron guardar los archivos modulares de Squid")
+                raise RuntimeError(
+                    "No se pudieron guardar los archivos modulares de Squid"
+                )
 
         else:
             lines = cm.config_content.split("\n") if cm.config_content else []
@@ -119,7 +129,11 @@ def _sync_quota_squid_rules(enabled: bool):
                     if not inserted:
                         lines.append(http_line)
             else:
-                lines = [line for line in lines if not (_is_acl_line(line) or _is_http_line(line))]
+                lines = [
+                    line
+                    for line in lines
+                    if not (_is_acl_line(line) or _is_http_line(line))
+                ]
 
             if lines != original_lines:
                 config_changed = True
@@ -129,11 +143,15 @@ def _sync_quota_squid_rules(enabled: bool):
                 raise RuntimeError("No se pudo guardar squid.conf")
 
         if not config_changed:
-            logger.debug("No hay cambios en la configuración de Squid, se omite validación y recarga")
+            logger.debug(
+                "No hay cambios en la configuración de Squid, se omite validación y recarga"
+            )
             return
 
         # Validar la configuración con SquidConfigSplitter antes de dejar los cambios.
-        splitter = SquidConfigSplitter(input_file=cm.config_path, output_dir=cm.config_dir)
+        splitter = SquidConfigSplitter(
+            input_file=cm.config_path, output_dir=cm.config_dir
+        )
         validation = splitter._validate_squid_config()
 
         if not validation.get("success"):
@@ -148,12 +166,17 @@ def _sync_quota_squid_rules(enabled: bool):
             cm.save_config(previous_main_content)
             return
 
-        logger.info("Reglas de cuota sincronizadas y configuración de Squid validada correctamente")
+        logger.info(
+            "Reglas de cuota sincronizadas y configuración de Squid validada correctamente"
+        )
 
         # Recargar Squid sólo si todo está bien
         reload_success, reload_msg, _ = reload_squid()
         if not reload_success:
-            logger.warning("Squid no se pudo recargar después de actualizar reglas de cuota: %s", reload_msg)
+            logger.warning(
+                "Squid no se pudo recargar después de actualizar reglas de cuota: %s",
+                reload_msg,
+            )
 
     except FileNotFoundError as e:
         logger.error(f"Archivo de Squid no encontrado: {e}")
@@ -175,7 +198,6 @@ def _sync_quota_squid_rules(enabled: bool):
         cm.save_config(previous_main_content)
 
 
-
 def register_quota_scheduler_tasks(scheduler):
     """Registra tareas programadas relacionadas con cuotas."""
 
@@ -194,7 +216,7 @@ def register_quota_scheduler_tasks(scheduler):
             try:
                 last_reset = ""
                 if os.path.exists(reset_marker):
-                    with open(reset_marker, "r", encoding="utf-8") as f:
+                    with open(reset_marker, encoding="utf-8") as f:
                         last_reset = f.read().strip()
                 if today.day == 1 and last_reset != str(today):
                     session_reset = get_session()

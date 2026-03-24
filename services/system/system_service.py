@@ -12,7 +12,10 @@ def _docker_reconfigure() -> tuple[bool, str]:
             text=True,
             timeout=30,
         )
-        return True, "Squid reconfigure a través de docker exec squid_proxy squid -k reconfigure"
+        return (
+            True,
+            "Squid reconfigure a través de docker exec squid_proxy squid -k reconfigure",
+        )
     except subprocess.CalledProcessError as e:
         logger.warning("docker reconfigure falló con estado %s: %s", e.returncode, e)
         return False, str(e)
@@ -35,7 +38,9 @@ def _local_reconfigure() -> tuple[bool, str]:
         )
         return True, "Squid reconfigure a través de squid -k reconfigure (local)"
     except subprocess.CalledProcessError as e:
-        logger.warning("Local squid reconfigure falló con estado %s: %s", e.returncode, e)
+        logger.warning(
+            "Local squid reconfigure falló con estado %s: %s", e.returncode, e
+        )
         return False, str(e)
     except FileNotFoundError as e:
         logger.warning("Squid no encontrado: %s", e)
@@ -50,7 +55,9 @@ def restart_squid() -> tuple[bool, str, str]:
         subprocess.run(["systemctl", "restart", "squid"], check=True)
         return True, "Squid restarted successfully", None
     except subprocess.CalledProcessError as e:
-        logger.warning("systemctl restart squid falló con estado %s: %s", e.returncode, e)
+        logger.warning(
+            "systemctl restart squid falló con estado %s: %s", e.returncode, e
+        )
     except FileNotFoundError as e:
         logger.warning("systemctl no encontrado: %s", e)
     except Exception as e:
@@ -73,7 +80,9 @@ def reload_squid() -> tuple[bool, str, str]:
         subprocess.run(["systemctl", "reload", "squid"], check=True)
         return True, "Configuration reloaded successfully", None
     except subprocess.CalledProcessError as e:
-        logger.warning("systemctl reload squid falló con estado %s: %s", e.returncode, e)
+        logger.warning(
+            "systemctl reload squid falló con estado %s: %s", e.returncode, e
+        )
     except FileNotFoundError as e:
         logger.warning("systemctl no encontrado: %s", e)
     except Exception as e:
