@@ -225,35 +225,13 @@ def register_quota_scheduler_tasks(scheduler):
             quota_enabled = not os.path.exists(quota_disabled_flag)
             _sync_quota_squid_rules(quota_enabled)
 
-        except Exception as e:
-            logger.error(f"Error en check_quota_users: {e}")
-            raise
-
-    @scheduler.task(
-        "interval", id="reload_squid_if_quota_enabled", hours=12, misfire_grace_time=600
-    )
-    def reload_squid_if_quota_enabled():
-        quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
-        quota_enabled = not os.path.exists(quota_disabled_flag)
-
-        if not quota_enabled:
-            logger.debug("reload_squid_if_quota_enabled: cuota deshabilitada, omitiendo recarga")
-            return
-
-        logger.info("reload_squid_if_quota_enabled: cuota habilitada, intentando recarga de squid")
-        success, message, _ = reload_squid()
-        if success:
-            logger.info("reload_squid_if_quota_enabled: %s", message)
-        else:
-            logger.warning("reload_squid_if_quota_enabled falló: %s", message)
-
             # reinicio mensual 1ero del mes
             today = datetime.now().date()
             reset_marker = "/etc/squid/.quota_last_reset"
             try:
                 last_reset = ""
                 if os.path.exists(reset_marker):
-                    with open(reset_marker, encoding="utf-8") as f:
+                    with open(reset_marker, "r", encoding="utf-8") as f:
                         last_reset = f.read().strip()
                 if today.day == 1 and last_reset != str(today):
                     session_reset = get_session()
@@ -296,7 +274,6 @@ def register_quota_scheduler_tasks(scheduler):
                         if not username_line:
                             continue
                         if " - " in username_line:
-                            # compatibilidad con viejos formatos
                             parts = username_line.split(" - ")
                             if len(parts) > 1:
                                 blocked_usernames.add(parts[1].strip())
@@ -306,7 +283,6 @@ def register_quota_scheduler_tasks(scheduler):
                             blocked_usernames.add(username_line)
 
             users = session.query(QuotaUser).all()
-            # Actualizar used_mb con la suma real desde tablas de logs dinámicas antes de evaluar excedidos
             quota_usernames = [u.username for u in users]
             usage_by_username = {}
 
@@ -317,22 +293,17 @@ def register_quota_scheduler_tasks(scheduler):
             for table_name in all_tables:
                 if not table_name.startswith("user_"):
                     continue
-
                 suffix = table_name.split("_", 1)[1]
                 if not suffix.startswith(current_month_prefix):
                     continue
-
                 log_table_name = f"log_{suffix}"
                 if log_table_name not in all_tables:
                     continue
-
                 UserModel, LogModel = get_dynamic_models(suffix)
                 if not UserModel or not LogModel:
                     continue
-
                 if not quota_usernames:
                     break
-
                 usage_rows = (
                     session.query(
                         UserModel.username.label("username"),
@@ -345,7 +316,6 @@ def register_quota_scheduler_tasks(scheduler):
                     .group_by(UserModel.username)
                     .all()
                 )
-
                 for row in usage_rows:
                     usage_by_username[row.username] = usage_by_username.get(
                         row.username, 0
@@ -355,7 +325,6 @@ def register_quota_scheduler_tasks(scheduler):
                 new_mb = int(usage_by_username.get(user.username, 0) / 1024 / 1024)
                 user.used_mb = new_mb
 
-            # Group quota checking: sumar uso de usuarios por grupo y comparar contra cuota de grupo.
             group_quotas = {
                 g.group_name: g.quota_mb for g in session.query(QuotaGroup).all()
             }
@@ -394,7 +363,6 @@ def register_quota_scheduler_tasks(scheduler):
                 with open(file_path, "a", encoding="utf-8") as f:
                     for user in new_blocked:
                         f.write(f"{user.username}\n")
-
                 for user in new_blocked:
                     if (
                         user.quota_mb
@@ -411,7 +379,6 @@ def register_quota_scheduler_tasks(scheduler):
                             f"Cuota de grupo '{user.group_name}' excedida: "
                             f"{group_total}/{group_quota_value} MB"
                         )
-
                     event = QuotaEvent(
                         event_type=event_type,
                         username=user.username,
@@ -429,9 +396,7 @@ def register_quota_scheduler_tasks(scheduler):
             else:
                 logger.debug("check_quota_users: ningún usuario nuevo excedió la cuota")
 
-            # Guardar actualizaciones de used_mb y eventos si hay.
             session.commit()
-
         except Exception as e:
             logger.error(f"Error en check_quota_users: {e}")
             try:
@@ -468,4 +433,3 @@ def register_quota_scheduler_tasks(scheduler):
             logger.info("reload_squid_if_quota_enabled: %s", message)
         else:
             logger.warning("reload_squid_if_quota_enabled falló: %s", message)
-
