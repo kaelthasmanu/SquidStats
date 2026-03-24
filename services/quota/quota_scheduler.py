@@ -225,6 +225,28 @@ def register_quota_scheduler_tasks(scheduler):
             quota_enabled = not os.path.exists(quota_disabled_flag)
             _sync_quota_squid_rules(quota_enabled)
 
+        except Exception as e:
+            logger.error(f"Error en check_quota_users: {e}")
+            raise
+
+    @scheduler.task(
+        "interval", id="reload_squid_if_quota_enabled", hours=12, misfire_grace_time=600
+    )
+    def reload_squid_if_quota_enabled():
+        quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
+        quota_enabled = not os.path.exists(quota_disabled_flag)
+
+        if not quota_enabled:
+            logger.debug("reload_squid_if_quota_enabled: cuota deshabilitada, omitiendo recarga")
+            return
+
+        logger.info("reload_squid_if_quota_enabled: cuota habilitada, intentando recarga de squid")
+        success, message, _ = reload_squid()
+        if success:
+            logger.info("reload_squid_if_quota_enabled: %s", message)
+        else:
+            logger.warning("reload_squid_if_quota_enabled falló: %s", message)
+
             # reinicio mensual 1ero del mes
             today = datetime.now().date()
             reset_marker = "/etc/squid/.quota_last_reset"
@@ -421,3 +443,29 @@ def register_quota_scheduler_tasks(scheduler):
                 session.close()
             except Exception:
                 pass
+
+    @scheduler.task(
+        "interval",
+        id="reload_squid_if_quota_enabled",
+        hours=12,
+        misfire_grace_time=600,
+    )
+    def reload_squid_if_quota_enabled():
+        quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
+        quota_enabled = not os.path.exists(quota_disabled_flag)
+
+        if not quota_enabled:
+            logger.debug(
+                "reload_squid_if_quota_enabled: cuota deshabilitada, omitiendo recarga"
+            )
+            return
+
+        logger.info(
+            "reload_squid_if_quota_enabled: cuota habilitada, ejecutando recarga de squid"
+        )
+        success, message, _ = reload_squid()
+        if success:
+            logger.info("reload_squid_if_quota_enabled: %s", message)
+        else:
+            logger.warning("reload_squid_if_quota_enabled falló: %s", message)
+
