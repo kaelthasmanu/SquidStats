@@ -7,6 +7,8 @@ from sqlalchemy import inspect as sqlalchemy_inspect
 
 from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaUser
+from services.squid.squid_config_splitter import SquidConfigSplitter
+from services.system.system_service import reload_squid
 from utils.admin import SquidConfigManager
 
 
@@ -38,29 +40,23 @@ def _sync_quota_squid_rules(enabled: bool):
         text = _normalize_line(line)
         return text.startswith("http_access deny usuarios_bloqueados")
 
-    def _insert_or_append(lines: list[str], text: str, match_fn) -> list[str]:
-        # Si ya existe, no hacer nada
-        if any(match_fn(line) for line in lines):
-            return lines
-        # Ubicar el primer elemento del mismo tipo
-        for i, line in enumerate(lines):
-            if match_fn(line):
-                lines.insert(i, text)
-                return lines
-        # Si no hay, al final
-        lines.append(text)
-        return lines
+    # Guardar estado de respaldo
+    previous_main_content = cm.config_content or ""
+    previous_acls_content = ""
+    previous_http_content = ""
+    config_changed = False
 
-    # Modular preferred
     try:
         if cm.is_modular:
-            # 100_acls.conf
-            acls_content = cm.read_modular_config("100_acls.conf") or ""
+            previous_acls_content = cm.read_modular_config("100_acls.conf") or ""
+            previous_http_content = cm.read_modular_config("120_http_access.conf") or ""
+
+            acls_content = previous_acls_content
             acl_lines = [line for line in acls_content.split("\n") if line.strip() != ""]
+            original_acl_lines = acl_lines.copy()
 
             if enabled:
                 if not any(_is_acl_line(line) for line in acl_lines):
-                    # Insertar antes de la primera ACL cualquiera, si existe
                     for i, line in enumerate(acl_lines):
                         if line.strip().startswith("acl "):
                             acl_lines.insert(i, acl_line)
@@ -70,11 +66,14 @@ def _sync_quota_squid_rules(enabled: bool):
             else:
                 acl_lines = [line for line in acl_lines if not _is_acl_line(line)]
 
-            _commit_modular_config(cm, "100_acls.conf", acl_lines)
+            if acl_lines != original_acl_lines:
+                config_changed = True
 
-            # 120_http_access.conf
-            http_content = cm.read_modular_config("120_http_access.conf") or ""
+            success_acl = _commit_modular_config(cm, "100_acls.conf", acl_lines)
+
+            http_content = previous_http_content
             http_lines = [line for line in http_content.split("\n") if line.strip() != ""]
+            original_http_lines = http_lines.copy()
 
             if enabled:
                 if not any(_is_http_line(line) for line in http_lines):
@@ -87,10 +86,17 @@ def _sync_quota_squid_rules(enabled: bool):
             else:
                 http_lines = [line for line in http_lines if not _is_http_line(line)]
 
-            _commit_modular_config(cm, "120_http_access.conf", http_lines)
+            if http_lines != original_http_lines:
+                config_changed = True
+
+            success_http = _commit_modular_config(cm, "120_http_access.conf", http_lines)
+
+            if not (success_acl and success_http):
+                raise RuntimeError("No se pudieron guardar los archivos modulares de Squid")
+
         else:
-            # main squid.conf fallback
             lines = cm.config_content.split("\n") if cm.config_content else []
+            original_lines = lines.copy()
 
             if enabled:
                 if not any(_is_acl_line(line) for line in lines):
@@ -115,14 +121,59 @@ def _sync_quota_squid_rules(enabled: bool):
             else:
                 lines = [line for line in lines if not (_is_acl_line(line) or _is_http_line(line))]
 
-            cm.save_config("\n".join(lines))
+            if lines != original_lines:
+                config_changed = True
+
+            save_success = cm.save_config("\n".join(lines))
+            if not save_success:
+                raise RuntimeError("No se pudo guardar squid.conf")
+
+        if not config_changed:
+            logger.debug("No hay cambios en la configuración de Squid, se omite validación y recarga")
+            return
+
+        # Validar la configuración con SquidConfigSplitter antes de dejar los cambios.
+        splitter = SquidConfigSplitter(input_file=cm.config_path, output_dir=cm.config_dir)
+        validation = splitter._validate_squid_config()
+
+        if not validation.get("success"):
+            logger.error(
+                "Validación de Squid falló al sincronizar reglas de cuota: %s",
+                validation.get("error_message") or validation.get("output"),
+            )
+            # Rollback
+            if cm.is_modular:
+                cm.save_modular_config("100_acls.conf", previous_acls_content)
+                cm.save_modular_config("120_http_access.conf", previous_http_content)
+            cm.save_config(previous_main_content)
+            return
+
+        logger.info("Reglas de cuota sincronizadas y configuración de Squid validada correctamente")
+
+        # Recargar Squid sólo si todo está bien
+        reload_success, reload_msg, _ = reload_squid()
+        if not reload_success:
+            logger.warning("Squid no se pudo recargar después de actualizar reglas de cuota: %s", reload_msg)
 
     except FileNotFoundError as e:
         logger.error(f"Archivo de Squid no encontrado: {e}")
+        if cm.is_modular:
+            cm.save_modular_config("100_acls.conf", previous_acls_content)
+            cm.save_modular_config("120_http_access.conf", previous_http_content)
+        cm.save_config(previous_main_content)
     except PermissionError as e:
         logger.error(f"Sin permisos para modificar configuración de Squid: {e}")
+        if cm.is_modular:
+            cm.save_modular_config("100_acls.conf", previous_acls_content)
+            cm.save_modular_config("120_http_access.conf", previous_http_content)
+        cm.save_config(previous_main_content)
     except Exception as e:
         logger.error(f"Error sincronizando reglas Squid: {e}")
+        if cm.is_modular:
+            cm.save_modular_config("100_acls.conf", previous_acls_content)
+            cm.save_modular_config("120_http_access.conf", previous_http_content)
+        cm.save_config(previous_main_content)
+
 
 
 def register_quota_scheduler_tasks(scheduler):
