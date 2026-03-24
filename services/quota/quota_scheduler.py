@@ -51,8 +51,9 @@ def _sync_quota_squid_rules(enabled: bool):
 
     def _build_acl_line(use_src: bool) -> str:
         if use_src:
-            return f'acl usuarios_bloqueados src "{blocked_path}"'
-        return f'acl usuarios_bloqueados proxy_auth -i "{blocked_path}"'
+            # Modo sin auth: bloquear por IP con el mismo archivo usuarios_bloqueados.
+            return f"acl usuarios_bloqueados src {blocked_path}"
+        return f"acl usuarios_bloqueados proxy_auth -i {blocked_path}"
 
     auth_configured = bool(
         re.search(r"^\s*auth_param\b", cm.config_content, re.MULTILINE)
@@ -63,7 +64,7 @@ def _sync_quota_squid_rules(enabled: bool):
     acl_line = _build_acl_line(use_src)
     http_line = "http_access deny usuarios_bloqueados"
 
-    def _apply_changes(acl_line: str, http_line: str) -> bool:
+    def _apply_changes(acl_line: str, http_line: str, use_src: bool) -> bool:
         previous_main_content = cm.config_content or ""
         previous_acls_content = ""
         previous_http_content = ""
@@ -211,7 +212,7 @@ def _sync_quota_squid_rules(enabled: bool):
             return False
 
     # Primer intento
-    ok = _apply_changes(acl_line, http_line)
+    ok = _apply_changes(acl_line, http_line, use_src)
 
     # Si falla y no es src, fallback a src (evita vida de proxy_auth mal configurada)
     if not ok and not use_src:
@@ -219,7 +220,7 @@ def _sync_quota_squid_rules(enabled: bool):
             "Fallo con proxy_auth, reiniciando con ACL src para compatibilidad"
         )
         acl_line = _build_acl_line(True)
-        ok = _apply_changes(acl_line, http_line)
+        ok = _apply_changes(acl_line, http_line, True)
 
     if ok:
         logger.info(
@@ -377,9 +378,11 @@ def register_quota_scheduler_tasks(scheduler):
                     new_blocked.append(user)
 
             if new_blocked:
-                with open(file_path, "a", encoding="utf-8") as f:
+                target_file = blocked_path if use_src else file_path
+                with open(target_file, "a", encoding="utf-8") as f:
                     for user in new_blocked:
                         f.write(f"{user.username}\n")
+
                 for user in new_blocked:
                     if (
                         user.quota_mb
