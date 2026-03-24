@@ -378,8 +378,7 @@ def register_quota_scheduler_tasks(scheduler):
                     new_blocked.append(user)
 
             if new_blocked:
-                target_file = blocked_path if use_src else file_path
-                with open(target_file, "a", encoding="utf-8") as f:
+                with open(file_path, "a", encoding="utf-8") as f:
                     for user in new_blocked:
                         f.write(f"{user.username}\n")
 
