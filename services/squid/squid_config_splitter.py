@@ -218,18 +218,19 @@ class SquidConfigSplitter:
         if not os.path.exists(self.input_file):
             raise FileNotFoundError(f"File not found: {self.input_file}")
 
-        # Create backup of squid.conf before splitting
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_file = f"{self.input_file}.bak{timestamp}"
-        try:
-            shutil.copy2(self.input_file, backup_file)
-            logger.info(f"Backup created: {backup_file}")
-        except PermissionError:
-            logger.exception("Permission denied to create backup file: %s", backup_file)
-            raise RuntimeError("Permission denied to create backup file")
-        except Exception:
-            logger.exception("Failed to create backup file: %s", backup_file)
-            raise RuntimeError("Failed to create backup file")
+        # Backup of squid.conf is disabled by user request.
+        # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # backup_file = f"{self.input_file}.bak{timestamp}"
+        # try:
+        #     shutil.copy2(self.input_file, backup_file)
+        #     logger.info(f"Backup created: {backup_file}")
+        # except PermissionError:
+        #     logger.exception("Permission denied to create backup file: %s", backup_file)
+        #     raise RuntimeError("Permission denied to create backup file")
+        # except Exception:
+        #     logger.exception("Failed to create backup file: %s", backup_file)
+        #     raise RuntimeError("Failed to create backup file")
+        logger.info("Backup creation disabled: no .bak file generated")
 
         # Create the output directory if it doesn't exist
         try:
