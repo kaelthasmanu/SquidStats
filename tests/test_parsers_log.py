@@ -2,7 +2,6 @@
 Tests for log line parsers (parsers/log.py).
 """
 
-import pytest
 
 from parsers.log import (
     parse_log_line,

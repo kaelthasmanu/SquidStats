@@ -2,8 +2,6 @@
 Tests for SquidConfigSplitter — the Squid config file splitting engine.
 """
 
-import os
-import textwrap
 from unittest.mock import patch
 
 import pytest

@@ -2,9 +2,8 @@
 Tests for the connections parser (parsers/connections.py).
 """
 
-import pytest
 
-from parsers.connections import parse_raw_data, group_by_user
+from parsers.connections import group_by_user, parse_raw_data
 
 
 class TestParseRawData:

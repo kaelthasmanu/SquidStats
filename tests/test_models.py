@@ -2,28 +2,19 @@
 Tests for database models and dynamic table creation.
 """
 
-import os
-import sys
-from datetime import datetime
 
-import pytest
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import inspect
 from sqlalchemy.orm import sessionmaker
 
-from database.base import Base
 from database.models.models import (
-    AdminUser,
     BlacklistDomain,
     DeniedLog,
-    Log,
     LogMetadata,
     Notification,
     QuotaEvent,
     QuotaGroup,
-    QuotaRule,
     QuotaUser,
     SystemMetrics,
-    User,
     create_dynamic_models,
 )
 

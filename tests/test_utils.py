@@ -9,7 +9,6 @@ from utils.filters import divide_filter, format_bytes_filter, strftime_filter
 from utils.size import size_to_bytes
 from utils.social_media import SOCIAL_MEDIA_DOMAINS
 
-
 # ── utils/size.py ────────────────────────────────────────────────────────
 
 class TestSizeToBytes:

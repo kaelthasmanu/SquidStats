@@ -2,13 +2,9 @@
 Tests for services layer — auth, user, quota logic.
 """
 
-import os
-from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
-
-from database.models.models import AdminUser, QuotaGroup, QuotaUser
+from database.models.models import QuotaGroup, QuotaUser
 
 
 class TestAuthService:
