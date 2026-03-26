@@ -253,6 +253,7 @@ class SquidConfigSplitter:
         buffers: dict[str, list[str]] = {}
         pending_comments: list[str] = []
         results: dict[str, int] = {}
+        backup_file = None
         results["_backup_file"] = backup_file
 
         try:
@@ -344,7 +345,12 @@ class SquidConfigSplitter:
                     "Squid configuration validation failed. Rolling back changes. Error: %s",
                     error_details,
                 )
-                self._rollback_changes(backup_file, list(buffers.keys()))
+                if backup_file:
+                    self._rollback_changes(backup_file, list(buffers.keys()))
+                else:
+                    logger.warning(
+                        "No backup file available: no rollback will be performed"
+                    )
                 raise RuntimeError(
                     f"Squid configuration validation failed. Changes have been reverted.\n\nSquid output:\n{error_details}"
                 )
