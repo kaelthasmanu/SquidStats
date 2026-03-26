@@ -26,25 +26,20 @@ def test_alembic_installation():
         try:
             version = alembic.__version__
         except AttributeError:
-            # Older versions might not have __version__
             version = "installed (version not available)"
         print(f"✓ Alembic installed: {version}")
-        return True
+        assert True
     except ImportError:
         print("✗ Alembic NOT installed")
         print("  Run: pip install -r requirements.txt")
-        return False
+        assert False, "Alembic is not installed"
 
 
 def test_alembic_config():
     """Verify that alembic.ini exists."""
     alembic_ini = project_root / "alembic.ini"
-    if alembic_ini.exists():
-        print("✓ alembic.ini file found")
-        return True
-    else:
-        print("✗ alembic.ini file NOT found")
-        return False
+    assert alembic_ini.exists(), "alembic.ini file not found"
+    print("✓ alembic.ini file found")
 
 
 def test_alembic_structure():
@@ -67,7 +62,7 @@ def test_alembic_structure():
             print(f"✗ {description} NOT found")
             all_ok = False
 
-    return all_ok
+    assert all_ok, "One or more Alembic structure checks failed"
 
 
 def test_database_module():
@@ -84,15 +79,14 @@ def test_database_module():
         except Exception as e:
             print(f"⚠ Warning getting URL: {e}")
 
-        return True
+        assert True
     except ImportError:
         print("⚠ Cannot import database (missing dependencies)")
         print("  Run: pip install -r requirements.txt")
-        # This is not a failure if dependencies aren't installed yet
-        return True
+        assert True
     except Exception as e:
         print(f"✗ Error importing database: {e}")
-        return False
+        assert False, f"Error importing database: {e}"
 
 
 def test_manage_db_script():
@@ -101,7 +95,7 @@ def test_manage_db_script():
 
     if not manage_db.exists():
         print("✗ manage_db.py NOT found")
-        return False
+        assert False, "manage_db.py not found"
 
     print("✓ manage_db.py script found")
 
@@ -112,7 +106,7 @@ def test_manage_db_script():
         else:
             print("⚠ manage_db.py is not executable (run: chmod +x manage_db.py)")
 
-    return True
+    assert True
 
 
 def main():
