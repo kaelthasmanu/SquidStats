@@ -237,7 +237,7 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.3/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.3.1/install.sh
 ```
 
 2. Add permission execution:
@@ -310,7 +310,7 @@ facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
     Note: for use MARIADB need your own database running
    ```bash
    # Application Version
-   VERSION="2.3"
+   VERSION="2.3.1"
    
    # Security Keys
    SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
@@ -586,7 +586,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.3/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.3.1/install.sh
 ```
 
 2. Add permission execution:
