@@ -862,16 +862,16 @@ class SquidConfigManager:
             return False
 
         try:
-            # Create backup before saving
-            if os.path.exists(filepath):
-                backup_path = (
-                    f"{filepath}.bak{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                )
-                try:
-                    shutil.copy2(filepath, backup_path)
-                    logger.info(f"Backup created: {backup_path}")
-                except Exception as e:
-                    logger.warning(f"Could not create backup: {e}")
+            # Backup creation disabled by user request
+            # if os.path.exists(filepath):
+            #     backup_path = (
+            #         f"{filepath}.bak{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            #     )
+            #     try:
+            #         shutil.copy2(filepath, backup_path)
+            #         logger.info(f"Backup created: {backup_path}")
+            #     except Exception as e:
+            #         logger.warning(f"Could not create backup: {e}")
 
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(content)
