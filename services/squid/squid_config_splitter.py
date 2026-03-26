@@ -185,13 +185,13 @@ class SquidConfigSplitter:
             "50_auth.conf",  # Auth defines 'auth' ACL
             "60_logs.conf",
             "80_dns.conf",
+            "90_includes.conf",  # Includes may define ACLs (e.g. usuarios_bloqueados)
             "100_acls.conf",  # All other ACLs defined here
             "70_icap.conf",  # Uses 'infoaccess' ACL
             "110_delay_pools.conf",  # Uses 'auth', 'work_time_*', 'research_files' ACLs
             "115_cache_control.conf",
             "120_http_access.conf",  # Uses all ACLs
             "55_ssl_bump.conf",  # Can go anywhere but typically after ACLs
-            "90_includes.conf",  # Additional includes
             self.unknown_file,  # Catch-all for unclassified
         ]
 
@@ -218,17 +218,18 @@ class SquidConfigSplitter:
         if not os.path.exists(self.input_file):
             raise FileNotFoundError(f"File not found: {self.input_file}")
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_file = f"{self.input_file}.bak{timestamp}"
-        try:
-            shutil.copy2(self.input_file, backup_file)
-            logger.info(f"Backup created: {backup_file}")
-        except PermissionError:
-            logger.exception("Permission denied to create backup file: %s", backup_file)
-            raise RuntimeError("Permission denied to create backup file")
-        except Exception:
-            logger.exception("Failed to create backup file: %s", backup_file)
-            raise RuntimeError("Failed to create backup file")
+        # Backup of squid.conf is disabled by user request.
+        # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # backup_file = f"{self.input_file}.bak{timestamp}"
+        # try:
+        #     shutil.copy2(self.input_file, backup_file)
+        #     logger.info(f"Backup created: {backup_file}")
+        # except PermissionError:
+        #     logger.exception("Permission denied to create backup file: %s", backup_file)
+        #     raise RuntimeError("Permission denied to create backup file")
+        # except Exception:
+        #     logger.exception("Failed to create backup file: %s", backup_file)
+        #     raise RuntimeError("Failed to create backup file")
         logger.info("Backup creation disabled: no .bak file generated")
 
         # Create the output directory if it doesn't exist
@@ -252,6 +253,7 @@ class SquidConfigSplitter:
         buffers: dict[str, list[str]] = {}
         pending_comments: list[str] = []
         results: dict[str, int] = {}
+        backup_file = None
         results["_backup_file"] = backup_file
 
         try:
