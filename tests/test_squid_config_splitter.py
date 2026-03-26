@@ -33,7 +33,10 @@ class TestClassifyLine:
             ("auth_param basic program /usr/lib/squid/basic_ncsa_auth", "50_auth.conf"),
             ("acl auth proxy_auth REQUIRED", "50_auth.conf"),
             ("ssl_bump bump all", "55_ssl_bump.conf"),
-            ("sslcrtd_program /usr/lib/squid/security_file_certgen", "55_ssl_bump.conf"),
+            (
+                "sslcrtd_program /usr/lib/squid/security_file_certgen",
+                "55_ssl_bump.conf",
+            ),
             ("acl step1 at_step SslBump1", "55_ssl_bump.conf"),
             ("access_log /var/log/squid/access.log", "60_logs.conf"),
             ("cache_log /var/log/squid/cache.log", "60_logs.conf"),
@@ -63,7 +66,10 @@ class TestClassifyLine:
         assert self.splitter._classify_line(line) == expected_file
 
     def test_classify_unknown_goes_to_999(self):
-        assert self.splitter._classify_line("some_random_directive value") == "999_unknown.conf"
+        assert (
+            self.splitter._classify_line("some_random_directive value")
+            == "999_unknown.conf"
+        )
 
 
 class TestLoadOrder:
@@ -98,12 +104,16 @@ class TestSplitConfig:
 
     def test_split_creates_modular_files(self, tmp_squid_conf, tmp_path):
         output_dir = tmp_path / "squid.d"
-        with patch.object(SquidConfigSplitter, "_validate_squid_config", return_value={"success": True, "output": ""}):
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": True, "output": ""},
+        ):
             splitter = SquidConfigSplitter(
                 input_file=str(tmp_squid_conf),
                 output_dir=str(output_dir),
             )
-            results = splitter.split_config()
+            splitter.split_config()
 
         assert output_dir.exists()
         # Check expected files were created
@@ -123,7 +133,11 @@ class TestSplitConfig:
 
     def test_split_generates_main_config_with_includes(self, tmp_squid_conf, tmp_path):
         output_dir = tmp_path / "squid.d"
-        with patch.object(SquidConfigSplitter, "_validate_squid_config", return_value={"success": True, "output": ""}):
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": True, "output": ""},
+        ):
             splitter = SquidConfigSplitter(
                 input_file=str(tmp_squid_conf),
                 output_dir=str(output_dir),
@@ -146,7 +160,11 @@ class TestSplitConfig:
         )
         output_dir = tmp_path / "squid.d"
 
-        with patch.object(SquidConfigSplitter, "_validate_squid_config", return_value={"success": True, "output": ""}):
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": True, "output": ""},
+        ):
             splitter = SquidConfigSplitter(
                 input_file=str(conf),
                 output_dir=str(output_dir),
@@ -178,7 +196,11 @@ class TestSplitConfig:
         )
         output_dir = tmp_path / "squid.d"
 
-        with patch.object(SquidConfigSplitter, "_validate_squid_config", return_value={"success": True, "output": ""}):
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": True, "output": ""},
+        ):
             splitter = SquidConfigSplitter(
                 input_file=str(conf),
                 output_dir=str(output_dir),
@@ -203,7 +225,11 @@ class TestSplitConfig:
         )
         output_dir = tmp_path / "squid.d"
 
-        with patch.object(SquidConfigSplitter, "_validate_squid_config", return_value={"success": True, "output": ""}):
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": True, "output": ""},
+        ):
             splitter = SquidConfigSplitter(
                 input_file=str(conf),
                 output_dir=str(output_dir),
@@ -217,7 +243,11 @@ class TestSplitConfig:
     def test_backup_disabled(self, tmp_squid_conf, tmp_path):
         """Backup creation is currently disabled — no .bak files should appear."""
         output_dir = tmp_path / "squid.d"
-        with patch.object(SquidConfigSplitter, "_validate_squid_config", return_value={"success": True, "output": ""}):
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": True, "output": ""},
+        ):
             splitter = SquidConfigSplitter(
                 input_file=str(tmp_squid_conf),
                 output_dir=str(output_dir),

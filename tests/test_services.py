@@ -107,9 +107,7 @@ class TestQuotaModels:
 
         total_usage = sum(
             u.used_mb
-            for u in db_session.query(QuotaUser)
-            .filter_by(group_name="marketing")
-            .all()
+            for u in db_session.query(QuotaUser).filter_by(group_name="marketing").all()
         )
         assert total_usage == 6000
         assert total_usage > group.quota_mb  # Group exceeded

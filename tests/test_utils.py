@@ -11,6 +11,7 @@ from utils.social_media import SOCIAL_MEDIA_DOMAINS
 
 # ── utils/size.py ────────────────────────────────────────────────────────
 
+
 class TestSizeToBytes:
     @pytest.mark.parametrize(
         "input_str, expected",
@@ -41,6 +42,7 @@ class TestSizeToBytes:
 
 
 # ── utils/filters.py ────────────────────────────────────────────────────
+
 
 class TestDivideFilter:
     def test_normal_division(self):
@@ -98,6 +100,7 @@ class TestStrftimeFilter:
 
 # ── utils/colors.py ──────────────────────────────────────────────────────
 
+
 class TestColorMap:
     def test_known_codes(self):
         assert "200" in color_map
@@ -112,6 +115,7 @@ class TestColorMap:
 
 
 # ── utils/social_media.py ───────────────────────────────────────────────
+
 
 class TestSocialMediaDomains:
     def test_has_major_platforms(self):
@@ -130,4 +134,6 @@ class TestSocialMediaDomains:
     def test_domains_are_lowercase(self):
         for platform, domains in SOCIAL_MEDIA_DOMAINS.items():
             for domain in domains:
-                assert domain == domain.lower(), f"{domain} in {platform} should be lowercase"
+                assert domain == domain.lower(), (
+                    f"{domain} in {platform} should be lowercase"
+                )

@@ -2,7 +2,6 @@
 Tests for the connections parser (parsers/connections.py).
 """
 
-
 from parsers.connections import group_by_user, parse_raw_data
 
 
@@ -49,9 +48,24 @@ class TestParseRawData:
 class TestGroupByUser:
     def test_groups_connections(self):
         connections = [
-            {"username": "user1", "uri": "http://a.com", "data_read": 100, "data_written": 50},
-            {"username": "user1", "uri": "http://b.com", "data_read": 200, "data_written": 100},
-            {"username": "user2", "uri": "http://c.com", "data_read": 50, "data_written": 25},
+            {
+                "username": "user1",
+                "uri": "http://a.com",
+                "data_read": 100,
+                "data_written": 50,
+            },
+            {
+                "username": "user1",
+                "uri": "http://b.com",
+                "data_read": 200,
+                "data_written": 100,
+            },
+            {
+                "username": "user2",
+                "uri": "http://c.com",
+                "data_read": 50,
+                "data_written": 25,
+            },
         ]
         grouped = group_by_user(connections)
         assert "user1" in grouped

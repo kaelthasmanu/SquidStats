@@ -32,7 +32,7 @@ def test_alembic_installation():
     except ImportError:
         print("✗ Alembic NOT installed")
         print("  Run: pip install -r requirements.txt")
-        assert False, "Alembic is not installed"
+        raise AssertionError("Alembic is not installed")
 
 
 def test_alembic_config():
@@ -86,7 +86,7 @@ def test_database_module():
         assert True
     except Exception as e:
         print(f"✗ Error importing database: {e}")
-        assert False, f"Error importing database: {e}"
+        raise AssertionError(f"Error importing database: {e}")
 
 
 def test_manage_db_script():
@@ -95,7 +95,7 @@ def test_manage_db_script():
 
     if not manage_db.exists():
         print("✗ manage_db.py NOT found")
-        assert False, "manage_db.py not found"
+        raise AssertionError("manage_db.py not found")
 
     print("✓ manage_db.py script found")
 

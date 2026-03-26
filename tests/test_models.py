@@ -2,7 +2,6 @@
 Tests for database models and dynamic table creation.
 """
 
-
 from sqlalchemy import inspect
 from sqlalchemy.orm import sessionmaker
 
@@ -43,7 +42,14 @@ class TestStaticModels:
     def test_admin_user_columns(self, in_memory_engine):
         inspector = inspect(in_memory_engine)
         columns = {c["name"] for c in inspector.get_columns("admin_users")}
-        assert {"id", "username", "password_hash", "salt", "role", "is_active"}.issubset(columns)
+        assert {
+            "id",
+            "username",
+            "password_hash",
+            "salt",
+            "role",
+            "is_active",
+        }.issubset(columns)
 
     def test_quota_user_columns(self, in_memory_engine):
         inspector = inspect(in_memory_engine)
@@ -53,7 +59,9 @@ class TestStaticModels:
     def test_notification_columns(self, in_memory_engine):
         inspector = inspect(in_memory_engine)
         columns = {c["name"] for c in inspector.get_columns("notifications")}
-        assert {"id", "type", "message", "message_hash", "source", "read"}.issubset(columns)
+        assert {"id", "type", "message", "message_hash", "source", "read"}.issubset(
+            columns
+        )
 
 
 class TestDynamicModels:
@@ -78,12 +86,12 @@ class TestDynamicModels:
         assert {"id", "username", "ip", "created_at"}.issubset(user_cols)
 
         log_cols = {c["name"] for c in inspector.get_columns("log_test")}
-        assert {"id", "user_id", "url", "response", "data_transmitted"}.issubset(log_cols)
+        assert {"id", "user_id", "url", "response", "data_transmitted"}.issubset(
+            log_cols
+        )
 
     def test_dynamic_model_insert(self, in_memory_engine):
-        DynUser, DynLog = create_dynamic_models(
-            in_memory_engine, "user_ins", "log_ins"
-        )
+        DynUser, DynLog = create_dynamic_models(in_memory_engine, "user_ins", "log_ins")
         Session = sessionmaker(bind=in_memory_engine)
         session = Session()
 
