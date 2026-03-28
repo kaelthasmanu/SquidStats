@@ -92,15 +92,34 @@ def json_error(message: str, status_code: int = 400, *, details: str | None = No
     """
     resp = {"status": "error", "message": message}
     if is_debug() and details:
-        resp["details"] = details
+        # Avoid leaking raw stack traces in debug output too.
+        if "Traceback" in details or "Exception" in details:
+            resp["details"] = "[REDACTED; check logs]"
+        else:
+            resp["details"] = details
     return jsonify(resp), status_code
+
+
+def _sanitize_response_payload(payload: dict) -> dict:
+    """Remove sensitive fields that may expose stack traces or exception info."""
+    if not payload:
+        return {}
+
+    forbidden = {"stack", "stack_trace", "trace", "traceback", "exception", "error"}
+    sanitized = {}
+    for key, value in payload.items():
+        if key.lower() in forbidden:
+            sanitized[key] = "[REDACTED]"
+        else:
+            sanitized[key] = value
+    return sanitized
 
 
 def json_success(message: str, *, extra: dict | None = None):
     """Build a standard JSON success response."""
     resp = {"status": "success", "message": message}
     if extra:
-        resp.update(extra)
+        resp.update(_sanitize_response_payload(extra))
     return jsonify(resp)
 
 

@@ -151,7 +151,9 @@ _Una herramienta moderna para analizar logs de Squid, proporcionando un panel el
   - Total de Usuarios
   - Total de Datos Transmitidos
   - Total de Solicitudes
-  - Y Más...
+- **_Sistema de Cuotas_**:
+  - Quota por usuarios
+  - Quota por grupos 
 - **_Y Más_**
 
 ## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
@@ -701,11 +703,6 @@ sudo rm -rf /opt/squidstats
 
 - **Mejoras de Interfaz** 🎨
   - Exportación de reportes (PDF, Excel)
-
-- **Características de Seguridad** 🔒
-  - Autenticación de usuarios
-  - Logs de auditoría del sistema
-  - Alertas automatizadas
 
 - **Optimización y Rendimiento** ⚡
   - Cache de datos mejorado

@@ -3,6 +3,7 @@ from loguru import logger
 from werkzeug.exceptions import BadRequest
 
 from database.database import get_session
+from routes.admin.helpers import json_error, json_success
 from services.analytics.auditoria_service import (
     find_by_ip,
     find_by_keyword,
@@ -211,44 +212,49 @@ def api_mark_notifications_read():
 def api_delete_notification(notification_id):
     try:
         delete_notification(notification_id)
-        return jsonify(
-            {"success": True, "unread_count": get_all_notifications()["unread_count"]}
+        return json_success(
+            "Notification deleted",
+            extra={"unread_count": get_all_notifications()["unread_count"]},
         )
     except Exception as e:
-        logger.error(f"Error deleting notification: {e}")
-        return jsonify({"success": False, "error": "Internal server error"}), 500
+        logger.exception("Error deleting notification")
+        return json_error("Internal server error", 500, details=str(e))
 
 
 @api_bp.route("/notifications/delete-all", methods=["DELETE"])
 def api_delete_all_notifications():
     try:
         delete_all_notifications()
-        return jsonify({"success": True, "unread_count": 0})
+        return json_success("All notifications deleted", extra={"unread_count": 0})
     except Exception as e:
-        logger.error(f"Error deleting all notifications: {e}")
-        return jsonify({"success": False, "error": "Internal server error"}), 500
+        logger.exception("Error deleting all notifications")
+        return json_error("Internal server error", 500, details=str(e))
 
 
 @api_bp.route("/restart-squid", methods=["POST"])
 @admin_required
 def api_restart_squid():
     success, message, details = restart_squid()
-    status_code = 200 if success else 500
-    response = {"success": success, "message": message}
-    if details:
-        response["details"] = details
-    return jsonify(response), status_code
+    if success:
+        return json_success(message)
+    return json_error(
+        message or "Could not restart squid",
+        500,
+        details=str(details) if details else None,
+    )
 
 
 @api_bp.route("/reload-squid", methods=["POST"])
 @admin_required
 def api_reload_squid():
     success, message, details = reload_squid()
-    status_code = 200 if success else 500
-    response = {"success": success, "message": message}
-    if details:
-        response["details"] = details
-    return jsonify(response), status_code
+    if success:
+        return json_success(message)
+    return json_error(
+        message or "Could not reload squid",
+        500,
+        details=str(details) if details else None,
+    )
 
 
 def validate_required_fields(audit_type, data):
