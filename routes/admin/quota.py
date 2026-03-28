@@ -130,9 +130,7 @@ def register_routes(bp):
                         if not raw:
                             continue
                         # Format 1: acl usuarios_bloqueados src <IP>
-                        m = re.match(
-                            r"^acl\s+usuarios_bloqueados\s+src\s+(\S+)", raw
-                        )
+                        m = re.match(r"^acl\s+usuarios_bloqueados\s+src\s+(\S+)", raw)
                         if m:
                             username = m.group(1)
                             detail = "Bloqueado por IP (src)"
@@ -141,9 +139,7 @@ def register_routes(bp):
                             parts = [p.strip() for p in raw.split(" - ")]
                             if len(parts) >= 2:
                                 username = parts[1]
-                                detail = (
-                                    " - ".join(parts[2:]) if len(parts) > 2 else ""
-                                )
+                                detail = " - ".join(parts[2:]) if len(parts) > 2 else ""
                             else:
                                 username = raw
                                 detail = ""

@@ -125,9 +125,7 @@ class SquidConfigManager:
         prefix = base + suffix
         try:
             backups = sorted(
-                f
-                for f in os.listdir(directory)
-                if f.startswith(prefix) and f != base
+                f for f in os.listdir(directory) if f.startswith(prefix) and f != base
             )
             # Remove all but the last (newest) backup
             for old in backups[:-1]:
@@ -894,7 +892,9 @@ class SquidConfigManager:
                     with open(filepath, encoding="utf-8") as f:
                         existing = f.read()
                     if existing == content:
-                        logger.debug(f"Modular config unchanged, skipping write: {filename}")
+                        logger.debug(
+                            f"Modular config unchanged, skipping write: {filename}"
+                        )
                         return True
                 except Exception:
                     pass  # If we can't read, proceed with write
