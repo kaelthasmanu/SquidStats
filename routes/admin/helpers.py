@@ -84,6 +84,15 @@ def get_int_form_field(name: str) -> int | None:
 # ---------------------------------------------------------------------------
 
 
+def _sanitize_error_details(details: str) -> str:
+    """Sanitize textual error details by redacting stack trace / exception artifacts."""
+    normalized = details.lower()
+    suspects = ("traceback", "exception", "stack", "stacktrace", "error")
+    if any(token in normalized for token in suspects):
+        return "[REDACTED; check logs]"
+    return details
+
+
 def json_error(message: str, status_code: int = 400, *, details: str | None = None):
     """Build a standard JSON error response.
 
@@ -92,11 +101,7 @@ def json_error(message: str, status_code: int = 400, *, details: str | None = No
     """
     resp = {"status": "error", "message": message}
     if is_debug() and details:
-        # Avoid leaking raw stack traces in debug output too.
-        if "Traceback" in details or "Exception" in details:
-            resp["details"] = "[REDACTED; check logs]"
-        else:
-            resp["details"] = details
+        resp["details"] = _sanitize_error_details(details)
     return jsonify(resp), status_code
 
 
