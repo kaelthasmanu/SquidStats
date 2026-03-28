@@ -8,6 +8,8 @@ import asyncio
 import sys
 from pathlib import Path
 
+import pytest
+
 # Agregar el directorio raíz al path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -89,6 +91,7 @@ def check_configuration():
     return True
 
 
+@pytest.mark.asyncio
 async def test_connection():
     """Probar conexión a Telegram"""
     print_separator("Test de Conexión")
@@ -136,6 +139,7 @@ async def test_connection():
         return False
 
 
+@pytest.mark.asyncio
 async def test_send_basic_notification():
     """Probar envío de notificación básica"""
     print_separator("Test de Notificación Básica")
@@ -172,6 +176,7 @@ async def test_send_basic_notification():
         return False
 
 
+@pytest.mark.asyncio
 async def test_priority_notifications():
     """Probar notificaciones con diferentes prioridades"""
     print_separator("Test de Prioridades")
@@ -209,6 +214,7 @@ async def test_priority_notifications():
         return False
 
 
+@pytest.mark.asyncio
 async def test_formatted_notifications():
     """Probar notificaciones con datos extra"""
     print_separator("Test de Mensajes Formateados")
@@ -311,7 +317,7 @@ def test_integration_wrapper():
         else:
             print("\n⚠️ Algunos tests fallaron")
 
-        return all_success
+        assert all_success, "Al menos un test del wrapper falló"
 
     except Exception as e:
         print(f"\n❌ Error en test de wrapper: {e}")
@@ -389,7 +395,7 @@ def test_proxy_parsing():
     else:
         print("\n❌ Algunos tests de proxy fallaron")
 
-    return all_passed
+    assert all_passed, "El parsing de proxy falló en uno o más casos"
 
 
 def main():

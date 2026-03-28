@@ -1,6 +1,7 @@
 """Admin quota management routes."""
 
 import os
+import re
 from datetime import datetime, timezone
 
 from flask import render_template, request
@@ -25,13 +26,10 @@ def is_quota_enabled() -> bool:
 
 def set_quota_enabled(enabled: bool) -> None:
     """Persist the quota enabled flag using a file marker."""
-    block_file = os.path.join(os.getcwd(), "blockUsersQuota")
     try:
         if enabled:
             if os.path.exists(QUOTA_DISABLED_FLAG):
                 os.remove(QUOTA_DISABLED_FLAG)
-            if os.path.exists(block_file):
-                os.remove(block_file)
         else:
             with open(QUOTA_DISABLED_FLAG, "w", encoding="utf-8") as f:
                 f.write("disabled\n")
@@ -124,20 +122,27 @@ def register_routes(bp):
             )
 
             blocked_users = []
-            block_file = os.path.join(os.getcwd(), "blockUsersQuota")
+            block_file = "/etc/squid/usuarios_bloqueados.txt"
             if os.path.exists(block_file):
                 with open(block_file, encoding="utf-8") as f:
                     for line in f:
                         raw = line.strip()
                         if not raw:
                             continue
-                        parts = [p.strip() for p in raw.split(" - ")]
-                        if len(parts) >= 2:
-                            username = parts[1]
-                            detail = " - ".join(parts[2:]) if len(parts) > 2 else ""
+                        # Format 1: acl usuarios_bloqueados src <IP>
+                        m = re.match(r"^acl\s+usuarios_bloqueados\s+src\s+(\S+)", raw)
+                        if m:
+                            username = m.group(1)
+                            detail = "Bloqueado por IP (src)"
                         else:
-                            username = raw
-                            detail = ""
+                            # Format 2: plain username or "detail - username"
+                            parts = [p.strip() for p in raw.split(" - ")]
+                            if len(parts) >= 2:
+                                username = parts[1]
+                                detail = " - ".join(parts[2:]) if len(parts) > 2 else ""
+                            else:
+                                username = raw
+                                detail = ""
                         blocked_users.append(
                             {"username": username, "detail": detail, "raw": raw}
                         )
