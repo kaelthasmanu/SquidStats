@@ -262,24 +262,8 @@ sudo ./install.sh
 # Actualizar instalación existente
 sudo ./install.sh --update
 
-# Configurar solo blacklist
-sudo ./install.sh --configure-blacklist
-
 # Mostrar ayuda
 ./install.sh --help
-```
-
-#### 🛡️ Configuración de Blacklist
-Durante la instalación, puedes configurar qué dominios notificar como bloqueados:
-
-- **Opción 1**: Usar blacklist por defecto (facebook.com, twitter.com, instagram.com, etc.)
-- **Opción 2**: Configurar dominios personalizados
-- **Opción 3**: Omitir configuración de blacklist
-
-**Ejemplo de configuración personalizada:**
-```bash
-# Cuando se solicite, ingresa dominios separados por comas:
-facebook.com,twitter.com,youtube.com,netflix.com,tiktok.com
 ```
 
 ## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
