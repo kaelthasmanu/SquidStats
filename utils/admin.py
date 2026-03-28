@@ -118,6 +118,27 @@ class SquidConfigManager:
             self.is_valid = True
             logger.info("SquidConfigManager initialized successfully")
 
+    def _cleanup_modular_backups(self, filepath: str, suffix: str = ".bak"):
+        """Remove old backups for a modular config file, keeping only the newest one."""
+        base = os.path.basename(filepath)
+        directory = os.path.dirname(filepath)
+        prefix = base + suffix
+        try:
+            backups = sorted(
+                f
+                for f in os.listdir(directory)
+                if f.startswith(prefix) and f != base
+            )
+            # Remove all but the last (newest) backup
+            for old in backups[:-1]:
+                try:
+                    os.remove(os.path.join(directory, old))
+                    logger.debug(f"Removed old backup: {old}")
+                except Exception as e:
+                    logger.warning(f"Could not remove old backup {old}: {e}")
+        except Exception as e:
+            logger.warning(f"Error cleaning up backups for {base}: {e}")
+
     def load_config(self):
         if not self.is_valid:
             logger.error("Cannot load configuration: invalid environment")
@@ -151,6 +172,11 @@ class SquidConfigManager:
             return False
 
         try:
+            # Skip write if content hasn't changed
+            if self.config_content == content:
+                logger.debug("Main config unchanged, skipping write")
+                return True
+
             backup_created = self.create_backup()
             if not backup_created:
                 logger.warning("Could not create backup, but continuing with save...")
@@ -862,16 +888,24 @@ class SquidConfigManager:
             return False
 
         try:
-            # Backup creation disabled by user request
-            # if os.path.exists(filepath):
-            #     backup_path = (
-            #         f"{filepath}.bak{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            #     )
-            #     try:
-            #         shutil.copy2(filepath, backup_path)
-            #         logger.info(f"Backup created: {backup_path}")
-            #     except Exception as e:
-            #         logger.warning(f"Could not create backup: {e}")
+            # Skip write if content hasn't changed
+            if os.path.exists(filepath):
+                try:
+                    with open(filepath, encoding="utf-8") as f:
+                        existing = f.read()
+                    if existing == content:
+                        logger.debug(f"Modular config unchanged, skipping write: {filename}")
+                        return True
+                except Exception:
+                    pass  # If we can't read, proceed with write
+
+                # Create single backup before overwriting
+                backup_path = f"{filepath}.bak"
+                try:
+                    shutil.copy2(filepath, backup_path)
+                    logger.debug(f"Backup created: {backup_path}")
+                except Exception as e:
+                    logger.warning(f"Could not create backup for {filename}: {e}")
 
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(content)
@@ -900,10 +934,13 @@ class SquidConfigManager:
             return False
 
         try:
-            # Create backup before deleting
-            backup_path = (
-                f"{filepath}.deleted{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            )
+            # Keep a single .deleted backup, removing any previous one
+            backup_path = f"{filepath}.deleted"
+            if os.path.exists(backup_path):
+                try:
+                    os.remove(backup_path)
+                except Exception as e:
+                    logger.warning(f"Could not remove previous deleted backup: {e}")
             try:
                 shutil.move(filepath, backup_path)
                 logger.info(f"File moved to: {backup_path}")
