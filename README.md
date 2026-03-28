@@ -695,11 +695,6 @@ sudo rm -rf /opt/squidstats
 - **Interface Improvements** 🎨
   - Report export (PDF, Excel)
 
-- **Security Features** 🔒
-  - User authentication
-  - System audit logs
-  - Automated alerts
-
 - **Optimization and Performance** ⚡
   - Enhanced data caching
   - Historical log compression

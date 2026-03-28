@@ -720,11 +720,6 @@ sudo rm -rf /opt/squidstats
 - **Mejoras de Interfaz** 🎨
   - Exportación de reportes (PDF, Excel)
 
-- **Características de Seguridad** 🔒
-  - Autenticación de usuarios
-  - Logs de auditoría del sistema
-  - Alertas automatizadas
-
 - **Optimización y Rendimiento** ⚡
   - Cache de datos mejorado
   - Compresión de logs históricos
