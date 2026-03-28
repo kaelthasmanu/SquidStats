@@ -174,7 +174,7 @@ cython_debug/
 eicar.com.txt
 .DS_Store
 blockUsersQuota
-quota_disable
+quota_disabled
 
 # Telegram session files
 *.session
