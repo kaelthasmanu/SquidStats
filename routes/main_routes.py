@@ -36,14 +36,27 @@ def inject_app_version():
     return {"app_version": version}
 
 
+def _sanitize_error_message(message: str) -> str:
+    """Keep error page text safe for end users.
+
+    Any value that looks like a traceback or exception content is replaced.
+    """
+    lower = message.lower()
+    suspicious = ("traceback", "exception", "stack", "stack_trace", "stacktrace")
+    if any(token in lower for token in suspicious):
+        return "Unexpected internal failure"
+    return message
+
+
 def _build_error_page(message: str, status: int = 500):
     """
     Build a standardized error page
     """
+    safe_message = _sanitize_error_message(message)
     return (
         render_template(
             "error.html",
-            message=message,
+            message=safe_message,
         ),
         status,
     )
