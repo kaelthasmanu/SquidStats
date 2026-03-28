@@ -18,6 +18,7 @@ from loguru import logger
 from config import Config
 from database.database import get_session
 from database.models.models import BlacklistDomain
+from routes.admin.helpers import json_error, json_success
 from services.auth.auth_service import AuthService, admin_required, api_auth_required
 from services.auth.user_service import (
     create_user as service_create_user,
@@ -598,11 +599,12 @@ def delete_user(user_id):
 def restart_squid():
     success, message, details = service_restart_squid()
     if success:
-        return jsonify({"status": "success", "message": message})
-    resp = {"status": "error", "message": message}
-    if bool(current_app.debug) and details:
-        resp["details"] = details
-    return jsonify(resp), 500
+        return json_success(message)
+    return json_error(
+        message or "Could not restart squid",
+        500,
+        details=str(details) if details else None,
+    )
 
 
 @admin_bp.route("/api/reload-squid", methods=["POST"])
@@ -610,11 +612,12 @@ def restart_squid():
 def reload_squid():
     success, message, details = service_reload_squid()
     if success:
-        return jsonify({"status": "success", "message": message})
-    resp = {"status": "error", "message": message}
-    if bool(current_app.debug) and details:
-        resp["details"] = details
-    return jsonify(resp), 500
+        return json_success(message)
+    return json_error(
+        message or "Could not reload squid",
+        500,
+        details=str(details) if details else None,
+    )
 
 
 @admin_bp.route("/api/get-tables", methods=["GET"])
