@@ -4,8 +4,9 @@ from routes.admin.helpers import (
     _sanitize_error_details,
     _sanitize_response_payload,
     json_error,
+    sanitize_error_page_message,
 )
-from routes.main_routes import _build_error_page, _sanitize_error_message
+from routes.main_routes import _build_error_page
 
 
 def test_sanitize_response_payload_strips_sensitive_keys():
@@ -45,6 +46,6 @@ def test_build_error_page_sanitizes_stacktrace_like_string(flask_app):
         assert status == 500
         # Template is Werkzeug response object/str, just ensure sanitizer is applied via helper directly.
         assert (
-            _sanitize_error_message("Traceback... Exception")
+            sanitize_error_page_message("Traceback... Exception")
             == "Unexpected internal failure"
         )

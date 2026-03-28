@@ -8,6 +8,7 @@ from loguru import logger
 from config import Config
 from parsers.connections import group_by_user, parse_raw_data
 from parsers.squid_info import fetch_squid_info_stats
+from routes.admin.helpers import sanitize_error_page_message
 from services.notifications.notifications import get_all_notifications
 from services.squid.fetch_data import fetch_squid_data
 from services.system.system_info import get_system_type
@@ -36,23 +37,11 @@ def inject_app_version():
     return {"app_version": version}
 
 
-def _sanitize_error_message(message: str) -> str:
-    """Keep error page text safe for end users.
-
-    Any value that looks like a traceback or exception content is replaced.
-    """
-    lower = message.lower()
-    suspicious = ("traceback", "exception", "stack", "stack_trace", "stacktrace")
-    if any(token in lower for token in suspicious):
-        return "Unexpected internal failure"
-    return message
-
-
 def _build_error_page(message: str, status: int = 500):
     """
     Build a standardized error page
     """
-    safe_message = _sanitize_error_message(message)
+    safe_message = sanitize_error_page_message(message)
     return (
         render_template(
             "error.html",

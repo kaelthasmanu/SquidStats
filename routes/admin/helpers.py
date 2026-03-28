@@ -84,13 +84,25 @@ def get_int_form_field(name: str) -> int | None:
 # ---------------------------------------------------------------------------
 
 
+def _contains_stack_trace_error_hint(text: str) -> bool:
+    """Detect indicators of stack traces or exception text."""
+    normalized = text.lower()
+    suspects = ("traceback", "exception", "stack", "stack_trace", "stacktrace", "error")
+    return any(token in normalized for token in suspects)
+
+
 def _sanitize_error_details(details: str) -> str:
     """Sanitize textual error details by redacting stack trace / exception artifacts."""
-    normalized = details.lower()
-    suspects = ("traceback", "exception", "stack", "stacktrace", "error")
-    if any(token in normalized for token in suspects):
+    if _contains_stack_trace_error_hint(details):
         return "[REDACTED; check logs]"
     return details
+
+
+def sanitize_error_page_message(message: str) -> str:
+    """Sanitize user-facing error page message to avoid leaking diagnostic traces."""
+    if _contains_stack_trace_error_hint(message):
+        return "Unexpected internal failure"
+    return message
 
 
 def json_error(message: str, status_code: int = 400, *, details: str | None = None):
