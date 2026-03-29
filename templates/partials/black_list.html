@@ -8,9 +8,9 @@
                     <span class="font-bold text-red-600">{{ pagination.total }}</span>
                 </span>
             </div>
-            <div class="flex items-center">
+            <div class="flex items-center gap-2">
                 <span class="text-sm font-medium text-gray-600 mr-2">Mostrar:</span>
-                <select id="per_page" class="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                <select id="per_page" class="border border-gray-300 bg-white text-gray-800 rounded-md px-3 py-1.5 text-sm font-medium shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                         onchange="window.location.href = updateQueryParam('per_page', this.value)">
                     <option value="20" {% if pagination.per_page == 20 %}selected{% endif %}>20</option>
                     <option value="50" {% if pagination.per_page == 50 %}selected{% endif %}>50</option>
