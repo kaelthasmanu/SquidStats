@@ -75,7 +75,8 @@ def find_blacklisted_sites(
 ) -> dict[str, Any]:
     engine = get_engine()
     inspector = inspect(engine)
-    domain_counts: dict[str, int] = {}
+    # user -> domain -> count
+    user_domain_counts: dict[str, dict[str, int]] = {}
     total_requests = 0
 
     # Early-exit if the blacklist table has no active entries.
@@ -117,28 +118,40 @@ def find_blacklisted_sites(
             blacklist_exists = _blacklist_exists(LogModel)
 
             query_results = (
-                db.query(LogModel.url, LogModel.request_count)
+                db.query(UserModel.username, LogModel.url, LogModel.request_count)
                 .join(UserModel, LogModel.user_id == UserModel.id)
                 .filter(blacklist_exists)
                 .all()
             )
 
-            for url, request_count in query_results:
+            for username, url, request_count in query_results:
                 domain = _get_parent_domain(url)
-                count = (request_count or 1)
-                domain_counts[domain] = domain_counts.get(domain, 0) + count
+                count = request_count or 1
+                user_domain_counts.setdefault(username, {})
+                user_domain_counts[username][domain] = (
+                    user_domain_counts[username].get(domain, 0) + count
+                )
                 total_requests += count
 
-        total_domains = len(domain_counts)
-        sorted_domains = sorted(
-            domain_counts.items(), key=lambda x: x[1], reverse=True
+        # Sort users by total attempts descending
+        sorted_users = sorted(
+            user_domain_counts.items(),
+            key=lambda x: sum(x[1].values()),
+            reverse=True,
         )
+
+        total_users = len(sorted_users)
         start = (page - 1) * per_page
         end = start + per_page
-        results = [
-            {"domain": d, "count": c}
-            for d, c in sorted_domains[start:end]
-        ]
+        paginated_users = sorted_users[start:end]
+
+        results = []
+        for username, domain_counts in paginated_users:
+            sorted_domains = sorted(
+                domain_counts.items(), key=lambda x: x[1], reverse=True
+            )
+            for domain, count in sorted_domains:
+                results.append({"usuario": username, "domain": domain, "count": count})
 
     except SQLAlchemyError:
         logger.exception("Database error while searching blacklisted sites")
@@ -147,11 +160,11 @@ def find_blacklisted_sites(
     return {
         "results": results,
         "pagination": {
-            "total": total_domains,
+            "total": total_users,
             "total_requests": total_requests,
             "page": page,
             "per_page": per_page,
-            "total_pages": (total_domains + per_page - 1) // per_page,
+            "total_pages": (total_users + per_page - 1) // per_page,
         },
     }
 

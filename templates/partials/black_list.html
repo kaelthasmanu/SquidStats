@@ -4,7 +4,7 @@
         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center">
             <div class="mb-2 sm:mb-0">
                 <span class="text-sm font-medium text-gray-600">
-                    Total dominios: 
+                    Total usuarios: 
                     <span class="font-bold text-red-600">{{ pagination.total }}</span>
                 </span>
                 <span class="text-sm font-medium text-gray-600 ml-4">
@@ -24,13 +24,36 @@
         </div>
 
         <div class="divide-y divide-gray-200">
-            {% for item in results %}
-            <div class="px-6 py-4 bg-white">
-                <div class="flex items-center justify-between gap-3">
-                    <p class="font-mono text-sm text-gray-800 truncate">{{ item.domain }}</p>
-                    <span class="px-2.5 py-0.5 text-xs font-bold text-red-800 bg-red-100 rounded-full">
-                        {{ item.count }} intentos
-                    </span>
+            {% for user, items in results | groupby('usuario') %}
+            {% set user_items = items | list %}
+            {% set total_user = user_items | sum(attribute='count') %}
+            <div class="user-group">
+                <div class="px-6 py-4 bg-white">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                        <div class="flex items-center mb-2 sm:mb-0">
+                            <svg class="h-6 w-6 mr-3 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <h2 class="text-lg font-semibold text-gray-800">{{ user }}</h2>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">
+                                {{ total_user }} Intentos Bloqueados
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50/50">
+                    <div class="space-y-2">
+                        {% for item in user_items %}
+                        <div class="flex items-center p-2 bg-white rounded-md shadow-sm">
+                            <p class="flex-grow font-mono text-sm text-gray-800 truncate pr-4">{{ item.domain }}</p>
+                            <span class="flex-shrink-0 px-2.5 py-0.5 text-xs font-bold text-red-800 bg-red-100 rounded-full">
+                                {{ item.count }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
             {% else %}
@@ -47,7 +70,7 @@
         <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <div class="flex flex-col sm:flex-row justify-between items-center">
                 <span class="text-sm text-gray-600 mb-2 sm:mb-0">
-                    Mostrando {{ results | length }} dominios en esta página.
+                    Mostrando {{ results | groupby('usuario') | list | length }} usuarios en esta página.
                 </span>
                 <div class="flex space-x-2">
                     {% if pagination.page > 1 %}
