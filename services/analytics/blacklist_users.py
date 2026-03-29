@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any
+from urllib.parse import urlparse
 
 from loguru import logger
 from sqlalchemy import func, inspect, select
@@ -29,13 +30,53 @@ def _blacklist_exists(LogModel):
     )
 
 
+def _get_parent_domain(url: str) -> str:
+    if not url:
+        return "unknown"
+
+    u = url.strip().lower()
+
+    # Normalize safe URL forms.
+    if not (u.startswith("http://") or u.startswith("https://")):
+        maybe = f"http://{u}"
+        parsed = urlparse(maybe)
+    else:
+        parsed = urlparse(u)
+
+    host = parsed.netloc or parsed.path
+    host = host.split("/")[0].split(":")[0].strip()
+    if host.startswith("www."):
+        host = host[4:]
+
+    # Map common services to root domain.
+    if "facebook.com" in host or "fb.com" in host:
+        return "facebook.com"
+    if "instagram.com" in host:
+        return "instagram.com"
+    if "youtube.com" in host or "ytimg.com" in host:
+        return "youtube.com"
+    if "twitter.com" in host or "x.com" in host:
+        return "twitter.com"
+    if "tiktok.com" in host:
+        return "tiktok.com"
+    if "whatsapp.com" in host:
+        return "whatsapp.com"
+    if "netflix.com" in host:
+        return "netflix.com"
+
+    parts = [p for p in host.split(".") if p]
+    if len(parts) >= 2:
+        return ".".join(parts[-2:])
+    return host or "unknown"
+
+
 def find_blacklisted_sites(
     db: Session, page: int = 1, per_page: int = 10
 ) -> dict[str, Any]:
     engine = get_engine()
     inspector = inspect(engine)
-    results = []
-    total_results = 0
+    domain_counts: dict[str, int] = {}
+    total_requests = 0
 
     # Early-exit if the blacklist table has no active entries.
     if (
@@ -48,6 +89,7 @@ def find_blacklisted_sites(
             "results": [],
             "pagination": {
                 "total": 0,
+                "total_requests": 0,
                 "page": page,
                 "per_page": per_page,
                 "total_pages": 0,
@@ -57,27 +99,16 @@ def find_blacklisted_sites(
     try:
         all_tables = inspector.get_table_names()
         log_tables = sorted(
-            [t for t in all_tables if t.startswith("log_") and len(t) == 12],
+            [
+                t for t in all_tables
+                if t.startswith("log_") and len(t) == 12 and t[4:].isdigit()
+            ],
             reverse=True,
         )
-
-        offset = (page - 1) * per_page
-        remaining = per_page
-        count_only = offset >= 1000
 
         for log_table in log_tables:
             try:
                 date_str = log_table.split("_")[1]
-                log_date = datetime.strptime(date_str, "%Y%m%d").date()
-                formatted_date = log_date.strftime("%Y-%m-%d")
-            except (IndexError, ValueError):
-                continue
-
-            user_table = f"user_{date_str}"
-            if user_table not in all_tables:
-                continue
-
-            try:
                 UserModel, LogModel = get_dynamic_models(date_str)
             except Exception as e:
                 logger.warning(f"Error getting dynamic models for {date_str}: {e}")
@@ -85,66 +116,29 @@ def find_blacklisted_sites(
 
             blacklist_exists = _blacklist_exists(LogModel)
 
-            if not count_only:
-                table_total = (
-                    db.query(func.count(LogModel.id))
-                    .join(UserModel, LogModel.user_id == UserModel.id)
-                    .filter(blacklist_exists)
-                    .scalar()
-                )
+            query_results = (
+                db.query(LogModel.url, LogModel.request_count)
+                .join(UserModel, LogModel.user_id == UserModel.id)
+                .filter(blacklist_exists)
+                .all()
+            )
 
-                total_results += table_total
+            for url, request_count in query_results:
+                domain = _get_parent_domain(url)
+                count = (request_count or 1)
+                domain_counts[domain] = domain_counts.get(domain, 0) + count
+                total_requests += count
 
-                if offset >= table_total:
-                    offset -= table_total
-                    continue
-
-                query_results = (
-                    db.query(UserModel.username, LogModel.url)
-                    .join(UserModel, LogModel.user_id == UserModel.id)
-                    .filter(blacklist_exists)
-                    .offset(offset)
-                    .limit(remaining)
-                    .all()
-                )
-
-                offset = 0
-
-                for row in query_results:
-                    results.append(
-                        {
-                            "fecha": formatted_date,
-                            "usuario": row.username,
-                            "url": row.url,
-                        }
-                    )
-                    remaining -= 1
-                    if remaining == 0:
-                        break
-
-            if remaining == 0:
-                break
-
-        if count_only:
-            total_results = 0
-            for log_table in log_tables:
-                try:
-                    date_str = log_table.split("_")[1]
-                    UserModel, LogModel = get_dynamic_models(date_str)
-                except Exception as e:
-                    logger.warning(f"Error getting dynamic models for {date_str}: {e}")
-                    continue
-
-                blacklist_exists = _blacklist_exists(LogModel)
-
-                table_count = (
-                    db.query(func.count(LogModel.id))
-                    .join(UserModel, LogModel.user_id == UserModel.id)
-                    .filter(blacklist_exists)
-                    .scalar()
-                )
-
-                total_results += table_count
+        total_domains = len(domain_counts)
+        sorted_domains = sorted(
+            domain_counts.items(), key=lambda x: x[1], reverse=True
+        )
+        start = (page - 1) * per_page
+        end = start + per_page
+        results = [
+            {"domain": d, "count": c}
+            for d, c in sorted_domains[start:end]
+        ]
 
     except SQLAlchemyError:
         logger.exception("Database error while searching blacklisted sites")
@@ -153,10 +147,11 @@ def find_blacklisted_sites(
     return {
         "results": results,
         "pagination": {
-            "total": total_results,
+            "total": total_domains,
+            "total_requests": total_requests,
             "page": page,
             "per_page": per_page,
-            "total_pages": (total_results + per_page - 1) // per_page,
+            "total_pages": (total_domains + per_page - 1) // per_page,
         },
     }
 

@@ -4,8 +4,12 @@
         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center">
             <div class="mb-2 sm:mb-0">
                 <span class="text-sm font-medium text-gray-600">
-                    Total de registros: 
+                    Total dominios: 
                     <span class="font-bold text-red-600">{{ pagination.total }}</span>
+                </span>
+                <span class="text-sm font-medium text-gray-600 ml-4">
+                    Total peticiones: 
+                    <span class="font-bold text-red-600">{{ pagination.total_requests }}</span>
                 </span>
             </div>
             <div class="flex items-center gap-2">
@@ -20,67 +24,13 @@
         </div>
 
         <div class="divide-y divide-gray-200">
-            {% for user, items in results | groupby('usuario') %}
-            {% set user_items = items | list %}
-            <div class="user-group">
-                <div class="px-6 py-4 bg-white">
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                        <div class="flex items-center mb-2 sm:mb-0">
-                             <svg class="h-6 w-6 mr-3 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                            <h2 class="text-lg font-semibold text-gray-800">{{ user }}</h2>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">
-                                {{ user_items | length }} Intentos Bloqueados
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50/50">
-                    <div class="space-y-2">
-                        {# Bloque para agrupar manualmente por dominio principal #}
-                        {% set grouped_by_domain = {} %}
-                        {% for item in user_items %}
-                            {% set url_lower = item.url | lower %}
-                            {% set parent_domain = 'unknown' %}
-
-                            {% if 'facebook.com' in url_lower or 'fb.com' in url_lower %} {% set parent_domain = 'facebook.com' %}
-                            {% elif 'instagram.com' in url_lower %} {% set parent_domain = 'instagram.com' %}
-                            {% elif 'youtube.com' in url_lower or 'ytimg.com' in url_lower %} {% set parent_domain = 'youtube.com' %}
-                            {% elif 'twitter.com' in url_lower or 'x.com' in url_lower %} {% set parent_domain = 'twitter.com' %}
-                            {% elif 'tiktok.com' in url_lower %} {% set parent_domain = 'tiktok.com' %}
-                            {% elif 'whatsapp.com' in url_lower %} {% set parent_domain = 'whatsapp.com' %}
-                            {% elif 'netflix.com' in url_lower %} {% set parent_domain = 'netflix.com' %}
-                            {% else %}
-                                {% set domain_parts = item.url.split('/')[0].split('.') %}
-                                {% if domain_parts | length >= 2 %}
-                                    {% set parent_domain = domain_parts[-2] + '.' + domain_parts[-1] %}
-                                {% else %}
-                                    {% set parent_domain = item.url.split('/')[0] %}
-                                {% endif %}
-                            {% endif %}
-
-                            {% set current_items = grouped_by_domain.get(parent_domain, []) %}
-                            {% set _ = current_items.append(item) %}
-                            {% set _ = grouped_by_domain.update({parent_domain: current_items}) %}
-                        {% endfor %}
-
-                        {# Iterar sobre los dominios agrupados y mostrarlos en filas sin icono #}
-                        {% for domain, domain_items in grouped_by_domain.items() | sort %}
-                            {% set count = domain_items | length %}
-                            {% set all_urls = (domain_items | map(attribute='url') | unique | list) | join('\n') %}
-
-                            <div class="flex items-center p-2 bg-white rounded-md shadow-sm" title="URLs reales:\n{{ all_urls }}">
-                                <p class="flex-grow font-mono text-sm text-gray-800 truncate pr-4">{{ domain }}</p>
-                                <span class="flex-shrink-0 px-2.5 py-0.5 text-xs font-bold text-red-800 bg-red-100 rounded-full">
-                                    {{ count }}
-                                </span>
-                            </div>
-                        {% endfor %}
-                    </div>
+            {% for item in results %}
+            <div class="px-6 py-4 bg-white">
+                <div class="flex items-center justify-between gap-3">
+                    <p class="font-mono text-sm text-gray-800 truncate">{{ item.domain }}</p>
+                    <span class="px-2.5 py-0.5 text-xs font-bold text-red-800 bg-red-100 rounded-full">
+                        {{ item.count }} intentos
+                    </span>
                 </div>
             </div>
             {% else %}
@@ -97,7 +47,7 @@
         <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <div class="flex flex-col sm:flex-row justify-between items-center">
                 <span class="text-sm text-gray-600 mb-2 sm:mb-0">
-                    Mostrando {{ (results | groupby('usuario') | list) | length }} grupos de usuarios en esta página.
+                    Mostrando {{ results | length }} dominios en esta página.
                 </span>
                 <div class="flex space-x-2">
                     <a href="{{ url_for('logs.blacklist_logs', page=pagination.page-1, per_page=pagination.per_page) }}" 
