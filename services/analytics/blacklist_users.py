@@ -101,7 +101,8 @@ def find_blacklisted_sites(
         all_tables = inspector.get_table_names()
         log_tables = sorted(
             [
-                t for t in all_tables
+                t
+                for t in all_tables
                 if t.startswith("log_") and len(t) == 12 and t[4:].isdigit()
             ],
             reverse=True,
