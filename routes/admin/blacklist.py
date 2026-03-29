@@ -143,7 +143,19 @@ def register_routes(bp):
 
         try:
             save_custom_list(items)
-            flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
+
+            cm = get_config_manager()
+            if "__custom__" in get_enforced_blocklist_urls(cm):
+                ok, msg = enable_single_blocklist(None, cm)
+                if ok:
+                    flash("Lista personalizada guardada y archivo custom de Squid actualizado", "success")
+                else:
+                    flash(
+                        f"Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: {msg}",
+                        "error",
+                    )
+            else:
+                flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
         except Exception as e:
             logger.exception("Error guardando lista personalizada")
             flash_error_with_details("Error al guardar la lista", e)
