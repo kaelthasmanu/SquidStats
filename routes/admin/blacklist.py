@@ -16,6 +16,7 @@ from services.security.blacklist_service import (
     save_custom_list,
     test_pihole_connection,
 )
+from services.analytics.blacklist_users import invalidate_blacklist_cache
 from services.security.blocklist_enforcement import (
     disable_single_blocklist,
     enable_single_blocklist,
@@ -119,6 +120,7 @@ def register_routes(bp):
             if not file_domains and not url_domains:
                 flash("No se encontraron dominios para importar", "warning")
             else:
+                invalidate_blacklist_cache()
                 flash("Blacklist actualizada exitosamente", "success")
         except Exception as e:
             logger.exception("Error guardando BLACKLIST_DOMAINS")
@@ -143,6 +145,7 @@ def register_routes(bp):
 
         try:
             save_custom_list(items)
+            invalidate_blacklist_cache()
 
             cm = get_config_manager()
             if "__custom__" in get_enforced_blocklist_urls(cm):
@@ -175,6 +178,7 @@ def register_routes(bp):
         cm = get_config_manager()
         count = delete_blacklist_by_source_url(url)
         disable_single_blocklist(url, cm)
+        invalidate_blacklist_cache()
         flash(f"Lista eliminada: {url} ({count} dominios)", "success")
         return redirect(url_for("admin.manage_blacklist"))
 
