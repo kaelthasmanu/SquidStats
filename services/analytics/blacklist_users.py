@@ -31,7 +31,7 @@ def invalidate_blacklist_cache() -> None:
 
 
 _BLACKLIST_DOMAIN_THRESHOLD = 100  # if more than this, cap the subquery
-_BLACKLIST_DOMAIN_CAP = 50        # number of domains to use when capped
+_BLACKLIST_DOMAIN_CAP = 50  # number of domains to use when capped
 
 
 def _blacklist_exists(LogModel, domain_ids: list[int] | None = None):
@@ -244,7 +244,9 @@ def find_blacklisted_sites(
 
     results = []
     for username, domain_counts in paginated_users:
-        for domain, count in sorted(domain_counts.items(), key=lambda x: x[1], reverse=True):
+        for domain, count in sorted(
+            domain_counts.items(), key=lambda x: x[1], reverse=True
+        ):
             results.append({"usuario": username, "domain": domain, "count": count})
 
     return {

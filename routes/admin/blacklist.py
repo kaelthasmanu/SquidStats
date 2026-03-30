@@ -5,6 +5,7 @@ from loguru import logger
 
 from database.database import get_session
 from database.models.models import BlacklistDomain
+from services.analytics.blacklist_users import invalidate_blacklist_cache
 from services.auth.auth_service import admin_required, api_auth_required
 from services.database.admin_helpers import load_env_vars
 from services.security.blacklist_service import (
@@ -16,7 +17,6 @@ from services.security.blacklist_service import (
     save_custom_list,
     test_pihole_connection,
 )
-from services.analytics.blacklist_users import invalidate_blacklist_cache
 from services.security.blocklist_enforcement import (
     disable_single_blocklist,
     enable_single_blocklist,
