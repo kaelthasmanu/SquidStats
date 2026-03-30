@@ -5,7 +5,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from loguru import logger
-from sqlalchemy import func, inspect, select
+from sqlalchemy import func, inspect, literal, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -50,7 +50,7 @@ def _blacklist_exists(LogModel, domain_ids: list[int] | None = None):
         select(BlacklistDomain.id)
         .where(
             BlacklistDomain.active == 1,
-            LogModel.url.like(func.concat("%", BlacklistDomain.domain, "%")),
+            LogModel.url.like(literal("%").op("||")(BlacklistDomain.domain).op("||")(literal("%"))),
         )
         .correlate(LogModel.__table__)
     )
