@@ -50,7 +50,9 @@ def _blacklist_exists(LogModel, domain_ids: list[int] | None = None):
         select(BlacklistDomain.id)
         .where(
             BlacklistDomain.active == 1,
-            LogModel.url.like(literal("%").op("||")(BlacklistDomain.domain).op("||")(literal("%"))),
+            LogModel.url.like(
+                literal("%").op("||")(BlacklistDomain.domain).op("||")(literal("%"))
+            ),
         )
         .correlate(LogModel.__table__)
     )
