@@ -221,7 +221,9 @@ def find_blacklisted_sites(
     # --- Cache miss: (re)compute ---
     if sorted_users is None:
         try:
-            user_domain_counts, total_requests, domain_capped = _compute_full_aggregation(db)
+            user_domain_counts, total_requests, domain_capped = (
+                _compute_full_aggregation(db)
+            )
         except SQLAlchemyError:
             logger.exception("Database error while searching blacklisted sites")
             return {"error": "Error interno del servidor"}
