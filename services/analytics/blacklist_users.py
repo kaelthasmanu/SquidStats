@@ -65,45 +65,23 @@ def _get_parent_domain(url: str) -> str:
 
     u = url.strip().lower()
 
-    # Normalize safe URL forms.
     if not (u.startswith("http://") or u.startswith("https://")):
-        maybe = f"http://{u}"
-        parsed = urlparse(maybe)
-    else:
-        parsed = urlparse(u)
+        u = f"http://{u}"
 
-    host = parsed.netloc or parsed.path
-    host = host.split("/")[0].split(":")[0].strip()
+    parsed = urlparse(u)
+    host = (parsed.netloc or parsed.path).split("/")[0].split(":")[0].strip()
     if host.startswith("www."):
         host = host[4:]
 
     parts = [p for p in host.split(".") if p]
-    root = ".".join(parts[-2:]) if len(parts) >= 2 else host
-
-    # Map common services to root domain using structured label checks.
-    if root in ("facebook.com", "fb.com"):
-        return "facebook.com"
-    if root == "instagram.com":
-        return "instagram.com"
-    if root in ("youtube.com", "ytimg.com"):
-        return "youtube.com"
-    if root in ("twitter.com", "x.com"):
-        return "twitter.com"
-    if root == "tiktok.com":
-        return "tiktok.com"
-    if root == "whatsapp.com":
-        return "whatsapp.com"
-    if root == "netflix.com":
-        return "netflix.com"
-
-    return root or host or "unknown"
+    return ".".join(parts[-2:]) if len(parts) >= 2 else host or "unknown"
 
 
 def _compute_full_aggregation(
     db: Session,
 ) -> tuple[dict[str, dict[str, int]], int, bool]:
     """
-    Scan all daily log tables and return (user_domain_counts, total_requests, domain_capped).
+    Scan all daily log tables and return (user_domain_counts, total_requiere mostrar URLs completas couests, domain_capped).
 
     Key optimisations vs the naive approach:
     - SQL GROUP BY (username, url) per table  →  far fewer rows transferred to Python.
