@@ -5,6 +5,7 @@ from loguru import logger
 
 from database.database import get_session
 from database.models.models import BlacklistDomain
+from services.analytics.blacklist_users import invalidate_blacklist_cache
 from services.auth.auth_service import admin_required, api_auth_required
 from services.database.admin_helpers import load_env_vars
 from services.security.blacklist_service import (
@@ -119,6 +120,7 @@ def register_routes(bp):
             if not file_domains and not url_domains:
                 flash("No se encontraron dominios para importar", "warning")
             else:
+                invalidate_blacklist_cache()
                 flash("Blacklist actualizada exitosamente", "success")
         except Exception as e:
             logger.exception("Error guardando BLACKLIST_DOMAINS")
@@ -143,7 +145,23 @@ def register_routes(bp):
 
         try:
             save_custom_list(items)
-            flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
+            invalidate_blacklist_cache()
+
+            cm = get_config_manager()
+            if "__custom__" in get_enforced_blocklist_urls(cm):
+                ok, msg = enable_single_blocklist(None, cm)
+                if ok:
+                    flash(
+                        "Lista personalizada guardada y archivo custom de Squid actualizado",
+                        "success",
+                    )
+                else:
+                    flash(
+                        f"Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: {msg}",
+                        "error",
+                    )
+            else:
+                flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
         except Exception as e:
             logger.exception("Error guardando lista personalizada")
             flash_error_with_details("Error al guardar la lista", e)
@@ -160,6 +178,7 @@ def register_routes(bp):
         cm = get_config_manager()
         count = delete_blacklist_by_source_url(url)
         disable_single_blocklist(url, cm)
+        invalidate_blacklist_cache()
         flash(f"Lista eliminada: {url} ({count} dominios)", "success")
         return redirect(url_for("admin.manage_blacklist"))
 
