@@ -77,26 +77,26 @@ def _get_parent_domain(url: str) -> str:
     if host.startswith("www."):
         host = host[4:]
 
-    # Map common services to root domain.
-    if "facebook.com" in host or "fb.com" in host:
+    parts = [p for p in host.split(".") if p]
+    root = ".".join(parts[-2:]) if len(parts) >= 2 else host
+
+    # Map common services to root domain using structured label checks.
+    if root in ("facebook.com", "fb.com"):
         return "facebook.com"
-    if "instagram.com" in host:
+    if root == "instagram.com":
         return "instagram.com"
-    if "youtube.com" in host or "ytimg.com" in host:
+    if root in ("youtube.com", "ytimg.com"):
         return "youtube.com"
-    if "twitter.com" in host or "x.com" in host:
+    if root in ("twitter.com", "x.com"):
         return "twitter.com"
-    if "tiktok.com" in host:
+    if root == "tiktok.com":
         return "tiktok.com"
-    if "whatsapp.com" in host:
+    if root == "whatsapp.com":
         return "whatsapp.com"
-    if "netflix.com" in host:
+    if root == "netflix.com":
         return "netflix.com"
 
-    parts = [p for p in host.split(".") if p]
-    if len(parts) >= 2:
-        return ".".join(parts[-2:])
-    return host or "unknown"
+    return root or host or "unknown"
 
 
 def _compute_full_aggregation(
