@@ -30,8 +30,8 @@ def invalidate_blacklist_cache() -> None:
         _cache_time = 0.0
 
 
-_BLACKLIST_DOMAIN_THRESHOLD = 100  # if more than this, cap the subquery
-_BLACKLIST_DOMAIN_CAP = 50  # number of domains to use when capped
+_BLACKLIST_DOMAIN_THRESHOLD = 50  # if more than this, cap the subquery
+_BLACKLIST_DOMAIN_CAP = 25  # number of domains to use when capped
 
 
 def _blacklist_exists(LogModel, domain_ids: list[int] | None = None):
@@ -101,9 +101,9 @@ def _get_parent_domain(url: str) -> str:
 
 def _compute_full_aggregation(
     db: Session,
-) -> tuple[dict[str, dict[str, int]], int]:
+) -> tuple[dict[str, dict[str, int]], int, bool]:
     """
-    Scan all daily log tables and return (user_domain_counts, total_requests).
+    Scan all daily log tables and return (user_domain_counts, total_requests, domain_capped).
 
     Key optimisations vs the naive approach:
     - SQL GROUP BY (username, url) per table  →  far fewer rows transferred to Python.
@@ -134,7 +134,8 @@ def _compute_full_aggregation(
         .scalar()
         or 0
     )
-    if domain_count > _BLACKLIST_DOMAIN_THRESHOLD:
+    domain_capped = domain_count > _BLACKLIST_DOMAIN_THRESHOLD
+    if domain_capped:
         domain_ids: list[int] | None = [
             row[0]
             for row in (
@@ -151,7 +152,7 @@ def _compute_full_aggregation(
     else:
         domain_ids = None
 
-    for log_table in log_tables:
+    for log_table in log_tables:  # noqa: E501 (loop continues below)
         date_str = log_table[4:]  # "log_YYYYMMDD" → "YYYYMMDD"
         try:
             UserModel, LogModel = get_dynamic_models(date_str)
@@ -181,7 +182,7 @@ def _compute_full_aggregation(
             ud[domain] = ud.get(domain, 0) + count
             total_requests += count
 
-    return user_domain_counts, total_requests
+    return user_domain_counts, total_requests, domain_capped
 
 
 def find_blacklisted_sites(
@@ -213,13 +214,14 @@ def find_blacklisted_sites(
         if _cache_data is not None and (now - _cache_time) < _CACHE_TTL:
             sorted_users = _cache_data["sorted_users"]
             total_requests = _cache_data["total_requests"]
+            domain_capped = _cache_data["domain_capped"]
         else:
             sorted_users = None
 
     # --- Cache miss: (re)compute ---
     if sorted_users is None:
         try:
-            user_domain_counts, total_requests = _compute_full_aggregation(db)
+            user_domain_counts, total_requests, domain_capped = _compute_full_aggregation(db)
         except SQLAlchemyError:
             logger.exception("Database error while searching blacklisted sites")
             return {"error": "Error interno del servidor"}
@@ -234,6 +236,7 @@ def find_blacklisted_sites(
             _cache_data = {
                 "sorted_users": sorted_users,
                 "total_requests": total_requests,
+                "domain_capped": domain_capped,
             }
             _cache_time = time.monotonic()
 
@@ -251,6 +254,8 @@ def find_blacklisted_sites(
 
     return {
         "results": results,
+        "domain_capped": domain_capped,
+        "domain_cap": _BLACKLIST_DOMAIN_CAP,
         "pagination": {
             "total": total_users,
             "total_requests": total_requests,

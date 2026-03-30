@@ -82,6 +82,8 @@ def blacklist_logs():
             "blacklist.html",
             results=result_data["results"],
             pagination=result_data["pagination"],
+            domain_capped=result_data.get("domain_capped", False),
+            domain_cap=result_data.get("domain_cap", 25),
             current_page=page,
             page_icon="shield-exclamation.ico",
             page_title="Registros Bloqueados",
