@@ -311,7 +311,16 @@
         <form method="POST" action="/admin/quota/rules/save" class="bg-gray-50 p-4 rounded border space-y-3">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
-                <label class="text-sm font-medium text-gray-700">Política de excedente</label>
+                <label class="text-sm font-medium text-gray-700 flex items-center gap-1">
+                    Política de excedente
+                    <span class="relative inline-flex items-center" x-data="{ tip: false }">
+                        <button type="button" @mouseenter="tip = true" @mouseleave="tip = false" @focus="tip = true" @blur="tip = false" class="w-4 h-4 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center leading-none focus:outline-none" aria-label="Información sobre la política por defecto">i</button>
+                        <div x-show="tip" x-transition class="absolute left-6 top-1/2 -translate-y-1/2 z-50 w-72 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg pointer-events-none" style="display:none;">
+                            <p class="font-semibold mb-1">🔒 Política por defecto: <code class="bg-gray-700 px-1 rounded">Bloquear</code></p>
+                            <p>Aunque no haya ninguna regla guardada, el sistema aplica automáticamente la política de <strong>bloqueo</strong> cuando un usuario supera su cuota. Guarda explícitamente "Bloquear" si quieres que quede registrado.</p>
+                        </div>
+                    </span>
+                </label>
                 <select name="policy" class="w-full mt-2 p-2 border rounded">
                     <option value="block" {% if active_quota_rule and active_quota_rule.policy == 'block' %}selected{% endif %}>Bloquear</option>
                     <option value="throttle" {% if active_quota_rule and active_quota_rule.policy == 'throttle' %}selected{% endif %} disabled class="text-gray-400">Degradar velocidad (próximamente)</option>
