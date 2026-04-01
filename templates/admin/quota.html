@@ -117,7 +117,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td class="p-2 border" colspan="4">No hay usuarios con cuota configurada</td>
+                                <td class="p-2 border" colspan="5">No hay usuarios con cuota configurada</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -167,10 +167,29 @@
         <h3 class="text-lg font-semibold mb-3">Cuotas por Usuario</h3>
         <p class="text-sm text-gray-600 mb-4">Configura y revisa cuotas específicas por usuario de Squid.</p>
 
+        <div class="mb-4 flex items-start gap-3 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 shadow-sm">
+            <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white shadow">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z"/></svg>
+            </div>
+            <div class="text-sm text-blue-900">
+                <p class="font-semibold">Cuota global con el usuario <code class="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-blue-700">default</code></p>
+                <p class="mt-0.5 text-blue-800">Si creas un usuario llamado <strong>default</strong> y le asignas una cuota, ese límite se aplicará automáticamente a <strong>todos los usuarios que no tengan una cuota individual</strong>. Cuando un usuario sí tiene cuota propia, ésta siempre tiene prioridad sobre la global.</p>
+            </div>
+        </div>
+
         <form id="user_quota_form" method="POST" action="/admin/quota/user/save" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
-                <label class="text-sm font-medium text-gray-700">Usuario</label>
+                <label class="text-sm font-medium text-gray-700 flex items-center gap-1">
+                    Usuario
+                    <span class="relative inline-flex items-center" x-data="{ tip: false }">
+                        <button type="button" @mouseenter="tip = true" @mouseleave="tip = false" @focus="tip = true" @blur="tip = false" class="w-4 h-4 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center leading-none focus:outline-none" aria-label="Información sobre el usuario default">i</button>
+                        <div x-show="tip" x-transition class="absolute left-6 top-1/2 -translate-y-1/2 z-50 w-72 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg pointer-events-none" style="display:none;">
+                            <p class="font-semibold mb-1">💡 Usuario <code class="bg-gray-700 px-1 rounded">default</code></p>
+                            <p>Si creas un usuario con el nombre <strong>default</strong> y le asignas una cuota, esa cuota actuará como <strong>límite global</strong> para todos los usuarios que no tengan una cuota individual configurada. La cuota individual siempre tiene prioridad sobre la global.</p>
+                        </div>
+                    </span>
+                </label>
                 <input x-model="userForm.username" name="username" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de usuario" />
             </div>
             <div>
@@ -219,7 +238,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td class="p-2 border" colspan="4">No hay usuarios con cuota configurada</td>
+                            <td class="p-2 border" colspan="5">No hay usuarios con cuota configurada</td>
                         </tr>
                     {% endif %}
                 </tbody>
@@ -275,7 +294,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td class="p-2 border" colspan="2">No hay grupos con cuota configurada</td>
+                            <td class="p-2 border" colspan="3">No hay grupos con cuota configurada</td>
                         </tr>
                     {% endif %}
                 </tbody>
@@ -292,11 +311,20 @@
         <form method="POST" action="/admin/quota/rules/save" class="bg-gray-50 p-4 rounded border space-y-3">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
-                <label class="text-sm font-medium text-gray-700">Política de excedente</label>
+                <label class="text-sm font-medium text-gray-700 flex items-center gap-1">
+                    Política de excedente
+                    <span class="relative inline-flex items-center" x-data="{ tip: false }">
+                        <button type="button" @mouseenter="tip = true" @mouseleave="tip = false" @focus="tip = true" @blur="tip = false" class="w-4 h-4 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center leading-none focus:outline-none" aria-label="Información sobre la política por defecto">i</button>
+                        <div x-show="tip" x-transition class="absolute left-6 top-1/2 -translate-y-1/2 z-50 w-72 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg pointer-events-none" style="display:none;">
+                            <p class="font-semibold mb-1">🔒 Política por defecto: <code class="bg-gray-700 px-1 rounded">Bloquear</code></p>
+                            <p>Aunque no haya ninguna regla guardada, el sistema aplica automáticamente la política de <strong>bloqueo</strong> cuando un usuario supera su cuota. Guarda explícitamente "Bloquear" si quieres que quede registrado.</p>
+                        </div>
+                    </span>
+                </label>
                 <select name="policy" class="w-full mt-2 p-2 border rounded">
                     <option value="block" {% if active_quota_rule and active_quota_rule.policy == 'block' %}selected{% endif %}>Bloquear</option>
-                    <option value="throttle" {% if active_quota_rule and active_quota_rule.policy == 'throttle' %}selected{% endif %}>Degradar velocidad</option>
-                    <option value="notify" {% if active_quota_rule and active_quota_rule.policy == 'notify' %}selected{% endif %}>Solo notificar</option>
+                    <option value="throttle" {% if active_quota_rule and active_quota_rule.policy == 'throttle' %}selected{% endif %} disabled class="text-gray-400">Degradar velocidad (próximamente)</option>
+                    <option value="notify" {% if active_quota_rule and active_quota_rule.policy == 'notify' %}selected{% endif %} disabled class="text-gray-400">Solo notificar (próximamente)</option>
                 </select>
             </div>
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Regla</button>

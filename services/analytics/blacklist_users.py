@@ -5,7 +5,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from loguru import logger
-from sqlalchemy import func, inspect, select
+from sqlalchemy import func, inspect, literal, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -50,7 +50,9 @@ def _blacklist_exists(LogModel, domain_ids: list[int] | None = None):
         select(BlacklistDomain.id)
         .where(
             BlacklistDomain.active == 1,
-            LogModel.url.like(func.concat("%", BlacklistDomain.domain, "%")),
+            LogModel.url.like(
+                literal("%").op("||")(BlacklistDomain.domain).op("||")(literal("%"))
+            ),
         )
         .correlate(LogModel.__table__)
     )
@@ -169,22 +171,34 @@ def find_blacklisted_sites(
     global _cache_data, _cache_time
 
     # Early-exit: no active blacklist entries at all.
-    if (
-        not db.query(BlacklistDomain)
-        .filter(BlacklistDomain.active == 1)
-        .limit(1)
-        .first()
-    ):
-        return {
-            "results": [],
-            "pagination": {
-                "total": 0,
-                "total_requests": 0,
-                "page": page,
-                "per_page": per_page,
-                "total_pages": 0,
-            },
-        }
+    _EMPTY_RESULT = {
+        "results": [],
+        "domain_capped": False,
+        "domain_cap": _BLACKLIST_DOMAIN_CAP,
+        "pagination": {
+            "total": 0,
+            "total_requests": 0,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": 0,
+        },
+    }
+
+    try:
+        has_active = (
+            db.query(BlacklistDomain)
+            .filter(BlacklistDomain.active == 1)
+            .limit(1)
+            .first()
+        )
+    except SQLAlchemyError:
+        logger.warning(
+            "blacklist_domains table is not available — returning empty results"
+        )
+        return _EMPTY_RESULT
+
+    if not has_active:
+        return _EMPTY_RESULT
 
     # --- Cache read ---
     now = time.monotonic()
