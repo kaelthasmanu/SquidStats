@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timezone
 
 from flask import render_template, request
+from loguru import logger
 from sqlalchemy import func
 from sqlalchemy import inspect as sqlalchemy_inspect
 from sqlalchemy.exc import IntegrityError
@@ -24,8 +25,8 @@ def is_quota_enabled() -> bool:
     return not os.path.exists(QUOTA_DISABLED_FLAG)
 
 
-def set_quota_enabled(enabled: bool) -> None:
-    """Persist the quota enabled flag using a file marker."""
+def set_quota_enabled(enabled: bool) -> bool:
+    """Persist the quota enabled flag using a file marker. Returns True on success."""
     try:
         if enabled:
             if os.path.exists(QUOTA_DISABLED_FLAG):
@@ -33,8 +34,10 @@ def set_quota_enabled(enabled: bool) -> None:
         else:
             with open(QUOTA_DISABLED_FLAG, "w", encoding="utf-8") as f:
                 f.write("disabled\n")
-    except Exception:
-        pass
+        return True
+    except OSError as exc:
+        logger.error("Error al cambiar estado de cuotas: %s", exc)
+        return False
 
 
 def register_routes(bp):
@@ -169,7 +172,14 @@ def register_routes(bp):
     @admin_required
     def toggle_quota():
         current = is_quota_enabled()
-        set_quota_enabled(not current)
+        ok = set_quota_enabled(not current)
+        if not ok:
+            return flash_and_redirect(
+                False,
+                "Error al cambiar el estado de las cuotas. "
+                "Verifica los permisos del directorio de trabajo.",
+                "admin.manage_quota",
+            )
         message = "Cuotas activadas" if not current else "Cuotas desactivadas"
         return flash_and_redirect(True, message, "admin.manage_quota")
 

@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime
+from types import SimpleNamespace
 
 from loguru import logger
 from sqlalchemy import func
@@ -107,7 +108,19 @@ def register_quota_scheduler_tasks(scheduler):
                                 blocked_usernames.add(text)
 
             users = session.query(QuotaUser).all()
-            quota_usernames = [u.username for u in users]
+
+            # Cuota global "default": si existe un QuotaUser con username="default"
+            # y quota_mb > 0, esa cuota aplica a todos los usuarios que no tengan
+            # una cuota propia asignada. La cuota individual tiene prioridad.
+            default_user = next((u for u in users if u.username == "default"), None)
+            default_quota_mb = (
+                default_user.quota_mb
+                if default_user and default_user.quota_mb > 0
+                else 0
+            )
+            regular_users = [u for u in users if u.username != "default"]
+
+            quota_usernames = [u.username for u in regular_users]
             usage_by_username = {}
 
             inspector = sqlalchemy_inspect(session.get_bind())
@@ -126,26 +139,24 @@ def register_quota_scheduler_tasks(scheduler):
                 UserModel, LogModel = get_dynamic_models(suffix)
                 if not UserModel or not LogModel:
                     continue
-                if not quota_usernames:
+                if not quota_usernames and not default_quota_mb:
                     break
-                usage_rows = (
-                    session.query(
-                        UserModel.username.label("username"),
-                        func.coalesce(func.sum(LogModel.data_transmitted), 0).label(
-                            "total_bytes"
-                        ),
-                    )
-                    .join(LogModel, UserModel.id == LogModel.user_id)
-                    .filter(UserModel.username.in_(quota_usernames))
-                    .group_by(UserModel.username)
-                    .all()
-                )
+                q = session.query(
+                    UserModel.username.label("username"),
+                    func.coalesce(func.sum(LogModel.data_transmitted), 0).label(
+                        "total_bytes"
+                    ),
+                ).join(LogModel, UserModel.id == LogModel.user_id)
+                if not default_quota_mb:
+                    # Sin cuota global: solo consultar usuarios con cuota explícita
+                    q = q.filter(UserModel.username.in_(quota_usernames))
+                usage_rows = q.group_by(UserModel.username).all()
                 for row in usage_rows:
                     usage_by_username[row.username] = usage_by_username.get(
                         row.username, 0
                     ) + (row.total_bytes or 0)
 
-            for user in users:
+            for user in regular_users:
                 new_mb = int(usage_by_username.get(user.username, 0) / 1024 / 1024)
                 user.used_mb = new_mb
 
@@ -153,7 +164,7 @@ def register_quota_scheduler_tasks(scheduler):
                 g.group_name: g.quota_mb for g in session.query(QuotaGroup).all()
             }
             group_usage = {}
-            for user in users:
+            for user in regular_users:
                 if user.group_name:
                     group_usage[user.group_name] = group_usage.get(
                         user.group_name, 0
@@ -168,15 +179,39 @@ def register_quota_scheduler_tasks(scheduler):
             ]
 
             exceeded_users = []
-            for user in users:
-                if (
+            for user in regular_users:
+                # La cuota efectiva es la propia del usuario; si no tiene,
+                # se usa la cuota global "default" (si está configurada).
+                effective_quota = (
                     user.quota_mb
+                    if (user.quota_mb and user.quota_mb > 0)
+                    else default_quota_mb
+                )
+                if (
+                    effective_quota > 0
                     and user.used_mb is not None
-                    and user.used_mb > user.quota_mb
+                    and user.used_mb > effective_quota
                 ):
                     exceeded_users.append(user)
                 elif user.group_name and user.group_name in exceeded_groups:
                     exceeded_users.append(user)
+
+            # Usuarios del log que no están en QuotaUser pero superan la cuota global
+            if default_quota_mb > 0:
+                known_usernames = {u.username for u in regular_users}
+                for username, total_bytes in usage_by_username.items():
+                    if username in known_usernames:
+                        continue
+                    used_mb_val = int(total_bytes / 1024 / 1024)
+                    if used_mb_val > default_quota_mb:
+                        exceeded_users.append(
+                            SimpleNamespace(
+                                username=username,
+                                used_mb=used_mb_val,
+                                quota_mb=default_quota_mb,
+                                group_name=None,
+                            )
+                        )
 
             new_blocked = []
             for user in exceeded_users:
@@ -204,13 +239,18 @@ def register_quota_scheduler_tasks(scheduler):
                 _sync_blocked_file_to_docker(file_path)
 
                 for user in new_blocked:
-                    if (
+                    effective_quota = (
                         user.quota_mb
+                        if (user.quota_mb and user.quota_mb > 0)
+                        else default_quota_mb
+                    )
+                    if (
+                        effective_quota > 0
                         and user.used_mb is not None
-                        and user.used_mb > user.quota_mb
+                        and user.used_mb > effective_quota
                     ):
                         event_type = "user_quota_exceeded"
-                        detail = f"Cuota de usuario excedida: {user.used_mb}/{user.quota_mb} MB"
+                        detail = f"Cuota de usuario excedida: {user.used_mb}/{effective_quota} MB"
                     else:
                         event_type = "group_quota_exceeded"
                         group_quota_value = group_quotas.get(user.group_name, 0)
