@@ -314,8 +314,8 @@
                 <label class="text-sm font-medium text-gray-700">Política de excedente</label>
                 <select name="policy" class="w-full mt-2 p-2 border rounded">
                     <option value="block" {% if active_quota_rule and active_quota_rule.policy == 'block' %}selected{% endif %}>Bloquear</option>
-                    <option value="throttle" {% if active_quota_rule and active_quota_rule.policy == 'throttle' %}selected{% endif %}>Degradar velocidad</option>
-                    <option value="notify" {% if active_quota_rule and active_quota_rule.policy == 'notify' %}selected{% endif %}>Solo notificar</option>
+                    <option value="throttle" {% if active_quota_rule and active_quota_rule.policy == 'throttle' %}selected{% endif %} disabled class="text-gray-400">Degradar velocidad (próximamente)</option>
+                    <option value="notify" {% if active_quota_rule and active_quota_rule.policy == 'notify' %}selected{% endif %} disabled class="text-gray-400">Solo notificar (próximamente)</option>
                 </select>
             </div>
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Regla</button>
