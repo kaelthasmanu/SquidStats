@@ -8,10 +8,12 @@ from sqlalchemy import inspect as sqlalchemy_inspect
 
 from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaUser
-from services.quota.quota_service import _sync_blocked_file_to_docker, _sync_quota_squid_rules
+from services.quota.quota_service import (
+    _sync_blocked_file_to_docker,
+    _sync_quota_squid_rules,
+)
 from services.system.system_service import reload_squid
 from utils.admin import SquidConfigManager
-
 
 
 def register_quota_scheduler_tasks(scheduler):
