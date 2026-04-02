@@ -8,6 +8,7 @@ from weasyprint import CSS, HTML
 from database.database import get_dynamic_models, get_session
 from services.analytics.fetch_data_logs import get_metrics_for_date
 from services.analytics.get_reports import get_important_metrics
+from services.analytics.auditoria_service import run_audit_operation
 from utils.colors import color_map
 
 reports_bp = Blueprint("reports", __name__)
@@ -242,3 +243,57 @@ def auditoria_logs():
         icon="fas fa-magnifying-glass",
         subtitle="Herramienta para el análisis de actividad y seguridad.",
     )
+
+
+@reports_bp.route("/auditoria/download/pdf", methods=["GET"])
+def auditoria_download_pdf():
+    audit_type = request.args.get("audit_type", "top_users_data")
+    # Keep incoming parameters as strings; list endpoints can be comma-separated.
+    params = {
+        "start_date": request.args.get("start_date", ""),
+        "end_date": request.args.get("end_date", ""),
+        "username": request.args.get("username", ""),
+        "keyword": request.args.get("keyword", ""),
+        "ip_address": request.args.get("ip_address", ""),
+        "response_code": request.args.get("response_code", ""),
+        "social_media_sites": request.args.get("social_media_sites", ""),
+    }
+    params["audit_type"] = audit_type
+
+    db = None
+    try:
+        db = get_session()
+        data = run_audit_operation(db, audit_type, params)
+
+        if not data or data.get("error"):
+            message = data.get("error", "No data for this audit selection")
+            return render_template("error.html", message=message), 404
+
+        rendered = render_template(
+            "auditoria_pdf.html",
+            audit_type=audit_type,
+            params=params,
+            data=data,
+            generated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        pdf_bytes = HTML(string=rendered, base_url=request.url_root).write_pdf(
+            stylesheets=[CSS(string="body { font-family: Arial, sans-serif; }")]
+        )
+        buffer = BytesIO(pdf_bytes)
+        buffer.seek(0)
+        filename = f"auditoria_{audit_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        return send_file(
+            buffer,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=filename,
+        )
+
+    except Exception:
+        logger.exception("Error generating auditoría PDF report")
+        return render_template(
+            "error.html", message="Error interno generando reporte PDF"
+        ), 500
+    finally:
+        if db:
+            db.close()

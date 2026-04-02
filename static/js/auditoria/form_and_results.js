@@ -42,6 +42,25 @@
     return true;
   }
 
+  function buildAuditDownloadUrl(data){
+    const query = new URLSearchParams();
+    query.set('audit_type', data.audit_type || 'top_users_data');
+    if (data.start_date) query.set('start_date', data.start_date);
+    if (data.end_date) query.set('end_date', data.end_date);
+    if (data.username) query.set('username', data.username);
+    if (data.keyword) query.set('keyword', data.keyword);
+    if (data.ip_address) query.set('ip_address', data.ip_address);
+    if (data.response_code) query.set('response_code', data.response_code);
+
+    if (Array.isArray(data.social_media_sites)) {
+      query.set('social_media_sites', data.social_media_sites.join(','));
+    } else if (data.social_media_sites) {
+      query.set('social_media_sites', data.social_media_sites);
+    }
+
+    return `/auditoria/download/pdf?${query.toString()}`;
+  }
+
   function renderResults(auditType, data, formData){
     let html='';
       if (!window.__AUD_RENDERERS__) {
@@ -137,11 +156,23 @@
     els.socialMediaChipsContainer.addEventListener('click', e=>{ if (e.target.classList.contains('social-chip')) e.target.classList.toggle('selected'); });
   }
 
+  function bindDownloadButton(){
+    const downloadBtn = document.getElementById('audit-export-pdf');
+    if (!downloadBtn) return;
+    downloadBtn.addEventListener('click', ()=>{
+      const data = collectFormData();
+      if (!validateRequired(data)) return;
+      const url = buildAuditDownloadUrl(data);
+      window.open(url, '_blank');
+    });
+  }
+
   function initFormAndResults(){
     cacheDom();
     els.resultsContainer.innerHTML = defaultResultsHTML;
     bindForm();
     bindSocialChips();
+    bindDownloadButton();
   }
 
   window.__AUD_FORM__ = { initFormAndResults, defaultResultsHTML };

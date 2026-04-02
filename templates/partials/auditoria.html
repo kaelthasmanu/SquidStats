@@ -168,10 +168,14 @@
         </div>
       </div>
 
-      <div class="lg:col-span-3">
-        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl">
+      <div class="lg:col-span-3 flex flex-wrap gap-2 items-center">
+        <button id="audit-generate-button" type="submit" class="flex-1 min-w-[200px] bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl">
           <i class="fas fa-play mr-2"></i>
           Generar Reporte
+        </button>
+        <button id="audit-export-pdf" type="button" class="flex-1 min-w-[200px] bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl">
+          <i class="fas fa-download mr-2"></i>
+          Descargar PDF
         </button>
       </div>
     </form>
