@@ -18,7 +18,6 @@ except (ImportError, OSError) as exc:
     HTML = None
     logger.warning(
         "WeasyPrint unavailable: PDF report generation disabled. "
-        "Install weasyprint+dependencies to enable." + str(exc)
     )
 from services.analytics.fetch_data_logs import get_metrics_for_date
 from services.analytics.get_reports import get_important_metrics
@@ -94,7 +93,6 @@ def reports_download_pdf():
             "error.html",
             message=(
                 "PDF no disponible: weasyprint o sus librerías nativas no están instaladas. "
-                "Instale: gobject, cairo, pango, gdk-pixbuf y weasyprint."
             ),
         ), 503
 
