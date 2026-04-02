@@ -110,7 +110,6 @@ def api_run_audit():
         logger.exception("Audit API error")
         return jsonify({"error": "Internal server error"}), 500
 
-
     finally:
         db.close()
 

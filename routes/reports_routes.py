@@ -5,24 +5,18 @@ from flask import Blueprint, render_template, request, send_file
 from loguru import logger
 
 from database.database import get_dynamic_models, get_session
+from services.analytics.auditoria_service import run_audit_operation
 from services.analytics.fetch_data_logs import get_metrics_for_date
 from services.analytics.get_reports import get_important_metrics
-from services.analytics.auditoria_service import run_audit_operation
 from utils.colors import color_map
 
 # WeasyPrint is optional; if missing, PDF endpoint returns friendly error.
 try:
     from weasyprint import CSS, HTML
-except (ImportError, OSError) as exc:
+except (ImportError, OSError):
     CSS = None
     HTML = None
-    logger.warning(
-        "WeasyPrint unavailable: PDF report generation disabled. "
-    )
-from services.analytics.fetch_data_logs import get_metrics_for_date
-from services.analytics.get_reports import get_important_metrics
-from services.analytics.auditoria_service import run_audit_operation
-from utils.colors import color_map
+    logger.warning("WeasyPrint unavailable: PDF report generation disabled. ")
 
 reports_bp = Blueprint("reports", __name__)
 
@@ -303,7 +297,9 @@ def auditoria_download_pdf():
         )
         buffer = BytesIO(pdf_bytes)
         buffer.seek(0)
-        filename = f"auditoria_{audit_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        filename = (
+            f"auditoria_{audit_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        )
         return send_file(
             buffer,
             mimetype="application/pdf",

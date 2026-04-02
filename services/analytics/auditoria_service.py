@@ -1086,18 +1086,60 @@ def get_denied_requests(db, hours=1, threshold=5):
 
 
 AUDIT_HANDLERS = {
-    "user_summary": lambda db, data: get_user_activity_summary(db, data.get("username", ""), data.get("start_date", ""), data.get("end_date", "")),
-    "top_users_data": lambda db, data: get_top_users_by_data(db, data.get("start_date", ""), data.get("end_date", "")),
-    "top_urls_data": lambda db, data: get_top_urls_by_data(db, data.get("start_date", ""), data.get("end_date", "")),
-    "top_users_requests": lambda db, data: get_top_users_by_requests(db, data.get("start_date", ""), data.get("end_date", "")),
-    "top_ips_data": lambda db, data: get_top_ips_by_data(db, data.get("start_date", ""), data.get("end_date", "")),
-    "total_data_consumed": lambda db, data: get_total_data_consumed(db, data.get("start_date", ""), data.get("end_date", "")),
-    "daily_activity": lambda db, data: get_daily_activity(db, data.get("start_date", ""), data.get("username", "")),
-    "keyword_search": lambda db, data: find_by_keyword(db, data.get("start_date", ""), data.get("end_date", ""), data.get("keyword", ""), data.get("username")),
-    "social_media_activity": lambda db, data: find_social_media_activity(db, data.get("start_date", ""), data.get("end_date", ""), data.get("social_media_sites", []), data.get("username")),
-    "ip_activity": lambda db, data: find_by_ip(db, data.get("start_date", ""), data.get("end_date", ""), data.get("ip_address", "")),
-    "response_code_search": lambda db, data: find_by_response_code(db, data.get("start_date", ""), data.get("end_date", ""), int(data.get("response_code", 0)), data.get("username")),
-    "denied_access": lambda db, data: find_denied_access(db, data.get("start_date", ""), data.get("end_date", ""), data.get("username")),
+    "user_summary": lambda db, data: get_user_activity_summary(
+        db,
+        data.get("username", ""),
+        data.get("start_date", ""),
+        data.get("end_date", ""),
+    ),
+    "top_users_data": lambda db, data: get_top_users_by_data(
+        db, data.get("start_date", ""), data.get("end_date", "")
+    ),
+    "top_urls_data": lambda db, data: get_top_urls_by_data(
+        db, data.get("start_date", ""), data.get("end_date", "")
+    ),
+    "top_users_requests": lambda db, data: get_top_users_by_requests(
+        db, data.get("start_date", ""), data.get("end_date", "")
+    ),
+    "top_ips_data": lambda db, data: get_top_ips_by_data(
+        db, data.get("start_date", ""), data.get("end_date", "")
+    ),
+    "total_data_consumed": lambda db, data: get_total_data_consumed(
+        db, data.get("start_date", ""), data.get("end_date", "")
+    ),
+    "daily_activity": lambda db, data: get_daily_activity(
+        db, data.get("start_date", ""), data.get("username", "")
+    ),
+    "keyword_search": lambda db, data: find_by_keyword(
+        db,
+        data.get("start_date", ""),
+        data.get("end_date", ""),
+        data.get("keyword", ""),
+        data.get("username"),
+    ),
+    "social_media_activity": lambda db, data: find_social_media_activity(
+        db,
+        data.get("start_date", ""),
+        data.get("end_date", ""),
+        data.get("social_media_sites", []),
+        data.get("username"),
+    ),
+    "ip_activity": lambda db, data: find_by_ip(
+        db,
+        data.get("start_date", ""),
+        data.get("end_date", ""),
+        data.get("ip_address", ""),
+    ),
+    "response_code_search": lambda db, data: find_by_response_code(
+        db,
+        data.get("start_date", ""),
+        data.get("end_date", ""),
+        int(data.get("response_code", 0)),
+        data.get("username"),
+    ),
+    "denied_access": lambda db, data: find_denied_access(
+        db, data.get("start_date", ""), data.get("end_date", ""), data.get("username")
+    ),
 }
 
 
@@ -1108,7 +1150,9 @@ def run_audit_operation(db, audit_type, data):
     handler = AUDIT_HANDLERS[audit_type]
 
     if data.get("social_media_sites") and isinstance(data["social_media_sites"], str):
-        data["social_media_sites"] = [s.strip() for s in data["social_media_sites"].split(",") if s.strip()]
+        data["social_media_sites"] = [
+            s.strip() for s in data["social_media_sites"].split(",") if s.strip()
+        ]
 
     try:
         result = handler(db, data)
@@ -1117,8 +1161,8 @@ def run_audit_operation(db, audit_type, data):
         return result
     except ValueError as e:
         return {"error": str(e)}
-    except Exception as e:
+    except Exception:
         import traceback
+
         traceback.print_exc()
         return {"error": "Error interno ejecutando la auditoría"}
-
