@@ -25,8 +25,8 @@
     <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">{{ log_name }} <span class="text-xs sm:text-sm font-normal text-gray-500">({{ log_lines|length }} líneas)</span></h2>
         
-        <div class="bg-gray-900 rounded-lg p-2 sm:p-4 overflow-x-auto h-96 overflow-y-auto">
-            <pre class="text-green-400 text-xs sm:text-sm font-mono whitespace-pre">{% for line in log_lines %}{{ line }}{% endfor %}</pre>
+        <div class="bg-gray-900 rounded-lg p-2 sm:p-4 overflow-y-auto h-96">
+            <pre class="text-green-400 text-xs sm:text-sm font-mono whitespace-pre-wrap break-words">{% for line in log_lines %}{{ line }}{% endfor %}</pre>
         </div>
     </div>
     {% endfor %}
