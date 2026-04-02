@@ -160,6 +160,18 @@ class QuotaEvent(Base):
     created_at = Column(DateTime, default=datetime.now, nullable=False)
 
 
+class BackupConfig(Base):
+    __tablename__ = "backup_config"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    db_type = Column(String(50), nullable=False, default="sqlite")
+    frequency = Column(String(50), nullable=False, default="daily_weekly")
+    backup_dir = Column(String(512), nullable=False, default="/opt/SquidStats/backups")
+    enabled = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
 def create_dynamic_models(engine, user_table_name: str, log_table_name: str):
     """Factory to create dynamic user/log models bound to a fresh declarative base.
 

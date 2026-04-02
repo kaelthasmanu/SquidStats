@@ -9,9 +9,7 @@ Planned (not yet implemented):
   - PostgreSQL
 """
 
-import json
 import os
-import shutil
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -20,11 +18,13 @@ from urllib.parse import urlparse
 from loguru import logger
 
 from config import Config
+from database.database import get_session
+from database.models.models import BackupConfig
 
-# ─── Constants ────────────────────────────────────────────────────────────────
+# Constants
 
-_CONFIG_FILE = Path(os.path.dirname(os.path.abspath(__file__))) / "backup_config.json"
 _MAX_RETENTION = 3
+_DEFAULT_BACKUP_DIR = "/opt/SquidStats/backups"
 
 FREQUENCY_CHOICES = {
     "daily_weekly": "Diaria — máx. 3 por semana",
@@ -32,56 +32,90 @@ FREQUENCY_CHOICES = {
 }
 
 
-# ─── Config helpers ───────────────────────────────────────────────────────────
+# Config helpers
 
 
 def _default_config() -> dict:
     return {
         "db_type": "sqlite",
         "frequency": "daily_weekly",
-        "backup_dir": "/opt/SquidStats/backups",
+        "backup_dir": _DEFAULT_BACKUP_DIR,
         "enabled": False,
     }
 
 
 def load_config() -> dict:
-    if _CONFIG_FILE.exists():
-        try:
-            with open(_CONFIG_FILE) as f:
-                data = json.load(f)
-            cfg = _default_config()
-            cfg.update(data)
-            return cfg
-        except Exception as e:
-            logger.warning(f"Could not read backup config, using defaults: {e}")
-    return _default_config()
+    """Read backup configuration from the database. Returns defaults if no row exists."""
+    session = get_session()
+    try:
+        row = session.query(BackupConfig).first()
+        if row is None:
+            return _default_config()
+        return {
+            "db_type": row.db_type,
+            "frequency": row.frequency,
+            "backup_dir": row.backup_dir,
+            "enabled": bool(row.enabled),
+        }
+    except Exception as e:
+        logger.warning(f"Could not read backup config from DB, using defaults: {e}")
+        return _default_config()
+    finally:
+        session.close()
 
 
 def save_config(cfg: dict) -> None:
+    """Upsert backup configuration into the database (single-row table)."""
     allowed_keys = {"db_type", "frequency", "backup_dir", "enabled"}
     safe = {k: v for k, v in cfg.items() if k in allowed_keys}
-    _CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(_CONFIG_FILE, "w") as f:
-        json.dump(safe, f, indent=2)
+
+    session = get_session()
+    try:
+        row = session.query(BackupConfig).first()
+        if row is None:
+            row = BackupConfig(
+                db_type=safe.get("db_type", "sqlite"),
+                frequency=safe.get("frequency", "daily_weekly"),
+                backup_dir=safe.get("backup_dir", _DEFAULT_BACKUP_DIR),
+                enabled=int(bool(safe.get("enabled", False))),
+                created_at=datetime.now(),
+            )
+            session.add(row)
+        else:
+            if "db_type" in safe:
+                row.db_type = safe["db_type"]
+            if "frequency" in safe:
+                row.frequency = safe["frequency"]
+            if "backup_dir" in safe:
+                row.backup_dir = safe["backup_dir"]
+            if "enabled" in safe:
+                row.enabled = int(bool(safe["enabled"]))
+            row.updated_at = datetime.now()
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.exception(f"Error saving backup config: {e}")
+        raise
+    finally:
+        session.close()
 
 
-# ─── Backup directory helpers ─────────────────────────────────────────────────
+# Backup directory helpers
 
 
 def _backup_dir(cfg: dict) -> Path:
-    p = Path(cfg.get("backup_dir", "/opt/SquidStats/backups"))
+    p = Path(cfg.get("backup_dir", _DEFAULT_BACKUP_DIR))
     p.mkdir(parents=True, exist_ok=True)
     return p
 
 
 def _list_backup_files(backup_dir: Path) -> list[Path]:
     """Return backup files sorted newest-first."""
-    files = sorted(
+    return sorted(
         backup_dir.glob("squidstats_backup_*.sqlite3"),
         key=lambda f: f.stat().st_mtime,
         reverse=True,
     )
-    return files
 
 
 def _human_size(size_bytes: int) -> str:
@@ -101,7 +135,6 @@ def list_backups(cfg: dict | None = None) -> list[dict]:
     for f in _list_backup_files(bdir):
         stat = f.stat()
         created = datetime.fromtimestamp(stat.st_mtime)
-        # Detect type from filename suffix
         btype = "auto" if "_auto_" in f.name else "manual"
         result.append(
             {
@@ -115,14 +148,13 @@ def list_backups(cfg: dict | None = None) -> list[dict]:
     return result
 
 
-# ─── Retention enforcement ────────────────────────────────────────────────────
+# Retention enforcement
 
 
 def _enforce_retention(backup_dir: Path) -> None:
     """Delete oldest backups beyond _MAX_RETENTION."""
     files = _list_backup_files(backup_dir)
-    excess = files[_MAX_RETENTION:]
-    for f in excess:
+    for f in files[_MAX_RETENTION:]:
         try:
             f.unlink()
             logger.info(f"Backup retention: removed old backup {f.name}")
@@ -130,20 +162,18 @@ def _enforce_retention(backup_dir: Path) -> None:
             logger.warning(f"Could not remove old backup {f.name}: {e}")
 
 
-# ─── Period quota check ───────────────────────────────────────────────────────
+# Period quota check
 
 
 def _count_backups_in_period(backup_dir: Path, frequency: str) -> int:
     """Count how many auto-backups exist within the current period window."""
-    files = _list_backup_files(backup_dir)
     now = datetime.now()
     count = 0
-    for f in files:
+    for f in _list_backup_files(backup_dir):
         if "_auto_" not in f.name:
             continue
         mtime = datetime.fromtimestamp(f.stat().st_mtime)
         if frequency == "daily_weekly":
-            # Same ISO week
             if mtime.isocalendar()[1] == now.isocalendar()[1] and mtime.year == now.year:
                 count += 1
         else:  # daily_monthly
@@ -152,7 +182,7 @@ def _count_backups_in_period(backup_dir: Path, frequency: str) -> int:
     return count
 
 
-# ─── SQLite backup ────────────────────────────────────────────────────────────
+# SQLite backup
 
 
 def _sqlite_backup(backup_dir: Path, tag: str) -> Path:
@@ -160,20 +190,31 @@ def _sqlite_backup(backup_dir: Path, tag: str) -> Path:
     db_url = Config.DATABASE_URL
     parsed = urlparse(db_url)
 
-    # urlparse: sqlite:///path  →  path='' netloc='', or path='/abs'
     db_path = parsed.path
+
+    # sqlite:///relative/path.db -> path is '/relative/path.db' but it should be project-relative
+    if db_path.startswith("/") and not Path(db_path).exists():
+        project_root = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent
+        rel_path = db_path.lstrip("/")
+        alt_path = project_root / rel_path
+        if alt_path.exists():
+            db_path = str(alt_path)
+
     if not db_path or db_path == "/":
-        # Handle sqlite:///relative or sqlite:///opt/…
         db_path = db_url.replace("sqlite:///", "")
 
     db_path = Path(db_path)
     if not db_path.is_absolute():
-        # Relative to the project root
         project_root = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent
         db_path = project_root / db_path
 
     if not db_path.exists():
-        raise FileNotFoundError(f"SQLite database not found: {db_path}")
+        # try fallback for sqlite:///filename.db
+        try_path = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent / db_path.name
+        if try_path.exists():
+            db_path = try_path
+        else:
+            raise FileNotFoundError(f"SQLite database not found: {db_path}")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     dest = backup_dir / f"squidstats_backup_{tag}_{timestamp}.sqlite3"
@@ -190,7 +231,7 @@ def _sqlite_backup(backup_dir: Path, tag: str) -> Path:
     return dest
 
 
-# ─── MySQL / MariaDB backup (not yet implemented) ─────────────────────────────
+# MySQL / MariaDB backup (not yet implemented)
 
 
 def _mysql_backup(backup_dir: Path, tag: str) -> Path:
@@ -200,7 +241,7 @@ def _mysql_backup(backup_dir: Path, tag: str) -> Path:
     )
 
 
-# ─── PostgreSQL backup (not yet implemented) ──────────────────────────────────
+# PostgreSQL backup (not yet implemented)
 
 
 def _postgresql_backup(backup_dir: Path, tag: str) -> Path:
@@ -210,14 +251,14 @@ def _postgresql_backup(backup_dir: Path, tag: str) -> Path:
     )
 
 
-# ─── Public API ───────────────────────────────────────────────────────────────
+# Public API
 
 
 def run_backup(is_auto: bool = False) -> dict:
-    """
-    Execute a database backup according to the current configuration.
+    """Execute a database backup according to the current configuration.
 
-    Returns a dict with keys: status ('success'|'error'), message, filename (on success).
+    Returns a dict with keys: status ('success'|'error'|'skipped'), message,
+    and filename on success.
     """
     cfg = load_config()
     db_type = cfg.get("db_type", "sqlite").lower()
@@ -225,7 +266,6 @@ def run_backup(is_auto: bool = False) -> dict:
     bdir = _backup_dir(cfg)
     tag = "auto" if is_auto else "manual"
 
-    # For auto backups: respect the per-period quota before running
     if is_auto:
         current_in_period = _count_backups_in_period(bdir, frequency)
         if current_in_period >= _MAX_RETENTION:
@@ -262,7 +302,6 @@ def run_backup(is_auto: bool = False) -> dict:
 
 def delete_backup(filename: str) -> dict:
     """Delete a specific backup file by name."""
-    # Validate filename to prevent path traversal
     if not filename or "/" in filename or "\\" in filename or ".." in filename:
         return {"status": "error", "message": "Nombre de archivo inválido"}
 
@@ -273,7 +312,6 @@ def delete_backup(filename: str) -> dict:
     if not target.exists():
         return {"status": "error", "message": "La salva no existe"}
 
-    # Ensure the target is strictly inside the backup directory
     try:
         target.resolve().relative_to(bdir.resolve())
     except ValueError:
@@ -284,7 +322,7 @@ def delete_backup(filename: str) -> dict:
     return {"status": "success", "message": f"Salva eliminada: {filename}"}
 
 
-def get_backup_file_path(filename: str):
+def get_backup_file_path(filename: str) -> Path | None:
     """Return the absolute Path for a backup file, or None if invalid/missing."""
     if not filename or "/" in filename or "\\" in filename or ".." in filename:
         return None
