@@ -72,13 +72,6 @@ def reports():
 @reports_bp.route("/reports/download/pdf")
 def reports_download_pdf():
     """Pdf export endpoint for the same data shown in /reports."""
-    if HTML is None:
-        logger.error("WeasyPrint is not installed, PDF export unavailable.")
-        return render_template(
-            "error.html",
-            message="La generación de PDF requiere weasyprint. Instale 'weasyprint'.",
-        ), 500
-
     date_str = request.args.get("date")
     if date_str:
         try:
@@ -129,6 +122,7 @@ def reports_download_pdf():
             "reports_pdf.html",
             metrics=metrics,
             selected_date=selected,
+            generated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )
 
         pdf_bytes = HTML(string=html, base_url=request.url_root).write_pdf(

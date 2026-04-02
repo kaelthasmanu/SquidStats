@@ -17,27 +17,26 @@
 </head>
 <body>
     <h1>Reportes SquidStats</h1>
-    <div class="meta">Fecha del reporte: {{ selected_date.isoformat() }} - Generado: {{ now().strftime('%Y-%m-%d %H:%M:%S') }}</div>
+    <div class="meta">Fecha del reporte: {{ selected_date.isoformat() }} - Generado: {{ generated_at }}</div>
 
     <div class="box">
         <h2>Resumen General</h2>
-        <p>Total usuarios: {{ metrics.total_users | default(0) }}</p>
-        <p>Total solicitudes: {{ metrics.total_requests | default(0) }}</p>
-        <p>Datos consumidos (MB): {{ metrics.total_data_consumed_mb | default(0) | round(2) }}</p>
+        <p>Total usuarios: {{ metrics.total_stats.total_users | default(0) }}</p>
+        <p>Total solicitudes: {{ metrics.total_stats.total_requests | default(0) }}</p>
+        <p>Datos consumidos (MB): {{ ((metrics.total_stats.total_data_transmitted | default(0)) / 1048576) | round(2) }}</p>
     </div>
 
     <div class="box">
         <h2>Top usuarios por actividad</h2>
         <table class="table">
             <thead>
-                <tr><th>Usuario</th><th>Visitas</th><th>Datos (MB)</th></tr>
+                <tr><th>Usuario</th><th>Visitas</th></tr>
             </thead>
             <tbody>
             {% for item in metrics.top_users_by_activity %}
                 <tr>
                     <td>{{ item.username }}</td>
                     <td>{{ item.total_visits }}</td>
-                    <td>{{ (item.total_data_bytes / 1048576) | round(2) }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -51,10 +50,10 @@
                 <tr><th>URL</th><th>Datos (MB)</th></tr>
             </thead>
             <tbody>
-            {% for item in metrics.top_urls_by_data %}
+            {% for item in metrics.top_pages_by_data %}
                 <tr>
                     <td>{{ item.url }}</td>
-                    <td>{{ (item.total_data_bytes / 1048576) | round(2) }}</td>
+                    <td>{{ ((item.total_data_bytes | default(0)) / 1048576) | round(2) }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -68,10 +67,10 @@
                 <tr><th>Código</th><th>Conteo</th></tr>
             </thead>
             <tbody>
-            {% for i, code in enumerate(metrics.http_response_distribution_chart.labels) %}
+            {% for code in metrics.http_response_distribution_chart.labels %}
                 <tr>
                     <td>{{ code }}</td>
-                    <td>{{ metrics.http_response_distribution_chart.data[i] }}</td>
+                    <td>{{ metrics.http_response_distribution_chart.data[loop.index0] }}</td>
                 </tr>
             {% endfor %}
             </tbody>
