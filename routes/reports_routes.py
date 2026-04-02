@@ -3,9 +3,23 @@ from io import BytesIO
 
 from flask import Blueprint, render_template, request, send_file
 from loguru import logger
-from weasyprint import CSS, HTML
 
 from database.database import get_dynamic_models, get_session
+from services.analytics.fetch_data_logs import get_metrics_for_date
+from services.analytics.get_reports import get_important_metrics
+from services.analytics.auditoria_service import run_audit_operation
+from utils.colors import color_map
+
+# WeasyPrint is optional; if missing, PDF endpoint returns friendly error.
+try:
+    from weasyprint import CSS, HTML
+except (ImportError, OSError) as exc:
+    CSS = None
+    HTML = None
+    logger.warning(
+        "WeasyPrint unavailable: PDF report generation disabled. "
+        "Install weasyprint+dependencies to enable." + str(exc)
+    )
 from services.analytics.fetch_data_logs import get_metrics_for_date
 from services.analytics.get_reports import get_important_metrics
 from services.analytics.auditoria_service import run_audit_operation
@@ -74,6 +88,16 @@ def reports():
 @reports_bp.route("/reports/download/pdf")
 def reports_download_pdf():
     """Pdf export endpoint for the same data shown in /reports."""
+    if HTML is None or CSS is None:
+        logger.error("PDF export requested but weasyprint is unavailable.")
+        return render_template(
+            "error.html",
+            message=(
+                "PDF no disponible: weasyprint o sus librerías nativas no están instaladas. "
+                "Instale: gobject, cairo, pango, gdk-pixbuf y weasyprint."
+            ),
+        ), 503
+
     date_str = request.args.get("date")
     if date_str:
         try:
