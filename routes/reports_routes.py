@@ -1,8 +1,9 @@
 from datetime import date, datetime
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, send_file, abort
+from io import BytesIO
 from loguru import logger
-
+from weasyprint import HTML, CSS
 from database.database import get_dynamic_models, get_session
 from services.analytics.fetch_data_logs import get_metrics_for_date
 from services.analytics.get_reports import get_important_metrics
@@ -62,6 +63,91 @@ def reports():
         logger.error(f"Error en ruta /reports: {str(e)}", exc_info=True)
         return render_template(
             "error.html", message="Error interno generando reportes"
+        ), 500
+    finally:
+        if db:
+            db.close()
+
+
+@reports_bp.route("/reports/download/pdf")
+def reports_download_pdf():
+    """Pdf export endpoint for the same data shown in /reports."""
+    if HTML is None:
+        logger.error("WeasyPrint is not installed, PDF export unavailable.")
+        return render_template(
+            "error.html",
+            message="La generación de PDF requiere weasyprint. Instale 'weasyprint'.",
+        ), 500
+
+    date_str = request.args.get("date")
+    if date_str:
+        try:
+            selected = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            return render_template("error.html", message="Formato de fecha inválido"), 400
+    else:
+        selected = date.today()
+
+    date_suffix = selected.strftime("%Y%m%d")
+    logger.info(f"Generating PDF report for date: {date_suffix}")
+
+    db = None
+    try:
+        db = get_session()
+        UserModel, LogModel = get_dynamic_models(date_suffix)
+
+        if not UserModel or not LogModel:
+            return render_template(
+                "error.html", message="Error cargando datos para la fecha solicitada"
+            ), 500
+
+        metrics = get_important_metrics(db, UserModel, LogModel)
+        if not metrics:
+            return render_template(
+                "error.html", message="No hay datos para la fecha solicitada"
+            ), 404
+
+        http_codes = metrics.get("http_response_distribution", [])
+        http_codes = sorted(http_codes, key=lambda x: x["count"], reverse=True)
+        main_codes = http_codes[:8]
+        other_codes = http_codes[8:]
+
+        if other_codes:
+            other_count = sum(item["count"] for item in other_codes)
+            main_codes.append({"response_code": "Otros", "count": other_count})
+
+        metrics["http_response_distribution_chart"] = {
+            "labels": [str(item["response_code"]) for item in main_codes],
+            "data": [item["count"] for item in main_codes],
+            "colors": [
+                color_map.get(str(item["response_code"]), color_map["Otros"])
+                for item in main_codes
+            ],
+        }
+
+        html = render_template(
+            "reports_pdf.html",
+            metrics=metrics,
+            selected_date=selected,
+        )
+
+        pdf_bytes = HTML(string=html, base_url=request.url_root).write_pdf(
+            stylesheets=[CSS(string="body { font-family: Arial, sans-serif; }")]
+        )
+
+        buffer = BytesIO(pdf_bytes)
+        buffer.seek(0)
+        filename = f"squidstats_report_{selected.isoformat()}.pdf"
+        return send_file(
+            buffer,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=filename,
+        )
+    except Exception:
+        logger.exception("Error generating PDF report")
+        return render_template(
+            "error.html", message="Error interno generando reporte PDF"
         ), 500
     finally:
         if db:
