@@ -7,7 +7,6 @@ from services.database import backup_service
 
 
 def register_routes(bp):
-
     @bp.route("/backup")
     @admin_required
     def backup_config():
@@ -21,8 +20,15 @@ def register_routes(bp):
         allowed = {"db_type", "frequency", "backup_dir", "enabled"}
         cfg = {k: v for k, v in data.items() if k in allowed}
 
-        if cfg.get("db_type", "sqlite") not in ("sqlite", "mysql", "postgresql", "mariadb"):
-            return jsonify({"status": "error", "message": "Motor de BD desconocido"}), 400
+        if cfg.get("db_type", "sqlite") not in (
+            "sqlite",
+            "mysql",
+            "postgresql",
+            "mariadb",
+        ):
+            return jsonify(
+                {"status": "error", "message": "Motor de BD desconocido"}
+            ), 400
 
         if cfg.get("frequency") not in backup_service.FREQUENCY_CHOICES:
             return jsonify({"status": "error", "message": "Frecuencia inválida"}), 400
@@ -31,7 +37,9 @@ def register_routes(bp):
             cfg["enabled"] = bool(cfg["enabled"])
 
         backup_service.save_config(cfg)
-        return jsonify({"status": "success", "message": "Configuración guardada correctamente"})
+        return jsonify(
+            {"status": "success", "message": "Configuración guardada correctamente"}
+        )
 
     @bp.route("/backup/run", methods=["POST"])
     @admin_required

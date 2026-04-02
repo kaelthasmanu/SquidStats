@@ -174,7 +174,10 @@ def _count_backups_in_period(backup_dir: Path, frequency: str) -> int:
             continue
         mtime = datetime.fromtimestamp(f.stat().st_mtime)
         if frequency == "daily_weekly":
-            if mtime.isocalendar()[1] == now.isocalendar()[1] and mtime.year == now.year:
+            if (
+                mtime.isocalendar()[1] == now.isocalendar()[1]
+                and mtime.year == now.year
+            ):
                 count += 1
         else:  # daily_monthly
             if mtime.month == now.month and mtime.year == now.year:
@@ -210,7 +213,10 @@ def _sqlite_backup(backup_dir: Path, tag: str) -> Path:
 
     if not db_path.exists():
         # try fallback for sqlite:///filename.db
-        try_path = Path(os.path.dirname(os.path.abspath(__file__))).parent.parent / db_path.name
+        try_path = (
+            Path(os.path.dirname(os.path.abspath(__file__))).parent.parent
+            / db_path.name
+        )
         if try_path.exists():
             db_path = try_path
         else:
@@ -227,7 +233,9 @@ def _sqlite_backup(backup_dir: Path, tag: str) -> Path:
         dst_conn.close()
         src_conn.close()
 
-    logger.info(f"SQLite backup created: {dest.name} ({_human_size(dest.stat().st_size)})")
+    logger.info(
+        f"SQLite backup created: {dest.name} ({_human_size(dest.stat().st_size)})"
+    )
     return dest
 
 
@@ -246,8 +254,7 @@ def _mysql_backup(backup_dir: Path, tag: str) -> Path:
 
 def _postgresql_backup(backup_dir: Path, tag: str) -> Path:
     raise NotImplementedError(
-        "PostgreSQL backup is not yet implemented. "
-        "Planned: use pg_dump via subprocess."
+        "PostgreSQL backup is not yet implemented. Planned: use pg_dump via subprocess."
     )
 
 
