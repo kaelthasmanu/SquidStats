@@ -1,9 +1,10 @@
 from datetime import date, datetime
-
-from flask import Blueprint, render_template, request, send_file, abort
 from io import BytesIO
+
+from flask import Blueprint, render_template, request, send_file
 from loguru import logger
-from weasyprint import HTML, CSS
+from weasyprint import CSS, HTML
+
 from database.database import get_dynamic_models, get_session
 from services.analytics.fetch_data_logs import get_metrics_for_date
 from services.analytics.get_reports import get_important_metrics
@@ -77,7 +78,9 @@ def reports_download_pdf():
         try:
             selected = datetime.strptime(date_str, "%Y-%m-%d").date()
         except ValueError:
-            return render_template("error.html", message="Formato de fecha inválido"), 400
+            return render_template(
+                "error.html", message="Formato de fecha inválido"
+            ), 400
     else:
         selected = date.today()
 
