@@ -130,22 +130,32 @@ def list_backups(cfg: dict | None = None) -> list[dict]:
     """Return a list of backup metadata dicts, newest first."""
     if cfg is None:
         cfg = load_config()
-    bdir = _backup_dir(cfg)
-    result = []
-    for f in _list_backup_files(bdir):
-        stat = f.stat()
-        created = datetime.fromtimestamp(stat.st_mtime)
-        btype = "auto" if "_auto_" in f.name else "manual"
-        result.append(
-            {
-                "filename": f.name,
-                "created_at": created.strftime("%Y-%m-%d %H:%M"),
-                "size_bytes": stat.st_size,
-                "size_human": _human_size(stat.st_size),
-                "type": btype,
-            }
-        )
-    return result
+
+    try:
+        bdir = _backup_dir(cfg)
+    except Exception as e:
+        logger.error(f"No se puede acceder al directorio de salvas: {e}")
+        return []
+
+    try:
+        result = []
+        for f in _list_backup_files(bdir):
+            stat = f.stat()
+            created = datetime.fromtimestamp(stat.st_mtime)
+            btype = "auto" if "_auto_" in f.name else "manual"
+            result.append(
+                {
+                    "filename": f.name,
+                    "created_at": created.strftime("%Y-%m-%d %H:%M"),
+                    "size_bytes": stat.st_size,
+                    "size_human": _human_size(stat.st_size),
+                    "type": btype,
+                }
+            )
+        return result
+    except Exception as e:
+        logger.exception(f"Error listando salvas: {e}")
+        return []
 
 
 # Retention enforcement
