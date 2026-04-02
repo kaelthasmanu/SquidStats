@@ -55,7 +55,9 @@ def register_routes(bp):
             backups = backup_service.list_backups()
             return jsonify({"status": "success", "backups": backups})
         except Exception as e:
-            return jsonify({"status": "error", "message": str(e) or 'Error leyendo salvas'}), 500
+            return jsonify(
+                {"status": "error", "message": str(e) or "Error leyendo salvas"}
+            ), 500
 
     @bp.route("/backup/download/<filename>")
     @admin_required
