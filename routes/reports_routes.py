@@ -254,7 +254,7 @@ def dashboard():
 def auditoria_logs():
     return render_template(
         "auditor.html",
-        page_icon="magnifying-glass.ico",
+        page_icon="favicon.ico",
         page_title="Centro de Auditoría",
         icon="fas fa-magnifying-glass",
         subtitle="Herramienta para el análisis de actividad y seguridad.",
