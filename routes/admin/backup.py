@@ -1,5 +1,6 @@
 """Admin backup management routes."""
 
+import logging
 from flask import jsonify, render_template, request, send_file
 
 from services.auth.auth_service import admin_required
@@ -54,9 +55,10 @@ def register_routes(bp):
         try:
             backups = backup_service.list_backups()
             return jsonify({"status": "success", "backups": backups})
-        except Exception as e:
+        except Exception:
+            logging.exception("Error listing backups")
             return jsonify(
-                {"status": "error", "message": str(e) or "Error leyendo salvas"}
+                {"status": "error", "message": "Error leyendo salvas"}
             ), 500
 
     @bp.route("/backup/download/<filename>")
