@@ -63,7 +63,7 @@ def cache_stats_realtime():
             cache_stats=stats_data,
             system_info=system_info_data,
             network_stats=network_stats,
-            page_icon="statistics.ico",
+            page_icon="favicon.ico",
             page_title="Estadísticas del Sistema",
             icon="fas fa-chart-bar",
             subtitle="Estadisticas del comportamiento del Sistema",

@@ -19,7 +19,7 @@ def logs():
         return render_template(
             "logsView.html",
             users_data=users_data,
-            page_icon="user.ico",
+            page_icon="favicon.ico",
             page_title="Actividad usuarios",
             icon="fas fa-user-friends",
             subtitle="Analisis de la Actividad de los Usuarios",

@@ -63,7 +63,7 @@ def reports():
         return render_template(
             "reports.html",
             metrics=metrics,
-            page_icon="bar.ico",
+            page_icon="favicon.ico",
             page_title="Reportes y gráficas",
             icon="fas fa-chart-simple",
             subtitle="Top de la Actividad de los Usuarios y comportamiento",
@@ -217,7 +217,7 @@ def reports_for_date(date_str: str):
         return render_template(
             "reports.html",
             metrics=metrics,
-            page_icon="bar.ico",
+            page_icon="favicon.ico",
             page_title=f"Reportes y gráficas - {selected.isoformat()}",
             icon="fas fa-chart-simple",
             subtitle="Top de la Actividad de los Usuarios y comportamiento",
