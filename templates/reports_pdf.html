@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reportes SquidStats - {{ selected_date.isoformat() }}</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; color: #1f2937; margin: 24px; }
+        h1 { font-size: 22px; margin-bottom: 8px; }
+        h2 { font-size: 18px; margin-top: 24px; margin-bottom: 8px; }
+        .meta { font-size: 12px; opacity: .8; margin-bottom: 16px; }
+        .box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .table th, .table td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+        .table th { background: #f3f4f6; }
+    </style>
+</head>
+<body>
+    <h1>Reportes SquidStats</h1>
+    <div class="meta">Fecha del reporte: {{ selected_date.isoformat() }} - Generado: {{ generated_at }}</div>
+
+    <div class="box">
+        <h2>Resumen General</h2>
+        <p>Total usuarios: {{ metrics.total_stats.total_users | default(0) }}</p>
+        <p>Total solicitudes: {{ metrics.total_stats.total_requests | default(0) }}</p>
+        <p>Datos consumidos (MB): {{ ((metrics.total_stats.total_data_transmitted | default(0)) / 1048576) | round(2) }}</p>
+    </div>
+
+    <div class="box">
+        <h2>Top usuarios por actividad</h2>
+        <table class="table">
+            <thead>
+                <tr><th>Usuario</th><th>Visitas</th></tr>
+            </thead>
+            <tbody>
+            {% for item in metrics.top_users_by_activity %}
+                <tr>
+                    <td>{{ item.username }}</td>
+                    <td>{{ item.total_visits }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="box">
+        <h2>Top URLs por consumo de datos</h2>
+        <table class="table">
+            <thead>
+                <tr><th>URL</th><th>Datos (MB)</th></tr>
+            </thead>
+            <tbody>
+            {% for item in metrics.top_pages_by_data %}
+                <tr>
+                    <td>{{ item.url }}</td>
+                    <td>{{ ((item.total_data_bytes | default(0)) / 1048576) | round(2) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="box">
+        <h2>Distribución de códigos HTTP</h2>
+        <table class="table">
+            <thead>
+                <tr><th>Código</th><th>Conteo</th></tr>
+            </thead>
+            <tbody>
+            {% for code in metrics.http_response_distribution_chart.labels %}
+                <tr>
+                    <td>{{ code }}</td>
+                    <td>{{ metrics.http_response_distribution_chart.data[loop.index0] }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

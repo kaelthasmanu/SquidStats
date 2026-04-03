@@ -3,6 +3,7 @@ import os
 from loguru import logger
 
 from parsers.log import process_logs
+from services.database import backup_service
 from services.notifications.notifications import (
     has_remote_commits_with_messages,
     set_commit_notifications,
@@ -43,6 +44,20 @@ def register_scheduler_tasks(scheduler):
                 logger.warning("Error during cleanup of old metrics")
         except Exception as e:
             logger.error(f"Error in metrics cleanup task: {e}")
+
+    @scheduler.task("cron", id="auto_backup", hour=2, minute=0, misfire_grace_time=3600)
+    def auto_backup_task():
+        """Daily automatic backup at 02:00. Respects per-period quota."""
+        cfg = backup_service.load_config()
+        if not cfg.get("enabled", False):
+            return
+        result = backup_service.run_backup(is_auto=True)
+        if result["status"] == "success":
+            logger.info(f"Auto backup completed: {result.get('filename')}")
+        elif result["status"] == "skipped":
+            logger.info(f"Auto backup skipped: {result['message']}")
+        else:
+            logger.error(f"Auto backup failed: {result['message']}")
 
     # Register quota worker tasks along with global tasks.
     register_quota_scheduler_tasks(scheduler)

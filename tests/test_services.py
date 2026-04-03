@@ -111,3 +111,25 @@ class TestQuotaModels:
         )
         assert total_usage == 6000
         assert total_usage > group.quota_mb  # Group exceeded
+
+
+class TestLogsService:
+    """Test logs service output cleaning and fallback behavior."""
+
+    def test_read_logs_strips_ansi_sequences(self, tmp_path):
+        from services.system.logs_service import read_logs
+
+        log_file = tmp_path / "app.log"
+        log_file.write_text("\x1b[32mINFO\x1b[0m: Test log line\n")
+
+        result = read_logs([str(log_file)], max_lines=10, debug=True)
+
+        assert "app.log" in result
+        assert result["app.log"] == ["INFO: Test log line"]
+
+    def test_read_logs_file_not_found(self):
+        from services.system.logs_service import read_logs
+
+        result = read_logs(["/no/such/file.log"], max_lines=10, debug=True)
+        assert "/no/such/file.log" not in result  # key is basename
+        assert result.get("file.log") == ["Log file not found"]

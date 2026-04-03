@@ -10,6 +10,7 @@ from flask import Blueprint
 
 from . import (
     acls,
+    backup,
     blacklist,
     dashboard,
     delay_pools,
@@ -33,4 +34,5 @@ http_access.register_routes(admin_bp)
 delay_pools.register_routes(admin_bp)
 quota.register_routes(admin_bp)
 logs.register_routes(admin_bp)
+backup.register_routes(admin_bp)
 system_api.register_routes(admin_bp)

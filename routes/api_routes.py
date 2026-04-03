@@ -5,19 +5,8 @@ from werkzeug.exceptions import BadRequest
 from database.database import get_session
 from routes.admin.helpers import json_error, json_success
 from services.analytics.auditoria_service import (
-    find_by_ip,
-    find_by_keyword,
-    find_by_response_code,
-    find_denied_access,
-    find_social_media_activity,
     get_all_usernames,
-    get_daily_activity,
-    get_top_ips_by_data,
-    get_top_urls_by_data,
-    get_top_users_by_data,
-    get_top_users_by_requests,
-    get_total_data_consumed,
-    get_user_activity_summary,
+    run_audit_operation,
 )
 from services.auth.auth_service import admin_required
 from services.notifications.notifications import (
@@ -40,53 +29,6 @@ REQUIRED_FIELDS = {
     "ip_activity": ["ip_address"],
     "response_code_search": ["response_code"],
     "total_data_consumed": ["start_date", "end_date"],
-}
-
-AUDIT_HANDLERS = {
-    "user_summary": lambda db, d: get_user_activity_summary(
-        db, d["username"], d.get("start_date"), d.get("end_date")
-    ),
-    "top_users_data": lambda db, d: get_top_users_by_data(
-        db, d.get("start_date"), d.get("end_date")
-    ),
-    "top_urls_data": lambda db, d: get_top_urls_by_data(
-        db, d.get("start_date"), d.get("end_date")
-    ),
-    "top_users_requests": lambda db, d: get_top_users_by_requests(
-        db, d.get("start_date"), d.get("end_date")
-    ),
-    "top_ips_data": lambda db, d: get_top_ips_by_data(
-        db, d.get("start_date"), d.get("end_date")
-    ),
-    "daily_activity": lambda db, d: get_daily_activity(
-        db, d["start_date"], d.get("username")
-    ),
-    "denied_access": lambda db, d: find_denied_access(
-        db, d.get("start_date"), d.get("end_date"), d.get("username")
-    ),
-    "keyword_search": lambda db, d: find_by_keyword(
-        db, d.get("start_date"), d.get("end_date"), d["keyword"], d.get("username")
-    ),
-    "social_media_activity": lambda db, d: find_social_media_activity(
-        db,
-        d.get("start_date"),
-        d.get("end_date"),
-        d["social_media_sites"],
-        d.get("username"),
-    ),
-    "ip_activity": lambda db, d: find_by_ip(
-        db, d.get("start_date"), d.get("end_date"), d["ip_address"]
-    ),
-    "response_code_search": lambda db, d: find_by_response_code(
-        db,
-        d.get("start_date"),
-        d.get("end_date"),
-        int(d["response_code"]),
-        d.get("username"),
-    ),
-    "total_data_consumed": lambda db, d: get_total_data_consumed(
-        db, d["start_date"], d["end_date"]
-    ),
 }
 
 
@@ -150,14 +92,11 @@ def api_run_audit():
 
     audit_type = data.get("audit_type")
 
-    if audit_type not in AUDIT_HANDLERS:
-        return jsonify({"error": "Invalid audit type"}), 400
-
     db = get_session()
 
     try:
         validate_required_fields(audit_type, data)
-        result = AUDIT_HANDLERS[audit_type](db, data)
+        result = run_audit_operation(db, audit_type, data)
         return jsonify(result)
 
     except BadRequest as e:

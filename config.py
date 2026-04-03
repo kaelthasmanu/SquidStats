@@ -99,6 +99,7 @@ class Config:
     # Squid settings
     SQUID_LOG = safe_get_env("SQUID_LOG", "/var/log/squid/access.log")
     SQUID_CACHE_LOG = safe_get_env("SQUID_CACHE_LOG", "/var/log/squid/cache.log")
+    APP_LOG = safe_get_env("APP_LOG", "logs/app.log")
     SQUID_HOST = safe_get_env("SQUID_HOST", "127.0.0.1")
     SQUID_PORT = safe_get_env("SQUID_PORT", 3128, var_type=int)
     BLACKLIST_DOMAINS = safe_get_env("BLACKLIST_DOMAINS", "")

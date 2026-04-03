@@ -1,6 +1,13 @@
 import os
+import re
 
 from loguru import logger
+
+ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+
+
+def _strip_ansi(line):
+    return ANSI_ESCAPE_RE.sub("", line)
 
 
 def read_logs(log_files, max_lines, debug=False):
@@ -11,9 +18,12 @@ def read_logs(log_files, max_lines, debug=False):
     logs = {}
     for log_file in log_files:
         try:
-            with open(log_file) as f:
+            with open(log_file, errors="replace") as f:
                 lines = f.readlines()
-                logs[os.path.basename(log_file)] = lines[-max_lines:]
+                cleaned = [
+                    _strip_ansi(line.rstrip("\n")) for line in lines[-max_lines:]
+                ]
+                logs[os.path.basename(log_file)] = cleaned
         except FileNotFoundError:
             logs[os.path.basename(log_file)] = ["Log file not found"]
         except Exception as e:

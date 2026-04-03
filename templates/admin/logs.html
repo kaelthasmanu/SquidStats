@@ -2,13 +2,11 @@
 
 {% block content %}
 <div class="space-y-4 sm:space-y-6">
-    <!-- Selector global de líneas -->
+    <!-- Controles globales de visualización -->
     <div class="bg-white rounded-lg shadow-lg p-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-            <label for="lines-selector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Líneas a mostrar:</label>
-            <select id="lines-selector" 
-                    class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
-                    onchange="window.location.href='{{ url_for('admin.view_logs') }}?lines=' + this.value">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4">
+            <label for="lines-selector" class="text-sm font-semibold text-gray-700">Líneas a mostrar:</label>
+            <select id="lines-selector" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-40" onchange="window.location.href='{{ url_for('admin.view_logs') }}?lines=' + this.value">
                 <option value="10" {% if max_lines == 10 %}selected{% endif %}>10</option>
                 <option value="25" {% if max_lines == 25 %}selected{% endif %}>25</option>
                 <option value="50" {% if max_lines == 50 %}selected{% endif %}>50</option>
@@ -17,18 +15,45 @@
                 <option value="500" {% if max_lines == 500 %}selected{% endif %}>500</option>
                 <option value="1000" {% if max_lines == 1000 %}selected{% endif %}>1000</option>
             </select>
-            <span class="text-xs sm:text-sm text-gray-500">Mostrando últimas {{ max_lines }} líneas de cada log</span>
+            <input id="search-input" type="text" placeholder="Buscar texto en los logs" class="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="filterLogs()" />
+            <button id="toggle-lines" class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-2 text-sm font-medium" onclick="toggleLineNumbers()">Alternar n.º de línea</button>
         </div>
+        <p class="mt-2 text-xs text-gray-500">Mostrando últimas <strong>{{ max_lines }}</strong> líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes del mensaje.</p>
     </div>
 
     {% for log_name, log_lines in logs.items() %}
-    <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-        <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">{{ log_name }} <span class="text-xs sm:text-sm font-normal text-gray-500">({{ log_lines|length }} líneas)</span></h2>
-        
-        <div class="bg-gray-900 rounded-lg p-2 sm:p-4 overflow-x-auto h-96 overflow-y-auto">
-            <pre class="text-green-400 text-xs sm:text-sm font-mono whitespace-pre">{% for line in log_lines %}{{ line }}{% endfor %}</pre>
+    <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 border border-gray-200">
+        <div class="flex items-center justify-between gap-2 mb-3">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800">{{ log_name }}</h2>
+            <span class="text-xs sm:text-sm font-medium text-gray-500">{{ log_lines|length }} líneas</span>
+        </div>
+
+        <div class="bg-gray-900 rounded-lg p-2 sm:p-4 overflow-y-auto h-96">
+            <div class="text-xs sm:text-sm font-mono text-slate-200">            
+                {% for line in log_lines %}
+                <div class="log-line py-0.5 px-2 rounded transition-colors duration-150 {% if loop.index is even %}bg-slate-800{% else %}bg-slate-900{% endif %}" data-line-number="{{ loop.index }}"> 
+                    <span class="line-number text-slate-500 mr-2" style="display:none;">{{ '%04d'|format(loop.index) }}:</span>
+                    <span class="line-text">{{ line | e }}</span>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+<script>
+function filterLogs() {
+    const filter = document.getElementById('search-input').value.toLowerCase();
+    document.querySelectorAll('.log-line').forEach(item => {
+        const text = item.querySelector('.line-text').textContent.toLowerCase();
+        item.style.display = text.includes(filter) ? 'block' : 'none';
+    });
+}
+
+function toggleLineNumbers() {
+    const toggle = document.querySelectorAll('.line-number');
+    toggle.forEach(el => el.style.display = el.style.display === 'inline' ? 'none' : 'inline');
+}
+</script>
 {% endblock %}

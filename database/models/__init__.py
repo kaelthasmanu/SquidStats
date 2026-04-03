@@ -1,5 +1,6 @@
 from .models import (
     AdminUser,
+    BackupConfig,
     DailyBase,
     DeniedLog,
     Log,
@@ -22,6 +23,7 @@ __all__ = [
     "SystemMetrics",
     "Notification",
     "AdminUser",
+    "BackupConfig",
     "QuotaUser",
     "QuotaGroup",
     "QuotaRule",
