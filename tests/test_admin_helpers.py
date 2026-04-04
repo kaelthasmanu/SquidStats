@@ -49,3 +49,32 @@ def test_build_error_page_sanitizes_stacktrace_like_string(flask_app):
             sanitize_error_page_message("Traceback... Exception")
             == "Unexpected internal failure"
         )
+
+
+def test_sanitize_response_payload_redacts_stacktrace_like_values():
+    payload = {
+        "status": "ok",
+        "info": "Traceback (most recent call last): error happened",
+        "nested": {
+            "exception": "Exception: boom",
+            "other": "ok",
+        },
+        "list": ["ok", "stacktrace here"],
+    }
+
+    sanitized = _sanitize_response_payload(payload)
+
+    assert sanitized["status"] == "ok"
+    assert sanitized["info"] == "[REDACTED]"
+    assert sanitized["nested"]["exception"] == "[REDACTED]"
+    assert sanitized["nested"]["other"] == "ok"
+    assert sanitized["list"][1] == "[REDACTED]"
+
+
+def test_json_success_redacts_exception_object_in_extra(flask_app):
+    from routes.admin.helpers import json_success
+
+    with flask_app.test_request_context():
+        resp = json_success("ok", extra={"exception": ValueError("boom")})
+        data = resp.get_json()
+        assert data["exception"] == "[REDACTED]"

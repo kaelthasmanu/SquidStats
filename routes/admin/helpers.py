@@ -117,18 +117,37 @@ def json_error(message: str, status_code: int = 400, *, details: str | None = No
     return jsonify(resp), status_code
 
 
+def _sanitize_response_value(key: str, value):
+    """Sanitize a single response payload value."""
+    forbidden = {"stack", "stack_trace", "trace", "traceback", "exception", "error"}
+
+    if key.lower() in forbidden:
+        return "[REDACTED]"
+
+    if isinstance(value, Exception):
+        return "[REDACTED]"
+
+    if isinstance(value, str) and _contains_stack_trace_error_hint(value):
+        return "[REDACTED]"
+
+    if isinstance(value, dict):
+        return _sanitize_response_payload(value)
+
+    if isinstance(value, (list, tuple)):
+        sanitized_sequence = [_sanitize_response_value("", item) for item in value]
+        return type(value)(sanitized_sequence)
+
+    return value
+
+
 def _sanitize_response_payload(payload: dict) -> dict:
     """Remove sensitive fields that may expose stack traces or exception info."""
     if not payload:
         return {}
 
-    forbidden = {"stack", "stack_trace", "trace", "traceback", "exception", "error"}
     sanitized = {}
     for key, value in payload.items():
-        if key.lower() in forbidden:
-            sanitized[key] = "[REDACTED]"
-        else:
-            sanitized[key] = value
+        sanitized[key] = _sanitize_response_value(key, value)
     return sanitized
 
 
