@@ -305,10 +305,10 @@ def _sync_quota_squid_rules(enabled: bool):
         acl_line = _build_acl_line(True)
         ok = _apply_changes(acl_line, http_line, True)
 
-    if ok:
-        logger.info(
-            "Reglas de cuota sincronizadas exitosamente con ACL %s",
-            "src" if use_src else "proxy_auth",
-        )
+    # if ok:
+    #     logger.info(
+    #         "Reglas de cuota sincronizadas exitosamente con ACL %s",
+    #         "src" if use_src else "proxy_auth",
+    #     )
     else:
         logger.error("No se pudo sincronizar las reglas de cuota después de reintentos")
