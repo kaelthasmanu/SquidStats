@@ -10,6 +10,7 @@ Planned (not yet implemented):
 """
 
 import os
+import re
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -30,6 +31,10 @@ FREQUENCY_CHOICES = {
     "daily_weekly": "Diaria — máx. 3 por semana",
     "daily_monthly": "Diaria — máx. 3 por mes",
 }
+
+_BACKUP_FILENAME_RE = re.compile(
+    r"^squidstats_backup_[A-Za-z0-9_]+_[0-9]{8}_[0-9]{6}\.sqlite3$"
+)
 
 
 # Config helpers
@@ -116,6 +121,23 @@ def _list_backup_files(backup_dir: Path) -> list[Path]:
         key=lambda f: f.stat().st_mtime,
         reverse=True,
     )
+
+
+def _normalize_backup_filename(filename: str) -> str | None:
+    """Validate and normalize a backup filename from untrusted input."""
+    if not filename:
+        return None
+
+    if filename != Path(filename).name:
+        return None
+
+    if ".." in filename:
+        return None
+
+    if not _BACKUP_FILENAME_RE.fullmatch(filename):
+        return None
+
+    return filename
 
 
 def _human_size(size_bytes: int) -> str:
@@ -319,12 +341,13 @@ def run_backup(is_auto: bool = False) -> dict:
 
 def delete_backup(filename: str) -> dict:
     """Delete a specific backup file by name."""
-    if not filename or "/" in filename or "\\" in filename or ".." in filename:
+    safe_filename = _normalize_backup_filename(filename)
+    if safe_filename is None:
         return {"status": "error", "message": "Nombre de archivo inválido"}
 
     cfg = load_config()
     bdir = _backup_dir(cfg)
-    target = bdir / filename
+    target = bdir / safe_filename
 
     if not target.exists():
         return {"status": "error", "message": "La salva no existe"}
@@ -335,18 +358,19 @@ def delete_backup(filename: str) -> dict:
         return {"status": "error", "message": "Acceso denegado"}
 
     target.unlink()
-    logger.info(f"Backup deleted: {filename}")
-    return {"status": "success", "message": f"Salva eliminada: {filename}"}
+    logger.info(f"Backup deleted: {safe_filename}")
+    return {"status": "success", "message": f"Salva eliminada: {safe_filename}"}
 
 
 def get_backup_file_path(filename: str) -> Path | None:
     """Return the absolute Path for a backup file, or None if invalid/missing."""
-    if not filename or "/" in filename or "\\" in filename or ".." in filename:
+    safe_filename = _normalize_backup_filename(filename)
+    if safe_filename is None:
         return None
 
     cfg = load_config()
     bdir = _backup_dir(cfg)
-    target = bdir / filename
+    target = bdir / safe_filename
 
     if not target.exists():
         return None
