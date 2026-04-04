@@ -198,7 +198,9 @@ class TelegramService:
                     try:
                         await self._client.disconnect()
                     except Exception as e:
-                        logger.debug("Error disconnecting previous Telegram client: %s", e)
+                        logger.debug(
+                            "Error disconnecting previous Telegram client: %s", e
+                        )
 
                 self._client = TelegramClient(
                     self.session_name, self.api_id, self.api_hash, proxy=self.proxy

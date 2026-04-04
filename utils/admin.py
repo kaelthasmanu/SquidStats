@@ -897,7 +897,10 @@ class SquidConfigManager:
                         )
                         return True
                 except Exception as e:
-                    logger.debug("Could not read existing config for comparison, proceeding with write: %s", e)
+                    logger.debug(
+                        "Could not read existing config for comparison, proceeding with write: %s",
+                        e,
+                    )
 
                 # Create single backup before overwriting
                 backup_path = f"{filepath}.bak"

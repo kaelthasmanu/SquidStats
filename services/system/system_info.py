@@ -204,7 +204,9 @@ def get_timezone():
             return tz_path.split("zoneinfo/")[-1]
         timedatectl_bin = shutil.which("timedatectl")
         if timedatectl_bin:
-            result = subprocess.run([timedatectl_bin], stdout=subprocess.PIPE, text=True)  # nosec B603
+            result = subprocess.run(
+                [timedatectl_bin], stdout=subprocess.PIPE, text=True
+            )  # nosec B603
             match = re.search(r"Time zone: (\S+)\s+(\S+/\S+)", result.stdout)
             if match:
                 return f"{match.group(1)} {match.group(2)}"
