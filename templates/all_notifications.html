@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            if (data.success) {
+            if (data.success || data.status === 'success') {
                 // Actualizar contador en el header
                 document.getElementById('unread-count').textContent = data.unread_count;
                 
@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            if (data.success) {
+            if (data.success || data.status === 'success') {
                 // Recargar notificaciones
                 loadNotifications(currentPage);
                 
