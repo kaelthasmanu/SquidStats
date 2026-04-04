@@ -697,9 +697,9 @@ class SquidConfigManager:
             delay_pools = [
                 pools_dict[key] for key in sorted(pools_dict.keys(), key=int)
             ]
-            logger.debug(
-                f"Found {len(delay_pools)} delay pool configurations (total_pools={total_pools})"
-            )
+            # logger.debug(
+            #     f"Found {len(delay_pools)} delay pool configurations (total_pools={total_pools})"
+            # )
             return delay_pools
 
         except Exception as e:
@@ -796,7 +796,7 @@ class SquidConfigManager:
                     )
                     continue
 
-            logger.debug(f"Found {len(rules)} HTTP access rules")
+            #logger.debug(f"Found {len(rules)} HTTP access rules")
             return rules
 
         except Exception as e:
@@ -892,9 +892,9 @@ class SquidConfigManager:
                     with open(filepath, encoding="utf-8") as f:
                         existing = f.read()
                     if existing == content:
-                        logger.debug(
-                            f"Modular config unchanged, skipping write: {filename}"
-                        )
+                        # logger.debug(
+                        #     f"Modular config unchanged, skipping write: {filename}"
+                        # )
                         return True
                 except Exception as e:
                     logger.debug(

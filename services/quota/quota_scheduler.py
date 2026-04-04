@@ -64,9 +64,9 @@ def register_quota_scheduler_tasks(scheduler):
                 logger.warning(f"Error verificando reinicio mensual de cuotas: {e}")
 
             if not quota_enabled:
-                logger.debug(
-                    "check_quota_users: cuota deshabilitada, omitiendo evaluación"
-                )
+                # logger.debug(
+                #     "check_quota_users: cuota deshabilitada, omitiendo evaluación"
+                # )
                 return
 
             session = get_session()
