@@ -192,6 +192,7 @@ def all_notifications():
         return render_template(
             "all_notifications.html",
             page_title="Todas las Notificaciones",
+            page_icon="favicon.ico",
             subtitle="Historial completo de notificaciones del sistema",
             icon="fas fa-bell",
             notifications=notifications_data["notifications"],
@@ -213,6 +214,7 @@ def all_notifications():
         return render_template(
             "all_notifications.html",
             page_title="Todas las Notificaciones",
+            page_icon="favicon.ico",
             subtitle="Error al cargar las notificaciones",
             icon="fa-bell",
             notifications=[],
