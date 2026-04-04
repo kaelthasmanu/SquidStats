@@ -632,7 +632,7 @@ class SquidConfigManager:
 
         try:
             pools_dict = {}  # Dictionary to group by pool number
-            total_pools = 0
+            # total_pools = 0
             lines = config_to_parse.split("\n")
 
             for line_num, line in enumerate(lines, 1):
@@ -640,9 +640,10 @@ class SquidConfigManager:
                     line = line.strip()
 
                     if line.startswith("delay_pools "):
-                        parts = line.split()
-                        if len(parts) >= 2:
-                            total_pools = int(parts[1])
+                        pass
+                        # parts = line.split()
+                        # if len(parts) >= 2:
+                        # total_pools = int(parts[1])
 
                     elif line.startswith("delay_class "):
                         parts = line.split()
