@@ -250,9 +250,9 @@ def _sync_quota_squid_rules(enabled: bool):
                     raise RuntimeError("No se pudo guardar squid.conf")
 
             if not config_changed:
-                logger.debug(
-                    "No hay cambios en la configuración de Squid, se omite validación y recarga"
-                )
+                # logger.debug(
+                #     "No hay cambios en la configuración de Squid, se omite validación y recarga"
+                # )
                 return True
 
             splitter = SquidConfigSplitter(
