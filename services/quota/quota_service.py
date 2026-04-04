@@ -83,15 +83,24 @@ def _commit_modular_config(cm: SquidConfigManager, filename: str, lines: list[st
 def _sync_quota_squid_rules(enabled: bool):
     """Sync `usuarios_bloqueados` ACL/http_access in Squid config."""
     cm = SquidConfigManager()
+    logger.debug(
+        "sync_quota_squid_rules: enabled={}, config_path={}, config_dir={}, is_modular={}, is_valid={}",
+        enabled,
+        cm.config_path,
+        cm.config_dir,
+        cm.is_modular,
+        cm.is_valid,
+    )
     if not cm.is_valid:
         logger.warning(
-            "SquidConfigManager no válido: no se puede sincronizar reglas de cuota"
+            "SquidConfigManager no válido: no se puede sincronizar reglas de cuota. Errores: {}",
+            "; ".join(cm.errors) if cm.errors else "sin detalles",
         )
         return
 
     blocked_path = "/etc/squid/usuarios_bloqueados.txt"
-    print(
-        f"[DEBUG] _sync_quota_squid_rules: blocked_path={blocked_path}, enabled={enabled}"
+    logger.debug(
+        "_sync_quota_squid_rules: blocked_path={}, enabled={}", blocked_path, enabled
     )
     _ensure_blocked_file(blocked_path)
 
@@ -118,7 +127,9 @@ def _sync_quota_squid_rules(enabled: bool):
         re.search(r"^\s*auth_param\b", cm.config_content, re.MULTILINE)
         and re.search(r"^\s*acl\s+auth\b", cm.config_content, re.MULTILINE)
     )
-    print(f"[DEBUG] auth_configured={auth_configured} (use_src={not auth_configured})")
+    # logger.debug(
+    #     "auth_configured={}, use_src={}", auth_configured, not auth_configured
+    # )
 
     use_src = not auth_configured
     acl_line = _build_acl_line(use_src)
@@ -133,6 +144,14 @@ def _sync_quota_squid_rules(enabled: bool):
         def _matches_acl_entry(line: str) -> bool:
             """Coincide con la ACL o include según el modo."""
             return _is_include_line(line) if use_src else _is_acl_line(line)
+
+        # logger.debug(
+        #     "_apply_changes: enabled={} use_src={} acl_line={} http_line={}",
+        #     enabled,
+        #     use_src,
+        #     acl_line,
+        #     http_line,
+        # )
 
         try:
             if cm.is_modular:
@@ -150,9 +169,10 @@ def _sync_quota_squid_rules(enabled: bool):
                 if enabled:
                     if not any(_matches_acl_entry(line) for line in acl_lines):
                         if use_src:
-                            print(
-                                f"[DEBUG] _apply_changes: modo src detectado, insertar include {acl_line}"
-                            )
+                            # logger.debug(
+                            #     "_apply_changes: modo src detectado, insertar include {}",
+                            #     acl_line,
+                            # )
                             acl_lines.insert(0, acl_line)
                         else:
                             inserted = False
@@ -182,9 +202,9 @@ def _sync_quota_squid_rules(enabled: bool):
 
                 if enabled:
                     if not any(_is_http_line(line) for line in http_lines):
-                        print(
-                            "[DEBUG] _apply_changes: insertando http_access deny usuarios_bloqueados"
-                        )
+                        # logger.debug(
+                        #     "_apply_changes: insertando http_access deny usuarios_bloqueados"
+                        # )
                         inserted = False
                         for i, line in enumerate(http_lines):
                             if line.strip().startswith("http_access "):
@@ -216,6 +236,10 @@ def _sync_quota_squid_rules(enabled: bool):
                                 if line.strip() and not line.strip().startswith("#"):
                                     insert_idx = i
                                     break
+                            # logger.debug(
+                            #     "_apply_changes: insertando ACL src en squid.conf: {}",
+                            #     acl_line,
+                            # )
                             lines.insert(insert_idx, acl_line)
                         else:
                             inserted = False
@@ -263,9 +287,12 @@ def _sync_quota_squid_rules(enabled: bool):
 
             if not validation.get("success"):
                 logger.error(
-                    "Validación de Squid falló al sincronizar reglas de cuota: %s",
+                    "Validación de Squid falló al sincronizar reglas de cuota: {} | output={} | error_message={}",
+                    validation.get("output") or "<sin output>",
+                    validation.get("error_message") or "<sin error_message>",
                     validation.get("error_message") or validation.get("output"),
                 )
+                # logger.debug("Squid validation raw data: {}", validation)
                 # rollback
                 if cm.is_modular:
                     cm.save_modular_config("100_acls.conf", previous_acls_content)
@@ -286,16 +313,21 @@ def _sync_quota_squid_rules(enabled: bool):
 
             return True
 
-        except Exception as e:
-            logger.error("Error aplicando reglas de cuota: %s", e)
+        except Exception:
+            logger.exception("Error aplicando reglas de cuota")
             if cm.is_modular:
                 cm.save_modular_config("100_acls.conf", previous_acls_content)
                 cm.save_modular_config("120_http_access.conf", previous_http_content)
             cm.save_config(previous_main_content)
             return False
 
-    # Frist Try
+    # First try
     ok = _apply_changes(acl_line, http_line, use_src)
+    # logger.debug(
+    #     "_sync_quota_squid_rules: primer intento terminado con ok={} use_src={}",
+    #     ok,
+    #     use_src,
+    # )
 
     # Si falla y no es src, fallback a src (evita vida de proxy_auth mal configurada)
     if not ok and not use_src:
@@ -304,11 +336,15 @@ def _sync_quota_squid_rules(enabled: bool):
         )
         acl_line = _build_acl_line(True)
         ok = _apply_changes(acl_line, http_line, True)
+        # logger.debug(
+        #     "_sync_quota_squid_rules: segundo intento con use_src=True terminado con ok={}",
+        #     ok,
+        # )
 
-    # if ok:
-    #     logger.info(
-    #         "Reglas de cuota sincronizadas exitosamente con ACL %s",
-    #         "src" if use_src else "proxy_auth",
-    #     )
-    else:
-        logger.error("No se pudo sincronizar las reglas de cuota después de reintentos")
+    if not ok:
+        logger.error(
+            "No se pudo sincronizar las reglas de cuota después de reintentos. use_src={}, acl_line={}, http_line={}",
+            use_src,
+            acl_line,
+            http_line,
+        )

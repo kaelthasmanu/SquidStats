@@ -866,7 +866,7 @@ class SquidConfigManager:
         try:
             with open(filepath, encoding="utf-8") as f:
                 content = f.read()
-            logger.debug(f"Read modular config: {filename}")
+            # logger.debug(f"Read modular config: {filename}")
             return content
         except Exception as e:
             logger.error(f"Error reading modular config {filename}: {e}")

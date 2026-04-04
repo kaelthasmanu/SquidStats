@@ -24,6 +24,7 @@ def register_quota_scheduler_tasks(scheduler):
         "interval", id="check_quota_users", minutes=1, misfire_grace_time=300
     )
     def check_quota_users():
+        session = None
         try:
             quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
             quota_enabled = not os.path.exists(quota_disabled_flag)
@@ -277,19 +278,27 @@ def register_quota_scheduler_tasks(scheduler):
                 logger.debug("check_quota_users: ningún usuario nuevo excedió la cuota")
 
             session.commit()
-        except Exception as e:
-            logger.error(f"Error en check_quota_users: {e}")
-            try:
-                session.rollback()
-            except Exception as e:
-                logger.warning(
-                    "Error rolling back session after quota check failure: %s", e
-                )
+        except Exception:
+            logger.exception("Error en check_quota_users")
+            if session is not None:
+                try:
+                    session.rollback()
+                except Exception as rollback_exc:
+                    logger.warning(
+                        "Error rolling back session after quota check failure: {}",
+                        rollback_exc,
+                    )
         finally:
-            try:
-                session.close()
-            except Exception as e:
-                logger.warning("Error closing session after quota check: %s", e)
+            if session is not None:
+                try:
+                    session.close()
+                except Exception as close_exc:
+                    logger.warning(
+                        "Error closing session after quota check: {}",
+                        close_exc,
+                    )
+            # else:
+            #     logger.debug("check_quota_users: no session creada, no es necesario cerrar")
 
     @scheduler.task(
         "interval",
@@ -302,9 +311,9 @@ def register_quota_scheduler_tasks(scheduler):
         quota_enabled = not os.path.exists(quota_disabled_flag)
 
         if not quota_enabled:
-            logger.debug(
-                "reload_squid_if_quota_enabled: cuota deshabilitada, omitiendo recarga"
-            )
+            # logger.debug(
+            #     "reload_squid_if_quota_enabled: cuota deshabilitada, omitiendo recarga"
+            # )
             return
 
         logger.info(
