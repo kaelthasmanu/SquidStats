@@ -1,6 +1,7 @@
 import hashlib
 import os
-import subprocess
+import shutil
+import subprocess  # nosec B404
 import threading
 from contextlib import contextmanager
 from datetime import datetime, timedelta
@@ -477,17 +478,22 @@ def has_remote_commits_with_messages(
             env["http_proxy"] = http_proxy
             env["https_proxy"] = http_proxy
 
-        subprocess.run(
-            ["git", "fetch"],
+        git_bin = shutil.which("git")
+        if git_bin is None:
+            logger.warning("'git' executable not found in PATH")
+            return False, []
+
+        subprocess.run(  # nosec B603
+            [git_bin, "fetch"],
             cwd=repo_path,
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             env=env,
         )
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603
             [
-                "git",
+                git_bin,
                 "rev-list",
                 "--left-right",
                 "--count",
@@ -503,8 +509,8 @@ def has_remote_commits_with_messages(
         remote_ahead = int(ahead_behind[0])
 
         if remote_ahead > 0:
-            log_result = subprocess.run(
-                ["git", "log", f"{branch}..origin/{branch}", "--pretty=format:%s"],
+            log_result = subprocess.run(  # nosec B603
+                [git_bin, "log", f"{branch}..origin/{branch}", "--pretty=format:%s"],
                 cwd=repo_path,
                 capture_output=True,
                 text=True,

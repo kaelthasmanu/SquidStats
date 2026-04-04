@@ -1,6 +1,7 @@
 import os
 import re
-import subprocess
+import shutil
+import subprocess  # nosec B404
 
 from loguru import logger
 
@@ -23,23 +24,28 @@ def _ensure_blocked_file(blocked_path: str):
             "No se pudo crear/ajustar permisos locales de %s: %s", blocked_path, e
         )
 
+    docker_bin = shutil.which("docker")
+    if docker_bin is None:
+        logger.debug("Docker no disponible, omitiendo creación en contenedor")
+        return
+
     try:
-        subprocess.run(
-            ["docker", "exec", "squid_proxy", "test", "-f", blocked_path],
+        subprocess.run(  # nosec B603
+            [docker_bin, "exec", "squid_proxy", "test", "-f", blocked_path],
             check=True,
             capture_output=True,
             timeout=10,
         )
     except subprocess.CalledProcessError:
         try:
-            subprocess.run(
-                ["docker", "exec", "squid_proxy", "touch", blocked_path],
+            subprocess.run(  # nosec B603
+                [docker_bin, "exec", "squid_proxy", "touch", blocked_path],
                 check=True,
                 capture_output=True,
                 timeout=10,
             )
-            subprocess.run(
-                ["docker", "exec", "squid_proxy", "chmod", "640", blocked_path],
+            subprocess.run(  # nosec B603
+                [docker_bin, "exec", "squid_proxy", "chmod", "640", blocked_path],
                 check=True,
                 capture_output=True,
                 timeout=10,
@@ -49,23 +55,22 @@ def _ensure_blocked_file(blocked_path: str):
             logger.warning(
                 "No se pudo crear %s en contenedor Docker: %s", blocked_path, e
             )
-    except FileNotFoundError:
-        logger.debug("Docker no disponible, omitiendo creación en contenedor")
     except Exception as e:
         logger.debug("Error verificando archivo en contenedor: %s", e)
 
 
 def _sync_blocked_file_to_docker(blocked_path: str):
     """Copia el archivo de bloqueados al contenedor Docker si está disponible."""
+    docker_bin = shutil.which("docker")
+    if docker_bin is None:
+        return
     try:
-        subprocess.run(
-            ["docker", "cp", blocked_path, f"squid_proxy:{blocked_path}"],
+        subprocess.run(  # nosec B603
+            [docker_bin, "cp", blocked_path, f"squid_proxy:{blocked_path}"],
             check=True,
             capture_output=True,
             timeout=10,
         )
-    except FileNotFoundError:
-        pass
     except Exception as e:
         logger.debug("No se pudo sincronizar %s a Docker: %s", blocked_path, e)
 

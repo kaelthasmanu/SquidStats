@@ -281,13 +281,13 @@ def register_quota_scheduler_tasks(scheduler):
             logger.error(f"Error en check_quota_users: {e}")
             try:
                 session.rollback()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Error rolling back session after quota check failure: %s", e)
         finally:
             try:
                 session.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Error closing session after quota check: %s", e)
 
     @scheduler.task(
         "interval",

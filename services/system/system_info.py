@@ -1,8 +1,9 @@
 import os
 import platform
 import re
+import shutil
 import socket
-import subprocess
+import subprocess  # nosec B404
 import time
 
 import psutil
@@ -201,10 +202,12 @@ def get_timezone():
         tz_path = os.path.realpath("/etc/localtime")
         if "zoneinfo" in tz_path:
             return tz_path.split("zoneinfo/")[-1]
-        result = subprocess.run(["timedatectl"], stdout=subprocess.PIPE, text=True)
-        match = re.search(r"Time zone: (\S+)\s+(\S+/\S+)", result.stdout)
-        if match:
-            return f"{match.group(1)} {match.group(2)}"
+        timedatectl_bin = shutil.which("timedatectl")
+        if timedatectl_bin:
+            result = subprocess.run([timedatectl_bin], stdout=subprocess.PIPE, text=True)  # nosec B603
+            match = re.search(r"Time zone: (\S+)\s+(\S+/\S+)", result.stdout)
+            if match:
+                return f"{match.group(1)} {match.group(2)}"
         return "Unknown"
     except Exception:
         logger.exception("Error getting timezone")
@@ -224,30 +227,32 @@ def get_system_type():
                         ):
                             value = value[1:-1]
                         return value
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Error reading /etc/os-release: %s", e)
 
     # Check for macOS
-    try:
-        result = subprocess.run(
-            ["sw_vers", "-productName"], capture_output=True, text=True, timeout=5
-        )
-        if result.returncode == 0:
-            name = result.stdout.strip()
-            result = subprocess.run(
-                ["sw_vers", "-productVersion"],
-                capture_output=True,
-                text=True,
-                timeout=5,
+    sw_vers_bin = shutil.which("sw_vers")
+    if sw_vers_bin is not None:
+        try:
+            result = subprocess.run(  # nosec B603 B607
+                [sw_vers_bin, "-productName"], capture_output=True, text=True, timeout=5
             )
-            version = result.stdout.strip()
-            return f"{name} {version}"
-    except Exception:
-        pass
+            if result.returncode == 0:
+                name = result.stdout.strip()
+                result = subprocess.run(  # nosec B603 B607
+                    [sw_vers_bin, "-productVersion"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                version = result.stdout.strip()
+                return f"{name} {version}"
+        except Exception as e:
+            logger.debug("Error calling sw_vers: %s", e)
 
     # Check for Windows
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B602 B607
             'systeminfo | findstr /B /C:"OS Name" /B /C:"OS Version"',
             shell=True,
             capture_output=True,
@@ -267,7 +272,7 @@ def get_system_type():
                 return f"{os_name} {os_version}"
             elif os_name:
                 return os_name
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Error calling systeminfo: %s", e)
 
     return "Unknown"

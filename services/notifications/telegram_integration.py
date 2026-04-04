@@ -43,8 +43,8 @@ def run_async(coro):
                 task.cancel()
             # Run loop until all tasks are cancelled
             loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Error while cancelling pending async tasks: %s", e)
         finally:
             loop.close()
 

@@ -1,12 +1,21 @@
-import subprocess
+import shutil
+import subprocess  # nosec B404
 
 from loguru import logger
 
 
+def _get_bin(name: str) -> str | None:
+    """Return the absolute path of *name* in PATH, or None if not found."""
+    return shutil.which(name)
+
+
 def _docker_reconfigure() -> tuple[bool, str]:
+    docker_bin = _get_bin("docker")
+    if docker_bin is None:
+        return False, "Docker no encontrado"
     try:
-        subprocess.run(
-            ["docker", "exec", "squid_proxy", "squid", "-k", "reconfigure"],
+        subprocess.run(  # nosec B603
+            [docker_bin, "exec", "squid_proxy", "squid", "-k", "reconfigure"],
             check=True,
             capture_output=True,
             text=True,
@@ -28,9 +37,12 @@ def _docker_reconfigure() -> tuple[bool, str]:
 
 
 def _local_reconfigure() -> tuple[bool, str]:
+    squid_bin = _get_bin("squid")
+    if squid_bin is None:
+        return False, "Squid no encontrado"
     try:
-        subprocess.run(
-            ["squid", "-k", "reconfigure"],
+        subprocess.run(  # nosec B603
+            [squid_bin, "-k", "reconfigure"],
             check=True,
             capture_output=True,
             text=True,
@@ -51,17 +63,17 @@ def _local_reconfigure() -> tuple[bool, str]:
 
 
 def restart_squid() -> tuple[bool, str, str]:
-    try:
-        subprocess.run(["systemctl", "restart", "squid"], check=True)
-        return True, "Squid restarted successfully", None
-    except subprocess.CalledProcessError as e:
-        logger.warning(
-            "systemctl restart squid falló con estado %s: %s", e.returncode, e
-        )
-    except FileNotFoundError as e:
-        logger.warning("systemctl no encontrado: %s", e)
-    except Exception as e:
-        logger.warning("Error systemctl restart squid: %s", e)
+    systemctl_bin = _get_bin("systemctl")
+    if systemctl_bin:
+        try:
+            subprocess.run([systemctl_bin, "restart", "squid"], check=True)  # nosec B603
+            return True, "Squid restarted successfully", None
+        except subprocess.CalledProcessError as e:
+            logger.warning(
+                "systemctl restart squid falló con estado %s: %s", e.returncode, e
+            )
+        except Exception as e:
+            logger.warning("Error systemctl restart squid: %s", e)
 
     # Fallback docker si existe, y luego local
     success, msg = _docker_reconfigure()
@@ -76,17 +88,17 @@ def restart_squid() -> tuple[bool, str, str]:
 
 
 def reload_squid() -> tuple[bool, str, str]:
-    try:
-        subprocess.run(["systemctl", "reload", "squid"], check=True)
-        return True, "Configuration reloaded successfully", None
-    except subprocess.CalledProcessError as e:
-        logger.warning(
-            "systemctl reload squid falló con estado %s: %s", e.returncode, e
-        )
-    except FileNotFoundError as e:
-        logger.warning("systemctl no encontrado: %s", e)
-    except Exception as e:
-        logger.warning("Error systemctl reload squid: %s", e)
+    systemctl_bin = _get_bin("systemctl")
+    if systemctl_bin:
+        try:
+            subprocess.run([systemctl_bin, "reload", "squid"], check=True)  # nosec B603
+            return True, "Configuration reloaded successfully", None
+        except subprocess.CalledProcessError as e:
+            logger.warning(
+                "systemctl reload squid falló con estado %s: %s", e.returncode, e
+            )
+        except Exception as e:
+            logger.warning("Error systemctl reload squid: %s", e)
 
     # Fallback docker si existe, y luego local
     success, msg = _docker_reconfigure()

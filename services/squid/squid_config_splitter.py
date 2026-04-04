@@ -1,7 +1,7 @@
 import os
 import re
 import shutil
-import subprocess
+import subprocess  # nosec B404
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -372,7 +372,7 @@ class SquidConfigSplitter:
         def _run_command(cmd: list[str]) -> dict:
             """Run a validation command and return a result dict."""
             try:
-                result = subprocess.run(
+                result = subprocess.run(  # nosec B603
                     cmd,
                     capture_output=True,
                     text=True,

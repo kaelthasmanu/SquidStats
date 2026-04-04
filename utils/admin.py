@@ -896,8 +896,8 @@ class SquidConfigManager:
                             f"Modular config unchanged, skipping write: {filename}"
                         )
                         return True
-                except Exception:
-                    pass  # If we can't read, proceed with write
+                except Exception as e:
+                    logger.debug("Could not read existing config for comparison, proceeding with write: %s", e)
 
                 # Create single backup before overwriting
                 backup_path = f"{filepath}.bak"

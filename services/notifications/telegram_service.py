@@ -197,8 +197,8 @@ class TelegramService:
                 if self._client:
                     try:
                         await self._client.disconnect()
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug("Error disconnecting previous Telegram client: %s", e)
 
                 self._client = TelegramClient(
                     self.session_name, self.api_id, self.api_hash, proxy=self.proxy
@@ -432,8 +432,8 @@ class TelegramService:
                 # Try to disconnect gracefully
                 if self._event_loop and self._event_loop.is_running():
                     asyncio.create_task(self.disconnect())
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Error scheduling disconnect in __del__: %s", e)
 
 
 # Singleton instance

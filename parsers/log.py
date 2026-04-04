@@ -111,8 +111,8 @@ def parse_log_line(line):
             or "error:invalid-request" in line_lower
         ):
             return None
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Unexpected error pre-filtering log line: %s", e)
 
     if LOG_FORMAT == "DEFAULT":
         return parse_log_line_default(line)
