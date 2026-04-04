@@ -420,8 +420,8 @@ def _ensure_admin_user(conn, engine):
             if not existing_admin:
                 logger.info("Admin user not found, creating default admin user...")
                 _create_default_admin_user(conn, engine)
-            else:
-                logger.debug("Admin user already exists.")
+            # else:
+            #     logger.debug("Admin user already exists.")
         finally:
             session.close()
     except Exception as e:
