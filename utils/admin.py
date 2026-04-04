@@ -796,7 +796,7 @@ class SquidConfigManager:
                     )
                     continue
 
-            #logger.debug(f"Found {len(rules)} HTTP access rules")
+            # logger.debug(f"Found {len(rules)} HTTP access rules")
             return rules
 
         except Exception as e:
