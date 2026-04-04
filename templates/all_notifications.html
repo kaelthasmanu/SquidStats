@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            if (data.success) {
+            if (data.success || data.status === 'success') {
                 // Mostrar estado vacío
                 showEmptyState();
                 
