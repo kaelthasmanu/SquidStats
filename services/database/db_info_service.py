@@ -68,9 +68,7 @@ def get_db_health():
             journal_mode = (
                 session.execute(text("PRAGMA journal_mode")).scalar() or "unknown"
             )
-            auto_vacuum_val = (
-                session.execute(text("PRAGMA auto_vacuum")).scalar() or 0
-            )
+            auto_vacuum_val = session.execute(text("PRAGMA auto_vacuum")).scalar() or 0
             _av = {0: "None", 1: "Full", 2: "Incremental"}
             fragmentation_pct = (
                 round(freelist_count / page_count * 100, 2) if page_count else 0.0
@@ -82,15 +80,11 @@ def get_db_health():
             corruption = False
             corruption_detail = None
             try:
-                qc_rows = session.execute(
-                    text("PRAGMA quick_check(1)")
-                ).fetchall()
+                qc_rows = session.execute(text("PRAGMA quick_check(1)")).fetchall()
                 if not qc_rows or qc_rows[0][0] != "ok":
                     corruption = True
                     corruption_detail = (
-                        qc_rows[0][0]
-                        if qc_rows
-                        else "Sin respuesta del PRAGMA"
+                        qc_rows[0][0] if qc_rows else "Sin respuesta del PRAGMA"
                     )
             except Exception as qc_err:
                 corruption = True
@@ -144,9 +138,7 @@ def get_db_health():
                 ).scalar()
                 or 0
             )
-            version = (
-                session.execute(text("SELECT version()")).scalar() or "unknown"
-            )
+            version = session.execute(text("SELECT version()")).scalar() or "unknown"
             health["total_size_bytes"] = int(size)
             health["extra"] = {"version": " ".join(version.split()[:2])}
 
