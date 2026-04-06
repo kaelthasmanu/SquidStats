@@ -12,6 +12,7 @@ from . import (
     acls,
     backup,
     blacklist,
+    database,
     dashboard,
     delay_pools,
     http_access,
@@ -35,4 +36,5 @@ delay_pools.register_routes(admin_bp)
 quota.register_routes(admin_bp)
 logs.register_routes(admin_bp)
 backup.register_routes(admin_bp)
+database.register_routes(admin_bp)
 system_api.register_routes(admin_bp)
