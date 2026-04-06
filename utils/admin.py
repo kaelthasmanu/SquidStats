@@ -6,8 +6,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from loguru import logger
 
-from utils.types import ACL_TYPES_INFO, PREDEFINED_ACLS
 from config import Config
+from utils.types import ACL_TYPES_INFO, PREDEFINED_ACLS
 
 load_dotenv()
 
