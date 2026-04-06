@@ -116,8 +116,8 @@
                     <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-users mr-3"></i>Usuarios
                     </a>
-                    <a href="{{ url_for('admin.clean_data') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-database mr-3"></i>Limpiar Datos
+                    <a href="{{ url_for('admin.database_view') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                        <i class="fas fa-database mr-3"></i>Base de Datos
                     </a>
                     <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <span class="flex items-center">
@@ -147,9 +147,7 @@
                     <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-file-alt mr-3"></i>Logs
                     </a>
-                    <a href="{{ url_for('admin.backup_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-database mr-3"></i>Salvas de BD
-                    </a>
+
                 </div>
             </nav>
         </aside>
@@ -177,7 +175,6 @@
     <!-- Custom Confirm Modal -->
     {% include 'components/confirm_modal.html' %}
 
-    <script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
     <script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
     <script>
         // Get CSRF token from meta tag
