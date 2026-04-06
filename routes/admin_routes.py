@@ -620,11 +620,11 @@ def reload_squid():
     )
 
 
-@admin_bp.route("/api/get-tables", methods=["GET"])
-@api_auth_required
-def get_tables():
-    resp, code = service_get_tables_info()
-    return jsonify(resp), code
+# @admin_bp.route("/api/get-tables", methods=["GET"])
+# @api_auth_required
+# def get_tables():
+#     resp, code = service_get_tables_info()
+#     return jsonify(resp), code
 
 
 @admin_bp.route("/clean-data")
