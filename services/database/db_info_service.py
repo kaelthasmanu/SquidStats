@@ -59,11 +59,17 @@ def get_db_health():
         if db_type == "SQLITE":
             page_size = session.execute(text("PRAGMA page_size")).scalar() or 0
             page_count = session.execute(text("PRAGMA page_count")).scalar() or 0
-            freelist_count = session.execute(text("PRAGMA freelist_count")).scalar() or 0
-            journal_mode = session.execute(text("PRAGMA journal_mode")).scalar() or "unknown"
+            freelist_count = (
+                session.execute(text("PRAGMA freelist_count")).scalar() or 0
+            )
+            journal_mode = (
+                session.execute(text("PRAGMA journal_mode")).scalar() or "unknown"
+            )
             auto_vacuum_val = session.execute(text("PRAGMA auto_vacuum")).scalar() or 0
             _av = {0: "None", 1: "Full", 2: "Incremental"}
-            fragmentation_pct = round(freelist_count / page_count * 100, 2) if page_count else 0.0
+            fragmentation_pct = (
+                round(freelist_count / page_count * 100, 2) if page_count else 0.0
+            )
 
             health["total_size_bytes"] = page_size * page_count
             health["extra"] = {
@@ -76,20 +82,26 @@ def get_db_health():
             }
 
         elif db_type in ("MYSQL", "MARIADB"):
-            size = session.execute(
-                text(
-                    "SELECT COALESCE(SUM(data_length + index_length), 0)"
-                    " FROM information_schema.tables WHERE table_schema = DATABASE()"
-                )
-            ).scalar() or 0
+            size = (
+                session.execute(
+                    text(
+                        "SELECT COALESCE(SUM(data_length + index_length), 0)"
+                        " FROM information_schema.tables WHERE table_schema = DATABASE()"
+                    )
+                ).scalar()
+                or 0
+            )
             version = session.execute(text("SELECT VERSION()")).scalar() or "unknown"
             health["total_size_bytes"] = int(size)
             health["extra"] = {"version": version}
 
         elif db_type in ("POSTGRES", "POSTGRESQL"):
-            size = session.execute(
-                text("SELECT pg_database_size(current_database())")
-            ).scalar() or 0
+            size = (
+                session.execute(
+                    text("SELECT pg_database_size(current_database())")
+                ).scalar()
+                or 0
+            )
             version = session.execute(text("SELECT version()")).scalar() or "unknown"
             health["total_size_bytes"] = int(size)
             health["extra"] = {"version": " ".join(version.split()[:2])}
@@ -126,9 +138,7 @@ def run_integrity_check():
                 )
             ).fetchall()
             for (t,) in tables:
-                rows = session.execute(
-                    text(f"CHECK TABLE `{t}` FAST QUICK")
-                ).fetchall()
+                rows = session.execute(text(f"CHECK TABLE `{t}` FAST QUICK")).fetchall()
                 for row in rows:
                     if row[3] not in ("OK", "note"):
                         errors.append(f"{t}: {row[3]}")
