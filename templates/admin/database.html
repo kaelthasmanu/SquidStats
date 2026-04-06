@@ -104,14 +104,26 @@
                             'text-red-700': healthStatus === 'critical'
                         }"
                        class="text-sm mt-0.5">
-                        <span x-show="health.db_type === 'SQLITE'">
-                            Fragmentación:
-                            <strong x-text="health.extra.fragmentation_pct + '%'"></strong>
-                            <span x-show="healthStatus === 'good'"> — dentro del rango normal</span>
-                            <span x-show="healthStatus === 'warning'"> — considera ejecutar VACUUM</span>
-                            <span x-show="healthStatus === 'critical'"> — ejecuta VACUUM urgentemente</span>
-                        </span>
-                        <span x-show="health.db_type !== 'SQLITE'">
+                        <!-- Corruption takes priority over fragmentation message -->
+                        <template x-if="health.extra.corruption">
+                            <span>
+                                La base de datos tiene páginas dañadas.
+                                <span x-show="health.extra.corruption_detail"
+                                      class="font-mono bg-red-100 px-1.5 py-0.5 rounded text-xs ml-1"
+                                      x-text="health.extra.corruption_detail"></span>
+                                Haz un respaldo y ejecuta <strong>VACUUM</strong> o restaura desde una copia sana.
+                            </span>
+                        </template>
+                        <template x-if="!health.extra.corruption && health.db_type === 'SQLITE'">
+                            <span>
+                                Fragmentación:
+                                <strong x-text="health.extra.fragmentation_pct + '%'"></strong>
+                                <span x-show="healthStatus === 'good'"> — dentro del rango normal</span>
+                                <span x-show="healthStatus === 'warning'"> — considera ejecutar VACUUM</span>
+                                <span x-show="healthStatus === 'critical'"> — ejecuta VACUUM urgentemente</span>
+                            </span>
+                        </template>
+                        <span x-show="!health.extra.corruption && health.db_type !== 'SQLITE'">
                             Motor <strong x-text="health.db_type"></strong> operando con normalidad
                         </span>
                     </p>
@@ -223,6 +235,13 @@
                                   x-text="healthLabel"></span>
                         </div>
                     </div>
+                    <template x-if="health.extra.corruption && health.extra.corruption_detail">
+                        <div class="col-span-3">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Detalle de Corrupción</p>
+                            <p class="text-sm font-mono bg-red-50 border border-red-200 rounded px-3 py-2 text-red-700 break-all"
+                               x-text="health.extra.corruption_detail"></p>
+                        </div>
+                    </template>
                 </div>
             </div>
         </template>
@@ -707,12 +726,14 @@ function dbHealthPanel() {
         },
 
         get healthStatus() {
+            if (this.health?.extra?.corruption) return 'critical';
             const frag = this.health?.extra?.fragmentation_pct ?? 0;
             if (frag > 30) return 'critical';
             if (frag > 10) return 'warning';
             return 'good';
         },
         get healthLabel() {
+            if (this.health?.extra?.corruption) return 'Corrupción detectada';
             return { good: 'Saludable', warning: 'Advertencia', critical: 'Crítico' }[this.healthStatus];
         }
     };

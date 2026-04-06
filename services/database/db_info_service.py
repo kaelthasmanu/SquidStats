@@ -37,26 +37,29 @@ def get_tables_info():
 
 
 def get_db_health():
-    """Return a fast health snapshot of the database (no full table scans)."""
+    """Return a health snapshot of the database.
+
+    For SQLite, runs PRAGMA quick_check(1) on every call so corruption is
+    detected automatically without the user having to click the integrity
+    check button.  The query stops after the *first* error it finds, keeping
+    latency acceptable even on large databases.
+    """
     session = None
     try:
         engine = get_engine()
         session = get_session()
         db_type = Config.DATABASE_TYPE
 
-        stats = get_all_tables_stats(session, engine, db_type)
-        table_count = len(stats)
-        total_rows = sum(v["rows"] for v in stats.values())
-
         health = {
             "db_type": db_type,
-            "table_count": table_count,
-            "total_rows": total_rows,
+            "table_count": 0,
+            "total_rows": 0,
             "total_size_bytes": 0,
             "extra": {},
         }
 
         if db_type == "SQLITE":
+            # ── Read header-level PRAGMAs first (safe on any DB state) ──
             page_size = session.execute(text("PRAGMA page_size")).scalar() or 0
             page_count = session.execute(text("PRAGMA page_count")).scalar() or 0
             freelist_count = (
@@ -65,13 +68,34 @@ def get_db_health():
             journal_mode = (
                 session.execute(text("PRAGMA journal_mode")).scalar() or "unknown"
             )
-            auto_vacuum_val = session.execute(text("PRAGMA auto_vacuum")).scalar() or 0
+            auto_vacuum_val = (
+                session.execute(text("PRAGMA auto_vacuum")).scalar() or 0
+            )
             _av = {0: "None", 1: "Full", 2: "Incremental"}
             fragmentation_pct = (
                 round(freelist_count / page_count * 100, 2) if page_count else 0.0
             )
 
             health["total_size_bytes"] = page_size * page_count
+
+            # ── Corruption probe: quick_check stops at the first bad page ──
+            corruption = False
+            corruption_detail = None
+            try:
+                qc_rows = session.execute(
+                    text("PRAGMA quick_check(1)")
+                ).fetchall()
+                if not qc_rows or qc_rows[0][0] != "ok":
+                    corruption = True
+                    corruption_detail = (
+                        qc_rows[0][0]
+                        if qc_rows
+                        else "Sin respuesta del PRAGMA"
+                    )
+            except Exception as qc_err:
+                corruption = True
+                corruption_detail = str(qc_err)
+
             health["extra"] = {
                 "page_size": page_size,
                 "page_count": page_count,
@@ -79,9 +103,24 @@ def get_db_health():
                 "journal_mode": journal_mode,
                 "auto_vacuum": _av.get(auto_vacuum_val, str(auto_vacuum_val)),
                 "fragmentation_pct": fragmentation_pct,
+                "corruption": corruption,
+                "corruption_detail": corruption_detail,
             }
 
+            # ── Table stats (may fail on severely corrupted DBs) ──
+            try:
+                stats = get_all_tables_stats(session, engine, db_type)
+                health["table_count"] = len(stats)
+                health["total_rows"] = sum(v["rows"] for v in stats.values())
+            except Exception:
+                logger.warning(
+                    "Could not read SQLite table stats — database may be corrupted"
+                )
+
         elif db_type in ("MYSQL", "MARIADB"):
+            stats = get_all_tables_stats(session, engine, db_type)
+            health["table_count"] = len(stats)
+            health["total_rows"] = sum(v["rows"] for v in stats.values())
             size = (
                 session.execute(
                     text(
@@ -96,13 +135,18 @@ def get_db_health():
             health["extra"] = {"version": version}
 
         elif db_type in ("POSTGRES", "POSTGRESQL"):
+            stats = get_all_tables_stats(session, engine, db_type)
+            health["table_count"] = len(stats)
+            health["total_rows"] = sum(v["rows"] for v in stats.values())
             size = (
                 session.execute(
                     text("SELECT pg_database_size(current_database())")
                 ).scalar()
                 or 0
             )
-            version = session.execute(text("SELECT version()")).scalar() or "unknown"
+            version = (
+                session.execute(text("SELECT version()")).scalar() or "unknown"
+            )
             health["total_size_bytes"] = int(size)
             health["extra"] = {"version": " ".join(version.split()[:2])}
 
