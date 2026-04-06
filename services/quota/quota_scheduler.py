@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 from loguru import logger
@@ -26,8 +27,8 @@ def register_quota_scheduler_tasks(scheduler):
     def check_quota_users():
         session = None
         try:
-            quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
-            quota_enabled = not os.path.exists(quota_disabled_flag)
+            quota_disabled_flag = Path(__file__).resolve().parents[2] / "quota_disabled"
+            quota_enabled = not quota_disabled_flag.exists()
             _sync_quota_squid_rules(quota_enabled)
 
             # reinicio mensual 1ero del mes
@@ -307,8 +308,8 @@ def register_quota_scheduler_tasks(scheduler):
         misfire_grace_time=600,
     )
     def reload_squid_if_quota_enabled():
-        quota_disabled_flag = os.path.join(os.getcwd(), "quota_disabled")
-        quota_enabled = not os.path.exists(quota_disabled_flag)
+        quota_disabled_flag = Path(__file__).resolve().parents[2] / "quota_disabled"
+        quota_enabled = not quota_disabled_flag.exists()
 
         if not quota_enabled:
             # logger.debug(
