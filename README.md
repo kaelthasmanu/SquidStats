@@ -237,22 +237,13 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
 
 ### Installation Script
 
-1. Get Script With curl o wget:
-
+1. Install with script:
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.3.1/install.sh
+ curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.3.1/install.sh | sudo bash
 ```
-
-2. Add permission execution:
-
+or
 ```bash
- sudo chmod +x install.sh
-```
-
-3. Execute the script:
-
-```bash
- sudo ./install.sh
+  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.3.1/install.sh | sudo bash
 ```
 
 #### Installation Options

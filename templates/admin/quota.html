@@ -61,12 +61,17 @@
                 <h3 class="text-lg font-semibold">Resumen de Cuotas</h3>
                 <p class="text-sm text-gray-600">Visualiza el estado general de las cuotas de ancho de banda y límites de datos para los usuarios y grupos.</p>
             </div>
-            <form method="POST" action="{{ url_for('admin.toggle_quota') }}" class="shrink-0">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                <button type="submit" title="Activa o desactiva el control de cuotas para usuarios y grupos" class="px-4 py-2 font-semibold rounded-lg shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 {{ 'bg-red-500 hover:bg-red-600 text-white' if quota_enabled else 'bg-green-500 hover:bg-green-600 text-white' }}">
-                    {{ 'Desactivar cuotas' if quota_enabled else 'Activar cuotas' }}
-                </button>
-            </form>
+            <div class="flex flex-wrap items-center gap-3">
+                <form method="POST" action="{{ url_for('admin.toggle_quota') }}" class="shrink-0">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <button type="submit" title="Activa o desactiva el control de cuotas para usuarios y grupos" class="px-4 py-2 font-semibold rounded-lg shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 {{ 'bg-red-500 hover:bg-red-600 text-white' if quota_enabled else 'bg-green-500 hover:bg-green-600 text-white' }}">
+                        {{ 'Desactivar cuotas' if quota_enabled else 'Activar cuotas' }}
+                    </button>
+                </form>
+                <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {{ 'bg-green-100 text-green-800' if quota_enabled else 'bg-red-100 text-red-800' }}">
+                    {{ 'Cuotas habilitadas' if quota_enabled else 'Cuotas deshabilitadas' }}
+                </span>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -58,3 +58,61 @@ def get_table_size(session, db_type, table_name):
         return result.scalar() or 0
 
     return 0
+
+
+def get_all_tables_stats(session, engine, db_type):
+    """
+    Return {table_name: {"rows": int, "size": int}} for all tables using
+    a minimal number of queries (1-2 total) instead of N*2 per-table queries.
+
+    MySQL/MariaDB and PostgreSQL use the engine's internal statistics so the
+    response is near-instant regardless of database size.  SQLite still needs
+    one COUNT(*) per table but at least reuses a single reflected metadata
+    object and batches the size query.
+    """
+    if db_type in ("MYSQL", "MARIADB"):
+        result = session.execute(
+            text("""
+                SELECT table_name,
+                       COALESCE(table_rows, 0),
+                       COALESCE(data_length + index_length, 0)
+                FROM information_schema.tables
+                WHERE table_schema = DATABASE()
+                  AND table_type = 'BASE TABLE'
+            """)
+        )
+        return {row[0]: {"rows": int(row[1]), "size": int(row[2])} for row in result}
+
+    if db_type in ("POSTGRES", "POSTGRESQL"):
+        result = session.execute(
+            text("""
+                SELECT relname,
+                       COALESCE(n_live_tup, 0),
+                       pg_total_relation_size(relid)
+                FROM pg_stat_user_tables
+            """)
+        )
+        return {row[0]: {"rows": int(row[1]), "size": int(row[2])} for row in result}
+
+    if db_type == "SQLITE":
+        # Batch-fetch all table sizes in one query
+        size_rows = session.execute(
+            text("SELECT name, COALESCE(SUM(pgsize), 0) FROM dbstat GROUP BY name")
+        ).fetchall()
+        sizes = {row[0]: int(row[1]) for row in size_rows}
+
+        # Reflect all tables once and run COUNT(*) per table
+        metadata = MetaData()
+        metadata.reflect(bind=engine)
+        stats = {}
+        for table_name, table_obj in metadata.tables.items():
+            try:
+                count = session.execute(
+                    select(func.count()).select_from(table_obj)
+                ).scalar_one()
+            except Exception:
+                count = 0
+            stats[table_name] = {"rows": count, "size": sizes.get(table_name, 0)}
+        return stats
+
+    return {}

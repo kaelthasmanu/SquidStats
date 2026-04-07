@@ -39,7 +39,6 @@ from services.database.admin_helpers import (
 from services.database.db_admin_service import (
     delete_table_data as service_delete_table_data,
 )
-from services.database.db_info_service import get_tables_info as service_get_tables_info
 from services.security.blacklist_service import (
     delete_blacklist_by_source_url,
     get_url_blacklists_with_counts,
@@ -620,11 +619,11 @@ def reload_squid():
     )
 
 
-@admin_bp.route("/api/get-tables", methods=["GET"])
-@api_auth_required
-def get_tables():
-    resp, code = service_get_tables_info()
-    return jsonify(resp), code
+# @admin_bp.route("/api/get-tables", methods=["GET"])
+# @api_auth_required
+# def get_tables():
+#     resp, code = service_get_tables_info()
+#     return jsonify(resp), code
 
 
 @admin_bp.route("/clean-data")

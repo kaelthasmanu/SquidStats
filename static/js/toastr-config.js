@@ -21,8 +21,8 @@
       onclick: null,
       showDuration: 300,
       hideDuration: 1000,
-      timeOut: 5000, // 5 seconds
-      extendedTimeOut: 1000,
+      timeOut: 10000, // 10 seconds
+      extendedTimeOut: 2000,
       showEasing: "swing",
       hideEasing: "linear",
       showMethod: "fadeIn",

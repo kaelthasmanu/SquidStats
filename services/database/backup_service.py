@@ -110,7 +110,15 @@ def save_config(cfg: dict) -> None:
 
 def _backup_dir(cfg: dict) -> Path:
     p = Path(cfg.get("backup_dir", _DEFAULT_BACKUP_DIR))
-    p.mkdir(parents=True, exist_ok=True)
+    try:
+        p.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        message = (
+            f"No se puede acceder al directorio de salvas '{p}': {e}. "
+            "Verifique que el directorio exista y que SquidStats tenga permisos."
+        )
+        logger.error(message)
+        raise OSError(message) from e
     return p
 
 
@@ -302,7 +310,10 @@ def run_backup(is_auto: bool = False) -> dict:
     cfg = load_config()
     db_type = cfg.get("db_type", "sqlite").lower()
     frequency = cfg.get("frequency", "daily_weekly")
-    bdir = _backup_dir(cfg)
+    try:
+        bdir = _backup_dir(cfg)
+    except OSError as e:
+        return {"status": "error", "message": str(e)}
     tag = "auto" if is_auto else "manual"
 
     if is_auto:
@@ -346,7 +357,10 @@ def delete_backup(filename: str) -> dict:
         return {"status": "error", "message": "Nombre de archivo inválido"}
 
     cfg = load_config()
-    bdir = _backup_dir(cfg)
+    try:
+        bdir = _backup_dir(cfg)
+    except OSError as e:
+        return {"status": "error", "message": str(e)}
     target = bdir / safe_filename
 
     if not target.exists():
@@ -369,7 +383,10 @@ def get_backup_file_path(filename: str) -> Path | None:
         return None
 
     cfg = load_config()
-    bdir = _backup_dir(cfg)
+    try:
+        bdir = _backup_dir(cfg)
+    except OSError:
+        return None
     target = bdir / safe_filename
 
     if not target.exists():

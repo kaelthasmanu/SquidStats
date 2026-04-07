@@ -3,6 +3,7 @@
 import os
 import re
 from datetime import datetime, timezone
+from pathlib import Path
 
 from flask import render_template, request
 from loguru import logger
@@ -17,7 +18,8 @@ from services.database.admin_helpers import load_env_vars
 
 from .helpers import flash_and_redirect, get_config_manager
 
-QUOTA_DISABLED_FLAG = os.path.join(os.getcwd(), "quota_disabled")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+QUOTA_DISABLED_FLAG = PROJECT_ROOT / "quota_disabled"
 
 
 def is_quota_enabled() -> bool:
