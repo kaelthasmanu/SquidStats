@@ -390,18 +390,24 @@
                         <div class="relative">
                             <select x-model="config.db_type" @change="onDbTypeChange()"
                                 class="w-full appearance-none bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
-                                <option value="sqlite">SQLite (Activo)</option>
-                                <option value="mysql" disabled class="text-gray-400">MySQL / MariaDB (Próximamente)</option>
-                                <option value="postgresql" disabled class="text-gray-400">PostgreSQL (Próximamente)</option>
+                                <option value="sqlite">SQLite</option>
+                                <option value="mysql">MySQL / MariaDB</option>
+                                <option value="postgresql">PostgreSQL</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
                                 <i class="fas fa-chevron-down text-xs"></i>
                             </div>
                         </div>
-                        <template x-if="config.db_type !== 'sqlite'">
+                        <template x-if="config.db_type === 'mysql'">
                             <p class="mt-1.5 text-xs text-amber-600 flex items-center gap-1">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                Este motor aún no está implementado.
+                                Requiere <code class="font-mono">mysqldump</code> instalado en el servidor.
+                            </p>
+                        </template>
+                        <template x-if="config.db_type === 'postgresql'">
+                            <p class="mt-1.5 text-xs text-amber-600 flex items-center gap-1">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Requiere <code class="font-mono">pg_dump</code> instalado en el servidor.
                             </p>
                         </template>
                     </div>
@@ -773,10 +779,7 @@ function backupManager() {
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         },
         onDbTypeChange() {
-            if (this.config.db_type !== 'sqlite') {
-                this.showStatus('Este motor de BD aún no está implementado.', 'error');
-                setTimeout(() => { this.config.db_type = 'sqlite'; }, 1500);
-            }
+            // all engines now supported
         },
         showStatus(msg, type = 'success') {
             this.statusMsg = msg;
