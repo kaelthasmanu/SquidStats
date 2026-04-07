@@ -69,13 +69,13 @@ def register_scheduler_tasks(scheduler):
     register_quota_scheduler_tasks(scheduler)
 
     @scheduler.task(
-        "interval", id="trim_denied_logs", minutes=1, misfire_grace_time=900
+        "interval", id="trim_denied_logs", minutes=60, misfire_grace_time=900
     )
     def trim_denied_logs_task():
-        """Keep denied_logs under 100 KB.
+        """Keep denied_logs under 1 GB.
 
         When the table exceeds the limit, oldest rows are deleted until it
-        sits at 70 KB (30% headroom), using a single DELETE with a subquery
+        sits at 650 MB (35% headroom), using a single DELETE with a subquery
         so no Python-level row iteration is needed.
         """
 
