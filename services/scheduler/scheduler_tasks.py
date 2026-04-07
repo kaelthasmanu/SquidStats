@@ -2,6 +2,9 @@ import os
 
 from loguru import logger
 
+# from sqlalchemy import text
+# from config import Config
+# from database.database import get_session
 from parsers.log import process_logs
 from services.database import backup_service
 from services.notifications.notifications import (
