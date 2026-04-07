@@ -306,6 +306,7 @@ sudo ./install.sh --update
    DATABASE_TYPE="SQLITE"  # Options: SQLITE or MARIADB
    DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db"  # For SQLite: directory path
    # For MariaDB: connection string mysql+pymysql://user:clave@host:port/db
+   # For Postgresql: connection string postgresql+psycopg2://squidstats:squidstats@127.0.0.1:5432/squidstats
    
    # Flask Application Settings
    FLASK_DEBUG="False"  # Set to True only for development
