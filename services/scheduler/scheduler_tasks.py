@@ -14,7 +14,7 @@ from services.notifications.notifications import (
 from services.quota.quota_scheduler import register_quota_scheduler_tasks
 from services.system.metrics_service import MetricsService
 
-_DENIED_LOGS_MAX_BYTES = 1 * 1024 * 1024 * 1024      # 1 GB hard limit
+_DENIED_LOGS_MAX_BYTES = 1 * 1024 * 1024 * 1024  # 1 GB hard limit
 _DENIED_LOGS_TARGET_BYTES = int(_DENIED_LOGS_MAX_BYTES * 0.65)  # free 35 % → keep 65 %
 
 
