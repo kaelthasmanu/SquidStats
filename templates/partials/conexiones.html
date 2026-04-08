@@ -163,7 +163,7 @@
     {% set client_ip = user_data.client_ip %}
 
     <div class="user-accordion bg-white rounded-lg shadow-md mb-3 overflow-hidden">
-      <div class="w-full text-left p-4 border-b bg-white cursor-pointer" onclick="toggleAccordion({{ loop.index }})" id="header-{{ loop.index }}">
+      <div class="w-full text-left p-4 border-b bg-white" id="header-{{ loop.index }}">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center mb-3 sm:mb-0">
             <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
@@ -217,10 +217,22 @@
               <i class="fas fa-bullhorn mr-1.5 text-purple-500"></i>
               <span>{{ total_requests.value }} solicitudes</span>
             </div>
-            
-            <div class="w-6 text-center">
-              <i class="fas fa-chevron-down transition-transform duration-300 rotate-180" id="icon-{{ loop.index }}"></i>
+
+            <div class="relative">
+              <button type="button" onclick="event.stopPropagation(); toggleActionsMenu({{ loop.index }})" class="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold border border-slate-200 hover:bg-slate-200 transition-colors duration-200">
+                Acciones
+                <i class="fas fa-chevron-down ml-2 text-xs"></i>
+              </button>
+              <div id="actions-menu-{{ loop.index }}" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
+                <button type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">Bajar velocidad de navegación</button>
+                <button type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">Bloquear usuario</button>
+                <button type="button" class="w-full text-left px-4 py-2 text-sm text-slate-400 cursor-not-allowed" disabled>Resetear todas las conexiones (Próximamente)</button>
+              </div>
             </div>
+
+            <button type="button" onclick="toggleAccordion({{ loop.index }})" class="w-6 text-center cursor-pointer">
+              <i class="fas fa-chevron-down transition-transform duration-300 rotate-180" id="icon-{{ loop.index }}"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -354,4 +366,26 @@ function toggleAccordion(index) {
   accordionState[user] = content.style.display !== 'none'; // true si está abierto
   localStorage.setItem('accordion-state', JSON.stringify(accordionState));
 }
+
+function toggleActionsMenu(index) {
+  const menu = document.getElementById('actions-menu-' + index);
+  const isOpen = !menu.classList.contains('hidden');
+  closeAllActionsMenus();
+  if (!isOpen) {
+    menu.classList.remove('hidden');
+  }
+}
+
+function closeAllActionsMenus() {
+  document.querySelectorAll('[id^="actions-menu-"]').forEach(menu => {
+    menu.classList.add('hidden');
+  });
+}
+
+// Cerrar menús de acciones al hacer clic fuera
+window.addEventListener('click', function(event) {
+  if (!event.target.closest('[onclick^="toggleActionsMenu"]') && !event.target.closest('[id^="actions-menu-"]')) {
+    closeAllActionsMenus();
+  }
+});
 </script>
