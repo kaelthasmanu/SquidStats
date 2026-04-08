@@ -172,6 +172,30 @@ class BackupConfig(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
+class BlockedUser(Base):
+    __tablename__ = "blocked_users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(255), nullable=False, index=True)
+    ip = Column(String(45), nullable=False, index=True)
+    notes = Column(Text, nullable=True)
+    active = Column(Integer, default=1, nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class ThrottledUser(Base):
+    __tablename__ = "throttled_users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(255), nullable=False, index=True)
+    ip = Column(String(45), nullable=False, index=True)
+    pool_number = Column(Integer, nullable=False)
+    active = Column(Integer, default=1, nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
 def create_dynamic_models(engine, user_table_name: str, log_table_name: str):
     """Factory to create dynamic user/log models bound to a fresh declarative base.
 
