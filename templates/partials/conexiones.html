@@ -221,10 +221,13 @@
             <div class="relative">
               <button type="button" data-actions-toggle="{{ loop.index }}" class="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold border border-slate-200 hover:bg-slate-200 transition-colors duration-200">
                 Acciones
+                <span class="ml-2 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-semibold uppercase px-2 py-0.5">Beta</span>
                 <i class="fas fa-chevron-down ml-2 text-xs"></i>
               </button>
               <div data-actions-menu="{{ loop.index }}" class="hidden absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden py-1">
-                <div class="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100">Acciones</div>
+                <div class="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide border-b border-gray-100">Acciones
+                  <span class="ml-1 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-semibold uppercase px-2 py-0.5">Beta</span>
+                </div>
                 <button type="button"
                   data-action="throttle" data-user="{{ user }}" data-ip="{{ client_ip }}"
                   class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-amber-700 hover:bg-amber-50 transition-colors duration-150">
