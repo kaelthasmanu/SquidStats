@@ -57,26 +57,31 @@ def test_connection(cfg: dict) -> dict:
         return {"status": "error", "message": str(exc)}
 
 
+def _paged_count(cfg: dict, object_class: str) -> int:
+    search_filter = f"(objectClass={object_class})"
+    conn = _connect(cfg)
+    count = 0
+    try:
+        for entry in conn.extend.standard.paged_search(
+            search_base=cfg["base_dn"],
+            search_filter=search_filter,
+            search_scope=SUBTREE,
+            attributes=["cn"],
+            paged_size=1000,
+            generator=True,
+        ):
+            if isinstance(entry, dict) and entry.get("type") == "searchResEntry":
+                count += 1
+        return count
+    finally:
+        conn.unbind()
+
+
 def get_stats(cfg: dict) -> dict:
     """Return total user and group counts from the directory."""
     try:
-        conn = _connect(cfg)
-
-        conn.search(
-            cfg["base_dn"],
-            "(objectClass=person)",
-            attributes=["cn"],
-        )
-        user_count = len(conn.entries)
-
-        conn.search(
-            cfg["base_dn"],
-            "(objectClass=group)",
-            attributes=["cn"],
-        )
-        group_count = len(conn.entries)
-
-        conn.unbind()
+        user_count = _paged_count(cfg, "person")
+        group_count = _paged_count(cfg, "group")
         return {"status": "success", "users": user_count, "groups": group_count}
     except Exception as exc:
         logger.error(f"Error al obtener estadísticas LDAP: {exc}")
