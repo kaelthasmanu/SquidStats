@@ -37,8 +37,10 @@ def register_routes(bp):
     @bp.route("/api/ldap/test", methods=["POST"])
     @api_auth_required
     def ldap_test():
-        cfg = ldap_config_service.load_config()
-        print(f"[LDAP DEBUG] ldap_test: loaded cfg={cfg}")
+        cfg = request.get_json(silent=True) or {}
+        if not cfg:
+            cfg = ldap_config_service.load_config()
+        print(f"[LDAP DEBUG] ldap_test: request cfg={cfg}")
         if not cfg.get("host"):
             print("[LDAP DEBUG] ldap_test: host is missing, returning 400")
             return jsonify({"status": "error", "message": "No se ha configurado el servidor LDAP.", "cfg": cfg}), 400

@@ -3,7 +3,7 @@
 {% block title %}LDAP / Active Directory | Admin Squid{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto space-y-6" x-data="ldapApp()">
+<div class="max-w-7xl mx-auto space-y-6" x-data="ldapApp()" x-init="init()">
 
     <!-- ── Header ────────────────────────────────────────────────────── -->
     <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
@@ -119,6 +119,10 @@
                     <i class="fas fa-plug"></i>
                     <span x-text="testingConn ? 'Probando…' : 'Probar'"></span>
                 </button>
+            </div>
+
+            <div x-show="clientNotice" class="text-xs text-gray-500 italic mt-2">
+                <span x-text="clientNotice"></span>
             </div>
 
             <!-- Inline alert -->
@@ -297,6 +301,7 @@ function ldapApp() {
 
         // Connection status
         connectionStatus: "Sin probar",
+        clientNotice: "",
 
         // Stats
         stats:        { users: null, groups: null },
@@ -320,9 +325,56 @@ function ldapApp() {
         loadingMembership: false,
         membershipError:   "",
 
+        storageKey: "squidstats_ldap_config",
+
         // ── Helpers ────────────────────────────────────────────────────
         csrfToken() {
             return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        },
+
+        init() {
+            this.loadLocalConfig();
+            this.$watch('cfg', () => { this.saveLocalConfig(); }, { deep: true });
+        },
+
+        loadLocalConfig() {
+            try {
+                const raw = localStorage.getItem(this.storageKey);
+                if (!raw) return;
+
+                const data = JSON.parse(raw);
+                if (data && typeof data === 'object') {
+                    this.cfg = {
+                        ...this.cfg,
+                        ...data,
+                        use_ssl: data.use_ssl === true || data.use_ssl === 'true',
+                    };
+                    this.clientNotice = 'Configuración cargada desde el navegador. Los cambios se guardan localmente.';
+                    console.log('[LDAP DEBUG] loadLocalConfig', this.cfg);
+                }
+            } catch (error) {
+                console.warn('[LDAP DEBUG] loadLocalConfig error', error);
+            }
+        },
+
+        saveLocalConfig() {
+            try {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.cfg));
+                this.clientNotice = 'Configuración guardada localmente en el navegador.';
+                console.log('[LDAP DEBUG] saveLocalConfig', this.cfg);
+            } catch (error) {
+                console.warn('[LDAP DEBUG] saveLocalConfig error', error);
+            }
+        },
+
+        clearLocalConfig() {
+            try {
+                localStorage.removeItem(this.storageKey);
+                this.clientNotice = 'Configuración local eliminada.';
+                console.log('[LDAP DEBUG] clearLocalConfig');
+            } catch (error) {
+                console.warn('[LDAP DEBUG] clearLocalConfig error', error);
+            }
         },
 
         statusBadgeClass() {
@@ -374,13 +426,18 @@ function ldapApp() {
             try {
                 const res = await fetch('/admin/api/ldap/test', {
                     method: 'POST',
-                    headers: { 'X-CSRFToken': this.csrfToken() },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify(this.cfg),
                 });
                 const data = await res.json();
                 this.connectionStatus = data.status === 'success' ? 'Conectado' : 'Error';
                 this.showAlert(data.message, data.status);
                 if (data.status === 'success') this.loadStats();
-            } catch {
+            } catch (error) {
+                console.error('[LDAP DEBUG] testConnection error', error);
                 this.connectionStatus = "Error";
                 this.showAlert('Error al conectar.', 'error');
             } finally {
