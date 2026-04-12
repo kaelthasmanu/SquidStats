@@ -8,7 +8,7 @@ from services.analytics.auditoria_service import (
     get_all_usernames,
     run_audit_operation,
 )
-from services.auth.auth_service import admin_required
+from services.auth.auth_service import api_admin_required
 from services.notifications.notifications import (
     delete_all_notifications,
     delete_notification,
@@ -178,7 +178,7 @@ def api_delete_all_notifications():
 
 
 @api_bp.route("/restart-squid", methods=["POST"])
-@admin_required
+@api_admin_required
 def api_restart_squid():
     success, message, details = restart_squid()
     if success:
@@ -191,7 +191,7 @@ def api_restart_squid():
 
 
 @api_bp.route("/reload-squid", methods=["POST"])
-@admin_required
+@api_admin_required
 def api_reload_squid():
     success, message, details = reload_squid()
     if success:
@@ -216,7 +216,7 @@ def validate_required_fields(audit_type, data):
 
 
 @api_bp.route("/connections/status", methods=["GET"])
-@admin_required
+@api_admin_required
 def api_connection_status():
     ip = request.args.get("ip", "").strip()
     if not ip:
@@ -233,7 +233,7 @@ def api_connection_status():
 
 
 @api_bp.route("/connections/block", methods=["POST"])
-@admin_required
+@api_admin_required
 def api_block_user():
     data = request.get_json(silent=True) or {}
     username = str(data.get("username", "")).strip()
@@ -257,7 +257,7 @@ def api_block_user():
 
 
 @api_bp.route("/connections/unblock", methods=["POST"])
-@admin_required
+@api_admin_required
 def api_unblock_user():
     data = request.get_json(silent=True) or {}
     username = str(data.get("username", "")).strip()
@@ -281,7 +281,7 @@ def api_unblock_user():
 
 
 @api_bp.route("/connections/throttle", methods=["POST"])
-@admin_required
+@api_admin_required
 def api_throttle_user():
     data = request.get_json(silent=True) or {}
     username = str(data.get("username", "")).strip()
@@ -311,7 +311,7 @@ def api_throttle_user():
 
 
 @api_bp.route("/connections/unthrottle", methods=["POST"])
-@admin_required
+@api_admin_required
 def api_unthrottle_user():
     data = request.get_json(silent=True) or {}
     username = str(data.get("username", "")).strip()
@@ -335,7 +335,7 @@ def api_unthrottle_user():
 
 
 @api_bp.route("/delay-pools", methods=["GET"])
-@admin_required
+@api_admin_required
 def api_list_delay_pools():
     try:
         cm = get_config_manager()

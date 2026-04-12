@@ -68,7 +68,7 @@ function _apiAction(url, body) {
     .then(function(data) {
       showToast(
         data.status === 'success',
-        data.message || (data.status === 'success' ? 'Operación exitosa' : 'Error')
+        data.message || data.error || (data.status === 'success' ? 'Operación exitosa' : 'Error')
       );
     })
     .catch(function() {
