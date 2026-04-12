@@ -1,0 +1,30 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}LDAP / Active Directory | Admin Squid{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white shadow rounded-lg border border-gray-200 p-6 mb-6">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Configuraciones LDAP / Active Directory</h2>
+        <p class="text-sm text-gray-600 mb-4">Administra los ajustes de autenticación y sincronización con LDAP o Active Directory.</p>
+        <div class="rounded-lg bg-blue-50 border border-blue-100 p-4 text-blue-800">
+            <p class="font-medium">Estado:</p>
+            <p class="text-sm">Esta página está lista para agregar tus formularios y opciones de configuración LDAP/Active Directory.</p>
+        </div>
+    </div>
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold mb-3">Próximos pasos</h3>
+            <ul class="list-disc list-inside text-gray-700 space-y-2">
+                <li>Configurar conexión al servidor LDAP/AD.</li>
+                <li>Mapear atributos de usuario y grupos.</li>
+                <li>Probar autenticación y búsqueda de usuarios.</li>
+            </ul>
+        </div>
+        <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold mb-3">Descripción</h3>
+            <p class="text-gray-700 text-sm leading-6">Utiliza esta sección para centralizar los ajustes de integración con servicios de directorio, como LDAP y Active Directory, y autenticar usuarios externos en SquidStats.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
