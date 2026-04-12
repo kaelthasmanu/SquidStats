@@ -333,7 +333,12 @@ function ldapApp() {
         },
 
         init() {
-            this.loadLocalConfig();
+            if (this.cfg.host || this.cfg.base_dn || this.cfg.bind_dn) {
+                this.clientNotice = 'Configuración cargada desde la base de datos.';
+                console.log('[LDAP DEBUG] init: loaded DB config', this.cfg);
+            } else {
+                this.loadLocalConfig();
+            }
             this.$watch('cfg', () => { this.saveLocalConfig(); }, { deep: true });
         },
 
