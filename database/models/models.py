@@ -204,7 +204,7 @@ class LdapConfig(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     host = Column(String(255), nullable=False, default="")
     port = Column(Integer, nullable=False, default=389)
-    use_ssl = Column(Integer, nullable=False, default=0)     # 0 = False, 1 = True
+    use_ssl = Column(Integer, nullable=False, default=0)  # 0 = False, 1 = True
     auth_type = Column(String(20), nullable=False, default="SIMPLE")  # SIMPLE | NTLM
     bind_dn = Column(String(512), nullable=False, default="")
     bind_password = Column(String(512), nullable=False, default="")

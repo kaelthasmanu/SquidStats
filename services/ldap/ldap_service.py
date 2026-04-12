@@ -14,13 +14,13 @@ from ldap3 import (
 )
 from loguru import logger
 
-
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_server(host: str, port: int, use_ssl: bool) -> Server:
-    tls = Tls(validate=0) if use_ssl else None         # 0 = ssl.CERT_NONE
+    tls = Tls(validate=0) if use_ssl else None  # 0 = ssl.CERT_NONE
     return Server(host, port=port, use_ssl=use_ssl, tls=tls, get_info=ALL)
 
 
@@ -42,6 +42,7 @@ def _connect(cfg: dict) -> Connection:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def test_connection(cfg: dict) -> dict:
     """Try to bind with the provided settings. Returns status/message dict."""
@@ -100,20 +101,29 @@ def search_users(cfg: dict, query: str, limit: int = 50) -> dict:
         conn.search(
             cfg["base_dn"],
             filter_str,
-            attributes=["cn", "sAMAccountName", "mail", "displayName", "department", "title"],
+            attributes=[
+                "cn",
+                "sAMAccountName",
+                "mail",
+                "displayName",
+                "department",
+                "title",
+            ],
             size_limit=limit,
         )
         users = []
         for entry in conn.entries:
-            users.append({
-                "cn": _val(entry, "cn"),
-                "username": _val(entry, "sAMAccountName"),
-                "email": _val(entry, "mail"),
-                "display_name": _val(entry, "displayName"),
-                "department": _val(entry, "department"),
-                "title": _val(entry, "title"),
-                "dn": entry.entry_dn,
-            })
+            users.append(
+                {
+                    "cn": _val(entry, "cn"),
+                    "username": _val(entry, "sAMAccountName"),
+                    "email": _val(entry, "mail"),
+                    "display_name": _val(entry, "displayName"),
+                    "department": _val(entry, "department"),
+                    "title": _val(entry, "title"),
+                    "dn": entry.entry_dn,
+                }
+            )
         conn.unbind()
         return {"status": "success", "results": users, "total": len(users)}
     except Exception as exc:
@@ -136,12 +146,14 @@ def search_groups(cfg: dict, query: str, limit: int = 50) -> dict:
         groups = []
         for entry in conn.entries:
             members_raw = entry["member"].values if "member" in entry else []
-            groups.append({
-                "cn": _val(entry, "cn"),
-                "description": _val(entry, "description"),
-                "member_count": len(members_raw),
-                "dn": entry.entry_dn,
-            })
+            groups.append(
+                {
+                    "cn": _val(entry, "cn"),
+                    "description": _val(entry, "description"),
+                    "member_count": len(members_raw),
+                    "dn": entry.entry_dn,
+                }
+            )
         conn.unbind()
         return {"status": "success", "results": groups, "total": len(groups)}
     except Exception as exc:
@@ -163,7 +175,12 @@ def get_user_groups(cfg: dict, username: str) -> dict:
         )
         if not conn.entries:
             conn.unbind()
-            return {"status": "error", "message": "Usuario no encontrado.", "groups": [], "user": None}
+            return {
+                "status": "error",
+                "message": "Usuario no encontrado.",
+                "groups": [],
+                "user": None,
+            }
 
         entry = conn.entries[0]
         member_of = entry["memberOf"].values if "memberOf" in entry else []
@@ -191,6 +208,7 @@ def get_user_groups(cfg: dict, username: str) -> dict:
 # ---------------------------------------------------------------------------
 # Tiny helpers
 # ---------------------------------------------------------------------------
+
 
 def _val(entry: Any, attr: str, default: str = "") -> str:
     try:

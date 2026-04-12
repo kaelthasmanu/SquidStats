@@ -9,7 +9,9 @@ from services.ldap import ldap_config_service, ldap_service
 
 def _load_request_config():
     data = request.get_json(silent=True) or {}
-    if isinstance(data, dict) and any(key in data for key in ("host", "port", "bind_dn", "base_dn")):
+    if isinstance(data, dict) and any(
+        key in data for key in ("host", "port", "bind_dn", "base_dn")
+    ):
         print(f"[LDAP DEBUG] _load_request_config: using request config {data}")
         return data
     cfg = ldap_config_service.load_config()
@@ -18,7 +20,6 @@ def _load_request_config():
 
 
 def register_routes(bp):
-
     @bp.route("/ldap-config", endpoint="ldap_config")
     @admin_required
     def ldap_config_view():
@@ -35,10 +36,14 @@ def register_routes(bp):
         data = request.get_json(silent=True) or {}
         try:
             ldap_config_service.save_config(data)
-            return jsonify({"status": "success", "message": "Configuración LDAP guardada."})
+            return jsonify(
+                {"status": "success", "message": "Configuración LDAP guardada."}
+            )
         except Exception as exc:
             logger.error(f"Error al guardar configuración LDAP: {exc}")
-            return jsonify({"status": "error", "message": "Error al guardar la configuración."}), 500
+            return jsonify(
+                {"status": "error", "message": "Error al guardar la configuración."}
+            ), 500
 
     # ------------------------------------------------------------------
     # Test connection
@@ -61,7 +66,13 @@ def register_routes(bp):
         print(f"[LDAP DEBUG] ldap_test: effective cfg={cfg}")
         if not cfg.get("host"):
             print("[LDAP DEBUG] ldap_test: host is missing, returning 400")
-            return jsonify({"status": "error", "message": "No se ha configurado el servidor LDAP.", "cfg": cfg}), 400
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "No se ha configurado el servidor LDAP.",
+                    "cfg": cfg,
+                }
+            ), 400
         try:
             result = ldap_service.test_connection(cfg)
             print(f"[LDAP DEBUG] ldap_test: result={result}")
@@ -69,7 +80,13 @@ def register_routes(bp):
         except Exception as exc:
             logger.exception(f"Unexpected error during ldap_test: {exc}")
             print(f"[LDAP DEBUG] ldap_test: unexpected exception -> {exc}")
-            return jsonify({"status": "error", "message": "Error interno al probar LDAP.", "details": str(exc)}), 500
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "Error interno al probar LDAP.",
+                    "details": str(exc),
+                }
+            ), 500
 
     # ------------------------------------------------------------------
     # Stats (total users / groups)
@@ -80,7 +97,15 @@ def register_routes(bp):
     def ldap_stats():
         cfg = _load_request_config()
         if not cfg.get("host"):
-            return jsonify({"status": "error", "message": "LDAP no configurado.", "users": 0, "groups": 0, "cfg": cfg}), 400
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "LDAP no configurado.",
+                    "users": 0,
+                    "groups": 0,
+                    "cfg": cfg,
+                }
+            ), 400
         result = ldap_service.get_stats(cfg)
         return jsonify(result)
 
@@ -98,10 +123,18 @@ def register_routes(bp):
         if not query:
             query = request.args.get("q", "").strip()
         if not query:
-            return jsonify({"status": "error", "message": "Parámetro 'q' requerido.", "results": []}), 400
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "Parámetro 'q' requerido.",
+                    "results": [],
+                }
+            ), 400
         cfg = _load_request_config()
         if not cfg.get("host"):
-            return jsonify({"status": "error", "message": "LDAP no configurado.", "results": []}), 400
+            return jsonify(
+                {"status": "error", "message": "LDAP no configurado.", "results": []}
+            ), 400
         result = ldap_service.search_users(cfg, query)
         return jsonify(result)
 
@@ -119,10 +152,18 @@ def register_routes(bp):
         if not query:
             query = request.args.get("q", "").strip()
         if not query:
-            return jsonify({"status": "error", "message": "Parámetro 'q' requerido.", "results": []}), 400
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "Parámetro 'q' requerido.",
+                    "results": [],
+                }
+            ), 400
         cfg = _load_request_config()
         if not cfg.get("host"):
-            return jsonify({"status": "error", "message": "LDAP no configurado.", "results": []}), 400
+            return jsonify(
+                {"status": "error", "message": "LDAP no configurado.", "results": []}
+            ), 400
         result = ldap_service.search_groups(cfg, query)
         return jsonify(result)
 
@@ -140,9 +181,17 @@ def register_routes(bp):
         if not username:
             username = request.args.get("username", "").strip()
         if not username:
-            return jsonify({"status": "error", "message": "Parámetro 'username' requerido.", "groups": []}), 400
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "Parámetro 'username' requerido.",
+                    "groups": [],
+                }
+            ), 400
         cfg = _load_request_config()
         if not cfg.get("host"):
-            return jsonify({"status": "error", "message": "LDAP no configurado.", "groups": []}), 400
+            return jsonify(
+                {"status": "error", "message": "LDAP no configurado.", "groups": []}
+            ), 400
         result = ldap_service.get_user_groups(cfg, username)
         return jsonify(result)

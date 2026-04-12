@@ -33,7 +33,9 @@ def load_config() -> dict:
         row = session.query(LdapConfig).first()
         if row is None:
             cfg = _default_config()
-            print("[LDAP DEBUG] load_config: no config row found, returning defaults", cfg)
+            print(
+                "[LDAP DEBUG] load_config: no config row found, returning defaults", cfg
+            )
             return cfg
 
         cfg = {
@@ -79,7 +81,9 @@ def save_config(cfg: dict) -> None:
             row.bind_password = new_password
 
         session.commit()
-        print(f"[LDAP DEBUG] save_config: saved row id={row.id} host={row.host} port={row.port} use_ssl={row.use_ssl} auth_type={row.auth_type} base_dn={row.base_dn}")
+        print(
+            f"[LDAP DEBUG] save_config: saved row id={row.id} host={row.host} port={row.port} use_ssl={row.use_ssl} auth_type={row.auth_type} base_dn={row.base_dn}"
+        )
     except Exception as exc:
         session.rollback()
         logger.error(f"Error saving ldap_config to DB: {exc}")

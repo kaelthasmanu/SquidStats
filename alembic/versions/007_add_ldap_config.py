@@ -32,10 +32,24 @@ def upgrade() -> None:
             sa.Column("host", sa.String(length=255), nullable=False, server_default=""),
             sa.Column("port", sa.Integer(), nullable=False, server_default="389"),
             sa.Column("use_ssl", sa.Integer(), nullable=False, server_default="0"),
-            sa.Column("auth_type", sa.String(length=20), nullable=False, server_default="SIMPLE"),
-            sa.Column("bind_dn", sa.String(length=512), nullable=False, server_default=""),
-            sa.Column("bind_password", sa.String(length=512), nullable=False, server_default=""),
-            sa.Column("base_dn", sa.String(length=512), nullable=False, server_default=""),
+            sa.Column(
+                "auth_type",
+                sa.String(length=20),
+                nullable=False,
+                server_default="SIMPLE",
+            ),
+            sa.Column(
+                "bind_dn", sa.String(length=512), nullable=False, server_default=""
+            ),
+            sa.Column(
+                "bind_password",
+                sa.String(length=512),
+                nullable=False,
+                server_default="",
+            ),
+            sa.Column(
+                "base_dn", sa.String(length=512), nullable=False, server_default=""
+            ),
             sa.Column("created_at", sa.DateTime(), nullable=False),
             sa.Column("updated_at", sa.DateTime(), nullable=True),
             sa.PrimaryKeyConstraint("id"),
