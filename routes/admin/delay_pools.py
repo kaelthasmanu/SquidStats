@@ -2,7 +2,7 @@
 
 from flask import render_template, request
 
-from services.auth.auth_service import admin_required
+from services.auth.auth_service import AuthService, admin_required
 from services.squid.delay_pools_service import (
     add_delay_pool as service_add_delay_pool,
 )
@@ -22,7 +22,12 @@ def register_routes(bp):
     def manage_delay_pools():
         cm = get_config_manager()
         delay_pools = cm.get_delay_pools()
-        return render_template("admin/delay_pools.html", delay_pools=delay_pools)
+        authenticated = AuthService.is_authenticated()
+        return render_template(
+            "admin/delay_pools.html",
+            delay_pools=delay_pools,
+            authenticated=authenticated,
+        )
 
     @bp.route("/delay-pools/delete", methods=["POST"])
     @admin_required

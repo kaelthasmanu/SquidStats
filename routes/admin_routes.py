@@ -245,7 +245,12 @@ def delete_acl():
 @admin_required
 def manage_delay_pools():
     delay_pools = config_manager.get_delay_pools()
-    return render_template("admin/delay_pools.html", delay_pools=delay_pools)
+    authenticated = AuthService.is_authenticated()
+    return render_template(
+        "admin/delay_pools.html",
+        delay_pools=delay_pools,
+        authenticated=authenticated,
+    )
 
 
 @admin_bp.route("/http-access")
