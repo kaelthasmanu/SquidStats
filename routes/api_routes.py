@@ -291,7 +291,9 @@ def api_throttle_user():
     except (TypeError, ValueError):
         return json_error("El campo 'pool_number' debe ser un entero", 400)
     if not username or not ip:
-        return json_error("Se requieren los campos 'username', 'ip' y 'pool_number'", 400)
+        return json_error(
+            "Se requieren los campos 'username', 'ip' y 'pool_number'", 400
+        )
 
     db = get_session()
     try:

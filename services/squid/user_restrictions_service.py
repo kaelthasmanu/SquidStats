@@ -225,10 +225,9 @@ def _find_delay_insert_index(lines: list[str], pool_number: int, deny_all: str) 
         stripped = line.strip()
         if stripped == deny_all:
             return i
-        if (
-            stripped.startswith(f"delay_parameters {pool_number} ")
-            and after_params == len(lines)
-        ):
+        if stripped.startswith(
+            f"delay_parameters {pool_number} "
+        ) and after_params == len(lines):
             after_params = i + 1
     return after_params
 
@@ -293,7 +292,9 @@ def block_user(username: str, ip: str, db, cm) -> tuple[bool, str]:
     if not _add_acl_src_file(BLOCKED_ACL_NAME, filepath, cm):
         logger.warning("Could not add squidstats_blocked ACL; DB entry saved")
     if not add_http_deny_blocklist(BLOCKED_ACL_NAME, cm):
-        logger.warning("Could not add http_access deny squidstats_blocked; DB entry saved")
+        logger.warning(
+            "Could not add http_access deny squidstats_blocked; DB entry saved"
+        )
 
     return True, f"Usuario {username} ({ip}) bloqueado"
 
@@ -339,7 +340,10 @@ def throttle_user(username: str, ip: str, pool_number: int, db, cm) -> tuple[boo
 
     existing = db.query(ThrottledUser).filter_by(ip=ip, active=1).first()
     if existing:
-        return False, f"La IP {ip} ya tiene velocidad reducida (pool #{existing.pool_number})"
+        return (
+            False,
+            f"La IP {ip} ya tiene velocidad reducida (pool #{existing.pool_number})",
+        )
 
     record = ThrottledUser(username=username, ip=ip, pool_number=pool_number, active=1)
     try:
