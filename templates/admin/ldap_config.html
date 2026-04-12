@@ -423,6 +423,7 @@ function ldapApp() {
         async testConnection() {
             this.testingConn = true;
             this.connectionStatus = "Probando…";
+            console.log('[LDAP DEBUG] testConnection sending cfg', this.cfg);
             try {
                 const res = await fetch('/admin/api/ldap/test', {
                     method: 'POST',
@@ -433,6 +434,7 @@ function ldapApp() {
                     body: JSON.stringify(this.cfg),
                 });
                 const data = await res.json();
+                console.log('[LDAP DEBUG] testConnection response', data);
                 this.connectionStatus = data.status === 'success' ? 'Conectado' : 'Error';
                 this.showAlert(data.message, data.status);
                 if (data.status === 'success') this.loadStats();
@@ -449,14 +451,22 @@ function ldapApp() {
             this.loadingStats = true;
             try {
                 const res = await fetch('/admin/api/ldap/stats', {
-                    headers: { 'X-CSRFToken': this.csrfToken() },
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify(this.cfg),
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     this.stats = { users: data.users, groups: data.groups };
+                } else {
+                    this.showAlert(data.message, 'error');
                 }
-            } catch { /* silently ignore */ }
-            finally {
+            } catch (error) {
+                console.error('[LDAP DEBUG] loadStats error', error);
+            } finally {
                 this.loadingStats = false;
             }
         },
@@ -467,13 +477,19 @@ function ldapApp() {
             this.userSearched  = false;
             this.userResults   = [];
             try {
-                const res = await fetch(`/admin/api/ldap/search-users?q=${encodeURIComponent(this.userQuery)}`, {
-                    headers: { 'X-CSRFToken': this.csrfToken() },
+                const res = await fetch('/admin/api/ldap/search-users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify({ q: this.userQuery, ...this.cfg }),
                 });
                 const data = await res.json();
                 this.userResults  = data.results || [];
                 this.userSearched = true;
-            } catch {
+            } catch (error) {
+                console.error('[LDAP DEBUG] searchUsers error', error);
                 this.userSearched = true;
             } finally {
                 this.searchingUsers = false;
@@ -486,13 +502,19 @@ function ldapApp() {
             this.groupSearched   = false;
             this.groupResults    = [];
             try {
-                const res = await fetch(`/admin/api/ldap/search-groups?q=${encodeURIComponent(this.groupQuery)}`, {
-                    headers: { 'X-CSRFToken': this.csrfToken() },
+                const res = await fetch('/admin/api/ldap/search-groups', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify({ q: this.groupQuery, ...this.cfg }),
                 });
                 const data = await res.json();
                 this.groupResults  = data.results || [];
                 this.groupSearched = true;
-            } catch {
+            } catch (error) {
+                console.error('[LDAP DEBUG] searchGroups error', error);
                 this.groupSearched = true;
             } finally {
                 this.searchingGroups = false;
@@ -505,8 +527,13 @@ function ldapApp() {
             this.membershipError   = "";
             this.loadingMembership = true;
             try {
-                const res = await fetch(`/admin/api/ldap/user-groups?username=${encodeURIComponent(username)}`, {
-                    headers: { 'X-CSRFToken': this.csrfToken() },
+                const res = await fetch('/admin/api/ldap/user-groups', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify({ username, ...this.cfg }),
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
@@ -514,7 +541,8 @@ function ldapApp() {
                 } else {
                     this.membershipError = data.message;
                 }
-            } catch {
+            } catch (error) {
+                console.error('[LDAP DEBUG] loadUserGroups error', error);
                 this.membershipError = 'Error al cargar los grupos del usuario.';
             } finally {
                 this.loadingMembership = false;

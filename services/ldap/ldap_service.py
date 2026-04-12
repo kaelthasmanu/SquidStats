@@ -6,6 +6,7 @@ from ldap3 import (
     ALL,
     NTLM,
     SIMPLE,
+    SUBTREE,
     Connection,
     Server,
     Tls,
