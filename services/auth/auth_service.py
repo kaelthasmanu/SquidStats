@@ -507,7 +507,10 @@ def api_auth_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not AuthService.is_authenticated():
-            return {"message": "Necesitas iniciar sesión como admin.", "status": "error"}, 401
+            return {
+                "message": "Necesitas iniciar sesión como admin.",
+                "status": "error",
+            }, 401
         return f(*args, **kwargs)
 
     return decorated_function
@@ -523,9 +526,15 @@ def api_admin_required(f):
     def decorated_function(*args, **kwargs):
         user = AuthService.get_current_user()
         if not user:
-            return {"message": "Necesitas iniciar sesión como admin.", "status": "error"}, 401
+            return {
+                "message": "Necesitas iniciar sesión como admin.",
+                "status": "error",
+            }, 401
         if user.get("role") != "admin":
-            return {"message": "No tienes permisos para acceder a esta página.", "status": "error"}, 403
+            return {
+                "message": "No tienes permisos para acceder a esta página.",
+                "status": "error",
+            }, 403
         return f(*args, **kwargs)
 
     return decorated_function
