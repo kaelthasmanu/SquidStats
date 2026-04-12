@@ -16,6 +16,7 @@ from . import (
     database,
     delay_pools,
     http_access,
+    ldap_config,
     logs,
     quota,
     squid_config,
@@ -29,12 +30,11 @@ admin_bp = Blueprint("admin", __name__)
 dashboard.register_routes(admin_bp)
 users.register_routes(admin_bp)
 blacklist.register_routes(admin_bp)
+database.register_routes(admin_bp)
 squid_config.register_routes(admin_bp)
 acls.register_routes(admin_bp)
 http_access.register_routes(admin_bp)
 delay_pools.register_routes(admin_bp)
 quota.register_routes(admin_bp)
 logs.register_routes(admin_bp)
-backup.register_routes(admin_bp)
-database.register_routes(admin_bp)
-system_api.register_routes(admin_bp)
+ldap_config.register_routes(admin_bp)
