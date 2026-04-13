@@ -97,7 +97,7 @@
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Contraseña Bind</label>
-                <input x-model="cfg.bind_password" type="password" placeholder="••••••••"
+                <input x-model="cfg.bind_password" type="password" autocomplete="current-password" placeholder="••••••••"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
@@ -282,18 +282,23 @@
     </div>
 </div>
 
+<script type="application/json" id="ldap-config-data">
+{{ cfg | tojson | safe }}
+</script>
+
 <script>
 function ldapApp() {
+    const initialCfg = JSON.parse(document.getElementById('ldap-config-data').textContent || '{}');
     return {
         // Config form
         cfg: {
-            host:          "{{ cfg.host }}",
-            port:          {{ cfg.port }},
-            use_ssl:       {{ 'true' if cfg.use_ssl else 'false' }},
-            auth_type:     "{{ cfg.auth_type }}",
-            bind_dn:       "{{ cfg.bind_dn }}",
-            bind_password: "",
-            base_dn:       "{{ cfg.base_dn }}",
+            host:          initialCfg.host || "",
+            port:          initialCfg.port || 389,
+            use_ssl:       initialCfg.use_ssl || false,
+            auth_type:     initialCfg.auth_type || "SIMPLE",
+            bind_dn:       initialCfg.bind_dn || "",
+            bind_password: initialCfg.bind_password || "",
+            base_dn:       initialCfg.base_dn || "",
         },
         savingCfg:    false,
         testingConn:  false,
