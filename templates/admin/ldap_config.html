@@ -353,10 +353,11 @@ function ldapApp() {
 
                 const data = JSON.parse(raw);
                 if (data && typeof data === 'object') {
+                    const { bind_password, ...safeData } = data;
                     this.cfg = {
                         ...this.cfg,
-                        ...data,
-                        use_ssl: data.use_ssl === true || data.use_ssl === 'true',
+                        ...safeData,
+                        use_ssl: safeData.use_ssl === true || safeData.use_ssl === 'true',
                     };
                     this.clientNotice = 'Configuración cargada desde el navegador. Los cambios se guardan localmente.';
                 }
@@ -367,7 +368,8 @@ function ldapApp() {
 
         saveLocalConfig() {
             try {
-                localStorage.setItem(this.storageKey, JSON.stringify(this.cfg));
+                const { bind_password, ...safeCfg } = this.cfg;
+                localStorage.setItem(this.storageKey, JSON.stringify(safeCfg));
                 this.clientNotice = 'Configuración guardada localmente en el navegador.';
             } catch (error) {
                 console.warn('[LDAP DEBUG] saveLocalConfig error', error);
