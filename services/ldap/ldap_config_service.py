@@ -70,10 +70,14 @@ def load_config() -> dict:
             try:
                 bind_password = _decrypt_password(bind_password, row.encryption_key)
             except InvalidToken:
-                print("[LDAP DEBUG] load_config: stored bind_password could not be decrypted with row encryption key, hiding password")
+                print(
+                    "[LDAP DEBUG] load_config: stored bind_password could not be decrypted with row encryption key, hiding password"
+                )
                 bind_password = ""
         elif bind_password and not row.encryption_key:
-            print("[LDAP DEBUG] load_config: bind_password present without encryption key, keeping raw value")
+            print(
+                "[LDAP DEBUG] load_config: bind_password present without encryption key, keeping raw value"
+            )
 
         cfg = {
             "host": row.host or "",
