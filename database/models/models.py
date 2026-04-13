@@ -208,6 +208,7 @@ class LdapConfig(Base):
     auth_type = Column(String(20), nullable=False, default="SIMPLE")  # SIMPLE | NTLM
     bind_dn = Column(String(512), nullable=False, default="")
     bind_password = Column(String(512), nullable=False, default="")
+    encryption_key = Column(String(512), nullable=True)
     base_dn = Column(String(512), nullable=False, default="")
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
