@@ -18,3 +18,4 @@ bcrypt==5.0.0
 telethon>=1.42.0
 loguru==0.7.3
 weasyprint==68.1
+cryptography==46.0.7
