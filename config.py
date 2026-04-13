@@ -85,7 +85,7 @@ class Config:
     SCHEDULER_API_ENABLED = True
 
     # Security settings
-    SECRET_KEY = os.urandom(24).hex()
+    SECRET_KEY = safe_get_env("SECRET_KEY", os.urandom(24).hex())
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None  # CSRF tokens don't expire
 
