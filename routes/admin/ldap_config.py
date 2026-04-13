@@ -50,8 +50,6 @@ def register_routes(bp):
     @bp.route("/api/ldap/test", methods=["POST"])
     @api_auth_required
     def ldap_test():
-        raw = request.get_data(as_text=True)
-        headers = dict(request.headers)
         cfg = request.get_json(silent=True)
         if cfg is None:
             cfg = request.get_json(force=True, silent=True)
