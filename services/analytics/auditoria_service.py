@@ -970,7 +970,7 @@ def get_high_usage_users(db, hours=24, limit=5, threshold_mb=500):
                 )
 
                 for row in results:
-                    usage_mb = (row.total_bytes or 0) / (1024 * 1024)
+                    usage_mb = float((row.total_bytes or 0) / (1024 * 1024))
                     user_usage[row[0]] += usage_mb
 
             except Exception as e:

@@ -1,0 +1,566 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}LDAP / Active Directory | Admin Squid{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6" x-data="ldapApp()" x-init="init()">
+
+    <!-- ── Header ────────────────────────────────────────────────────── -->
+    <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-network-wired text-blue-600"></i>
+                    LDAP / Active Directory
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Configura la conexión y explora el directorio.</p>
+            </div>
+            <!-- Connection status badge -->
+            <div>
+                <span :class="statusBadgeClass()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold">
+                    <span class="w-2 h-2 rounded-full" :class="statusDotClass()"></span>
+                    <span x-text="connectionStatus"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Stats Cards ───────────────────────────────────────────────── -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow border border-gray-200 p-6 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-users text-blue-600 text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Total Usuarios</p>
+                <p class="text-3xl font-bold text-gray-800" x-text="stats.users ?? '—'"></p>
+            </div>
+            <button @click="loadStats()" :disabled="loadingStats" title="Actualizar" class="ml-auto text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-40">
+                <i class="fas fa-sync-alt" :class="loadingStats ? 'animate-spin' : ''"></i>
+            </button>
+        </div>
+        <div class="bg-white rounded-lg shadow border border-gray-200 p-6 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-layer-group text-indigo-600 text-2xl"></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Total Grupos</p>
+                <p class="text-3xl font-bold text-gray-800" x-text="stats.groups ?? '—'"></p>
+            </div>
+            <button @click="loadStats()" :disabled="loadingStats" title="Actualizar" class="ml-auto text-gray-400 hover:text-indigo-600 transition-colors disabled:opacity-40">
+                <i class="fas fa-sync-alt" :class="loadingStats ? 'animate-spin' : ''"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Main grid ─────────────────────────────────────────────────── -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        <!-- LEFT – Configuration form -->
+        <div class="xl:col-span-1 bg-white shadow rounded-lg border border-gray-200 p-6 space-y-4">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-cog text-gray-500"></i> Configuración de conexión
+            </h3>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Servidor (host)</label>
+                <input x-model="cfg.host" type="text" placeholder="ldap.empresa.com"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Puerto</label>
+                    <input x-model.number="cfg.port" type="number" placeholder="389"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Autenticación</label>
+                    <select x-model="cfg.auth_type"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="SIMPLE">SIMPLE (LDAP)</option>
+                        <option value="NTLM">NTLM (AD)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <input x-model="cfg.use_ssl" type="checkbox" id="use_ssl" class="rounded text-blue-600" />
+                <label for="use_ssl" class="text-sm text-gray-700">Usar SSL / LDAPS</label>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Bind DN / Usuario</label>
+                <input x-model="cfg.bind_dn" type="text" placeholder="CN=admin,DC=empresa,DC=com"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Contraseña Bind</label>
+                <input x-model="cfg.bind_password" type="password" autocomplete="current-password" placeholder="••••••••"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Base DN</label>
+                <input x-model="cfg.base_dn" type="text" placeholder="DC=empresa,DC=com"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex gap-2 pt-2">
+                <button @click="saveConfig()" :disabled="savingCfg"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i>
+                    <span x-text="savingCfg ? 'Guardando…' : 'Guardar'"></span>
+                </button>
+                <button @click="testConnection()" :disabled="testingConn"
+                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-plug"></i>
+                    <span x-text="testingConn ? 'Probando…' : 'Probar'"></span>
+                </button>
+            </div>
+
+            <div x-show="clientNotice" class="text-xs text-gray-500 italic mt-2">
+                <span x-text="clientNotice"></span>
+            </div>
+
+            <!-- Inline alert -->
+            <template x-if="cfgAlert.message">
+                <div :class="cfgAlert.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'"
+                    class="rounded-lg border p-3 text-sm flex items-start gap-2">
+                    <i :class="cfgAlert.type === 'success' ? 'fas fa-check-circle text-green-600' : 'fas fa-exclamation-circle text-red-600'" class="mt-0.5"></i>
+                    <span x-text="cfgAlert.message"></span>
+                </div>
+            </template>
+        </div>
+
+        <!-- RIGHT – Search & membership panels -->
+        <div class="xl:col-span-2 space-y-6">
+
+            <!-- Search Users -->
+            <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                    <i class="fas fa-user-search text-blue-500"></i> Buscar Usuarios
+                </h3>
+                <div class="flex gap-2 mb-4">
+                    <input x-model="userQuery" @keydown.enter="searchUsers()" type="text"
+                        placeholder="Nombre, usuario, email…"
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <button @click="searchUsers()" :disabled="searchingUsers"
+                        class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                        <i class="fas fa-search" :class="searchingUsers ? 'animate-pulse' : ''"></i>
+                        Buscar
+                    </button>
+                </div>
+
+                <!-- Results table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" x-show="userResults.length > 0">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Usuario</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Email</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Departamento</th>
+                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Grupos</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <template x-for="u in userResults" :key="u.dn">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-3 py-2 font-medium text-gray-900" x-text="u.display_name || u.cn"></td>
+                                    <td class="px-3 py-2 text-gray-600 hidden sm:table-cell" x-text="u.username"></td>
+                                    <td class="px-3 py-2 text-gray-600 hidden md:table-cell" x-text="u.email"></td>
+                                    <td class="px-3 py-2 text-gray-600 hidden lg:table-cell" x-text="u.department"></td>
+                                    <td class="px-3 py-2 text-center">
+                                        <button @click="loadUserGroups(u.username)"
+                                            class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold hover:underline transition-colors"
+                                            title="Ver grupos del usuario">
+                                            <i class="fas fa-sitemap mr-1"></i>Ver grupos
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                    <p x-show="userResults.length === 0 && userSearched" class="text-sm text-gray-500 text-center py-4">
+                        <i class="fas fa-inbox mr-2"></i>No se encontraron usuarios.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Search Groups -->
+            <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                    <i class="fas fa-layer-group text-indigo-500"></i> Buscar Grupos
+                </h3>
+                <div class="flex gap-2 mb-4">
+                    <input x-model="groupQuery" @keydown.enter="searchGroups()" type="text"
+                        placeholder="Nombre del grupo…"
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    <button @click="searchGroups()" :disabled="searchingGroups"
+                        class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                        <i class="fas fa-search" :class="searchingGroups ? 'animate-pulse' : ''"></i>
+                        Buscar
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" x-show="groupResults.length > 0">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Descripción</th>
+                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Miembros</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <template x-for="g in groupResults" :key="g.dn">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-3 py-2 font-medium text-gray-900" x-text="g.cn"></td>
+                                    <td class="px-3 py-2 text-gray-600 hidden sm:table-cell" x-text="g.description || '—'"></td>
+                                    <td class="px-3 py-2 text-center">
+                                        <span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded-full" x-text="g.member_count"></span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                    <p x-show="groupResults.length === 0 && groupSearched" class="text-sm text-gray-500 text-center py-4">
+                        <i class="fas fa-inbox mr-2"></i>No se encontraron grupos.
+                    </p>
+                </div>
+            </div>
+
+            <!-- User Groups membership panel -->
+            <div class="bg-white shadow rounded-lg border border-gray-200 p-6" x-show="membershipTarget">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-sitemap text-purple-500"></i>
+                        Grupos de <span class="text-purple-700 ml-1" x-text="membershipTarget"></span>
+                    </h3>
+                    <button @click="clearMembership()" class="text-gray-400 hover:text-gray-600 transition-colors text-xs">
+                        <i class="fas fa-times"></i> Limpiar
+                    </button>
+                </div>
+
+                <!-- Loading spinner -->
+                <div x-show="loadingMembership" class="flex items-center justify-center py-8 text-gray-400">
+                    <i class="fas fa-circle-notch fa-spin text-2xl mr-3"></i> Cargando grupos…
+                </div>
+
+                <!-- Error -->
+                <div x-show="!loadingMembership && membershipError"
+                    class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span x-text="membershipError"></span>
+                </div>
+
+                <!-- Groups list -->
+                <div x-show="!loadingMembership && !membershipError && membershipGroups.length > 0">
+                    <p class="text-xs text-gray-500 mb-3">
+                        <span x-text="membershipGroups.length"></span> grupo(s) encontrado(s)
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="g in membershipGroups" :key="g.dn">
+                            <span class="inline-flex items-center gap-1 bg-purple-50 border border-purple-200 text-purple-700 text-xs font-medium px-3 py-1.5 rounded-full">
+                                <i class="fas fa-layer-group text-purple-400"></i>
+                                <span x-text="g.cn"></span>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+
+                <p x-show="!loadingMembership && !membershipError && membershipGroups.length === 0"
+                    class="text-sm text-gray-500 text-center py-4">
+                    <i class="fas fa-inbox mr-2"></i>Este usuario no pertenece a ningún grupo.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="application/json" id="ldap-config-data">
+{{ cfg | tojson | safe }}
+</script>
+
+<script>
+function ldapApp() {
+    const initialCfg = JSON.parse(document.getElementById('ldap-config-data').textContent || '{}');
+    return {
+        // Config form
+        cfg: {
+            host:          initialCfg.host || "",
+            port:          initialCfg.port || 389,
+            use_ssl:       initialCfg.use_ssl || false,
+            auth_type:     initialCfg.auth_type || "SIMPLE",
+            bind_dn:       initialCfg.bind_dn || "",
+            bind_password: initialCfg.bind_password || "",
+            base_dn:       initialCfg.base_dn || "",
+        },
+        savingCfg:    false,
+        testingConn:  false,
+        cfgAlert:     { message: "", type: "" },
+
+        // Connection status
+        connectionStatus: "Sin probar",
+        clientNotice: "",
+
+        // Stats
+        stats:        { users: null, groups: null },
+        loadingStats: false,
+
+        // User search
+        userQuery:    "",
+        userResults:  [],
+        searchingUsers: false,
+        userSearched: false,
+
+        // Group search
+        groupQuery:    "",
+        groupResults:  [],
+        searchingGroups: false,
+        groupSearched: false,
+
+        // Membership panel
+        membershipTarget:  "",
+        membershipGroups:  [],
+        loadingMembership: false,
+        membershipError:   "",
+
+        storageKey: "squidstats_ldap_config",
+
+        // ── Helpers ────────────────────────────────────────────────────
+        csrfToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        },
+
+        init() {
+            if (this.cfg.host || this.cfg.base_dn || this.cfg.bind_dn) {
+                this.clientNotice = 'Configuración cargada desde la base de datos.';
+            } else {
+                this.loadLocalConfig();
+            }
+            this.$watch('cfg', () => { this.saveLocalConfig(); }, { deep: true });
+        },
+
+        loadLocalConfig() {
+            try {
+                const raw = localStorage.getItem(this.storageKey);
+                if (!raw) return;
+
+                const data = JSON.parse(raw);
+                if (data && typeof data === 'object') {
+                    const { bind_password, ...safeData } = data;
+                    this.cfg = {
+                        ...this.cfg,
+                        ...safeData,
+                        use_ssl: safeData.use_ssl === true || safeData.use_ssl === 'true',
+                    };
+                    this.clientNotice = 'Configuración cargada desde el navegador. Los cambios se guardan localmente.';
+                }
+            } catch (error) {
+                console.warn('[LDAP DEBUG] loadLocalConfig error', error);
+            }
+        },
+
+        saveLocalConfig() {
+            try {
+                const { bind_password, ...safeCfg } = this.cfg;
+                localStorage.setItem(this.storageKey, JSON.stringify(safeCfg));
+                this.clientNotice = 'Configuración guardada localmente en el navegador.';
+            } catch (error) {
+                console.warn('[LDAP DEBUG] saveLocalConfig error', error);
+            }
+        },
+
+        clearLocalConfig() {
+            try {
+                localStorage.removeItem(this.storageKey);
+                this.clientNotice = 'Configuración local eliminada.';
+            } catch (error) {
+                console.warn('[LDAP DEBUG] clearLocalConfig error', error);
+            }
+        },
+
+        statusBadgeClass() {
+            const map = {
+                "Conectado":  "bg-green-100 text-green-800",
+                "Error":      "bg-red-100 text-red-800",
+                "Sin probar": "bg-gray-100 text-gray-600",
+                "Probando…":  "bg-yellow-100 text-yellow-800",
+            };
+            return map[this.connectionStatus] || "bg-gray-100 text-gray-600";
+        },
+
+        statusDotClass() {
+            const map = {
+                "Conectado":  "bg-green-500",
+                "Error":      "bg-red-500",
+                "Sin probar": "bg-gray-400",
+                "Probando…":  "bg-yellow-400",
+            };
+            return map[this.connectionStatus] || "bg-gray-400";
+        },
+
+        showAlert(message, type = "success") {
+            this.cfgAlert = { message, type };
+            setTimeout(() => { this.cfgAlert = { message: "", type: "" }; }, 4000);
+        },
+
+        // ── Actions ────────────────────────────────────────────────────
+        async saveConfig() {
+            this.savingCfg = true;
+            try {
+                const res = await fetch('/admin/api/ldap/save-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.csrfToken() },
+                    body: JSON.stringify(this.cfg),
+                });
+                const data = await res.json();
+                this.showAlert(data.message, data.status === 'success' ? 'success' : 'error');
+            } catch {
+                this.showAlert('Error al guardar la configuración.', 'error');
+            } finally {
+                this.savingCfg = false;
+            }
+        },
+
+        async testConnection() {
+            this.testingConn = true;
+            this.connectionStatus = "Probando…";
+            try {
+                const res = await fetch('/admin/api/ldap/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify(this.cfg),
+                });
+                const data = await res.json();
+                this.connectionStatus = data.status === 'success' ? 'Conectado' : 'Error';
+                this.showAlert(data.message, data.status);
+                if (data.status === 'success') this.loadStats();
+            } catch (error) {
+                console.error('[LDAP DEBUG] testConnection error', error);
+                this.connectionStatus = "Error";
+                this.showAlert('Error al conectar.', 'error');
+            } finally {
+                this.testingConn = false;
+            }
+        },
+
+        async loadStats() {
+            this.loadingStats = true;
+            try {
+                const res = await fetch('/admin/api/ldap/stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify(this.cfg),
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    this.stats = { users: data.users, groups: data.groups };
+                } else {
+                    this.showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('[LDAP DEBUG] loadStats error', error);
+            } finally {
+                this.loadingStats = false;
+            }
+        },
+
+        async searchUsers() {
+            if (!this.userQuery.trim()) return;
+            this.searchingUsers = true;
+            this.userSearched  = false;
+            this.userResults   = [];
+            try {
+                const res = await fetch('/admin/api/ldap/search-users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify({ q: this.userQuery, ...this.cfg }),
+                });
+                const data = await res.json();
+                this.userResults  = data.results || [];
+                this.userSearched = true;
+            } catch (error) {
+                console.error('[LDAP DEBUG] searchUsers error', error);
+                this.userSearched = true;
+            } finally {
+                this.searchingUsers = false;
+            }
+        },
+
+        async searchGroups() {
+            if (!this.groupQuery.trim()) return;
+            this.searchingGroups = true;
+            this.groupSearched   = false;
+            this.groupResults    = [];
+            try {
+                const res = await fetch('/admin/api/ldap/search-groups', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify({ q: this.groupQuery, ...this.cfg }),
+                });
+                const data = await res.json();
+                this.groupResults  = data.results || [];
+                this.groupSearched = true;
+            } catch (error) {
+                console.error('[LDAP DEBUG] searchGroups error', error);
+                this.groupSearched = true;
+            } finally {
+                this.searchingGroups = false;
+            }
+        },
+
+        async loadUserGroups(username) {
+            this.membershipTarget  = username;
+            this.membershipGroups  = [];
+            this.membershipError   = "";
+            this.loadingMembership = true;
+            try {
+                const res = await fetch('/admin/api/ldap/user-groups', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.csrfToken(),
+                    },
+                    body: JSON.stringify({ username, ...this.cfg }),
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    this.membershipGroups = data.groups;
+                } else {
+                    this.membershipError = data.message;
+                }
+            } catch (error) {
+                console.error('[LDAP DEBUG] loadUserGroups error', error);
+                this.membershipError = 'Error al cargar los grupos del usuario.';
+            } finally {
+                this.loadingMembership = false;
+            }
+        },
+
+        clearMembership() {
+            this.membershipTarget = "";
+            this.membershipGroups = [];
+            this.membershipError  = "";
+        },
+    };
+}
+</script>
+{% endblock %}

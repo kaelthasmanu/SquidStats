@@ -1,6 +1,6 @@
-"""Admin backup management routes."""
+"""Admin backup API routes."""
 
-from flask import jsonify, render_template, request, send_file
+from flask import jsonify, request, send_file
 from loguru import logger
 
 from services.auth.auth_service import admin_required
@@ -8,12 +8,6 @@ from services.database import backup_service
 
 
 def register_routes(bp):
-    @bp.route("/backup")
-    @admin_required
-    def backup_config():
-        cfg = backup_service.load_config()
-        return render_template("admin/backup.html", current_config=cfg)
-
     @bp.route("/backup/config", methods=["POST"])
     @admin_required
     def backup_save_config():

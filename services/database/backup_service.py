@@ -12,6 +12,7 @@ Planned (not yet implemented):
 import os
 import re
 import sqlite3
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -33,7 +34,7 @@ FREQUENCY_CHOICES = {
 }
 
 _BACKUP_FILENAME_RE = re.compile(
-    r"^squidstats_backup_[A-Za-z0-9_]+_[0-9]{8}_[0-9]{6}\.sqlite3$"
+    r"^squidstats_backup_[A-Za-z0-9_]+_[0-9]{8}_[0-9]{6}\.(sqlite3|sql)$"
 )
 
 
@@ -124,11 +125,11 @@ def _backup_dir(cfg: dict) -> Path:
 
 def _list_backup_files(backup_dir: Path) -> list[Path]:
     """Return backup files sorted newest-first."""
-    return sorted(
-        backup_dir.glob("squidstats_backup_*.sqlite3"),
-        key=lambda f: f.stat().st_mtime,
-        reverse=True,
-    )
+    files = [
+        *backup_dir.glob("squidstats_backup_*.sqlite3"),
+        *backup_dir.glob("squidstats_backup_*.sql"),
+    ]
+    return sorted(files, key=lambda f: f.stat().st_mtime, reverse=True)
 
 
 def _normalize_backup_filename(filename: str) -> str | None:
@@ -279,23 +280,102 @@ def _sqlite_backup(backup_dir: Path, tag: str) -> Path:
     return dest
 
 
-# MySQL / MariaDB backup (not yet implemented)
+# MySQL / MariaDB backup
 
 
 def _mysql_backup(backup_dir: Path, tag: str) -> Path:
-    raise NotImplementedError(
-        "MySQL/MariaDB backup is not yet implemented. "
-        "Planned: use mysqldump via subprocess."
+    """Backup using mysqldump. Requires mysqldump to be installed."""
+    db_url = Config.DATABASE_URL
+    parsed = urlparse(db_url)
+
+    host = parsed.hostname or "localhost"
+    port = str(parsed.port or 3306)
+    user = parsed.username or "root"
+    password = parsed.password or ""
+    dbname = parsed.path.lstrip("/")
+
+    if not dbname:
+        raise ValueError("No database name found in DATABASE_URL")
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    dest = backup_dir / f"squidstats_backup_{tag}_{timestamp}.sql"
+
+    cmd = [
+        "mysqldump",
+        f"--host={host}",
+        f"--port={port}",
+        f"--user={user}",
+        "--single-transaction",
+        "--routines",
+        "--triggers",
+        dbname,
+    ]
+
+    env = os.environ.copy()
+    if password:
+        env["MYSQL_PWD"] = password
+
+    with open(dest, "w") as f:
+        result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, env=env)
+
+    if result.returncode != 0:
+        dest.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"mysqldump failed (exit {result.returncode}): {result.stderr.decode().strip()}"
+        )
+
+    logger.info(
+        f"MySQL backup created: {dest.name} ({_human_size(dest.stat().st_size)})"
     )
+    return dest
 
 
-# PostgreSQL backup (not yet implemented)
+# PostgreSQL backup
 
 
 def _postgresql_backup(backup_dir: Path, tag: str) -> Path:
-    raise NotImplementedError(
-        "PostgreSQL backup is not yet implemented. Planned: use pg_dump via subprocess."
+    """Backup using pg_dump. Requires pg_dump to be installed."""
+    db_url = Config.DATABASE_URL
+    parsed = urlparse(db_url)
+
+    host = parsed.hostname or "localhost"
+    port = str(parsed.port or 5432)
+    user = parsed.username or "postgres"
+    password = parsed.password or ""
+    dbname = parsed.path.lstrip("/")
+
+    if not dbname:
+        raise ValueError("No database name found in DATABASE_URL")
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    dest = backup_dir / f"squidstats_backup_{tag}_{timestamp}.sql"
+
+    cmd = [
+        "pg_dump",
+        f"--host={host}",
+        f"--port={port}",
+        f"--username={user}",
+        "--no-password",
+        "--format=plain",
+        dbname,
+    ]
+
+    env = os.environ.copy()
+    env["PGPASSWORD"] = password
+
+    with open(dest, "w") as f:
+        result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, env=env)
+
+    if result.returncode != 0:
+        dest.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"pg_dump failed (exit {result.returncode}): {result.stderr.decode().strip()}"
+        )
+
+    logger.info(
+        f"PostgreSQL backup created: {dest.name} ({_human_size(dest.stat().st_size)})"
     )
+    return dest
 
 
 # Public API

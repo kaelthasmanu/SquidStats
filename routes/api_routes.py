@@ -3,17 +3,24 @@ from loguru import logger
 from werkzeug.exceptions import BadRequest
 
 from database.database import get_session
-from routes.admin.helpers import json_error, json_success
+from routes.admin.helpers import get_config_manager, json_error, json_success
 from services.analytics.auditoria_service import (
     get_all_usernames,
     run_audit_operation,
 )
-from services.auth.auth_service import admin_required
+from services.auth.auth_service import api_admin_required
 from services.notifications.notifications import (
     delete_all_notifications,
     delete_notification,
     get_all_notifications,
     mark_notifications_read,
+)
+from services.squid.user_restrictions_service import (
+    block_user,
+    get_user_status,
+    throttle_user,
+    unblock_user,
+    unthrottle_user,
 )
 from services.system.metrics_service import MetricsService
 from services.system.system_service import reload_squid, restart_squid
@@ -171,7 +178,7 @@ def api_delete_all_notifications():
 
 
 @api_bp.route("/restart-squid", methods=["POST"])
-@admin_required
+@api_admin_required
 def api_restart_squid():
     success, message, details = restart_squid()
     if success:
@@ -184,7 +191,7 @@ def api_restart_squid():
 
 
 @api_bp.route("/reload-squid", methods=["POST"])
-@admin_required
+@api_admin_required
 def api_reload_squid():
     success, message, details = reload_squid()
     if success:
@@ -201,3 +208,139 @@ def validate_required_fields(audit_type, data):
     missing = [field for field in required if not data.get(field)]
     if missing:
         raise BadRequest(f"Missing required fields: {', '.join(missing)}")
+
+
+# ---------------------------------------------------------------------------
+# Connections: block / throttle actions
+# ---------------------------------------------------------------------------
+
+
+@api_bp.route("/connections/status", methods=["GET"])
+@api_admin_required
+def api_connection_status():
+    ip = request.args.get("ip", "").strip()
+    if not ip:
+        return json_error("Se requiere el parámetro 'ip'", 400)
+    db = get_session()
+    try:
+        status = get_user_status(ip, db)
+        return jsonify({"status": "success", **status})
+    except Exception:
+        logger.exception("Error getting connection status")
+        return json_error("Error interno", 500)
+    finally:
+        db.close()
+
+
+@api_bp.route("/connections/block", methods=["POST"])
+@api_admin_required
+def api_block_user():
+    data = request.get_json(silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    ip = str(data.get("ip", "")).strip()
+    if not username or not ip:
+        return json_error("Se requieren los campos 'username' e 'ip'", 400)
+
+    db = get_session()
+    try:
+        cm = get_config_manager()
+        success, message = block_user(username, ip, db, cm)
+        if success:
+            reload_squid()
+            return json_success(message)
+        return json_error(message, 409)
+    except Exception:
+        logger.exception("Error blocking user")
+        return json_error("Error interno al bloquear el usuario", 500)
+    finally:
+        db.close()
+
+
+@api_bp.route("/connections/unblock", methods=["POST"])
+@api_admin_required
+def api_unblock_user():
+    data = request.get_json(silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    ip = str(data.get("ip", "")).strip()
+    if not username or not ip:
+        return json_error("Se requieren los campos 'username' e 'ip'", 400)
+
+    db = get_session()
+    try:
+        cm = get_config_manager()
+        success, message = unblock_user(username, ip, db, cm)
+        if success:
+            reload_squid()
+            return json_success(message)
+        return json_error(message, 409)
+    except Exception:
+        logger.exception("Error unblocking user")
+        return json_error("Error interno al desbloquear el usuario", 500)
+    finally:
+        db.close()
+
+
+@api_bp.route("/connections/throttle", methods=["POST"])
+@api_admin_required
+def api_throttle_user():
+    data = request.get_json(silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    ip = str(data.get("ip", "")).strip()
+    try:
+        pool_number = int(data.get("pool_number"))
+    except (TypeError, ValueError):
+        return json_error("El campo 'pool_number' debe ser un entero", 400)
+    if not username or not ip:
+        return json_error(
+            "Se requieren los campos 'username', 'ip' y 'pool_number'", 400
+        )
+
+    db = get_session()
+    try:
+        cm = get_config_manager()
+        success, message = throttle_user(username, ip, pool_number, db, cm)
+        if success:
+            reload_squid()
+            return json_success(message)
+        return json_error(message, 409)
+    except Exception:
+        logger.exception("Error throttling user")
+        return json_error("Error interno al reducir la velocidad", 500)
+    finally:
+        db.close()
+
+
+@api_bp.route("/connections/unthrottle", methods=["POST"])
+@api_admin_required
+def api_unthrottle_user():
+    data = request.get_json(silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    ip = str(data.get("ip", "")).strip()
+    if not username or not ip:
+        return json_error("Se requieren los campos 'username' e 'ip'", 400)
+
+    db = get_session()
+    try:
+        cm = get_config_manager()
+        success, message = unthrottle_user(username, ip, db, cm)
+        if success:
+            reload_squid()
+            return json_success(message)
+        return json_error(message, 409)
+    except Exception:
+        logger.exception("Error unthrottling user")
+        return json_error("Error interno al restaurar la velocidad", 500)
+    finally:
+        db.close()
+
+
+@api_bp.route("/delay-pools", methods=["GET"])
+@api_admin_required
+def api_list_delay_pools():
+    try:
+        cm = get_config_manager()
+        pools = cm.get_delay_pools()
+        return jsonify({"status": "success", "pools": pools})
+    except Exception:
+        logger.exception("Error listing delay pools")
+        return json_error("Error interno al listar delay pools", 500)
