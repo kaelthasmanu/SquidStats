@@ -88,7 +88,6 @@ def load_config() -> dict:
             "bind_password": bind_password,
             "base_dn": row.base_dn or "",
         }
-        print(f"[LDAP DEBUG] load_config: loaded row id={row.id} config={cfg}")
         return cfg
     except Exception as exc:
         logger.warning(f"Could not read ldap_config from DB, using defaults: {exc}")

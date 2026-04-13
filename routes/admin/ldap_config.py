@@ -73,7 +73,6 @@ def register_routes(bp):
                 {
                     "status": "error",
                     "message": "Error interno al probar LDAP.",
-                    "details": str(exc),
                 }
             ), 500
 
