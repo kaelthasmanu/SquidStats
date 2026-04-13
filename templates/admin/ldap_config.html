@@ -340,7 +340,6 @@ function ldapApp() {
         init() {
             if (this.cfg.host || this.cfg.base_dn || this.cfg.bind_dn) {
                 this.clientNotice = 'Configuración cargada desde la base de datos.';
-                console.log('[LDAP DEBUG] init: loaded DB config', this.cfg);
             } else {
                 this.loadLocalConfig();
             }
@@ -360,7 +359,6 @@ function ldapApp() {
                         use_ssl: data.use_ssl === true || data.use_ssl === 'true',
                     };
                     this.clientNotice = 'Configuración cargada desde el navegador. Los cambios se guardan localmente.';
-                    console.log('[LDAP DEBUG] loadLocalConfig', this.cfg);
                 }
             } catch (error) {
                 console.warn('[LDAP DEBUG] loadLocalConfig error', error);
@@ -371,7 +369,6 @@ function ldapApp() {
             try {
                 localStorage.setItem(this.storageKey, JSON.stringify(this.cfg));
                 this.clientNotice = 'Configuración guardada localmente en el navegador.';
-                console.log('[LDAP DEBUG] saveLocalConfig', this.cfg);
             } catch (error) {
                 console.warn('[LDAP DEBUG] saveLocalConfig error', error);
             }
@@ -381,7 +378,6 @@ function ldapApp() {
             try {
                 localStorage.removeItem(this.storageKey);
                 this.clientNotice = 'Configuración local eliminada.';
-                console.log('[LDAP DEBUG] clearLocalConfig');
             } catch (error) {
                 console.warn('[LDAP DEBUG] clearLocalConfig error', error);
             }
@@ -433,7 +429,6 @@ function ldapApp() {
         async testConnection() {
             this.testingConn = true;
             this.connectionStatus = "Probando…";
-            console.log('[LDAP DEBUG] testConnection sending cfg', this.cfg);
             try {
                 const res = await fetch('/admin/api/ldap/test', {
                     method: 'POST',
@@ -444,7 +439,6 @@ function ldapApp() {
                     body: JSON.stringify(this.cfg),
                 });
                 const data = await res.json();
-                console.log('[LDAP DEBUG] testConnection response', data);
                 this.connectionStatus = data.status === 'success' ? 'Conectado' : 'Error';
                 this.showAlert(data.message, data.status);
                 if (data.status === 'success') this.loadStats();
