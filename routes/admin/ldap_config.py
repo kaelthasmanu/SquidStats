@@ -12,10 +12,8 @@ def _load_request_config():
     if isinstance(data, dict) and any(
         key in data for key in ("host", "port", "bind_dn", "base_dn")
     ):
-        print(f"[LDAP DEBUG] _load_request_config: using request config {data}")
         return data
     cfg = ldap_config_service.load_config()
-    print(f"[LDAP DEBUG] _load_request_config: loaded db config {cfg}")
     return cfg
 
 
@@ -54,18 +52,13 @@ def register_routes(bp):
     def ldap_test():
         raw = request.get_data(as_text=True)
         headers = dict(request.headers)
-        print(f"[LDAP DEBUG] ldap_test: headers={headers}")
-        print(f"[LDAP DEBUG] ldap_test: raw body={raw}")
         cfg = request.get_json(silent=True)
         if cfg is None:
             cfg = request.get_json(force=True, silent=True)
         cfg = cfg or {}
-        print(f"[LDAP DEBUG] ldap_test: parsed cfg={cfg}")
         if not cfg:
             cfg = ldap_config_service.load_config()
-        print(f"[LDAP DEBUG] ldap_test: effective cfg={cfg}")
         if not cfg.get("host"):
-            print("[LDAP DEBUG] ldap_test: host is missing, returning 400")
             return jsonify(
                 {
                     "status": "error",
@@ -75,11 +68,9 @@ def register_routes(bp):
             ), 400
         try:
             result = ldap_service.test_connection(cfg)
-            print(f"[LDAP DEBUG] ldap_test: result={result}")
             return jsonify(result)
         except Exception as exc:
             logger.exception(f"Unexpected error during ldap_test: {exc}")
-            print(f"[LDAP DEBUG] ldap_test: unexpected exception -> {exc}")
             return jsonify(
                 {
                     "status": "error",
