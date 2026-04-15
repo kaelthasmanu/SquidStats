@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from loguru import logger
+from flask_babel import gettext as _
 from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
 
@@ -298,7 +299,7 @@ def get_default_icon(notification_type):
     icons = {
         "info": "fa-info-circle",
         "warning": "fa-exclamation-triangle",
-        "error": "fa-times-circle",
+        "error": _("fa-times-circle"),
         "success": "fa-check-circle",
     }
     return icons.get(notification_type, "fa-bell")

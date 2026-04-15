@@ -4,6 +4,7 @@ from sqlalchemy import text
 from config import Config
 from database.database import get_engine, get_session
 from services.database.admin_helpers import get_all_tables_stats
+from flask_babel import gettext as _
 
 
 def get_tables_info():
@@ -29,7 +30,7 @@ def get_tables_info():
 
     except Exception:
         logger.exception("Error getting database tables")
-        return {"status": "error", "message": "Error interno del servidor"}, 500
+        return {"status": "error", "message": _("Error interno del servidor")}, 500
 
     finally:
         if session:
@@ -146,7 +147,7 @@ def get_db_health():
 
     except Exception:
         logger.exception("Error getting DB health")
-        return {"status": "error", "message": "Error interno del servidor"}, 500
+        return {"status": "error", "message": _("Error interno del servidor")}, 500
 
     finally:
         if session:
@@ -193,7 +194,7 @@ def run_integrity_check():
 
     except Exception:
         logger.exception("Error running integrity check")
-        return {"status": "error", "message": "Error al ejecutar la verificación"}, 500
+        return {"status": "error", "message": _("Error al ejecutar la verificación")}, 500
 
     finally:
         if session:
