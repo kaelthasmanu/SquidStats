@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 
 from config import Config
 
+from loguru import logger
+
 load_dotenv()
 
 SQUID_HOST = Config.SQUID_HOST
@@ -72,6 +74,11 @@ def _send_http_request(host: str, port: int, request: str, timeout: float = 5.0)
     return response.decode("utf-8", errors="replace")
 
 
+def _squid_error_response(host: str, port: int) -> str:
+    logger.exception(f"Error fetching Squid data from {host}:{port}")
+    return "error: unable to fetch squid data"
+
+
 def fetch_squid_data():
     try:
         # Build HTTP/1.1 request similar to curl
@@ -111,8 +118,8 @@ def fetch_squid_data():
             )
 
         return response_text
-    except Exception as e:
-        return str(e)
+    except Exception:
+        return _squid_error_response(SQUID_HOST, SQUID_PORT)
 
 
 def fetch_squid_data_from_host(host: str, port: int) -> str:
@@ -149,8 +156,8 @@ def fetch_squid_data_from_host(host: str, port: int) -> str:
             response_text = _send_http_request(host, port, legacy_request, timeout=5.0)
 
         return response_text
-    except Exception as e:
-        return str(e)
+    except Exception:
+        return _squid_error_response(host, port)
 
 
 def fetch_all_squid_data() -> list[dict]:
