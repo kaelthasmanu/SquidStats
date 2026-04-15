@@ -127,7 +127,10 @@ def fetch_squid_info_stats():
         parts = response_text.split("\r\n\r\n", 1)
         data = parts[1] if len(parts) > 1 else response_text
     except Exception as e:
-        logger.exception("Error fetching squid info stats")
+        if isinstance(e, (TimeoutError, ConnectionRefusedError, socket.gaierror)):
+            logger.warning(f"Could not reach Squid at {SQUID_HOST}:{SQUID_PORT}: {type(e).__name__}: {e}")
+        else:
+            logger.exception("Error fetching squid info stats")
         default_stats["error"] = "Error obteniendo información de Squid"
         if isinstance(e, TimeoutError):
             default_stats["connection_status"] = "timeout"
