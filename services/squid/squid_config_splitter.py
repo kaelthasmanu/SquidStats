@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from loguru import logger
+from flask_babel import gettext as _
 
 
 @dataclass(frozen=True)
@@ -619,7 +620,7 @@ class SquidConfigSplitter:
             logger.error(f"Error de permisos al leer archivos: {e}")
             return {
                 "status": "error",
-                "message": "No se tienen permisos suficientes para leer los archivos",
+                "message": _("No se tienen permisos suficientes para leer los archivos"),
                 "code": 403,
             }
 
@@ -627,6 +628,6 @@ class SquidConfigSplitter:
             logger.exception("Error al obtener archivos de configuración")
             return {
                 "status": "error",
-                "message": "Error interno al obtener los archivos",
+                "message": _("Error interno al obtener los archivos"),
                 "code": 500,
             }
