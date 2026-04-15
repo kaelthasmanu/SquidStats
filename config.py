@@ -151,3 +151,11 @@ class Config:
 
     # Squid configuration path
     SQUID_CONFIG_PATH = safe_get_env("SQUID_CONFIG_PATH", "/etc/squid/squid.conf")
+
+    # Internationalization (i18n)
+    BABEL_DEFAULT_LOCALE = safe_get_env("BABEL_DEFAULT_LOCALE", "es")
+    BABEL_SUPPORTED_LOCALES = ["es", "en"]
+    LANGUAGES = {
+        "es": "Español",
+        "en": "English",
+    }
