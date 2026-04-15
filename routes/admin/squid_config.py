@@ -17,6 +17,7 @@ from services.squid.split_config_service import (
 )
 from services.squid.squid_config_splitter import SquidConfigSplitter
 
+from flask_babel import gettext as _
 from .helpers import (
     flash_error_with_details,
     get_config_manager,
@@ -53,7 +54,7 @@ def register_routes(bp):
                 return redirect(url_for("admin.view_config"))
             else:
                 flash_error_with_details(
-                    "Error saving configuration", Exception(message)
+                    _("Error saving configuration"), Exception(message)
                 )
         return render_template(
             "admin/edit_config.html", config_content=cm.config_content
@@ -78,7 +79,7 @@ def register_routes(bp):
             existing_vars[key] = value
 
         save_env_vars(existing_vars)
-        flash("Variables de entorno guardadas exitosamente", "success")
+        flash(_("Variables de entorno guardadas exitosamente"), "success")
         return redirect(url_for("admin.view_config"))
 
     # ------------------------------------------------------------------
@@ -101,7 +102,7 @@ def register_routes(bp):
             )
         except Exception as e:
             logger.exception("Error al cargar la vista de división de configuración")
-            flash_error_with_details("Error al cargar la vista", e)
+            flash_error_with_details(_("Error al cargar la vista"), e)
             return redirect(url_for("admin.admin_dashboard"))
 
     @bp.route("/api/split-config", methods=["POST"])

@@ -6,6 +6,7 @@ from services.auth import user_service
 from services.auth.auth_service import AuthService, admin_required
 
 from .helpers import flash_and_redirect
+from flask_babel import gettext as _
 
 
 def register_routes(bp):
@@ -49,7 +50,7 @@ def register_routes(bp):
         users = AuthService.get_all_users()
         user = next((u for u in users if u["id"] == user_id), None)
         if not user:
-            flash("Usuario no encontrado", "error")
+            flash(_("Usuario no encontrado"), "error")
             return redirect(url_for("admin.manage_users"))
 
         return render_template("admin/user_form.html", user=user, action="edit")
