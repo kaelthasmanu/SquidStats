@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from loguru import logger
+from flask_babel import gettext as _
 from sqlalchemy import func, inspect, or_, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -37,7 +38,7 @@ def find_by_keyword(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     all_results = []
 
@@ -112,14 +113,14 @@ def find_social_media_activity(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     domain_list = []
     for site_name in sites:
         if site_name in SOCIAL_MEDIA_DOMAINS:
             domain_list.extend(SOCIAL_MEDIA_DOMAINS[site_name])
     if not domain_list:
-        return {"error": "No valid domains specified for search."}
+        return {"error": _("No valid domains specified for search.")}
 
     all_results = []
 
@@ -208,7 +209,7 @@ def find_by_ip(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     all_results = []
 
@@ -279,7 +280,7 @@ def find_by_response_code(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     all_results = []
 
@@ -351,7 +352,7 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, A
     try:
         selected_date = datetime.strptime(date_str, "%Y-%m-%d")
     except ValueError:
-        return {"error": "Invalid date format. Use YYYY-MM-DD."}
+        return {"error": _("Invalid date format. Use YYYY-MM-DD.")}
 
     date_suffix = selected_date.strftime("%Y%m%d")
 
@@ -395,11 +396,11 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, A
 
     except SQLAlchemyError as e:
         print(f"Database error in get_daily_activity: {e}")
-        return {"error": "A database error occurred while calculating daily activity."}
+        return {"error": _("A database error occurred while calculating daily activity.")}
     except Exception as e:
         print(f"General error in get_daily_activity: {e}")
         return {
-            "error": "An unexpected error occurred while calculating daily activity."
+            "error": _("An unexpected error occurred while calculating daily activity.")
         }
 
 
@@ -450,7 +451,7 @@ def get_user_activity_summary(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     total_requests = 0
     total_data = 0
@@ -530,7 +531,7 @@ def get_top_users_by_data(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     user_data = defaultdict(int)
 
@@ -633,7 +634,7 @@ def get_top_users_by_requests(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     user_reqs: defaultdict[str, int] = defaultdict(int)
 
@@ -676,7 +677,7 @@ def get_top_urls_by_data(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     url_data = defaultdict(int)
 
@@ -722,7 +723,7 @@ def get_top_ips_by_data(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     ip_data: defaultdict[str, int] = defaultdict(int)
 
@@ -767,7 +768,7 @@ def find_denied_access(
     inspector = inspect(db.get_bind())
     tables = _get_tables_in_range(inspector, start_date, end_date)
     if not tables:
-        return {"error": "No data for the selected dates."}
+        return {"error": _("No data for the selected dates.")}
 
     all_results = []
 
@@ -1145,7 +1146,7 @@ AUDIT_HANDLERS = {
 
 def run_audit_operation(db, audit_type, data):
     if audit_type not in AUDIT_HANDLERS:
-        return {"error": "Tipo de auditoría inválido"}
+        return {"error": _("Tipo de auditoría inválido")}
 
     handler = AUDIT_HANDLERS[audit_type]
 
@@ -1165,4 +1166,4 @@ def run_audit_operation(db, audit_type, data):
         import traceback
 
         traceback.print_exc()
-        return {"error": "Error interno ejecutando la auditoría"}
+        return {"error": _("Error interno ejecutando la auditoría")}

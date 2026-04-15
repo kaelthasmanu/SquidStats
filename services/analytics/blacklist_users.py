@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from database.database import get_dynamic_models, get_engine
 from database.models.models import BlacklistDomain
+from flask_babel import gettext as _
 
 # ---------------------------------------------------------------------------
 # Module-level TTL cache
@@ -218,7 +219,7 @@ def find_blacklisted_sites(
             )
         except SQLAlchemyError:
             logger.exception("Database error while searching blacklisted sites")
-            return {"error": "Error interno del servidor"}
+            return {"error": _("Error interno del servidor")}
 
         sorted_users = sorted(
             user_domain_counts.items(),

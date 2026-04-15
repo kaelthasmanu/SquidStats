@@ -17,6 +17,7 @@ from loguru import logger
 
 from config import Config
 from database.database import AdminUser, get_session
+from flask_babel import gettext as _
 
 
 class AuthConfig:
@@ -465,7 +466,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not AuthService.is_authenticated():
-            flash("Por favor, inicia sesión para acceder a esta página.", "warning")
+            flash(_("Por favor, inicia sesión para acceder a esta página."), "warning")
             # Store the original URL to redirect after login
             session["next_url"] = request.url
             return redirect(url_for("auth.login"))
@@ -485,12 +486,12 @@ def admin_required(f):
         user = AuthService.get_current_user()
 
         if not user:
-            flash("Por favor, inicia sesión para acceder a esta página.", "warning")
+            flash(_("Por favor, inicia sesión para acceder a esta página."), "warning")
             session["next_url"] = request.url
             return redirect(url_for("auth.login"))
 
         if user.get("role") != "admin":
-            flash("No tienes permisos para acceder a esta página.", "error")
+            flash(_("No tienes permisos para acceder a esta página."), "error")
             return redirect(url_for("main.index"))
 
         return f(*args, **kwargs)
@@ -508,7 +509,7 @@ def api_auth_required(f):
     def decorated_function(*args, **kwargs):
         if not AuthService.is_authenticated():
             return {
-                "message": "Necesitas iniciar sesión como admin.",
+                "message": _("Necesitas iniciar sesión como admin."),
                 "status": "error",
             }, 401
         return f(*args, **kwargs)
@@ -527,12 +528,12 @@ def api_admin_required(f):
         user = AuthService.get_current_user()
         if not user:
             return {
-                "message": "Necesitas iniciar sesión como admin.",
+                "message": _("Necesitas iniciar sesión como admin."),
                 "status": "error",
             }, 401
         if user.get("role") != "admin":
             return {
-                "message": "No tienes permisos para acceder a esta página.",
+                "message": _("No tienes permisos para acceder a esta página."),
                 "status": "error",
             }, 403
         return f(*args, **kwargs)
