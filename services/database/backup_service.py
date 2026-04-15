@@ -22,6 +22,7 @@ from loguru import logger
 from config import Config
 from database.database import get_session
 from database.models.models import BackupConfig
+from flask_babel import gettext as _
 
 # Constants
 
@@ -459,10 +460,10 @@ def delete_backup(filename: str) -> dict:
 
     target = _get_safe_backup_path(bdir, filename)
     if target is None:
-        return {"status": "error", "message": "Nombre de archivo inválido"}
+        return {"status": "error", "message": _("Nombre de archivo inválido")}
 
     if not target.exists():
-        return {"status": "error", "message": "La salva no existe"}
+        return {"status": "error", "message": _("La salva no existe")}
 
     target.unlink()
     logger.info(f"Backup deleted: {target.name}")
