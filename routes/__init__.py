@@ -6,6 +6,7 @@ Contains all route blueprints organized by functionality.
 from .admin import admin_bp
 from .api_routes import api_bp
 from .auth_routes import auth_bp
+from .i18n_routes import i18n_bp
 from .logs_routes import logs_bp
 from .main_routes import main_bp
 from .reports_routes import reports_bp
@@ -16,6 +17,7 @@ def register_routes(app):
     """Register all blueprints with the Flask application."""
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(i18n_bp)
     app.register_blueprint(logs_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
