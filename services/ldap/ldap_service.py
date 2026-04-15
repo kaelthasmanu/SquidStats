@@ -12,6 +12,7 @@ from ldap3 import (
     Tls,
     core,
 )
+from ldap3.utils.conv import escape_filter_chars
 from loguru import logger
 
 # ---------------------------------------------------------------------------
@@ -89,12 +90,18 @@ def get_stats(cfg: dict) -> dict:
         return {"status": "error", "message": str(exc), "users": 0, "groups": 0}
 
 
+def _escape_ldap_filter_value(value: str) -> str:
+    """Escape a user-controlled string for safe LDAP filtering."""
+    return escape_filter_chars(value or "")
+
+
 def search_users(cfg: dict, query: str, limit: int = 50) -> dict:
     """Search users whose cn, sAMAccountName or mail matches *query*."""
     query = query.strip().replace("*", "").replace("(", "").replace(")", "")
+    escaped_query = _escape_ldap_filter_value(query)
     filter_str = (
         f"(&(objectClass=person)"
-        f"(|(cn=*{query}*)(sAMAccountName=*{query}*)(mail=*{query}*)(displayName=*{query}*)))"
+        f"(|(cn=*{escaped_query}*)(sAMAccountName=*{escaped_query}*)(mail=*{escaped_query}*)(displayName=*{escaped_query}*)))"
     )
     try:
         conn = _connect(cfg)
@@ -134,7 +141,8 @@ def search_users(cfg: dict, query: str, limit: int = 50) -> dict:
 def search_groups(cfg: dict, query: str, limit: int = 50) -> dict:
     """Search groups whose cn matches *query*."""
     query = query.strip().replace("*", "").replace("(", "").replace(")", "")
-    filter_str = f"(&(objectClass=group)(cn=*{query}*))"
+    escaped_query = _escape_ldap_filter_value(query)
+    filter_str = f"(&(objectClass=group)(cn=*{escaped_query}*))"
     try:
         conn = _connect(cfg)
         conn.search(
@@ -164,13 +172,14 @@ def search_groups(cfg: dict, query: str, limit: int = 50) -> dict:
 def get_user_groups(cfg: dict, username: str) -> dict:
     """Return the groups that *username* (sAMAccountName) belongs to."""
     username = username.strip().replace("*", "").replace("(", "").replace(")", "")
+    escaped_username = _escape_ldap_filter_value(username)
     try:
         conn = _connect(cfg)
 
         # Find the user DN first
         conn.search(
             cfg["base_dn"],
-            f"(&(objectClass=person)(sAMAccountName={username}))",
+            f"(&(objectClass=person)(sAMAccountName={escaped_username}))",
             attributes=["distinguishedName", "memberOf", "cn", "displayName"],
         )
         if not conn.entries:
