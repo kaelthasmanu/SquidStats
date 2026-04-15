@@ -137,13 +137,30 @@ jobs:
         # Iniciar squid
         service squid start || squid
 
-    - name: Generate Squid access log
+    - name: Wait for Squid to become available and generate access log
       run: |
-        # Esperar a que squid esté listo
-        sleep 2
-        
+        for i in $(seq 1 30); do
+          if curl -s --max-time 5 http://127.0.0.1:3128/ > /dev/null 2>&1; then
+            echo "Squid responding on port 3128"
+            break
+          fi
+          echo "Waiting for Squid to start... ($i/30)"
+          sleep 1
+        done
+
+        if ! curl -s --max-time 5 http://127.0.0.1:3128/ > /dev/null 2>&1; then
+          echo "ERROR: Squid failed to start or is not listening on 127.0.0.1:3128"
+          echo "=== Squid process list ==="
+          ps -ef | grep squid | grep -v grep || true
+          echo "=== Squid cache log ==="
+          cat /var/log/squid/cache.log 2>/dev/null || true
+          echo "=== Squid access log ==="
+          cat /var/log/squid/access.log 2>/dev/null || true
+          exit 1
+        fi
+
         # Generar una entrada en el log accediendo a squid
-        curl -s -o /dev/null http://127.0.0.1:3128/ || echo "Squid access logged"
+        curl -s -o /dev/null http://127.0.0.1:3128/ || true
         
         # Verificar que el log existe
         ls -la /var/log/squid/access.log || echo "Log file check"
