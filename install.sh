@@ -335,9 +335,6 @@ createEnvFile() {
 VERSION=2.3.2
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
-# Multi-proxy load-balancing (optional): comma-separated host:port list.
-# When set, overrides SQUID_HOST/SQUID_PORT for the active-connections page.
-# Example: SQUID_HOSTS="192.168.0.10:3128,192.168.0.11:3128"
 SQUID_HOSTS=
 LOG_FORMAT=DETAILED
 FLASK_DEBUG=True
