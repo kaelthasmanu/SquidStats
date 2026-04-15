@@ -10,7 +10,7 @@ from parsers.connections import group_by_user, parse_raw_data
 from parsers.squid_info import fetch_squid_info_stats
 from routes.admin.helpers import sanitize_error_page_message
 from services.notifications.notifications import get_all_notifications
-from services.squid.fetch_data import fetch_squid_data
+from services.squid.fetch_data import fetch_all_squid_data
 from services.system.system_info import get_system_type
 from utils.updateSquid import update_squid
 from utils.updateSquidStats import updateSquidStats
@@ -58,23 +58,34 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
     """
     t0 = time.time()
     try:
-        raw_data = fetch_squid_data()
-        if not raw_data:
-            logger.error("fetch_squid_data() returned empty response")
-            return None, _build_error_page("No data from Squid", 502)
-        if isinstance(raw_data, str) and raw_data.strip().lower().startswith("error"):
-            logger.error(f"Failed to fetch Squid data: {raw_data}")
-            return None, _build_error_page("Error connecting to Squid", 502)
+        proxy_results = fetch_all_squid_data()
 
-        try:
-            connections = parse_raw_data(raw_data)
-        except Exception:
-            logger.exception("Error parsing Squid connections")
-            return None, _build_error_page("Error processing Squid data", 500)
+        # Collect per-proxy status for the UI
+        proxy_statuses: list[dict] = []
+        all_connections: list = []
 
-        if not connections:
-            logger.warning("No active connections detected in Squid output")
-            connections = []
+        for proxy in proxy_results:
+            raw_data = proxy["data"]
+            label = proxy["label"]
+            ok = proxy["ok"]
+
+            proxy_statuses.append({"label": label, "ok": ok})
+
+            if not ok:
+                logger.warning(f"Could not fetch data from proxy {label}: {raw_data}")
+                continue
+
+            try:
+                conns = parse_raw_data(raw_data, source_host=label)
+                all_connections.extend(conns)
+            except Exception:
+                logger.exception(f"Error parsing connections from proxy {label}")
+
+        if not all_connections and all(not p["ok"] for p in proxy_results):
+            logger.error("All Squid proxies returned errors")
+            return None, _build_error_page("No data from any Squid proxy", 502)
+
+        connections = all_connections
 
         try:
             grouped_connections = group_by_user(connections)
@@ -97,6 +108,8 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
             else "No disponible"
         )
 
+        multi_proxy = len(proxy_results) > 1
+
         context: dict[str, Any] = {
             "grouped_connections": grouped_connections,
             "valid_users": valid_users,
@@ -107,6 +120,8 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
             "build_time_ms": int((time.time() - t0) * 1000),
             "connection_count": len(connections),
             "system_type": get_system_type(),
+            "proxy_statuses": proxy_statuses,
+            "multi_proxy": multi_proxy,
         }
         return context, None
     except Exception:  # Fallback catch-all
@@ -134,6 +149,8 @@ def index():
             build_time_ms=context["build_time_ms"],
             connection_count=context["connection_count"],
             system_type=context["system_type"],
+            proxy_statuses=context["proxy_statuses"],
+            multi_proxy=context["multi_proxy"],
         )
 
     # Normal request: return the complete page
