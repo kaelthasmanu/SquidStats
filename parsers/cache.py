@@ -166,7 +166,10 @@ def fetch_squid_cache_stats():
                     )
                     break
             except Exception:
-                logger.debug(f"[cache] Error decoding response on attempt {idx + 1}", exc_info=True)
+                logger.debug(
+                    f"[cache] Error decoding response on attempt {idx + 1}",
+                    exc_info=True,
+                )
                 response = b""
                 continue
 

@@ -32,11 +32,15 @@ def get_squid_hosts() -> list[tuple[str, int]]:
                 if entry.startswith("["):
                     bracket_end = entry.rfind("]")
                     host = entry[1:bracket_end]
-                    port = int(entry[bracket_end + 2:]) if bracket_end + 2 < len(entry) else 3128
+                    port = (
+                        int(entry[bracket_end + 2 :])
+                        if bracket_end + 2 < len(entry)
+                        else 3128
+                    )
                 else:
                     last_colon = entry.rfind(":")
                     host = entry[:last_colon]
-                    port_str = entry[last_colon + 1:]
+                    port_str = entry[last_colon + 1 :]
                     try:
                         port = int(port_str)
                     except ValueError:
@@ -168,7 +172,11 @@ def fetch_all_squid_data() -> list[dict]:
     def _fetch(host: str, port: int) -> dict:
         label = f"{host}:{port}"
         raw = fetch_squid_data_from_host(host, port)
-        ok = bool(raw) and not raw.strip().lower().startswith("error") and not raw.strip().lower().startswith("[errno")
+        ok = (
+            bool(raw)
+            and not raw.strip().lower().startswith("error")
+            and not raw.strip().lower().startswith("[errno")
+        )
         return {"host": host, "port": port, "label": label, "data": raw, "ok": ok}
 
     if len(hosts) == 1:
