@@ -6,6 +6,7 @@ from loguru import logger
 from database.database import get_session
 from services.analytics.blacklist_users import find_blacklisted_sites
 from services.analytics.fetch_data_logs import get_users_logs
+from flask_babel import gettext as _
 
 logs_bp = Blueprint("logs", __name__)
 
@@ -47,10 +48,10 @@ def get_logs_by_date():
         )
         return jsonify(users_data)
     except ValueError:
-        return jsonify({"error": "Invalid date format"}), 400
+        return jsonify({"error": _("Invalid date format")}), 400
     except Exception:
         logger.exception("Error en get-logs-by-date")
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": _("Internal server error")}), 500
     finally:
         if db:
             db.close()
