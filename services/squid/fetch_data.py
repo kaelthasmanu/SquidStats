@@ -4,10 +4,9 @@ import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from dotenv import load_dotenv
+from loguru import logger
 
 from config import Config
-
-from loguru import logger
 
 load_dotenv()
 
