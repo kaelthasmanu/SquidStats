@@ -4,44 +4,44 @@
 <div class="space-y-4 sm:space-y-6">
     <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Gestión de ACLs</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">{{ _("Gestión de ACLs") }}</h2>
             <button onclick="toggleAddForm()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-plus mr-2"></i>Agregar ACL
+                <i class="fas fa-plus mr-2"></i>{{ _("Agregar ACL") }}
             </button>
         </div>
 
         <!-- Add ACL Form -->
         <div id="addAclForm" class="hidden bg-gray-50 p-4 sm:p-6 rounded-lg mb-6">
-            <h3 class="text-base sm:text-lg font-semibold mb-4">Agregar Nueva ACL</h3>
+            <h3 class="text-base sm:text-lg font-semibold mb-4">{{ _("Agregar Nueva ACL") }}</h3>
             <form method="POST" action="/admin/acls/add" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre:</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Nombre:") }}</label>
                     <input type="text" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo:</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Tipo:") }}</label>
                     <select name="type" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="src">src (IP origen)</option>
-                        <option value="dst">dst (IP destino)</option>
-                        <option value="dstdomain">dstdomain (Dominio destino)</option>
-                        <option value="port">port (Puerto)</option>
-                        <option value="time">time (Tiempo)</option>
-                        <option value="method">method (Método HTTP)</option>
-                        <option value="proxy_auth">proxy_auth (Autenticación)</option>
-                        <option value="maxconn">maxconn (Conexiones máximas)</option>
+                        <option value="src">{{ _("src (IP origen)") }}</option>
+                        <option value="dst">{{ _("dst (IP destino)") }}</option>
+                        <option value="dstdomain">{{ _("dstdomain (Dominio destino)") }}</option>
+                        <option value="port">{{ _("port (Puerto)") }}</option>
+                        <option value="time">{{ _("time (Tiempo)") }}</option>
+                        <option value="method">{{ _("method (Método HTTP)") }}</option>
+                        <option value="proxy_auth">{{ _("proxy_auth (Autenticación)") }}</option>
+                        <option value="maxconn">{{ _("maxconn (Conexiones máximas)") }}</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Valor:</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Valor:") }}</label>
                     <input type="text" name="value" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="sm:col-span-2 lg:col-span-3 flex flex-col sm:flex-row gap-2 sm:space-x-4 sm:gap-0">
                     <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-save mr-2"></i>Guardar ACL
+                        <i class="fas fa-save mr-2"></i>{{ _("Guardar ACL") }}
                     </button>
                     <button type="button" onclick="toggleAddForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-times mr-2"></i>Cancelar
+                        <i class="fas fa-times mr-2"></i>{{ _("Cancelar") }}
                     </button>
                 </div>
             </form>
@@ -49,37 +49,37 @@
 
         <!-- Edit ACL Form -->
         <div id="editAclForm" class="hidden bg-yellow-50 p-4 sm:p-6 rounded-lg mb-6">
-            <h3 class="text-base sm:text-lg font-semibold mb-4">Editar ACL</h3>
+            <h3 class="text-base sm:text-lg font-semibold mb-4">{{ _("Editar ACL") }}</h3>
             <form method="POST" action="/admin/acls/edit" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" id="editAclId" name="id">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre:</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Nombre:") }}</label>
                     <input type="text" id="editName" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo:</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Tipo:") }}</label>
                     <select id="editType" name="type" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="src">src (IP origen)</option>
-                        <option value="dst">dst (IP destino)</option>
-                        <option value="dstdomain">dstdomain (Dominio destino)</option>
-                        <option value="port">port (Puerto)</option>
-                        <option value="time">time (Tiempo)</option>
-                        <option value="method">method (Método HTTP)</option>
-                        <option value="proxy_auth">proxy_auth (Autenticación)</option>
-                        <option value="maxconn">maxconn (Conexiones máximas)</option>
+                        <option value="src">{{ _("src (IP origen)") }}</option>
+                        <option value="dst">{{ _("dst (IP destino)") }}</option>
+                        <option value="dstdomain">{{ _("dstdomain (Dominio destino)") }}</option>
+                        <option value="port">{{ _("port (Puerto)") }}</option>
+                        <option value="time">{{ _("time (Tiempo)") }}</option>
+                        <option value="method">{{ _("method (Método HTTP)") }}</option>
+                        <option value="proxy_auth">{{ _("proxy_auth (Autenticación)") }}</option>
+                        <option value="maxconn">{{ _("maxconn (Conexiones máximas)") }}</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Valor:</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Valor:") }}</label>
                     <input type="text" id="editValue" name="value" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="md:col-span-3 flex space-x-4">
                     <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-save mr-2"></i>Actualizar ACL
+                        <i class="fas fa-save mr-2"></i>{{ _("Actualizar ACL") }}
                     </button>
                     <button type="button" onclick="toggleEditForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-times mr-2"></i>Cancelar
+                        <i class="fas fa-times mr-2"></i>{{ _("Cancelar") }}
                     </button>
                 </div>
             </form>
@@ -91,10 +91,10 @@
             <table class="w-full table-auto">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                        <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Tipo</th>
-                        <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                        <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("Nombre") }}</th>
+                        <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">{{ _("Tipo") }}</th>
+                        <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("Valor") }}</th>
+                        <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("Acciones") }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -108,10 +108,10 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{{ acl.value }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="editAcl('{{ acl.id }}', '{{ acl.name }}', '{{ acl.type }}', '{{ acl.value }}')" class="text-blue-600 hover:text-blue-900 mr-3" title="Editar">
+                            <button onclick="editAcl('{{ acl.id }}', '{{ acl.name }}', '{{ acl.type }}', '{{ acl.value }}')" class="text-blue-600 hover:text-blue-900 mr-3" title="{{ _("Editar") }}">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="deleteAcl('{{ acl.id }}', '{{ acl.name }}')" class="text-red-600 hover:text-red-900" title="Eliminar">
+                            <button onclick="deleteAcl('{{ acl.id }}', '{{ acl.name }}')" class="text-red-600 hover:text-red-900" title="{{ _("Eliminar") }}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -123,22 +123,22 @@
         {% else %}
         <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
             <i class="fas fa-shield-alt text-6xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500 text-lg font-medium">No hay ACLs configuradas</p>
-            <p class="text-gray-400 text-sm mt-2">Las ACLs son fundamentales para controlar el acceso en Squid</p>
+            <p class="text-gray-500 text-lg font-medium">{{ _("No hay ACLs configuradas") }}</p>
+            <p class="text-gray-400 text-sm mt-2">{{ _("Las ACLs son fundamentales para controlar el acceso en Squid") }}</p>
             
             <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
                 <div class="flex items-start">
                     <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
                     <div class="text-left text-sm">
-                        <p class="font-semibold text-blue-900 mb-1">¿Ya tienes ACLs configuradas?</p>
-                        <p class="text-blue-800 mb-2">Si tu squid.conf aún no está dividido, puedes <a href="{{ url_for('admin.split_config') }}" class="underline hover:text-blue-600 font-semibold">dividir tu configuración</a> para una mejor gestión modular.</p>
-                        <p class="text-blue-800">Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde <a href="{{ url_for('admin.view_config') }}" class="underline hover:text-blue-600 font-semibold">Configuración</a>.</p>
+                        <p class="font-semibold text-blue-900 mb-1">{{ _("¿Ya tienes ACLs configuradas?") }}</p>
+                        <p class="text-blue-800 mb-2">{{ _("Si tu squid.conf aún no está dividido, puedes") }} <a href="{{ url_for('admin.split_config') }}" class="underline hover:text-blue-600 font-semibold">{{ _("dividir tu configuración") }}</a> {{ _("para una mejor gestión modular.") }}</p>
+                        <p class="text-blue-800">{{ _("Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde") }} <a href="{{ url_for('admin.view_config') }}" class="underline hover:text-blue-600 font-semibold">{{ _("Configuración") }}</a>.</p>
                     </div>
                 </div>
             </div>
             
             <button onclick="toggleAddForm()" class="mt-4 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors">
-                <i class="fas fa-plus mr-2"></i>Crear primera ACL
+                <i class="fas fa-plus mr-2"></i>{{ _("Crear primera ACL") }}
             </button>
         </div>
         {% endif %}

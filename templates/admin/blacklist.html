@@ -4,71 +4,71 @@
 {% include 'components/confirm_modal.html' %}
 {% include 'components/loading_spinner.html' %}
 <div x-data="{ activeTab: 'pihole' }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Blacklist - Gestor de Listas</h2>
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">{{ _("Blacklist - Gestor de Listas") }}</h2>
 
     <!-- Tabs -->
     <div class="flex border-b border-gray-200 flex-wrap">
         <button @click="activeTab = 'pihole'" :class="activeTab === 'pihole' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Pi-hole
+            {{ _("Pi-hole") }}
         </button>
         <button @click="activeTab = 'adguard'" :class="activeTab === 'adguard' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            AdGuard
+            {{ _("AdGuard") }}
         </button>
         <button @click="activeTab = 'dnsmasq'" :class="activeTab === 'dnsmasq' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            DNSmasq
+            {{ _("DNSmasq") }}
         </button>
         <button @click="activeTab = 'custom'" :class="activeTab === 'custom' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Personalizada
+            {{ _("Personalizada") }}
         </button>
         <button @click="activeTab = 'import'" :class="activeTab === 'import' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Importar
+            {{ _("Importar") }}
         </button>
     </div>
 
     <!-- Pi-hole Tab -->
     <div x-show="activeTab === 'pihole'" class="mt-6">
         <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
-            Integración Pi-hole
-            <span class="inline-block bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-0.5 rounded align-middle border border-yellow-300 shadow-sm animate-pulse" title="Funcionalidad en Beta">BETA</span>
+            {{ _("Integración Pi-hole") }}
+            <span class="inline-block bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-0.5 rounded align-middle border border-yellow-300 shadow-sm animate-pulse" title="{{ _("Funcionalidad en Beta") }}">{{ _("BETA") }}</span>
         </h3>
-        <p class="text-sm text-gray-600 mb-4">Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí puedes configurar conexión y ver el estado.</p>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí puedes configurar conexión y ver el estado.") }}</p>
 
         <form method="POST" action="/admin/blacklist/test-connection" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="bg-gray-50 p-4 rounded border">
-                <label class="text-sm font-medium text-gray-700">Pi-hole Host</label>
-                <input name="host" type="text" class="w-full mt-2 p-2 border rounded" placeholder="192.168.1.2 or example.com" />
+                <label class="text-sm font-medium text-gray-700">{{ _("Pi-hole Host") }}</label>
+                <input name="host" type="text" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("192.168.1.2 or example.com") }}" />
             </div>
             <div class="bg-gray-50 p-4 rounded border">
-                <label class="text-sm font-medium text-gray-700">API Token</label>
-                <input name="token" type="password" class="w-full mt-2 p-2 border rounded" placeholder="Token (opcional)" />
+                <label class="text-sm font-medium text-gray-700">{{ _("API Token") }}</label>
+                <input name="token" type="password" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("Token (opcional)") }}" />
             </div>
 
             <div class="md:col-span-2 mt-4 flex gap-2">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Probar Conexión</button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">{{ _("Probar Conexión") }}</button>
         </form>
         <form method="POST" action="/admin/blacklist/sync" class="mt-0">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Sincronizar Listas</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">{{ _("Sincronizar Listas") }}</button>
         </form>
             </div>
     </div>
 
     <!-- AdGuard Tab -->
     <div x-show="activeTab === 'adguard'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Integración AdGuard</h3>
-        <p class="text-sm text-gray-600 mb-4">Soporte para fuentes y listas públicas compatibles con AdGuard.</p>
+        <h3 class="text-lg font-semibold mb-3">{{ _("Integración AdGuard") }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Soporte para fuentes y listas públicas compatibles con AdGuard.") }}</p>
         <form id="importUrlForm" method="POST" action="/admin/blacklist/import" class="bg-gray-50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <label class="text-sm font-medium text-gray-700">URL de la lista</label>
+            <label class="text-sm font-medium text-gray-700">{{ _("URL de la lista") }}</label>
             <input name="url" type="text" class="w-full mt-2 p-2 border rounded" placeholder="https://example.com/list.txt" />
             <div class="mt-3">
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Agregar Lista</button>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">{{ _("Agregar Lista") }}</button>
             </div>
         </form>
         {% if url_lists %}
         <div class="mt-6">
-            <h4 class="text-md font-semibold mb-2 text-gray-700">Listas importadas</h4>
+            <h4 class="text-md font-semibold mb-2 text-gray-700">{{ _("Listas importadas") }}</h4>
             <ul class="divide-y divide-gray-200 bg-white rounded shadow">
                 {% for item in url_lists %}
                 <li class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 gap-3" x-data="{ enforced: {{ 'true' if item.enforced else 'false' }}, loading: false }">
@@ -77,10 +77,10 @@
                         <div class="flex items-center gap-2 mt-0.5">
                             <span class="text-xs text-gray-500">{{ item.count }} dominios</span>
                             <span x-show="enforced" class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">
-                                <i class="fas fa-shield-alt text-[10px]"></i> Activa en Squid
+                                <i class="fas fa-shield-alt text-[10px]"></i> {{ _("Activa en Squid") }}
                             </span>
                             <span x-show="!enforced" class="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded-full">
-                                <i class="fas fa-ban text-[10px]"></i> Inactiva
+                                <i class="fas fa-ban text-[10px]"></i> {{ _("Inactiva") }}
                             </span>
                         </div>
                     </div>
@@ -108,7 +108,7 @@
                         <form method="POST" action="/admin/blacklist/delete-list" class="delete-list-form">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <input type="hidden" name="source_url" value="{{ item.source_url }}"/>
-                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-semibold shadow delete-list-btn" title="Eliminar lista y dominios">
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-semibold shadow delete-list-btn" title="{{ _("Eliminar lista y dominios") }}">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </form>
@@ -288,12 +288,12 @@
     <!-- DNSmasq Tab -->
     <div x-show="activeTab === 'dnsmasq'" class="mt-6">
         <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
-            DNSmasq
-            <span class="inline-block bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-0.5 rounded align-middle border border-yellow-300 shadow-sm animate-pulse" title="Funcionalidad en Beta">BETA</span>
+            {{ _("DNSmasq") }}
+            <span class="inline-block bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-0.5 rounded align-middle border border-yellow-300 shadow-sm animate-pulse" title="{{ _("Funcionalidad en Beta") }}">{{ _("BETA") }}</span>
         </h3>
-        <p class="text-sm text-gray-600 mb-4">Exporta o importa reglas en formato compatible con dnsmasq.</p>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Exporta o importa reglas en formato compatible con dnsmasq.") }}</p>
         <div class="bg-gray-50 p-4 rounded border">
-            <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Exportar archivo hosts</button>
+            <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">{{ _("Exportar archivo hosts") }}</button>
         </div>
     </div>
 
@@ -301,16 +301,16 @@
     <div x-show="activeTab === 'custom'" x-data="{ customEnforced: {{ 'true' if custom_enforced else 'false' }}, customLoading: false }" class="mt-6">
         <div class="flex items-center justify-between mb-3">
             <div>
-                <h3 class="text-lg font-semibold">Lista Personalizada</h3>
-                <p class="text-sm text-gray-600">Añade dominios manualmente o pega una lista separada por comas/lineas.</p>
+                <h3 class="text-lg font-semibold">{{ _("Lista Personalizada") }}</h3>
+                <p class="text-sm text-gray-600">{{ _("Añade dominios manualmente o pega una lista separada por comas/lineas.") }}</p>
             </div>
             <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="flex items-center gap-2">
                     <span x-show="customEnforced" class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-full">
-                        <i class="fas fa-shield-alt text-[10px]"></i> Activa en Squid
+                        <i class="fas fa-shield-alt text-[10px]"></i> {{ _("Activa en Squid") }}
                     </span>
                     <span x-show="!customEnforced" class="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2 py-1 rounded-full">
-                        <i class="fas fa-ban text-[10px]"></i> Inactiva
+                        <i class="fas fa-ban text-[10px]"></i> {{ _("Inactiva") }}
                     </span>
                 </div>
                 <button
@@ -335,27 +335,26 @@
         </div>
         <form method="POST" action="/admin/blacklist/save-custom" class="grid grid-cols-1 gap-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <textarea name="custom_list" rows="6" class="w-full p-3 border rounded" placeholder="example.com
-example.org
-">{{ blacklist }}</textarea>
+            <textarea name="custom_list" rows="6" class="w-full p-3 border rounded" placeholder="{{ _("example.com
+example.org") }}">{{ blacklist }}</textarea>
             <div class="flex gap-2">
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar</button>
-                <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">{{ _("Guardar") }}</button>
+                <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">{{ _("Cancelar") }}</button>
             </div>
         </form>
     </div>
 
     <!-- Import Tab -->
     <div x-show="activeTab === 'import'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Importar listas</h3>
-        <p class="text-sm text-gray-600 mb-4">Importa desde archivos locales o pega URLs de listas públicas.</p>
+        <h3 class="text-lg font-semibold mb-3">{{ _("Importar listas") }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Importa desde archivos locales o pega URLs de listas públicas.") }}</p>
 
         <form id="importFileForm" method="POST" action="/admin/blacklist/import" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <label class="text-sm font-medium text-gray-700">Subir archivo</label>
+            <label class="text-sm font-medium text-gray-700">{{ _("Subir archivo") }}</label>
             <input name="file" type="file" class="w-full mt-2" />
             <div class="mt-3">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Importar</button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">{{ _("Importar") }}</button>
             </div>
         </form>
     </div>
