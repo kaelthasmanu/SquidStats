@@ -58,6 +58,9 @@
       <a href="#accessing-the-admin-panel">Accessing the Admin Panel</a>
     </li>
     <li>
+      <a href="#-multi-proxy-mode-load-balancing">Multi-Proxy Mode (Load Balancing)</a>
+    </li>
+    <li>
       <a href="#-telegram-notifications-setup-optional">Telegram Notifications Setup</a>
       <ul>
         <li><a href="#prerequisites-1">Prerequisites</a></li>
@@ -438,6 +441,50 @@ sudo ./install.sh --update
   http://ip/hostname:5000
 ```
 
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
+## 🔀 Multi-Proxy Mode (Load Balancing)
+
+SquidStats can monitor **multiple Squid proxies simultaneously**, aggregating their active connections into a single unified dashboard view.
+
+### How It Works
+
+When `SQUID_HOSTS` is set, SquidStats queries all listed proxies **in parallel** on every refresh. It then:
+
+- Merges the active connections from all nodes into one view.
+- Shows a **status bar** at the top of the dashboard indicating whether each proxy is reachable (green) or not (red).
+- Adds **filter buttons** so you can isolate connections by proxy node.
+- Tags each user/connection row with the originating proxy.
+
+If `SQUID_HOSTS` is not set, SquidStats falls back to the single `SQUID_HOST` / `SQUID_PORT` values (fully backward-compatible).
+
+### Configuration
+
+Edit your `.env` file and set `SQUID_HOSTS` as a comma-separated list of `host:port` entries:
+
+```bash
+# Single proxy (default behaviour — keep using these)
+SQUID_HOST="192.168.1.10"
+SQUID_PORT="3128"
+
+# Multi-proxy: uncomment and list all your Squid nodes.
+# This overrides SQUID_HOST / SQUID_PORT for the connections page.
+# Supports plain IPv4, hostnames, and IPv6 literals ([::1]:3128).
+SQUID_HOSTS="192.168.1.10:3128,192.168.1.11:3128,192.168.1.12:3128"
+```
+
+> **Note:** Each Squid node must be configured to allow Cache Manager access from the SquidStats server IP. See the [Cache Manager Configuration](#-cache-manager-configuration-critical-for-squidstats) section above.
+
+### Dashboard in Multi-Proxy Mode
+
+| Feature | Description |
+|---|---|
+| **Proxy status bar** | At the top of the connections page, each proxy shows a green ✅ or red ❌ badge. |
+| **Filter tabs** | Click a proxy label to show only the connections coming from that node. |
+| **Proxy badge per user** | Each user accordion shows which proxy their connections were fetched from. |
+| **Proxy column in table** | Each individual connection row has a "Proxy" column identifying its source node. |
+| **Squid status card** | Replaced by the status bar in multi-proxy mode to avoid redundancy. |
+
 ## Accessing the Admin Panel
 
 To access the admin panel, you need to configure the initial password and restart the service.
@@ -674,7 +721,7 @@ sudo rm -rf /opt/squidstats
 - **Optimization and Performance** ⚡
   - Enhanced data caching
   - Historical log compression
-  - Multi-proxy support
+  - ~~Multi-proxy support~~ ✅ **Implemented** — see [Multi-Proxy Mode](#-multi-proxy-mode-load-balancing)
 
 ## Contributing
 

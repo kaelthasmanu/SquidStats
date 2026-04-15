@@ -22,7 +22,7 @@ REGEX_MAP = {
 }
 
 
-def parse_raw_data(raw_data: str):
+def parse_raw_data(raw_data: str, source_host: str | None = None):
     if not raw_data:
         return []
 
@@ -59,6 +59,8 @@ def parse_raw_data(raw_data: str):
                     conn = parse_connection_block(
                         block_text, squid_version, kid=current_kid
                     )
+                    if source_host:
+                        conn["proxy_host"] = source_host
                     connections.append(conn)
                 except Exception as e:
                     print(f"Error parseando bloque: {e}\n{block_text[:120]}...")
@@ -71,6 +73,8 @@ def parse_raw_data(raw_data: str):
         block_text = "\n".join(current_block_lines)
         try:
             conn = parse_connection_block(block_text, squid_version, kid=current_kid)
+            if source_host:
+                conn["proxy_host"] = source_host
             connections.append(conn)
         except Exception as e:
             print(f"Error parseando bloque: {e}\n{block_text[:120]}...")

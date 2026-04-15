@@ -1,7 +1,6 @@
 import re
 import re as _re
 import socket
-import traceback
 
 from dotenv import load_dotenv
 from loguru import logger
@@ -74,12 +73,15 @@ def fetch_squid_cache_stats():
                     response = b""
                     while chunk := s.recv(4096):
                         response += chunk
-            except Exception:
-                tb = traceback.format_exc()
-                print(
-                    f"[cache_debug] Connection attempt {idx + 1} failed:\n{tb}",
-                    flush=True,
+            except (TimeoutError, ConnectionRefusedError, OSError) as conn_err:
+                logger.debug(
+                    f"[cache] Connection attempt {idx + 1} failed: {type(conn_err).__name__}: {conn_err}"
                 )
+                # Host is unreachable — no point trying other request variants
+                response = b""
+                break
+            except Exception as conn_err:
+                logger.debug(f"[cache] Attempt {idx + 1} failed: {conn_err}")
                 response = b""
                 continue
 
@@ -164,10 +166,9 @@ def fetch_squid_cache_stats():
                     )
                     break
             except Exception:
-                tb = traceback.format_exc()
-                print(
-                    f"[cache_debug] Error decoding response on attempt {idx + 1}:\n{tb}",
-                    flush=True,
+                logger.debug(
+                    f"[cache] Error decoding response on attempt {idx + 1}",
+                    exc_info=True,
                 )
                 response = b""
                 continue

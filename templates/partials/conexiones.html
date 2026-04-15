@@ -1,5 +1,54 @@
 {% from 'macros.html' import format_bandwidth %}
 <div class="w-full space-y-6">
+
+  {# ── Barra de estado de proxies (solo visible si multi_proxy) ── #}
+  {% if multi_proxy and proxy_statuses %}
+  <div class="flex flex-wrap gap-2 items-center bg-white rounded-lg shadow px-4 py-2 border border-gray-100">
+    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mr-2">Proxies:</span>
+    {% for ps in proxy_statuses %}
+    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
+      {% if ps.ok %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-700{% endif %}">
+      <i class="fas {% if ps.ok %}fa-circle-check{% else %}fa-circle-xmark{% endif %} text-[10px]"></i>
+      {{ ps.label }}
+    </span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Filtro por proxy (solo si multi_proxy) ── #}
+  {% if multi_proxy and proxy_statuses %}
+  <div class="flex flex-wrap gap-2 items-center">
+    <button type="button"
+      class="proxy-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-600 text-white shadow"
+      data-proxy="all">Todos</button>
+    {% for ps in proxy_statuses %}
+    {% if ps.ok %}
+    <button type="button"
+      class="proxy-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-indigo-100 transition-colors"
+      data-proxy="{{ ps.label }}">{{ ps.label }}</button>
+    {% endif %}
+    {% endfor %}
+  </div>
+  <script>
+    (function(){
+      document.addEventListener("click", function(e){
+        const btn = e.target.closest(".proxy-filter-btn");
+        if(!btn) return;
+        const chosen = btn.dataset.proxy;
+        document.querySelectorAll(".proxy-filter-btn").forEach(b=>{
+          b.classList.toggle("bg-indigo-600", b.dataset.proxy === chosen);
+          b.classList.toggle("text-white", b.dataset.proxy === chosen);
+          b.classList.toggle("bg-gray-100", b.dataset.proxy !== chosen);
+          b.classList.toggle("text-gray-700", b.dataset.proxy !== chosen);
+        });
+        document.querySelectorAll(".user-accordion[data-proxy]").forEach(el=>{
+          el.style.display = (chosen === "all" || el.dataset.proxy === chosen) ? "" : "none";
+        });
+      });
+    })();
+  </script>
+  {% endif %}
+
   {# Tarjetas de estadísticas #}
   <div class="flex justify-center mb-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-3 w-full">
@@ -112,8 +161,8 @@
       </div>
       {% endif %} 
 
-      {# Estado de Conexión de Squid #} 
-      {% if squid_info_stats %}
+      {# Estado de Conexión de Squid (oculto en modo multi-proxy, que ya muestra estado por proxy) #} 
+      {% if squid_info_stats and not multi_proxy %}
       <div class="bg-white p-3 rounded-lg shadow flex items-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5 min-w-0">
         <div class="w-10 h-10 rounded-full {% if squid_info_stats.connection_status == 'connected' %}bg-green-100{% else %}bg-red-100{% endif %} flex items-center justify-center mr-3 flex-shrink-0">
           <i class="fas {% if squid_info_stats.connection_status == 'connected' %}fa-check-circle text-green-500{% else %}fa-exclamation-triangle text-red-500{% endif %} text-lg"></i>
@@ -161,8 +210,10 @@
     {% for user, user_data in valid_users.items() %} 
     {% set connections = user_data.connections %} 
     {% set client_ip = user_data.client_ip %}
+    {# Determine the proxy label for this user (from first connection) #}
+    {% set user_proxy = connections[0].proxy_host if connections and connections[0].proxy_host is defined else '' %}
 
-    <div class="user-accordion bg-white rounded-lg shadow-md mb-3">
+    <div class="user-accordion bg-white rounded-lg shadow-md mb-3" {% if user_proxy %}data-proxy="{{ user_proxy }}"{% endif %}>
       <div class="w-full text-left p-4 border-b bg-white rounded-t-lg" id="header-{{ loop.index }}">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center mb-3 sm:mb-0">
@@ -171,6 +222,11 @@
             </div>
             <div class="min-w-0">
               <h2 class="text-lg font-bold text-gray-800 truncate" title="{{ user }}">{{ user }}</h2>
+              {% if multi_proxy and user_proxy %}
+              <span class="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-100 text-indigo-700">
+                <i class="fas fa-network-wired text-[9px]"></i> {{ user_proxy }}
+              </span>
+              {% endif %}
             </div>
           </div>
 
@@ -293,6 +349,11 @@
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                   Dir. Remota
                 </th>
+                {% if multi_proxy %}
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                  Proxy
+                </th>
+                {% endif %}
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -340,6 +401,13 @@
                 <td class="px-4 py-3 whitespace-nowrap text-sm font-mono ... hover:text-blue-600">
                   {{ connection.proxy_local_ip }}
                 </td>
+                {% if multi_proxy %}
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-indigo-100 text-indigo-700">
+                    {{ connection.proxy_host if connection.proxy_host is defined else '—' }}
+                  </span>
+                </td>
+                {% endif %}
               </tr>
               {% endfor %}
             </tbody>
