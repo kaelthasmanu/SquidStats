@@ -14,6 +14,7 @@ from services.squid.acls_service import (
 )
 
 from .helpers import flash_and_redirect, get_config_manager, get_int_form_field
+from flask_babel import gettext as _
 
 
 def register_routes(bp):
@@ -46,7 +47,7 @@ def register_routes(bp):
         cm = get_config_manager()
         acl_index = get_int_form_field("id")
         if acl_index is None:
-            flash("ID de ACL inválido", "error")
+            flash(_("ID de ACL inválido"), "error")
             return redirect(url_for("admin.manage_acls"))
 
         new_name = request.form.get("name")
@@ -67,7 +68,7 @@ def register_routes(bp):
         cm = get_config_manager()
         acl_index = get_int_form_field("id")
         if acl_index is None:
-            flash("ID de ACL inválido", "error")
+            flash(_("ID de ACL inválido"), "error")
             return redirect(url_for("admin.manage_acls"))
 
         success, message = service_delete_acl(acl_index, cm)
