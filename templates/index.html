@@ -15,14 +15,14 @@
     <div class="flex flex-wrap items-center gap-3 mb-4 bg-white/70 dark:bg-gray-800/60 px-3 py-2 rounded-md border border-gray-200 shadow-sm text-sm w-full">
       <label for="refresh-interval" class="text-gray-700 dark:text-gray-200 font-medium select-none">⏱️</label>
       <div class="flex items-center gap-1">
-        <input id="refresh-interval" type="number" min="10" class="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white/80 dark:bg-gray-700/60 text-gray-700 dark:text-gray-100" placeholder="60" aria-label="Intervalo de refresco (segundos)">
+        <input id="refresh-interval" type="number" min="10" class="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 focus:outline-none bg-white/80 dark:bg-gray-700/60 text-gray-700 dark:text-gray-100" placeholder="60" aria-label="{{ _("Intervalo de refresco (segundos)") }}">
         <span class="text-gray-500 dark:text-gray-400">s</span>
       </div>
       <div class="flex items-center gap-1 text-gray-600 dark:text-gray-300">
         <span class="hidden sm:inline">→</span>
         <span id="next-refresh" class="font-mono">--</span>
       </div>
-      <button id="set-interval-btn" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium transition text-xs">Aplicar</button>
+      <button id="set-interval-btn" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium transition text-xs">{{ _("Aplicar") }}</button>
       <span id="persist-status" class="text-[11px] text-gray-400 ml-auto pr-1 opacity-0 transition-opacity"></span>
     </div>
   </div>
