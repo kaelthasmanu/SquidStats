@@ -17,6 +17,7 @@ from services.squid.http_access_service import (
 )
 
 from .helpers import flash_and_redirect, get_config_manager, get_int_form_field
+from flask_babel import gettext as _
 
 
 def register_routes(bp):
@@ -33,7 +34,7 @@ def register_routes(bp):
         cm = get_config_manager()
         rule_index = get_int_form_field("index")
         if rule_index is None:
-            flash("Índice de regla inválido", "error")
+            flash(_("Índice de regla inválido"), "error")
             return redirect(url_for("admin.manage_http_access"))
 
         success, message = service_delete_http_access(rule_index, cm)
@@ -46,7 +47,7 @@ def register_routes(bp):
         cm = get_config_manager()
         rule_index = get_int_form_field("index")
         if rule_index is None:
-            flash("Índice de regla inválido", "error")
+            flash(_("Índice de regla inválido"), "error")
             return redirect(url_for("admin.manage_http_access"))
 
         action = request.form.get("action")
@@ -77,7 +78,7 @@ def register_routes(bp):
         cm = get_config_manager()
         rule_index = get_int_form_field("index")
         if rule_index is None:
-            flash("Índice de regla inválido", "error")
+            flash(_("Índice de regla inválido"), "error")
             return redirect(url_for("admin.manage_http_access"))
 
         direction = request.form.get("direction")

@@ -5,6 +5,7 @@ from loguru import logger
 
 from services.auth.auth_service import admin_required, api_auth_required
 from services.ldap import ldap_config_service, ldap_service
+from flask_babel import gettext as _
 
 
 def _load_request_config():
@@ -35,12 +36,12 @@ def register_routes(bp):
         try:
             ldap_config_service.save_config(data)
             return jsonify(
-                {"status": "success", "message": "Configuración LDAP guardada."}
+                {"status": "success", "message": _("Configuración LDAP guardada.")}
             )
         except Exception as exc:
             logger.error(f"Error al guardar configuración LDAP: {exc}")
             return jsonify(
-                {"status": "error", "message": "Error al guardar la configuración."}
+                {"status": "error", "message": _("Error al guardar la configuración.")}
             ), 500
 
     # ------------------------------------------------------------------
@@ -60,7 +61,7 @@ def register_routes(bp):
             return jsonify(
                 {
                     "status": "error",
-                    "message": "No se ha configurado el servidor LDAP.",
+                    "message": _("No se ha configurado el servidor LDAP."),
                     "cfg": cfg,
                 }
             ), 400
@@ -72,7 +73,7 @@ def register_routes(bp):
             return jsonify(
                 {
                     "status": "error",
-                    "message": "Error interno al probar LDAP.",
+                    "message": _("Error interno al probar LDAP."),
                 }
             ), 500
 
@@ -88,7 +89,7 @@ def register_routes(bp):
             return jsonify(
                 {
                     "status": "error",
-                    "message": "LDAP no configurado.",
+                    "message": _("LDAP no configurado."),
                     "users": 0,
                     "groups": 0,
                     "cfg": cfg,
@@ -114,14 +115,14 @@ def register_routes(bp):
             return jsonify(
                 {
                     "status": "error",
-                    "message": "Parámetro 'q' requerido.",
+                    "message": _("Parámetro 'q' requerido."),
                     "results": [],
                 }
             ), 400
         cfg = _load_request_config()
         if not cfg.get("host"):
             return jsonify(
-                {"status": "error", "message": "LDAP no configurado.", "results": []}
+                {"status": "error", "message": _("LDAP no configurado."), "results": []}
             ), 400
         result = ldap_service.search_users(cfg, query)
         return jsonify(result)
@@ -143,14 +144,14 @@ def register_routes(bp):
             return jsonify(
                 {
                     "status": "error",
-                    "message": "Parámetro 'q' requerido.",
+                    "message": _("Parámetro 'q' requerido."),
                     "results": [],
                 }
             ), 400
         cfg = _load_request_config()
         if not cfg.get("host"):
             return jsonify(
-                {"status": "error", "message": "LDAP no configurado.", "results": []}
+                {"status": "error", "message": _("LDAP no configurado."), "results": []}
             ), 400
         result = ldap_service.search_groups(cfg, query)
         return jsonify(result)
@@ -172,14 +173,14 @@ def register_routes(bp):
             return jsonify(
                 {
                     "status": "error",
-                    "message": "Parámetro 'username' requerido.",
+                    "message": _("Parámetro 'username' requerido."),
                     "groups": [],
                 }
             ), 400
         cfg = _load_request_config()
         if not cfg.get("host"):
             return jsonify(
-                {"status": "error", "message": "LDAP no configurado.", "groups": []}
+                {"status": "error", "message": _("LDAP no configurado."), "groups": []}
             ), 400
         result = ldap_service.get_user_groups(cfg, username)
         return jsonify(result)
