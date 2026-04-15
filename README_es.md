@@ -58,6 +58,9 @@
       <a href="#accediendo-al-panel-de-admin">Accediendo al Panel de Admin</a>
     </li>
     <li>
+      <a href="#-modo-multi-proxy-balanceo-de-carga">Modo Multi-Proxy (Balanceo de Carga)</a>
+    </li>
+    <li>
       <a href="#-notificaciones-de-telegram-opcional">Notificaciones de Telegram</a>
       <ul>
         <li><a href="#prerrequisitos-1">Prerrequisitos</a></li>
@@ -441,6 +444,50 @@ sudo ./install.sh --update
   http://ip/hostname:5000
 ```
 
+## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
+
+## 🔀 Modo Multi-Proxy (Balanceo de Carga)
+
+SquidStats puede monitorear **múltiples proxies Squid simultáneamente**, agregando sus conexiones activas en una sola vista unificada del dashboard.
+
+### Cómo Funciona
+
+Cuando se define `SQUID_HOSTS`, SquidStats consulta todos los proxies listados **en paralelo** en cada refresco. Luego:
+
+- Une las conexiones activas de todos los nodos en una sola vista.
+- Muestra una **barra de estado** en la parte superior del dashboard indicando si cada proxy es accesible (verde) o no (rojo).
+- Agrega **botones de filtro** para que puedas aislar las conexiones por nodo proxy.
+- Etiqueta cada fila de usuario/conexión con el proxy de origen.
+
+Si `SQUID_HOSTS` no está definido, SquidStats usa los valores de `SQUID_HOST` / `SQUID_PORT` (totalmente retrocompatible).
+
+### Configuración
+
+Edita tu archivo `.env` y define `SQUID_HOSTS` como una lista separada por comas de entradas `host:port`:
+
+```bash
+# Proxy único (comportamiento por defecto — mantener estos valores)
+SQUID_HOST="192.168.1.10"
+SQUID_PORT="3128"
+
+# Multi-proxy: descomenta y lista todos tus nodos Squid.
+# Esto reemplaza SQUID_HOST / SQUID_PORT para la página de conexiones.
+# Soporta IPv4, hostnames e IPv6 literales ([::1]:3128).
+SQUID_HOSTS="192.168.1.10:3128,192.168.1.11:3128,192.168.1.12:3128"
+```
+
+> **Nota:** Cada nodo Squid debe estar configurado para permitir acceso al Cache Manager desde la IP del servidor SquidStats. Consulta la sección de configuración del Cache Manager en el README en inglés.
+
+### Dashboard en Modo Multi-Proxy
+
+| Característica | Descripción |
+|---|---|
+| **Barra de estado de proxies** | En la parte superior de la página de conexiones, cada proxy muestra un badge verde ✅ o rojo ❌. |
+| **Pestañas de filtro** | Haz clic en el label de un proxy para ver solo las conexiones de ese nodo. |
+| **Badge de proxy por usuario** | Cada acordeón de usuario muestra de qué proxy vienen sus conexiones. |
+| **Columna Proxy en la tabla** | Cada fila de conexión tiene una columna "Proxy" que identifica su nodo de origen. |
+| **Tarjeta de estado de Squid** | Reemplazada por la barra de estado en modo multi-proxy para evitar redundancia. |
+
 ## Accediendo al Panel de Admin
 
 Para acceder al panel de admin, necesitas configurar la contraseña inicial y reiniciar el servicio.
@@ -700,7 +747,7 @@ sudo rm -rf /opt/squidstats
 - **Optimización y Rendimiento** ⚡
   - Cache de datos mejorado
   - Compresión de logs históricos
-  - Soporte multi-proxy
+  - ~~Soporte multi-proxy~~ ✅ **Implementado** — ver [Modo Multi-Proxy](#-modo-multi-proxy-balanceo-de-carga)
 
 ## Contribuir
 
