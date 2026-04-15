@@ -86,14 +86,14 @@ jobs:
         mkdir -p /var/log/squid /var/cache/squid
         chmod -R 777 /var/log/squid /var/cache/squid
 
-        cat > /etc/squid/squid.conf << 'SQUIDCONF'
-http_port 3128
-access_log /var/log/squid/access.log squid
-coredump_dir /var/cache/squid
-acl localnet src 127.0.0.0/8
-http_access allow localnet
-http_access deny all
-SQUIDCONF
+        {
+          echo 'http_port 3128'
+          echo 'access_log /var/log/squid/access.log squid'
+          echo 'coredump_dir /var/cache/squid'
+          echo 'acl localnet src 127.0.0.0/8'
+          echo 'http_access allow localnet'
+          echo 'http_access deny all'
+        } > /etc/squid/squid.conf
 
         # Run in foreground (non-daemon) so the process stays visible in the container
         squid -N -f /etc/squid/squid.conf &
@@ -106,14 +106,14 @@ SQUIDCONF
         chown -R proxy:proxy /var/log/squid /var/cache/squid
         chmod -R 755 /var/log/squid /var/cache/squid
 
-        cat > /etc/squid/squid.conf << 'SQUIDCONF'
-http_port 3128
-access_log /var/log/squid/access.log squid
-coredump_dir /var/cache/squid
-acl localnet src 127.0.0.0/8
-http_access allow localnet
-http_access deny all
-SQUIDCONF
+        {
+          echo 'http_port 3128'
+          echo 'access_log /var/log/squid/access.log squid'
+          echo 'coredump_dir /var/cache/squid'
+          echo 'acl localnet src 127.0.0.0/8'
+          echo 'http_access allow localnet'
+          echo 'http_access deny all'
+        } > /etc/squid/squid.conf
 
         # Run in foreground (non-daemon) so the process stays visible in the container
         squid -N -f /etc/squid/squid.conf &
