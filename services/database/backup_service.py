@@ -132,12 +132,16 @@ def _list_backup_files(backup_dir: Path) -> list[Path]:
     return sorted(files, key=lambda f: f.stat().st_mtime, reverse=True)
 
 
-def _normalize_backup_filename(filename: str) -> str | None:
+def _normalize_backup_filename(filename: str) -> Path | None:
     """Validate and normalize a backup filename from untrusted input."""
     if not filename:
         return None
 
-    if filename != Path(filename).name:
+    candidate = Path(filename)
+    if candidate.name != filename:
+        return None
+
+    if candidate.is_absolute():
         return None
 
     if ".." in filename:
@@ -146,7 +150,22 @@ def _normalize_backup_filename(filename: str) -> str | None:
     if not _BACKUP_FILENAME_RE.fullmatch(filename):
         return None
 
-    return filename
+    return Path(candidate.name)
+
+
+def _get_safe_backup_path(backup_dir: Path, filename: str) -> Path | None:
+    """Return a safe backup path inside the configured backup directory."""
+    normalized = _normalize_backup_filename(filename)
+    if normalized is None:
+        return None
+
+    target = (backup_dir / normalized).resolve()
+    try:
+        target.relative_to(backup_dir.resolve())
+    except ValueError:
+        return None
+
+    return target
 
 
 def _human_size(size_bytes: int) -> str:
@@ -432,49 +451,34 @@ def run_backup(is_auto: bool = False) -> dict:
 
 def delete_backup(filename: str) -> dict:
     """Delete a specific backup file by name."""
-    safe_filename = _normalize_backup_filename(filename)
-    if safe_filename is None:
-        return {"status": "error", "message": "Nombre de archivo inválido"}
-
     cfg = load_config()
     try:
         bdir = _backup_dir(cfg)
     except OSError as e:
         return {"status": "error", "message": str(e)}
-    target = bdir / safe_filename
+
+    target = _get_safe_backup_path(bdir, filename)
+    if target is None:
+        return {"status": "error", "message": "Nombre de archivo inválido"}
 
     if not target.exists():
         return {"status": "error", "message": "La salva no existe"}
 
-    try:
-        target.resolve().relative_to(bdir.resolve())
-    except ValueError:
-        return {"status": "error", "message": "Acceso denegado"}
-
     target.unlink()
-    logger.info(f"Backup deleted: {safe_filename}")
-    return {"status": "success", "message": f"Salva eliminada: {safe_filename}"}
+    logger.info(f"Backup deleted: {target.name}")
+    return {"status": "success", "message": f"Salva eliminada: {target.name}"}
 
 
 def get_backup_file_path(filename: str) -> Path | None:
     """Return the absolute Path for a backup file, or None if invalid/missing."""
-    safe_filename = _normalize_backup_filename(filename)
-    if safe_filename is None:
-        return None
-
     cfg = load_config()
     try:
         bdir = _backup_dir(cfg)
     except OSError:
         return None
-    target = bdir / safe_filename
 
-    if not target.exists():
-        return None
-
-    try:
-        target.resolve().relative_to(bdir.resolve())
-    except ValueError:
+    target = _get_safe_backup_path(bdir, filename)
+    if target is None or not target.exists():
         return None
 
     return target
