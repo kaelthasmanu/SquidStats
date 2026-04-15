@@ -3,7 +3,7 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
       <h3 class="text-lg font-semibold text-gray-700">
-        Usuarios Totales
+        {{ _("Usuarios Totales") }}
       </h3>
       <p class="text-2xl font-bold text-blue-600">
         {{ metrics.total_stats.total_users }}
@@ -11,7 +11,7 @@
     </div>
     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
       <h3 class="text-lg font-semibold text-gray-700">
-        Registros de Log
+        {{ _("Registros de Log") }}
       </h3>
       <p class="text-2xl font-bold text-green-600">
         {{ metrics.total_stats.total_log_entries }}
@@ -19,14 +19,14 @@
     </div>
     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
       <h3 class="text-lg font-semibold text-gray-700">
-        Datos Transmitidos
+        {{ _("Datos Transmitidos") }}
       </h3>
       <p class="text-2xl font-bold text-purple-600">
-        {{ "%.2f"|format(metrics.total_stats.total_data_transmitted / (1024**3)) }} GB
+        {{ "%.2f"|format(metrics.total_stats.total_data_transmitted / (1024**3)) }} {{ _("GB") }}
       </p>
     </div>
     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-700">Total Requests</h3>
+      <h3 class="text-lg font-semibold text-gray-700">{{ _("Total Requests") }}</h3>
       <p class="text-2xl font-bold text-orange-600">
         {{ metrics.total_stats.total_requests }}
       </p>
@@ -37,7 +37,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <h2 class="text-xl font-bold mb-4 text-gray-800">
-        Top 20 Usuarios por Actividad
+        {{ _("Top 20 Usuarios por Actividad") }}
       </h2>
       <div class="h-80">
         <canvas id="usersActivityChart"></canvas>
@@ -46,7 +46,7 @@
 
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <h2 class="text-xl font-bold mb-4 text-gray-800">
-        Top 20 Usuarios por Datos Transmitidos
+        {{ _("Top 20 Usuarios por Datos Transmitidos") }}
       </h2>
       <div class="h-80">
         <canvas id="usersDataChart"></canvas>
@@ -57,7 +57,7 @@
   <!-- HTTP codes chart -->
   <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
     <h2 class="text-xl font-bold mb-4 text-gray-800">
-      Distribución de Códigos HTTP
+      {{ _("Distribución de Códigos HTTP") }}
     </h2>
     <div class="h-96">
       <canvas id="httpCodesChart"></canvas>
@@ -67,23 +67,23 @@
   <!-- Most visited pages table -->
   <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
     <h2 class="text-xl font-bold mb-4 text-gray-800">
-      Top 20 Páginas Más Visitadas
+      {{ _("Top 20 Páginas Más Visitadas") }}
     </h2>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              URL
+              {{ _("URL") }}
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Total Requests
+              {{ _("Total Requests") }}
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Visitas Únicas
+              {{ _("Visitas Únicas") }}
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Datos Transmitidos
+              {{ _("Datos Transmitidos") }}
             </th>
           </tr>
         </thead>
@@ -100,7 +100,7 @@
               {{ page.unique_visits }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ "%.2f"|format(page.total_data_bytes / (1024**2)) }} MB
+              {{ "%.2f"|format(page.total_data_bytes / (1024**2)) }} {{ _("MB") }}
             </td>
           </tr>
           {% endfor %}
@@ -112,20 +112,20 @@
   <!-- Shared IPs table -->
   <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
     <h2 class="text-xl font-bold mb-4 text-gray-800">
-      IPs Compartidas por Múltiples Usuarios
+      {{ _("IPs Compartidas por Múltiples Usuarios") }}
     </h2>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              IP
+              {{ _("IP") }}
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Número de Usuarios
+              {{ _("Número de Usuarios") }}
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Usuarios
+              {{ _("Usuarios") }}
             </th>
           </tr>
         </thead>

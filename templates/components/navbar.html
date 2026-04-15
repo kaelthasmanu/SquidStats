@@ -4,14 +4,14 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between py-4 h-[64px]">
       <!-- Brand/Logo Section -->
       <div class="flex items-center gap-3 font-bold text-xl text-white no-underline">
-        <img src="{{ url_for('static', filename='squidstats.webp') }}" alt="Logo SquidStats" class="h-8 w-8 object-contain rounded-md" />
-        <span class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-300">SquidStats</span>
+        <img src="{{ url_for('static', filename='squidstats.webp') }}" alt="{{ _("Logo SquidStats") }}" class="h-8 w-8 object-contain rounded-md" />
+        <span class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-300">{{ _("SquidStats") }}</span>
       </div>
       <!-- Container for mobile icons (notifications + hamburger) -->
       <div class="lg:hidden flex items-center gap-3">
         <!-- Mobile Notifications Button -->
         <div class="relative" x-data="{ open: false }">
-          <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Notificaciones">
+          <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="{{ _("Notificaciones") }}">
             <i class="fas fa-bell"></i>
             <span class="notification-badge absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-full border-2 border-white shadow-lg hidden">0</span>
           </button>
@@ -28,23 +28,23 @@
             class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
             style="display: none">
             <div class="py-2 px-4 border-b border-gray-200 flex items-center justify-between">
-              <span class="font-semibold text-gray-800">Notificaciones</span>
+              <span class="font-semibold text-gray-800">{{ _("Notificaciones") }}</span>
               <button @click="open = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                 <i class="fas fa-times"></i>
               </button>
             </div>
             <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 notifications-mobile">
               <li class="px-4 py-3 text-gray-500 text-center">
-                Cargando notificaciones...
+                {{ _("Cargando notificaciones...") }}
               </li>
             </ul>
             <div class="py-2 px-4 text-center border-t border-gray-200">
-                <a href="/all-notifications" class="text-sm text-blue-600 hover:underline">Ver todas las notificaciones</a>
+                <a href="/all-notifications" class="text-sm text-blue-600 hover:underline">{{ _("Ver todas las notificaciones") }}</a>
             </div>
           </div>
         </div>
         <!-- Hamburger Button for Mobile -->
-        <button @click="mobileMenuOpen = !mobileMenuOpen" class="flex flex-col w-8 h-8 justify-center items-center gap-1.5 text-white focus:outline-none z-[1001]" aria-label="Toggle menu">
+        <button @click="mobileMenuOpen = !mobileMenuOpen" class="flex flex-col w-8 h-8 justify-center items-center gap-1.5 text-white focus:outline-none z-[1001]" aria-label="{{ _("Toggle menu") }}">
           <span class="w-6 h-0.5 bg-white transition-all" :class="{'rotate-45 translate-y-2': mobileMenuOpen}"></span>
           <span class="w-6 h-0.5 bg-white transition-all" :class="{'opacity-0': mobileMenuOpen}"></span>
           <span class="w-6 h-0.5 bg-white transition-all" :class="{'-rotate-45 -translate-y-2': mobileMenuOpen}"></span>
@@ -52,36 +52,36 @@
       </div>
       <!-- Navigation Links - Desktop -->
       <div class="hidden lg:flex items-center gap-2">
-        <a href="/" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Panel principal con conexiones activas">
+        <a href="/" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="{{ _("Panel principal con conexiones activas") }}">
           <i class="fas fa-home text-base"></i>
-          <span class="font-medium">Inicio</span>
+          <span class="font-medium">{{ _("Inicio") }}</span>
         </a>
-        <a href="/stats" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Estadísticas de rendimiento del cache">
+        <a href="/stats" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="{{ _("Estadísticas de rendimiento del cache") }}">
           <i class="fas fa-chart-bar text-base"></i>
-          <span class="font-medium">Estadísticas</span>
+          <span class="font-medium">{{ _("Estadísticas") }}</span>
         </a>
-        <a href="/logs" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Actividad y logs de usuarios">
+        <a href="/logs" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="{{ _("Actividad y logs de usuarios") }}">
           <i class="fas fa-user-friends text-base"></i>
-          <span class="font-medium">Usuarios</span>
+          <span class="font-medium">{{ _("Usuarios") }}</span>
         </a>
-        <a href="/reports" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Reportes y gráficas avanzadas">
+        <a href="/reports" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="{{ _("Reportes y gráficas avanzadas") }}">
           <i class="fas fa-chart-simple text-base"></i>
-          <span class="font-medium">Reportes</span>
+          <span class="font-medium">{{ _("Reportes") }}</span>
         </a>
-        <a href="/blacklist" data-nav-loading="true" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Sitios bloqueados y actividad restringida">
+        <a href="/blacklist" data-nav-loading="true" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="{{ _("Sitios bloqueados y actividad restringida") }}">
           <i class="fas fa-ban text-base"></i>
-          <span class="font-medium">Blacklist</span>
+          <span class="font-medium">{{ _("Blacklist") }}</span>
         </a>
-        <a href="/auditoria" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Auditoría de actividad por usuario y fecha">
+        <a href="/auditoria" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="{{ _("Auditoría de actividad por usuario y fecha") }}">
           <i class="fas fa-magnifying-glass text-base"></i>
-          <span class="font-medium">Auditoría</span>
+          <span class="font-medium">{{ _("Auditoría") }}</span>
         </a>
       </div>
       <!-- Desktop Notifications -->
       <div class="hidden lg:flex items-center gap-3">
         <div class="relative" x-data="{ open: false }">
           <!-- Desktop Notifications Button -->
-          <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="Notificaciones">
+          <button @click="open = !open" class="flex items-center gap-2 px-4 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 relative hover:text-white hover:bg-white/10 hover:-translate-y-0.5" data-tooltip="{{ _("Notificaciones") }}">
             <i class="fas fa-bell"></i>
             <span class="notification-badge absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-full border-2 border-white shadow-lg hidden">0</span>
           </button>
@@ -98,37 +98,53 @@
             class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
             style="display: none">
             <div class="py-2 px-4 border-b border-gray-200 flex items-center justify-between">
-              <span class="font-semibold text-gray-800">Notificaciones</span>
+              <span class="font-semibold text-gray-800">{{ _("Notificaciones") }}</span>
               <button @click="open = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                 <i class="fas fa-times"></i>
               </button>
             </div>
             <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 notifications">
               <li class="px-4 py-3 text-gray-500 text-center">
-                Cargando notificaciones...
+                {{ _("Cargando notificaciones...") }}
               </li>
             </ul>
             <div class="py-2 px-4 text-center border-t border-gray-200">
-                <a href="/all-notifications" class="text-sm text-blue-600 hover:underline">Ver todas las notificaciones</a>
+                <a href="/all-notifications" class="text-sm text-blue-600 hover:underline">{{ _("Ver todas las notificaciones") }}</a>
             </div>
           </div>
         </div>
         <!-- Action Buttons - Desktop -->
         <div class="flex items-center gap-3">
-          <a href="/admin" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow hover:from-blue-700 hover:to-blue-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Panel de administración del sistema">
+          <a href="/admin" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow hover:from-blue-700 hover:to-blue-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="{{ _("Panel de administración del sistema") }}">
             <i class="fas fa-cog"></i>
-            <span>Admin</span>
+            <span>{{ _("Admin") }}</span>
           </a>
 
-          <button onclick="confirmSquidUpdate()" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Actualizar paquetes y configuración de Squid">
+          <button onclick="confirmSquidUpdate()" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="{{ _("Actualizar paquetes y configuración de Squid") }}">
             <i class="fas fa-sync-alt"></i>
-            <span>Squid</span>
+            <span>{{ _("Squid") }}</span>
           </button>
 
-          <button onclick="confirmWebUpdate()" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="Actualizar aplicación web SquidStats">
+          <button onclick="confirmWebUpdate()" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="{{ _("Actualizar aplicación web SquidStats") }}">
             <i class="fas fa-cloud-download-alt"></i>
-            <span>Web</span>
+            <span>{{ _("Web") }}</span>
           </button>
+
+          <!-- Language Switcher -->
+          <div class="relative" x-data="{ langOpen: false }">
+            <button @click="langOpen = !langOpen" @click.outside="langOpen = false" class="flex items-center gap-1 px-3 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 hover:text-white hover:bg-white/10" data-tooltip="{{ _('Idioma') }}">
+              <i class="fas fa-globe"></i>
+              <span class="uppercase">{{ get_locale() }}</span>
+            </button>
+            <div x-show="langOpen" x-transition class="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden" style="display: none;">
+              {% for code, name in LANGUAGES.items() %}
+              <a href="{{ url_for('i18n.set_language', lang=code) }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors {% if get_locale() == code %}bg-blue-50 font-semibold text-blue-700{% endif %}">
+                {{ name }}
+                {% if get_locale() == code %}<i class="fas fa-check ml-auto text-blue-500"></i>{% endif %}
+              </a>
+              {% endfor %}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -151,29 +167,29 @@
       <div class="flex flex-col gap-2 mb-8">
         <a href="/" @click="mobileMenuOpen = false" class="flex items-center gap-3 px-4 py-3 text-gray-200 rounded-lg font-medium text-base transition-all duration-300 hover:text-white hover:bg-white/10">
           <i class="fas fa-home text-lg"></i>
-          <span>Inicio</span>
+          <span>{{ _("Inicio") }}</span>
         </a>
         <a
           href="/stats" @click="mobileMenuOpen = false"
           class="flex items-center gap-3 px-4 py-3 text-gray-200 rounded-lg font-medium text-base transition-all duration-300 hover:text-white hover:bg-white/10">
           <i class="fas fa-chart-bar text-lg"></i>
-          <span>Estadísticas</span>
+          <span>{{ _("Estadísticas") }}</span>
         </a>
         <a href="/logs" @click="mobileMenuOpen = false" class="flex items-center gap-3 px-4 py-3 text-gray-200 rounded-lg font-medium text-base transition-all duration-300 hover:text-white hover:bg-white/10">
           <i class="fas fa-user-friends text-lg"></i>
-          <span>Usuarios</span>
+          <span>{{ _("Usuarios") }}</span>
         </a>
         <a href="/reports" @click="mobileMenuOpen = false" class="flex items-center gap-3 px-4 py-3 text-gray-200 rounded-lg font-medium text-base transition-all duration-300 hover:text-white hover:bg-white/10">
           <i class="fas fa-chart-simple text-lg"></i>
-          <span>Reportes</span>
+          <span>{{ _("Reportes") }}</span>
         </a>
         <a href="/blacklist" data-nav-loading="true" @click="mobileMenuOpen = false" class="flex items-center gap-3 px-4 py-3 text-gray-200 rounded-lg font-medium text-base transition-all duration-300 hover:text-white hover:bg-white/10">
           <i class="fas fa-ban text-lg"></i>
-          <span>Blacklist</span>
+          <span>{{ _("Blacklist") }}</span>
         </a>
         <a href="/auditoria" @click="mobileMenuOpen = false" class="flex items-center gap-3 px-4 py-3 text-gray-200 rounded-lg font-medium text-base transition-all duration-300 hover:text-white hover:bg-white/10">
           <i class="fas fa-magnifying-glass text-lg"></i>
-          <span>Auditoría</span>
+          <span>{{ _("Auditoría") }}</span>
         </a>
       </div>
       <!-- Squid and Web buttons in a row -->
@@ -181,17 +197,27 @@
         <div class="flex flex-1 gap-2">
           <a href="/admin" @click="mobileMenuOpen = false" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow hover:from-blue-700 hover:to-blue-600 transition-all duration-300">
             <i class="fas fa-cog"></i>
-            <span>Admin</span>
+            <span>{{ _("Admin") }}</span>
           </a>
           <button onclick="confirmSquidUpdate(); mobileMenuOpen = false" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 transition-all duration-300">
             <i class="fas fa-sync-alt"></i>
-            <span>Squid</span>
+            <span>{{ _("Squid") }}</span>
           </button>
           <button onclick="confirmWebUpdate(); mobileMenuOpen = false" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 transition-all duration-300">
             <i class="fas fa-cloud-download-alt"></i>
-            <span>Web</span>
+            <span>{{ _("Web") }}</span>
           </button>
         </div>
+      </div>
+      <!-- Language Switcher - Mobile -->
+      <div class="flex gap-2 mb-4">
+        {% for code, name in LANGUAGES.items() %}
+        <a href="{{ url_for('i18n.set_language', lang=code) }}" @click="mobileMenuOpen = false" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm transition-all duration-300 {% if get_locale() == code %}bg-white/20 text-white ring-1 ring-white/30{% else %}text-gray-300 hover:text-white hover:bg-white/10{% endif %}">
+          <i class="fas fa-globe"></i>
+          <span>{{ name }}</span>
+          {% if get_locale() == code %}<i class="fas fa-check text-xs"></i>{% endif %}
+        </a>
+        {% endfor %}
       </div>
     </div>
   </div>

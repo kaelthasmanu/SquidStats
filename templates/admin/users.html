@@ -3,9 +3,9 @@
 {% block content %}
 <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Gestión de Usuarios</h2>
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">{{ _("Gestión de Usuarios") }}</h2>
         <a href="{{ url_for('admin.create_user') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center w-full sm:w-auto justify-center">
-            <i class="fas fa-plus mr-2"></i>Crear Usuario
+            <i class="fas fa-plus mr-2"></i>{{ _("Crear Usuario") }}
         </a>
     </div>
 
@@ -13,12 +13,12 @@
         <table class="min-w-full table-auto">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
-                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Rol</th>
-                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Último Login</th>
-                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("ID") }}</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("Usuario") }}</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">{{ _("Rol") }}</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("Estado") }}</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">{{ _("Último Login") }}</th>
+                    <th class="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("Acciones") }}</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -29,27 +29,27 @@
                     <td class="px-2 sm:px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">{{ user.role }}</td>
                     <td class="px-2 sm:px-4 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                            {% if user.is_active %}Activo{% else %}Inactivo{% endif %}
+                            {% if user.is_active %}{{ _("Activo") }}{% else %}{{ _("Inactivo") }}{% endif %}
                         </span>
                     </td>
                     <td class="px-2 sm:px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                         {% if user.last_login %}
                             {{ user.last_login | datetime_format('%Y-%m-%d %H:%M') }}
                         {% else %}
-                            Nunca
+                            {{ _("Nunca") }}
                         {% endif %}
                     </td>
                     <td class="px-2 sm:px-4 py-4 whitespace-nowrap text-sm font-medium">
                         <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="text-blue-600 hover:text-blue-900 mr-2">
-                            <i class="fas fa-edit"></i><span class="hidden sm:inline"> Editar</span>
+                            <i class="fas fa-edit"></i><span class="hidden sm:inline"> {{ _("Editar") }}</span>
                         </a>
                         {% if user.username != 'admin' %}
                         <button type="button" onclick="confirmDelete({{ user.id }}, '{{ user.username }}')" class="text-red-600 hover:text-red-900">
-                            <i class="fas fa-trash"></i><span class="hidden sm:inline"> Eliminar</span>
+                            <i class="fas fa-trash"></i><span class="hidden sm:inline"> {{ _("Eliminar") }}</span>
                         </button>
                         {% else %}
                         <span class="text-gray-400 cursor-not-allowed">
-                            <i class="fas fa-trash"></i><span class="hidden sm:inline"> Eliminar</span>
+                            <i class="fas fa-trash"></i><span class="hidden sm:inline"> {{ _("Eliminar") }}</span>
                         </span>
                         {% endif %}
                     </td>

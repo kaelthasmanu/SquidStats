@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 
-{% block title %}Dividir Configuración Squid{% endblock %}
+{% block title %}{{ _("Dividir Configuración Squid") }}{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
@@ -9,8 +9,8 @@
         <div class="flex items-center space-x-4">
             <i class="fas fa-code-branch text-4xl"></i>
             <div>
-                <h2 class="text-3xl font-bold">Dividir Configuración Squid</h2>
-                <p class="text-blue-100 mt-1">Modulariza tu archivo squid.conf para una gestión más sencilla</p>
+                <h2 class="text-3xl font-bold">{{ _("Dividir Configuración Squid") }}</h2>
+                <p class="text-blue-100 mt-1">{{ _("Modulariza tu archivo squid.conf para una gestión más sencilla") }}</p>
             </div>
         </div>
     </div>
@@ -21,7 +21,7 @@
             <div class="flex items-center space-x-3">
                 <i class="fas fa-file-code text-blue-600 text-2xl"></i>
                 <div>
-                    <p class="text-gray-600 text-sm">Archivo de entrada</p>
+                    <p class="text-gray-600 text-sm">{{ _("Archivo de entrada") }}</p>
                     <p class="font-semibold text-gray-800 text-sm">{{ input_file }}</p>
                 </div>
             </div>
@@ -30,7 +30,7 @@
             <div class="flex items-center space-x-3">
                 <i class="fas fa-folder text-emerald-600 text-2xl"></i>
                 <div>
-                    <p class="text-gray-600 text-sm">Directorio de salida</p>
+                    <p class="text-gray-600 text-sm">{{ _("Directorio de salida") }}</p>
                     <p class="font-semibold text-gray-800 text-sm">{{ output_dir }}</p>
                 </div>
             </div>
@@ -39,11 +39,11 @@
             <div class="flex items-center space-x-3">
                 <i class="fas fa-layer-group text-amber-600 text-2xl"></i>
                 <div>
-                    <p class="text-gray-600 text-sm">Estado</p>
+                    <p class="text-gray-600 text-sm">{{ _("Estado") }}</p>
                     {% if output_exists %}
-                        <p class="font-semibold text-emerald-600 text-sm">{{ files_count }} archivos generados</p>
+                        <p class="font-semibold text-emerald-600 text-sm">{{ files_count }} {{ _("archivos generados") }}</p>
                     {% else %}
-                        <p class="font-semibold text-gray-600 text-sm">No dividido aún</p>
+                        <p class="font-semibold text-gray-600 text-sm">{{ _("No dividido aún") }}</p>
                     {% endif %}
                 </div>
             </div>
@@ -54,17 +54,17 @@
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
             <i class="fas fa-info-circle text-blue-600 mr-2"></i>
-            ¿Qué hace esta funcionalidad?
+            {{ _("¿Qué hace esta funcionalidad?") }}
         </h3>
         <p class="text-gray-700 mb-4">
-            Esta herramienta divide tu archivo monolítico <code class="bg-gray-100 px-2 py-1 rounded">squid.conf</code> 
-            en múltiples archivos modulares organizados por categorías. Esto facilita:
+            {{ _("Esta herramienta divide tu archivo monolítico") }} <code class="bg-gray-100 px-2 py-1 rounded">squid.conf</code> 
+            {{ _("en múltiples archivos modulares organizados por categorías. Esto facilita:") }}
         </p>
         <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
-            <li>Gestión y mantenimiento más sencillo de la configuración</li>
-            <li>Mejor organización de directivas por funcionalidad</li>
-            <li>Facilita la edición desde la interfaz web</li>
-            <li>Reduce errores al editar configuraciones complejas</li>
+            <li>{{ _("Gestión y mantenimiento más sencillo de la configuración") }}</li>
+            <li>{{ _("Mejor organización de directivas por funcionalidad") }}</li>
+            <li>{{ _("Facilita la edición desde la interfaz web") }}</li>
+            <li>{{ _("Reduce errores al editar configuraciones complejas") }}</li>
         </ul>
     </div>
 
@@ -72,7 +72,7 @@
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
             <i class="fas fa-list text-blue-600 mr-2"></i>
-            Archivos que se generarán
+            {{ _("Archivos que se generarán") }}
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             {% for filename, description in split_info.items() %}
@@ -93,19 +93,19 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
             <i class="fas fa-cogs text-blue-600 mr-2"></i>
-            Acciones
+            {{ _("Acciones") }}
         </h3>
         
         <!-- RC -->
         <div class="mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-6 flex items-start space-x-4">
             <i class="fas fa-exclamation-triangle text-red-600 text-3xl mt-1 animate-pulse"></i>
             <div class="flex-1">
-                <p class="font-bold text-red-800 text-lg">¡MUY IMPORTANTE!</p>
+                <p class="font-bold text-red-800 text-lg">{{ _("¡MUY IMPORTANTE!") }}</p>
                 <p class="text-red-700 mt-2 font-medium">
-                    Esta funcionalidad se encuentra en <strong>RC</strong>. Puede contener errores y comportamientos inesperados.
+                    {{ _("Esta funcionalidad se encuentra en") }} <strong>{{ _("RC") }}</strong>. Puede contener errores y comportamientos inesperados.
                 </p>
                 <p class="text-red-700 mt-2">
-                    <strong>Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba.</strong>
+                    <strong>{{ _("Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba.") }}</strong>
                 </p>
             </div>
         </div>
@@ -115,22 +115,22 @@
             <div class="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                 <input type="checkbox" id="strictMode" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
                 <div class="flex-1">
-                    <label for="strictMode" class="font-medium text-gray-800 cursor-pointer">Modo estricto</label>
-                    <p class="text-sm text-gray-600">Abortar si se encuentran directivas desconocidas</p>
+                    <label for="strictMode" class="font-medium text-gray-800 cursor-pointer">{{ _("Modo estricto") }}</label>
+                    <p class="text-sm text-gray-600">{{ _("Abortar si se encuentran directivas desconocidas") }}</p>
                 </div>
             </div>
 
             <!-- Action buttons -->
             <div class="flex flex-col sm:flex-row gap-4">
-                <button onclick="confirmSplit()" title="Divide squid.conf en archivos modulares y crea respaldo" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
+                <button onclick="confirmSplit()" title="{{ _("Divide squid.conf en archivos modulares y crea respaldo") }}" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
                     <i class="fas fa-code-branch mr-2"></i>
-                    Dividir Configuración
+                    {{ _("Dividir Configuración") }}
                 </button>
                 
                 {% if output_exists %}
-                <button onclick="showFilesModal()" title="Abre un modal con los archivos generados por la división" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
+                <button onclick="showFilesModal()" title="{{ _("Abre un modal con los archivos generados por la división") }}" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center">
                     <i class="fas fa-folder-open mr-2"></i>
-                    Ver Archivos Generados
+                    {{ _("Ver Archivos Generados") }}
                 </button>
                 {% endif %}
             </div>
@@ -140,9 +140,9 @@
         <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
             <i class="fas fa-exclamation-triangle text-amber-600 text-xl mt-1"></i>
             <div class="flex-1">
-                <p class="font-semibold text-amber-800">Advertencia</p>
+                <p class="font-semibold text-amber-800">{{ _("Advertencia") }}</p>
                 <p class="text-sm text-amber-700 mt-1">
-                    Esta operación creará múltiples archivos en el directorio <code class="bg-amber-100 px-2 py-0.5 rounded">{{ output_dir }}</code>. 
+                    {{ _("Esta operación creará múltiples archivos en el directorio") }} <code class="bg-amber-100 px-2 py-0.5 rounded">{{ output_dir }}</code>. 
                     Si ya existen archivos en ese directorio, serán sobrescritos.
                 </p>
             </div>
@@ -153,7 +153,7 @@
     <div id="resultsArea" class="hidden mt-6 bg-white rounded-lg shadow-md p-6">
         <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
             <i class="fas fa-check-circle text-emerald-600 mr-2"></i>
-            Resultados
+            {{ _("Resultados") }}
         </h3>
         <div id="resultsContent" class="space-y-3"></div>
     </div>
@@ -166,7 +166,7 @@
         <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-folder-open text-2xl"></i>
-                <h3 class="text-xl font-bold">Archivos Generados</h3>
+                <h3 class="text-xl font-bold">{{ _("Archivos Generados") }}</h3>
             </div>
             <button onclick="closeFilesModal()" class="text-white hover:text-gray-200 transition-colors">
                 <i class="fas fa-times text-2xl"></i>
@@ -187,10 +187,10 @@
         <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex items-center justify-between border-t">
             <p class="text-sm text-gray-600">
                 <i class="fas fa-info-circle mr-1"></i>
-                Directorio: <code class="bg-gray-200 px-2 py-1 rounded text-xs">{{ output_dir }}</code>
+                {{ _("Directorio:") }} <code class="bg-gray-200 px-2 py-1 rounded text-xs">{{ output_dir }}</code>
             </p>
             <button onclick="closeFilesModal()" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
-                Cerrar
+                {{ _("Cerrar") }}
             </button>
         </div>
     </div>

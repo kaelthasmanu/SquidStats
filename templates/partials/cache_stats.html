@@ -1,14 +1,14 @@
 <div class="w-full space-y-6">
   <div class="flex border-b mb-6">
     <button id="dashboardTab" class="main-tab-btn active relative overflow-hidden py-3 px-6 font-medium text-blue-600">
-      <i class="fas fa-tachometer-alt mr-2"></i>Sistema
+      <i class="fas fa-tachometer-alt mr-2"></i>{{ _("Sistema") }}
     </button>
     <button id="cacheTab"
       class="main-tab-btn relative overflow-hidden py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
-      <i class="fas fa-database mr-2"></i>Caché
+      <i class="fas fa-database mr-2"></i>{{ _("Caché") }}
     </button>
     <button id="networkTab" class="main-tab-btn relative overflow-hidden py-3 px-6 font-medium text-gray-500 hover:text-blue-600">
-      <i class="fas fa-network-wired mr-2"></i>Red
+      <i class="fas fa-network-wired mr-2"></i>{{ _("Red") }}
     </button>
   </div>
 
@@ -19,7 +19,7 @@
           <div class="flex items-center mb-6">
             <i class="fas fa-chart-pie text-2xl text-blue-600 mr-3"></i>
             <h2 class="text-xl font-bold text-gray-800">
-              Estadísticas del Sistema
+              {{ _("Estadísticas del Sistema") }}
             </h2>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center justify-center">
@@ -31,9 +31,9 @@
                   <text id="cpu-value" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0%</text>
                 </svg>
               </div>
-              <h3 class="mt-2 font-semibold text-gray-700">CPU</h3>
+              <h3 class="mt-2 font-semibold text-gray-700">{{ _("CPU") }}</h3>
               <p class="text-xs mt-1 bg-red-500 text-white px-2 py-0.5 rounded-full font-medium">
-                {{ system_info.cpu.physical_cores }} núcleos
+                {{ system_info.cpu.physical_cores }} {{ _("núcleos") }}
               </p>
             </div>
             <div class="flex flex-col items-center justify-center">
@@ -41,10 +41,10 @@
                 <svg viewBox="0 0 36 36" class="block mx-auto">
                   <path class="fill-none stroke-blue-100 stroke-[3.5]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                   <path id="ram-ring" class="circle-animation fill-none stroke-linecap-round stroke-blue-600 stroke-[3.5]" stroke-dasharray="0,100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <text id="ram-used" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
+                  <text id="ram-used" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">{{ _("0G") }}</text>
                 </svg>
               </div>
-              <h3 class="mt-2 font-semibold text-gray-700">RAM</h3>
+              <h3 class="mt-2 font-semibold text-gray-700">{{ _("RAM") }}</h3>
               <p class="text-xs mt-1 bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">
                 {{ system_info.ram.total }}
               </p>
@@ -54,10 +54,10 @@
                 <svg viewBox="0 0 36 36" class="block mx-auto">
                   <path class="fill-none stroke-emerald-100 stroke-[3.5]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                   <path id="swap-ring" class="circle-animation fill-none stroke-linecap-round stroke-emerald-500 stroke-[3.5]" stroke-dasharray="0,100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <text id="swap-used" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">0G</text>
+                  <text id="swap-used" x="18" y="18" class="text-[0.5rem] fill-gray-500" text-anchor="middle" dominant-baseline="middle">{{ _("0G") }}</text>
                 </svg>
               </div>
-              <h3 class="mt-2 font-semibold text-gray-700">SWAP</h3>
+              <h3 class="mt-2 font-semibold text-gray-700">{{ _("SWAP") }}</h3>
               <p class="text-xs mt-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full font-medium">
                 {{ system_info.swap.total }}
               </p>
@@ -69,7 +69,7 @@
           <div class="flex items-center mb-6">
             <i class="fas fa-info-circle text-2xl text-blue-600 mr-3"></i>
             <h2 class="text-xl font-bold text-gray-800">
-              Información del Sistema
+              {{ _("Información del Sistema") }}
             </h2>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -77,7 +77,7 @@
               <i class="fas fa-server text-gray-500 mt-1 mr-3"></i>
               <div>
                 <h3 class="text-sm font-semibold text-gray-600">
-                  Nombre del Host
+                  {{ _("Nombre del Host") }}
                 </h3>
                 <p id="hostname" class="text-gray-800">
                   {{ system_info.hostname }}
@@ -88,7 +88,7 @@
               <i class="fas fa-network-wired text-gray-500 mt-1 mr-3"></i>
               <div>
                 <h3 class="text-sm font-semibold text-gray-600">
-                  Direcciones IP
+                  {{ _("Direcciones IP") }}
                 </h3>
                 <p id="ip-addresses" class="text-gray-800">
                   {% for ip in system_info.ips %}{{ ip.ip }}<br />{% endfor
@@ -100,7 +100,7 @@
               <i class="fab fa-linux text-gray-500 mt-1 mr-3"></i>
               <div>
                 <h3 class="text-sm font-semibold text-gray-600">
-                  Sistema Operativo
+                  {{ _("Sistema Operativo") }}
                 </h3>
                 <p id="os-info" class="text-gray-800">
                   {{ system_info.os }}
@@ -111,7 +111,7 @@
               <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
               <div>
                 <h3 class="text-sm font-semibold text-gray-600">
-                  Tiempo Encendido
+                  {{ _("Tiempo Encendido") }}
                 </h3>
                 <p id="uptime" class="text-gray-800">
                   {{ system_info.uptime }}
@@ -122,7 +122,7 @@
               <i class="fas fa-globe text-gray-500 mt-1 mr-3"></i>
               <div>
                 <h3 class="text-sm font-semibold text-gray-600">
-                  Zona Horaria
+                  {{ _("Zona Horaria") }}
                 </h3>
                 <p id="timezone" class="text-gray-800">
                   {{ system_info.timezone }}
@@ -133,7 +133,7 @@
               <i class="fas fa-clock text-gray-500 mt-1 mr-3"></i>
               <div>
                 <h3 class="text-sm font-semibold text-gray-600">
-                  Hora Local
+                  {{ _("Hora Local") }}
                 </h3>
                 <p id="local-time" class="text-gray-800">
                   {{ system_info.local_time }}
@@ -148,20 +148,20 @@
     <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-gray-800">
-          Gráficas del Sistema
+          {{ _("Gráficas del Sistema") }}
         </h2>
         <div class="flex bg-gray-100 rounded-lg p-1">
           <button
             id="todayBtn"
             class="time-range-btn active px-4 py-2 rounded-md text-sm font-medium text-blue-600 bg-white shadow"
           >
-            Hoy
+            {{ _("Hoy") }}
           </button>
           <button
             id="24hoursBtn"
             class="time-range-btn px-4 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-blue-600"
           >
-            24 Horas
+            {{ _("24 Horas") }}
           </button>
         </div>
       </div>
@@ -169,17 +169,17 @@
         <button
           class="tab-btn active py-3 px-6 font-medium border-b-2 border-blue-600 text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
         >
-          CPU
+          {{ _("CPU") }}
         </button>
         <button
           class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
         >
-          RAM
+          {{ _("RAM") }}
         </button>
         <button
           class="tab-btn py-3 px-6 font-medium text-gray-500 hover:text-blue-600 transition-all duration-300 ease-in-out hover:bg-slate-100"
         >
-          SWAP
+          {{ _("SWAP") }}
         </button>
       </div>
       <div class="tab-content active">
@@ -200,7 +200,7 @@
         <div class="flex items-center mb-6">
           <i class="fas fa-database text-2xl text-blue-600 mr-3"></i>
           <h2 class="text-2xl font-bold text-gray-800">
-            Estadísticas de Caché
+            {{ _("Estadísticas de Caché") }}
           </h2>
         </div>
         <div
@@ -217,11 +217,11 @@
           {% set total_space_html %}{% if (cache_stats.fs_space_total /
           1024) < 1024 %}
           <p class="text-xl text-blue-800" data-stat="espacio_total">
-            {{ (cache_stats.fs_space_total / 1024)|int }} MB
+            {{ (cache_stats.fs_space_total / 1024)|int }} {{ _("MB") }}
           </p>
           {% else %}
           <p class="text-xl text-blue-800" data-stat="espacio_total">
-            {{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }} GB
+            {{ (cache_stats.fs_space_total / 1024 / 1024)|round(2) }} {{ _("GB") }}
           </p>
           {% endif %}{% endset %} {{ flip_card(icon='fas fa-hdd',
           title='Espacio total', back_title='Espacio total',
@@ -234,11 +234,11 @@
           ') }} {% endif %} {% set used_space_html %}{% if
           (cache_stats.fs_space_used / 1024) < 1024 %}
           <p class="text-xl text-blue-800" data-stat="espacio_usado">
-            {{ (cache_stats.fs_space_used / 1024)|int }} MB
+            {{ (cache_stats.fs_space_used / 1024)|int }} {{ _("MB") }}
           </p>
           {% else %}
           <p class="text-xl text-blue-800" data-stat="espacio_usado">
-            {{ (cache_stats.fs_space_used / 1024 / 1024)|round(2) }} GB
+            {{ (cache_stats.fs_space_used / 1024 / 1024)|round(2) }} {{ _("GB") }}
           </p>
           {% endif %}{% endset %}{{ flip_card(icon='fas fa-folder-open',
           title='Espacio usado', back_title='Espacio usado',
@@ -260,7 +260,7 @@
     <section class="bg-white rounded-xl shadow-lg p-6">
       <div class="flex items-center mb-6">
         <i class="fas fa-network-wired text-2xl text-blue-600 mr-3"></i>
-        <h2 class="text-xl font-bold text-gray-800">Tráfico de Red</h2>
+        <h2 class="text-xl font-bold text-gray-800">{{ _("Tráfico de Red") }}</h2>
       </div>
       <div class="h-80"><canvas id="networkChart"></canvas></div>
     </section>

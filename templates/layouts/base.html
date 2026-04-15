@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ get_locale() }}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -71,6 +71,16 @@
     <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
     <!-- Configuración global de Toastr -->
     <script src="{{ url_for('static', filename='js/toastr-config.js') }}"></script>
+    <!-- i18n translations for JavaScript -->
+    <script>
+      window._i18n = window._i18n || {};
+      window._i18n.locale = "{{ get_locale() }}";
+      window.__ = function(key) { return (window._i18n.translations && window._i18n.translations[key]) || key; };
+      fetch("{{ url_for('i18n.get_translations') }}")
+        .then(function(r) { return r.json(); })
+        .then(function(data) { window._i18n.translations = data; })
+        .catch(function() {});
+    </script>
     <!-- Page-specific scripts -->
     {% block scripts %}{% endblock scripts %}
   </body>

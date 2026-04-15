@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login - SquidStats Admin</title>
+    <title>{{ _("Login - SquidStats Admin") }}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"/>
     <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}">
@@ -56,12 +56,12 @@
             <div class="inline-flex items-center justify-center w-24 h-24 mb-4">
                 <img
                     src="{{ url_for('static', filename='squidstats.webp') }}"
-                    alt="SquidStats"
+                    alt="{{ _("SquidStats") }}"
                     class="w-full h-full object-contain drop-shadow-lg"
                 >
             </div>
-            <h1 class="text-2xl font-bold text-gray-800">SquidStats</h1>
-            <p class="text-gray-500 mt-1">Panel de Administración</p>
+            <h1 class="text-2xl font-bold text-gray-800">{{ _("SquidStats") }}</h1>
+            <p class="text-gray-500 mt-1">{{ _("Panel de Administración") }}</p>
         </div>
 
         <!-- Error Message -->
@@ -95,7 +95,7 @@
             <!-- Username Field -->
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-user mr-2 text-gray-400"></i>Usuario
+                    <i class="fas fa-user mr-2 text-gray-400"></i>{{ _("Usuario") }}
                 </label>
                 <div class="relative">
                     <input 
@@ -105,7 +105,7 @@
                         required
                         autocomplete="username"
                         class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Ingresa tu usuario"
+                        placeholder="{{ _("Ingresa tu usuario") }}"
                     >
                 </div>
             </div>
@@ -113,7 +113,7 @@
             <!-- Password Field -->
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-lock mr-2 text-gray-400"></i>Contraseña
+                    <i class="fas fa-lock mr-2 text-gray-400"></i>{{ _("Contraseña") }}
                 </label>
                 <div class="relative">
                     <input 
@@ -123,7 +123,7 @@
                         required
                         autocomplete="current-password"
                         class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-11"
-                        placeholder="Ingresa tu contraseña"
+                        placeholder="{{ _("Ingresa tu contraseña") }}"
                     >
                     <button 
                         type="button" 
@@ -143,7 +143,7 @@
                         name="remember" 
                         class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     >
-                    <span class="ml-2 text-sm text-gray-600">Recordarme</span>
+                    <span class="ml-2 text-sm text-gray-600">{{ _("Recordarme") }}</span>
                 </label>
             </div>
 
@@ -153,7 +153,7 @@
                 class="btn-gradient w-full py-3 px-4 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center"
             >
                 <i class="fas fa-sign-in-alt mr-2"></i>
-                Iniciar Sesión
+                {{ _("Iniciar Sesión") }}
             </button>
         </form>
 
@@ -161,18 +161,18 @@
         <div class="mt-8 pt-6 border-t border-gray-200 text-center">
             <p class="text-gray-500 text-sm">
                 <i class="fas fa-shield-alt mr-1"></i>
-                Conexión segura con JWT
+                {{ _("Conexión segura con JWT") }}
             </p>
             <a href="{{ url_for('main.index') }}" class="inline-flex items-center mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>
-                Volver al Dashboard Principal
+                {{ _("Volver al Dashboard Principal") }}
             </a>
         </div>
     </div>
 
     <!-- Version Badge -->
     <div class="fixed bottom-4 right-4 text-white/50 text-xs">
-        SquidStats v{{ config.VERSION }}
+        {{ _("SquidStats v") }}{{ config.VERSION }}
     </div>
 
     <script>
