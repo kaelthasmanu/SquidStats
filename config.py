@@ -104,6 +104,12 @@ class Config:
     SQUID_PORT = safe_get_env("SQUID_PORT", 3128, var_type=int)
     BLACKLIST_DOMAINS = safe_get_env("BLACKLIST_DOMAINS", "")
 
+    # Multi-proxy load-balancing: comma-separated list of host:port entries.
+    # Example: SQUID_HOSTS="192.168.0.10:3128,192.168.0.11:3128"
+    # When set, overrides SQUID_HOST / SQUID_PORT for the connections page.
+    # When not set, falls back to the single SQUID_HOST:SQUID_PORT above.
+    SQUID_HOSTS = safe_get_list("SQUID_HOSTS", [])
+
     # Flask settings
     DEBUG = safe_get_env("FLASK_DEBUG", False, var_type=bool)
     LISTEN_HOST = safe_get_env("LISTEN_HOST") or safe_get_env("FLASK_HOST") or "0.0.0.0"  # nosec B104
