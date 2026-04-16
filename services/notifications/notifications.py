@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Any
 
-from flask_babel import gettext as _
+from flask_babel import gettext as _, ngettext
 from loguru import logger
 from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
@@ -268,13 +268,25 @@ def _format_time_ago(timestamp: datetime) -> str:
     days = int(diff.total_seconds() / 86400)
 
     if minutes < 1:
-        return "Hace unos momentos"
+        return _("Hace unos momentos")
     elif minutes < 60:
-        return f"Hace {minutes} minuto{'s' if minutes > 1 else ''}"
+        return ngettext(
+            "Hace {count} minuto",
+            "Hace {count} minutos",
+            minutes,
+        ).format(count=minutes)
     elif hours < 24:
-        return f"Hace {hours} hora{'s' if hours > 1 else ''}"
+        return ngettext(
+            "Hace {count} hora",
+            "Hace {count} horas",
+            hours,
+        ).format(count=hours)
     else:
-        return f"Hace {days} día{'s' if days > 1 else ''}"
+        return ngettext(
+            "Hace {count} día",
+            "Hace {count} días",
+            days,
+        ).format(count=days)
 
 
 def _get_unread_count(db: Session) -> int:
