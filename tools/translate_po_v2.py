@@ -890,7 +890,6 @@ TRANSLATIONS = {
     "Valor": "Value",
     "Fecha y Hora": "Date and Time",
     "Tráfico": "Traffic",
-    "Información": "Information",
     "Aviso": "Notice",
     "Atención": "Attention",
     "Importante": "Important",
