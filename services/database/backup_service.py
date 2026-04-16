@@ -17,12 +17,12 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
+from flask_babel import gettext as _
 from loguru import logger
 
 from config import Config
 from database.database import get_session
 from database.models.models import BackupConfig
-from flask_babel import gettext as _
 
 # Constants
 

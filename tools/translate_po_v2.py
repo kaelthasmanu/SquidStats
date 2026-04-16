@@ -59,7 +59,6 @@ TRANSLATIONS = {
     "Bloquear": "Block",
     "Desbloquear": "Unblock",
     "Seleccionar": "Select",
-
     # ── Auth ──
     "Iniciar sesión": "Log In",
     "Iniciar Sesión": "Log In",
@@ -84,7 +83,6 @@ TRANSLATIONS = {
     "La contraseña debe tener al menos 8 caracteres": "Password must be at least 8 characters",
     "Autenticación": "Authentication",
     "Contraseña Bind": "Bind Password",
-
     # ── Status ──
     "Activo": "Active",
     "Inactivo": "Inactive",
@@ -103,7 +101,6 @@ TRANSLATIONS = {
     "Excedido": "Exceeded",
     "Cargada": "Loaded",
     "No cargada": "Not loaded",
-
     # ── Table headers & labels ──
     "Nombre": "Name",
     "Descripción": "Description",
@@ -150,7 +147,6 @@ TRANSLATIONS = {
     "Tabla": "Table",
     "Frecuencia": "Frequency",
     "Departamento": "Department",
-
     # ── Admin sections ──
     "Gestión de Usuarios": "User Management",
     "Gestionar Usuarios": "Manage Users",
@@ -191,7 +187,6 @@ TRANSLATIONS = {
     "Admin Squid": "Squid Admin",
     "Administrador": "Administrator",
     "Administrador Squid Proxy": "Squid Proxy Administrator",
-
     # ── Dashboard ──
     "Panel principal con conexiones activas": "Main panel with active connections",
     "Conexiones Activas": "Active Connections",
@@ -234,7 +229,6 @@ TRANSLATIONS = {
     "Zona Horaria": "Time Zone",
     "Sistema Operativo": "Operating System",
     "Tipo de Sistema": "System Type",
-
     # ── Blacklist ──
     "Gestión de Blacklist": "Blacklist Management",
     "Blacklist - Gestor de Listas": "Blacklist - List Manager",
@@ -281,7 +275,6 @@ TRANSLATIONS = {
     "Integración Pi-hole": "Pi-hole Integration",
     "Pi-hole Host": "Pi-hole Host",
     "Intentos Bloqueados": "Blocked Attempts",
-
     # ── Reports ──
     "Generar Reporte": "Generate Report",
     "Reporte Diario": "Daily Report",
@@ -311,7 +304,6 @@ TRANSLATIONS = {
     "Últimos 7 días": "Last 7 days",
     "Últimos 30 días": "Last 30 days",
     "24 Horas": "24 Hours",
-
     # ── Logs ──
     "Registros del Sistema": "System Logs",
     "Ver Logs": "View Logs",
@@ -324,7 +316,6 @@ TRANSLATIONS = {
     "Líneas a mostrar:": "Lines to show:",
     "Mostrando últimas": "Showing last",
     "Mostrar:": "Show:",
-
     # ── Config ──
     "Variables de entorno guardadas exitosamente": "Environment variables saved successfully",
     "ID de ACL inválido": "Invalid ACL ID",
@@ -380,7 +371,6 @@ TRANSLATIONS = {
     "Directorio de Salvas": "Backup Directory",
     "Directorio de salida": "Output directory",
     "Dir. Remota": "Remote Dir.",
-
     # ── Errors & Success ──
     "Error": "Error",
     "Éxito": "Success",
@@ -428,7 +418,6 @@ TRANSLATIONS = {
     "Internal error": "Internal error",
     "Error DNS": "DNS Error",
     "Error Parsing": "Parsing Error",
-
     # ── Squid specific ──
     "Actualizar paquetes y configuración de Squid": "Update Squid packages and configuration",
     "Actualizar aplicación web SquidStats": "Update SquidStats web application",
@@ -438,13 +427,11 @@ TRANSLATIONS = {
     "Caché": "Cache",
     "Proxy": "Proxy",
     "SquidStats Monitor": "SquidStats Monitor",
-
     # ── Error page ──
     "Error - Squid Monitor": "Error - Squid Monitor",
     "Volver al Inicio": "Back to Home",
     "Volver al Dashboard Principal": "Back to Main Dashboard",
     "Disculpamos las molestias. Por favor, intenta de nuevo más tarde o contacta al soporte si el problema persiste.": "We apologize for the inconvenience. Please try again later or contact support if the problem persists.",
-
     # ── Notifications ──
     "Cargando notificaciones...": "Loading notifications...",
     "Ver todas las notificaciones": "View all notifications",
@@ -467,7 +454,6 @@ TRANSLATIONS = {
     "Reciente": "Recent",
     "Todos los estados": "All statuses",
     "Todos los tipos": "All types",
-
     # ── LDAP ──
     "Configuración LDAP": "LDAP Configuration",
     "LDAP / Active Directory": "LDAP / Active Directory",
@@ -490,7 +476,6 @@ TRANSLATIONS = {
     "Ver grupos del usuario": "View user groups",
     "Ver grupos": "View groups",
     "Configura la conexión y explora el directorio.": "Configure the connection and explore the directory.",
-
     # ── Backup ──
     "Motor de BD desconocido": "Unknown database engine",
     "Frecuencia inválida": "Invalid frequency",
@@ -517,7 +502,6 @@ TRANSLATIONS = {
     "Diaria — máx. 3 por mes": "Daily — max. 3 per month",
     "Diaria — máx. 3 por semana": "Daily — max. 3 per week",
     "¿Estás seguro de que deseas eliminar este respaldo?": "Are you sure you want to delete this backup?",
-
     # ── Database admin ──
     "Nombre de tabla no proporcionado": "Table name not provided",
     "Nombre de tabla inválido": "Invalid table name",
@@ -556,7 +540,6 @@ TRANSLATIONS = {
     "Esta operación puede tardar varios minutos en bases de datos grandes.": "This operation may take several minutes on large databases.",
     "Información de la Tabla": "Table Information",
     "Monitor de salud, copias de seguridad y gestión de datos": "Health monitoring, backups, and data management",
-
     # ── Split config ──
     "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf.": "Required file not found. Please check the squid.conf file configuration.",
     "No se tienen permisos suficientes para crear los archivos": "Insufficient permissions to create the files",
@@ -586,7 +569,6 @@ TRANSLATIONS = {
     "¿Tu configuración ya está dividida en módulos?": "Is your configuration already split into modules?",
     "dividir tu configuración": "split your configuration",
     "Si tu squid.conf aún no está dividido, puedes": "If your squid.conf is not split yet, you can",
-
     # ── Quota ──
     "Cuota": "Quota",
     "Cuota (MB)": "Quota (MB)",
@@ -634,7 +616,6 @@ TRANSLATIONS = {
     "Información sobre la política por defecto": "Information about the default policy",
     "Para ver los delay pools debes iniciar sesión.": "You must log in to view delay pools.",
     "Total de velocidad del usuario": "Total user speed",
-
     # ── ACLs ──
     "ACL actualizada": "ACL updated",
     "ACL agregada": "ACL added",
@@ -677,7 +658,6 @@ TRANSLATIONS = {
     "Solo letras, números, guiones y guiones bajos": "Only letters, numbers, hyphens and underscores",
     "Contiene negación (!) - se aplica cuando NO coincide con la ACL": "Contains negation (!) - applies when NOT matching the ACL",
     "antes del nombre de una ACL para negación. Ej:": "before ACL name for negation. E.g.:",
-
     # ── HTTP Access ──
     "HTTP Access": "HTTP Access",
     "Reglas HTTP": "HTTP Rules",
@@ -702,7 +682,7 @@ TRANSLATIONS = {
     "Denegar acceso": "Deny access",
     "La primera regla que coincida se aplica (allow o deny)": "The first matching rule applies (allow or deny)",
     "Las reglas se procesan de arriba hacia abajo": "Rules are processed from top to bottom",
-    "Se recomienda terminar con \\\"deny all\\\" para evitar confusión": "It is recommended to end with \\\"deny all\\\" to avoid confusion",
+    'Se recomienda terminar con \\"deny all\\" para evitar confusión': 'It is recommended to end with \\"deny all\\" to avoid confusion',
     "Se agregará como comentario antes de la regla": "Will be added as a comment before the rule",
     "Importante sobre el orden:": "Important about order:",
     "Mover arriba": "Move up",
@@ -710,7 +690,6 @@ TRANSLATIONS = {
     "⚠️ Sin reglas, el acceso será DENEGADO por defecto": "⚠️ Without rules, access will be DENIED by default",
     "🔒 Política por defecto:": "🔒 Default policy:",
     "http_access deny": "http_access deny",
-
     # ── Delay Pools ──
     "Gestión de Delay Pools": "Delay Pool Management",
     "¿Qué son los Delay Pools?": "What are Delay Pools?",
@@ -775,7 +754,6 @@ TRANSLATIONS = {
     "delay pool": "delay pool",
     "Degradar velocidad (próximamente)": "Throttle speed (coming soon)",
     "Solo notificar (próximamente)": "Notify only (coming soon)",
-
     # ── Users ──
     "Nombre, usuario, email…": "Name, user, email...",
     "Complete el formulario para crear un nuevo usuario administrador.": "Complete the form to create a new administrator user.",
@@ -812,7 +790,6 @@ TRANSLATIONS = {
     "Por Usuario": "By User",
     "Por Grupo": "By Group",
     "Pool #": "Pool #",
-
     # ── Audit ──
     "Auditoría del Sistema": "System Audit",
     "Auditoría -": "Audit -",
@@ -830,7 +807,6 @@ TRANSLATIONS = {
     "Buscar auditoría": "Search audit",
     "Histórico": "History",
     "Los resultados de su auditoría aparecerán aquí.": "Your audit results will appear here.",
-
     # ── Stats ──
     "Actividad Diaria": "Daily Activity",
     "Actividad diaria": "Daily activity",
@@ -894,7 +870,6 @@ TRANSLATIONS = {
     "Top usuarios por actividad": "Top users by activity",
     "Top usuarios por datos": "Top users by data",
     "Top usuarios por solicitudes": "Top users by requests",
-
     # ── Common phrases ──
     "Guardar cambios": "Save changes",
     "Guardar Cambios": "Save Changes",
@@ -959,7 +934,6 @@ TRANSLATIONS = {
     "No se encontraron grupos.": "No groups found.",
     "No se encontraron usuarios.": "No users found.",
     "No se encontraron bloqueos (archivo vacío o no existe).": "No blocks found (file empty or does not exist).",
-
     # ── Misc UI ──
     "¿Deseas actualizar Squid?": "Do you want to update Squid?",
     "¿Deseas actualizar SquidStats?": "Do you want to update SquidStats?",
@@ -1005,7 +979,6 @@ TRANSLATIONS = {
     "Activa en Squid": "Active in Squid",
     "instalado en el servidor.": "installed on the server.",
     "en Squid y se guardará en la base de datos para persistencia.": "in Squid and will be saved in the database for persistence.",
-
     # ── Social media ──
     "Facebook": "Facebook",
     "Instagram": "Instagram",
@@ -1014,7 +987,6 @@ TRANSLATIONS = {
     "YouTube": "YouTube",
     "Pinterest": "Pinterest",
     "Telegram": "Telegram",
-
     # ── Squid config technical ──
     "Kbps": "Kbps",
     "Mbps": "Mbps",
@@ -1052,7 +1024,6 @@ TRANSLATIONS = {
     "No valid domains specified for search.": "No valid domains specified for search.",
     "Error al detectar la configuración SSL Bump": "Error detecting SSL Bump configuration",
     "Error al ejecutar la verificación": "Error running verification",
-
     # ── Examples & placeholders ──
     "192.168.1.2 or example.com": "192.168.1.2 or example.com",
     "CN=admin,DC=empresa,DC=com": "CN=admin,DC=company,DC=com",
@@ -1063,7 +1034,6 @@ TRANSLATIONS = {
     "Ej: 64000/64000 = 512 Kbps": "E.g.: 64000/64000 = 512 Kbps",
     "Ej: Permitir acceso desde la red local": "E.g.: Allow access from local network",
     "Ej: juegos, descargas...": "E.g.: games, downloads...",
-
     # ── Remaining ACL type descriptions ──
     "src (IP origen)": "src (Source IP)",
     "dst (IP destino)": "dst (Destination IP)",
@@ -1113,7 +1083,6 @@ TRANSLATIONS = {
     "note - Anotación transacción": "note - Transaction annotation",
     "any-of - Grupo OR": "any-of - OR Group",
     "all-of - Grupo AND": "all-of - AND Group",
-
     # ── Remaining long Spanish phrases ──
     "Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!": "All notifications will appear here. Stay tuned for system updates!",
     "Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde": "If already split, verify files are in the correct directory or edit them directly from",
@@ -1134,14 +1103,13 @@ TRANSLATIONS = {
     "para todos los usuarios que no tengan una cuota individual configurada. La cuota individual siempre tiene prioridad sobre la global.": "for all users without an individual quota configured. Individual quota always has priority over the global one.",
     "Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el acceso o degradar la velocidad).": "Define the behavior when exceeding the quota. (For example: block access or throttle speed).",
     "Aunque no haya ninguna regla guardada, el sistema aplica automáticamente la política de": "Even if no rule is saved, the system automatically applies the policy of",
-    "cuando un usuario supera su cuota. Guarda explícitamente \\\"Bloquear\\\" si quieres que quede registrado.": "when a user exceeds their quota. Explicitly save \\\"Block\\\" if you want it recorded.",
+    'cuando un usuario supera su cuota. Guarda explícitamente \\"Bloquear\\" si quieres que quede registrado.': 'when a user exceeds their quota. Explicitly save \\"Block\\" if you want it recorded.',
     "dominios activos. Para evitar un alto consumo de recursos, la consulta se ha limitado a los primeros": "active domains. To avoid high resource consumption, the query has been limited to the first",
     "dominios. Es posible que algunos accesos bloqueados no aparezcan en este listado.": "domains. Some blocked accesses may not appear in this list.",
     "Se eliminará el bloqueo activo para esta IP y se recargará la configuración de Squid.": "The active block for this IP will be removed and Squid configuration will be reloaded.",
     "existente. Sus conexiones estarán sujetas a los límites de ancho de banda configurados en ese pool.": "existing. Their connections will be subject to the bandwidth limits configured in that pool.",
     "Se eliminará la restricción de velocidad activa para esta IP y se recargará la configuración de Squid.": "The active speed restriction for this IP will be removed and Squid configuration will be reloaded.",
     "Requiere": "Requires",
-
     # ── Technical/pass-through strings ──
     "fa-times-circle": "fa-times-circle",
     "!Safe_ports": "!Safe_ports",
@@ -1159,7 +1127,6 @@ TRANSLATIONS = {
     "all, manager, localhost, to_localhost, to_linklocal, CONNECT": "all, manager, localhost, to_localhost, to_linklocal, CONNECT",
     "List membership": "List membership",
     "example.com\\nexample.org": "example.com\\nexample.org",
-
     # ── HTTP status codes ──
     "200 OK": "200 OK",
     "301 Moved Permanently": "301 Moved Permanently",
@@ -1173,7 +1140,6 @@ TRANSLATIONS = {
     "502 Bad Gateway": "502 Bad Gateway",
     "503 Service Unavailable": "503 Service Unavailable",
     "504 Gateway Timeout": "504 Gateway Timeout",
-
     # ── CSRF/validation ──
     "CSRF token missing.": "CSRF token missing.",
     "CSRF failed.": "CSRF failed.",
@@ -1183,64 +1149,64 @@ TRANSLATIONS = {
 # Patterns for strings that are already in English → copy as-is
 ENGLISH_PATTERNS = [
     # Click/WTForms/Werkzeug validation messages
-    r'^Missing \w+',
-    r'^Invalid \w+',
-    r'^Not a valid',
-    r'^Number must be',
-    r'^Field must be',
-    r'^Choices cannot',
-    r'^File does not',
-    r'^Error: ',
-    r'^Option ',
-    r'^No such ',
-    r'^Try ',
-    r'^Could not',
+    r"^Missing \w+",
+    r"^Invalid \w+",
+    r"^Not a valid",
+    r"^Number must be",
+    r"^Field must be",
+    r"^Choices cannot",
+    r"^File does not",
+    r"^Error: ",
+    r"^Option ",
+    r"^No such ",
+    r"^Try ",
+    r"^Could not",
     r"^Couldn't",
-    r'^Show ',
-    r'^Press any',
-    r'^Repeat for',
-    r'^Usage:',
-    r'^Commands$',
-    r'^Options$',
-    r'^Value must be',
-    r'^This field',
-    r'^DeprecationWarning',
-    r'^Shell completion',
-    r'^Aborted!$',
-    r'^A database error',
-    r'^An unexpected error',
-    r'^No data for',
-    r'^Internal server error$',
-    r'^Invalid JSON body$',
-    r'^Bad request$',
-    r'^Invalid numeric value$',
-    r'^Invalid date format$',
-    r'^Internal error$',
-    r'^Unknown error$',
-    r'^Access denied',
-    r'^Username and',
-    r'^Password must be',
-    r'^Password updated',
-    r'^Failed to update',
-    r'^No file part',
-    r'^Not a valid',
-    r'^\{(name|value|editor|text|param)',
-    r'^\%\(prog\)s',
-    r'^First page$',
-    r'^Last page$',
-    r'^Next page$',
-    r'^Previous page$',
-    r'^Total Bandwidth$',
-    r'^Total Requests$',
-    r'^unknown error$',
-    r'^required$',
-    r'^file$',
-    r'^path$',
-    r'^directory$',
-    r'^(default|env var): ',
-    r'^Argument \{',
-    r'^Choose from',
-    r'^Missing \{',
+    r"^Show ",
+    r"^Press any",
+    r"^Repeat for",
+    r"^Usage:",
+    r"^Commands$",
+    r"^Options$",
+    r"^Value must be",
+    r"^This field",
+    r"^DeprecationWarning",
+    r"^Shell completion",
+    r"^Aborted!$",
+    r"^A database error",
+    r"^An unexpected error",
+    r"^No data for",
+    r"^Internal server error$",
+    r"^Invalid JSON body$",
+    r"^Bad request$",
+    r"^Invalid numeric value$",
+    r"^Invalid date format$",
+    r"^Internal error$",
+    r"^Unknown error$",
+    r"^Access denied",
+    r"^Username and",
+    r"^Password must be",
+    r"^Password updated",
+    r"^Failed to update",
+    r"^No file part",
+    r"^Not a valid",
+    r"^\{(name|value|editor|text|param)",
+    r"^\%\(prog\)s",
+    r"^First page$",
+    r"^Last page$",
+    r"^Next page$",
+    r"^Previous page$",
+    r"^Total Bandwidth$",
+    r"^Total Requests$",
+    r"^unknown error$",
+    r"^required$",
+    r"^file$",
+    r"^path$",
+    r"^directory$",
+    r"^(default|env var): ",
+    r"^Argument \{",
+    r"^Choose from",
+    r"^Missing \{",
     r'^0"',  # HTML fragments that got extracted
 ]
 
@@ -1274,10 +1240,10 @@ def translate_msgid(msgid):
 
 def process_po_file(filepath):
     """Process a .po file and fill in English translations."""
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
-    lines = content.split('\n')
+    lines = content.split("\n")
     result = []
     i = 0
     translated_count = 0
@@ -1339,14 +1305,16 @@ def process_po_file(filepath):
         result.append(line)
         i += 1
 
-    with open(filepath, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(result))
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(result))
 
     return translated_count, total_msgids, untranslated
 
 
 def main():
-    po_file = sys.argv[1] if len(sys.argv) > 1 else "translations/en/LC_MESSAGES/messages.po"
+    po_file = (
+        sys.argv[1] if len(sys.argv) > 1 else "translations/en/LC_MESSAGES/messages.po"
+    )
     print(f"Processing: {po_file}")
     translated, total, untranslated = process_po_file(po_file)
     print(f"Translated: {translated}/{total} strings")

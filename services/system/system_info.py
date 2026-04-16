@@ -7,8 +7,8 @@ import subprocess  # nosec B404
 import time
 
 import psutil
-from loguru import logger
 from flask_babel import gettext as _
+from loguru import logger
 
 # Variables globales para el cálculo de estadísticas de red
 _last_net_io = None

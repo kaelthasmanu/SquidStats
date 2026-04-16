@@ -15,7 +15,7 @@ TEMPLATES_DIR = os.path.join(PROJECT_ROOT, "templates")
 
 def process_template_file(filepath):
     """Process a single Jinja2 template file and wrap Spanish text."""
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     original = content
@@ -49,12 +49,12 @@ def process_template_file(filepath):
             return m.group(0)
 
         # Must contain at least one letter
-        if not re.search(r'[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]', stripped):
+        if not re.search(r"[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]", stripped):
             return m.group(0)
 
         # Preserve whitespace around the text
-        leading_ws = text[:len(text) - len(text.lstrip())]
-        trailing_ws = text[len(text.rstrip()):]
+        leading_ws = text[: len(text) - len(text.lstrip())]
+        trailing_ws = text[len(text.rstrip()) :]
 
         # Escape any quotes in the text
         escaped = stripped.replace('"', '\\"')
@@ -63,26 +63,30 @@ def process_template_file(filepath):
 
     # Process text between HTML tags
     content = re.sub(
-        r'(>)((?:(?!<|{{|{%).)+?)(<)',
-        wrap_text_node,
-        content,
-        flags=re.DOTALL
+        r"(>)((?:(?!<|{{|{%).)+?)(<)", wrap_text_node, content, flags=re.DOTALL
     )
 
     # ─── Pattern: HTML attributes with Spanish text ───
     # Common attributes: placeholder, title, data-tooltip, aria-label, alt
     attrs_to_translate = [
-        'placeholder', 'title', 'data-tooltip', 'aria-label', 'alt',
-        'data-confirm', 'data-message', 'data-title'
+        "placeholder",
+        "title",
+        "data-tooltip",
+        "aria-label",
+        "alt",
+        "data-confirm",
+        "data-message",
+        "data-title",
     ]
 
     for attr in attrs_to_translate:
+
         def wrap_attr(m):
             quote = m.group(2)
             value = m.group(3)
-            if '{{' in value or '{%' in value:
+            if "{{" in value or "{%" in value:
                 return m.group(0)
-            if not re.search(r'[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]', value):
+            if not re.search(r"[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]", value):
                 return m.group(0)
             if value.startswith(("http", "www.", "/", "#", ".", "fas ", "url_for")):
                 return m.group(0)
@@ -93,14 +97,15 @@ def process_template_file(filepath):
 
         # Match attr="value" where value contains text
         pattern = rf'({attr}=)(["\'])((?:(?!\2).)*?)\2'
+
         # Simpler approach - just use {{ _() }} in attribute values
         def wrap_attr_simple(m):
             attr_name = m.group(1)
             quote_char = m.group(2)
             value = m.group(3)
-            if '{{' in value or '{%' in value or '_(' in value:
+            if "{{" in value or "{%" in value or "_(" in value:
                 return m.group(0)
-            if not re.search(r'[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]', value):
+            if not re.search(r"[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]", value):
                 return m.group(0)
             if value.startswith(("http", "www.", "/", "#", ".", "fas ", "url_for")):
                 return m.group(0)
@@ -122,7 +127,7 @@ def process_template_file(filepath):
 
 def process_python_file(filepath):
     """Process a Python file and wrap user-facing strings with _()."""
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     original = content
@@ -137,9 +142,9 @@ def process_python_file(filepath):
         quote = m.group(2)
         value = m.group(3)
 
-        if '_(' in value or 'f"' in value or "f'" in value:
+        if "_(" in value or 'f"' in value or "f'" in value:
             return m.group(0)
-        if not re.search(r'[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]', value):
+        if not re.search(r"[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]", value):
             return m.group(0)
         if value.startswith(("http", "/", ".")):
             return m.group(0)
@@ -152,39 +157,35 @@ def process_python_file(filepath):
     content = re.sub(
         r'"(message|status_message|error)":\s*(["\'])((?:(?!\2).)*?)\2',
         wrap_message_value,
-        content
+        content,
     )
 
-    # Pattern: flash("Spanish text", ...) 
+    # Pattern: flash("Spanish text", ...)
     def wrap_flash(m):
         nonlocal needs_import
         prefix = m.group(1)
         value = m.group(2)
         suffix = m.group(3)
-        if '_(' in value:
+        if "_(" in value:
             return m.group(0)
         needs_import = True
         escaped = value.replace('"', '\\"')
         return f'{prefix}_("{escaped}"){suffix}'
 
-    content = re.sub(
-        r'(flash\()"([^"]+)"(\s*[,)])',
-        wrap_flash,
-        content
-    )
+    content = re.sub(r'(flash\()"([^"]+)"(\s*[,)])', wrap_flash, content)
 
     if content != original:
         # Add import if needed
-        if needs_import and 'from flask_babel import' not in content:
+        if needs_import and "from flask_babel import" not in content:
             # Find the best place to add import
-            if 'from flask import' in content:
+            if "from flask import" in content:
                 content = content.replace(
-                    'from flask import',
-                    'from flask_babel import gettext as _\nfrom flask import',
-                    1
+                    "from flask import",
+                    "from flask_babel import gettext as _\nfrom flask import",
+                    1,
                 )
             else:
-                content = 'from flask_babel import gettext as _\n' + content
+                content = "from flask_babel import gettext as _\n" + content
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)

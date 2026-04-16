@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from flask_babel import gettext as _
 from ldap3 import (
     ALL,
     NTLM,
@@ -14,7 +15,6 @@ from ldap3 import (
 )
 from ldap3.utils.conv import escape_filter_chars
 from loguru import logger
-from flask_babel import gettext as _
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -51,7 +51,10 @@ def test_connection(cfg: dict) -> dict:
     try:
         conn = _connect(cfg)
         conn.unbind()
-        return {"status": "success", "message": _("Conexión exitosa al servidor LDAP/AD.")}
+        return {
+            "status": "success",
+            "message": _("Conexión exitosa al servidor LDAP/AD."),
+        }
     except core.exceptions.LDAPBindError as exc:
         logger.warning(f"LDAP bind falló: {exc}")
         return {"status": "error", "message": f"Error de autenticación: {exc}"}

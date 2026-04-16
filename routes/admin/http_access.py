@@ -1,6 +1,7 @@
 """Admin http_access rules management routes."""
 
 from flask import flash, redirect, render_template, request, url_for
+from flask_babel import gettext as _
 
 from services.auth.auth_service import admin_required
 from services.squid.http_access_service import (
@@ -17,7 +18,6 @@ from services.squid.http_access_service import (
 )
 
 from .helpers import flash_and_redirect, get_config_manager, get_int_form_field
-from flask_babel import gettext as _
 
 
 def register_routes(bp):

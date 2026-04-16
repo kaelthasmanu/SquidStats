@@ -64,8 +64,12 @@ def get_translations():
         "unthrottle_user": _("Restaurar velocidad"),
         "confirm_block": _("¿Estás seguro de que deseas bloquear a este usuario?"),
         "confirm_unblock": _("¿Estás seguro de que deseas desbloquear a este usuario?"),
-        "confirm_throttle": _("¿Estás seguro de que deseas reducir la velocidad de este usuario?"),
-        "confirm_unthrottle": _("¿Estás seguro de que deseas restaurar la velocidad de este usuario?"),
+        "confirm_throttle": _(
+            "¿Estás seguro de que deseas reducir la velocidad de este usuario?"
+        ),
+        "confirm_unthrottle": _(
+            "¿Estás seguro de que deseas restaurar la velocidad de este usuario?"
+        ),
         "operation_success": _("Operación exitosa"),
         "operation_error": _("Error en la operación"),
         "connection_error": _("Error de conexión"),
@@ -131,7 +135,9 @@ def get_translations():
         "creating_backup": _("Creando respaldo..."),
         "backup_created": _("Respaldo creado"),
         "backup_deleted": _("Respaldo eliminado"),
-        "confirm_delete_backup": _("¿Estás seguro de que deseas eliminar este respaldo?"),
+        "confirm_delete_backup": _(
+            "¿Estás seguro de que deseas eliminar este respaldo?"
+        ),
         "restoring_backup": _("Restaurando respaldo..."),
         # System
         "reloading_squid": _("Recargando Squid..."),

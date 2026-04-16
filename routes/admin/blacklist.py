@@ -1,6 +1,7 @@
 """Admin blacklist management routes."""
 
 from flask import flash, redirect, render_template, request, url_for
+from flask_babel import gettext as _
 from loguru import logger
 
 from database.database import get_session
@@ -23,7 +24,6 @@ from services.security.blocklist_enforcement import (
     get_enforced_blocklist_urls,
 )
 
-from flask_babel import gettext as _
 from .helpers import (
     flash_and_redirect,
     flash_error_with_details,
@@ -153,12 +153,17 @@ def register_routes(bp):
                 ok, msg = enable_single_blocklist(None, cm)
                 if ok:
                     flash(
-                        _("Lista personalizada guardada y archivo custom de Squid actualizado"),
+                        _(
+                            "Lista personalizada guardada y archivo custom de Squid actualizado"
+                        ),
                         "success",
                     )
                 else:
                     flash(
-                        _("Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: %(msg)s") % {"msg": msg},
+                        _(
+                            "Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: %(msg)s"
+                        )
+                        % {"msg": msg},
                         "error",
                     )
             else:
@@ -180,7 +185,11 @@ def register_routes(bp):
         count = delete_blacklist_by_source_url(url)
         disable_single_blocklist(url, cm)
         invalidate_blacklist_cache()
-        flash(_("Lista eliminada: %(url)s (%(count)s dominios)") % {"url": url, "count": count}, "success")
+        flash(
+            _("Lista eliminada: %(url)s (%(count)s dominios)")
+            % {"url": url, "count": count},
+            "success",
+        )
         return redirect(url_for("admin.manage_blacklist"))
 
     @bp.route("/api/blocklist/toggle", methods=["POST"])

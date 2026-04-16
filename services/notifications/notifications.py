@@ -7,8 +7,8 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Any
 
-from loguru import logger
 from flask_babel import gettext as _
+from loguru import logger
 from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
 

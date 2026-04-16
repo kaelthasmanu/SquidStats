@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Mark user-facing strings in Python files with _() for Flask-Babel."""
 
-import re
 import os
+import re
 import sys
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -12,7 +12,11 @@ DIRS = ["routes", "services"]
 
 # Keys whose string values should be translated in dict literals
 TRANSLATABLE_KEYS = {
-    "message", "error", "msg", "error_message", "user_message",
+    "message",
+    "error",
+    "msg",
+    "error_message",
+    "user_message",
 }
 
 IMPORT_LINE = "from flask_babel import gettext as _"
@@ -30,7 +34,7 @@ def should_skip_file(filepath):
 
 def has_gettext_import(content):
     """Check if file already imports gettext as _."""
-    return bool(re.search(r'from flask_babel import.*gettext', content))
+    return bool(re.search(r"from flask_babel import.*gettext", content))
 
 
 def add_import(content):
@@ -38,29 +42,29 @@ def add_import(content):
     if has_gettext_import(content):
         return content
 
-    lines = content.split('\n')
+    lines = content.split("\n")
     insert_idx = 0
 
     for i, line in enumerate(lines):
         stripped = line.strip()
-        if stripped.startswith('from ') or stripped.startswith('import '):
+        if stripped.startswith("from ") or stripped.startswith("import "):
             insert_idx = i + 1
 
     lines.insert(insert_idx, IMPORT_LINE)
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def is_translatable(text):
     """Check if a string value should be translated."""
     if not text or len(text.strip()) <= 1:
         return False
-    if text.lower() in ('true', 'false', 'none', 'null', 'ok'):
+    if text.lower() in ("true", "false", "none", "null", "ok"):
         return False
     # Must have a letter
-    if not re.search(r'[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]', text):
+    if not re.search(r"[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ]", text):
         return False
     # Skip URLs, paths
-    if re.match(r'^(https?://|/|\.)', text):
+    if re.match(r"^(https?://|/|\.)", text):
         return False
     return True
 
@@ -80,9 +84,7 @@ def wrap_flash_strings(content):
 
     # Double-quoted: flash("text", ...) or flash("text")
     content = re.sub(
-        r'(flash\()"((?:[^"\\]|\\.)+)"(\s*[,\)])',
-        replace_flash_dq,
-        content
+        r'(flash\()"((?:[^"\\]|\\.)+)"(\s*[,\)])', replace_flash_dq, content
     )
 
     def replace_flash_sq(m):
@@ -96,9 +98,7 @@ def wrap_flash_strings(content):
 
     # Single-quoted: flash('text', ...)
     content = re.sub(
-        r"(flash\()'((?:[^'\\]|\\.)+)'(\s*[,\)])",
-        replace_flash_sq,
-        content
+        r"(flash\()'((?:[^'\\]|\\.)+)'(\s*[,\)])", replace_flash_sq, content
     )
 
     return content
@@ -117,6 +117,7 @@ def wrap_dict_strings(content):
                 if not is_translatable(value):
                     return m.group(0)
                 return f'{prefix}_("{value}")'
+
             return replacer
 
         content = re.sub(pattern, make_replacer(), content)
@@ -132,6 +133,7 @@ def wrap_dict_strings(content):
                     return m.group(0)
                 escaped = value.replace('"', '\\"')
                 return f'{prefix}_("{escaped}")'
+
             return replacer_sq
 
         content = re.sub(pattern_sq, make_replacer_sq(), content)
@@ -152,6 +154,7 @@ def wrap_return_dict_strings(content):
                 if not is_translatable(value):
                     return m.group(0)
                 return f'{prefix}_("{value}")'
+
             return replacer
 
         content = re.sub(pattern, make_replacer(), content)
@@ -161,7 +164,7 @@ def wrap_return_dict_strings(content):
 
 def process_file(filepath):
     """Process a single Python file."""
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     # Skip if already has _() calls throughout (likely already processed)
@@ -173,7 +176,7 @@ def process_file(filepath):
 
     if content != original:
         content = add_import(content)
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -204,7 +207,7 @@ def main():
         dir_path = os.path.join(PROJECT_ROOT, dir_name)
         for root, dirs, files in os.walk(dir_path):
             for f in sorted(files):
-                if not f.endswith('.py'):
+                if not f.endswith(".py"):
                     continue
                 filepath = os.path.join(root, f)
                 if should_skip_file(filepath):

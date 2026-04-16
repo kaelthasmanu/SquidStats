@@ -15,11 +15,11 @@ from flask import (
     session,
     url_for,
 )
+from flask_babel import gettext as _
 from flask_wtf.csrf import CSRFProtect
 from loguru import logger
 
 from services.auth.auth_service import AuthConfig, AuthService
-from flask_babel import gettext as _
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 csrf = CSRFProtect()
@@ -87,7 +87,9 @@ def login():
                 logger.info(
                     f"Successful login for user: {username} from IP: {client_ip} ({remember_status})"
                 )
-                flash(_("¡Bienvenido, %(username)s!") % {"username": username}, "success")
+                flash(
+                    _("¡Bienvenido, %(username)s!") % {"username": username}, "success"
+                )
 
                 # Get redirect URL (stored before login redirect)
                 next_url = session.pop("next_url", None)
@@ -189,7 +191,9 @@ def reset_password():
     if client_ip not in ["127.0.0.1", "::1", "localhost"]:
         logger.warning("Password reset attempt from unauthorized IP")
         return {
-            "error": _("Access denied. This endpoint is only accessible from localhost.")
+            "error": _(
+                "Access denied. This endpoint is only accessible from localhost."
+            )
         }, 403
 
     # Get data from request

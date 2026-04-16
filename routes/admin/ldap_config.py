@@ -1,11 +1,11 @@
 """Admin LDAP / Active Directory configuration routes."""
 
 from flask import jsonify, render_template, request
+from flask_babel import gettext as _
 from loguru import logger
 
 from services.auth.auth_service import admin_required, api_auth_required
 from services.ldap import ldap_config_service, ldap_service
-from flask_babel import gettext as _
 
 
 def _load_request_config():

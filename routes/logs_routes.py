@@ -1,12 +1,12 @@
 from datetime import datetime
 
 from flask import Blueprint, jsonify, render_template, request
+from flask_babel import gettext as _
 from loguru import logger
 
 from database.database import get_session
 from services.analytics.blacklist_users import find_blacklisted_sites
 from services.analytics.fetch_data_logs import get_users_logs
-from flask_babel import gettext as _
 
 logs_bp = Blueprint("logs", __name__)
 

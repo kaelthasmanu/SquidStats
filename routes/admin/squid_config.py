@@ -1,6 +1,7 @@
 """Admin Squid configuration routes (view, edit, env, split)."""
 
 from flask import flash, jsonify, redirect, render_template, request, url_for
+from flask_babel import gettext as _
 from loguru import logger
 
 from services.auth.auth_service import admin_required, api_auth_required
@@ -17,7 +18,6 @@ from services.squid.split_config_service import (
 )
 from services.squid.squid_config_splitter import SquidConfigSplitter
 
-from flask_babel import gettext as _
 from .helpers import (
     flash_error_with_details,
     get_config_manager,

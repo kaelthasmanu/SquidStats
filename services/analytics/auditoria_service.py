@@ -2,8 +2,8 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any
 
-from loguru import logger
 from flask_babel import gettext as _
+from loguru import logger
 from sqlalchemy import func, inspect, or_, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -396,7 +396,9 @@ def get_daily_activity(db: Session, date_str: str, username: str) -> dict[str, A
 
     except SQLAlchemyError as e:
         print(f"Database error in get_daily_activity: {e}")
-        return {"error": _("A database error occurred while calculating daily activity.")}
+        return {
+            "error": _("A database error occurred while calculating daily activity.")
+        }
     except Exception as e:
         print(f"General error in get_daily_activity: {e}")
         return {

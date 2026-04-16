@@ -5,8 +5,8 @@ import subprocess  # nosec B404
 from dataclasses import dataclass
 from datetime import datetime
 
-from loguru import logger
 from flask_babel import gettext as _
+from loguru import logger
 
 
 @dataclass(frozen=True)
@@ -620,7 +620,9 @@ class SquidConfigSplitter:
             logger.error(f"Error de permisos al leer archivos: {e}")
             return {
                 "status": "error",
-                "message": _("No se tienen permisos suficientes para leer los archivos"),
+                "message": _(
+                    "No se tienen permisos suficientes para leer los archivos"
+                ),
                 "code": 403,
             }
 

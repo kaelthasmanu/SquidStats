@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 from urllib.parse import urlparse
 
+from flask_babel import gettext as _
 from loguru import logger
 from sqlalchemy import func, inspect, literal, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -11,7 +12,6 @@ from sqlalchemy.orm import Session
 
 from database.database import get_dynamic_models, get_engine
 from database.models.models import BlacklistDomain
-from flask_babel import gettext as _
 
 # ---------------------------------------------------------------------------
 # Module-level TTL cache

@@ -1,4 +1,5 @@
 from flask import Blueprint, current_app, jsonify, request
+from flask_babel import gettext as _
 from loguru import logger
 from werkzeug.exceptions import BadRequest
 
@@ -24,7 +25,6 @@ from services.squid.user_restrictions_service import (
 )
 from services.system.metrics_service import MetricsService
 from services.system.system_service import reload_squid, restart_squid
-from flask_babel import gettext as _
 
 api_bp = Blueprint("api", __name__)
 

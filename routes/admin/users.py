@@ -1,12 +1,12 @@
 """Admin user management routes."""
 
 from flask import flash, redirect, render_template, request, url_for
+from flask_babel import gettext as _
 
 from services.auth import user_service
 from services.auth.auth_service import AuthService, admin_required
 
 from .helpers import flash_and_redirect
-from flask_babel import gettext as _
 
 
 def register_routes(bp):

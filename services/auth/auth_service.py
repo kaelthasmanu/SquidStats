@@ -13,11 +13,11 @@ from functools import wraps
 import bcrypt
 import jwt
 from flask import flash, redirect, request, session, url_for
+from flask_babel import gettext as _
 from loguru import logger
 
 from config import Config
 from database.database import AdminUser, get_session
-from flask_babel import gettext as _
 
 
 class AuthConfig:

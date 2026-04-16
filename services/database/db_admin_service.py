@@ -1,10 +1,10 @@
 import re
 
+from flask_babel import gettext as _
 from loguru import logger
 from sqlalchemy import MetaData, Table, inspect
 
 from database.database import get_engine
-from flask_babel import gettext as _
 
 
 def delete_table_data(table_name: str):
@@ -13,7 +13,10 @@ def delete_table_data(table_name: str):
     Returns tuple `(response_dict, status_code)` ready to jsonify/return.
     """
     if not table_name:
-        return {"status": "error", "message": _("Nombre de tabla no proporcionado")}, 400
+        return {
+            "status": "error",
+            "message": _("Nombre de tabla no proporcionado"),
+        }, 400
 
     if not re.match(r"^[a-zA-Z0-9_]+$", table_name):
         return {"status": "error", "message": _("Nombre de tabla inválido")}, 400

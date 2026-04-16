@@ -1,9 +1,9 @@
 import os
 
+from flask_babel import gettext as _
 from loguru import logger
 
 from services.squid.squid_config_splitter import SquidConfigSplitter
-from flask_babel import gettext as _
 
 
 def get_split_view_data():
@@ -39,7 +39,10 @@ def split_config(strict=False):
         }, 200
     except FileNotFoundError as e:
         logger.error("Archivo no encontrado: %s", e)
-        return {"status": "error", "message": _("Archivo requerido no encontrado.")}, 404
+        return {
+            "status": "error",
+            "message": _("Archivo requerido no encontrado."),
+        }, 404
     except PermissionError as e:
         logger.error("Error de permisos: %s", e)
         return {

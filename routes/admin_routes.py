@@ -13,8 +13,8 @@ from flask import (
     request,
     url_for,
 )
-from loguru import logger
 from flask_babel import gettext as _
+from loguru import logger
 
 from config import Config
 from database.database import get_session
@@ -147,7 +147,10 @@ def edit_config():
                 show_details = False
 
             if show_details:
-                flash(_("Error saving configuration: %(message)s") % {"message": message}, "error")
+                flash(
+                    _("Error saving configuration: %(message)s") % {"message": message},
+                    "error",
+                )
             else:
                 flash(_("Error saving configuration"), "error")
     return render_template(
@@ -344,7 +347,10 @@ def blacklist_import():
             except RuntimeError:
                 show_details = False
             if show_details:
-                flash(_("Error al procesar el archivo: %(error)s") % {"error": str(e)}, "error")
+                flash(
+                    _("Error al procesar el archivo: %(error)s") % {"error": str(e)},
+                    "error",
+                )
             else:
                 flash(_("Error al procesar el archivo"), "error")
             return redirect(url_for("admin.manage_blacklist"))
@@ -378,7 +384,9 @@ def blacklist_import():
         except RuntimeError:
             show_details = False
         if show_details:
-            flash(_("Error al guardar blacklist: %(error)s") % {"error": str(e)}, "error")
+            flash(
+                _("Error al guardar blacklist: %(error)s") % {"error": str(e)}, "error"
+            )
         else:
             flash(_("Error al guardar blacklist"), "error")
 
@@ -411,7 +419,9 @@ def blacklist_save_custom():
         except RuntimeError:
             show_details = False
         if show_details:
-            flash(_("Error al guardar la lista: %(error)s") % {"error": str(e)}, "error")
+            flash(
+                _("Error al guardar la lista: %(error)s") % {"error": str(e)}, "error"
+            )
         else:
             flash(_("Error al guardar la lista"), "error")
 
@@ -735,7 +745,9 @@ def split_config():
         return jsonify(
             {
                 "status": "error",
-                "message": _("Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf."),
+                "message": _(
+                    "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf."
+                ),
             }
         ), 404
 
@@ -744,7 +756,9 @@ def split_config():
         return jsonify(
             {
                 "status": "error",
-                "message": _("No se tienen permisos suficientes para crear los archivos"),
+                "message": _(
+                    "No se tienen permisos suficientes para crear los archivos"
+                ),
             }
         ), 403
 
@@ -795,7 +809,11 @@ def blacklist_delete_list():
     count = delete_blacklist_by_source_url(url)
     # Also disable enforcement if the list was enforced
     _disable_single_blocklist(url, config_manager)
-    flash(_("Lista eliminada: %(url)s (%(count)s dominios)") % {"url": url, "count": count}, "success")
+    flash(
+        _("Lista eliminada: %(url)s (%(count)s dominios)")
+        % {"url": url, "count": count},
+        "success",
+    )
     return redirect(url_for("admin.manage_blacklist"))
 
 

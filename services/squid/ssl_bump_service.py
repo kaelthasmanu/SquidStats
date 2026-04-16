@@ -1,7 +1,7 @@
 """Service layer for SSL Bump detection."""
 
-from loguru import logger
 from flask_babel import gettext as _
+from loguru import logger
 
 
 def get_ssl_bump_status(config_manager) -> dict:

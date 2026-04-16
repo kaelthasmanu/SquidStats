@@ -1,10 +1,10 @@
+from flask_babel import gettext as _
 from loguru import logger
 from sqlalchemy import text
 
 from config import Config
 from database.database import get_engine, get_session
 from services.database.admin_helpers import get_all_tables_stats
-from flask_babel import gettext as _
 
 
 def get_tables_info():
@@ -194,7 +194,10 @@ def run_integrity_check():
 
     except Exception:
         logger.exception("Error running integrity check")
-        return {"status": "error", "message": _("Error al ejecutar la verificación")}, 500
+        return {
+            "status": "error",
+            "message": _("Error al ejecutar la verificación"),
+        }, 500
 
     finally:
         if session:
