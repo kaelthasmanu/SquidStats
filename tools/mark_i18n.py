@@ -82,7 +82,6 @@ def process_template_file(filepath):
     for attr in attrs_to_translate:
 
         def wrap_attr(m):
-            quote = m.group(2)
             value = m.group(3)
             if "{{" in value or "{%" in value:
                 return m.group(0)
@@ -101,7 +100,6 @@ def process_template_file(filepath):
         # Simpler approach - just use {{ _() }} in attribute values
         def wrap_attr_simple(m):
             attr_name = m.group(1)
-            quote_char = m.group(2)
             value = m.group(3)
             if "{{" in value or "{%" in value or "_(" in value:
                 return m.group(0)
@@ -139,7 +137,6 @@ def process_python_file(filepath):
     def wrap_message_value(m):
         nonlocal needs_import
         key = m.group(1)
-        quote = m.group(2)
         value = m.group(3)
 
         if "_(" in value or 'f"' in value or "f'" in value:
@@ -203,7 +200,7 @@ def main():
     if mode in ("all", "templates"):
         print("\n📄 Processing templates...")
         template_count = 0
-        for root, dirs, files in os.walk(TEMPLATES_DIR):
+        for root, _dirs, files in os.walk(TEMPLATES_DIR):
             for f in sorted(files):
                 if f.endswith(".html"):
                     filepath = os.path.join(root, f)
@@ -221,7 +218,7 @@ def main():
         py_count = 0
         for pdir in python_dirs:
             full_dir = os.path.join(PROJECT_ROOT, pdir)
-            for root, dirs, files in os.walk(full_dir):
+            for root, _dirs, files in os.walk(full_dir):
                 for f in sorted(files):
                     if f.endswith(".py"):
                         filepath = os.path.join(root, f)

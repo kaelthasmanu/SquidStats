@@ -205,7 +205,7 @@ def main():
     count = 0
     for dir_name in DIRS:
         dir_path = os.path.join(PROJECT_ROOT, dir_name)
-        for root, dirs, files in os.walk(dir_path):
+        for root, _dirs, files in os.walk(dir_path):
             for f in sorted(files):
                 if not f.endswith(".py"):
                     continue

@@ -182,10 +182,8 @@ def process_tag_attributes(tag):
         # Single quotes version
         pattern_sq = rf"({attr}=')([^']*?)(')"
 
-        def replace_attr_sq(m):
-            prefix = m.group(1)
+        def replace_attr_sq(m, attr=attr):
             value = m.group(2)
-            suffix = m.group(3)
             if is_translatable_text(value):
                 escaped = value.strip().replace("'", "\\'")
                 return f"""{attr}="{{ _("{escaped}") }}" """
@@ -291,7 +289,7 @@ def main():
         return
 
     count = 0
-    for root, dirs, files in os.walk(TEMPLATES_DIR):
+    for root, _dirs, files in os.walk(TEMPLATES_DIR):
         for f in sorted(files):
             if f.endswith(".html"):
                 filepath = os.path.join(root, f)

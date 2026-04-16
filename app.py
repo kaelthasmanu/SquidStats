@@ -101,7 +101,7 @@ def create_app():
             Config.BABEL_SUPPORTED_LOCALES, default=Config.BABEL_DEFAULT_LOCALE
         )
 
-    babel = Babel(app, locale_selector=get_locale)
+    Babel(app, locale_selector=get_locale)
 
     # Make get_locale available in templates
     app.jinja_env.globals["get_locale"] = get_locale

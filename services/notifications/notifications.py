@@ -7,7 +7,8 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Any
 
-from flask_babel import gettext as _, ngettext
+from flask_babel import gettext as _
+from flask_babel import ngettext
 from loguru import logger
 from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
@@ -421,7 +422,10 @@ def check_squid_log_health():
         if not os.path.exists(log_file):
             add_notification(
                 "error",
-                _("Archivo de log de Squid no encontrado: %(log_file)s", log_file=log_file),
+                _(
+                    "Archivo de log de Squid no encontrado: %(log_file)s",
+                    log_file=log_file,
+                ),
                 "fa-file-exclamation",
                 "squid",
             )
@@ -651,7 +655,7 @@ def notify_squid_config_error(error_message: str):
             error=error_message,
         ),
         "fa-cog",
-        "squid"
+        "squid",
     )
 
 
@@ -676,9 +680,9 @@ def check_security_events():
                 add_notification(
                     "warning",
                     _(
-                    "%(count)d intentos de autenticación fallidos en la última hora",
-                    count=failed_auth_count,
-                ),
+                        "%(count)d intentos de autenticación fallidos en la última hora",
+                        count=failed_auth_count,
+                    ),
                     "fa-shield-alt",
                     "security",
                 )
