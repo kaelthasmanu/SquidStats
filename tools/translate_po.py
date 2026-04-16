@@ -105,7 +105,6 @@ TRANSLATIONS = {
     "Último Login": "Last Login",
     "Última conexión": "Last Connection",
     "Fecha de creación": "Creation Date",
-    "Acciones": "Actions",
     "ID": "ID",
     # Admin sections
     "Gestión de Usuarios": "User Management",
@@ -252,7 +251,6 @@ TRANSLATIONS = {
     "Frecuencia inválida": "Invalid frequency",
     "Configuración guardada correctamente": "Configuration saved successfully",
     "Error leyendo salvas": "Error reading backups",
-    "Archivo no encontrado": "File not found",
     "Nombre de archivo inválido": "Invalid filename",
     "La salva no existe": "Backup does not exist",
     # Database admin
@@ -315,7 +313,6 @@ TRANSLATIONS = {
     "Gráfico": "Chart",
     "Lista": "List",
     "Detalle": "Detail",
-    "Información": "Information",
     "Aviso": "Notice",
     "Atención": "Attention",
     "Importante": "Important",
@@ -369,11 +366,9 @@ TRANSLATIONS = {
     "Red Asociada": "Associated Network",
     # Misc
     "Información general": "General Information",
-    "Confirmar": "Confirm",
     "Procesando": "Processing",
     "Operación completada": "Operation completed",
     "Operación cancelada": "Operation cancelled",
-    "Sin datos disponibles": "No data available",
     "Versión": "Version",
     "Licencia": "License",
     "Documentación": "Documentation",
