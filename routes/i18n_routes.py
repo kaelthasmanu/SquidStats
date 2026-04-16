@@ -16,11 +16,11 @@ i18n_bp = Blueprint("i18n", __name__)
 @i18n_bp.route("/set-language/<lang>")
 def set_language(lang):
     """Set the user's preferred language."""
-    safe_lang = (
-        lang if lang in Config.BABEL_SUPPORTED_LOCALES else Config.BABEL_DEFAULT_LOCALE
-    )
+    supported_locales = tuple(Config.BABEL_SUPPORTED_LOCALES)
+    canonical_locales = {locale: locale for locale in supported_locales}
+    selected_lang = canonical_locales.get(lang, Config.BABEL_DEFAULT_LOCALE)
 
-    session["lang"] = safe_lang
+    session["lang"] = selected_lang
 
     referrer = (request.referrer or "").replace("\\", "")
     parsed_referrer = urlparse(referrer)
@@ -29,7 +29,7 @@ def set_language(lang):
     )
 
     response = make_response(redirect(redirect_target))
-    response.set_cookie("lang", safe_lang, max_age=365 * 24 * 60 * 60, samesite="Lax")
+    response.set_cookie("lang", selected_lang, max_age=365 * 24 * 60 * 60, samesite="Lax")
     return response
 
 
