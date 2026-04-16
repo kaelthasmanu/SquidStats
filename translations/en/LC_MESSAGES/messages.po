@@ -4572,3 +4572,18 @@ msgstr "Tool for activity and security analysis."
 msgid "Estadísticas del comportamiento del Sistema"
 msgstr "System Behavior Statistics"
 
+
+msgid "Reporte generado exitosamente"
+msgstr "Report generated successfully"
+
+msgid "Auditoría completada"
+msgstr "Audit completed"
+
+msgid "Error de conexión con el servidor"
+msgstr "Server connection error"
+
+msgid "Error de red"
+msgstr "Network error"
+
+msgid "Error en la auditoría"
+msgstr "Audit error"

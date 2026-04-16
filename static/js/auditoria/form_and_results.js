@@ -1,7 +1,8 @@
 // Form submit & results rendering (sin cambios funcionales)
 (function(){
   let els = {};
-  const defaultResultsHTML = `<div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center"><div class="text-center text-gray-500 py-10"><i class="fas fa-clipboard-list text-5xl mb-4 text-gray-300"></i><h3 class="text-xl font-semibold">Seleccione los filtros y genere un reporte</h3><p class="mt-2">Los resultados de su auditoría aparecerán aquí.</p></div></div>`;
+  const i18n = window.__AUD_I18N__ || {};
+  const defaultResultsHTML = `<div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center"><div class="text-center text-gray-500 py-10"><i class="fas fa-clipboard-list text-5xl mb-4 text-gray-300"></i><h3 class="text-xl font-semibold">${i18n.selectFilters || 'Seleccione los filtros y genere un reporte'}</h3><p class="mt-2">${i18n.resultsAppear || 'Los resultados de su auditoría aparecerán aquí.'}</p></div></div>`;
 
   function cacheDom(){
     els.form = document.getElementById('audit-form');
@@ -20,7 +21,7 @@
     submitButton.classList.remove('opacity-50','cursor-not-allowed');
     submitButton.classList.add('hover:bg-blue-700','hover:shadow-xl');
     buttonIcon.className = 'fas fa-play mr-2';
-    submitButton.innerHTML = '<i class="fas fa-play mr-2"></i>Generar Reporte';
+    submitButton.innerHTML = `<i class="fas fa-play mr-2"></i>${i18n.generateReport || 'Generar Reporte'}`;
   }
 
   function collectFormData(){
@@ -126,8 +127,8 @@
       submitButton.classList.add('opacity-50','cursor-not-allowed');
       submitButton.classList.remove('hover:bg-blue-700','hover:shadow-xl');
       buttonIcon.className = 'fas fa-spinner fa-spin mr-2';
-      submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generando Reporte...';
-      els.resultsContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center"><div class="text-center text-gray-500 py-10"><i class="fas fa-spinner fa-spin text-5xl mb-4 text-blue-500"></i><h3 class="text-xl font-semibold">Generando reporte...</h3></div></div>`;
+      submitButton.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${i18n.generating || 'Generando Reporte...'}`;
+      els.resultsContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center"><div class="text-center text-gray-500 py-10"><i class="fas fa-spinner fa-spin text-5xl mb-4 text-blue-500"></i><h3 class="text-xl font-semibold">${i18n.generating || 'Generando reporte...'}</h3></div></div>`;
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
       fetch('/api/run-audit', { 
         method:'POST', 
@@ -140,13 +141,13 @@
         .then(r=>r.json())
         .then(result=>{
           toastr.clear(); restoreSubmitButton();
-          if (result.error) { toastr.error(result.error,'Error en la auditoría'); }
-          else { toastr.success('Reporte generado exitosamente','Auditoría completada'); }
+          if (result.error) { toastr.error(result.error, i18n.auditError || 'Error en la auditoría'); }
+          else { toastr.success(i18n.reportGenerated || 'Reporte generado exitosamente', i18n.auditCompleted || 'Auditoría completada'); }
           renderResults(data.audit_type, result, data);
         })
         .catch(err=>{
           toastr.clear(); restoreSubmitButton();
-          toastr.error('Error de conexión con el servidor','Error de red');
+          toastr.error(i18n.connectionError || 'Error de conexión con el servidor', i18n.networkError || 'Error de red');
           els.resultsContainer.innerHTML = `<div class=\"bg-white p-6 rounded-lg shadow-lg\"><div class=\"text-center text-red-500 py-10\"><strong>Error de red o del servidor:</strong> ${err}</div></div>`;
         });
     });

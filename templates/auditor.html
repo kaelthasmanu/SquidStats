@@ -69,6 +69,19 @@
     <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
 
     <!-- Divided scripts -->
+    <script>
+        window.__AUD_I18N__ = {
+            selectFilters: "{{ _('Seleccione los filtros y genere un reporte') }}",
+            resultsAppear: "{{ _('Los resultados de su auditoría aparecerán aquí.') }}",
+            generating: "{{ _('Generando reporte...') }}",
+            generateReport: "{{ _('Generar Reporte') }}",
+            reportGenerated: "{{ _('Reporte generado exitosamente') }}",
+            auditCompleted: "{{ _('Auditoría completada') }}",
+            connectionError: "{{ _('Error de conexión con el servidor') }}",
+            networkError: "{{ _('Error de red') }}",
+            auditError: "{{ _('Error en la auditoría') }}",
+        };
+    </script>
     <script src="{{ url_for('static', filename='js/auditoria/config_and_utils.js') }}"></script>
     <script src="{{ url_for('static', filename='js/auditoria/renderers.js') }}"></script>
     <script src="{{ url_for('static', filename='js/auditoria/user_search_and_inputs.js') }}"></script>
