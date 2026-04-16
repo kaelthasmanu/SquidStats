@@ -160,7 +160,10 @@ def setup_scheduler_tasks(scheduler):
     register_scheduler_tasks(scheduler)
 
 
-def shutdown_app(scheduler, socketio):
+def shutdown_app(scheduler, socketio, app=None):
+    if shutdown_event.is_set():
+        return
+
     logger.info("\n🛑 Shutting down SquidStats...")
 
     # Set shutdown event to stop all threads
@@ -186,13 +189,8 @@ def shutdown_app(scheduler, socketio):
     except Exception as e:
         logger.error(f"Error stopping scheduler: {e}")
 
-    # Stop SocketIO
-    logger.info("Stopping SocketIO...")
-    try:
-        if socketio:
-            socketio.stop()
-    except Exception as e:
-        logger.error(f"Error stopping SocketIO: {e}")
+    # SocketIO shutdown is handled by process exit. Avoid calling socketio.stop() here.
+    logger.info("Stopping SocketIO (handled by process exit)...")
 
     logger.info("✅ Shutdown complete")
 
@@ -227,14 +225,14 @@ def main():
     # Register signal handlers for graceful shutdown
     def signal_handler(signum, frame):
         logger.info(f"\n⚠️ Received signal {signum}")
-        shutdown_app(scheduler, socketio)
+        shutdown_event.set()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
     signal.signal(signal.SIGTERM, signal_handler)  # kill command
 
     # Register cleanup on exit
-    atexit.register(lambda: shutdown_app(scheduler, socketio))
+    atexit.register(lambda: shutdown_app(scheduler, socketio, app))
 
     # Run the application
     debug_mode = Config.DEBUG
@@ -252,10 +250,10 @@ def main():
         )
     except KeyboardInterrupt:
         logger.info("\n⚠️ Keyboard interrupt received")
-        shutdown_app(scheduler, socketio)
+        shutdown_app(scheduler, socketio, app)
     except Exception as e:
         logger.error(f"Application error: {e}")
-        shutdown_app(scheduler, socketio)
+        shutdown_app(scheduler, socketio, app)
         raise
 
 
