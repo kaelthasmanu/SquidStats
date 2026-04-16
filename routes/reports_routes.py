@@ -2,6 +2,7 @@ from datetime import date, datetime
 from io import BytesIO
 
 from flask import Blueprint, render_template, request, send_file
+from flask_babel import gettext as _
 from loguru import logger
 
 from database.database import get_dynamic_models, get_session
@@ -64,9 +65,9 @@ def reports():
             "reports.html",
             metrics=metrics,
             page_icon="favicon.ico",
-            page_title="Reportes y gráficas",
+            page_title=_("Reportes y gráficas"),
             icon="fas fa-chart-simple",
-            subtitle="Top de la Actividad de los Usuarios y comportamiento",
+            subtitle=_("Top de la Actividad de los Usuarios y comportamiento"),
         )
     except Exception as e:
         logger.error(f"Error en ruta /reports: {str(e)}", exc_info=True)
@@ -218,9 +219,9 @@ def reports_for_date(date_str: str):
             "reports.html",
             metrics=metrics,
             page_icon="favicon.ico",
-            page_title=f"Reportes y gráficas - {selected.isoformat()}",
+            page_title=_("Reportes y gráficas") + f" - {selected.isoformat()}",
             icon="fas fa-chart-simple",
-            subtitle="Top de la Actividad de los Usuarios y comportamiento",
+            subtitle=_("Top de la Actividad de los Usuarios y comportamiento"),
         )
     except Exception:
         logger.exception("Error generating reports for specific date")
@@ -255,9 +256,9 @@ def auditoria_logs():
     return render_template(
         "auditor.html",
         page_icon="favicon.ico",
-        page_title="Centro de Auditoría",
+        page_title=_("Centro de Auditoría"),
         icon="fas fa-magnifying-glass",
-        subtitle="Herramienta para el análisis de actividad y seguridad.",
+        subtitle=_("Herramienta para el análisis de actividad y seguridad."),
     )
 
 
