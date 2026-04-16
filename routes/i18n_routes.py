@@ -3,6 +3,8 @@ Internationalization (i18n) routes.
 Provides language switching and JS translation endpoint.
 """
 
+from urllib.parse import urlparse
+
 from flask import Blueprint, jsonify, make_response, redirect, request, session
 from flask_babel import gettext as _
 
@@ -14,12 +16,20 @@ i18n_bp = Blueprint("i18n", __name__)
 @i18n_bp.route("/set-language/<lang>")
 def set_language(lang):
     """Set the user's preferred language."""
-    if lang not in Config.BABEL_SUPPORTED_LOCALES:
-        lang = Config.BABEL_DEFAULT_LOCALE
+    safe_lang = (
+        lang if lang in Config.BABEL_SUPPORTED_LOCALES else Config.BABEL_DEFAULT_LOCALE
+    )
 
-    session["lang"] = lang
-    response = make_response(redirect(request.referrer or "/"))
-    response.set_cookie("lang", lang, max_age=365 * 24 * 60 * 60, samesite="Lax")
+    session["lang"] = safe_lang
+
+    referrer = (request.referrer or "").replace("\\", "")
+    parsed_referrer = urlparse(referrer)
+    redirect_target = (
+        referrer if not parsed_referrer.netloc and not parsed_referrer.scheme else "/"
+    )
+
+    response = make_response(redirect(redirect_target))
+    response.set_cookie("lang", safe_lang, max_age=365 * 24 * 60 * 60, samesite="Lax")
     return response
 
 
