@@ -203,8 +203,25 @@
 <script defer src="{{ url_for('static', filename='src/alpine.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
 <script>
+  window.__NAV_I18N__ = {
+    noNewNotifications: "{{ _('No hay notificaciones nuevas') }}",
+    systemSource: "{{ _('Sistema') }}",
+    errorHttp: "{{ _('Error HTTP:') }}",
+    serverMarkReadError: "{{ _('Error del servidor al marcar como leída:') }}",
+    markReadError: "{{ _('Error al marcar notificación como leída:') }}",
+    unknownError: "{{ _('Error desconocido') }}",
+    fetchNotificationsError: "{{ _('Error al obtener notificaciones:') }}",
+    errorUpdateSquid: "{{ _('Error al actualizar Squid') }}",
+    errorConnection: "{{ _('Error de conexión') }}",
+    errorUpdateWeb: "{{ _('Error al actualizar la aplicación web') }}",
+    confirmUpdateSquid: "{{ _('¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente.') }}",
+    confirmUpdateWeb: "{{ _('¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad.') }}"
+  };
+</script>
+<script>
   // Enhanced Navbar Functionality with Real-time Notifications
   document.addEventListener("DOMContentLoaded", function () {
+    const i18n = window.__NAV_I18N__ || {};
     // Tooltip functionality
     function initTooltips() {
       const elements = document.querySelectorAll('[data-tooltip]');
@@ -338,7 +355,7 @@
             
             // Construir el título con la fuente
             const source = notification.source === 'squid' ? 'Squid' : 
-                          notification.source === 'git' ? 'Git' : 'Sistema';
+                          notification.source === 'git' ? 'Git' : (i18n.systemSource || 'Sistema');
             const title = notification.count && notification.count > 1 ? 
                          `${source} (×${notification.count})` : source;
             
@@ -409,7 +426,7 @@
                         const sourceP = document.createElement('p');
                         sourceP.className = 'text-sm font-medium text-gray-900';
                         sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
-                                              notification.source === 'git' ? 'Git' : 'Sistema';
+                                              notification.source === 'git' ? 'Git' : (i18n.systemSource || 'Sistema');
                         
                         const messageP = document.createElement('p');
                         messageP.className = 'text-sm text-gray-700 mt-1';
@@ -437,7 +454,7 @@
                 } else {
                     ul.innerHTML = `
                         <li class='px-4 py-3 text-gray-500 text-center'>
-                            No hay notificaciones nuevas
+                            ${i18n.noNewNotifications || 'No hay notificaciones nuevas'}
                         </li>
                     `;
                 }
@@ -473,7 +490,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
+                    throw new Error(`${i18n.errorHttp || 'Error HTTP:'} ${response.status}`);
                 }
                 return response.json();
             })
@@ -488,17 +505,17 @@
                     updateNotificationBadges(data.unread_count);
                     updateNotificationLists();
                 } else {
-                    console.error('Error del servidor al marcar como leída:', data.error);
+                    console.error(`${i18n.serverMarkReadError || 'Error del servidor al marcar como leída:'} ${data.error}`);
                     showNotificationToast({
                         type: 'error',
-                        message: 'Error al marcar notificación como leída: ' + (data.error || 'Error desconocido')
+                        message: `${i18n.markReadError || 'Error al marcar notificación como leída: '} ${data.error || i18n.unknownError || 'Error desconocido'}`
                     });
                 }
             })
             .catch(error => {
                 showNotificationToast({
                     type: 'error',
-                    message: 'Error al marcar notificación como leída: ' + error.message
+                    message: `${i18n.markReadError || 'Error al marcar notificación como leída: '} ${error.message}`
                 });
             });
         }
@@ -507,7 +524,7 @@
             fetch("/api/notifications")
                 .then((res) => {
                     if (!res.ok) {
-                        throw new Error(`Error HTTP: ${res.status}`);
+                        throw new Error(`${i18n.errorHttp || 'Error HTTP:'} ${res.status}`);
                     }
                     return res.json();
                 })
@@ -519,7 +536,7 @@
                     updateNotificationBadges(data.unread_count);
                 })
                 .catch((error) => {
-                    console.error('Error fetching notifications:', error);
+                    console.error(`${i18n.fetchNotificationsError || 'Error fetching notifications:'} ${error}`);
                     notificationsData.notifications = [];
                     notificationsData.unread_count = 0;
                     updateNotificationLists();
@@ -603,7 +620,7 @@
   // Funciones de confirmación para actualizaciones
   function confirmSquidUpdate() {
     showCustomConfirm(
-      '¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente.',
+      i18n.confirmUpdateSquid || '¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente.',
       async () => {
         try {
           const response = await fetch('/install', {
@@ -617,10 +634,10 @@
           if (response.ok) {
             window.location.reload();
           } else {
-            alert('Error al actualizar Squid');
+            alert(i18n.errorUpdateSquid || 'Error al actualizar Squid');
           }
         } catch (error) {
-          alert('Error de conexión');
+          alert(i18n.errorConnection || 'Error de conexión');
         }
       }
     );
@@ -628,7 +645,7 @@
 
   function confirmWebUpdate() {
     showCustomConfirm(
-      '¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad.',
+      i18n.confirmUpdateWeb || '¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad.',
       async () => {
         try {
           const response = await fetch('/update', {
@@ -642,10 +659,10 @@
           if (response.ok) {
             window.location.reload();
           } else {
-            alert('Error al actualizar la aplicación web');
+            alert(i18n.errorUpdateWeb || 'Error al actualizar la aplicación web');
           }
         } catch (error) {
-          alert('Error de conexión');
+          alert(i18n.errorConnection || 'Error de conexión');
         }
       }
     );

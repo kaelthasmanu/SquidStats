@@ -4713,3 +4713,30 @@ msgstr "Select user..."
 
 msgid "Buscar usuario... (Opcional)"
 msgstr "Search user... (Optional)"
+
+msgid "No hay notificaciones nuevas"
+msgstr "No new notifications"
+
+msgid "Error HTTP:"
+msgstr "HTTP Error:"
+
+msgid "Error del servidor al marcar como leída:"
+msgstr "Server error marking as read:"
+
+msgid "Error al marcar notificación como leída:"
+msgstr "Error marking notification as read:"
+
+msgid "Error al obtener notificaciones:"
+msgstr "Error fetching notifications:"
+
+msgid "Error al actualizar Squid"
+msgstr "Error updating Squid"
+
+msgid "Error al actualizar la aplicación web"
+msgstr "Error updating the web application"
+
+msgid "¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente."
+msgstr "Are you sure you want to update the Squid service? Save your configuration before continuing; the service will restart automatically."
+
+msgid "¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad."
+msgstr "Are you sure you want to update SquidStats? The web interface, features, and security fixes will be updated."
