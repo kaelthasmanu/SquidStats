@@ -35,11 +35,11 @@
   function validateRequired(data){
     const selectedOption = els.auditTypeSelect.options[els.auditTypeSelect.selectedIndex];
     const requiredInputs = (selectedOption.dataset.requires||'').split(',').filter(Boolean);
-    if (requiredInputs.includes('user') && !els.usernameSelect.value){ toastr.error('Por favor, seleccione un usuario.','Campo requerido'); return false; }
-    if (requiredInputs.includes('keyword') && !data.keyword){ toastr.error('Por favor, ingrese una palabra clave.','Campo requerido'); return false; }
-    if (requiredInputs.includes('ip') && !data.ip_address){ toastr.error('Por favor, ingrese una dirección IP.','Campo requerido'); return false; }
-    if (requiredInputs.includes('response_code') && !data.response_code){ toastr.error('Por favor, seleccione un código de respuesta.','Campo requerido'); return false; }
-    if (requiredInputs.includes('social_media') && data.social_media_sites.length===0){ toastr.error('Por favor, seleccione al menos una red social.','Campo requerido'); return false; }
+    if (requiredInputs.includes('user') && !els.usernameSelect.value){ toastr.error(i18n.selectUser || 'Por favor, seleccione un usuario.', i18n.requiredField || 'Campo requerido'); return false; }
+    if (requiredInputs.includes('keyword') && !data.keyword){ toastr.error(i18n.enterKeyword || 'Por favor, ingrese una palabra clave.', i18n.requiredField || 'Campo requerido'); return false; }
+    if (requiredInputs.includes('ip') && !data.ip_address){ toastr.error(i18n.enterIp || 'Por favor, ingrese una dirección IP.', i18n.requiredField || 'Campo requerido'); return false; }
+    if (requiredInputs.includes('response_code') && !data.response_code){ toastr.error(i18n.selectResponseCode || 'Por favor, seleccione un código de respuesta.', i18n.requiredField || 'Campo requerido'); return false; }
+    if (requiredInputs.includes('social_media') && data.social_media_sites.length===0){ toastr.error(i18n.selectSocialMedia || 'Por favor, seleccione al menos una red social.', i18n.requiredField || 'Campo requerido'); return false; }
     return true;
   }
 
@@ -66,7 +66,7 @@
     let html='';
       if (!window.__AUD_RENDERERS__) {
         console.error('[AUDITORIA] __AUD_RENDERERS__ no disponible');
-        html = '<div class="bg-white p-6 rounded-lg shadow-lg text-red-600">Error interno: Renderers no cargados.</div>';
+        html = `<div class="bg-white p-6 rounded-lg shadow-lg text-red-600">${i18n.internalError || 'Error interno: Renderers no cargados.'}</div>`;
       } else if (data.error){
       html = `<div class="bg-white p-6 rounded-lg shadow-lg"><div class="text-center text-red-500 py-10"><strong>Error:</strong> ${data.error}</div></div>`;
     } else {
@@ -79,21 +79,23 @@
       else if (auditType === 'daily_activity') {
         const user = formData.username;
         const date = formData.start_date;
-        const title = `Distribución de Peticiones para '${user}' el ${date}`;
+        const title = (i18n.distributionTitle || 'Distribución de Peticiones para {user} el {date}')
+            .replace('{user}', `'${user}'`).replace('{date}', date);
         if (data.total_requests>0){
-          html = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-2">${title}</h2><p class="text-gray-600 mb-4">Total de Peticiones en el día: <span class="font-bold text-blue-600">${data.total_requests.toLocaleString()}</span></p><canvas id="daily-activity-chart"></canvas></div>`;
+          html = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-2">${title}</h2><p class="text-gray-600 mb-4">${i18n.totalRequestsDay || 'Total de Peticiones en el día:'} <span class="font-bold text-blue-600">${data.total_requests.toLocaleString()}</span></p><canvas id="daily-activity-chart"></canvas></div>`;
         } else {
-          html = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">No se encontraron peticiones para la fecha y usuario seleccionado.</p></div>`;
+          html = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">${i18n.noRequestsFound || 'No se encontraron peticiones para la fecha y usuario seleccionado.'}</p></div>`;
         }
       } else if (['keyword_search','ip_activity','response_code_search','social_media_activity'].includes(auditType)){
         let title='';
-        if (auditType==='keyword_search'){ const user=formData.username||'Todos'; title = `Resultados para la palabra clave "${formData.keyword}" para: ${user}`; }
-        else if (auditType==='ip_activity'){ title = `Resultados de Búsqueda para la IP: ${formData.ip_address}`; }
-        else if (auditType==='response_code_search'){ const user=formData.username||'Todos'; title = `Resultados por Código de Respuesta ${formData.response_code} para: ${user}`; }
-        else if (auditType==='social_media_activity'){ const user=formData.username||'Todos'; const sites=formData.social_media_sites.join(', '); title = `Actividad en Redes Sociales (${sites}) para: ${user}`; }
+        const all = i18n.all || 'Todos';
+        if (auditType==='keyword_search'){ const user=formData.username||all; title = (i18n.keywordTitle || 'Resultados para la palabra clave {keyword} para: {user}').replace('{keyword}', formData.keyword).replace('{user}', user); }
+        else if (auditType==='ip_activity'){ title = (i18n.ipTitle || 'Resultados de Búsqueda para la IP: {ip}').replace('{ip}', formData.ip_address); }
+        else if (auditType==='response_code_search'){ const user=formData.username||all; title = (i18n.responseCodeTitle || 'Resultados por Código de Respuesta {code} para: {user}').replace('{code}', formData.response_code).replace('{user}', user); }
+        else if (auditType==='social_media_activity'){ const user=formData.username||all; const sites=formData.social_media_sites.join(', '); title = (i18n.socialMediaTitle || 'Actividad en Redes Sociales ({sites}) para: {user}').replace('{sites}', sites).replace('{user}', user); }
         html = window.__AUD_RENDERERS__.renderNestedAccordionResults(title, data.results);
       } else {
-        html = '<div class="bg-white p-6 rounded-lg shadow-lg"><p>Tipo de reporte no reconocido.</p></div>';
+        html = `<div class="bg-white p-6 rounded-lg shadow-lg"><p>${i18n.unknownReportType || 'Tipo de reporte no reconocido.'}</p></div>`;
       }
     }
     els.resultsContainer.innerHTML = html;
@@ -148,7 +150,7 @@
         .catch(err=>{
           toastr.clear(); restoreSubmitButton();
           toastr.error(i18n.connectionError || 'Error de conexión con el servidor', i18n.networkError || 'Error de red');
-          els.resultsContainer.innerHTML = `<div class=\"bg-white p-6 rounded-lg shadow-lg\"><div class=\"text-center text-red-500 py-10\"><strong>Error de red o del servidor:</strong> ${err}</div></div>`;
+          els.resultsContainer.innerHTML = `<div class=\"bg-white p-6 rounded-lg shadow-lg\"><div class=\"text-center text-red-500 py-10\"><strong>${i18n.networkServerError || 'Error de red o del servidor:'}</strong> ${err}</div></div>`;
         });
     });
   }

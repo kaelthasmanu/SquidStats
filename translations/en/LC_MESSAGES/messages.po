@@ -4587,3 +4587,48 @@ msgstr "Network error"
 
 msgid "Error en la auditoría"
 msgstr "Audit error"
+
+msgid "Por favor, seleccione un usuario."
+msgstr "Please select a user."
+
+msgid "Por favor, ingrese una palabra clave."
+msgstr "Please enter a keyword."
+
+msgid "Por favor, ingrese una dirección IP."
+msgstr "Please enter an IP address."
+
+msgid "Por favor, seleccione un código de respuesta."
+msgstr "Please select a response code."
+
+msgid "Por favor, seleccione al menos una red social."
+msgstr "Please select at least one social network."
+
+msgid "Error interno: Renderers no cargados."
+msgstr "Internal error: Renderers not loaded."
+
+msgid "Distribución de Peticiones para {user} el {date}"
+msgstr "Request Distribution for {user} on {date}"
+
+msgid "Total de Peticiones en el día:"
+msgstr "Total Requests for the day:"
+
+msgid "No se encontraron peticiones para la fecha y usuario seleccionado."
+msgstr "No requests found for the selected date and user."
+
+msgid "Resultados para la palabra clave {keyword} para: {user}"
+msgstr "Results for keyword {keyword} for: {user}"
+
+msgid "Resultados de Búsqueda para la IP: {ip}"
+msgstr "Search Results for IP: {ip}"
+
+msgid "Resultados por Código de Respuesta {code} para: {user}"
+msgstr "Results by Response Code {code} for: {user}"
+
+msgid "Actividad en Redes Sociales ({sites}) para: {user}"
+msgstr "Social Media Activity ({sites}) for: {user}"
+
+msgid "Tipo de reporte no reconocido."
+msgstr "Unknown report type."
+
+msgid "Error de red o del servidor:"
+msgstr "Network or server error:"

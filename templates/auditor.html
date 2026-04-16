@@ -80,6 +80,23 @@
             connectionError: "{{ _('Error de conexión con el servidor') }}",
             networkError: "{{ _('Error de red') }}",
             auditError: "{{ _('Error en la auditoría') }}",
+            selectUser: "{{ _('Por favor, seleccione un usuario.') }}",
+            requiredField: "{{ _('Campo requerido') }}",
+            enterKeyword: "{{ _('Por favor, ingrese una palabra clave.') }}",
+            enterIp: "{{ _('Por favor, ingrese una dirección IP.') }}",
+            selectResponseCode: "{{ _('Por favor, seleccione un código de respuesta.') }}",
+            selectSocialMedia: "{{ _('Por favor, seleccione al menos una red social.') }}",
+            internalError: "{{ _('Error interno: Renderers no cargados.') }}",
+            distributionTitle: "{{ _('Distribución de Peticiones para {user} el {date}') }}",
+            totalRequestsDay: "{{ _('Total de Peticiones en el día:') }}",
+            noRequestsFound: "{{ _('No se encontraron peticiones para la fecha y usuario seleccionado.') }}",
+            all: "{{ _('Todos') }}",
+            keywordTitle: "{{ _('Resultados para la palabra clave {keyword} para: {user}') }}",
+            ipTitle: "{{ _('Resultados de Búsqueda para la IP: {ip}') }}",
+            responseCodeTitle: "{{ _('Resultados por Código de Respuesta {code} para: {user}') }}",
+            socialMediaTitle: "{{ _('Actividad en Redes Sociales ({sites}) para: {user}') }}",
+            unknownReportType: "{{ _('Tipo de reporte no reconocido.') }}",
+            networkServerError: "{{ _('Error de red o del servidor:') }}",
         };
     </script>
     <script src="{{ url_for('static', filename='js/auditoria/config_and_utils.js') }}"></script>
