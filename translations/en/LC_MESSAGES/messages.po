@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-04-15 21:49-0400\n"
+"POT-Creation-Date: 2026-04-15 21:51-0400\n"
 "PO-Revision-Date: 2026-04-15 13:15-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,20 +18,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: routes/main_routes.py:120
-msgid "Inicio Dashboard"
+#: routes/logs_routes.py:24
+msgid "Actividad usuarios"
 msgstr ""
 
-#: routes/main_routes.py:212 routes/main_routes.py:234
-msgid "Todas las Notificaciones"
+#: routes/logs_routes.py:26
+msgid "Analisis de la Actividad de los Usuarios"
 msgstr ""
 
-#: routes/main_routes.py:214
-msgid "Historial completo de notificaciones del sistema"
+#: routes/logs_routes.py:51
+msgid "Invalid date format"
 msgstr ""
 
-#: routes/main_routes.py:236
-msgid "Error al cargar las notificaciones"
+#: routes/logs_routes.py:54
+msgid "Internal server error"
+msgstr ""
+
+#: routes/logs_routes.py:90
+msgid "Registros Bloqueados"
+msgstr ""
+
+#: routes/logs_routes.py:92
+msgid "Peticiones que deberian ser bloqueadas o fueron bloqueadas"
 msgstr ""
 
 #~ msgid "Error saving configuration: %(message)s"
@@ -3143,5 +3151,17 @@ msgstr ""
 #~ msgstr "Audit Type"
 
 #~ msgid "Herramienta para el análisis de actividad y seguridad."
+#~ msgstr ""
+
+#~ msgid "Inicio Dashboard"
+#~ msgstr ""
+
+#~ msgid "Todas las Notificaciones"
+#~ msgstr ""
+
+#~ msgid "Historial completo de notificaciones del sistema"
+#~ msgstr ""
+
+#~ msgid "Error al cargar las notificaciones"
 #~ msgstr ""
 

@@ -21,9 +21,9 @@ def logs():
             "logsView.html",
             users_data=users_data,
             page_icon="favicon.ico",
-            page_title="Actividad usuarios",
+            page_title=_("Actividad usuarios"),
             icon="fas fa-user-friends",
-            subtitle="Analisis de la Actividad de los Usuarios",
+            subtitle=_("Analisis de la Actividad de los Usuarios"),
         )
     except Exception as e:
         logger.error(f"Error en ruta /logs: {e}")
@@ -87,9 +87,9 @@ def blacklist_logs():
             domain_cap=result_data.get("domain_cap", 25),
             current_page=page,
             page_icon="favicon.ico",
-            page_title="Registros Bloqueados",
+            page_title=_("Registros Bloqueados"),
             icon="fas fa-ban",
-            subtitle="Peticiones que deberian ser bloqueadas o fueron bloqueadas",
+            subtitle=_("Peticiones que deberian ser bloqueadas o fueron bloqueadas"),
         )
 
     except ValueError:
