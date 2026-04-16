@@ -5,51 +5,51 @@
 {% include 'components/loading_spinner.html' %}
 
 <div x-data="{ activeTab: '{{ active_tab|default('overview') }}', overview_user_filter: '', overview_blocked_filter: '', userForm: { username: '', quota_mb: '' }, groupForm: { group_name: '', quota_mb: '' }, editModal: { isOpen: false, type: '', username: '', group_name: '', quota_mb: '' } }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Cuotas de Usuario(Mensual) - Administración Squid</h2>
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">{{ _("Cuotas de Usuario(Mensual) - Administración Squid") }}</h2>
 
     <!-- Tabs -->
     <div class="flex border-b border-gray-200 flex-wrap">
-        <button @click="activeTab = 'overview'" :class="activeTab === 'overview' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">Resumen</button>
-        <button @click="activeTab = 'user'" :class="activeTab === 'user' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">Por Usuario</button>
-        <button @click="activeTab = 'group'" :class="activeTab === 'group' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">Por Grupo</button>
-        <button @click="activeTab = 'rules'" :class="activeTab === 'rules' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">Reglas</button>
-        <button @click="activeTab = 'history'" :class="activeTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">Histórico</button>
+        <button @click="activeTab = 'overview'" :class="activeTab === 'overview' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">{{ _("Resumen") }}</button>
+        <button @click="activeTab = 'user'" :class="activeTab === 'user' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">{{ _("Por Usuario") }}</button>
+        <button @click="activeTab = 'group'" :class="activeTab === 'group' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">{{ _("Por Grupo") }}</button>
+        <button @click="activeTab = 'rules'" :class="activeTab === 'rules' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">{{ _("Reglas") }}</button>
+        <button @click="activeTab = 'history'" :class="activeTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">{{ _("Histórico") }}</button>
     </div>
 
     <!-- Modal for edit -->
     <div x-show="editModal.isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display: none;">
         <div class="bg-white rounded-lg w-full max-w-lg p-6 shadow-xl" @click.away="editModal.isOpen = false">
-            <h3 class="text-lg font-bold mb-4">Editar cuota <span x-text="editModal.type === 'user' ? 'usuario' : 'grupo'"></span></h3>
+            <h3 class="text-lg font-bold mb-4">{{ _("Editar cuota") }} <span x-text="editModal.type === 'user' ? 'usuario' : 'grupo'"></span></h3>
 
             <form :action="editModal.type === 'user' ? '/admin/quota/user/save' : '/admin/quota/group/save'" method="POST" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
                 <template x-if="editModal.type === 'user'">
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Usuario</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Usuario") }}</label>
                         <input type="text" name="username" x-model="editModal.username" readonly class="w-full mt-2 p-2 border rounded bg-gray-100" />
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Grupo (opcional)</label>
-                        <input type="text" name="group_name" x-model="editModal.group_name" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de grupo" />
+                        <label class="text-sm font-medium text-gray-700">{{ _("Grupo (opcional)") }}</label>
+                        <input type="text" name="group_name" x-model="editModal.group_name" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("Nombre de grupo") }}" />
                     </div>
                 </template>
 
                 <template x-if="editModal.type === 'group'">
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Grupo</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Grupo") }}</label>
                         <input type="text" name="group_name" x-model="editModal.group_name" readonly class="w-full mt-2 p-2 border rounded bg-gray-100" />
                     </div>
                 </template>
 
                 <div>
-                    <label class="text-sm font-medium text-gray-700">Cuota (MB)</label>
+                    <label class="text-sm font-medium text-gray-700">{{ _("Cuota (MB)") }}</label>
                     <input type="number" name="quota_mb" x-model="editModal.quota_mb" min="0" class="w-full mt-2 p-2 border rounded" required />
                 </div>
 
                 <div class="flex justify-end gap-2">
-                    <button type="button" @click="editModal.isOpen = false" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white">Guardar</button>
+                    <button type="button" @click="editModal.isOpen = false" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">{{ _("Cancelar") }}</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white">{{ _("Guardar") }}</button>
                 </div>
             </form>
         </div>
@@ -58,13 +58,13 @@
     <div x-show="activeTab === 'overview'" class="mt-6">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
             <div>
-                <h3 class="text-lg font-semibold">Resumen de Cuotas</h3>
-                <p class="text-sm text-gray-600">Visualiza el estado general de las cuotas de ancho de banda y límites de datos para los usuarios y grupos.</p>
+                <h3 class="text-lg font-semibold">{{ _("Resumen de Cuotas") }}</h3>
+                <p class="text-sm text-gray-600">{{ _("Visualiza el estado general de las cuotas de ancho de banda y límites de datos para los usuarios y grupos.") }}</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <form method="POST" action="{{ url_for('admin.toggle_quota') }}" class="shrink-0">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                    <button type="submit" title="Activa o desactiva el control de cuotas para usuarios y grupos" class="px-4 py-2 font-semibold rounded-lg shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 {{ 'bg-red-500 hover:bg-red-600 text-white' if quota_enabled else 'bg-green-500 hover:bg-green-600 text-white' }}">
+                    <button type="submit" title="{{ _("Activa o desactiva el control de cuotas para usuarios y grupos") }}" class="px-4 py-2 font-semibold rounded-lg shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 {{ 'bg-red-500 hover:bg-red-600 text-white' if quota_enabled else 'bg-green-500 hover:bg-green-600 text-white' }}">
                         {{ 'Desactivar cuotas' if quota_enabled else 'Activar cuotas' }}
                     </button>
                 </form>
@@ -76,15 +76,15 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="p-4 bg-gray-50 rounded border">
-                <p class="text-sm text-gray-500">Pools configurados</p>
+                <p class="text-sm text-gray-500">{{ _("Pools configurados") }}</p>
                 <p class="text-2xl font-bold text-blue-700">{{ delay_pools|length }}</p>
             </div>
             <div class="p-4 bg-gray-50 rounded border">
-                <p class="text-sm text-gray-500">Usuarios con cuota</p>
+                <p class="text-sm text-gray-500">{{ _("Usuarios con cuota") }}</p>
                 <p class="text-2xl font-bold text-blue-700">{{ users_with_quota or 0 }}</p>
             </div>
             <div class="p-4 bg-gray-50 rounded border">
-                <p class="text-sm text-gray-500">Incidentes de exceso</p>
+                <p class="text-sm text-gray-500">{{ _("Incidentes de exceso") }}</p>
                 <p class="text-2xl font-bold text-blue-700">{{ quota_exceeded_count or 0 }}</p>
             </div>
         </div>
@@ -92,21 +92,21 @@
         <div class="mt-8 bg-white p-4 rounded-lg border shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
                 <div>
-                    <h4 class="text-lg font-semibold">Usuarios con cuota</h4>
-                    <p class="text-sm text-gray-500">Ver y filtrar en tiempo real por nombre de usuario.</p>
+                    <h4 class="text-lg font-semibold">{{ _("Usuarios con cuota") }}</h4>
+                    <p class="text-sm text-gray-500">{{ _("Ver y filtrar en tiempo real por nombre de usuario.") }}</p>
                 </div>
-                <input type="text" x-model="overview_user_filter" placeholder="Buscar usuario..." class="w-full sm:w-64 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" />
+                <input type="text" x-model="overview_user_filter" placeholder="{{ _("Buscar usuario...") }}" class="w-full sm:w-64 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" />
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm border-collapse">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="p-2 border">Usuario</th>
-                            <th class="p-2 border">Grupo</th>
-                            <th class="p-2 border">Cuota (MB)</th>
-                            <th class="p-2 border">Usado (MB)</th>
-                            <th class="p-2 border">Estado</th>
+                            <th class="p-2 border">{{ _("Usuario") }}</th>
+                            <th class="p-2 border">{{ _("Grupo") }}</th>
+                            <th class="p-2 border">{{ _("Cuota (MB)") }}</th>
+                            <th class="p-2 border">{{ _("Usado (MB)") }}</th>
+                            <th class="p-2 border">{{ _("Estado") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,12 +117,12 @@
                                     <td class="p-2 border">{{ q.group_name or '-' }}</td>
                                     <td class="p-2 border">{{ q.quota_mb }}</td>
                                     <td class="p-2 border">{{ q.used_mb }}</td>
-                                    <td class="p-2 border">{% if q.quota_mb > 0 and q.used_mb > q.quota_mb %}<span class="text-red-600 font-semibold">Excedido</span>{% else %}<span class="text-green-600">Normal</span>{% endif %}</td>
+                                    <td class="p-2 border">{% if q.quota_mb > 0 and q.used_mb > q.quota_mb %}<span class="text-red-600 font-semibold">{{ _("Excedido") }}</span>{% else %}<span class="text-green-600">{{ _("Normal") }}</span>{% endif %}</td>
                                 </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td class="p-2 border" colspan="5">No hay usuarios con cuota configurada</td>
+                                <td class="p-2 border" colspan="5">{{ _("No hay usuarios con cuota configurada") }}</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -133,19 +133,19 @@
         <div class="mt-6 bg-white p-4 rounded-lg border shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
                 <div>
-                    <h4 class="text-lg font-semibold">Usuarios bloqueados</h4>
-                    <p class="text-sm text-gray-500">Datos extraídos del archivo de bloqueos de quota.</p>
+                    <h4 class="text-lg font-semibold">{{ _("Usuarios bloqueados") }}</h4>
+                    <p class="text-sm text-gray-500">{{ _("Datos extraídos del archivo de bloqueos de quota.") }}</p>
                 </div>
-                <input type="text" x-model="overview_blocked_filter" placeholder="Buscar bloqueado..." class="w-full sm:w-64 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" />
+                <input type="text" x-model="overview_blocked_filter" placeholder="{{ _("Buscar bloqueado...") }}" class="w-full sm:w-64 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" />
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm border-collapse">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="p-2 border">Usuario</th>
-                            <th class="p-2 border">Detalle</th>
-                            <th class="p-2 border">Registro</th>
+                            <th class="p-2 border">{{ _("Usuario") }}</th>
+                            <th class="p-2 border">{{ _("Detalle") }}</th>
+                            <th class="p-2 border">{{ _("Registro") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -159,7 +159,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td class="p-2 border" colspan="3">No se encontraron bloqueos (archivo vacío o no existe).</td>
+                                <td class="p-2 border" colspan="3">{{ _("No se encontraron bloqueos (archivo vacío o no existe).") }}</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -169,16 +169,16 @@
     </div>
 
     <div x-show="activeTab === 'user'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Cuotas por Usuario</h3>
-        <p class="text-sm text-gray-600 mb-4">Configura y revisa cuotas específicas por usuario de Squid.</p>
+        <h3 class="text-lg font-semibold mb-3">{{ _("Cuotas por Usuario") }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Configura y revisa cuotas específicas por usuario de Squid.") }}</p>
 
         <div class="mb-4 flex items-start gap-3 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 shadow-sm">
             <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white shadow">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z"/></svg>
             </div>
             <div class="text-sm text-blue-900">
-                <p class="font-semibold">Cuota global con el usuario <code class="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-blue-700">default</code></p>
-                <p class="mt-0.5 text-blue-800">Si creas un usuario llamado <strong>default</strong> y le asignas una cuota, ese límite se aplicará automáticamente a <strong>todos los usuarios que no tengan una cuota individual</strong>. Cuando un usuario sí tiene cuota propia, ésta siempre tiene prioridad sobre la global.</p>
+                <p class="font-semibold">{{ _("Cuota global con el usuario") }} <code class="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-blue-700">default</code></p>
+                <p class="mt-0.5 text-blue-800">{{ _("Si creas un usuario llamado") }} <strong>default</strong> {{ _("y le asignas una cuota, ese límite se aplicará automáticamente a") }} <strong>{{ _("todos los usuarios que no tengan una cuota individual") }}</strong>. Cuando un usuario sí tiene cuota propia, ésta siempre tiene prioridad sobre la global.</p>
             </div>
         </div>
 
@@ -186,41 +186,41 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
                 <label class="text-sm font-medium text-gray-700 flex items-center gap-1">
-                    Usuario
+                    {{ _("Usuario") }}
                     <span class="relative inline-flex items-center" x-data="{ tip: false }">
-                        <button type="button" @mouseenter="tip = true" @mouseleave="tip = false" @focus="tip = true" @blur="tip = false" class="w-4 h-4 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center leading-none focus:outline-none" aria-label="Información sobre el usuario default">i</button>
+                        <button type="button" @mouseenter="tip = true" @mouseleave="tip = false" @focus="tip = true" @blur="tip = false" class="w-4 h-4 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center leading-none focus:outline-none" aria-label="{{ _("Información sobre el usuario default") }}">i</button>
                         <div x-show="tip" x-transition class="absolute left-6 top-1/2 -translate-y-1/2 z-50 w-72 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg pointer-events-none" style="display:none;">
-                            <p class="font-semibold mb-1">💡 Usuario <code class="bg-gray-700 px-1 rounded">default</code></p>
-                            <p>Si creas un usuario con el nombre <strong>default</strong> y le asignas una cuota, esa cuota actuará como <strong>límite global</strong> para todos los usuarios que no tengan una cuota individual configurada. La cuota individual siempre tiene prioridad sobre la global.</p>
+                            <p class="font-semibold mb-1">{{ _("💡 Usuario") }} <code class="bg-gray-700 px-1 rounded">default</code></p>
+                            <p>{{ _("Si creas un usuario con el nombre") }} <strong>default</strong> {{ _("y le asignas una cuota, esa cuota actuará como") }} <strong>{{ _("límite global") }}</strong> {{ _("para todos los usuarios que no tengan una cuota individual configurada. La cuota individual siempre tiene prioridad sobre la global.") }}</p>
                         </div>
                     </span>
                 </label>
-                <input x-model="userForm.username" name="username" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de usuario" />
+                <input x-model="userForm.username" name="username" type="text" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("Nombre de usuario") }}" />
             </div>
             <div>
-                <label class="text-sm font-medium text-gray-700">Grupo (opcional)</label>
-                <input x-model="userForm.group_name" name="group_name" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre de grupo" />
+                <label class="text-sm font-medium text-gray-700">{{ _("Grupo (opcional)") }}</label>
+                <input x-model="userForm.group_name" name="group_name" type="text" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("Nombre de grupo") }}" />
             </div>
             <div>
-                <label class="text-sm font-medium text-gray-700">Cuota (MB)</label>
-                <input x-model="userForm.quota_mb" name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="Ej. 2048" />
+                <label class="text-sm font-medium text-gray-700">{{ _("Cuota (MB)") }}</label>
+                <input x-model="userForm.quota_mb" name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("Ej. 2048") }}" />
             </div>
             <div class="md:col-span-2 flex gap-2">
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Cuota</button>
-                <button type="button" @click="userForm.username=''; userForm.group_name=''; userForm.quota_mb='';" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">{{ _("Guardar Cuota") }}</button>
+                <button type="button" @click="userForm.username=''; userForm.group_name=''; userForm.quota_mb='';" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">{{ _("Cancelar") }}</button>
             </div>
         </form>
 
         <div class="mt-5">
-            <h4 class="font-semibold">Usuarios con cuota</h4>
+            <h4 class="font-semibold">{{ _("Usuarios con cuota") }}</h4>
             <table class="w-full text-left text-sm border-collapse">
                 <thead>
                     <tr class="bg-gray-100">
-                        <th class="p-2 border">Usuario</th>
-                        <th class="p-2 border">Cuota (MB)</th>
-                        <th class="p-2 border">Uso (MB)</th>
-                        <th class="p-2 border">Estado</th>
-                        <th class="p-2 border">Acciones</th>
+                        <th class="p-2 border">{{ _("Usuario") }}</th>
+                        <th class="p-2 border">{{ _("Cuota (MB)") }}</th>
+                        <th class="p-2 border">{{ _("Uso (MB)") }}</th>
+                        <th class="p-2 border">{{ _("Estado") }}</th>
+                        <th class="p-2 border">{{ _("Acciones") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -230,20 +230,20 @@
                             <td class="p-2 border">{{ q.username }}</td>
                             <td class="p-2 border">{{ q.quota_mb }}</td>
                             <td class="p-2 border">{{ q.used_mb }}</td>
-                            <td class="p-2 border">{% if q.used_mb > q.quota_mb %}Excedido{% else %}-{% endif %}</td>
+                            <td class="p-2 border">{% if q.used_mb > q.quota_mb %}{{ _("Excedido") }}{% else %}-{% endif %}</td>
                             <td class="p-2 border flex gap-2">
-                                <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='user'; editModal.username='{{ q.username }}'; editModal.group_name='{{ q.group_name or '' }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='user';">Editar</button>
+                                <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='user'; editModal.username='{{ q.username }}'; editModal.group_name='{{ q.group_name or '' }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='user';">{{ _("Editar") }}</button>
                                 <form method="POST" action="/admin/quota/user/delete" onsubmit="return confirm('¿Eliminar la cuota del usuario {{ q.username }}?');">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden" name="username" value="{{ q.username }}" />
-                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">Eliminar</button>
+                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">{{ _("Eliminar") }}</button>
                                 </form>
                             </td>
                         </tr>
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td class="p-2 border" colspan="5">No hay usuarios con cuota configurada</td>
+                            <td class="p-2 border" colspan="5">{{ _("No hay usuarios con cuota configurada") }}</td>
                         </tr>
                     {% endif %}
                 </tbody>
@@ -252,33 +252,33 @@
     </div>
 
     <div x-show="activeTab === 'group'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Cuotas por Grupo</h3>
-        <p class="text-sm text-gray-600 mb-4">Define límites grupales para los usuarios conectados al proxy.</p>
+        <h3 class="text-lg font-semibold mb-3">{{ _("Cuotas por Grupo") }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Define límites grupales para los usuarios conectados al proxy.") }}</p>
 
         <form id="group_quota_form" method="POST" action="/admin/quota/group/save" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
-                <label class="text-sm font-medium text-gray-700">Grupo</label>
-                <input x-model="groupForm.group_name" name="group_name" type="text" class="w-full mt-2 p-2 border rounded" placeholder="Nombre del grupo" />
+                <label class="text-sm font-medium text-gray-700">{{ _("Grupo") }}</label>
+                <input x-model="groupForm.group_name" name="group_name" type="text" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("Nombre del grupo") }}" />
             </div>
             <div>
-                <label class="text-sm font-medium text-gray-700">Cuota (MB)</label>
-                <input x-model="groupForm.quota_mb" name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="Ej. 10240" />
+                <label class="text-sm font-medium text-gray-700">{{ _("Cuota (MB)") }}</label>
+                <input x-model="groupForm.quota_mb" name="quota_mb" type="number" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("Ej. 10240") }}" />
             </div>
             <div class="md:col-span-2 flex gap-2">
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Grupo</button>
-                <button type="button" @click="groupForm.group_name=''; groupForm.quota_mb='';" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">{{ _("Guardar Grupo") }}</button>
+                <button type="button" @click="groupForm.group_name=''; groupForm.quota_mb='';" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">{{ _("Cancelar") }}</button>
             </div>
         </form>
 
         <div class="mt-5">
-            <h4 class="font-semibold">Grupos con cuota</h4>
+            <h4 class="font-semibold">{{ _("Grupos con cuota") }}</h4>
             <table class="w-full text-left text-sm border-collapse">
                 <thead>
                     <tr class="bg-gray-100">
-                        <th class="p-2 border">Grupo</th>
-                        <th class="p-2 border">Cuota (MB)</th>
-                        <th class="p-2 border">Acción</th>
+                        <th class="p-2 border">{{ _("Grupo") }}</th>
+                        <th class="p-2 border">{{ _("Cuota (MB)") }}</th>
+                        <th class="p-2 border">{{ _("Acción") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -288,18 +288,18 @@
                                 <td class="p-2 border">{{ q.group_name }}</td>
                                 <td class="p-2 border">{{ q.quota_mb }}</td>
                                 <td class="p-2 border flex gap-2">
-                                    <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='group'; editModal.group_name='{{ q.group_name }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='group';">Editar</button>
+                                    <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='group'; editModal.group_name='{{ q.group_name }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='group';">{{ _("Editar") }}</button>
                                     <form method="POST" action="/admin/quota/group/delete" onsubmit="return confirm('¿Eliminar la cuota del grupo {{ q.group_name }}?');">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                         <input type="hidden" name="group_name" value="{{ q.group_name }}" />
-                                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">Eliminar</button>
+                                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">{{ _("Eliminar") }}</button>
                                     </form>
                                 </td>
                             </tr>
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td class="p-2 border" colspan="3">No hay grupos con cuota configurada</td>
+                            <td class="p-2 border" colspan="3">{{ _("No hay grupos con cuota configurada") }}</td>
                         </tr>
                     {% endif %}
                 </tbody>
@@ -308,46 +308,46 @@
     </div>
 
     <div x-show="activeTab === 'rules'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Reglas de Control</h3>
-        <p class="text-sm text-gray-600 mb-4">Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el acceso o degradar la velocidad).</p>
+        <h3 class="text-lg font-semibold mb-3">{{ _("Reglas de Control") }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el acceso o degradar la velocidad).") }}</p>
 
-        <p class="mb-3">Regla activa: <strong>{{ active_quota_rule.policy if active_quota_rule else 'Ninguna' }}</strong></p>
+        <p class="mb-3">{{ _("Regla activa:") }} <strong>{{ active_quota_rule.policy if active_quota_rule else 'Ninguna' }}</strong></p>
 
         <form method="POST" action="/admin/quota/rules/save" class="bg-gray-50 p-4 rounded border space-y-3">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div>
                 <label class="text-sm font-medium text-gray-700 flex items-center gap-1">
-                    Política de excedente
+                    {{ _("Política de excedente") }}
                     <span class="relative inline-flex items-center" x-data="{ tip: false }">
-                        <button type="button" @mouseenter="tip = true" @mouseleave="tip = false" @focus="tip = true" @blur="tip = false" class="w-4 h-4 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center leading-none focus:outline-none" aria-label="Información sobre la política por defecto">i</button>
+                        <button type="button" @mouseenter="tip = true" @mouseleave="tip = false" @focus="tip = true" @blur="tip = false" class="w-4 h-4 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center leading-none focus:outline-none" aria-label="{{ _("Información sobre la política por defecto") }}">i</button>
                         <div x-show="tip" x-transition class="absolute left-6 top-1/2 -translate-y-1/2 z-50 w-72 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg pointer-events-none" style="display:none;">
-                            <p class="font-semibold mb-1">🔒 Política por defecto: <code class="bg-gray-700 px-1 rounded">Bloquear</code></p>
-                            <p>Aunque no haya ninguna regla guardada, el sistema aplica automáticamente la política de <strong>bloqueo</strong> cuando un usuario supera su cuota. Guarda explícitamente "Bloquear" si quieres que quede registrado.</p>
+                            <p class="font-semibold mb-1">{{ _("🔒 Política por defecto:") }} <code class="bg-gray-700 px-1 rounded">{{ _("Bloquear") }}</code></p>
+                            <p>{{ _("Aunque no haya ninguna regla guardada, el sistema aplica automáticamente la política de") }} <strong>bloqueo</strong> {{ _("cuando un usuario supera su cuota. Guarda explícitamente \"Bloquear\" si quieres que quede registrado.") }}</p>
                         </div>
                     </span>
                 </label>
                 <select name="policy" class="w-full mt-2 p-2 border rounded">
-                    <option value="block" {% if active_quota_rule and active_quota_rule.policy == 'block' %}selected{% endif %}>Bloquear</option>
-                    <option value="throttle" {% if active_quota_rule and active_quota_rule.policy == 'throttle' %}selected{% endif %} disabled class="text-gray-400">Degradar velocidad (próximamente)</option>
-                    <option value="notify" {% if active_quota_rule and active_quota_rule.policy == 'notify' %}selected{% endif %} disabled class="text-gray-400">Solo notificar (próximamente)</option>
+                    <option value="block" {% if active_quota_rule and active_quota_rule.policy == 'block' %}selected{% endif %}>{{ _("Bloquear") }}</option>
+                    <option value="throttle" {% if active_quota_rule and active_quota_rule.policy == 'throttle' %}selected{% endif %} disabled class="text-gray-400">{{ _("Degradar velocidad (próximamente)") }}</option>
+                    <option value="notify" {% if active_quota_rule and active_quota_rule.policy == 'notify' %}selected{% endif %} disabled class="text-gray-400">{{ _("Solo notificar (próximamente)") }}</option>
                 </select>
             </div>
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Guardar Regla</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">{{ _("Guardar Regla") }}</button>
         </form>
     </div>
 
     <div x-show="activeTab === 'history'" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Histórico de Eventos de Cuotas</h3>
-        <p class="text-sm text-gray-600 mb-4">Revisa las acciones registradas cuando usuarios superaron sus límites.</p>
+        <h3 class="text-lg font-semibold mb-3">{{ _("Histórico de Eventos de Cuotas") }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Revisa las acciones registradas cuando usuarios superaron sus límites.") }}</p>
 
         <div class="overflow-x-auto bg-white rounded border">
             <table class="w-full text-left text-sm border-collapse">
                 <thead>
                     <tr class="bg-gray-100">
-                        <th class="p-2 border">Fecha</th>
-                        <th class="p-2 border">Usuario/Grupo</th>
-                        <th class="p-2 border">Evento</th>
-                        <th class="p-2 border">Detalle</th>
+                        <th class="p-2 border">{{ _("Fecha") }}</th>
+                        <th class="p-2 border">{{ _("Usuario/Grupo") }}</th>
+                        <th class="p-2 border">{{ _("Evento") }}</th>
+                        <th class="p-2 border">{{ _("Detalle") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -362,7 +362,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td class="p-2 border" colspan="4">No hay registros disponibles</td>
+                            <td class="p-2 border" colspan="4">{{ _("No hay registros disponibles") }}</td>
                         </tr>
                     {% endif %}
                 </tbody>

@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 
-{% block title %}Base de Datos - Administrador Squid Proxy{% endblock %}
+{% block title %}{{ _("Base de Datos - Administrador Squid Proxy") }}{% endblock %}
 
 {% block content %}
 <div x-data="{ activeTab: 'resumen' }">
@@ -8,8 +8,8 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">Base de Datos</h2>
-            <p class="text-sm text-gray-500 mt-1">Monitor de salud, copias de seguridad y gestión de datos</p>
+            <h2 class="text-2xl font-bold text-gray-800">{{ _("Base de Datos") }}</h2>
+            <p class="text-sm text-gray-500 mt-1">{{ _("Monitor de salud, copias de seguridad y gestión de datos") }}</p>
         </div>
     </div>
 
@@ -22,7 +22,7 @@
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
                 class="flex items-center gap-2 px-6 py-4 text-sm font-semibold border-b-2 -mb-px transition-colors duration-150 focus:outline-none whitespace-nowrap">
                 <i class="fas fa-heartbeat text-base"></i>
-                Resumen DB
+                {{ _("Resumen DB") }}
             </button>
             <button @click="activeTab = 'salvas'"
                 :class="activeTab === 'salvas'
@@ -30,7 +30,7 @@
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
                 class="flex items-center gap-2 px-6 py-4 text-sm font-semibold border-b-2 -mb-px transition-colors duration-150 focus:outline-none whitespace-nowrap">
                 <i class="fas fa-save text-base"></i>
-                Salvas de BD
+                {{ _("Salvas de BD") }}
             </button>
             <button @click="activeTab = 'limpiar'"
                 :class="activeTab === 'limpiar'
@@ -38,7 +38,7 @@
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
                 class="flex items-center gap-2 px-6 py-4 text-sm font-semibold border-b-2 -mb-px transition-colors duration-150 focus:outline-none whitespace-nowrap">
                 <i class="fas fa-trash-alt text-base"></i>
-                Limpiar Datos
+                {{ _("Limpiar Datos") }}
             </button>
         </nav>
     </div>
@@ -52,7 +52,7 @@
         <div x-show="loading" class="flex items-center justify-center py-24">
             <div class="text-center">
                 <i class="fas fa-spinner fa-spin text-blue-500 text-4xl mb-4"></i>
-                <p class="text-sm text-gray-500 font-medium">Cargando información de la base de datos...</p>
+                <p class="text-sm text-gray-500 font-medium">{{ _("Cargando información de la base de datos...") }}</p>
             </div>
         </div>
 
@@ -61,12 +61,12 @@
              class="bg-red-50 border border-red-200 rounded-xl p-5 flex items-center gap-4">
             <i class="fas fa-exclamation-circle text-red-500 text-2xl flex-shrink-0"></i>
             <div class="flex-1">
-                <p class="font-semibold text-red-800">Error al cargar los datos</p>
+                <p class="font-semibold text-red-800">{{ _("Error al cargar los datos") }}</p>
                 <p class="text-sm text-red-600 mt-0.5" x-text="error"></p>
             </div>
             <button @click="loadHealth()"
                     class="text-sm text-red-700 hover:text-red-900 font-semibold border border-red-300 hover:border-red-400 rounded-lg px-3 py-1.5 transition-colors">
-                <i class="fas fa-redo mr-1"></i>Reintentar
+                <i class="fas fa-redo mr-1"></i>{{ _("Reintentar") }}
             </button>
         </div>
 
@@ -97,7 +97,7 @@
                             'text-red-800': healthStatus === 'critical'
                         }"
                        class="font-bold text-lg"
-                       x-text="'Salud de la BD: ' + healthLabel"></p>
+                       x-text="'{{ _('Salud de la BD:') }} ' + healthLabel"></p>
                     <p :class="{
                             'text-emerald-700': healthStatus === 'good',
                             'text-amber-700': healthStatus === 'warning',
@@ -107,24 +107,24 @@
                         <!-- Corruption takes priority over fragmentation message -->
                         <template x-if="health.extra.corruption">
                             <span>
-                                La base de datos tiene páginas dañadas.
+                                {{ _("La base de datos tiene páginas dañadas.") }}
                                 <span x-show="health.extra.corruption_detail"
                                       class="font-mono bg-red-100 px-1.5 py-0.5 rounded text-xs ml-1"
                                       x-text="health.extra.corruption_detail"></span>
-                                Haz un respaldo y ejecuta <strong>VACUUM</strong> o restaura desde una copia sana.
+                                {{ _("Haz un respaldo y ejecuta") }} <strong>{{ _("VACUUM") }}</strong> {{ _("o restaura desde una copia sana.") }}
                             </span>
                         </template>
                         <template x-if="!health.extra.corruption && health.db_type === 'SQLITE'">
                             <span>
-                                Fragmentación:
+                                {{ _("Fragmentación:") }}
                                 <strong x-text="health.extra.fragmentation_pct + '%'"></strong>
-                                <span x-show="healthStatus === 'good'"> — dentro del rango normal</span>
-                                <span x-show="healthStatus === 'warning'"> — considera ejecutar VACUUM</span>
-                                <span x-show="healthStatus === 'critical'"> — ejecuta VACUUM urgentemente</span>
+                                <span x-show="healthStatus === 'good'"> {{ _("— dentro del rango normal") }}</span>
+                                <span x-show="healthStatus === 'warning'"> {{ _("— considera ejecutar VACUUM") }}</span>
+                                <span x-show="healthStatus === 'critical'"> {{ _("— ejecuta VACUUM urgentemente") }}</span>
                             </span>
                         </template>
                         <span x-show="!health.extra.corruption && health.db_type !== 'SQLITE'">
-                            Motor <strong x-text="health.db_type"></strong> operando con normalidad
+                            {{ _("Motor") }} <strong x-text="health.db_type"></strong> {{ _("operando con normalidad") }}
                         </span>
                     </p>
                 </div>
@@ -135,7 +135,7 @@
                             'text-amber-800': healthStatus === 'warning',
                             'text-red-800': healthStatus === 'critical'
                         }">
-                    <i class="fas fa-sync-alt mr-1"></i>Actualizar
+                    <i class="fas fa-sync-alt mr-1"></i>{{ _("Actualizar") }}
                 </button>
             </div>
         </template>
@@ -149,7 +149,7 @@
                         <i class="fas fa-database text-indigo-600 text-xl"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Motor</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Motor") }}</p>
                         <p class="text-xl font-bold text-gray-800 truncate" x-text="health.db_type"></p>
                     </div>
                 </div>
@@ -159,7 +159,7 @@
                         <i class="fas fa-hdd text-blue-600 text-xl"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Tamaño Total</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Tamaño Total") }}</p>
                         <p class="text-xl font-bold text-gray-800" x-text="formatBytes(health.total_size_bytes)"></p>
                     </div>
                 </div>
@@ -169,7 +169,7 @@
                         <i class="fas fa-table text-purple-600 text-xl"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Tablas</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Tablas") }}</p>
                         <p class="text-xl font-bold text-gray-800" x-text="health.table_count.toLocaleString()"></p>
                     </div>
                 </div>
@@ -179,7 +179,7 @@
                         <i class="fas fa-list-ol text-emerald-600 text-xl"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Registros Totales</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Registros Totales") }}</p>
                         <p class="text-xl font-bold text-gray-800" x-text="health.total_rows.toLocaleString()"></p>
                     </div>
                 </div>
@@ -192,37 +192,37 @@
                 <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800 flex items-center gap-2">
                         <i class="fas fa-info-circle text-blue-500"></i>
-                        Detalles SQLite
+                        {{ _("Detalles SQLite") }}
                     </h3>
                 </div>
                 <div class="p-6 grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-5">
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Tamaño de Página</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">{{ _("Tamaño de Página") }}</p>
                         <p class="text-lg font-semibold text-gray-800"
                            x-text="(health.extra.page_size / 1024).toFixed(1) + ' KB'"></p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Páginas Totales</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">{{ _("Páginas Totales") }}</p>
                         <p class="text-lg font-semibold text-gray-800"
                            x-text="health.extra.page_count.toLocaleString()"></p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Páginas Libres</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">{{ _("Páginas Libres") }}</p>
                         <p class="text-lg font-semibold text-gray-800"
                            x-text="health.extra.freelist_count.toLocaleString()"></p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Modo Journal</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">{{ _("Modo Journal") }}</p>
                         <p class="text-lg font-semibold text-gray-800 uppercase"
                            x-text="health.extra.journal_mode"></p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Auto-Vacuum</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">{{ _("Auto-Vacuum") }}</p>
                         <p class="text-lg font-semibold text-gray-800"
                            x-text="health.extra.auto_vacuum"></p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Fragmentación</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">{{ _("Fragmentación") }}</p>
                         <div class="flex items-center gap-2">
                             <p class="text-lg font-semibold text-gray-800"
                                x-text="health.extra.fragmentation_pct + '%'"></p>
@@ -237,7 +237,7 @@
                     </div>
                     <template x-if="health.extra.corruption && health.extra.corruption_detail">
                         <div class="col-span-3">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Detalle de Corrupción</p>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">{{ _("Detalle de Corrupción") }}</p>
                             <p class="text-sm font-mono bg-red-50 border border-red-200 rounded px-3 py-2 text-red-700 break-all"
                                x-text="health.extra.corruption_detail"></p>
                         </div>
@@ -253,7 +253,7 @@
                     <i class="fas fa-code-branch text-gray-500 text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-0.5">Versión del Motor</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-0.5">{{ _("Versión del Motor") }}</p>
                     <p class="text-base font-semibold text-gray-800" x-text="health.extra.version"></p>
                 </div>
             </div>
@@ -264,20 +264,20 @@
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                 <h3 class="text-base font-semibold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-shield-alt text-blue-500"></i>
-                    Verificación de Integridad
+                    {{ _("Verificación de Integridad") }}
                 </h3>
             </div>
             <div class="p-6 space-y-4">
                 <p class="text-sm text-gray-600">
-                    Verifica la integridad estructural de la base de datos en busca de posibles errores o corrupción.
+                    {{ _("Verifica la integridad estructural de la base de datos en busca de posibles errores o corrupción.") }}
                     <span class="text-amber-600 font-medium">
-                        Esta operación puede tardar varios minutos en bases de datos grandes.
+                        {{ _("Esta operación puede tardar varios minutos en bases de datos grandes.") }}
                     </span>
                 </p>
                 <button @click="checkIntegrity()" :disabled="integrityLoading"
                         class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none">
                     <i :class="integrityLoading ? 'fas fa-spinner fa-spin' : 'fas fa-search'"></i>
-                    <span x-text="integrityLoading ? 'Verificando...' : 'Verificar Integridad'"></span>
+                    <span x-text="integrityLoading ? translations.verifying : translations.verifyIntegrity"></span>
                 </button>
 
                 <template x-if="integrityResult">
@@ -291,12 +291,10 @@
                            class="text-xl flex-shrink-0 mt-0.5"></i>
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold"
-                               x-text="integrityResult.ok ? 'Sin errores detectados — la base de datos está íntegra.' : 'Se encontraron errores de integridad.'"></p>
-                            <p class="text-sm mt-0.5"
-                               x-show="integrityResult.error_count > 0"
-                               x-text="integrityResult.error_count + ' error(es) detectado(s)'"></p>
-                            <ul x-show="integrityResult.errors && integrityResult.errors.length > 0"
-                                class="mt-2 space-y-1">
+                               x-text="integrityResult.ok ? translations.integrityOk : translations.integrityError"></p>
+                            <p class="text-sm mt-0.5" x-show="integrityResult.error_count > 0"
+                               x-text="integrityResult.error_count + ' ' + translations.integrityErrorsCount"></p>
+                            <ul x-show="integrityResult.errors && integrityResult.errors.length > 0" class="mt-2 space-y-1">
                                 <template x-for="err in integrityResult.errors" :key="err">
                                     <li class="text-sm font-mono bg-white/60 border border-current/10 rounded px-3 py-1"
                                         x-text="err"></li>
@@ -319,13 +317,13 @@
         <!-- Page sub-header -->
         <div class="flex items-center justify-between">
             <div>
-                <h3 class="text-xl font-bold text-gray-800">Salvas de Base de Datos</h3>
-                <p class="text-sm text-gray-500 mt-1">Configura y gestiona las copias de seguridad automáticas</p>
+                <h3 class="text-xl font-bold text-gray-800">{{ _("Salvas de Base de Datos") }}</h3>
+                <p class="text-sm text-gray-500 mt-1">{{ _("Configura y gestiona las copias de seguridad automáticas") }}</p>
             </div>
             <button @click="triggerManualBackup()" :disabled="loadingManual"
                 class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-5 py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none">
                 <i :class="loadingManual ? 'fas fa-spinner fa-spin' : 'fas fa-save'"></i>
-                <span x-text="loadingManual ? 'Guardando...' : 'Salva Manual'"></span>
+                <span x-text="loadingManual ? translations.guardando : translations.salvaManual"></span>
             </button>
         </div>
 
@@ -345,7 +343,7 @@
                     <i class="fas fa-database text-blue-600 text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Total Salvas</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Total Salvas") }}</p>
                     <p class="text-2xl font-bold text-gray-800" x-text="backups.length">--</p>
                 </div>
             </div>
@@ -354,8 +352,8 @@
                     <i class="fas fa-clock text-emerald-600 text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Última Salva</p>
-                    <p class="text-sm font-semibold text-gray-800" x-text="lastBackupDate">Sin salvas</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Última Salva") }}</p>
+                    <p class="text-sm font-semibold text-gray-800" x-text="lastBackupDate"></p>
                 </div>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
@@ -363,8 +361,8 @@
                     <i class="fas fa-hdd text-purple-600 text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Espacio Total</p>
-                    <p class="text-sm font-semibold text-gray-800" x-text="totalSize">0 B</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Espacio Total") }}</p>
+                    <p class="text-sm font-semibold text-gray-800" x-text="totalSize"></p>
                 </div>
             </div>
         </div>
@@ -376,7 +374,7 @@
                 <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                     <h3 class="text-base font-semibold text-gray-800 flex items-center gap-2">
                         <i class="fas fa-sliders-h text-blue-500"></i>
-                        Configuración de Salvas
+                        {{ _("Configuración de Salvas") }}
                     </h3>
                 </div>
                 <form @submit.prevent="saveConfig()" class="p-6 space-y-5">
@@ -385,14 +383,14 @@
                     <!-- DB Engine -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-server text-gray-400 mr-1"></i> Motor de Base de Datos
+                            <i class="fas fa-server text-gray-400 mr-1"></i> {{ _("Motor de Base de Datos") }}
                         </label>
                         <div class="relative">
                             <select x-model="config.db_type" @change="onDbTypeChange()"
                                 class="w-full appearance-none bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
-                                <option value="sqlite">SQLite</option>
-                                <option value="mysql">MySQL / MariaDB</option>
-                                <option value="postgresql">PostgreSQL</option>
+                                <option value="sqlite">{{ _("SQLite") }}</option>
+                                <option value="mysql">{{ _("MySQL / MariaDB") }}</option>
+                                <option value="postgresql">{{ _("PostgreSQL") }}</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
                                 <i class="fas fa-chevron-down text-xs"></i>
@@ -401,13 +399,13 @@
                         <template x-if="config.db_type === 'mysql'">
                             <p class="mt-1.5 text-xs text-amber-600 flex items-center gap-1">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                Requiere <code class="font-mono">mysqldump</code> instalado en el servidor.
+                                {{ _("Requiere") }} <code class="font-mono">mysqldump</code> {{ _("instalado en el servidor.") }}
                             </p>
                         </template>
                         <template x-if="config.db_type === 'postgresql'">
                             <p class="mt-1.5 text-xs text-amber-600 flex items-center gap-1">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                Requiere <code class="font-mono">pg_dump</code> instalado en el servidor.
+                                {{ _("Requiere") }} <code class="font-mono">pg_dump</code> {{ _("instalado en el servidor.") }}
                             </p>
                         </template>
                     </div>
@@ -415,13 +413,13 @@
                     <!-- Frequency -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-calendar-alt text-gray-400 mr-1"></i> Frecuencia
+                            <i class="fas fa-calendar-alt text-gray-400 mr-1"></i> {{ _("Frecuencia") }}
                         </label>
                         <div class="relative">
                             <select x-model="config.frequency"
                                 class="w-full appearance-none bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
-                                <option value="daily_weekly">Diaria — máx. 3 por semana</option>
-                                <option value="daily_monthly">Diaria — máx. 3 por mes</option>
+                                <option value="daily_weekly">{{ _("Diaria — máx. 3 por semana") }}</option>
+                                <option value="daily_monthly">{{ _("Diaria — máx. 3 por mes") }}</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
                                 <i class="fas fa-chevron-down text-xs"></i>
@@ -429,7 +427,7 @@
                         </div>
                         <p class="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
                             <i class="fas fa-info-circle"></i>
-                            <span x-text="config.frequency === 'daily_weekly' ? 'Se ejecuta diariamente, conservando máx. 3 salvas por semana' : 'Se ejecuta diariamente, conservando máx. 3 salvas por mes'"></span>
+                            <span x-text="config.frequency === 'daily_weekly' ? translations.freqDailyWeekly : translations.freqDailyMonthly"></span>
                         </p>
                     </div>
 
@@ -437,10 +435,10 @@
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-archive text-gray-400 mr-1"></i> Retención máxima
+                                <i class="fas fa-archive text-gray-400 mr-1"></i> {{ _("Retención máxima") }}
                             </label>
                             <span class="inline-flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                                <i class="fas fa-lock text-xs"></i> Fijo: 3 salvas
+                                <i class="fas fa-lock text-xs"></i> {{ _("Fijo: 3 salvas") }}
                             </span>
                         </div>
                         <div class="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
@@ -451,26 +449,26 @@
                                     </div>
                                 </template>
                             </div>
-                            <p class="text-xs text-gray-600">Se mantienen las 3 salvas más recientes. Las más antiguas se eliminan automáticamente.</p>
+                            <p class="text-xs text-gray-600">{{ _("Se mantienen las 3 salvas más recientes. Las más antiguas se eliminan automáticamente.") }}</p>
                         </div>
                     </div>
 
                     <!-- Backup Directory -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-folder text-gray-400 mr-1"></i> Directorio de Salvas
+                            <i class="fas fa-folder text-gray-400 mr-1"></i> {{ _("Directorio de Salvas") }}
                         </label>
                         <input type="text" x-model="config.backup_dir"
                             class="w-full bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                             placeholder="/opt/SquidStats/backups" />
-                        <p class="mt-1.5 text-xs text-gray-500">Ruta absoluta donde se guardarán las salvas</p>
+                        <p class="mt-1.5 text-xs text-gray-500">{{ _("Ruta absoluta donde se guardarán las salvas") }}</p>
                     </div>
 
                     <!-- Enabled Toggle -->
                     <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
                         <div>
-                            <p class="text-sm font-medium text-gray-700">Salvas automáticas</p>
-                            <p class="text-xs text-gray-500 mt-0.5">Habilitar programación automática</p>
+                            <p class="text-sm font-medium text-gray-700">{{ _("Salvas automáticas") }}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">{{ _("Habilitar programación automática") }}</p>
                         </div>
                         <button type="button" @click="config.enabled = !config.enabled"
                             :class="config.enabled ? 'bg-blue-600' : 'bg-gray-300'"
@@ -484,7 +482,7 @@
                     <button type="submit" :disabled="loadingSave"
                         class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-lg shadow hover:shadow-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
                         <i :class="loadingSave ? 'fas fa-spinner fa-spin' : 'fas fa-save'"></i>
-                        <span x-text="loadingSave ? 'Guardando...' : 'Guardar Configuración'"></span>
+                        <span x-text="loadingSave ? translations.guardando : translations.guardarConfiguracion"></span>
                     </button>
                 </form>
             </div>
@@ -494,10 +492,10 @@
                 <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                     <h3 class="text-base font-semibold text-gray-800 flex items-center gap-2">
                         <i class="fas fa-history text-blue-500"></i>
-                        Historial de Salvas
+                        {{ _("Historial de Salvas") }}
                     </h3>
                     <button @click="loadBackups()" class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 transition-colors">
-                        <i class="fas fa-sync-alt" :class="loadingList ? 'animate-spin' : ''"></i> Actualizar
+                        <i class="fas fa-sync-alt" :class="loadingList ? 'animate-spin' : ''"></i> {{ _("Actualizar") }}
                     </button>
                 </div>
 
@@ -505,7 +503,7 @@
                 <div x-show="loadingList" class="flex-1 flex items-center justify-center py-16">
                     <div class="text-center">
                         <i class="fas fa-spinner fa-spin text-blue-500 text-3xl mb-3"></i>
-                        <p class="text-sm text-gray-500">Cargando salvas...</p>
+                        <p class="text-sm text-gray-500">{{ _("Cargando salvas...") }}</p>
                     </div>
                 </div>
 
@@ -515,21 +513,21 @@
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-box-open text-gray-400 text-2xl"></i>
                         </div>
-                        <p class="text-sm font-medium text-gray-600">No hay salvas disponibles</p>
-                        <p class="text-xs text-gray-400 mt-1">Realiza una salva manual o activa las automáticas</p>
+                        <p class="text-sm font-medium text-gray-600">{{ _("No hay salvas disponibles") }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ _("Realiza una salva manual o activa las automáticas") }}</p>
                     </div>
                 </div>
 
                 <!-- Table -->
-                <div x-show="!loadingList && backups.length > 0" class="flex-1 overflow-auto">
+                <div x-show="!loadingList && backups.length > {{ _("0\" class=\"flex-1 overflow-auto\">") }}
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 sticky top-0">
                             <tr>
-                                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Archivo</th>
-                                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha</th>
-                                <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tamaño</th>
-                                <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo</th>
-                                <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Acción</th>
+                                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ _("Archivo") }}</th>
+                                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ _("Fecha") }}</th>
+                                <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ _("Tamaño") }}</th>
+                                <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ _("Tipo") }}</th>
+                                <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ _("Acción") }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
@@ -542,7 +540,7 @@
                                             <span class="font-medium text-gray-700 truncate max-w-[140px]" x-text="backup.filename" :title="backup.filename"></span>
                                             <template x-if="idx === 0">
                                                 <span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-semibold px-1.5 py-0.5 rounded">
-                                                    <i class="fas fa-star text-xs"></i> Reciente
+                                                    <i class="fas fa-star text-xs"></i> {{ _("Reciente") }}
                                                 </span>
                                             </template>
                                         </div>
@@ -560,12 +558,12 @@
                                         <div class="flex items-center justify-center gap-1">
                                             <a :href="'/admin/backup/download/' + backup.filename"
                                                 class="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors"
-                                                title="Descargar">
+                                                title="{{ _("Descargar") }}">
                                                 <i class="fas fa-download"></i>
                                             </a>
                                             <button @click="deleteBackup(backup.filename)"
                                                 class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors"
-                                                title="Eliminar">
+                                                title="{{ _("Eliminar") }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -577,10 +575,10 @@
                 </div>
 
                 <!-- Footer -->
-                <div x-show="!loadingList && backups.length > 0" class="px-6 py-3 bg-gray-50 border-t border-gray-100">
+                <div x-show="!loadingList && backups.length > {{ _("0\" class=\"px-6 py-3 bg-gray-50 border-t border-gray-100\">") }}
                     <p class="text-xs text-gray-400 flex items-center gap-1">
                         <i class="fas fa-info-circle"></i>
-                        Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente.
+                        {{ _("Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente.") }}
                     </p>
                 </div>
             </div>
@@ -597,9 +595,9 @@
             <!-- Sub-header -->
             <div class="mb-8">
                 <h3 class="text-2xl font-bold text-gray-800 mb-2">
-                    <i class="fas fa-database mr-3"></i>Limpiar Datos
+                    <i class="fas fa-database mr-3"></i>{{ _("Limpiar Datos") }}
                 </h3>
-                <p class="text-gray-600">Selecciona una tabla y elimina todos sus datos</p>
+                <p class="text-gray-600">{{ _("Selecciona una tabla y elimina todos sus datos") }}</p>
             </div>
 
             <!-- Warning -->
@@ -607,8 +605,8 @@
                 <div class="flex items-center">
                     <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3"></i>
                     <div>
-                        <p class="text-red-800 font-medium">¡Advertencia!</p>
-                        <p class="text-red-700 text-sm">Esta acción es irreversible. Una vez eliminados los datos, no se pueden recuperar.</p>
+                        <p class="text-red-800 font-medium">{{ _("¡Advertencia!") }}</p>
+                        <p class="text-red-700 text-sm">{{ _("Esta acción es irreversible. Una vez eliminados los datos, no se pueden recuperar.") }}</p>
                     </div>
                 </div>
             </div>
@@ -618,31 +616,31 @@
                 <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-700">
                     <h4 class="text-xl font-semibold text-white flex items-center">
                         <i class="fas fa-trash-alt mr-2"></i>
-                        Eliminar Datos de Tabla
+                        {{ _("Eliminar Datos de Tabla") }}
                     </h4>
                 </div>
                 <div class="p-6">
                     <form id="cleanDataForm" class="space-y-6">
                         <div>
                             <label for="tableSelect" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-table mr-1"></i>Seleccionar Tabla
+                                <i class="fas fa-table mr-1"></i>{{ _("Seleccionar Tabla") }}
                             </label>
                             <select id="tableSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Cargando tablas...</option>
+                                <option value="">{{ _("Cargando tablas...") }}</option>
                             </select>
                         </div>
 
                         <div id="tableInfo" class="hidden bg-gray-50 p-4 rounded-lg border">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h5 class="text-sm font-medium text-gray-900">Información de la Tabla</h5>
+                                    <h5 class="text-sm font-medium text-gray-900">{{ _("Información de la Tabla") }}</h5>
                                     <p id="tableDetails" class="text-sm text-gray-600 mt-1"></p>
                                 </div>
                                 <div id="actionButtons" class="hidden">
                                     <button type="button" id="cleanButton"
                                         class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center">
                                         <i class="fas fa-trash-alt mr-2"></i>
-                                        Limpiar Datos
+                                        {{ _("Limpiar Datos") }}
                                     </button>
                                 </div>
                             </div>
@@ -656,12 +654,12 @@
                 <div class="flex items-start">
                     <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
                     <div>
-                        <p class="text-blue-800 font-medium mb-2">Información Importante</p>
+                        <p class="text-blue-800 font-medium mb-2">{{ _("Información Importante") }}</p>
                         <ul class="text-blue-700 text-sm space-y-1 list-disc list-inside">
-                            <li>Solo se eliminan los datos de la tabla, no la estructura</li>
-                            <li>Las tablas con sufijo de fecha (ej: log_20240121) son tablas diarias</li>
-                            <li>Algunas tablas son críticas para el funcionamiento del sistema</li>
-                            <li>Se recomienda hacer un respaldo antes de eliminar datos importantes</li>
+                            <li>{{ _("Solo se eliminan los datos de la tabla, no la estructura") }}</li>
+                            <li>{{ _("Las tablas con sufijo de fecha (ej: log_20240121) son tablas diarias") }}</li>
+                            <li>{{ _("Algunas tablas son críticas para el funcionamiento del sistema") }}</li>
+                            <li>{{ _("Se recomienda hacer un respaldo antes de eliminar datos importantes") }}</li>
                         </ul>
                     </div>
                 </div>
@@ -682,6 +680,13 @@ function dbHealthPanel() {
         error: null,
         integrityLoading: false,
         integrityResult: null,
+        translations: {
+            verifying: '{{ _('Verificando...') }}',
+            verifyIntegrity: '{{ _('Verificar Integridad') }}',
+            integrityOk: '{{ _('Sin errores detectados — la base de datos está íntegra.') }}',
+            integrityError: '{{ _('Se encontraron errores de integridad.') }}',
+            integrityErrorsCount: '{{ _('error(es) detectado(s)') }}'
+        },
 
         init() { this.loadHealth(); },
 
@@ -724,7 +729,7 @@ function dbHealthPanel() {
         },
 
         formatBytes(bytes) {
-            if (!bytes || bytes === 0) return '0 B';
+            if (!bytes || bytes === 0) return '{{ _('0 B') }}';
             const k = 1024;
             const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -739,8 +744,8 @@ function dbHealthPanel() {
             return 'good';
         },
         get healthLabel() {
-            if (this.health?.extra?.corruption) return 'Corrupción detectada';
-            return { good: 'Saludable', warning: 'Advertencia', critical: 'Crítico' }[this.healthStatus];
+            if (this.health?.extra?.corruption) return '{{ _('Corrupción detectada') }}';
+            return { good: '{{ _('Saludable') }}', warning: '{{ _('Advertencia') }}', critical: '{{ _('Crítico') }}' }[this.healthStatus];
         }
     };
 }
@@ -750,6 +755,15 @@ function dbHealthPanel() {
 // ──────────────────────────────────────────────────────────
 function backupManager() {
     return {
+        translations: {
+            sinSalvas: '{{ _('Sin salvas') }}',
+            noBackups: '{{ _('0 B') }}',
+            guardando: '{{ _('Guardando...') }}',
+            salvaManual: '{{ _('Salva Manual') }}',
+            guardarConfiguracion: '{{ _('Guardar Configuración') }}',
+            freqDailyWeekly: '{{ _('Se ejecuta diariamente, conservando máx. 3 salvas por semana') }}',
+            freqDailyMonthly: '{{ _('Se ejecuta diariamente, conservando máx. 3 salvas por mes') }}',
+        },
         config: {
             db_type: '{{ current_config.db_type | default("sqlite") }}',
             frequency: '{{ current_config.frequency | default("daily_weekly") }}',
@@ -764,7 +778,7 @@ function backupManager() {
         statusType: 'success',
 
         get lastBackupDate() {
-            if (!this.backups.length) return 'Sin salvas';
+            if (!this.backups.length) return this.translations.sinSalvas;
             return this.backups[0].created_at;
         },
         get totalSize() {
@@ -772,7 +786,7 @@ function backupManager() {
             return this.formatBytes(total);
         },
         formatBytes(bytes) {
-            if (!bytes) return '0 B';
+            if (!bytes) return this.translations.noBackups;
             const k = 1024;
             const sizes = ['B', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -914,7 +928,7 @@ async function loadTables() {
 
 function populateTableSelect() {
     const select = document.getElementById('tableSelect');
-    select.innerHTML = '<option value="">Selecciona una tabla...</option>';
+    select.innerHTML = '<option value="">{{ _('Selecciona una tabla...') }}</option>';
     tablesData.forEach(table => {
         const option = document.createElement('option');
         option.value = table.name;

@@ -4,11 +4,11 @@
 <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <div class="flex justify-between items-center mb-4 sm:mb-6">
         <div>
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Gestión de Access Control Lists (ACLs)</h2>
-            <p class="text-sm text-gray-600 mt-1">Define condiciones para controlar el acceso al proxy</p>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">{{ _("Gestión de Access Control Lists (ACLs)") }}</h2>
+            <p class="text-sm text-gray-600 mt-1">{{ _("Define condiciones para controlar el acceso al proxy") }}</p>
         </div>
         <button onclick="showAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">
-            <i class="fas fa-plus mr-2"></i>Agregar ACL
+            <i class="fas fa-plus mr-2"></i>{{ _("Agregar ACL") }}
         </button>
     </div>
     
@@ -16,12 +16,12 @@
     <div class="mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-6 flex items-start space-x-4">
         <i class="fas fa-exclamation-triangle text-red-600 text-3xl mt-1 animate-pulse"></i>
         <div class="flex-1">
-            <p class="font-bold text-red-800 text-lg">¡MUY IMPORTANTE!</p>
+            <p class="font-bold text-red-800 text-lg">{{ _("¡MUY IMPORTANTE!") }}</p>
             <p class="text-red-700 mt-2 font-medium">
-                Esta funcionalidad se encuentra en <strong>RC</strong>. Puede contener errores y comportamientos inesperados.
+                {{ _("Esta funcionalidad se encuentra en") }} <strong>{{ _("RC") }}</strong>. Puede contener errores y comportamientos inesperados.
             </p>
             <p class="text-red-700 mt-2">
-                <strong>Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba.</strong>
+                <strong>{{ _("Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba.") }}</strong>
             </p>
         </div>
     </div>
@@ -31,12 +31,12 @@
         <div class="flex items-start">
             <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
             <div class="text-sm text-gray-700">
-                <p class="font-semibold text-gray-800 mb-1">Acerca de las ACLs:</p>
+                <p class="font-semibold text-gray-800 mb-1">{{ _("Acerca de las ACLs:") }}</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li><span class="font-mono text-xs bg-white px-1 rounded">[fast]</span> ACLs rápidas - no requieren lookups externos</li>
-                    <li><span class="font-mono text-xs bg-orange-100 px-1 rounded">[slow]</span> ACLs lentas - pueden requerir DNS o autenticación</li>
-                    <li>Usa las ACLs en reglas de http_access, http_reply_access, etc.</li>
-                    <li>ACLs predefinidas: <code class="bg-white px-1 rounded">all, manager, localhost, to_localhost, to_linklocal, CONNECT</code></li>
+                    <li><span class="font-mono text-xs bg-white px-1 rounded">{{ _("[fast]") }}</span> {{ _("ACLs rápidas - no requieren lookups externos") }}</li>
+                    <li><span class="font-mono text-xs bg-orange-100 px-1 rounded">{{ _("[slow]") }}</span> {{ _("ACLs lentas - pueden requerir DNS o autenticación") }}</li>
+                    <li>{{ _("Usa las ACLs en reglas de http_access, http_reply_access, etc.") }}</li>
+                    <li>{{ _("ACLs predefinidas:") }} <code class="bg-white px-1 rounded">{{ _("all, manager, localhost, to_localhost, to_linklocal, CONNECT") }}</code></li>
                 </ul>
             </div>
         </div>
@@ -49,7 +49,7 @@
                 <div class="flex flex-col items-center space-y-1 flex-shrink-0">
                     {% if acl.is_predefined %}
                         <span class="inline-flex px-2 py-1 text-xs font-bold rounded-full bg-purple-100 text-purple-800 border border-purple-300">
-                            <i class="fas fa-star mr-1"></i>BUILT-IN
+                            <i class="fas fa-star mr-1"></i>{{ _("BUILT-IN") }}
                         </span>
                     {% endif %}
                     
@@ -147,12 +147,12 @@
             <div class="flex space-x-2 flex-shrink-0 sm:ml-3">
                 <button onclick='editAcl({{ acl.id }}, "{{ acl.name }}", "{{ acl.type }}", {{ acl.value_list|tojson }}, {{ acl.options|tojson }}, "{{ acl.comment }}")' 
                         class="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-100 rounded" 
-                        title="Editar">
+                        title="{{ _("Editar") }}">
                     <i class="fas fa-edit text-lg"></i>
                 </button>
                 <button onclick='deleteAcl({{ acl.id }}, "{{ acl.name }}")' 
                         class="text-red-600 hover:text-red-900 p-2 hover:bg-red-100 rounded" 
-                        title="Eliminar">
+                        title="{{ _("Eliminar") }}">
                     <i class="fas fa-trash text-lg"></i>
                 </button>
             </div>
@@ -162,10 +162,10 @@
     {% else %}
     <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
         <i class="fas fa-shield-alt text-6xl text-gray-300 mb-4"></i>
-        <p class="text-gray-500 text-lg font-medium">No hay ACLs personalizadas configuradas</p>
-        <p class="text-gray-400 text-sm mt-2">Las ACLs predefinidas de Squid siguen disponibles</p>
+        <p class="text-gray-500 text-lg font-medium">{{ _("No hay ACLs personalizadas configuradas") }}</p>
+        <p class="text-gray-400 text-sm mt-2">{{ _("Las ACLs predefinidas de Squid siguen disponibles") }}</p>
         <button onclick="showAddModal()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-colors">
-            <i class="fas fa-plus mr-2"></i>Crear primera ACL
+            <i class="fas fa-plus mr-2"></i>{{ _("Crear primera ACL") }}
         </button>
     </div>
     {% endif %}

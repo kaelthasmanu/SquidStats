@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, jsonify, render_template, request
+from flask_babel import gettext as _
 from loguru import logger
 
 from database.database import get_session
@@ -20,9 +21,9 @@ def logs():
             "logsView.html",
             users_data=users_data,
             page_icon="favicon.ico",
-            page_title="Actividad usuarios",
+            page_title=_("Actividad usuarios"),
             icon="fas fa-user-friends",
-            subtitle="Analisis de la Actividad de los Usuarios",
+            subtitle=_("Analisis de la Actividad de los Usuarios"),
         )
     except Exception as e:
         logger.error(f"Error en ruta /logs: {e}")
@@ -47,10 +48,10 @@ def get_logs_by_date():
         )
         return jsonify(users_data)
     except ValueError:
-        return jsonify({"error": "Invalid date format"}), 400
+        return jsonify({"error": _("Invalid date format")}), 400
     except Exception:
         logger.exception("Error en get-logs-by-date")
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": _("Internal server error")}), 500
     finally:
         if db:
             db.close()
@@ -86,9 +87,9 @@ def blacklist_logs():
             domain_cap=result_data.get("domain_cap", 25),
             current_page=page,
             page_icon="favicon.ico",
-            page_title="Registros Bloqueados",
+            page_title=_("Registros Bloqueados"),
             icon="fas fa-ban",
-            subtitle="Peticiones que deberian ser bloqueadas o fueron bloqueadas",
+            subtitle=_("Peticiones que deberian ser bloqueadas o fueron bloqueadas"),
         )
 
     except ValueError:

@@ -4,6 +4,7 @@ from datetime import datetime
 from threading import Lock
 
 from flask import Blueprint, render_template  # , request, jsonify
+from flask_babel import gettext as _
 from loguru import logger
 
 # from services.security.icap_service import scan_file_with_icap
@@ -64,9 +65,9 @@ def cache_stats_realtime():
             system_info=system_info_data,
             network_stats=network_stats,
             page_icon="favicon.ico",
-            page_title="Estadísticas del Sistema",
+            page_title=_("Estadísticas del Sistema"),
             icon="fas fa-chart-bar",
-            subtitle="Estadisticas del comportamiento del Sistema",
+            subtitle=_("Estadísticas del comportamiento del Sistema"),
         )
     except Exception as e:
         logger.error(f"Error in /stats: {str(e)}")
@@ -78,7 +79,7 @@ def cache_stats_realtime():
 """ @stats_bp.route("/print_icap_service", methods=["POST"])
 def print_icap_service():
     if "file" not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
+        return jsonify({"error": _("No file part in the request")}), 400
 
     result, status = scan_file_with_icap(request.files["file"])
     return jsonify(result), status """

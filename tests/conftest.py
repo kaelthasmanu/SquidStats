@@ -81,6 +81,13 @@ def flask_app():
     app.config["SECRET_KEY"] = "test-secret-key"
     app.config["WTF_CSRF_ENABLED"] = False
     app.config["SERVER_NAME"] = "localhost"
+    app.config["BABEL_DEFAULT_LOCALE"] = "es"
+
+    from flask_babel import Babel, get_locale
+
+    Babel(app)
+    app.jinja_env.globals["get_locale"] = get_locale
+    app.jinja_env.globals["LANGUAGES"] = {"es": "Español", "en": "English"}
 
     register_filters(app)
 

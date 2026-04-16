@@ -1,5 +1,6 @@
 import os
 
+from flask_babel import gettext as _
 from loguru import logger
 
 from services.squid.squid_config_splitter import SquidConfigSplitter
@@ -38,24 +39,27 @@ def split_config(strict=False):
         }, 200
     except FileNotFoundError as e:
         logger.error("Archivo no encontrado: %s", e)
-        return {"status": "error", "message": "Archivo requerido no encontrado."}, 404
+        return {
+            "status": "error",
+            "message": _("Archivo requerido no encontrado."),
+        }, 404
     except PermissionError as e:
         logger.error("Error de permisos: %s", e)
         return {
             "status": "error",
-            "message": "No se tienen permisos suficientes para crear los archivos",
+            "message": _("No se tienen permisos suficientes para crear los archivos"),
         }, 403
     except RuntimeError as e:
         logger.error("Error de validación: %s", e)
         return {
             "status": "error",
-            "message": "Error de validación de la configuración",
+            "message": _("Error de validación de la configuración"),
         }, 400
     except Exception:
         logger.exception("Error al dividir el archivo de configuración")
         return {
             "status": "error",
-            "message": "Error interno al dividir la configuración",
+            "message": _("Error interno al dividir la configuración"),
         }, 500
 
 

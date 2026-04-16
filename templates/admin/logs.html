@@ -5,7 +5,7 @@
     <!-- Controles globales de visualización -->
     <div class="bg-white rounded-lg shadow-lg p-4">
         <div class="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4">
-            <label for="lines-selector" class="text-sm font-semibold text-gray-700">Líneas a mostrar:</label>
+            <label for="lines-selector" class="text-sm font-semibold text-gray-700">{{ _("Líneas a mostrar:") }}</label>
             <select id="lines-selector" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-40" onchange="window.location.href='{{ url_for('admin.view_logs') }}?lines=' + this.value">
                 <option value="10" {% if max_lines == 10 %}selected{% endif %}>10</option>
                 <option value="25" {% if max_lines == 25 %}selected{% endif %}>25</option>
@@ -15,17 +15,17 @@
                 <option value="500" {% if max_lines == 500 %}selected{% endif %}>500</option>
                 <option value="1000" {% if max_lines == 1000 %}selected{% endif %}>1000</option>
             </select>
-            <input id="search-input" type="text" placeholder="Buscar texto en los logs" class="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="filterLogs()" />
-            <button id="toggle-lines" class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-2 text-sm font-medium" onclick="toggleLineNumbers()">Alternar n.º de línea</button>
+            <input id="search-input" type="text" placeholder="{{ _("Buscar texto en los logs") }}" class="border border-gray-300 rounded-md px-3 py-2 text-sm w-full md:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="filterLogs()" />
+            <button id="toggle-lines" class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-2 text-sm font-medium" onclick="toggleLineNumbers()">{{ _("Alternar n.º de línea") }}</button>
         </div>
-        <p class="mt-2 text-xs text-gray-500">Mostrando últimas <strong>{{ max_lines }}</strong> líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes del mensaje.</p>
+        <p class="mt-2 text-xs text-gray-500">{{ _("Mostrando últimas") }} <strong>{{ max_lines }}</strong> {{ _("líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes del mensaje.") }}</p>
     </div>
 
     {% for log_name, log_lines in logs.items() %}
     <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 border border-gray-200">
         <div class="flex items-center justify-between gap-2 mb-3">
             <h2 class="text-lg sm:text-xl font-bold text-gray-800">{{ log_name }}</h2>
-            <span class="text-xs sm:text-sm font-medium text-gray-500">{{ log_lines|length }} líneas</span>
+            <span class="text-xs sm:text-sm font-medium text-gray-500">{{ log_lines|length }} {{ _("líneas") }}</span>
         </div>
 
         <div class="bg-gray-900 rounded-lg p-2 sm:p-4 overflow-y-auto h-96">

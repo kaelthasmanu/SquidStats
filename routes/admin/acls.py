@@ -1,6 +1,7 @@
 """Admin ACL management routes."""
 
 from flask import flash, redirect, render_template, request, url_for
+from flask_babel import gettext as _
 
 from services.auth.auth_service import admin_required
 from services.squid.acls_service import (
@@ -46,7 +47,7 @@ def register_routes(bp):
         cm = get_config_manager()
         acl_index = get_int_form_field("id")
         if acl_index is None:
-            flash("ID de ACL inválido", "error")
+            flash(_("ID de ACL inválido"), "error")
             return redirect(url_for("admin.manage_acls"))
 
         new_name = request.form.get("name")
@@ -67,7 +68,7 @@ def register_routes(bp):
         cm = get_config_manager()
         acl_index = get_int_form_field("id")
         if acl_index is None:
-            flash("ID de ACL inválido", "error")
+            flash(_("ID de ACL inválido"), "error")
             return redirect(url_for("admin.manage_acls"))
 
         success, message = service_delete_acl(acl_index, cm)

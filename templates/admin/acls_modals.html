@@ -2,87 +2,87 @@
 <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <h3 class="text-2xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-plus-circle text-blue-600 mr-2"></i>Agregar Nueva ACL
+            <i class="fas fa-plus-circle text-blue-600 mr-2"></i>{{ _("Agregar Nueva ACL") }}
         </h3>
         <form id="addForm" method="POST" action="/admin/acls/add">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Nombre de la ACL:</label>
+                    <label class="block text-gray-700 font-semibold mb-2">{{ _("Nombre de la ACL:") }}</label>
                     <input type="text" name="name" id="addName" required 
                            pattern="[a-zA-Z0-9_-]+" 
                            placeholder="mi_acl_personalizada"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="text-xs text-gray-500 mt-1">Solo letras, números, guiones y guiones bajos</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ _("Solo letras, números, guiones y guiones bajos") }}</p>
                 </div>
                 
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Tipo de ACL:</label>
+                    <label class="block text-gray-700 font-semibold mb-2">{{ _("Tipo de ACL:") }}</label>
                     <select name="type" id="addType" onchange="updateAddTypeInfo()" required 
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Selecciona un tipo...</option>
+                        <option value="">{{ _("Selecciona un tipo...") }}</option>
                         <optgroup label="🌐 Red / IP">
-                            <option value="src">src - IP origen del cliente</option>
-                            <option value="dst">dst - IP destino [slow]</option>
-                            <option value="localip">localip - IP local de conexión</option>
-                            <option value="src_as">src_as - AS number origen</option>
-                            <option value="dst_as">dst_as - AS number destino</option>
+                            <option value="src">{{ _("src - IP origen del cliente") }}</option>
+                            <option value="dst">{{ _("dst - IP destino [slow]") }}</option>
+                            <option value="localip">{{ _("localip - IP local de conexión") }}</option>
+                            <option value="src_as">{{ _("src_as - AS number origen") }}</option>
+                            <option value="dst_as">{{ _("dst_as - AS number destino") }}</option>
                         </optgroup>
                         <optgroup label="🌍 Dominios">
-                            <option value="dstdomain">dstdomain - Dominio destino</option>
-                            <option value="srcdomain">srcdomain - Dominio origen [slow]</option>
-                            <option value="dstdom_regex">dstdom_regex - Regex dominio destino</option>
-                            <option value="srcdom_regex">srcdom_regex - Regex dominio origen [slow]</option>
+                            <option value="dstdomain">{{ _("dstdomain - Dominio destino") }}</option>
+                            <option value="srcdomain">{{ _("srcdomain - Dominio origen [slow]") }}</option>
+                            <option value="dstdom_regex">{{ _("dstdom_regex - Regex dominio destino") }}</option>
+                            <option value="srcdom_regex">{{ _("srcdom_regex - Regex dominio origen [slow]") }}</option>
                         </optgroup>
                         <optgroup label="🔌 Puertos">
-                            <option value="port">port - Puerto TCP destino</option>
-                            <option value="localport">localport - Puerto local</option>
-                            <option value="myportname">myportname - Nombre de puerto</option>
+                            <option value="port">{{ _("port - Puerto TCP destino") }}</option>
+                            <option value="localport">{{ _("localport - Puerto local") }}</option>
+                            <option value="myportname">{{ _("myportname - Nombre de puerto") }}</option>
                         </optgroup>
                         <optgroup label="🕐 Tiempo">
-                            <option value="time">time - Día y hora</option>
+                            <option value="time">{{ _("time - Día y hora") }}</option>
                         </optgroup>
                         <optgroup label="🔗 URL">
-                            <option value="url_regex">url_regex - Regex en URL completa</option>
-                            <option value="urlpath_regex">urlpath_regex - Regex en path</option>
-                            <option value="urllogin">urllogin - Regex en login URL</option>
+                            <option value="url_regex">{{ _("url_regex - Regex en URL completa") }}</option>
+                            <option value="urlpath_regex">{{ _("urlpath_regex - Regex en path") }}</option>
+                            <option value="urllogin">{{ _("urllogin - Regex en login URL") }}</option>
                         </optgroup>
                         <optgroup label="⚡ Protocolo">
-                            <option value="proto">proto - Protocolo (HTTP/FTP)</option>
-                            <option value="method">method - Método HTTP</option>
-                            <option value="http_status">http_status - Código HTTP</option>
+                            <option value="proto">{{ _("proto - Protocolo (HTTP/FTP)") }}</option>
+                            <option value="method">{{ _("method - Método HTTP") }}</option>
+                            <option value="http_status">{{ _("http_status - Código HTTP") }}</option>
                         </optgroup>
                         <optgroup label="🔐 Autenticación">
-                            <option value="proxy_auth">proxy_auth - Usuario proxy [slow]</option>
-                            <option value="proxy_auth_regex">proxy_auth_regex - Regex usuario [slow]</option>
-                            <option value="ext_user">ext_user - Usuario externo [slow]</option>
-                            <option value="ext_user_regex">ext_user_regex - Regex usuario ext [slow]</option>
+                            <option value="proxy_auth">{{ _("proxy_auth - Usuario proxy [slow]") }}</option>
+                            <option value="proxy_auth_regex">{{ _("proxy_auth_regex - Regex usuario [slow]") }}</option>
+                            <option value="ext_user">{{ _("ext_user - Usuario externo [slow]") }}</option>
+                            <option value="ext_user_regex">{{ _("ext_user_regex - Regex usuario ext [slow]") }}</option>
                         </optgroup>
                         <optgroup label="📄 Contenido">
-                            <option value="browser">browser - User-Agent</option>
-                            <option value="referer_regex">referer_regex - Referer</option>
-                            <option value="req_mime_type">req_mime_type - MIME request</option>
-                            <option value="rep_mime_type">rep_mime_type - MIME reply</option>
-                            <option value="req_header">req_header - Header request</option>
-                            <option value="rep_header">rep_header - Header reply</option>
+                            <option value="browser">{{ _("browser - User-Agent") }}</option>
+                            <option value="referer_regex">{{ _("referer_regex - Referer") }}</option>
+                            <option value="req_mime_type">{{ _("req_mime_type - MIME request") }}</option>
+                            <option value="rep_mime_type">{{ _("rep_mime_type - MIME reply") }}</option>
+                            <option value="req_header">{{ _("req_header - Header request") }}</option>
+                            <option value="rep_header">{{ _("rep_header - Header reply") }}</option>
                         </optgroup>
                         <optgroup label="🔒 SSL/TLS">
-                            <option value="ssl_error">ssl_error - Error SSL</option>
-                            <option value="server_cert_fingerprint">server_cert_fingerprint - Fingerprint</option>
-                            <option value="ssl::server_name">ssl::server_name - SNI</option>
-                            <option value="ssl::server_name_regex">ssl::server_name_regex - SNI regex</option>
+                            <option value="ssl_error">{{ _("ssl_error - Error SSL") }}</option>
+                            <option value="server_cert_fingerprint">{{ _("server_cert_fingerprint - Fingerprint") }}</option>
+                            <option value="ssl::server_name">{{ _("ssl::server_name - SNI") }}</option>
+                            <option value="ssl::server_name_regex">{{ _("ssl::server_name_regex - SNI regex") }}</option>
                         </optgroup>
                         <optgroup label="🔧 Conexiones">
-                            <option value="maxconn">maxconn - Max conexiones IP</option>
-                            <option value="max_user_ip">max_user_ip - Max IPs usuario</option>
+                            <option value="maxconn">{{ _("maxconn - Max conexiones IP") }}</option>
+                            <option value="max_user_ip">{{ _("max_user_ip - Max IPs usuario") }}</option>
                         </optgroup>
                         <optgroup label="⚙️ Avanzado">
-                            <option value="external">external - Helper externo [slow]</option>
-                            <option value="random">random - Probabilidad random</option>
-                            <option value="note">note - Anotación transacción</option>
-                            <option value="any-of">any-of - Grupo OR</option>
-                            <option value="all-of">all-of - Grupo AND</option>
+                            <option value="external">{{ _("external - Helper externo [slow]") }}</option>
+                            <option value="random">{{ _("random - Probabilidad random") }}</option>
+                            <option value="note">{{ _("note - Anotación transacción") }}</option>
+                            <option value="any-of">{{ _("any-of - Grupo OR") }}</option>
+                            <option value="all-of">{{ _("all-of - Grupo AND") }}</option>
                         </optgroup>
                     </select>
                 </div>
@@ -101,48 +101,48 @@
             
             <!-- Options -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Opciones (opcional):</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Opciones (opcional):") }}</label>
                 <div class="flex flex-wrap gap-2">
                     <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
                         <input type="checkbox" name="options[]" value="-i" class="mr-2">
-                        <span class="text-sm"><code>-i</code> Case-insensitive</span>
+                        <span class="text-sm"><code>{{ _("-i") }}</code> {{ _("Case-insensitive") }}</span>
                     </label>
                     <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
                         <input type="checkbox" name="options[]" value="-n" class="mr-2">
-                        <span class="text-sm"><code>-n</code> No lookups</span>
+                        <span class="text-sm"><code>{{ _("-n") }}</code> {{ _("No lookups") }}</span>
                     </label>
                     <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
                         <input type="checkbox" name="options[]" value="-m" class="mr-2">
-                        <span class="text-sm"><code>-m</code> List membership</span>
+                        <span class="text-sm"><code>{{ _("-m") }}</code> {{ _("List membership") }}</span>
                     </label>
                 </div>
             </div>
             
             <!-- Values -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Valores:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Valores:") }}</label>
                 <div id="addValuesList" class="space-y-2 mb-2">
                     <!-- Values will be added dynamically -->
                 </div>
                 <button type="button" onclick="addValueInput('add')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    <i class="fas fa-plus-circle mr-1"></i>Agregar valor
+                    <i class="fas fa-plus-circle mr-1"></i>{{ _("Agregar valor") }}
                 </button>
             </div>
             
             <!-- Comment -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Comentario (opcional):</label>
-                <input type="text" name="comment" placeholder="Descripción de esta ACL"
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Comentario (opcional):") }}</label>
+                <input type="text" name="comment" placeholder="{{ _("Descripción de esta ACL") }}"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                <p class="text-xs text-gray-500 mt-1">Se agregará como comentario antes de la ACL</p>
+                <p class="text-xs text-gray-500 mt-1">{{ _("Se agregará como comentario antes de la ACL") }}</p>
             </div>
             
             <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
                 <button type="button" onclick="closeAddModal()" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors font-medium">
-                    Cancelar
+                    {{ _("Cancelar") }}
                 </button>
                 <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
-                    <i class="fas fa-save mr-2"></i>Crear ACL
+                    <i class="fas fa-save mr-2"></i>{{ _("Crear ACL") }}
                 </button>
             </div>
         </form>
@@ -153,7 +153,7 @@
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <h3 class="text-2xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-edit text-blue-600 mr-2"></i>Editar ACL
+            <i class="fas fa-edit text-blue-600 mr-2"></i>{{ _("Editar ACL") }}
         </h3>
         <form id="editForm" method="POST" action="/admin/acls/edit">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -161,64 +161,64 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Nombre de la ACL:</label>
+                    <label class="block text-gray-700 font-semibold mb-2">{{ _("Nombre de la ACL:") }}</label>
                     <input type="text" name="name" id="editName" required 
                            pattern="[a-zA-Z0-9_-]+"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
                 
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Tipo de ACL:</label>
+                    <label class="block text-gray-700 font-semibold mb-2">{{ _("Tipo de ACL:") }}</label>
                     <input type="text" id="editTypeDisplay" disabled
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
                     <input type="hidden" name="type" id="editType">
-                    <p class="text-xs text-gray-500 mt-1">El tipo no se puede cambiar, crea una nueva ACL si necesitas otro tipo</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ _("El tipo no se puede cambiar, crea una nueva ACL si necesitas otro tipo") }}</p>
                 </div>
             </div>
             
             <!-- Options -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Opciones:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Opciones:") }}</label>
                 <div class="flex flex-wrap gap-2">
                     <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
                         <input type="checkbox" name="options[]" value="-i" id="editOptI" class="mr-2">
-                        <span class="text-sm"><code>-i</code> Case-insensitive</span>
+                        <span class="text-sm"><code>{{ _("-i") }}</code> {{ _("Case-insensitive") }}</span>
                     </label>
                     <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
                         <input type="checkbox" name="options[]" value="-n" id="editOptN" class="mr-2">
-                        <span class="text-sm"><code>-n</code> No lookups</span>
+                        <span class="text-sm"><code>{{ _("-n") }}</code> {{ _("No lookups") }}</span>
                     </label>
                     <label class="flex items-center px-3 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50">
                         <input type="checkbox" name="options[]" value="-m" id="editOptM" class="mr-2">
-                        <span class="text-sm"><code>-m</code> List membership</span>
+                        <span class="text-sm"><code>{{ _("-m") }}</code> {{ _("List membership") }}</span>
                     </label>
                 </div>
             </div>
             
             <!-- Values -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Valores:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Valores:") }}</label>
                 <div id="editValuesList" class="space-y-2 mb-2">
                     <!-- Values will be filled dynamically -->
                 </div>
                 <button type="button" onclick="addValueInput('edit')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    <i class="fas fa-plus-circle mr-1"></i>Agregar valor
+                    <i class="fas fa-plus-circle mr-1"></i>{{ _("Agregar valor") }}
                 </button>
             </div>
             
             <!-- Comment -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Comentario:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Comentario:") }}</label>
                 <input type="text" name="comment" id="editComment"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
             </div>
             
             <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
                 <button type="button" onclick="closeEditModal()" class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors font-medium">
-                    Cancelar
+                    {{ _("Cancelar") }}
                 </button>
                 <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>

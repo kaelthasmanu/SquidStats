@@ -1,6 +1,7 @@
 """Admin blacklist management routes."""
 
 from flask import flash, redirect, render_template, request, url_for
+from flask_babel import gettext as _
 from loguru import logger
 
 from database.database import get_session
@@ -76,7 +77,7 @@ def register_routes(bp):
         host = request.form.get("host") or request.form.get("pihole_host")
         token = request.form.get("token") or request.form.get("api_token")
         if not host:
-            flash("Host de Pi-hole no proporcionado", "error")
+            flash(_("Host de Pi-hole no proporcionado"), "error")
             return redirect(url_for("admin.manage_blacklist"))
         success, msg = test_pihole_connection(host, token)
         return flash_and_redirect(success, msg, "admin.manage_blacklist")
@@ -84,7 +85,7 @@ def register_routes(bp):
     @bp.route("/blacklist/sync", methods=["POST"])
     @admin_required
     def blacklist_sync():
-        flash("Sincronización de listas iniciada (en segundo plano)", "success")
+        flash(_("Sincronización de listas iniciada (en segundo plano)"), "success")
         return redirect(url_for("admin.manage_blacklist"))
 
     @bp.route("/blacklist/import", methods=["POST"])
@@ -97,10 +98,10 @@ def register_routes(bp):
         if uploaded and uploaded.filename:
             try:
                 file_domains = import_domains_from_file(uploaded)
-                flash("Archivo importado correctamente", "success")
+                flash(_("Archivo importado correctamente"), "success")
             except Exception as e:
                 logger.exception("Error importando archivo de blacklist")
-                flash_error_with_details("Error al procesar el archivo", e)
+                flash_error_with_details(_("Error al procesar el archivo"), e)
                 return redirect(url_for("admin.manage_blacklist"))
 
         url = request.form.get("url")
@@ -108,9 +109,9 @@ def register_routes(bp):
             ok, imported_url_domains, err = import_domains_from_url(url)
             if ok:
                 url_domains.update(imported_url_domains)
-                flash("Lista importada desde URL correctamente", "success")
+                flash(_("Lista importada desde URL correctamente"), "success")
             else:
-                flash(f"Error importando desde URL: {err}", "error")
+                flash(_("Error importando desde URL: %(err)s") % {"err": err}, "error")
 
         try:
             if file_domains:
@@ -118,13 +119,13 @@ def register_routes(bp):
             if url_domains:
                 merge_and_save_blacklist(url_domains, source="url", source_url=url)
             if not file_domains and not url_domains:
-                flash("No se encontraron dominios para importar", "warning")
+                flash(_("No se encontraron dominios para importar"), "warning")
             else:
                 invalidate_blacklist_cache()
-                flash("Blacklist actualizada exitosamente", "success")
+                flash(_("Blacklist actualizada exitosamente"), "success")
         except Exception as e:
             logger.exception("Error guardando BLACKLIST_DOMAINS")
-            flash_error_with_details("Error al guardar blacklist", e)
+            flash_error_with_details(_("Error al guardar blacklist"), e)
 
         return redirect(url_for("admin.manage_blacklist"))
 
@@ -133,7 +134,7 @@ def register_routes(bp):
     def blacklist_save_custom():
         custom = request.form.get("custom_list", "")
         if not custom.strip():
-            flash("Lista personalizada vacía", "error")
+            flash(_("Lista personalizada vacía"), "error")
             return redirect(url_for("admin.manage_blacklist"))
 
         items = []
@@ -152,19 +153,24 @@ def register_routes(bp):
                 ok, msg = enable_single_blocklist(None, cm)
                 if ok:
                     flash(
-                        "Lista personalizada guardada y archivo custom de Squid actualizado",
+                        _(
+                            "Lista personalizada guardada y archivo custom de Squid actualizado"
+                        ),
                         "success",
                     )
                 else:
                     flash(
-                        f"Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: {msg}",
+                        _(
+                            "Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: %(msg)s"
+                        )
+                        % {"msg": msg},
                         "error",
                     )
             else:
-                flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
+                flash(_("Lista personalizada guardada en BLACKLIST_DOMAINS"), "success")
         except Exception as e:
             logger.exception("Error guardando lista personalizada")
-            flash_error_with_details("Error al guardar la lista", e)
+            flash_error_with_details(_("Error al guardar la lista"), e)
 
         return redirect(url_for("admin.manage_blacklist"))
 
@@ -173,13 +179,17 @@ def register_routes(bp):
     def blacklist_delete_list():
         url = request.form.get("source_url")
         if not url:
-            flash("URL no proporcionada", "error")
+            flash(_("URL no proporcionada"), "error")
             return redirect(url_for("admin.manage_blacklist"))
         cm = get_config_manager()
         count = delete_blacklist_by_source_url(url)
         disable_single_blocklist(url, cm)
         invalidate_blacklist_cache()
-        flash(f"Lista eliminada: {url} ({count} dominios)", "success")
+        flash(
+            _("Lista eliminada: %(url)s (%(count)s dominios)")
+            % {"url": url, "count": count},
+            "success",
+        )
         return redirect(url_for("admin.manage_blacklist"))
 
     @bp.route("/api/blocklist/toggle", methods=["POST"])

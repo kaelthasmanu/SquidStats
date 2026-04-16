@@ -3,9 +3,9 @@
 {% block content %}
 <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
     <div class="flex justify-between items-center mb-4 sm:mb-6">
-        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Gestión de Delay Pools</h2>
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">{{ _("Gestión de Delay Pools") }}</h2>
         <button onclick="showAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">
-            <i class="fas fa-plus mr-2"></i>Agregar Pool
+            <i class="fas fa-plus mr-2"></i>{{ _("Agregar Pool") }}
         </button>
     </div>
     
@@ -13,12 +13,12 @@
     <div class="mb-6 bg-red-50 border-2 border-red-300 rounded-lg p-6 flex items-start space-x-4">
         <i class="fas fa-exclamation-triangle text-red-600 text-3xl mt-1 animate-pulse"></i>
         <div class="flex-1">
-            <p class="font-bold text-red-800 text-lg">¡MUY IMPORTANTE!</p>
+            <p class="font-bold text-red-800 text-lg">{{ _("¡MUY IMPORTANTE!") }}</p>
             <p class="text-red-700 mt-2 font-medium">
-                Esta funcionalidad se encuentra en <strong>RC</strong>. Puede contener errores y comportamientos inesperados.
+                {{ _("Esta funcionalidad se encuentra en") }} <strong>{{ _("RC") }}</strong>. Puede contener errores y comportamientos inesperados.
             </p>
             <p class="text-red-700 mt-2">
-                <strong>Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba.</strong>
+                <strong>{{ _("Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba.") }}</strong>
             </p>
         </div>
     </div>
@@ -28,22 +28,22 @@
         <div class="flex items-start">
             <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
             <div class="text-sm text-gray-700">
-                <p class="font-semibold text-gray-800 mb-1">¿Qué son los Delay Pools?</p>
-                <p class="mb-2">Los delay pools permiten limitar el ancho de banda de ciertas solicitudes basadas en criterios específicos, proporcionando un control justo del tráfico.</p>
-                <p class="font-semibold text-gray-800 mb-1">Clases disponibles:</p>
+                <p class="font-semibold text-gray-800 mb-1">{{ _("¿Qué son los Delay Pools?") }}</p>
+                <p class="mb-2">{{ _("Los delay pools permiten limitar el ancho de banda de ciertas solicitudes basadas en criterios específicos, proporcionando un control justo del tráfico.") }}</p>
+                <p class="font-semibold text-gray-800 mb-1">{{ _("Clases disponibles:") }}</p>
                 <ul class="list-disc list-inside space-y-1 ml-2 mb-2">
-                    <li><strong>Clase 1:</strong> Un solo bucket agregado para todos los clientes</li>
-                    <li><strong>Clase 2:</strong> Bucket agregado + buckets individuales por host (/24)</li>
-                    <li><strong>Clase 3:</strong> Buckets por subred + buckets individuales por host (/16)</li>
-                    <li><strong>Clase 4:</strong> Como clase 3 + buckets por usuario autenticado</li>
-                    <li><strong>Clase 5:</strong> Basado en tags de external_acl_type</li>
+                    <li><strong>{{ _("Clase 1:") }}</strong> {{ _("Un solo bucket agregado para todos los clientes") }}</li>
+                    <li><strong>{{ _("Clase 2:") }}</strong> {{ _("Bucket agregado + buckets individuales por host (/24)") }}</li>
+                    <li><strong>{{ _("Clase 3:") }}</strong> {{ _("Buckets por subred + buckets individuales por host (/16)") }}</li>
+                    <li><strong>{{ _("Clase 4:") }}</strong> {{ _("Como clase 3 + buckets por usuario autenticado") }}</li>
+                    <li><strong>{{ _("Clase 5:") }}</strong> {{ _("Basado en tags de external_acl_type") }}</li>
                 </ul>
-                <p class="font-semibold text-gray-800 mb-1">Limitaciones importantes:</p>
+                <p class="font-semibold text-gray-800 mb-1">{{ _("Limitaciones importantes:") }}</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>No limita overheads como TCP, ICP, DNS, etc.</li>
-                    <li>Incompatible con slow aborts; usa quick abort bajo</li>
-                    <li>Una conexión puede tomar todo el ancho de banda de un bucket</li>
-                    <li>En Squid < 3.1, buckets limitados a 32-bits</li>
+                    <li>{{ _("No limita overheads como TCP, ICP, DNS, etc.") }}</li>
+                    <li>{{ _("Incompatible con slow aborts; usa quick abort bajo") }}</li>
+                    <li>{{ _("Una conexión puede tomar todo el ancho de banda de un bucket") }}</li>
+                    <li>{{ _("En Squid") }} < 3.1, buckets limitados a 32-bits</li>
                 </ul>
             </div>
         </div>
@@ -56,32 +56,32 @@
             <div class="flex justify-between items-start mb-4">
                 <div class="flex-1">
                     <div class="flex items-center mb-2">
-                        <h3 class="text-xl font-bold text-gray-800">Pool #{{ pool.pool_number }}</h3>
+                        <h3 class="text-xl font-bold text-gray-800">{{ _("Pool #") }}{{ pool.pool_number }}</h3>
                         <span class="ml-3 bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                            Clase {{ pool.class }}
+                            {{ _("Clase") }} {{ pool.class }}
                         </span>
                     </div>
                     <p class="text-sm text-gray-600">
                         {% if pool.class == '1' %}
-                            <i class="fas fa-stream mr-1"></i> Bucket único agregado para todos los clientes
+                            <i class="fas fa-stream mr-1"></i> {{ _("Bucket único agregado para todos los clientes") }}
                         {% elif pool.class == '2' %}
-                            <i class="fas fa-network-wired mr-1"></i> Bucket agregado + 255 buckets por host (red /24)
+                            <i class="fas fa-network-wired mr-1"></i> {{ _("Bucket agregado + 255 buckets por host (red /24)") }}
                         {% elif pool.class == '3' %}
-                            <i class="fas fa-sitemap mr-1"></i> Buckets por subred + buckets por host (red /16)
+                            <i class="fas fa-sitemap mr-1"></i> {{ _("Buckets por subred + buckets por host (red /16)") }}
                         {% elif pool.class == '4' %}
-                            <i class="fas fa-users mr-1"></i> Como clase 3 + buckets por usuario autenticado
+                            <i class="fas fa-users mr-1"></i> {{ _("Como clase 3 + buckets por usuario autenticado") }}
                         {% elif pool.class == '5' %}
-                            <i class="fas fa-tags mr-1"></i> Buckets basados en tags de external_acl_type
+                            <i class="fas fa-tags mr-1"></i> {{ _("Buckets basados en tags de external_acl_type") }}
                         {% endif %}
                     </p>
                 </div>
                 <div class="flex space-x-2">
                     <button onclick='editPool({{ pool.pool_number }}, "{{ pool.class }}", "{{ pool.parameters }}", {{ pool.access_rules|tojson }})' 
-                            class="text-blue-600 hover:text-blue-900 p-2" title="Editar">
+                            class="text-blue-600 hover:text-blue-900 p-2" title="{{ _("Editar") }}">
                         <i class="fas fa-edit text-lg"></i>
                     </button>
                     <button onclick="deletePool('{{ pool.pool_number }}')" 
-                            class="text-red-600 hover:text-red-900 p-2" title="Eliminar">
+                            class="text-red-600 hover:text-red-900 p-2" title="{{ _("Eliminar") }}">
                         <i class="fas fa-trash text-lg"></i>
                     </button>
                 </div>
@@ -90,7 +90,7 @@
             {% if pool.parameters %}
             <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
-                    <i class="fas fa-tachometer-alt mr-2 text-blue-600"></i> Parámetros de Velocidad:
+                    <i class="fas fa-tachometer-alt mr-2 text-blue-600"></i> {{ _("Parámetros de Velocidad:") }}
                 </h4>
                 <div class="font-mono text-sm text-gray-700 bg-white p-3 rounded border border-gray-300">
                     {{ pool.parameters }}
@@ -98,16 +98,16 @@
                 <div class="mt-2 text-xs text-gray-600">
                     {% set params = pool.parameters.split() %}
                     {% if pool.class == '1' %}
-                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Agregado: {{ params[0] if params|length > 0 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> {{ _("Agregado:") }} {{ params[0] if params|length > 0 }}</span>
                     {% elif pool.class == '2' %}
-                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Agregado: {{ params[0] if params|length > 0 }}</span>
-                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Individual (por host): {{ params[1] if params|length > 1 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> {{ _("Agregado:") }} {{ params[0] if params|length > 0 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> {{ _("Individual (por host):") }} {{ params[1] if params|length > 1 }}</span>
                     {% elif pool.class in ['3', '4'] %}
-                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Agregado: {{ params[0] if params|length > 0 }}</span>
-                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Red: {{ params[1] if params|length > 1 }}</span>
-                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> Individual (por host): {{ params[2] if params|length > 2 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> {{ _("Agregado:") }} {{ params[0] if params|length > 0 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> {{ _("Red:") }} {{ params[1] if params|length > 1 }}</span>
+                        <span class="block"><i class="fas fa-circle text-xs mr-1"></i> {{ _("Individual (por host):") }} {{ params[2] if params|length > 2 }}</span>
                     {% endif %}
-                    <p class="mt-1 italic">Formato: restore/max (bytes por segundo)</p>
+                    <p class="mt-1 italic">{{ _("Formato: restore/max (bytes por segundo)") }}</p>
                 </div>
             </div>
             {% endif %}
@@ -115,15 +115,15 @@
             {% if pool.access_rules %}
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
                 <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
-                    <i class="fas fa-shield-alt mr-2 text-blue-600"></i> Reglas de Acceso:
+                    <i class="fas fa-shield-alt mr-2 text-blue-600"></i> {{ _("Reglas de Acceso:") }}
                 </h4>
                 <div class="space-y-2">
                     {% for rule in pool.access_rules %}
                     <div class="flex items-center bg-white p-2 rounded border border-gray-200">
                         {% if rule.action == 'allow' %}
-                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded mr-2">ALLOW</span>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded mr-2">{{ _("ALLOW") }}</span>
                         {% else %}
-                            <span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded mr-2">DENY</span>
+                            <span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded mr-2">{{ _("DENY") }}</span>
                         {% endif %}
                         <span class="text-sm text-gray-700 font-mono">{{ rule.acl }}</span>
                     </div>
@@ -138,30 +138,30 @@
         {% if not authenticated %}
         <div class="text-center py-12">
             <i class="fas fa-user-lock text-6xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500 text-lg">Para ver los delay pools debes iniciar sesión.</p>
-            <p class="text-gray-500 mt-2">Inicia sesión con una cuenta de administrador para acceder a esta sección.</p>
+            <p class="text-gray-500 text-lg">{{ _("Para ver los delay pools debes iniciar sesión.") }}</p>
+            <p class="text-gray-500 mt-2">{{ _("Inicia sesión con una cuenta de administrador para acceder a esta sección.") }}</p>
             <a href="{{ url_for('auth.login') }}" class="mt-4 inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-colors">
-                <i class="fas fa-sign-in-alt mr-2"></i> Iniciar sesión
+                <i class="fas fa-sign-in-alt mr-2"></i> {{ _("Iniciar sesión") }}
             </a>
         </div>
         {% else %}
         <div class="text-center py-12">
             <i class="fas fa-clock text-6xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500 text-lg">No hay delay pools configurados</p>
+            <p class="text-gray-500 text-lg">{{ _("No hay delay pools configurados") }}</p>
             
             <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
                 <div class="flex items-start">
                     <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
                     <div class="text-left text-sm">
-                        <p class="font-semibold text-blue-900 mb-1">¿Ya tienes delay pools configurados?</p>
-                        <p class="text-blue-800 mb-2">Si tu squid.conf aún no está dividido, puedes <a href="{{ url_for('admin.split_config') }}" class="underline hover:text-blue-600 font-semibold">dividir tu configuración</a> para una mejor gestión modular.</p>
-                        <p class="text-blue-800">Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde <a href="{{ url_for('admin.view_config') }}" class="underline hover:text-blue-600 font-semibold">Configuración</a>.</p>
+                        <p class="font-semibold text-blue-900 mb-1">{{ _("¿Ya tienes delay pools configurados?") }}</p>
+                        <p class="text-blue-800 mb-2">{{ _("Si tu squid.conf aún no está dividido, puedes") }} <a href="{{ url_for('admin.split_config') }}" class="underline hover:text-blue-600 font-semibold">{{ _("dividir tu configuración") }}</a> {{ _("para una mejor gestión modular.") }}</p>
+                        <p class="text-blue-800">{{ _("Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde") }} <a href="{{ url_for('admin.view_config') }}" class="underline hover:text-blue-600 font-semibold">{{ _("Configuración") }}</a>.</p>
                     </div>
                 </div>
             </div>
             
             <button onclick="showAddModal()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-colors">
-                <i class="fas fa-plus mr-2"></i>Crear primer Pool
+                <i class="fas fa-plus mr-2"></i>{{ _("Crear primer Pool") }}
             </button>
         </div>
         {% endif %}
@@ -172,84 +172,84 @@
 <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <h3 class="text-2xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-plus-circle text-blue-600 mr-2"></i>Agregar Nuevo Delay Pool
+            <i class="fas fa-plus-circle text-blue-600 mr-2"></i>{{ _("Agregar Nuevo Delay Pool") }}
         </h3>
         <form id="addForm" method="POST" action="/admin/delay-pools/add">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Número de Pool:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Número de Pool:") }}</label>
                 <input type="number" name="pool_number" id="addPoolNumber" min="1" max="255" 
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                        required placeholder="1">
-                <p class="text-xs text-gray-500 mt-1">Número único del pool (1-255)</p>
+                <p class="text-xs text-gray-500 mt-1">{{ _("Número único del pool (1-255)") }}</p>
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Clase de Pool:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Clase de Pool:") }}</label>
                 <select name="pool_class" id="addPoolClass" onchange="updateParametersHelp('add')"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                    <option value="">Seleccione una clase...</option>
-                    <option value="1">Clase 1 - Bucket único agregado</option>
-                    <option value="2">Clase 2 - Agregado + por host (/24)</option>
-                    <option value="3">Clase 3 - Agregado + red + por host (/16)</option>
-                    <option value="4">Clase 4 - Como clase 3 + por usuario</option>
-                    <option value="5">Clase 5 - Basado en tags</option>
+                    <option value="">{{ _("Seleccione una clase...") }}</option>
+                    <option value="1">{{ _("Clase 1 - Bucket único agregado") }}</option>
+                    <option value="2">{{ _("Clase 2 - Agregado + por host (/24)") }}</option>
+                    <option value="3">{{ _("Clase 3 - Agregado + red + por host (/16)") }}</option>
+                    <option value="4">{{ _("Clase 4 - Como clase 3 + por usuario") }}</option>
+                    <option value="5">{{ _("Clase 5 - Basado en tags") }}</option>
                 </select>
             </div>
             
             <div id="addParametersSection" class="mb-4 hidden">
-                <label class="block text-gray-700 font-semibold mb-2">Parámetros de Velocidad:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Parámetros de Velocidad:") }}</label>
                 
                 <!-- Clase 1 -->
                 <div id="addClass1Params" class="hidden space-y-3">
                     <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700">
-                        <strong>Clase 1:</strong> Un solo bucket agregado para todos los clientes
+                        <strong>{{ _("Clase 1:") }}</strong> {{ _("Un solo bucket agregado para todos los clientes") }}
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Agregado (restore/max en bytes/seg):</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Agregado (restore/max en bytes/seg):") }}</label>
                         <input type="text" id="addAggregateClass1" placeholder="64000/64000" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
-                        <p class="text-xs text-gray-500 mt-1">Ej: 64000/64000 = 512 Kbps</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ _("Ej: 64000/64000 = 512 Kbps") }}</p>
                     </div>
                 </div>
                 
                 <!-- Clase 2 -->
                 <div id="addClass2Params" class="hidden space-y-3">
                     <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700">
-                        <strong>Clase 2:</strong> Bucket agregado + 255 buckets individuales por host
+                        <strong>{{ _("Clase 2:") }}</strong> {{ _("Bucket agregado + 255 buckets individuales por host") }}
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Agregado (restore/max):</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Agregado (restore/max):") }}</label>
                         <input type="text" id="addAggregateClass2" placeholder="64000/64000" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Individual por host (restore/max):</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Individual por host (restore/max):") }}</label>
                         <input type="text" id="addIndividualClass2" placeholder="16000/64000" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
-                        <p class="text-xs text-gray-500 mt-1">Usa -1/-1 para deshabilitar este bucket</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ _("Usa -1/-1 para deshabilitar este bucket") }}</p>
                     </div>
                 </div>
                 
                 <!-- Clase 3/4 -->
                 <div id="addClass3Params" class="hidden space-y-3">
                     <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700">
-                        <strong id="addClass3Title">Clase 3:</strong> <span id="addClass3Desc">Buckets por subred + por host</span>
+                        <strong id="addClass3Title">{{ _("Clase 3:") }}</strong> <span id="addClass3Desc">{{ _("Buckets por subred + por host") }}</span>
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Agregado (restore/max):</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Agregado (restore/max):") }}</label>
                         <input type="text" id="addAggregateClass3" placeholder="64000/64000" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Por red (restore/max):</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Por red (restore/max):") }}</label>
                         <input type="text" id="addNetworkClass3" placeholder="8000/64000" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
-                        <p class="text-xs text-gray-500 mt-1">Usa -1/-1 para deshabilitar</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ _("Usa -1/-1 para deshabilitar") }}</p>
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Individual por host (restore/max):</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Individual por host (restore/max):") }}</label>
                         <input type="text" id="addIndividualClass3" placeholder="2000/16000" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
                     </div>
@@ -258,10 +258,10 @@
                 <!-- Clase 5 -->
                 <div id="addClass5Params" class="hidden space-y-3">
                     <div class="bg-blue-50 p-3 rounded border border-blue-200 text-sm text-gray-700">
-                        <strong>Clase 5:</strong> Basado en tags de external_acl_type (un bucket por tag)
+                        <strong>{{ _("Clase 5:") }}</strong> {{ _("Basado en tags de external_acl_type (un bucket por tag)") }}
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Parámetros por tag (restore/max):</label>
+                        <label class="text-sm font-medium text-gray-700">{{ _("Parámetros por tag (restore/max):") }}</label>
                         <input type="text" id="addTagClass5" placeholder="16000/32000" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono">
                     </div>
@@ -269,24 +269,24 @@
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Reglas de Acceso (ACLs):</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Reglas de Acceso (ACLs):") }}</label>
                 <div id="addAccessRules" class="space-y-2">
                     <!-- Las reglas se agregarán dinámicamente -->
                 </div>
                 <button type="button" onclick="addAccessRule('add')" 
                         class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    <i class="fas fa-plus-circle mr-1"></i>Agregar regla de acceso
+                    <i class="fas fa-plus-circle mr-1"></i>{{ _("Agregar regla de acceso") }}
                 </button>
             </div>
             
             <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
                 <button type="button" onclick="closeAddModal()" 
                         class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors font-medium">
-                    Cancelar
+                    {{ _("Cancelar") }}
                 </button>
                 <button type="submit" 
                         class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
-                    <i class="fas fa-save mr-2"></i>Crear Pool
+                    <i class="fas fa-save mr-2"></i>{{ _("Crear Pool") }}
                 </button>
             </div>
         </form>
@@ -297,57 +297,57 @@
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <h3 class="text-2xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-edit text-blue-600 mr-2"></i>Editar Delay Pool
+            <i class="fas fa-edit text-blue-600 mr-2"></i>{{ _("Editar Delay Pool") }}
         </h3>
         <form id="editForm" method="POST" action="/admin/delay-pools/edit">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="pool_number" id="editPoolNumber">
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Número de Pool:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Número de Pool:") }}</label>
                 <input type="text" id="editPoolNumberDisplay" disabled
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Clase de Pool:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Clase de Pool:") }}</label>
                 <select name="pool_class" id="editPoolClass" onchange="updateParametersHelp('edit')"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                    <option value="1">Clase 1 - Bucket único agregado</option>
-                    <option value="2">Clase 2 - Agregado + por host (/24)</option>
-                    <option value="3">Clase 3 - Agregado + red + por host (/16)</option>
-                    <option value="4">Clase 4 - Como clase 3 + por usuario</option>
-                    <option value="5">Clase 5 - Basado en tags</option>
+                    <option value="1">{{ _("Clase 1 - Bucket único agregado") }}</option>
+                    <option value="2">{{ _("Clase 2 - Agregado + por host (/24)") }}</option>
+                    <option value="3">{{ _("Clase 3 - Agregado + red + por host (/16)") }}</option>
+                    <option value="4">{{ _("Clase 4 - Como clase 3 + por usuario") }}</option>
+                    <option value="5">{{ _("Clase 5 - Basado en tags") }}</option>
                 </select>
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Parámetros:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Parámetros:") }}</label>
                 <textarea name="parameters" id="editParameters" rows="2" 
                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" 
                           required placeholder="64000/64000 -1/-1 16000/64000"></textarea>
-                <p class="text-xs text-gray-500 mt-1" id="editParametersHelp">Formato: restore/max (bytes/seg)</p>
+                <p class="text-xs text-gray-500 mt-1" id="editParametersHelp">{{ _("Formato: restore/max (bytes/seg)") }}</p>
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Reglas de Acceso:</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ _("Reglas de Acceso:") }}</label>
                 <div id="editAccessRules" class="space-y-2">
                     <!-- Se llenarán dinámicamente -->
                 </div>
                 <button type="button" onclick="addAccessRule('edit')" 
                         class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    <i class="fas fa-plus-circle mr-1"></i>Agregar regla de acceso
+                    <i class="fas fa-plus-circle mr-1"></i>{{ _("Agregar regla de acceso") }}
                 </button>
             </div>
             
             <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
                 <button type="button" onclick="closeEditModal()" 
                         class="px-5 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors font-medium">
-                    Cancelar
+                    {{ _("Cancelar") }}
                 </button>
                 <button type="submit" 
                         class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>

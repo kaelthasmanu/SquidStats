@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 from urllib.parse import urlparse
 
+from flask_babel import gettext as _
 from loguru import logger
 from sqlalchemy import func, inspect, literal, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -218,7 +219,7 @@ def find_blacklisted_sites(
             )
         except SQLAlchemyError:
             logger.exception("Database error while searching blacklisted sites")
-            return {"error": "Error interno del servidor"}
+            return {"error": _("Error interno del servidor")}
 
         sorted_users = sorted(
             user_domain_counts.items(),

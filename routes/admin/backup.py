@@ -1,6 +1,7 @@
 """Admin backup API routes."""
 
 from flask import jsonify, request, send_file
+from flask_babel import gettext as _
 from loguru import logger
 
 from services.auth.auth_service import admin_required
@@ -22,18 +23,20 @@ def register_routes(bp):
             "mariadb",
         ):
             return jsonify(
-                {"status": "error", "message": "Motor de BD desconocido"}
+                {"status": "error", "message": _("Motor de BD desconocido")}
             ), 400
 
         if cfg.get("frequency") not in backup_service.FREQUENCY_CHOICES:
-            return jsonify({"status": "error", "message": "Frecuencia inválida"}), 400
+            return jsonify(
+                {"status": "error", "message": _("Frecuencia inválida")}
+            ), 400
 
         if "enabled" in cfg:
             cfg["enabled"] = bool(cfg["enabled"])
 
         backup_service.save_config(cfg)
         return jsonify(
-            {"status": "success", "message": "Configuración guardada correctamente"}
+            {"status": "success", "message": _("Configuración guardada correctamente")}
         )
 
     @bp.route("/backup/run", methods=["POST"])
@@ -51,14 +54,18 @@ def register_routes(bp):
             return jsonify({"status": "success", "backups": backups})
         except Exception:
             logger.exception("Error listing backups")
-            return jsonify({"status": "error", "message": "Error leyendo salvas"}), 500
+            return jsonify(
+                {"status": "error", "message": _("Error leyendo salvas")}
+            ), 500
 
     @bp.route("/backup/download/<filename>")
     @admin_required
     def backup_download(filename):
         path = backup_service.get_backup_file_path(filename)
         if path is None:
-            return jsonify({"status": "error", "message": "Archivo no encontrado"}), 404
+            return jsonify(
+                {"status": "error", "message": _("Archivo no encontrado")}
+            ), 404
         return send_file(path, as_attachment=True, download_name=filename)
 
     @bp.route("/backup/delete/<filename>", methods=["DELETE"])

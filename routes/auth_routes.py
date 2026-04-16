@@ -15,6 +15,7 @@ from flask import (
     session,
     url_for,
 )
+from flask_babel import gettext as _
 from flask_wtf.csrf import CSRFProtect
 from loguru import logger
 
@@ -86,7 +87,9 @@ def login():
                 logger.info(
                     f"Successful login for user: {username} from IP: {client_ip} ({remember_status})"
                 )
-                flash(f"¡Bienvenido, {username}!", "success")
+                flash(
+                    _("¡Bienvenido, %(username)s!") % {"username": username}, "success"
+                )
 
                 # Get redirect URL (stored before login redirect)
                 next_url = session.pop("next_url", None)
@@ -141,7 +144,7 @@ def logout():
     session.clear()
 
     logger.info(f"User logged out: {username}")
-    flash("Has cerrado sesión correctamente.", "success")
+    flash(_("Has cerrado sesión correctamente."), "success")
 
     # Create response and clear cookie
     response = make_response(redirect(url_for("auth.login")))
@@ -188,7 +191,9 @@ def reset_password():
     if client_ip not in ["127.0.0.1", "::1", "localhost"]:
         logger.warning("Password reset attempt from unauthorized IP")
         return {
-            "error": "Access denied. This endpoint is only accessible from localhost."
+            "error": _(
+                "Access denied. This endpoint is only accessible from localhost."
+            )
         }, 403
 
     # Get data from request
@@ -198,10 +203,10 @@ def reset_password():
 
     # Validate input
     if not username or not new_password:
-        return {"error": "Username and new_password are required."}, 400
+        return {"error": _("Username and new_password are required.")}, 400
 
     if len(new_password) < 8:
-        return {"error": "Password must be at least 8 characters long."}, 400
+        return {"error": _("Password must be at least 8 characters long.")}, 400
 
     # Update password
     success = AuthService.update_user_password(username, new_password)
@@ -211,7 +216,7 @@ def reset_password():
         # Do not reflect user input in the response to avoid XSS/vector reflection
         return {
             "success": True,
-            "message": "Password updated successfully.",
+            "message": _("Password updated successfully."),
         }, 200
     else:
-        return {"error": "Failed to update password. User may not exist."}, 400
+        return {"error": _("Failed to update password. User may not exist.")}, 400

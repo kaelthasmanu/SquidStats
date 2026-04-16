@@ -17,6 +17,7 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
+from flask_babel import gettext as _
 from loguru import logger
 
 from config import Config
@@ -459,10 +460,10 @@ def delete_backup(filename: str) -> dict:
 
     target = _get_safe_backup_path(bdir, filename)
     if target is None:
-        return {"status": "error", "message": "Nombre de archivo inválido"}
+        return {"status": "error", "message": _("Nombre de archivo inválido")}
 
     if not target.exists():
-        return {"status": "error", "message": "La salva no existe"}
+        return {"status": "error", "message": _("La salva no existe")}
 
     target.unlink()
     logger.info(f"Backup deleted: {target.name}")

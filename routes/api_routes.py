@@ -1,4 +1,5 @@
 from flask import Blueprint, current_app, jsonify, request
+from flask_babel import gettext as _
 from loguru import logger
 from werkzeug.exceptions import BadRequest
 
@@ -82,7 +83,7 @@ def api_get_all_users():
         except RuntimeError:
             show_details = False
 
-        resp = {"error": "Internal server error"}
+        resp = {"error": _("Internal server error")}
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
@@ -95,7 +96,7 @@ def api_run_audit():
     data = request.get_json()
 
     if not data:
-        return jsonify({"error": "Invalid JSON body"}), 400
+        return jsonify({"error": _("Invalid JSON body")}), 400
 
     audit_type = data.get("audit_type")
 
@@ -108,14 +109,14 @@ def api_run_audit():
 
     except BadRequest as e:
         logger.warning(f"Bad request in audit API: {e}")
-        return jsonify({"error": "Bad request"}), 400
+        return jsonify({"error": _("Bad request")}), 400
 
     except ValueError:
-        return jsonify({"error": "Invalid numeric value"}), 400
+        return jsonify({"error": _("Invalid numeric value")}), 400
 
     except Exception:
         logger.exception("Audit API error")
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": _("Internal server error")}), 500
 
     finally:
         db.close()
@@ -148,7 +149,7 @@ def api_mark_notifications_read():
             show_details = bool(current_app.debug)
         except RuntimeError:
             show_details = False
-        resp = {"success": False, "error": "Internal server error"}
+        resp = {"success": False, "error": _("Internal server error")}
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500

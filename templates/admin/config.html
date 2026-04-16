@@ -2,39 +2,39 @@
 
 {% block content %}
 <div x-data="{ activeTab: 'general', editing: false }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Configuración</h2>
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">{{ _("Configuración") }}</h2>
     
     <!-- Tabs -->
     <div class="flex border-b border-gray-200 flex-wrap">
         <button @click="activeTab = 'general'" :class="activeTab === 'general' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            General
+            {{ _("General") }}
         </button>
         <button @click="activeTab = 'squid'" :class="activeTab === 'squid' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Squid
+            {{ _("Squid") }}
         </button>
         <button @click="activeTab = 'database'" :class="activeTab === 'database' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Base de Datos
+            {{ _("Base de Datos") }}
         </button>
         <button @click="activeTab = 'security'" :class="activeTab === 'security' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Seguridad
+            {{ _("Seguridad") }}
         </button>
         <button @click="activeTab = 'blacklist'" :class="activeTab === 'blacklist' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Lista Negra
+            {{ _("Lista Negra") }}
         </button>
         <button @click="activeTab = 'proxy'" :class="activeTab === 'proxy' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Proxy
+            {{ _("Proxy") }}
         </button>
         <button @click="activeTab = 'telegram'" :class="activeTab === 'telegram' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
-            Telegram
+            {{ _("Telegram") }}
         </button>
     </div>
     
     <!-- General Tab -->
     <div x-show="activeTab === 'general'" class="mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración General</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ _("Configuración General") }}</h3>
             <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-edit mr-2"></i>Editar
+                <i class="fas fa-edit mr-2"></i>{{ _("Editar") }}
             </button>
         </div>
         
@@ -56,13 +56,13 @@
                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors {% if key in sensitive_vars %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}">
                 {% endif %}
                 {% if key in sensitive_vars %}
-                <p class="text-xs text-gray-500 mt-1">Esta variable está protegida y no puede ser modificada desde aquí</p>
+                <p class="text-xs text-gray-500 mt-1">{{ _("Esta variable está protegida y no puede ser modificada desde aquí") }}</p>
                 {% endif %}
             </div>
             {% endfor %}
             <div class="md:col-span-2 flex justify-center mt-4">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>
@@ -76,9 +76,9 @@
     <!-- Squid Tab -->
     <div x-show="activeTab === 'squid'" class="mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Squid</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ _("Configuración de Squid") }}</h3>
             <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-edit mr-2"></i>Editar
+                <i class="fas fa-edit mr-2"></i>{{ _("Editar") }}
             </button>
         </div>
         
@@ -95,7 +95,7 @@
             {% endfor %}
             <div class="md:col-span-2 flex justify-center mt-4">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>
@@ -109,9 +109,9 @@
     <!-- Database Tab -->
     <div x-show="activeTab === 'database'" class="mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Base de Datos</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ _("Configuración de Base de Datos") }}</h3>
             <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-edit mr-2"></i>Editar
+                <i class="fas fa-edit mr-2"></i>{{ _("Editar") }}
             </button>
         </div>
         
@@ -126,13 +126,13 @@
                        {% if key in sensitive_vars %}disabled{% endif %}
                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors {% if key in sensitive_vars %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}">
                 {% if key in sensitive_vars %}
-                <p class="text-xs text-gray-500 mt-1">Esta variable está protegida y no puede ser modificada desde aquí</p>
+                <p class="text-xs text-gray-500 mt-1">{{ _("Esta variable está protegida y no puede ser modificada desde aquí") }}</p>
                 {% endif %}
             </div>
             {% endfor %}
             <div class="md:col-span-2 flex justify-center mt-4">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>
@@ -146,9 +146,9 @@
     <!-- Security Tab -->
     <div x-show="activeTab === 'security'" class="mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Seguridad</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ _("Configuración de Seguridad") }}</h3>
             <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-edit mr-2"></i>Editar
+                <i class="fas fa-edit mr-2"></i>{{ _("Editar") }}
             </button>
         </div>
         
@@ -163,13 +163,13 @@
                        {% if key in sensitive_vars %}disabled{% endif %}
                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors {% if key in sensitive_vars %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}">
                 {% if key in sensitive_vars %}
-                <p class="text-xs text-gray-500 mt-1">Esta variable está protegida y no puede ser modificada desde aquí</p>
+                <p class="text-xs text-gray-500 mt-1">{{ _("Esta variable está protegida y no puede ser modificada desde aquí") }}</p>
                 {% endif %}
             </div>
             {% endfor %}
             <div class="md:col-span-2 flex justify-center mt-4">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>
@@ -183,9 +183,9 @@
     <!-- Blacklist Tab -->
     <div x-show="activeTab === 'blacklist'" class="mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Lista Negra de Dominios</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ _("Lista Negra de Dominios") }}</h3>
             <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-edit mr-2"></i>Editar
+                <i class="fas fa-edit mr-2"></i>{{ _("Editar") }}
             </button>
         </div>
         
@@ -201,7 +201,7 @@
             {% endfor %}
             <div class="flex justify-center mt-4">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>
@@ -215,9 +215,9 @@
     <!-- Proxy Tab -->
     <div x-show="activeTab === 'proxy'" class="mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Proxy</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ _("Configuración de Proxy") }}</h3>
             <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-edit mr-2"></i>Editar
+                <i class="fas fa-edit mr-2"></i>{{ _("Editar") }}
             </button>
         </div>
         
@@ -234,7 +234,7 @@
             {% endfor %}
             <div class="md:col-span-2 flex justify-center mt-4">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>
@@ -248,9 +248,9 @@
     <!-- Telegram Tab -->
     <div x-show="activeTab === 'telegram'" class="mt-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Configuración de Telegram</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ _("Configuración de Telegram") }}</h3>
             <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-edit mr-2"></i>Editar
+                <i class="fas fa-edit mr-2"></i>{{ _("Editar") }}
             </button>
         </div>
         
@@ -274,7 +274,7 @@
             {% endfor %}
             <div class="md:col-span-2 flex justify-center mt-4">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
-                    <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
                 </button>
             </div>
         </form>

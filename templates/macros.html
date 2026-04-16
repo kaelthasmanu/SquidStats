@@ -3,11 +3,11 @@
   {% if bw_value is defined %}
     {% set bw = bw_value|float %}
     {% if bw >= 1000000 %}
-      {{ (bw / 1000000)|round(2) }} Gbps
+      {{ (bw / 1000000)|round(2) }} {{ _("Gbps") }}
     {% elif bw >= 1000 %}
-      {{ (bw / 1000)|round(2) }} Mbps
+      {{ (bw / 1000)|round(2) }} {{ _("Mbps") }}
     {% else %}
-      {{ bw|round(2) }} Kbps
+      {{ bw|round(2) }} {{ _("Kbps") }}
     {% endif %}
-  {% else %}0 kbps{% endif %}
+  {% else %}{{ _("0 kbps") }}{% endif %}
 {% endmacro %}

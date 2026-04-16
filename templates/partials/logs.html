@@ -2,21 +2,21 @@
   <div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
   <div id="modals-container"></div>
   <div class="pagination-container flex justify-center items-center mt-12 gap-4">
-    <button id="first-page" aria-label="First page" class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
+    <button id="first-page" aria-label="{{ _("First page") }}" class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
       <i class="fas fa-angle-double-left"></i>
     </button>
-    <button id="prev-page" aria-label="Previous page" class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
+    <button id="prev-page" aria-label="{{ _("Previous page") }}" class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
       <i class="fas fa-angle-left"></i>
     </button>
     <!-- Here JS will generate the page buttons -->
     <div class="pagination flex gap-1" id="page-numbers"></div>
     <button
       id="next-page"
-      aria-label="Next page"
+      aria-label="{{ _("Next page") }}"
       class="pg-btn next w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
       <i class="fas fa-angle-right"></i>
     </button>
-    <button id="last-page" aria-label="Last page" class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
+    <button id="last-page" aria-label="{{ _("Last page") }}" class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
       <i class="fas fa-angle-double-right"></i>
     </button>
   </div>

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from flask_babel import gettext as _
 from ldap3 import (
     ALL,
     NTLM,
@@ -50,7 +51,10 @@ def test_connection(cfg: dict) -> dict:
     try:
         conn = _connect(cfg)
         conn.unbind()
-        return {"status": "success", "message": "Conexión exitosa al servidor LDAP/AD."}
+        return {
+            "status": "success",
+            "message": _("Conexión exitosa al servidor LDAP/AD."),
+        }
     except core.exceptions.LDAPBindError as exc:
         logger.warning(f"LDAP bind falló: {exc}")
         return {"status": "error", "message": f"Error de autenticación: {exc}"}
@@ -186,7 +190,7 @@ def get_user_groups(cfg: dict, username: str) -> dict:
             conn.unbind()
             return {
                 "status": "error",
-                "message": "Usuario no encontrado.",
+                "message": _("Usuario no encontrado."),
                 "groups": [],
                 "user": None,
             }

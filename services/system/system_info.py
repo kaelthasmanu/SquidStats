@@ -7,6 +7,7 @@ import subprocess  # nosec B404
 import time
 
 import psutil
+from flask_babel import gettext as _
 from loguru import logger
 
 # Variables globales para el cálculo de estadísticas de red
@@ -190,7 +191,7 @@ def get_network_stats():
             "bytes_recv_total": 0,
             "packets_sent": 0,
             "packets_recv": 0,
-            "error": "Internal error",
+            "error": _("Internal error"),
         }
 
 

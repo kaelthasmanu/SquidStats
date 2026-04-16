@@ -13,6 +13,7 @@ from flask import (
     request,
     url_for,
 )
+from flask_babel import gettext as _
 from loguru import logger
 
 from config import Config
@@ -146,9 +147,12 @@ def edit_config():
                 show_details = False
 
             if show_details:
-                flash(f"Error saving configuration: {message}", "error")
+                flash(
+                    _("Error saving configuration: %(message)s") % {"message": message},
+                    "error",
+                )
             else:
-                flash("Error saving configuration", "error")
+                flash(_("Error saving configuration"), "error")
     return render_template(
         "admin/edit_config.html", config_content=config_manager.config_content
     )
@@ -172,7 +176,7 @@ def save_env():
         existing_vars[key] = value
 
     save_env_vars(existing_vars)
-    flash("Variables de entorno guardadas exitosamente", "success")
+    flash(_("Variables de entorno guardadas exitosamente"), "success")
     return redirect(url_for("admin.view_config"))
 
 
@@ -215,7 +219,7 @@ def edit_acl():
     try:
         acl_index = int(acl_id)
     except (ValueError, TypeError):
-        flash("ID de ACL inválido", "error")
+        flash(_("ID de ACL inválido"), "error")
         return redirect(url_for("admin.manage_acls"))
 
     success, message = service_edit_acl(
@@ -233,7 +237,7 @@ def delete_acl():
     try:
         acl_index = int(acl_id)
     except (ValueError, TypeError):
-        flash("ID de ACL inválido", "error")
+        flash(_("ID de ACL inválido"), "error")
         return redirect(url_for("admin.manage_acls"))
 
     success, message = service_delete_acl(acl_index, config_manager)
@@ -306,7 +310,7 @@ def blacklist_test_connection():
     host = request.form.get("host") or request.form.get("pihole_host")
     token = request.form.get("token") or request.form.get("api_token")
     if not host:
-        flash("Host de Pi-hole no proporcionado", "error")
+        flash(_("Host de Pi-hole no proporcionado"), "error")
         return redirect(url_for("admin.manage_blacklist"))
     success, msg = test_pihole_connection(host, token)
     flash(msg, "success" if success else "error")
@@ -319,7 +323,7 @@ def blacklist_test_connection():
 def blacklist_sync():
     # Placeholder: kick off background sync job in production
     # For now just flash success and return
-    flash("Sincronización de listas iniciada (en segundo plano)", "success")
+    flash(_("Sincronización de listas iniciada (en segundo plano)"), "success")
     return redirect(url_for("admin.manage_blacklist"))
 
 
@@ -335,7 +339,7 @@ def blacklist_import():
     if uploaded and uploaded.filename:
         try:
             file_domains = import_domains_from_file(uploaded)
-            flash("Archivo importado correctamente", "success")
+            flash(_("Archivo importado correctamente"), "success")
         except Exception as e:
             logger.exception("Error importando archivo de blacklist")
             try:
@@ -343,9 +347,12 @@ def blacklist_import():
             except RuntimeError:
                 show_details = False
             if show_details:
-                flash(f"Error al procesar el archivo: {str(e)}", "error")
+                flash(
+                    _("Error al procesar el archivo: %(error)s") % {"error": str(e)},
+                    "error",
+                )
             else:
-                flash("Error al procesar el archivo", "error")
+                flash(_("Error al procesar el archivo"), "error")
             return redirect(url_for("admin.manage_blacklist"))
 
     # Handle URL import
@@ -354,9 +361,9 @@ def blacklist_import():
         ok, imported_url_domains, err = import_domains_from_url(url)
         if ok:
             url_domains.update(imported_url_domains)
-            flash("Lista importada desde URL correctamente", "success")
+            flash(_("Lista importada desde URL correctamente"), "success")
         else:
-            flash(f"Error importando desde URL: {err}", "error")
+            flash(_("Error importando desde URL: %(err)s") % {"err": err}, "error")
 
     # Merge with existing and save, preserving source metadata
     try:
@@ -367,9 +374,9 @@ def blacklist_import():
             merge_and_save_blacklist(url_domains, source="url", source_url=url)
 
         if not file_domains and not url_domains:
-            flash("No se encontraron dominios para importar", "warning")
+            flash(_("No se encontraron dominios para importar"), "warning")
         else:
-            flash("Blacklist actualizada exitosamente", "success")
+            flash(_("Blacklist actualizada exitosamente"), "success")
     except Exception as e:
         logger.exception("Error guardando BLACKLIST_DOMAINS")
         try:
@@ -377,9 +384,11 @@ def blacklist_import():
         except RuntimeError:
             show_details = False
         if show_details:
-            flash(f"Error al guardar blacklist: {str(e)}", "error")
+            flash(
+                _("Error al guardar blacklist: %(error)s") % {"error": str(e)}, "error"
+            )
         else:
-            flash("Error al guardar blacklist", "error")
+            flash(_("Error al guardar blacklist"), "error")
 
     return redirect(url_for("admin.manage_blacklist"))
 
@@ -389,7 +398,7 @@ def blacklist_import():
 def blacklist_save_custom():
     custom = request.form.get("custom_list", "")
     if not custom.strip():
-        flash("Lista personalizada vacía", "error")
+        flash(_("Lista personalizada vacía"), "error")
         return redirect(url_for("admin.manage_blacklist"))
 
     # parse lines and commas
@@ -402,7 +411,7 @@ def blacklist_save_custom():
 
     try:
         save_custom_list(items)
-        flash("Lista personalizada guardada en BLACKLIST_DOMAINS", "success")
+        flash(_("Lista personalizada guardada en BLACKLIST_DOMAINS"), "success")
     except Exception as e:
         logger.exception("Error guardando lista personalizada")
         try:
@@ -410,9 +419,11 @@ def blacklist_save_custom():
         except RuntimeError:
             show_details = False
         if show_details:
-            flash(f"Error al guardar la lista: {str(e)}", "error")
+            flash(
+                _("Error al guardar la lista: %(error)s") % {"error": str(e)}, "error"
+            )
         else:
-            flash("Error al guardar la lista", "error")
+            flash(_("Error al guardar la lista"), "error")
 
     return redirect(url_for("admin.manage_blacklist"))
 
@@ -424,7 +435,7 @@ def delete_http_access():
     try:
         rule_index = int(index)
     except (ValueError, TypeError):
-        flash("Índice de regla inválido", "error")
+        flash(_("Índice de regla inválido"), "error")
         return redirect(url_for("admin.manage_http_access"))
 
     success, message = service_delete_http_access(rule_index, config_manager)
@@ -444,7 +455,7 @@ def edit_http_access():
     try:
         rule_index = int(index)
     except (ValueError, TypeError):
-        flash("Índice de regla inválido", "error")
+        flash(_("Índice de regla inválido"), "error")
         return redirect(url_for("admin.manage_http_access"))
 
     success, message = service_edit_http_access(
@@ -479,7 +490,7 @@ def move_http_access():
     try:
         rule_index = int(index)
     except (ValueError, TypeError):
-        flash("Índice de regla inválido", "error")
+        flash(_("Índice de regla inválido"), "error")
         return redirect(url_for("admin.manage_http_access"))
 
     success, message = service_move_http_access(rule_index, direction, config_manager)
@@ -584,7 +595,7 @@ def edit_user(user_id):
     users = AuthService.get_all_users()
     user = next((u for u in users if u["id"] == user_id), None)
     if not user:
-        flash("Usuario no encontrado", "error")
+        flash(_("Usuario no encontrado"), "error")
         return redirect(url_for("admin.manage_users"))
 
     return render_template("admin/user_form.html", user=user, action="edit")
@@ -648,7 +659,7 @@ def delete_table_data():
 
         if not table_name:
             return jsonify(
-                {"status": "error", "message": "Nombre de tabla no proporcionado"}
+                {"status": "error", "message": _("Nombre de tabla no proporcionado")}
             ), 400
 
         # Validate table name to prevent SQL injection
@@ -656,7 +667,7 @@ def delete_table_data():
 
         if not re.match(r"^[a-zA-Z0-9_]+$", table_name):
             return jsonify(
-                {"status": "error", "message": "Nombre de tabla inválido"}
+                {"status": "error", "message": _("Nombre de tabla inválido")}
             ), 400
 
         # Prevent deletion of critical tables like admin_users and alembic_version
@@ -664,7 +675,7 @@ def delete_table_data():
             return jsonify(
                 {
                     "status": "error",
-                    "message": "No se puede eliminar estas tablas críticas",
+                    "message": _("No se puede eliminar estas tablas críticas"),
                 }
             ), 400
 
@@ -678,7 +689,7 @@ def delete_table_data():
         except RuntimeError:
             show_details = False
 
-        resp = {"status": "error", "message": "Error interno del servidor"}
+        resp = {"status": "error", "message": _("Error interno del servidor")}
         if show_details:
             resp["details"] = str(e)
         return jsonify(resp), 500
@@ -705,9 +716,9 @@ def split_config_view():
         except RuntimeError:
             show_details = False
         if show_details:
-            flash(f"Error al cargar la vista: {str(e)}", "error")
+            flash(_("Error al cargar la vista: %(error)s") % {"error": str(e)}, "error")
         else:
-            flash("Error al cargar la vista", "error")
+            flash(_("Error al cargar la vista"), "error")
         return redirect(url_for("admin.admin_dashboard"))
 
 
@@ -734,7 +745,9 @@ def split_config():
         return jsonify(
             {
                 "status": "error",
-                "message": "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf.",
+                "message": _(
+                    "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf."
+                ),
             }
         ), 404
 
@@ -743,7 +756,9 @@ def split_config():
         return jsonify(
             {
                 "status": "error",
-                "message": "No se tienen permisos suficientes para crear los archivos",
+                "message": _(
+                    "No se tienen permisos suficientes para crear los archivos"
+                ),
             }
         ), 403
 
@@ -752,7 +767,7 @@ def split_config():
         return jsonify(
             {
                 "status": "error",
-                "message": "Error de validación de la configuración",
+                "message": _("Error de validación de la configuración"),
             }
         ), 400
 
@@ -765,7 +780,7 @@ def split_config():
 
         resp = {
             "status": "error",
-            "message": "Error interno al dividir la configuración",
+            "message": _("Error interno al dividir la configuración"),
         }
         if show_details:
             resp["details"] = str(e)
@@ -789,12 +804,16 @@ def get_split_files():
 def blacklist_delete_list():
     url = request.form.get("source_url")
     if not url:
-        flash("URL no proporcionada", "error")
+        flash(_("URL no proporcionada"), "error")
         return redirect(url_for("admin.manage_blacklist"))
     count = delete_blacklist_by_source_url(url)
     # Also disable enforcement if the list was enforced
     _disable_single_blocklist(url, config_manager)
-    flash(f"Lista eliminada: {url} ({count} dominios)", "success")
+    flash(
+        _("Lista eliminada: %(url)s (%(count)s dominios)")
+        % {"url": url, "count": count},
+        "success",
+    )
     return redirect(url_for("admin.manage_blacklist"))
 
 
@@ -1217,7 +1236,7 @@ def blocklist_toggle():
     """
     data = request.get_json()
     if data is None:
-        return jsonify({"status": "error", "message": "JSON inválido"}), 400
+        return jsonify({"status": "error", "message": _("JSON inválido")}), 400
 
     source_url = data.get("source_url")  # None for custom
     enable = data.get("enable", False)
@@ -1239,7 +1258,7 @@ def blocklist_toggle():
             show_details = False
         resp = {
             "status": "error",
-            "message": "Error interno al cambiar estado de blocklist",
+            "message": _("Error interno al cambiar estado de blocklist"),
         }
         if show_details:
             resp["details"] = str(e)

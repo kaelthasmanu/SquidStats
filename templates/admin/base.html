@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{% block title %}Administrador Squid Proxy{% endblock %}</title>
+    <title>{% block title %}{{ _("Administrador Squid Proxy") }}{% endblock %}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"/>
     <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
     <script src="{{ url_for('static', filename='src/alpine.min.js') }}" defer></script>
@@ -21,23 +21,36 @@
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div class="flex items-center space-x-3">
-                        <img src="{{ url_for('static', filename='squidstats.webp') }}" alt="SquidStats logo" class="w-8 h-8 object-contain" />
+                        <img src="{{ url_for('static', filename='squidstats.webp') }}" alt="{{ _("SquidStats logo") }}" class="w-8 h-8 object-contain" />
                         <i class="fas fa-server text-2xl md:text-3xl text-blue-200"></i>
                         <div>
-                            <h1 class="text-lg md:text-2xl font-bold hidden sm:block">Administrador Squid Proxy</h1>
-                            <h1 class="text-lg font-bold sm:hidden">Admin Squid</h1>
+                            <h1 class="text-lg md:text-2xl font-bold hidden sm:block">{{ _("Administrador Squid Proxy") }}</h1>
+                            <h1 class="text-lg font-bold sm:hidden">{{ _("Admin Squid") }}</h1>
                         </div>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
-                    <button onclick="reloadSquid()" title="Recarga la configuración de Squid sin reiniciar el servicio" class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
+                    <button onclick="reloadSquid()" title="{{ _("Recarga la configuración de Squid sin reiniciar el servicio") }}" class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
                         <i class="fas fa-sync-alt mr-2"></i>
-                        <span class="hidden sm:inline">Recargar</span>
+                        <span class="hidden sm:inline">{{ _("Recargar") }}</span>
                     </button>
-                    <button onclick="restartSquid()" title="Reinicia Squid y vuelve a aplicar la configuración desde cero" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
+                    <button onclick="restartSquid()" title="{{ _("Reinicia Squid y vuelve a aplicar la configuración desde cero") }}" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
                         <i class="fas fa-power-off mr-2"></i>
-                        <span class="hidden sm:inline">Reiniciar</span>
+                        <span class="hidden sm:inline">{{ _("Reiniciar") }}</span>
                     </button>
+                    <div class="relative" x-data="{ langOpen: false }">
+                        <button @click="langOpen = !langOpen" @click.outside="langOpen = false" title="{{ _("Idioma") }}" class="flex items-center space-x-2 text-white bg-blue-800 bg-opacity-60 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            <i class="fas fa-globe"></i>
+                            <span class="hidden sm:inline uppercase">{{ get_locale() }}</span>
+                        </button>
+                        <div x-show="langOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-xl border border-gray-200 z-50" style="display: none;">
+                            {% for code, name in LANGUAGES.items() %}
+                                <a href="{{ url_for('i18n.set_language', lang=code) }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors {% if get_locale() == code %}bg-blue-50 font-semibold text-blue-700{% endif %}">
+                                    {{ name }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
                     <!-- User Dropdown -->
                     <div class="relative" x-data="{ userMenuOpen: false }">
                         <button @click="userMenuOpen = !userMenuOpen" @click.away="userMenuOpen = false" class="flex items-center space-x-2 text-white bg-blue-800 bg-opacity-60 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
@@ -72,16 +85,16 @@
                             <div class="py-2">
                                 <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-users mr-3 text-gray-400"></i>
-                                    Gestionar Usuarios
+                                    {{ _("Gestionar Usuarios") }}
                                 </a>
                                 <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-cog mr-3 text-gray-400"></i>
-                                    Configuración
+                                    {{ _("Configuración") }}
                                 </a>
                                 <div class="border-t border-gray-200 my-1"></div>
                                 <a href="{{ url_for('auth.logout') }}" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
                                     <i class="fas fa-sign-out-alt mr-3"></i>
-                                    Cerrar Sesión
+                                    {{ _("Cerrar Sesión") }}
                                 </a>
                             </div>
                         </div>
@@ -99,56 +112,56 @@
             <nav class="mt-8">
                 <div class="px-4 space-y-2">
                     <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-home mr-3"></i>Dashboard 
+                        <i class="fas fa-home mr-3"></i>{{ _("Dashboard") }} 
                     </a>
                     <a href="{{ url_for('admin.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-home mr-3"></i>Dashboard Admin
+                        <i class="fas fa-home mr-3"></i>{{ _("Dashboard Admin") }}
                     </a>
                     <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-cog mr-3"></i>Configuración
+                        <i class="fas fa-cog mr-3"></i>{{ _("Configuración") }}
                     </a>
                     <a href="{{ url_for('admin.split_config_view') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <span class="flex items-center">
-                            <i class="fas fa-code-branch mr-3"></i>Dividir Squid Config
+                            <i class="fas fa-code-branch mr-3"></i>{{ _("Dividir Squid Config") }}
                         </span>
-                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">RC</span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("RC") }}</span>
                     </a>
                     <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-users mr-3"></i>Usuarios
+                        <i class="fas fa-users mr-3"></i>{{ _("Usuarios") }}
                     </a>
-                    <a href="{{ url_for('admin.ldap_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="Configuraciones LDAP/Active Directory">
-                        <i class="fas fa-network-wired mr-3"></i>LDAP / Active Directory
+                    <a href="{{ url_for('admin.ldap_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="{{ _("Configuraciones LDAP/Active Directory") }}">
+                        <i class="fas fa-network-wired mr-3"></i>{{ _("LDAP / Active Directory") }}
                     </a>
                     <a href="{{ url_for('admin.database_view') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-database mr-3"></i>Base de Datos
+                        <i class="fas fa-database mr-3"></i>{{ _("Base de Datos") }}
                     </a>
                     <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <span class="flex items-center">
-                            <i class="fas fa-shield-alt mr-3"></i>ACLs
+                            <i class="fas fa-shield-alt mr-3"></i>{{ _("ACLs") }}
                         </span>
-                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">RC</span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("RC") }}</span>
                     </a>
                     <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <span class="flex items-center">
-                            <i class="fas fa-clock mr-3"></i>Delay Pools
+                            <i class="fas fa-clock mr-3"></i>{{ _("Delay Pools") }}
                         </span>
-                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">RC</span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("RC") }}</span>
                     </a>
                     <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <span class="flex items-center">
-                            <i class="fas fa-key mr-3"></i>HTTP Access
+                            <i class="fas fa-key mr-3"></i>{{ _("HTTP Access") }}
                         </span>
-                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">RC</span>
+                        <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("RC") }}</span>
                     </a>
-                    <a href="/admin/quota" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="Cuotas">
-                        <i class="fas fa-tachometer-alt mr-3"></i>Cuotas
-                        <span class="ml-2 text-xs font-semibold text-white bg-yellow-500 px-2 py-0.5 rounded">Beta</span>
+                    <a href="/admin/quota" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="{{ _("Cuotas") }}">
+                        <i class="fas fa-tachometer-alt mr-3"></i>{{ _("Cuotas") }}
+                        <span class="ml-2 text-xs font-semibold text-white bg-yellow-500 px-2 py-0.5 rounded">{{ _("Beta") }}</span>
                     </a>
                     <a href="/admin/blacklist" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-ban mr-3"></i>Blacklist
+                        <i class="fas fa-ban mr-3"></i>{{ _("Blacklist") }}
                     </a>
                     <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
-                        <i class="fas fa-file-alt mr-3"></i>Logs
+                        <i class="fas fa-file-alt mr-3"></i>{{ _("Logs") }}
                     </a>
 
                 </div>

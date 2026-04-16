@@ -3,6 +3,7 @@ import time
 from typing import Any
 
 from flask import Blueprint, redirect, render_template, request
+from flask_babel import gettext as _
 from loguru import logger
 
 from config import Config
@@ -116,7 +117,7 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
             "squid_version": squid_version,
             "squid_info_stats": squid_info_stats,
             "page_icon": "favicon.ico",
-            "page_title": "Inicio Dashboard",
+            "page_title": _("Inicio Dashboard"),
             "build_time_ms": int((time.time() - t0) * 1000),
             "connection_count": len(connections),
             "system_type": get_system_type(),
@@ -208,9 +209,9 @@ def all_notifications():
 
         return render_template(
             "all_notifications.html",
-            page_title="Todas las Notificaciones",
+            page_title=_("Todas las Notificaciones"),
             page_icon="favicon.ico",
-            subtitle="Historial completo de notificaciones del sistema",
+            subtitle=_("Historial completo de notificaciones del sistema"),
             icon="fas fa-bell",
             notifications=notifications_data["notifications"],
             unread_count=notifications_data["unread_count"],
@@ -230,9 +231,9 @@ def all_notifications():
         logger.error(f"Error loading notifications page: {e}")
         return render_template(
             "all_notifications.html",
-            page_title="Todas las Notificaciones",
+            page_title=_("Todas las Notificaciones"),
             page_icon="favicon.ico",
-            subtitle="Error al cargar las notificaciones",
+            subtitle=_("Error al cargar las notificaciones"),
             icon="fa-bell",
             notifications=[],
             unread_count=0,

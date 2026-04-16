@@ -4,6 +4,7 @@ import tempfile
 import icapclient
 
 from config import Config
+from flask_babel import gettext as _
 
 ICAP_HOST = os.getenv("ICAP_HOST", Config.SQUID_HOST)
 ICAP_PORT = int(os.getenv("ICAP_PORT", 1344))
@@ -11,7 +12,7 @@ ICAP_PORT = int(os.getenv("ICAP_PORT", 1344))
 
 def scan_file_with_icap(file_storage):
     if file_storage.filename == "":
-        return {"error": "No selected file"}, 400
+        return {"error": _("No selected file")}, 400
 
     # Save file to a temporary location
     with tempfile.NamedTemporaryFile(delete=False) as tmp:

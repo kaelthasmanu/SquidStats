@@ -1,6 +1,6 @@
 {% extends 'admin/base.html' %}
 
-{% block title %}LDAP / Active Directory | Admin Squid{% endblock %}
+{% block title %}{{ _("LDAP / Active Directory | Admin Squid") }}{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-6" x-data="ldapApp()" x-init="init()">
@@ -11,9 +11,9 @@
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-network-wired text-blue-600"></i>
-                    LDAP / Active Directory
+                    {{ _("LDAP / Active Directory") }}
                 </h2>
-                <p class="text-sm text-gray-500 mt-1">Configura la conexión y explora el directorio.</p>
+                <p class="text-sm text-gray-500 mt-1">{{ _("Configura la conexión y explora el directorio.") }}</p>
             </div>
             <!-- Connection status badge -->
             <div>
@@ -32,10 +32,10 @@
                 <i class="fas fa-users text-blue-600 text-2xl"></i>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Total Usuarios</p>
+                <p class="text-sm text-gray-500">{{ _("Total Usuarios") }}</p>
                 <p class="text-3xl font-bold text-gray-800" x-text="stats.users ?? '—'"></p>
             </div>
-            <button @click="loadStats()" :disabled="loadingStats" title="Actualizar" class="ml-auto text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-40">
+            <button @click="loadStats()" :disabled="loadingStats" title="{{ _("Actualizar") }}" class="ml-auto text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-40">
                 <i class="fas fa-sync-alt" :class="loadingStats ? 'animate-spin' : ''"></i>
             </button>
         </div>
@@ -44,10 +44,10 @@
                 <i class="fas fa-layer-group text-indigo-600 text-2xl"></i>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Total Grupos</p>
+                <p class="text-sm text-gray-500">{{ _("Total Grupos") }}</p>
                 <p class="text-3xl font-bold text-gray-800" x-text="stats.groups ?? '—'"></p>
             </div>
-            <button @click="loadStats()" :disabled="loadingStats" title="Actualizar" class="ml-auto text-gray-400 hover:text-indigo-600 transition-colors disabled:opacity-40">
+            <button @click="loadStats()" :disabled="loadingStats" title="{{ _("Actualizar") }}" class="ml-auto text-gray-400 hover:text-indigo-600 transition-colors disabled:opacity-40">
                 <i class="fas fa-sync-alt" :class="loadingStats ? 'animate-spin' : ''"></i>
             </button>
         </div>
@@ -59,51 +59,51 @@
         <!-- LEFT – Configuration form -->
         <div class="xl:col-span-1 bg-white shadow rounded-lg border border-gray-200 p-6 space-y-4">
             <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                <i class="fas fa-cog text-gray-500"></i> Configuración de conexión
+                <i class="fas fa-cog text-gray-500"></i> {{ _("Configuración de conexión") }}
             </h3>
 
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Servidor (host)</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Servidor (host)") }}</label>
                 <input x-model="cfg.host" type="text" placeholder="ldap.empresa.com"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Puerto</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Puerto") }}</label>
                     <input x-model.number="cfg.port" type="number" placeholder="389"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Autenticación</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Autenticación") }}</label>
                     <select x-model="cfg.auth_type"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="SIMPLE">SIMPLE (LDAP)</option>
-                        <option value="NTLM">NTLM (AD)</option>
+                        <option value="SIMPLE">{{ _("SIMPLE (LDAP)") }}</option>
+                        <option value="NTLM">{{ _("NTLM (AD)") }}</option>
                     </select>
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
                 <input x-model="cfg.use_ssl" type="checkbox" id="use_ssl" class="rounded text-blue-600" />
-                <label for="use_ssl" class="text-sm text-gray-700">Usar SSL / LDAPS</label>
+                <label for="use_ssl" class="text-sm text-gray-700">{{ _("Usar SSL / LDAPS") }}</label>
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Bind DN / Usuario</label>
-                <input x-model="cfg.bind_dn" type="text" placeholder="CN=admin,DC=empresa,DC=com"
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Bind DN / Usuario") }}</label>
+                <input x-model="cfg.bind_dn" type="text" placeholder="{{ _("CN=admin,DC=empresa,DC=com") }}"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Contraseña Bind</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Contraseña Bind") }}</label>
                 <input x-model="cfg.bind_password" type="password" autocomplete="current-password" placeholder="••••••••"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Base DN</label>
-                <input x-model="cfg.base_dn" type="text" placeholder="DC=empresa,DC=com"
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Base DN") }}</label>
+                <input x-model="cfg.base_dn" type="text" placeholder="{{ _("DC=empresa,DC=com") }}"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
@@ -141,16 +141,16 @@
             <!-- Search Users -->
             <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
-                    <i class="fas fa-user-search text-blue-500"></i> Buscar Usuarios
+                    <i class="fas fa-user-search text-blue-500"></i> {{ _("Buscar Usuarios") }}
                 </h3>
                 <div class="flex gap-2 mb-4">
                     <input x-model="userQuery" @keydown.enter="searchUsers()" type="text"
-                        placeholder="Nombre, usuario, email…"
+                        placeholder="{{ _("Nombre, usuario, email…") }}"
                         class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <button @click="searchUsers()" :disabled="searchingUsers"
                         class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
                         <i class="fas fa-search" :class="searchingUsers ? 'animate-pulse' : ''"></i>
-                        Buscar
+                        {{ _("Buscar") }}
                     </button>
                 </div>
 
@@ -159,11 +159,11 @@
                     <table class="min-w-full text-sm" x-show="userResults.length > 0">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Usuario</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _("Nombre") }}</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">{{ _("Usuario") }}</th>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Email</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Departamento</th>
-                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Grupos</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">{{ _("Departamento") }}</th>
+                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ _("Grupos") }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -176,8 +176,8 @@
                                     <td class="px-3 py-2 text-center">
                                         <button @click="loadUserGroups(u.username)"
                                             class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold hover:underline transition-colors"
-                                            title="Ver grupos del usuario">
-                                            <i class="fas fa-sitemap mr-1"></i>Ver grupos
+                                            title="{{ _("Ver grupos del usuario") }}">
+                                            <i class="fas fa-sitemap mr-1"></i>{{ _("Ver grupos") }}
                                         </button>
                                     </td>
                                 </tr>
@@ -185,7 +185,7 @@
                         </tbody>
                     </table>
                     <p x-show="userResults.length === 0 && userSearched" class="text-sm text-gray-500 text-center py-4">
-                        <i class="fas fa-inbox mr-2"></i>No se encontraron usuarios.
+                        <i class="fas fa-inbox mr-2"></i>{{ _("No se encontraron usuarios.") }}
                     </p>
                 </div>
             </div>
@@ -193,16 +193,16 @@
             <!-- Search Groups -->
             <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
-                    <i class="fas fa-layer-group text-indigo-500"></i> Buscar Grupos
+                    <i class="fas fa-layer-group text-indigo-500"></i> {{ _("Buscar Grupos") }}
                 </h3>
                 <div class="flex gap-2 mb-4">
                     <input x-model="groupQuery" @keydown.enter="searchGroups()" type="text"
-                        placeholder="Nombre del grupo…"
+                        placeholder="{{ _("Nombre del grupo…") }}"
                         class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                     <button @click="searchGroups()" :disabled="searchingGroups"
                         class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
                         <i class="fas fa-search" :class="searchingGroups ? 'animate-pulse' : ''"></i>
-                        Buscar
+                        {{ _("Buscar") }}
                     </button>
                 </div>
 
@@ -210,9 +210,9 @@
                     <table class="min-w-full text-sm" x-show="groupResults.length > 0">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Descripción</th>
-                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Miembros</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _("Nombre") }}</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">{{ _("Descripción") }}</th>
+                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ _("Miembros") }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -228,7 +228,7 @@
                         </tbody>
                     </table>
                     <p x-show="groupResults.length === 0 && groupSearched" class="text-sm text-gray-500 text-center py-4">
-                        <i class="fas fa-inbox mr-2"></i>No se encontraron grupos.
+                        <i class="fas fa-inbox mr-2"></i>{{ _("No se encontraron grupos.") }}
                     </p>
                 </div>
             </div>
@@ -238,16 +238,16 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
                         <i class="fas fa-sitemap text-purple-500"></i>
-                        Grupos de <span class="text-purple-700 ml-1" x-text="membershipTarget"></span>
+                        {{ _("Grupos de") }} <span class="text-purple-700 ml-1" x-text="membershipTarget"></span>
                     </h3>
                     <button @click="clearMembership()" class="text-gray-400 hover:text-gray-600 transition-colors text-xs">
-                        <i class="fas fa-times"></i> Limpiar
+                        <i class="fas fa-times"></i> {{ _("Limpiar") }}
                     </button>
                 </div>
 
                 <!-- Loading spinner -->
                 <div x-show="loadingMembership" class="flex items-center justify-center py-8 text-gray-400">
-                    <i class="fas fa-circle-notch fa-spin text-2xl mr-3"></i> Cargando grupos…
+                    <i class="fas fa-circle-notch fa-spin text-2xl mr-3"></i> {{ _("Cargando grupos…") }}
                 </div>
 
                 <!-- Error -->
@@ -260,7 +260,7 @@
                 <!-- Groups list -->
                 <div x-show="!loadingMembership && !membershipError && membershipGroups.length > 0">
                     <p class="text-xs text-gray-500 mb-3">
-                        <span x-text="membershipGroups.length"></span> grupo(s) encontrado(s)
+                        <span x-text="membershipGroups.length"></span> {{ _("grupo(s) encontrado(s)") }}
                     </p>
                     <div class="flex flex-wrap gap-2">
                         <template x-for="g in membershipGroups" :key="g.dn">
@@ -274,7 +274,7 @@
 
                 <p x-show="!loadingMembership && !membershipError && membershipGroups.length === 0"
                     class="text-sm text-gray-500 text-center py-4">
-                    <i class="fas fa-inbox mr-2"></i>Este usuario no pertenece a ningún grupo.
+                    <i class="fas fa-inbox mr-2"></i>{{ _("Este usuario no pertenece a ningún grupo.") }}
                 </p>
             </div>
 

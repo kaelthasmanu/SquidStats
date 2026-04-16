@@ -1,5 +1,5 @@
 <!-- components/loading_spinner.html -->
-<div id="importLoadingOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-sm" role="status" aria-live="polite" aria-label="Importando lista">
+<div id="importLoadingOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-sm" role="status" aria-live="polite" aria-label="{{ _("Importando lista") }}">
     <div class="w-full max-w-sm mx-4 rounded-2xl border border-white/20 bg-white/95 shadow-2xl p-6 text-center">
         <div class="relative mx-auto mb-5 h-20 w-20">
             <div class="absolute inset-0 rounded-full border-4 border-blue-200"></div>
@@ -10,8 +10,8 @@
             </div>
         </div>
 
-        <p id="importLoadingTitle" class="text-base sm:text-lg font-semibold text-slate-800">Importando lista de bloqueo</p>
-        <p id="importLoadingSubtitle" class="mt-1 text-sm text-slate-500">Validando URL y procesando dominios...</p>
+        <p id="importLoadingTitle" class="text-base sm:text-lg font-semibold text-slate-800">{{ _("Importando lista de bloqueo") }}</p>
+        <p id="importLoadingSubtitle" class="mt-1 text-sm text-slate-500">{{ _("Validando URL y procesando dominios...") }}</p>
 
         <div class="mt-4 flex items-center justify-center gap-1.5">
             <span class="h-2 w-2 rounded-full bg-blue-600 animate-bounce"></span>

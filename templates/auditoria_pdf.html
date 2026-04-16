@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auditoría - {{ audit_type }}</title>
+  <title>{{ _("Auditoría -") }} {{ audit_type }}</title>
   <style>
     body { font-family: Arial, Helvetica, sans-serif; color: #1f2937; margin: 24px; }
     h1 { font-size: 22px; margin-bottom: 8px; }
@@ -16,46 +16,46 @@
   </style>
 </head>
 <body>
-  <h1>Auditoría: {{ audit_type | replace('_',' ') | title }}</h1>
-  <div class="meta">Generado: {{ generated_at }} | Filtros: {% for k,v in params.items() if v %}{{ k }}={{ v }}{% if not loop.last %}, {% endif %}{% endfor %}</div>
+  <h1>{{ _("Auditoría:") }} {{ audit_type | replace('_',' ') | title }}</h1>
+  <div class="meta">{{ _("Generado:") }} {{ generated_at }} {{ _("| Filtros:") }} {% for k,v in params.items() if v %}{{ k }}={{ v }}{% if not loop.last %}, {% endif %}{% endfor %}</div>
 
   {% if data.error %}
-    <div class="box"><strong>Error:</strong> {{ data.error }}</div>
+    <div class="box"><strong>{{ _("Error:") }}</strong> {{ data.error }}</div>
   {% else %}
     {% set has_results = data.results is defined and data.results %}
     {% if audit_type == 'user_summary' %}
       <div class="box">
-        <h2>Resumen de Usuario</h2>
-        <p>Total solicitudes: {{ data.total_requests | default(0) }}</p>
-        <p>Datos totales (GB): {{ data.total_data_gb | default(0) }}</p>
+        <h2>{{ _("Resumen de Usuario") }}</h2>
+        <p>{{ _("Total solicitudes:") }} {{ data.total_requests | default(0) }}</p>
+        <p>{{ _("Datos totales (GB):") }} {{ data.total_data_gb | default(0) }}</p>
       </div>
       {% if data.top_domains %}
-      <div class="box"><h2>Top dominios</h2><table class="table"><tr><th>Dominio</th><th>Conteo</th></tr>{% for row in data.top_domains %}<tr><td>{{ row.domain }}</td><td>{{ row.count }}</td></tr>{% endfor %}</table></div>
+      <div class="box"><h2>{{ _("Top dominios") }}</h2><table class="table"><tr><th>{{ _("Dominio") }}</th><th>{{ _("Conteo") }}</th></tr>{% for row in data.top_domains %}<tr><td>{{ row.domain }}</td><td>{{ row.count }}</td></tr>{% endfor %}</table></div>
       {% endif %}
       {% if data.response_summary %}
-      <div class="box"><h2>Resumen de respuestas</h2><table class="table"><tr><th>Código</th><th>Conteo</th></tr>{% for row in data.response_summary %}<tr><td>{{ row.code }}</td><td>{{ row.count }}</td></tr>{% endfor %}</table></div>
+      <div class="box"><h2>{{ _("Resumen de respuestas") }}</h2><table class="table"><tr><th>{{ _("Código") }}</th><th>{{ _("Conteo") }}</th></tr>{% for row in data.response_summary %}<tr><td>{{ row.code }}</td><td>{{ row.count }}</td></tr>{% endfor %}</table></div>
       {% endif %}
     {% elif audit_type == 'daily_activity' %}
-      <div class="box"><h2>Actividad diaria</h2><p>Total solicitudes: {{ data.total_requests | default(0) }}</p><table class="table"><tr><th>Hora</th><th>Requests</th></tr>{% for value in data.hourly_activity %}<tr><td>{{ loop.index0 }}:00</td><td>{{ value }}</td></tr>{% endfor %}</table></div>
+      <div class="box"><h2>{{ _("Actividad diaria") }}</h2><p>{{ _("Total solicitudes:") }} {{ data.total_requests | default(0) }}</p><table class="table"><tr><th>{{ _("Hora") }}</th><th>{{ _("Requests") }}</th></tr>{% for value in data.hourly_activity %}<tr><td>{{ loop.index0 }}:00</td><td>{{ value }}</td></tr>{% endfor %}</table></div>
     {% elif audit_type == 'total_data_consumed' %}
-      <div class="box"><h2>Consumo total</h2><p>Datos totales (GB): {{ data.total_data_gb | default(0) }}</p><p>Total peticiones: {{ data.total_requests | default(0) }}</p><p>Rango: {{ data.date_range | default('n/a') }}</p></div>
+      <div class="box"><h2>{{ _("Consumo total") }}</h2><p>{{ _("Datos totales (GB):") }} {{ data.total_data_gb | default(0) }}</p><p>{{ _("Total peticiones:") }} {{ data.total_requests | default(0) }}</p><p>{{ _("Rango:") }} {{ data.date_range | default('n/a') }}</p></div>
     {% elif audit_type == 'top_users_data' %}
       {% set rows = data.top_users %}
-      <div class="box"><h2>Top usuarios por datos</h2></div>
+      <div class="box"><h2>{{ _("Top usuarios por datos") }}</h2></div>
     {% elif audit_type == 'top_users_requests' %}
       {% set rows = data.top_users_requests %}
-      <div class="box"><h2>Top usuarios por solicitudes</h2></div>
+      <div class="box"><h2>{{ _("Top usuarios por solicitudes") }}</h2></div>
     {% elif audit_type == 'top_urls_data' %}
       {% set rows = data.top_urls %}
-      <div class="box"><h2>Top URLs por datos</h2></div>
+      <div class="box"><h2>{{ _("Top URLs por datos") }}</h2></div>
     {% elif audit_type == 'top_ips_data' %}
       {% set rows = data.top_ips %}
-      <div class="box"><h2>Top IPs por datos</h2></div>
+      <div class="box"><h2>{{ _("Top IPs por datos") }}</h2></div>
     {% elif has_results %}
       {% set rows = data.results %}
-      <div class="box"><h2>Resultados</h2></div>
+      <div class="box"><h2>{{ _("Resultados") }}</h2></div>
     {% else %}
-      <div class="box"><p>No hay datos disponibles para esta auditoría.</p></div>
+      <div class="box"><p>{{ _("No hay datos disponibles para esta auditoría.") }}</p></div>
     {% endif %}
 
     {% if rows is defined and rows %}

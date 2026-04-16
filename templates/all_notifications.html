@@ -38,20 +38,20 @@
     <!-- Counter -->
     <div class="bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 flex-shrink-0 text-center">
       <span class="text-xs sm:text-sm text-blue-700 font-medium">
-        <span id="unread-count">{{ unread_count }}</span> No leídas
+        <span id="unread-count">{{ unread_count }}</span> {{ _("No leídas") }}
       </span>
     </div>
     
     <!-- Mark all as read button -->
     <button id="mark-all-read" class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm flex-1 sm:flex-none">
       <i class="fas fa-check-double"></i>
-      <span class="hidden xs:inline">Marcar todas</span>
+      <span class="hidden xs:inline">{{ _("Marcar todas") }}</span>
     </button>
 
     <!-- Delete all button -->
     <button id="delete-all" class="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm flex-1 sm:flex-none">
       <i class="fas fa-trash"></i>
-      <span class="hidden xs:inline">Eliminar todas</span>
+      <span class="hidden xs:inline">{{ _("Eliminar todas") }}</span>
     </button>
   </div>
 {% endblock %}
@@ -62,38 +62,38 @@
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
     <div class="flex flex-wrap gap-4 items-center">
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium text-gray-700">Filtrar por:</span>
+        <span class="text-sm font-medium text-gray-700">{{ _("Filtrar por:") }}</span>
         <select id="filter-type" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]">
-          <option value="all">Todos los tipos</option>
-          <option value="error">Errores</option>
-          <option value="warning">Advertencias</option>
-          <option value="success">Éxitos</option>
-          <option value="info">Información</option>
+          <option value="all">{{ _("Todos los tipos") }}</option>
+          <option value="error">{{ _("Errores") }}</option>
+          <option value="warning">{{ _("Advertencias") }}</option>
+          <option value="success">{{ _("Éxitos") }}</option>
+          <option value="info">{{ _("Información") }}</option>
         </select>
       </div>
       
       <div class="flex items-center gap-2">
         <select id="filter-source" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]">
-          <option value="all">Todas las fuentes</option>
-          <option value="squid">Squid</option>
-          <option value="system">Sistema</option>
-          <option value="security">Seguridad</option>
-          <option value="users">Usuarios</option>
-          <option value="git">Git</option>
+          <option value="all">{{ _("Todas las fuentes") }}</option>
+          <option value="squid">{{ _("Squid") }}</option>
+          <option value="system">{{ _("Sistema") }}</option>
+          <option value="security">{{ _("Seguridad") }}</option>
+          <option value="users">{{ _("Usuarios") }}</option>
+          <option value="git">{{ _("Git") }}</option>
         </select>
       </div>
       
       <div class="flex items-center gap-2">
         <select id="filter-status" class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[155px]">
-          <option value="all">Todos los estados</option>
-          <option value="unread">Sin leer</option>
-          <option value="read">Leída</option>
+          <option value="all">{{ _("Todos los estados") }}</option>
+          <option value="unread">{{ _("Sin leer") }}</option>
+          <option value="read">{{ _("Leída") }}</option>
         </select>
       </div>
       
       <button id="clear-filters" class="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1">
         <i class="fas fa-times"></i>
-        <span>Limpiar filtros</span>
+        <span>{{ _("Limpiar filtros") }}</span>
       </button>
     </div>
   </div>
@@ -102,7 +102,7 @@
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
     <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
       <div class="text-sm text-gray-600">
-        Mostrando <span id="current-range">1-{{ notifications|length }}</span> de 
+        {{ _("Mostrando") }} <span id="current-range">1-{{ notifications|length }}</span> de 
         <span id="total-notifications">{{ pagination.total_notifications if pagination else notifications|length }}</span> notificaciones
       </div>
       
@@ -112,7 +112,7 @@
           <i class="fas fa-chevron-left"></i>
         </button>
         <span id="page-info" class="px-3 py-1 text-gray-700 text-sm">
-          Página {{ pagination.current_page if pagination else 1 }} de {{ pagination.total_pages if pagination else 1 }}
+          {{ _("Página") }} {{ pagination.current_page if pagination else 1 }} de {{ pagination.total_pages if pagination else 1 }}
         </span>
         <button id="next-page" class="pagination-btn px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 {% if not pagination or not pagination.has_next %}disabled{% endif %}>
@@ -159,7 +159,7 @@
               </div>
               {% if not notification.read %}
               <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                No leída
+                {{ _("No leída") }}
               </span>
               {% endif %}
             </div>
@@ -183,13 +183,13 @@
             {% if not notification.read %}
             <button class="mark-read-btn text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors duration-150" 
                     data-id="{{ notification.id }}"
-                    title="Marcar como leída">
+                    title="{{ _("Marcar como leída") }}">
               <i class="fas fa-check"></i>
             </button>
             {% endif %}
             <button class="delete-btn text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors duration-150"
                     data-id="{{ notification.id }}"
-                    title="Eliminar notificación">
+                    title="{{ _("Eliminar notificación") }}">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -203,8 +203,8 @@
       <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
         <i class="fas fa-bell-slash text-gray-400 text-3xl"></i>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No hay notificaciones</h3>
-      <p class="text-gray-500 max-w-md mx-auto">Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!</p>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">{{ _("No hay notificaciones") }}</h3>
+      <p class="text-gray-500 max-w-md mx-auto">{{ _("Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!") }}</p>
     </div>
     {% endif %}
   </div>
@@ -214,6 +214,42 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const i18n = {
+        errorLoadNotifications: "{{ _('Error al cargar notificaciones') }}",
+        noNotifications: "{{ _('No hay notificaciones') }}",
+        noNotificationsDescription: "{{ _('Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!') }}",
+        unreadLabel: "{{ _('No leída') }}",
+        markAsReadTitle: "{{ _('Marcar como leída') }}",
+        deleteNotificationTitle: "{{ _('Eliminar notificación') }}",
+        noNotificationsUnread: "{{ _('No hay notificaciones sin leer') }}",
+        confirmDeleteNotification: "{{ _('¿Estás seguro de que quieres eliminar esta notificación?') }}",
+        notificationDeleted: "{{ _('Notificación eliminada') }}",
+        errorDeleteNotification: "{{ _('Error al eliminar notificación:') }}",
+        confirmDeleteAll: "{{ _('¿Estás seguro de que quieres eliminar TODAS las notificaciones? Esta acción no se puede deshacer.') }}",
+        allNotificationsDeleted: "{{ _('Todas las notificaciones han sido eliminadas') }}",
+        errorDeleteNotifications: "{{ _('Error al eliminar notificaciones:') }}",
+        filtersCleared: "{{ _('Filtros limpiados') }}",
+        errorConnectionPrefix: "{{ _('Error de conexión:') }}",
+        errorUnknown: "{{ _('Error desconocido') }}",
+        markReadSuccess: "{{ _('{count} notificación(es) marcada(s) como leída(s)') }}",
+        errorMarkReadNotifications: "{{ _('Error al marcar notificaciones como leídas:') }}",
+        agoJustNow: "{{ _('Hace unos momentos') }}",
+        agoMinutesSingular: "{{ _('Hace {count} minuto') }}",
+        agoMinutesPlural: "{{ _('Hace {count} minutos') }}",
+        agoHoursSingular: "{{ _('Hace {count} hora') }}",
+        agoHoursPlural: "{{ _('Hace {count} horas') }}",
+        agoDaysSingular: "{{ _('Hace {count} día') }}",
+        agoDaysPlural: "{{ _('Hace {count} días') }}",
+        systemSource: "{{ _('Sistema') }}",
+        squidSource: "{{ _('Squid') }}",
+        gitSource: "{{ _('Git') }}",
+        securitySource: "{{ _('Seguridad') }}",
+        usersSource: "{{ _('Usuarios') }}",
+        errorType: "{{ _('Error') }}",
+        warningType: "{{ _('Advertencia') }}",
+        successType: "{{ _('Éxito') }}",
+        infoType: "{{ _('Información') }}"
+    };
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     let currentPage = {{ pagination.current_page if pagination else 1 }};
     const totalPages = {{ pagination.total_pages if pagination else 1 }};
@@ -250,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error loading notifications:', error);
-                showToast('Error al cargar notificaciones', 'error');
+                showToast(i18n.errorLoadNotifications, 'error');
             });
     }
 
@@ -258,6 +294,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderNotifications(notifications) {
         const container = document.getElementById('notifications-list');
         if (!container) return;
+
+        const sourceMap = {
+            squid: i18n.squidSource || 'Squid',
+            git: i18n.gitSource || 'Git',
+            system: i18n.systemSource || 'Sistema',
+            security: i18n.securitySource || 'Seguridad',
+            users: i18n.usersSource || 'Usuarios'
+        };
+        const typeLabels = {
+            error: i18n.errorType || 'Error',
+            warning: i18n.warningType || 'Advertencia',
+            success: i18n.successType || 'Éxito',
+            info: i18n.infoType || 'Información'
+        };
 
         container.innerHTML = notifications.map(notification => `
             <div class="notification-item border-b border-gray-100 last:border-b-0 ${notification.read ? 'notification-read' : ''}" 
@@ -284,13 +334,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                               notification.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
                                               notification.type === 'success' ? 'bg-green-100 text-green-800' :
                                               'bg-blue-100 text-blue-800'}">
-                                    ${notification.source.toUpperCase()}
+                                    ${(() => {
+                                        const sourceMap = {
+                                            squid: i18n.squidSource || 'Squid',
+                                            git: i18n.gitSource || 'Git',
+                                            system: i18n.systemSource || 'Sistema',
+                                            security: i18n.securitySource || 'Seguridad',
+                                            users: i18n.usersSource || 'Usuarios'
+                                        };
+                                        return sourceMap[notification.source] || notification.source.toUpperCase();
+                                    })()}
                                 </span>
                                 <span class="ml-2 text-sm text-gray-500">${formatTimeAgo(notification.timestamp)}</span>
                             </div>
                             ${!notification.read ? `
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                No leída
+                                ${i18n.unreadLabel || 'No leída'}
                             </span>
                             ` : ''}
                         </div>
@@ -304,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </span>
                             <span class="flex items-center gap-1">
                                 <i class="fas fa-${notification.icon}"></i>
-                                <span class="capitalize">${notification.type}</span>
+                                <span class="capitalize">${typeLabels[notification.type] || notification.type}</span>
                             </span>
                         </div>
                     </div>
@@ -319,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         ` : ''}
                         <button class="delete-btn text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors duration-150"
                                 data-id="${notification.id}"
-                                title="Eliminar notificación">
+                                title="${i18n.deleteNotificationTitle}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -358,8 +417,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <i class="fas fa-bell-slash text-gray-400 text-3xl"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No hay notificaciones</h3>
-                <p class="text-gray-500 max-w-md mx-auto">Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!</p>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">${i18n.noNotifications || 'No hay notificaciones'}</h3>
+                <p class="text-gray-500 max-w-md mx-auto">${i18n.noNotificationsDescription || 'Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!'}</p>
             </div>
         `;
     }
@@ -373,10 +432,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const diffHours = Math.floor(diffMs / 3600000);
         const diffDays = Math.floor(diffMs / 86400000);
         
-        if (diffMins < 1) return 'Hace unos momentos';
-        if (diffMins < 60) return `Hace ${diffMins} minuto${diffMins > 1 ? 's' : ''}`;
-        if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
-        return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+        if (diffMins < 1) return i18n.agoJustNow || 'Hace unos momentos';
+        if (diffMins < 60) return (diffMins === 1 ? i18n.agoMinutesSingular : i18n.agoMinutesPlural)
+            .replace('{count}', diffMins);
+        if (diffHours < 24) return (diffHours === 1 ? i18n.agoHoursSingular : i18n.agoHoursPlural)
+            .replace('{count}', diffHours);
+        return (diffDays === 1 ? i18n.agoDaysSingular : i18n.agoDaysPlural)
+            .replace('{count}', diffDays);
     }
 
     // Function to mark notification as read
@@ -405,14 +467,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Reload notifications to reflect changes
                 loadNotifications(currentPage);
                 
-                showToast(`${notificationIds.length} notificación(es) marcada(s) como leída(s)`, 'success');
+                showToast(i18n.markReadSuccess.replace('{count}', notificationIds.length), 'success');
             } else {
-                showToast('Error al marcar notificaciones como leídas: ' + (data.error || 'Error desconocido'), 'error');
+                showToast(`${i18n.errorMarkReadNotifications || 'Error al marcar notificaciones como leídas:'} ${data.error || i18n.errorUnknown || 'Error desconocido'}`, 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('Error de conexión: ' + error.message, 'error');
+            showToast(`${i18n.errorConnectionPrefix || 'Error de conexión:'} ${error.message}`, 'error');
         });
     }
 
@@ -424,13 +486,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (unreadIds.length > 0) {
             markAsRead(unreadIds);
         } else {
-            showToast('No hay notificaciones sin leer', 'info');
+            showToast(i18n.noNotificationsUnread, 'info');
         }
     }
 
     // Función para ELIMINAR notificación
     function deleteNotification(notificationId) {
-        if (!confirm('¿Estás seguro de que quieres eliminar esta notificación?')) {
+        if (!confirm(i18n.confirmDeleteNotification)) {
             return;
         }
         
@@ -454,20 +516,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Actualizar contador
                 document.getElementById('unread-count').textContent = data.unread_count;
                 
-                showToast('Notificación eliminada', 'success');
+                showToast(i18n.notificationDeleted, 'success');
             } else {
-                showToast('Error al eliminar notificación: ' + (data.error || 'Error desconocido'), 'error');
+                showToast(`${i18n.errorDeleteNotification || 'Error al eliminar notificación:'} ${data.error || i18n.errorUnknown || 'Error desconocido'}`, 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('Error de conexión: ' + error.message, 'error');
+            showToast(`${i18n.errorConnectionPrefix || 'Error de conexión:'} ${error.message}`, 'error');
         });
     }
 
     // Función para ELIMINAR TODAS las notificaciones
     function deleteAllNotifications() {
-        if (!confirm('¿Estás seguro de que quieres eliminar TODAS las notificaciones? Esta acción no se puede deshacer.')) {
+        if (!confirm(i18n.confirmDeleteAll)) {
             return;
         }
         
@@ -500,14 +562,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('prev-page').disabled = true;
                 document.getElementById('next-page').disabled = true;
                 
-                showToast('Todas las notificaciones han sido eliminadas', 'success');
+                showToast(i18n.allNotificationsDeleted, 'success');
             } else {
-                showToast('Error al eliminar notificaciones: ' + (data.error || 'Error desconocido'), 'error');
+                showToast(`${i18n.errorDeleteNotifications || 'Error al eliminar notificaciones:'} ${data.error || i18n.errorUnknown || 'Error desconocido'}`, 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('Error de conexión: ' + error.message, 'error');
+            showToast(`${i18n.errorConnectionPrefix || 'Error de conexión:'} ${error.message}`, 'error');
         });
     }
     
@@ -587,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('filter-source').value = 'all';
         document.getElementById('filter-status').value = 'all';
         applyFilters();
-        showToast('Filtros limpiados', 'info');
+        showToast(i18n.filtersCleared, 'info');
     });
 });
 </script>

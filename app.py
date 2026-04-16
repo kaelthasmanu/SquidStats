@@ -6,8 +6,9 @@ from datetime import datetime, timedelta, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request, session
 from flask_apscheduler import APScheduler
+from flask_babel import Babel
 from flask_socketio import SocketIO
 from loguru import logger
 
@@ -84,6 +85,27 @@ def create_app():
 
     # Initialize CSRF protection (shared instance with routes)
     csrf.init_app(app)
+
+    # Initialize Flask-Babel for i18n
+    def get_locale():
+        # 1. Check session
+        lang = session.get("lang")
+        if lang and lang in Config.BABEL_SUPPORTED_LOCALES:
+            return lang
+        # 2. Check cookie
+        lang = request.cookies.get("lang")
+        if lang and lang in Config.BABEL_SUPPORTED_LOCALES:
+            return lang
+        # 3. Check Accept-Language header
+        return request.accept_languages.best_match(
+            Config.BABEL_SUPPORTED_LOCALES, default=Config.BABEL_DEFAULT_LOCALE
+        )
+
+    Babel(app, locale_selector=get_locale)
+
+    # Make get_locale available in templates
+    app.jinja_env.globals["get_locale"] = get_locale
+    app.jinja_env.globals["LANGUAGES"] = Config.LANGUAGES
 
     # Initialize extensions
     # Pass explicit timezone to avoid tzlocal.get_localzone() failures in containers
