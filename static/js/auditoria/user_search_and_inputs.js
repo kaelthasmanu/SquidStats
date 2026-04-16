@@ -1,5 +1,6 @@
 // User search & conditional inputs (sin cambios funcionales)
 (function(){
+  const i18n = window.__AUD_I18N__ || {};
   const conditionalInputs = {};
   let allUsers = [];
   let filteredUsers = [];
@@ -37,7 +38,7 @@
     if (!searchTerm){
       const allOption = document.createElement('div');
       allOption.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 border-b border-gray-100';
-      allOption.textContent = '-- Todos --';
+      allOption.textContent = i18n.allUsersOption || '-- Todos --';
       allOption.dataset.value = '';
       allOption.addEventListener('click', ()=>selectUser('', '-- Todos --'));
       elements.userOptionsContainer.appendChild(allOption);
@@ -58,7 +59,7 @@
     if (users.length===0 && searchTerm){
       const noResults = document.createElement('div');
       noResults.className = 'px-3 py-2 text-gray-500 italic';
-      noResults.textContent = 'No se encontraron usuarios';
+      noResults.textContent = i18n.noUsersFound || 'No se encontraron usuarios';
       elements.userOptionsContainer.appendChild(noResults);
     }
   }
@@ -102,7 +103,7 @@
         users.forEach(u=>{ const opt=document.createElement('option'); opt.value=u; opt.textContent=u; elements.usernameSelect.appendChild(opt); });
         renderUserOptions(filteredUsers);
       })
-      .catch(()=> toastr.error('Error al cargar la lista de usuarios','Error de carga'));
+      .catch(()=> toastr.error(i18n.errorLoadingUsers || 'Error al cargar la lista de usuarios', i18n.loadError || 'Error de carga'));
   }
 
   function toggleConditionalInputs(){
@@ -115,19 +116,19 @@
 
     if (auditType === 'daily_activity'){
       elements.endDateContainer.style.display='none';
-      elements.startDateContainer.querySelector('label').textContent = 'Fecha';
+      elements.startDateContainer.querySelector('label').textContent = i18n.dateLabel || 'Fecha';
     } else {
       elements.endDateContainer.style.display='block';
-      elements.startDateContainer.querySelector('label').textContent = 'Fecha de Inicio';
+      elements.startDateContainer.querySelector('label').textContent = i18n.startDateLabel || 'Fecha de Inicio';
     }
 
     if (auditType === 'user_summary' || auditType === 'daily_activity') {
-      elements.userSearchInput.placeholder = 'Seleccionar usuario...';
+      elements.userSearchInput.placeholder = i18n.selectUserPlaceholder || 'Seleccionar usuario...';
       elements.userSearchInput.value='';
       elements.usernameSelect.value='';
       elements.userSearchInput.disabled=false;
     } else {
-      elements.userSearchInput.placeholder = 'Buscar usuario... (Opcional)';
+      elements.userSearchInput.placeholder = i18n.searchUserOptionalPlaceholder || 'Buscar usuario... (Opcional)';
       elements.userSearchInput.value='-- Todos --';
       elements.usernameSelect.value='';
       elements.userSearchInput.disabled=false;

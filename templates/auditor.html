@@ -71,6 +71,7 @@
     <!-- Divided scripts -->
     <script>
         window.__AUD_I18N__ = {
+            // form_and_results.js
             selectFilters: "{{ _('Seleccione los filtros y genere un reporte') }}",
             resultsAppear: "{{ _('Los resultados de su auditoría aparecerán aquí.') }}",
             generating: "{{ _('Generando reporte...') }}",
@@ -97,6 +98,43 @@
             socialMediaTitle: "{{ _('Actividad en Redes Sociales ({sites}) para: {user}') }}",
             unknownReportType: "{{ _('Tipo de reporte no reconocido.') }}",
             networkServerError: "{{ _('Error de red o del servidor:') }}",
+            // renderers.js
+            noRecordsFound: "{{ _('No se encontraron registros.') }}",
+            requestsCol: "{{ _('Peticiones') }}",
+            lastAccessHeader: "{{ _('Hora (Últ. Acceso)') }}",
+            urlHeader: "URL",
+            attemptsHeader: "{{ _('Intentos') }}",
+            dataHeader: "{{ _('Datos') }}",
+            activitySummaryTitle: "{{ _('Resumen de Actividad') }}",
+            totalRequestsStat: "{{ _('Peticiones Totales') }}",
+            gbConsumedStat: "{{ _('GB Consumidos') }}",
+            responseSummaryStat: "{{ _('Resumen de Respuestas') }}",
+            top15DomainsTitle: "{{ _('Top 15 Dominios Visitados') }}",
+            httpResponseDistTitle: "{{ _('Distribución de Respuestas HTTP') }}",
+            top10UsersByDataTitle: "{{ _('Top 10 Usuarios por Consumo de Datos') }}",
+            userCol: "{{ _('Usuario') }}",
+            dataConsumedCol: "{{ _('Datos Consumidos') }}",
+            top15UrlsByDataTitle: "{{ _('Top 15 URLs por Consumo de Datos') }}",
+            top10UsersByRequestsTitle: "{{ _('Top 10 Usuarios por Peticiones') }}",
+            top10IpsByDataTitle: "{{ _('Top 10 IPs por Consumo de Datos') }}",
+            ipCol: "{{ _('IP') }}",
+            requestsPerHourLabel: "{{ _('Peticiones por Hora') }}",
+            timeOfDayAxis: "{{ _('Hora del Día') }}",
+            numberOfRequestsAxis: "{{ _('Número de Peticiones') }}",
+            totalDataConsumedTitle: "{{ _('Total de Datos Consumidos del {startDate} al {endDate}') }}",
+            totalDataPeriod: "{{ _('Total de datos consumidos en el período seleccionado') }}",
+            totalRequestsFooter: "{{ _('peticiones totales') }}",
+            tablesProcessedLabel: "{{ _('tablas procesadas') }}",
+            equivalentBytes: "{{ _('Equivalente a {bytes} bytes') }}",
+            // user_search_and_inputs.js
+            allUsersOption: "{{ _('-- Todos --') }}",
+            noUsersFound: "{{ _('No se encontraron usuarios.') }}",
+            errorLoadingUsers: "{{ _('Error al cargar la lista de usuarios') }}",
+            loadError: "{{ _('Error de carga') }}",
+            dateLabel: "{{ _('Fecha') }}",
+            startDateLabel: "{{ _('Fecha de Inicio') }}",
+            selectUserPlaceholder: "{{ _('Seleccionar usuario...') }}",
+            searchUserOptionalPlaceholder: "{{ _('Buscar usuario... (Opcional)') }}",
         };
     </script>
     <script src="{{ url_for('static', filename='js/auditoria/config_and_utils.js') }}"></script>

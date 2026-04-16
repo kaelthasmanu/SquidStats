@@ -4632,3 +4632,84 @@ msgstr "Unknown report type."
 
 msgid "Error de red o del servidor:"
 msgstr "Network or server error:"
+
+msgid "No se encontraron registros."
+msgstr "No records found."
+
+msgid "Hora (Últ. Acceso)"
+msgstr "Time (Last Access)"
+
+msgid "Intentos"
+msgstr "Attempts"
+
+msgid "Resumen de Actividad"
+msgstr "Activity Summary"
+
+msgid "Peticiones Totales"
+msgstr "Total Requests"
+
+msgid "GB Consumidos"
+msgstr "GB Consumed"
+
+msgid "Resumen de Respuestas"
+msgstr "Response Summary"
+
+msgid "Top 15 Dominios Visitados"
+msgstr "Top 15 Visited Domains"
+
+msgid "Distribución de Respuestas HTTP"
+msgstr "HTTP Response Distribution"
+
+msgid "Top 10 Usuarios por Consumo de Datos"
+msgstr "Top 10 Users by Data Consumption"
+
+msgid "Datos Consumidos"
+msgstr "Data Consumed"
+
+msgid "Top 15 URLs por Consumo de Datos"
+msgstr "Top 15 URLs by Data Consumption"
+
+msgid "Top 10 Usuarios por Peticiones"
+msgstr "Top 10 Users by Requests"
+
+msgid "Top 10 IPs por Consumo de Datos"
+msgstr "Top 10 IPs by Data Consumption"
+
+msgid "Peticiones por Hora"
+msgstr "Requests per Hour"
+
+msgid "Hora del Día"
+msgstr "Time of Day"
+
+msgid "Número de Peticiones"
+msgstr "Number of Requests"
+
+msgid "Total de Datos Consumidos del {startDate} al {endDate}"
+msgstr "Total Data Consumed from {startDate} to {endDate}"
+
+msgid "Total de datos consumidos en el período seleccionado"
+msgstr "Total data consumed in the selected period"
+
+msgid "peticiones totales"
+msgstr "total requests"
+
+msgid "tablas procesadas"
+msgstr "tables processed"
+
+msgid "Equivalente a {bytes} bytes"
+msgstr "Equivalent to {bytes} bytes"
+
+msgid "Error al cargar la lista de usuarios"
+msgstr "Error loading user list"
+
+msgid "Error de carga"
+msgstr "Load error"
+
+msgid "Fecha de Inicio"
+msgstr "Start Date"
+
+msgid "Seleccionar usuario..."
+msgstr "Select user..."
+
+msgid "Buscar usuario... (Opcional)"
+msgstr "Search user... (Optional)"
