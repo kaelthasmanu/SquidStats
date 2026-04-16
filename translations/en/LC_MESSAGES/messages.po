@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-04-15 13:05-0400\n"
+"POT-Creation-Date: 2026-04-15 21:19-0400\n"
 "PO-Revision-Date: 2026-04-15 13:15-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,147 +18,149 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: routes/admin_routes.py:149
+#: routes/admin_routes.py:150
 #, python-format
 msgid "Error saving configuration: %(message)s"
 msgstr "Error saving configuration: %(message)s"
 
-#: routes/admin/squid_config.py:57 routes/admin_routes.py:151
+#: routes/admin/squid_config.py:57 routes/admin_routes.py:152
 msgid "Error saving configuration"
 msgstr "Error saving configuration"
 
-#: routes/admin/squid_config.py:82 routes/admin_routes.py:175
+#: routes/admin/squid_config.py:82 routes/admin_routes.py:176
 msgid "Variables de entorno guardadas exitosamente"
 msgstr "Environment variables saved successfully"
 
-#: routes/admin/acls.py:50 routes/admin/acls.py:71 routes/admin_routes.py:218
-#: routes/admin_routes.py:236
+#: routes/admin/acls.py:50 routes/admin/acls.py:71 routes/admin_routes.py:219
+#: routes/admin_routes.py:237
 msgid "ID de ACL inválido"
 msgstr "Invalid ACL ID"
 
-#: routes/admin/blacklist.py:80 routes/admin_routes.py:309
+#: routes/admin/blacklist.py:80 routes/admin_routes.py:310
 msgid "Host de Pi-hole no proporcionado"
 msgstr "Pi-hole host not provided"
 
-#: routes/admin/blacklist.py:88 routes/admin_routes.py:322
+#: routes/admin/blacklist.py:88 routes/admin_routes.py:323
 msgid "Sincronización de listas iniciada (en segundo plano)"
 msgstr "List synchronization started (in background)"
 
-#: routes/admin/blacklist.py:101 routes/admin_routes.py:338
+#: routes/admin/blacklist.py:101 routes/admin_routes.py:339
 msgid "Archivo importado correctamente"
 msgstr "File imported successfully"
 
-#: routes/admin_routes.py:346
+#: routes/admin_routes.py:347
 #, python-format
 msgid "Error al procesar el archivo: %(error)s"
 msgstr "Error processing file: %(error)s"
 
-#: routes/admin/blacklist.py:104 routes/admin_routes.py:348
+#: routes/admin/blacklist.py:104 routes/admin_routes.py:349
 msgid "Error al procesar el archivo"
 msgstr "Error processing file"
 
-#: routes/admin/blacklist.py:112 routes/admin_routes.py:357
+#: routes/admin/blacklist.py:112 routes/admin_routes.py:358
 msgid "Lista importada desde URL correctamente"
 msgstr "List imported from URL successfully"
 
-#: routes/admin/blacklist.py:114 routes/admin_routes.py:359
+#: routes/admin/blacklist.py:114 routes/admin_routes.py:360
 #, python-format
 msgid "Error importando desde URL: %(err)s"
 msgstr "Error importing from URL: %(err)s"
 
-#: routes/admin/blacklist.py:122 routes/admin_routes.py:370
+#: routes/admin/blacklist.py:122 routes/admin_routes.py:371
 msgid "No se encontraron dominios para importar"
 msgstr "No domains found to import"
 
-#: routes/admin/blacklist.py:125 routes/admin_routes.py:372
+#: routes/admin/blacklist.py:125 routes/admin_routes.py:373
 msgid "Blacklist actualizada exitosamente"
 msgstr "Blacklist updated successfully"
 
-#: routes/admin_routes.py:380
+#: routes/admin_routes.py:381
 #, python-format
 msgid "Error al guardar blacklist: %(error)s"
 msgstr "Error saving blacklist: %(error)s"
 
-#: routes/admin/blacklist.py:128 routes/admin_routes.py:382
+#: routes/admin/blacklist.py:128 routes/admin_routes.py:383
 msgid "Error al guardar blacklist"
 msgstr "Error saving blacklist"
 
-#: routes/admin/blacklist.py:137 routes/admin_routes.py:392
+#: routes/admin/blacklist.py:137 routes/admin_routes.py:393
 msgid "Lista personalizada vacía"
 msgstr "Custom list is empty"
 
-#: routes/admin/blacklist.py:165 routes/admin_routes.py:405
+#: routes/admin/blacklist.py:165 routes/admin_routes.py:406
 msgid "Lista personalizada guardada en BLACKLIST_DOMAINS"
 msgstr "Custom list saved to BLACKLIST_DOMAINS"
 
-#: routes/admin_routes.py:413
+#: routes/admin_routes.py:414
 #, python-format
 msgid "Error al guardar la lista: %(error)s"
 msgstr "Error saving list: %(error)s"
 
-#: routes/admin/blacklist.py:168 routes/admin_routes.py:415
+#: routes/admin/blacklist.py:168 routes/admin_routes.py:416
 msgid "Error al guardar la lista"
 msgstr "Error saving list"
 
 #: routes/admin/http_access.py:37 routes/admin/http_access.py:50
-#: routes/admin/http_access.py:81 routes/admin_routes.py:427
-#: routes/admin_routes.py:447 routes/admin_routes.py:482
+#: routes/admin/http_access.py:81 routes/admin_routes.py:428
+#: routes/admin_routes.py:448 routes/admin_routes.py:483
 msgid "Índice de regla inválido"
 msgstr "Invalid rule index"
 
-#: routes/admin/users.py:53 routes/admin_routes.py:587
+#: routes/admin/users.py:53 routes/admin_routes.py:588
 msgid "Usuario no encontrado"
 msgstr "User not found"
 
-#: routes/admin_routes.py:651 services/database/db_admin_service.py:16
+#: routes/admin_routes.py:652 services/database/db_admin_service.py:16
 msgid "Nombre de tabla no proporcionado"
 msgstr "Table name not provided"
 
-#: routes/admin_routes.py:659 services/database/db_admin_service.py:19
+#: routes/admin_routes.py:660 services/database/db_admin_service.py:19
 msgid "Nombre de tabla inválido"
 msgstr "Invalid table name"
 
-#: routes/admin_routes.py:667 services/database/db_admin_service.py:24
+#: routes/admin_routes.py:668 services/database/db_admin_service.py:24
 msgid "No se puede eliminar estas tablas críticas"
 msgstr "Cannot delete these critical tables"
 
-#: routes/admin_routes.py:681 services/analytics/blacklist_users.py:222
+#: routes/admin_routes.py:682 services/analytics/blacklist_users.py:222
 #: services/database/db_admin_service.py:47
 #: services/database/db_info_service.py:33
 #: services/database/db_info_service.py:150
 msgid "Error interno del servidor"
 msgstr "Internal server error"
 
-#: routes/admin_routes.py:708
+#: routes/admin_routes.py:709
 #, python-format
 msgid "Error al cargar la vista: %(error)s"
 msgstr "Error loading view: %(error)s"
 
-#: routes/admin/squid_config.py:105 routes/admin_routes.py:710
+#: routes/admin/squid_config.py:105 routes/admin_routes.py:711
 msgid "Error al cargar la vista"
 msgstr "Error loading view"
 
-#: routes/admin_routes.py:737
-msgid "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf."
+#: routes/admin_routes.py:738
+msgid ""
+"Archivo requerido no encontrado. Verifique la configuración del archivo "
+"squid.conf."
 msgstr "Required file not found. Please check the squid.conf file configuration."
 
-#: routes/admin_routes.py:746 services/squid/split_config_service.py:47
+#: routes/admin_routes.py:747 services/squid/split_config_service.py:47
 msgid "No se tienen permisos suficientes para crear los archivos"
 msgstr "Insufficient permissions to create the files"
 
-#: routes/admin_routes.py:755 services/squid/split_config_service.py:53
+#: routes/admin_routes.py:756 services/squid/split_config_service.py:53
 msgid "Error de validación de la configuración"
 msgstr "Configuration validation error"
 
-#: routes/admin_routes.py:768 services/squid/split_config_service.py:59
+#: routes/admin_routes.py:769 services/squid/split_config_service.py:59
 msgid "Error interno al dividir la configuración"
 msgstr "Internal error splitting configuration"
 
-#: routes/admin/blacklist.py:177 routes/admin_routes.py:792
+#: routes/admin/blacklist.py:177 routes/admin_routes.py:793
 msgid "URL no proporcionada"
 msgstr "URL not provided"
 
-#: routes/admin/blacklist.py:183 routes/admin_routes.py:797
+#: routes/admin/blacklist.py:183 routes/admin_routes.py:798
 #, python-format
 msgid "Lista eliminada: %(url)s (%(count)s dominios)"
 msgstr "List deleted: %(url)s (%(count)s domains)"
@@ -278,7 +280,8 @@ msgstr "Error"
 msgid "Éxito"
 msgstr "Success"
 
-#: routes/i18n_routes.py:40 templates/admin/split_config.html:143
+#: routes/i18n_routes.py:40 templates/admin/database.html:741
+#: templates/admin/split_config.html:143
 msgid "Advertencia"
 msgstr "Warning"
 
@@ -731,7 +734,9 @@ msgstr "Custom list saved and Squid custom file updated"
 
 #: routes/admin/blacklist.py:161
 #, python-format
-msgid "Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: %(msg)s"
+msgid ""
+"Lista personalizada guardada en DB, pero no se pudo regenerar el archivo "
+"de Squid: %(msg)s"
 msgstr "Custom list saved to DB, but could not regenerate Squid file: %(msg)s"
 
 #: routes/admin/ldap_config.py:39
@@ -763,36 +768,36 @@ msgstr "Parameter 'q' required."
 msgid "Parámetro 'username' requerido."
 msgstr "Parameter 'username' required."
 
-#: services/analytics/auditoria_service.py:40
-#: services/analytics/auditoria_service.py:115
-#: services/analytics/auditoria_service.py:211
-#: services/analytics/auditoria_service.py:282
-#: services/analytics/auditoria_service.py:453
-#: services/analytics/auditoria_service.py:533
-#: services/analytics/auditoria_service.py:636
-#: services/analytics/auditoria_service.py:679
-#: services/analytics/auditoria_service.py:725
-#: services/analytics/auditoria_service.py:770
+#: services/analytics/auditoria_service.py:41
+#: services/analytics/auditoria_service.py:116
+#: services/analytics/auditoria_service.py:212
+#: services/analytics/auditoria_service.py:283
+#: services/analytics/auditoria_service.py:454
+#: services/analytics/auditoria_service.py:534
+#: services/analytics/auditoria_service.py:637
+#: services/analytics/auditoria_service.py:680
+#: services/analytics/auditoria_service.py:726
+#: services/analytics/auditoria_service.py:771
 msgid "No data for the selected dates."
 msgstr "No data for the selected dates."
 
-#: services/analytics/auditoria_service.py:122
+#: services/analytics/auditoria_service.py:123
 msgid "No valid domains specified for search."
 msgstr "No valid domains specified for search."
 
-#: services/analytics/auditoria_service.py:354
+#: services/analytics/auditoria_service.py:355
 msgid "Invalid date format. Use YYYY-MM-DD."
 msgstr "Invalid date format. Use YYYY-MM-DD."
 
-#: services/analytics/auditoria_service.py:398
+#: services/analytics/auditoria_service.py:399
 msgid "A database error occurred while calculating daily activity."
 msgstr "A database error occurred while calculating daily activity."
 
-#: services/analytics/auditoria_service.py:402
+#: services/analytics/auditoria_service.py:403
 msgid "An unexpected error occurred while calculating daily activity."
 msgstr "An unexpected error occurred while calculating daily activity."
 
-#: services/analytics/auditoria_service.py:1148
+#: services/analytics/auditoria_service.py:1149
 msgid "Tipo de auditoría inválido"
 msgstr "Invalid audit type"
 
@@ -840,7 +845,7 @@ msgstr "Successfully connected to LDAP/AD server."
 msgid "Usuario no encontrado."
 msgstr "User not found."
 
-#: services/notifications/notifications.py:301
+#: services/notifications/notifications.py:302
 msgid "fa-times-circle"
 msgstr "fa-times-circle"
 
@@ -898,7 +903,7 @@ msgstr "All sources"
 
 #: templates/admin/config.html:13 templates/admin/navbar.html:126
 #: templates/admin/navbar.html:185 templates/all_notifications.html:78
-#: templates/components/navbar.html:125 templates/components/navbar.html:188
+#: templates/components/navbar.html:125 templates/components/navbar.html:204
 msgid "Squid"
 msgstr "Squid"
 
@@ -910,9 +915,9 @@ msgstr "System"
 msgid "Seguridad"
 msgstr "Security"
 
-#: templates/admin/base.html:117 templates/admin/navbar.html:64
+#: templates/admin/base.html:130 templates/admin/navbar.html:64
 #: templates/admin/navbar.html:165 templates/all_notifications.html:81
-#: templates/components/navbar.html:65 templates/components/navbar.html:164
+#: templates/components/navbar.html:65 templates/components/navbar.html:180
 #: templates/partials/graph_reports.html:128
 msgid "Usuarios"
 msgstr "Users"
@@ -954,7 +959,9 @@ msgid "Eliminar notificación"
 msgstr "Delete notification"
 
 #: templates/all_notifications.html:207
-msgid "Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!"
+msgid ""
+"Todas las notificaciones aparecerán aquí. ¡Mantente atento a las "
+"actualizaciones del sistema!"
 msgstr "All notifications will appear here. Stay tuned for system updates!"
 
 #: templates/auditoria_pdf.html:6
@@ -1064,8 +1071,12 @@ msgid "Error - Squid Monitor"
 msgstr "Error - Squid Monitor"
 
 #: templates/error.html:45
-msgid "Disculpamos las molestias. Por favor, intenta de nuevo más tarde o contacta al soporte si el problema persiste."
-msgstr "We apologize for the inconvenience. Please try again later or contact support if the problem persists."
+msgid ""
+"Disculpamos las molestias. Por favor, intenta de nuevo más tarde o "
+"contacta al soporte si el problema persiste."
+msgstr ""
+"We apologize for the inconvenience. Please try again later or contact "
+"support if the problem persists."
 
 #: templates/error.html:47
 msgid "Volver al Inicio"
@@ -1282,11 +1293,15 @@ msgstr "for better modular management."
 
 #: templates/admin/acls.html:135 templates/admin/delay_pools.html:158
 #: templates/admin/http_access.html:142
-msgid "Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde"
-msgstr "If already split, verify files are in the correct directory or edit them directly from"
+msgid ""
+"Si ya está dividido, verifica que los archivos estén en el directorio "
+"correcto o edítalos directamente desde"
+msgstr ""
+"If already split, verify files are in the correct directory or edit them "
+"directly from"
 
-#: templates/admin/acls.html:135 templates/admin/base.html:79
-#: templates/admin/base.html:108 templates/admin/config.html:5
+#: templates/admin/acls.html:135 templates/admin/base.html:92
+#: templates/admin/base.html:121 templates/admin/config.html:5
 #: templates/admin/dashboardAdmin.html:197 templates/admin/delay_pools.html:158
 #: templates/admin/http_access.html:142
 msgid "Configuración"
@@ -1563,17 +1578,21 @@ msgstr "VERY IMPORTANT!"
 msgid "Esta funcionalidad se encuentra en"
 msgstr "This functionality is in"
 
-#: templates/admin/acls_new.html:21 templates/admin/base.html:114
-#: templates/admin/base.html:129 templates/admin/base.html:135
-#: templates/admin/base.html:141 templates/admin/delay_pools.html:18
+#: templates/admin/acls_new.html:21 templates/admin/base.html:127
+#: templates/admin/base.html:142 templates/admin/base.html:148
+#: templates/admin/base.html:154 templates/admin/delay_pools.html:18
 #: templates/admin/http_access.html:21 templates/admin/split_config.html:105
 msgid "RC"
 msgstr "RC"
 
 #: templates/admin/acls_new.html:24 templates/admin/delay_pools.html:21
 #: templates/admin/http_access.html:24 templates/admin/split_config.html:108
-msgid "Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba."
-msgstr "Please do not use it in production yet. Use it only in a testing environment."
+msgid ""
+"Por favor, no la uses en producción de momento. Úsala únicamente en un "
+"entorno de prueba."
+msgstr ""
+"Please do not use it in production yet. Use it only in a testing "
+"environment."
 
 #: templates/admin/acls_new.html:34
 msgid "Acerca de las ACLs:"
@@ -1647,67 +1666,71 @@ msgstr "Restart Squid and reapply configuration from scratch"
 msgid "Reiniciar"
 msgstr "Restart"
 
-#: templates/admin/base.html:75
+#: templates/admin/base.html:42 templates/components/navbar.html:135
+msgid "Idioma"
+msgstr ""
+
+#: templates/admin/base.html:88
 msgid "Gestionar Usuarios"
 msgstr "Manage Users"
 
-#: templates/admin/base.html:84
+#: templates/admin/base.html:97
 msgid "Cerrar Sesión"
 msgstr "Log Out"
 
-#: templates/admin/base.html:102
+#: templates/admin/base.html:115
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: templates/admin/base.html:105
+#: templates/admin/base.html:118
 msgid "Dashboard Admin"
 msgstr "Admin Dashboard"
 
-#: templates/admin/base.html:112
+#: templates/admin/base.html:125
 msgid "Dividir Squid Config"
 msgstr "Split Squid Config"
 
-#: templates/admin/base.html:119
+#: templates/admin/base.html:132
 msgid "Configuraciones LDAP/Active Directory"
 msgstr "LDAP/Active Directory Settings"
 
-#: templates/admin/base.html:120 templates/admin/ldap_config.html:14
+#: templates/admin/base.html:133 templates/admin/ldap_config.html:14
 msgid "LDAP / Active Directory"
 msgstr "LDAP / Active Directory"
 
-#: templates/admin/base.html:123 templates/admin/config.html:16
+#: templates/admin/base.html:136 templates/admin/config.html:16
 #: templates/admin/database.html:11
 msgid "Base de Datos"
 msgstr "Database"
 
-#: templates/admin/base.html:127
+#: templates/admin/base.html:140
 msgid "ACLs"
 msgstr "ACLs"
 
-#: templates/admin/base.html:133 templates/admin/dashboardAdmin.html:41
+#: templates/admin/base.html:146 templates/admin/dashboardAdmin.html:41
 msgid "Delay Pools"
 msgstr "Delay Pools"
 
-#: templates/admin/base.html:139
+#: templates/admin/base.html:152
 msgid "HTTP Access"
 msgstr "HTTP Access"
 
-#: templates/admin/base.html:143 templates/admin/base.html:144
+#: templates/admin/base.html:156 templates/admin/base.html:157
 msgid "Cuotas"
 msgstr "Quotas"
 
-#: templates/admin/base.html:145 templates/partials/conexiones.html:280
+#: templates/admin/base.html:158 templates/partials/conexiones.html:280
 #: templates/partials/conexiones.html:285
 msgid "Beta"
 msgstr "Beta"
 
-#: templates/admin/base.html:148 templates/admin/navbar.html:72
+#: templates/admin/base.html:161 templates/admin/navbar.html:72
 #: templates/admin/navbar.html:173 templates/components/navbar.html:73
-#: templates/components/navbar.html:172
+#: templates/components/navbar.html:188
 msgid "Blacklist"
 msgstr "Blacklist"
 
-#: templates/admin/base.html:151
+#: templates/admin/base.html:164
 msgid "Logs"
 msgstr "Logs"
 
@@ -1748,8 +1771,12 @@ msgid "BETA"
 msgstr "BETA"
 
 #: templates/admin/blacklist.html:34
-msgid "Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí puedes configurar conexión y ver el estado."
-msgstr "Connect and sync blocked lists from a Pi-hole server. Here you can configure the connection and check the status."
+msgid ""
+"Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí "
+"puedes configurar conexión y ver el estado."
+msgstr ""
+"Connect and sync blocked lists from a Pi-hole server. Here you can "
+"configure the connection and check the status."
 
 #: templates/admin/blacklist.html:39
 msgid "Pi-hole Host"
@@ -1827,7 +1854,9 @@ msgstr "Add domains manually or paste a comma/line separated list."
 msgid ""
 "example.com\n"
 "example.org"
-msgstr "example.com\nexample.org"
+msgstr ""
+"example.com\n"
+"example.org"
 
 #: templates/admin/blacklist.html:349
 msgid "Importar listas"
@@ -1855,12 +1884,18 @@ msgstr "Clean Data"
 msgid "Selecciona una tabla y elimina todos sus datos"
 msgstr "Select a table and delete all its data"
 
+#: templates/admin/clean_data.html:129
+msgid "Selecciona una tabla..."
+msgstr "Select a table..."
+
 #: templates/admin/clean_data.html:20 templates/admin/database.html:608
 msgid "¡Advertencia!"
 msgstr "Warning!"
 
 #: templates/admin/clean_data.html:21 templates/admin/database.html:609
-msgid "Esta acción es irreversible. Una vez eliminados los datos, no se pueden recuperar."
+msgid ""
+"Esta acción es irreversible. Una vez eliminados los datos, no se pueden "
+"recuperar."
 msgstr "This action is irreversible. Once data is deleted, it cannot be recovered."
 
 #: templates/admin/clean_data.html:31 templates/admin/database.html:619
@@ -1969,16 +2004,26 @@ msgid "No se encontraron configuraciones"
 msgstr "No configurations found"
 
 #: templates/admin/dashboardAdmin.html:120
-msgid "No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración de Squid."
-msgstr "No ACLs, HTTP rules, or delay pools were detected in your Squid configuration."
+msgid ""
+"No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración "
+"de Squid."
+msgstr ""
+"No ACLs, HTTP rules, or delay pools were detected in your Squid "
+"configuration."
 
 #: templates/admin/dashboardAdmin.html:122
 msgid "¿Tu configuración ya está dividida en módulos?"
 msgstr "Is your configuration already split into modules?"
 
 #: templates/admin/dashboardAdmin.html:123
-msgid "Si ya tienes tu configuración organizada en archivos separados (por ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede leerla directamente sin necesidad de unificarla."
-msgstr "If you already have your configuration organized in separate files (e.g.: acls.conf, http_access.conf, delay_pools.conf), SquidStats can read it directly without needing to unify it."
+msgid ""
+"Si ya tienes tu configuración organizada en archivos separados (por "
+"ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede"
+" leerla directamente sin necesidad de unificarla."
+msgstr ""
+"If you already have your configuration organized in separate files (e.g.:"
+" acls.conf, http_access.conf, delay_pools.conf), SquidStats can read it "
+"directly without needing to unify it."
 
 #: templates/admin/dashboardAdmin.html:126
 msgid "Gestionar Configuración Modular"
@@ -2082,6 +2127,10 @@ msgstr "Loading database information..."
 msgid "Reintentar"
 msgstr "Retry"
 
+#: templates/admin/database.html:100
+msgid "Salud de la BD:"
+msgstr "Database health:"
+
 #: templates/admin/database.html:110
 msgid "La base de datos tiene páginas dañadas."
 msgstr "The database has damaged pages."
@@ -2180,20 +2229,36 @@ msgid "Verificación de Integridad"
 msgstr "Integrity Check"
 
 #: templates/admin/database.html:272
-msgid "Verifica la integridad estructural de la base de datos en busca de posibles errores o corrupción."
-msgstr "Verify the structural integrity of the database looking for possible errors or corruption."
+msgid ""
+"Verifica la integridad estructural de la base de datos en busca de "
+"posibles errores o corrupción."
+msgstr ""
+"Verify the structural integrity of the database looking for possible "
+"errors or corruption."
 
 #: templates/admin/database.html:274
 msgid "Esta operación puede tardar varios minutos en bases de datos grandes."
 msgstr "This operation may take several minutes on large databases."
 
-#: templates/admin/database.html:296
-msgid "0\" x-text=\"integrityResult.error_count + ' error(es) detectado(s)'\">"
-msgstr ""
+#: templates/admin/database.html:280
+msgid "Verificando..."
+msgstr "Verifying..."
 
-#: templates/admin/database.html:297
-msgid "0\" class=\"mt-2 space-y-1\">"
-msgstr ""
+#: templates/admin/database.html:280
+msgid "Verificar Integridad"
+msgstr "Verify Integrity"
+
+#: templates/admin/database.html:294
+msgid "Sin errores detectados — la base de datos está íntegra."
+msgstr "No errors detected — the database is intact."
+
+#: templates/admin/database.html:294
+msgid "Se encontraron errores de integridad."
+msgstr "Integrity errors were found."
+
+#: templates/admin/database.html:296
+msgid "error(es) detectado(s)"
+msgstr "error(s) detected"
 
 #: templates/admin/database.html:320
 msgid "Salvas de Base de Datos"
@@ -2211,17 +2276,9 @@ msgstr "Total Backups"
 msgid "Última Salva"
 msgstr "Last Backup"
 
-#: templates/admin/database.html:356
-msgid "Sin salvas"
-msgstr "No backups"
-
 #: templates/admin/database.html:364
 msgid "Espacio Total"
 msgstr "Total Space"
-
-#: templates/admin/database.html:365
-msgid "0 B"
-msgstr "0 B"
 
 #: templates/admin/database.html:377
 msgid "Configuración de Salvas"
@@ -2272,7 +2329,9 @@ msgid "Fijo: 3 salvas"
 msgstr "Fixed: 3 backups"
 
 #: templates/admin/database.html:452
-msgid "Se mantienen las 3 salvas más recientes. Las más antiguas se eliminan automáticamente."
+msgid ""
+"Se mantienen las 3 salvas más recientes. Las más antiguas se eliminan "
+"automáticamente."
 msgstr "The 3 most recent backups are kept. Oldest ones are automatically deleted."
 
 #: templates/admin/database.html:459
@@ -2344,6 +2403,46 @@ msgstr ""
 msgid "Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente."
 msgstr "Maximum 3 backups per period. Oldest ones are automatically deleted."
 
+#: templates/admin/database.html:725 templates/admin/database.html:753
+msgid "0 B"
+msgstr "0 B"
+
+#: templates/admin/database.html:740
+msgid "Corrupción detectada"
+msgstr "Database corruption detected"
+
+#: templates/admin/database.html:741
+msgid "Saludable"
+msgstr "Healthy"
+
+#: templates/admin/database.html:741
+msgid "Crítico"
+msgstr "Critical"
+
+#: templates/admin/database.html:752
+msgid "Sin salvas"
+msgstr "No backups"
+
+#: templates/admin/database.html:754
+msgid "Guardando..."
+msgstr "Loading..."
+
+#: templates/admin/database.html:755
+msgid "Salva Manual"
+msgstr "Manual Backup"
+
+#: templates/admin/database.html:756
+msgid "Guardar Configuración"
+msgstr "Save Configuration"
+
+#: templates/admin/database.html:757
+msgid "Se ejecuta diariamente, conservando máx. 3 salvas por semana"
+msgstr "Runs daily, keeping a maximum of 3 backups per week"
+
+#: templates/admin/database.html:758
+msgid "Se ejecuta diariamente, conservando máx. 3 salvas por mes"
+msgstr "Runs daily, keeping a maximum of 3 backups per month"
+
 #: templates/admin/delay_pools.html:6
 msgid "Gestión de Delay Pools"
 msgstr "Delay Pool Management"
@@ -2357,8 +2456,13 @@ msgid "¿Qué son los Delay Pools?"
 msgstr "What are Delay Pools?"
 
 #: templates/admin/delay_pools.html:32
-msgid "Los delay pools permiten limitar el ancho de banda de ciertas solicitudes basadas en criterios específicos, proporcionando un control justo del tráfico."
-msgstr "Delay pools allow limiting bandwidth for certain requests based on specific criteria, providing fair traffic control."
+msgid ""
+"Los delay pools permiten limitar el ancho de banda de ciertas solicitudes"
+" basadas en criterios específicos, proporcionando un control justo del "
+"tráfico."
+msgstr ""
+"Delay pools allow limiting bandwidth for certain requests based on "
+"specific criteria, providing fair traffic control."
 
 #: templates/admin/delay_pools.html:33
 msgid "Clases disponibles:"
@@ -2628,7 +2732,9 @@ msgid "Reglas de Acceso HTTP"
 msgstr "HTTP Access Rules"
 
 #: templates/admin/http_access.html:8
-msgid "Las reglas se evalúan en orden. La primera coincidencia determina el acceso."
+msgid ""
+"Las reglas se evalúan en orden. La primera coincidencia determina el "
+"acceso."
 msgstr "Rules are evaluated in order. The first match determines access."
 
 #: templates/admin/http_access.html:11
@@ -2648,12 +2754,14 @@ msgid "La primera regla que coincida se aplica (allow o deny)"
 msgstr "The first matching rule applies (allow or deny)"
 
 #: templates/admin/http_access.html:38
-msgid "Si ninguna regla coincide, se aplica el comportamiento contrario a la última regla"
+msgid ""
+"Si ninguna regla coincide, se aplica el comportamiento contrario a la "
+"última regla"
 msgstr "If no rule matches, the opposite behavior of the last rule is applied"
 
 #: templates/admin/http_access.html:39
 msgid "Se recomienda terminar con \"deny all\" para evitar confusión"
-msgstr "It is recommended to end with \\"deny all\\" to avoid confusion"
+msgstr "It is recommended to end with \\\"deny all\\\" to avoid confusion"
 
 #: templates/admin/http_access.html:97
 msgid "Contiene negación (!) - se aplica cuando NO coincide con la ACL"
@@ -2908,8 +3016,12 @@ msgid "Mostrando últimas"
 msgstr "Showing last"
 
 #: templates/admin/logs.html:21
-msgid "líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes del mensaje."
-msgstr "lines. Use the filter to quickly find errors, IPs, or parts of the message."
+msgid ""
+"líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes "
+"del mensaje."
+msgstr ""
+"lines. Use the filter to quickly find errors, IPs, or parts of the "
+"message."
 
 #: templates/admin/logs.html:28
 msgid "líneas"
@@ -2929,7 +3041,7 @@ msgid "Panel principal con conexiones activas"
 msgstr "Main panel with active connections"
 
 #: templates/admin/navbar.html:56 templates/admin/navbar.html:155
-#: templates/components/navbar.html:57 templates/components/navbar.html:154
+#: templates/components/navbar.html:57 templates/components/navbar.html:170
 msgid "Inicio"
 msgstr "Home"
 
@@ -2938,7 +3050,7 @@ msgid "Estadísticas de rendimiento del cache"
 msgstr "Cache performance statistics"
 
 #: templates/admin/navbar.html:60 templates/admin/navbar.html:161
-#: templates/components/navbar.html:61 templates/components/navbar.html:160
+#: templates/components/navbar.html:61 templates/components/navbar.html:176
 msgid "Estadísticas"
 msgstr "Statistics"
 
@@ -2951,7 +3063,7 @@ msgid "Reportes y gráficas avanzadas"
 msgstr "Reports and advanced charts"
 
 #: templates/admin/navbar.html:68 templates/admin/navbar.html:169
-#: templates/components/navbar.html:69 templates/components/navbar.html:168
+#: templates/components/navbar.html:69 templates/components/navbar.html:184
 msgid "Reportes"
 msgstr "Reports"
 
@@ -2964,7 +3076,7 @@ msgid "Auditoría de actividad por usuario y fecha"
 msgstr "Activity audit by user and date"
 
 #: templates/admin/navbar.html:76 templates/admin/navbar.html:177
-#: templates/components/navbar.html:77 templates/components/navbar.html:176
+#: templates/components/navbar.html:77 templates/components/navbar.html:192
 msgid "Auditoría"
 msgstr "Audit"
 
@@ -2973,7 +3085,7 @@ msgid "Panel de administración del sistema"
 msgstr "System administration panel"
 
 #: templates/admin/navbar.html:120 templates/components/navbar.html:120
-#: templates/components/navbar.html:184
+#: templates/components/navbar.html:200
 msgid "Admin"
 msgstr "Admin"
 
@@ -2986,7 +3098,7 @@ msgid "Actualizar aplicación web SquidStats"
 msgstr "Update SquidStats web application"
 
 #: templates/admin/navbar.html:131 templates/admin/navbar.html:189
-#: templates/components/navbar.html:130 templates/components/navbar.html:192
+#: templates/components/navbar.html:130 templates/components/navbar.html:208
 msgid "Web"
 msgstr "Web"
 
@@ -3042,8 +3154,12 @@ msgid "Resumen de Cuotas"
 msgstr "Quota Summary"
 
 #: templates/admin/quota.html:62
-msgid "Visualiza el estado general de las cuotas de ancho de banda y límites de datos para los usuarios y grupos."
-msgstr "View the general status of bandwidth quotas and data limits for users and groups."
+msgid ""
+"Visualiza el estado general de las cuotas de ancho de banda y límites de "
+"datos para los usuarios y grupos."
+msgstr ""
+"View the general status of bandwidth quotas and data limits for users and"
+" groups."
 
 #: templates/admin/quota.html:67
 msgid "Activa o desactiva el control de cuotas para usuarios y grupos"
@@ -3160,8 +3276,12 @@ msgid "límite global"
 msgstr "global limit"
 
 #: templates/admin/quota.html:194
-msgid "para todos los usuarios que no tengan una cuota individual configurada. La cuota individual siempre tiene prioridad sobre la global."
-msgstr "for all users without an individual quota configured. Individual quota always has priority over the global one."
+msgid ""
+"para todos los usuarios que no tengan una cuota individual configurada. "
+"La cuota individual siempre tiene prioridad sobre la global."
+msgstr ""
+"for all users without an individual quota configured. Individual quota "
+"always has priority over the global one."
 
 #: templates/admin/quota.html:198
 msgid "Nombre de usuario"
@@ -3212,8 +3332,12 @@ msgid "Reglas de Control"
 msgstr "Control Rules"
 
 #: templates/admin/quota.html:312
-msgid "Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el acceso o degradar la velocidad)."
-msgstr "Define the behavior when exceeding the quota. (For example: block access or throttle speed)."
+msgid ""
+"Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el "
+"acceso o degradar la velocidad)."
+msgstr ""
+"Define the behavior when exceeding the quota. (For example: block access "
+"or throttle speed)."
 
 #: templates/admin/quota.html:314
 msgid "Regla activa:"
@@ -3237,12 +3361,18 @@ msgid "Bloquear"
 msgstr "Block"
 
 #: templates/admin/quota.html:325
-msgid "Aunque no haya ninguna regla guardada, el sistema aplica automáticamente la política de"
+msgid ""
+"Aunque no haya ninguna regla guardada, el sistema aplica automáticamente "
+"la política de"
 msgstr "Even if no rule is saved, the system automatically applies the policy of"
 
 #: templates/admin/quota.html:325
-msgid "cuando un usuario supera su cuota. Guarda explícitamente \"Bloquear\" si quieres que quede registrado."
-msgstr "when a user exceeds their quota. Explicitly save \\"Block\\" if you want it recorded."
+msgid ""
+"cuando un usuario supera su cuota. Guarda explícitamente \"Bloquear\" si "
+"quieres que quede registrado."
+msgstr ""
+"when a user exceeds their quota. Explicitly save \\\"Block\\\" if you "
+"want it recorded."
 
 #: templates/admin/quota.html:331
 msgid "Degradar velocidad (próximamente)"
@@ -3673,11 +3803,17 @@ msgid "La blacklist contiene más de"
 msgstr "The blacklist contains more than"
 
 #: templates/partials/black_list.html:12
-msgid "dominios activos. Para evitar un alto consumo de recursos, la consulta se ha limitado a los primeros"
-msgstr "active domains. To avoid high resource consumption, the query has been limited to the first"
+msgid ""
+"dominios activos. Para evitar un alto consumo de recursos, la consulta se"
+" ha limitado a los primeros"
+msgstr ""
+"active domains. To avoid high resource consumption, the query has been "
+"limited to the first"
 
 #: templates/partials/black_list.html:13
-msgid "dominios. Es posible que algunos accesos bloqueados no aparezcan en este listado."
+msgid ""
+"dominios. Es posible que algunos accesos bloqueados no aparezcan en este "
+"listado."
 msgstr "domains. Some blocked accesses may not appear in this list."
 
 #: templates/partials/black_list.html:32
@@ -3943,8 +4079,12 @@ msgid "Confirmar bloqueo"
 msgstr "Confirm block"
 
 #: templates/partials/conexiones.html:464
-msgid "Se eliminará el bloqueo activo para esta IP y se recargará la configuración de Squid."
-msgstr "The active block for this IP will be removed and Squid configuration will be reloaded."
+msgid ""
+"Se eliminará el bloqueo activo para esta IP y se recargará la "
+"configuración de Squid."
+msgstr ""
+"The active block for this IP will be removed and Squid configuration will"
+" be reloaded."
 
 #: templates/partials/conexiones.html:487
 msgid "Asigna la IP del usuario a un"
@@ -3955,8 +4095,12 @@ msgid "delay pool"
 msgstr "delay pool"
 
 #: templates/partials/conexiones.html:487
-msgid "existente. Sus conexiones estarán sujetas a los límites de ancho de banda configurados en ese pool."
-msgstr "existing. Their connections will be subject to the bandwidth limits configured in that pool."
+msgid ""
+"existente. Sus conexiones estarán sujetas a los límites de ancho de banda"
+" configurados en ese pool."
+msgstr ""
+"existing. Their connections will be subject to the bandwidth limits "
+"configured in that pool."
 
 #: templates/partials/conexiones.html:489
 msgid "Selecciona el delay pool"
@@ -3967,8 +4111,12 @@ msgid "Cargando pools..."
 msgstr "Loading pools..."
 
 #: templates/partials/conexiones.html:514
-msgid "Se eliminará la restricción de velocidad activa para esta IP y se recargará la configuración de Squid."
-msgstr "The active speed restriction for this IP will be removed and Squid configuration will be reloaded."
+msgid ""
+"Se eliminará la restricción de velocidad activa para esta IP y se "
+"recargará la configuración de Squid."
+msgstr ""
+"The active speed restriction for this IP will be removed and Squid "
+"configuration will be reloaded."
 
 #: templates/partials/graph_reports.html:6
 msgid "Usuarios Totales"
@@ -4036,484 +4184,339 @@ msgstr "Next page"
 msgid "Last page"
 msgstr "Last page"
 
-#: venv/lib/python3.12/site-packages/click/_termui_impl.py:613
-#, python-brace-format
-msgid "{editor}: Editing failed"
-msgstr "{editor}: Editing failed"
-
-#: venv/lib/python3.12/site-packages/click/_termui_impl.py:617
-#, python-brace-format
-msgid "{editor}: Editing failed: {e}"
-msgstr "{editor}: Editing failed: {e}"
-
-#: venv/lib/python3.12/site-packages/click/core.py:1114
-#: venv/lib/python3.12/site-packages/click/core.py:1151
-#, python-brace-format
-msgid "{text} {deprecated_message}"
-msgstr "{text} {deprecated_message}"
-
-#: venv/lib/python3.12/site-packages/click/core.py:1170
-msgid "Options"
-msgstr "Options"
-
-#: venv/lib/python3.12/site-packages/click/core.py:1245
-#, python-brace-format
-msgid "Got unexpected extra argument ({args})"
-msgid_plural "Got unexpected extra arguments ({args})"
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/click/core.py:1264
-#, python-brace-format
-msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-msgstr "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-
-#: venv/lib/python3.12/site-packages/click/core.py:1448
-msgid "Aborted!"
-msgstr "Aborted!"
-
-#: venv/lib/python3.12/site-packages/click/core.py:1822
-msgid "Commands"
-msgstr "Commands"
-
-#: venv/lib/python3.12/site-packages/click/core.py:1853
-msgid "Missing command."
-msgstr "Missing command."
-
-#: venv/lib/python3.12/site-packages/click/core.py:1931
-#, python-brace-format
-msgid "No such command {name!r}."
-msgstr "No such command {name!r}."
-
-#: venv/lib/python3.12/site-packages/click/core.py:2355
-msgid "Value must be an iterable."
-msgstr "Value must be an iterable."
-
-#: venv/lib/python3.12/site-packages/click/core.py:2378
-#, python-brace-format
-msgid "Takes {nargs} values but 1 was given."
-msgid_plural "Takes {nargs} values but {len} were given."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/click/core.py:2567
-#, python-brace-format
-msgid "DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
-msgstr "DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
-
-#: venv/lib/python3.12/site-packages/click/core.py:3015
-#, python-brace-format
-msgid "env var: {var}"
-msgstr "env var: {var}"
-
-#: venv/lib/python3.12/site-packages/click/core.py:3018
-#, python-brace-format
-msgid "default: {default}"
-msgstr "default: {default}"
-
-#: venv/lib/python3.12/site-packages/click/core.py:3022
-msgid "required"
-msgstr "required"
-
-#: venv/lib/python3.12/site-packages/click/core.py:3082
-msgid "(dynamic)"
-msgstr "(dynamic)"
-
-#: venv/lib/python3.12/site-packages/click/decorators.py:465
-#, python-format
-msgid "%(prog)s, version %(version)s"
-msgstr "%(prog)s, version %(version)s"
-
-#: venv/lib/python3.12/site-packages/click/decorators.py:522
-msgid "Show the version and exit."
-msgstr "Show the version and exit."
-
-#: venv/lib/python3.12/site-packages/click/decorators.py:548
-msgid "Show this message and exit."
-msgstr "Show this message and exit."
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:50
-#: venv/lib/python3.12/site-packages/click/exceptions.py:89
-#, python-brace-format
-msgid "Error: {message}"
-msgstr "Error: {message}"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:81
-#, python-brace-format
-msgid "Try '{command} {option}' for help."
-msgstr "Try '{command} {option}' for help."
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:130
-#, python-brace-format
-msgid "Invalid value: {message}"
-msgstr "Invalid value: {message}"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:132
-#, python-brace-format
-msgid "Invalid value for {param_hint}: {message}"
-msgstr "Invalid value for {param_hint}: {message}"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:190
-msgid "Missing argument"
-msgstr "Missing argument"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:192
-msgid "Missing option"
-msgstr "Missing option"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:194
-msgid "Missing parameter"
-msgstr "Missing parameter"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:196
-#, python-brace-format
-msgid "Missing {param_type}"
-msgstr "Missing {param_type}"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:203
-#, python-brace-format
-msgid "Missing parameter: {param_name}"
-msgstr "Missing parameter: {param_name}"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:223
-#, python-brace-format
-msgid "No such option: {name}"
-msgstr "No such option: {name}"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:235
-#, python-brace-format
-msgid "Did you mean {possibility}?"
-msgid_plural "(Possible options: {possibilities})"
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:282
-msgid "unknown error"
-msgstr "unknown error"
-
-#: venv/lib/python3.12/site-packages/click/exceptions.py:289
-#, python-brace-format
-msgid "Could not open file {filename!r}: {message}"
-msgstr "Could not open file {filename!r}: {message}"
-
-#: venv/lib/python3.12/site-packages/click/formatting.py:156
-msgid "Usage:"
-msgstr "Usage:"
-
-#: venv/lib/python3.12/site-packages/click/parser.py:199
-#, python-brace-format
-msgid "Argument {name!r} takes {nargs} values."
-msgstr "Argument {name!r} takes {nargs} values."
-
-#: venv/lib/python3.12/site-packages/click/parser.py:381
-#, python-brace-format
-msgid "Option {name!r} does not take a value."
-msgstr "Option {name!r} does not take a value."
-
-#: venv/lib/python3.12/site-packages/click/parser.py:444
-#, python-brace-format
-msgid "Option {name!r} requires an argument."
-msgid_plural "Option {name!r} requires {nargs} arguments."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/click/shell_completion.py:332
-msgid "Shell completion is not supported for Bash versions older than 4.4."
-msgstr "Shell completion is not supported for Bash versions older than 4.4."
-
-#: venv/lib/python3.12/site-packages/click/shell_completion.py:339
-msgid "Couldn't detect Bash version, shell completion is not supported."
-msgstr "Couldn't detect Bash version, shell completion is not supported."
-
-#: venv/lib/python3.12/site-packages/click/termui.py:165
-msgid "Repeat for confirmation"
-msgstr "Repeat for confirmation"
-
-#: venv/lib/python3.12/site-packages/click/termui.py:181
-msgid "Error: The value you entered was invalid."
-msgstr "Error: The value you entered was invalid."
-
-#: venv/lib/python3.12/site-packages/click/termui.py:183
-#, python-brace-format
-msgid "Error: {e.message}"
-msgstr "Error: {e.message}"
-
-#: venv/lib/python3.12/site-packages/click/termui.py:194
-msgid "Error: The two entered values do not match."
-msgstr "Error: The two entered values do not match."
-
-#: venv/lib/python3.12/site-packages/click/termui.py:253
-msgid "Error: invalid input"
-msgstr "Error: invalid input"
-
-#: venv/lib/python3.12/site-packages/click/termui.py:872
-msgid "Press any key to continue..."
-msgstr "Press any key to continue..."
-
-#: venv/lib/python3.12/site-packages/click/types.py:332
-#, python-brace-format
-msgid ""
-"Choose from:\n"
-"\t{choices}"
-msgstr "Choose from:\n\t{choices}"
-
-#: venv/lib/python3.12/site-packages/click/types.py:369
-#, python-brace-format
-msgid "{value!r} is not {choice}."
-msgid_plural "{value!r} is not one of {choices}."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/click/types.py:460
-#, python-brace-format
-msgid "{value!r} does not match the format {format}."
-msgid_plural "{value!r} does not match the formats {formats}."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/click/types.py:482
-#, python-brace-format
-msgid "{value!r} is not a valid {number_type}."
-msgstr "{value!r} is not a valid {number_type}."
-
-#: venv/lib/python3.12/site-packages/click/types.py:538
-#, python-brace-format
-msgid "{value} is not in the range {range}."
-msgstr "{value} is not in the range {range}."
-
-#: venv/lib/python3.12/site-packages/click/types.py:719
-#, python-brace-format
-msgid "{value!r} is not a valid boolean. Recognized values: {states}"
-msgstr "{value!r} is not a valid boolean. Recognized values: {states}"
-
-#: venv/lib/python3.12/site-packages/click/types.py:747
-#, python-brace-format
-msgid "{value!r} is not a valid UUID."
-msgstr "{value!r} is not a valid UUID."
-
-#: venv/lib/python3.12/site-packages/click/types.py:937
-msgid "file"
-msgstr "file"
-
-#: venv/lib/python3.12/site-packages/click/types.py:939
-msgid "directory"
-msgstr "directory"
-
-#: venv/lib/python3.12/site-packages/click/types.py:941
-msgid "path"
-msgstr "path"
-
-#: venv/lib/python3.12/site-packages/click/types.py:988
-#, python-brace-format
-msgid "{name} {filename!r} does not exist."
-msgstr "{name} {filename!r} does not exist."
-
-#: venv/lib/python3.12/site-packages/click/types.py:997
-#, python-brace-format
-msgid "{name} {filename!r} is a file."
-msgstr "{name} {filename!r} is a file."
-
-#: venv/lib/python3.12/site-packages/click/types.py:1005
-#, python-brace-format
-msgid "{name} {filename!r} is a directory."
-msgstr "{name} {filename!r} is a directory."
-
-#: venv/lib/python3.12/site-packages/click/types.py:1014
-#, python-brace-format
-msgid "{name} {filename!r} is not readable."
-msgstr "{name} {filename!r} is not readable."
-
-#: venv/lib/python3.12/site-packages/click/types.py:1023
-#, python-brace-format
-msgid "{name} {filename!r} is not writable."
-msgstr "{name} {filename!r} is not writable."
-
-#: venv/lib/python3.12/site-packages/click/types.py:1032
-#, python-brace-format
-msgid "{name} {filename!r} is not executable."
-msgstr "{name} {filename!r} is not executable."
-
-#: venv/lib/python3.12/site-packages/click/types.py:1099
-#, python-brace-format
-msgid "{len_type} values are required, but {len_value} was given."
-msgid_plural "{len_type} values are required, but {len_value} were given."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/flask_wtf/file.py:55
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:293
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:323
-msgid "This field is required."
-msgstr "This field is required."
-
-#: venv/lib/python3.12/site-packages/flask_wtf/file.py:94
-#, python-brace-format
-msgid "File does not have an approved extension: {extensions}"
-msgstr "File does not have an approved extension: {extensions}"
-
-#: venv/lib/python3.12/site-packages/flask_wtf/file.py:101
-msgid "File does not have an approved extension."
-msgstr "File does not have an approved extension."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:86
-#, python-format
-msgid "Invalid field name '%s'."
-msgstr "Invalid field name '%s'."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:99
-#, python-format
-msgid "Field must be equal to %(other_name)s."
-msgstr "Field must be equal to %(other_name)s."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:146
-#, python-format
-msgid "Field must be at least %(min)d character long."
-msgid_plural "Field must be at least %(min)d characters long."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:152
-#, python-format
-msgid "Field cannot be longer than %(max)d character."
-msgid_plural "Field cannot be longer than %(max)d characters."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:158
-#, python-format
-msgid "Field must be exactly %(max)d character long."
-msgid_plural "Field must be exactly %(max)d characters long."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:164
-#, python-format
-msgid "Field must be between %(min)d and %(max)d characters long."
-msgstr "Field must be between %(min)d and %(max)d characters long."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:216
-#, python-format
-msgid "Number must be at least %(min)s."
-msgstr "Number must be at least %(min)s."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:219
-#, python-format
-msgid "Number must be at most %(max)s."
-msgstr "Number must be at most %(max)s."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:222
-#, python-format
-msgid "Number must be between %(min)s and %(max)s."
-msgstr "Number must be between %(min)s and %(max)s."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:358
-msgid "Invalid input."
-msgstr "Invalid input."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:422
-msgid "Invalid email address."
-msgstr "Invalid email address."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:460
-msgid "Invalid IP address."
-msgstr "Invalid IP address."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:503
-msgid "Invalid Mac address."
-msgstr "Invalid Mac address."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:540
-msgid "Invalid URL."
-msgstr "Invalid URL."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:561
-msgid "Invalid UUID."
-msgstr "Invalid UUID."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:595
-#, python-format
-msgid "Invalid value, must be one of: %(values)s."
-msgstr "Invalid value, must be one of: %(values)s."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:631
-#, python-format
-msgid "Invalid value, can't be any of: %(values)s."
-msgstr "Invalid value, can't be any of: %(values)s."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:700
-msgid "This field cannot be edited."
-msgstr "This field cannot be edited."
-
-#: venv/lib/python3.12/site-packages/wtforms/validators.py:716
-msgid "This field is disabled and cannot have a value."
-msgstr "This field is disabled and cannot have a value."
-
-#: venv/lib/python3.12/site-packages/wtforms/csrf/core.py:96
-msgid "Invalid CSRF Token."
-msgstr "Invalid CSRF Token."
-
-#: venv/lib/python3.12/site-packages/wtforms/csrf/session.py:64
-msgid "CSRF token missing."
-msgstr "CSRF token missing."
-
-#: venv/lib/python3.12/site-packages/wtforms/csrf/session.py:72
-msgid "CSRF failed."
-msgstr "CSRF failed."
-
-#: venv/lib/python3.12/site-packages/wtforms/csrf/session.py:77
-msgid "CSRF token expired."
-msgstr "CSRF token expired."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/choices.py:142
-msgid "Invalid Choice: could not coerce."
-msgstr "Invalid Choice: could not coerce."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/choices.py:149
-#: venv/lib/python3.12/site-packages/wtforms/fields/choices.py:203
-msgid "Choices cannot be None."
-msgstr "Choices cannot be None."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/choices.py:155
-msgid "Not a valid choice."
-msgstr "Not a valid choice."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/choices.py:194
-msgid "Invalid choice(s): one or more data inputs could not be coerced."
-msgstr "Invalid choice(s): one or more data inputs could not be coerced."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/choices.py:212
-#, python-format
-msgid "'%(value)s' is not a valid choice for this field."
-msgid_plural "'%(value)s' are not valid choices for this field."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/datetime.py:52
-msgid "Not a valid datetime value."
-msgstr "Not a valid datetime value."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/datetime.py:78
-msgid "Not a valid date value."
-msgstr "Not a valid date value."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/datetime.py:104
-msgid "Not a valid time value."
-msgstr "Not a valid time value."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/datetime.py:149
-msgid "Not a valid week value."
-msgstr "Not a valid week value."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/numeric.py:82
-#: venv/lib/python3.12/site-packages/wtforms/fields/numeric.py:92
-msgid "Not a valid integer value."
-msgstr "Not a valid integer value."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/numeric.py:168
-msgid "Not a valid decimal value."
-msgstr "Not a valid decimal value."
-
-#: venv/lib/python3.12/site-packages/wtforms/fields/numeric.py:197
-msgid "Not a valid float value."
-msgstr "Not a valid float value."
+#~ msgid "0\" x-text=\"integrityResult.error_count + ' error(es) detectado(s)'\">"
+#~ msgstr ""
+
+#~ msgid "0\" class=\"mt-2 space-y-1\">"
+#~ msgstr ""
+
+#~ msgid "{editor}: Editing failed"
+#~ msgstr "{editor}: Editing failed"
+
+#~ msgid "{editor}: Editing failed: {e}"
+#~ msgstr "{editor}: Editing failed: {e}"
+
+#~ msgid "{text} {deprecated_message}"
+#~ msgstr "{text} {deprecated_message}"
+
+#~ msgid "Options"
+#~ msgstr "Options"
+
+#~ msgid "Got unexpected extra argument ({args})"
+#~ msgid_plural "Got unexpected extra arguments ({args})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+#~ msgstr "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+
+#~ msgid "Aborted!"
+#~ msgstr "Aborted!"
+
+#~ msgid "Commands"
+#~ msgstr "Commands"
+
+#~ msgid "Missing command."
+#~ msgstr "Missing command."
+
+#~ msgid "No such command {name!r}."
+#~ msgstr "No such command {name!r}."
+
+#~ msgid "Value must be an iterable."
+#~ msgstr "Value must be an iterable."
+
+#~ msgid "Takes {nargs} values but 1 was given."
+#~ msgid_plural "Takes {nargs} values but {len} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+#~ msgstr ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+
+#~ msgid "env var: {var}"
+#~ msgstr "env var: {var}"
+
+#~ msgid "default: {default}"
+#~ msgstr "default: {default}"
+
+#~ msgid "required"
+#~ msgstr "required"
+
+#~ msgid "(dynamic)"
+#~ msgstr "(dynamic)"
+
+#~ msgid "%(prog)s, version %(version)s"
+#~ msgstr "%(prog)s, version %(version)s"
+
+#~ msgid "Show the version and exit."
+#~ msgstr "Show the version and exit."
+
+#~ msgid "Show this message and exit."
+#~ msgstr "Show this message and exit."
+
+#~ msgid "Error: {message}"
+#~ msgstr "Error: {message}"
+
+#~ msgid "Try '{command} {option}' for help."
+#~ msgstr "Try '{command} {option}' for help."
+
+#~ msgid "Invalid value: {message}"
+#~ msgstr "Invalid value: {message}"
+
+#~ msgid "Invalid value for {param_hint}: {message}"
+#~ msgstr "Invalid value for {param_hint}: {message}"
+
+#~ msgid "Missing argument"
+#~ msgstr "Missing argument"
+
+#~ msgid "Missing option"
+#~ msgstr "Missing option"
+
+#~ msgid "Missing parameter"
+#~ msgstr "Missing parameter"
+
+#~ msgid "Missing {param_type}"
+#~ msgstr "Missing {param_type}"
+
+#~ msgid "Missing parameter: {param_name}"
+#~ msgstr "Missing parameter: {param_name}"
+
+#~ msgid "No such option: {name}"
+#~ msgstr "No such option: {name}"
+
+#~ msgid "Did you mean {possibility}?"
+#~ msgid_plural "(Possible options: {possibilities})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "unknown error"
+#~ msgstr "unknown error"
+
+#~ msgid "Could not open file {filename!r}: {message}"
+#~ msgstr "Could not open file {filename!r}: {message}"
+
+#~ msgid "Usage:"
+#~ msgstr "Usage:"
+
+#~ msgid "Argument {name!r} takes {nargs} values."
+#~ msgstr "Argument {name!r} takes {nargs} values."
+
+#~ msgid "Option {name!r} does not take a value."
+#~ msgstr "Option {name!r} does not take a value."
+
+#~ msgid "Option {name!r} requires an argument."
+#~ msgid_plural "Option {name!r} requires {nargs} arguments."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Shell completion is not supported for Bash versions older than 4.4."
+#~ msgstr "Shell completion is not supported for Bash versions older than 4.4."
+
+#~ msgid "Couldn't detect Bash version, shell completion is not supported."
+#~ msgstr "Couldn't detect Bash version, shell completion is not supported."
+
+#~ msgid "Repeat for confirmation"
+#~ msgstr "Repeat for confirmation"
+
+#~ msgid "Error: The value you entered was invalid."
+#~ msgstr "Error: The value you entered was invalid."
+
+#~ msgid "Error: {e.message}"
+#~ msgstr "Error: {e.message}"
+
+#~ msgid "Error: The two entered values do not match."
+#~ msgstr "Error: The two entered values do not match."
+
+#~ msgid "Error: invalid input"
+#~ msgstr "Error: invalid input"
+
+#~ msgid "Press any key to continue..."
+#~ msgstr "Press any key to continue..."
+
+#~ msgid ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+#~ msgstr ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+
+#~ msgid "{value!r} is not {choice}."
+#~ msgid_plural "{value!r} is not one of {choices}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "{value!r} does not match the format {format}."
+#~ msgid_plural "{value!r} does not match the formats {formats}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "{value!r} is not a valid {number_type}."
+#~ msgstr "{value!r} is not a valid {number_type}."
+
+#~ msgid "{value} is not in the range {range}."
+#~ msgstr "{value} is not in the range {range}."
+
+#~ msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+#~ msgstr "{value!r} is not a valid boolean. Recognized values: {states}"
+
+#~ msgid "{value!r} is not a valid UUID."
+#~ msgstr "{value!r} is not a valid UUID."
+
+#~ msgid "file"
+#~ msgstr "file"
+
+#~ msgid "directory"
+#~ msgstr "directory"
+
+#~ msgid "path"
+#~ msgstr "path"
+
+#~ msgid "{name} {filename!r} does not exist."
+#~ msgstr "{name} {filename!r} does not exist."
+
+#~ msgid "{name} {filename!r} is a file."
+#~ msgstr "{name} {filename!r} is a file."
+
+#~ msgid "{name} {filename!r} is a directory."
+#~ msgstr "{name} {filename!r} is a directory."
+
+#~ msgid "{name} {filename!r} is not readable."
+#~ msgstr "{name} {filename!r} is not readable."
+
+#~ msgid "{name} {filename!r} is not writable."
+#~ msgstr "{name} {filename!r} is not writable."
+
+#~ msgid "{name} {filename!r} is not executable."
+#~ msgstr "{name} {filename!r} is not executable."
+
+#~ msgid "{len_type} values are required, but {len_value} was given."
+#~ msgid_plural "{len_type} values are required, but {len_value} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "This field is required."
+#~ msgstr "This field is required."
+
+#~ msgid "File does not have an approved extension: {extensions}"
+#~ msgstr "File does not have an approved extension: {extensions}"
+
+#~ msgid "File does not have an approved extension."
+#~ msgstr "File does not have an approved extension."
+
+#~ msgid "Invalid field name '%s'."
+#~ msgstr "Invalid field name '%s'."
+
+#~ msgid "Field must be equal to %(other_name)s."
+#~ msgstr "Field must be equal to %(other_name)s."
+
+#~ msgid "Field must be at least %(min)d character long."
+#~ msgid_plural "Field must be at least %(min)d characters long."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field cannot be longer than %(max)d character."
+#~ msgid_plural "Field cannot be longer than %(max)d characters."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field must be exactly %(max)d character long."
+#~ msgid_plural "Field must be exactly %(max)d characters long."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field must be between %(min)d and %(max)d characters long."
+#~ msgstr "Field must be between %(min)d and %(max)d characters long."
+
+#~ msgid "Number must be at least %(min)s."
+#~ msgstr "Number must be at least %(min)s."
+
+#~ msgid "Number must be at most %(max)s."
+#~ msgstr "Number must be at most %(max)s."
+
+#~ msgid "Number must be between %(min)s and %(max)s."
+#~ msgstr "Number must be between %(min)s and %(max)s."
+
+#~ msgid "Invalid input."
+#~ msgstr "Invalid input."
+
+#~ msgid "Invalid email address."
+#~ msgstr "Invalid email address."
+
+#~ msgid "Invalid IP address."
+#~ msgstr "Invalid IP address."
+
+#~ msgid "Invalid Mac address."
+#~ msgstr "Invalid Mac address."
+
+#~ msgid "Invalid URL."
+#~ msgstr "Invalid URL."
+
+#~ msgid "Invalid UUID."
+#~ msgstr "Invalid UUID."
+
+#~ msgid "Invalid value, must be one of: %(values)s."
+#~ msgstr "Invalid value, must be one of: %(values)s."
+
+#~ msgid "Invalid value, can't be any of: %(values)s."
+#~ msgstr "Invalid value, can't be any of: %(values)s."
+
+#~ msgid "This field cannot be edited."
+#~ msgstr "This field cannot be edited."
+
+#~ msgid "This field is disabled and cannot have a value."
+#~ msgstr "This field is disabled and cannot have a value."
+
+#~ msgid "Invalid CSRF Token."
+#~ msgstr "Invalid CSRF Token."
+
+#~ msgid "CSRF token missing."
+#~ msgstr "CSRF token missing."
+
+#~ msgid "CSRF failed."
+#~ msgstr "CSRF failed."
+
+#~ msgid "CSRF token expired."
+#~ msgstr "CSRF token expired."
+
+#~ msgid "Invalid Choice: could not coerce."
+#~ msgstr "Invalid Choice: could not coerce."
+
+#~ msgid "Choices cannot be None."
+#~ msgstr "Choices cannot be None."
+
+#~ msgid "Not a valid choice."
+#~ msgstr "Not a valid choice."
+
+#~ msgid "Invalid choice(s): one or more data inputs could not be coerced."
+#~ msgstr "Invalid choice(s): one or more data inputs could not be coerced."
+
+#~ msgid "'%(value)s' is not a valid choice for this field."
+#~ msgid_plural "'%(value)s' are not valid choices for this field."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Not a valid datetime value."
+#~ msgstr "Not a valid datetime value."
+
+#~ msgid "Not a valid date value."
+#~ msgstr "Not a valid date value."
+
+#~ msgid "Not a valid time value."
+#~ msgstr "Not a valid time value."
+
+#~ msgid "Not a valid week value."
+#~ msgstr "Not a valid week value."
+
+#~ msgid "Not a valid integer value."
+#~ msgstr "Not a valid integer value."
+
+#~ msgid "Not a valid decimal value."
+#~ msgstr "Not a valid decimal value."
+
+#~ msgid "Not a valid float value."
+#~ msgstr "Not a valid float value."
 

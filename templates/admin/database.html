@@ -97,7 +97,7 @@
                             'text-red-800': healthStatus === 'critical'
                         }"
                        class="font-bold text-lg"
-                       x-text="'Salud de la BD: ' + healthLabel"></p>
+                       x-text="'{{ _('Salud de la BD:') }} ' + healthLabel"></p>
                     <p :class="{
                             'text-emerald-700': healthStatus === 'good',
                             'text-amber-700': healthStatus === 'warning',
@@ -277,7 +277,7 @@
                 <button @click="checkIntegrity()" :disabled="integrityLoading"
                         class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-5 py-2.5 rounded-lg shadow hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none">
                     <i :class="integrityLoading ? 'fas fa-spinner fa-spin' : 'fas fa-search'"></i>
-                    <span x-text="integrityLoading ? 'Verificando...' : 'Verificar Integridad'"></span>
+                    <span x-text="integrityLoading ? translations.verifying : translations.verifyIntegrity"></span>
                 </button>
 
                 <template x-if="integrityResult">
@@ -291,10 +291,10 @@
                            class="text-xl flex-shrink-0 mt-0.5"></i>
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold"
-                               x-text="integrityResult.ok ? 'Sin errores detectados — la base de datos está íntegra.' : 'Se encontraron errores de integridad.'"></p>
-                            <p class="text-sm mt-0.5"
-                               x-show="integrityResult.error_count > {{ _("0\" x-text=\"integrityResult.error_count + ' error(es) detectado(s)'\">") }}</p>
-                            <ul x-show="integrityResult.errors && integrityResult.errors.length > {{ _("0\" class=\"mt-2 space-y-1\">") }}
+                               x-text="integrityResult.ok ? translations.integrityOk : translations.integrityError"></p>
+                            <p class="text-sm mt-0.5" x-show="integrityResult.error_count > 0"
+                               x-text="integrityResult.error_count + ' ' + translations.integrityErrorsCount"></p>
+                            <ul x-show="integrityResult.errors && integrityResult.errors.length > 0" class="mt-2 space-y-1">
                                 <template x-for="err in integrityResult.errors" :key="err">
                                     <li class="text-sm font-mono bg-white/60 border border-current/10 rounded px-3 py-1"
                                         x-text="err"></li>
@@ -323,7 +323,7 @@
             <button @click="triggerManualBackup()" :disabled="loadingManual"
                 class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-5 py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none">
                 <i :class="loadingManual ? 'fas fa-spinner fa-spin' : 'fas fa-save'"></i>
-                <span x-text="loadingManual ? 'Guardando...' : 'Salva Manual'"></span>
+                <span x-text="loadingManual ? translations.guardando : translations.salvaManual"></span>
             </button>
         </div>
 
@@ -353,7 +353,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Última Salva") }}</p>
-                    <p class="text-sm font-semibold text-gray-800" x-text="lastBackupDate">{{ _("Sin salvas") }}</p>
+                    <p class="text-sm font-semibold text-gray-800" x-text="lastBackupDate"></p>
                 </div>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
@@ -362,7 +362,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">{{ _("Espacio Total") }}</p>
-                    <p class="text-sm font-semibold text-gray-800" x-text="totalSize">{{ _("0 B") }}</p>
+                    <p class="text-sm font-semibold text-gray-800" x-text="totalSize"></p>
                 </div>
             </div>
         </div>
@@ -427,7 +427,7 @@
                         </div>
                         <p class="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
                             <i class="fas fa-info-circle"></i>
-                            <span x-text="config.frequency === 'daily_weekly' ? 'Se ejecuta diariamente, conservando máx. 3 salvas por semana' : 'Se ejecuta diariamente, conservando máx. 3 salvas por mes'"></span>
+                            <span x-text="config.frequency === 'daily_weekly' ? translations.freqDailyWeekly : translations.freqDailyMonthly"></span>
                         </p>
                     </div>
 
@@ -482,7 +482,7 @@
                     <button type="submit" :disabled="loadingSave"
                         class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-lg shadow hover:shadow-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
                         <i :class="loadingSave ? 'fas fa-spinner fa-spin' : 'fas fa-save'"></i>
-                        <span x-text="loadingSave ? 'Guardando...' : 'Guardar Configuración'"></span>
+                        <span x-text="loadingSave ? translations.guardando : translations.guardarConfiguracion"></span>
                     </button>
                 </form>
             </div>
@@ -680,6 +680,13 @@ function dbHealthPanel() {
         error: null,
         integrityLoading: false,
         integrityResult: null,
+        translations: {
+            verifying: '{{ _('Verificando...') }}',
+            verifyIntegrity: '{{ _('Verificar Integridad') }}',
+            integrityOk: '{{ _('Sin errores detectados — la base de datos está íntegra.') }}',
+            integrityError: '{{ _('Se encontraron errores de integridad.') }}',
+            integrityErrorsCount: '{{ _('error(es) detectado(s)') }}'
+        },
 
         init() { this.loadHealth(); },
 
@@ -722,7 +729,7 @@ function dbHealthPanel() {
         },
 
         formatBytes(bytes) {
-            if (!bytes || bytes === 0) return '0 B';
+            if (!bytes || bytes === 0) return '{{ _('0 B') }}';
             const k = 1024;
             const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -737,8 +744,8 @@ function dbHealthPanel() {
             return 'good';
         },
         get healthLabel() {
-            if (this.health?.extra?.corruption) return 'Corrupción detectada';
-            return { good: 'Saludable', warning: 'Advertencia', critical: 'Crítico' }[this.healthStatus];
+            if (this.health?.extra?.corruption) return '{{ _('Corrupción detectada') }}';
+            return { good: '{{ _('Saludable') }}', warning: '{{ _('Advertencia') }}', critical: '{{ _('Crítico') }}' }[this.healthStatus];
         }
     };
 }
@@ -748,6 +755,15 @@ function dbHealthPanel() {
 // ──────────────────────────────────────────────────────────
 function backupManager() {
     return {
+        translations: {
+            sinSalvas: '{{ _('Sin salvas') }}',
+            noBackups: '{{ _('0 B') }}',
+            guardando: '{{ _('Guardando...') }}',
+            salvaManual: '{{ _('Salva Manual') }}',
+            guardarConfiguracion: '{{ _('Guardar Configuración') }}',
+            freqDailyWeekly: '{{ _('Se ejecuta diariamente, conservando máx. 3 salvas por semana') }}',
+            freqDailyMonthly: '{{ _('Se ejecuta diariamente, conservando máx. 3 salvas por mes') }}',
+        },
         config: {
             db_type: '{{ current_config.db_type | default("sqlite") }}',
             frequency: '{{ current_config.frequency | default("daily_weekly") }}',
@@ -762,7 +778,7 @@ function backupManager() {
         statusType: 'success',
 
         get lastBackupDate() {
-            if (!this.backups.length) return 'Sin salvas';
+            if (!this.backups.length) return this.translations.sinSalvas;
             return this.backups[0].created_at;
         },
         get totalSize() {
@@ -770,7 +786,7 @@ function backupManager() {
             return this.formatBytes(total);
         },
         formatBytes(bytes) {
-            if (!bytes) return '0 B';
+            if (!bytes) return this.translations.noBackups;
             const k = 1024;
             const sizes = ['B', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));

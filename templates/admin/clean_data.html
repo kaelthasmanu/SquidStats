@@ -126,7 +126,7 @@
 
     function populateTableSelect() {
         const select = document.getElementById('tableSelect');
-        select.innerHTML = '<option value="">Selecciona una tabla...</option>';
+        select.innerHTML = '<option value="">{{ _('Selecciona una tabla...') }}</option>';
         
         tablesData.forEach(table => {
             const option = document.createElement('option');
