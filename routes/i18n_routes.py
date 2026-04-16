@@ -29,7 +29,9 @@ def set_language(lang):
     )
 
     response = make_response(redirect(redirect_target))
-    response.set_cookie("lang", selected_lang, max_age=365 * 24 * 60 * 60, samesite="Lax")
+    response.set_cookie(
+        "lang", selected_lang, max_age=365 * 24 * 60 * 60, samesite="Lax"
+    )
     return response
 
 
