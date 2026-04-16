@@ -633,7 +633,7 @@
   // Funciones de confirmación para actualizaciones
   function confirmSquidUpdate() {
     showCustomConfirm(
-      '¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente.',
+      {{ _('¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente.')|tojson }},
       async () => {
         try {
           const response = await fetch('/install', {
@@ -647,10 +647,10 @@
           if (response.ok) {
             window.location.reload();
           } else {
-            alert('Error al actualizar Squid');
+            alert({{ _('Error al actualizar Squid')|tojson }});
           }
         } catch (error) {
-          alert('Error de conexión');
+          alert({{ _('Error de conexión')|tojson }});
         }
       }
     );
@@ -658,7 +658,7 @@
 
   function confirmWebUpdate() {
     showCustomConfirm(
-      '¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad.',
+      {{ _('¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad.')|tojson }},
       async () => {
         try {
           const response = await fetch('/update', {
@@ -672,10 +672,10 @@
           if (response.ok) {
             window.location.reload();
           } else {
-            alert('Error al actualizar la aplicación web');
+            alert({{ _('Error al actualizar la aplicación web')|tojson }});
           }
         } catch (error) {
-          alert('Error de conexión');
+          alert({{ _('Error de conexión')|tojson }});
         }
       }
     );
