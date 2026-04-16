@@ -4740,3 +4740,63 @@ msgstr "Are you sure you want to update the Squid service? Save your configurati
 
 msgid "¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad."
 msgstr "Are you sure you want to update SquidStats? The web interface, features, and security fixes will be updated."
+
+msgid "Error al cargar notificaciones"
+msgstr "Error loading notifications"
+
+msgid "No hay notificaciones"
+msgstr "No notifications"
+
+msgid "No hay notificaciones sin leer"
+msgstr "No unread notifications"
+
+msgid "¿Estás seguro de que quieres eliminar esta notificación?"
+msgstr "Are you sure you want to delete this notification?"
+
+msgid "Notificación eliminada"
+msgstr "Notification deleted"
+
+msgid "Error al eliminar notificación:"
+msgstr "Error deleting notification:"
+
+msgid "¿Estás seguro de que quieres eliminar TODAS las notificaciones? Esta acción no se puede deshacer."
+msgstr "Are you sure you want to delete ALL notifications? This action cannot be undone."
+
+msgid "Todas las notificaciones han sido eliminadas"
+msgstr "All notifications have been deleted"
+
+msgid "Error al eliminar notificaciones:"
+msgstr "Error deleting notifications:"
+
+msgid "Filtros limpiados"
+msgstr "Filters cleared"
+
+msgid "Error de conexión:"
+msgstr "Connection error:"
+
+msgid "Error desconocido"
+msgstr "Unknown error"
+
+msgid "Hace unos momentos"
+msgstr "A few moments ago"
+
+msgid "Hace {count} minuto"
+msgstr "{count} minute ago"
+
+msgid "Hace {count} minutos"
+msgstr "{count} minutes ago"
+
+msgid "Hace {count} hora"
+msgstr "{count} hour ago"
+
+msgid "Hace {count} horas"
+msgstr "{count} hours ago"
+
+msgid "Hace {count} día"
+msgstr "{count} day ago"
+
+msgid "Hace {count} días"
+msgstr "{count} days ago"
+
+msgid "Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!"
+msgstr "All notifications will appear here. Stay tuned for system updates!"

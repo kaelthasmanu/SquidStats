@@ -120,7 +120,12 @@ def set_commit_notifications(has_updates, messages):
     # Convert commits to system notifications
     if has_updates and messages:
         for msg in messages:
-            add_notification("info", f"Commit: {msg}", "fa-code-branch", "git")
+            add_notification(
+                "info",
+                _("Commit: %(message)s", message=msg),
+                "fa-code-branch",
+                "git",
+            )
 
 
 def get_commit_notifications() -> dict[str, Any]:
@@ -130,9 +135,15 @@ def get_commit_notifications() -> dict[str, Any]:
             db.query(Notification).filter(Notification.source == "git").all()
         )
 
+        commit_prefix = _("Commit: ")
         return {
             "has_updates": len(git_notifications) > 0,
-            "commits": [n.message.replace("Commit: ", "") for n in git_notifications],
+            "commits": [
+                n.message.replace(commit_prefix, "", 1)
+                if n.message.startswith(commit_prefix)
+                else n.message
+                for n in git_notifications
+            ],
         }
 
 
@@ -299,7 +310,7 @@ def get_default_icon(notification_type):
     icons = {
         "info": "fa-info-circle",
         "warning": "fa-exclamation-triangle",
-        "error": _("fa-times-circle"),
+        "error": "fa-times-circle",
         "success": "fa-check-circle",
     }
     return icons.get(notification_type, "fa-bell")
@@ -398,7 +409,7 @@ def check_squid_log_health():
         if not os.path.exists(log_file):
             add_notification(
                 "error",
-                f"Archivo de log de Squid no encontrado: {log_file}",
+                _("Archivo de log de Squid no encontrado: %(log_file)s", log_file=log_file),
                 "fa-file-exclamation",
                 "squid",
             )
@@ -411,7 +422,7 @@ def check_squid_log_health():
         if file_size_mb > SQUID_LOG_SIZE_WARNING_MB:
             add_notification(
                 "warning",
-                f"Log de Squid muy grande: {file_size_mb:.1f}MB",
+                _("Log de Squid muy grande: %(size).1fMB", size=file_size_mb),
                 "fa-file-alt",
                 "squid",
             )
@@ -423,7 +434,10 @@ def check_squid_log_health():
         if hours_since_update > SQUID_LOG_STALE_HOURS:
             add_notification(
                 "warning",
-                f"Log de Squid no actualizado por más de {int(hours_since_update)}h",
+                _(
+                    "Log de Squid no actualizado por más de %(hours)d h",
+                    hours=int(hours_since_update),
+                ),
                 "fa-clock",
                 "squid",
             )
@@ -444,14 +458,20 @@ def check_system_health():
         if free_disk_gb < DISK_CRITICAL_GB:
             add_notification(
                 "error",
-                f"Espacio en disco crítico: {free_disk_gb:.1f}GB libres",
+                _(
+                    "Espacio en disco crítico: %(free).1fGB libres",
+                    free=free_disk_gb,
+                ),
                 "fa-hdd",
                 "system",
             )
         elif free_disk_gb < DISK_WARNING_GB:
             add_notification(
                 "warning",
-                f"Espacio en disco bajo: {free_disk_gb:.1f}GB libres",
+                _(
+                    "Espacio en disco bajo: %(free).1fGB libres",
+                    free=free_disk_gb,
+                ),
                 "fa-hdd",
                 "system",
             )
@@ -591,21 +611,35 @@ def start_notification_monitor():
 # Specific functions for Squid that can be called from other parts
 def notify_squid_restart_success():
     """Notify successful Squid restart"""
-    add_notification("success", "Squid reiniciado exitosamente", "fa-sync-alt", "squid")
+    add_notification(
+        "success",
+        _("Squid reiniciado exitosamente"),
+        "fa-sync-alt",
+        "squid",
+    )
 
 
 def notify_squid_restart_failed(error_message: str = ""):
     """Notify failed Squid restart"""
-    message = "Error al reiniciar Squid"
+    message = _("Error al reiniciar Squid")
     if error_message:
-        message += f": {error_message}"
+        message = _(
+            "Error al reiniciar Squid: %(error)s",
+            error=error_message,
+        )
     add_notification("error", message, "fa-exclamation-triangle", "squid")
 
 
 def notify_squid_config_error(error_message: str):
     """Notify Squid configuration error"""
     add_notification(
-        "error", f"Error de configuración de Squid: {error_message}", "fa-cog", "squid"
+        "error",
+        _(
+            "Error de configuración de Squid: %(error)s",
+            error=error_message,
+        ),
+        "fa-cog",
+        "squid"
     )
 
 
@@ -629,7 +663,10 @@ def check_security_events():
             if failed_auth_count > FAILED_AUTH_THRESHOLD:
                 add_notification(
                     "warning",
-                    f"{failed_auth_count} intentos de autenticación fallidos en la última hora",
+                    _(
+                    "%(count)d intentos de autenticación fallidos en la última hora",
+                    count=failed_auth_count,
+                ),
                     "fa-shield-alt",
                     "security",
                 )
@@ -639,7 +676,10 @@ def check_security_events():
             if denied_count > DENIED_REQUESTS_THRESHOLD:
                 add_notification(
                     "warning",
-                    f"{denied_count} solicitudes denegadas en la última hora",
+                    _(
+                        "%(count)d solicitudes denegadas en la última hora",
+                        count=denied_count,
+                    ),
                     "fa-ban",
                     "security",
                 )
@@ -703,14 +743,17 @@ def check_user_activity():
             if active_users > HIGH_ACTIVITY_THRESHOLD:
                 add_notification(
                     "info",
-                    f"Alta actividad: {active_users} usuarios conectados en la última hora",
+                    _(
+                        "Alta actividad: %(count)d usuarios conectados en la última hora",
+                        count=active_users,
+                    ),
                     "fa-users",
                     "users",
                 )
             elif active_users == 0:
                 add_notification(
                     "warning",
-                    "No hay usuarios activos en la última hora",
+                    _("No hay usuarios activos en la última hora"),
                     "fa-users",
                     "users",
                 )
@@ -725,7 +768,11 @@ def check_user_activity():
                 if usage_mb > high_usage_gb:
                     add_notification(
                         "warning",
-                        f"El usuario {user} consumió {usage_mb:,.0f}MB en 24h",
+                        _(
+                            "El usuario %(user)s consumió %(usage)s MB en 24h",
+                            user=user,
+                            usage=f"{usage_mb:,.0f}",
+                        ),
                         "fa-chart-line",
                         "users",
                     )
