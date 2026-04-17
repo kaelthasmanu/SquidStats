@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ get_locale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -199,7 +199,7 @@
         }
 
         async function reloadSquid() {
-            showCustomConfirm('¿Está seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio.', async () => {
+            showCustomConfirm({{ _('¿Está seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio.')|tojson }}, async () => {
                 try {
                     const response = await fetch('/api/reload-squid', { 
                         method: 'POST',
@@ -215,13 +215,13 @@
                         showNotification(data.message, 'error');
                     }
                 } catch (error) {
-                    showNotification('Error al recargar Squid', 'error');
+                    showNotification({{ _('Error al recargar Squid')|tojson }}, 'error');
                 }
             });
         }
 
         async function restartSquid() {
-            showCustomConfirm('¿Está seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio.', async () => {
+            showCustomConfirm({{ _('¿Está seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio.')|tojson }}, async () => {
                 try {
                     const response = await fetch('/api/restart-squid', { 
                         method: 'POST',
@@ -237,7 +237,7 @@
                         showNotification(data.message, 'error');
                     }
                 } catch (error) {
-                    showNotification('Error al reiniciar Squid', 'error');
+                    showNotification({{ _('Error al reiniciar Squid')|tojson }}, 'error');
                 }
             });
         }
