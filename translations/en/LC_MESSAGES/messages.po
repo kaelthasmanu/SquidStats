@@ -1668,7 +1668,7 @@ msgstr "Restart"
 
 #: templates/admin/base.html:42 templates/components/navbar.html:135
 msgid "Idioma"
-msgstr ""
+msgstr "Language"
 
 #: templates/admin/base.html:88
 msgid "Gestionar Usuarios"
@@ -4732,8 +4732,20 @@ msgstr "Error fetching notifications:"
 msgid "Error al actualizar Squid"
 msgstr "Error updating Squid"
 
+msgid "Error al recargar Squid"
+msgstr "Error reloading Squid"
+
+msgid "Error al reiniciar Squid"
+msgstr "Error restarting Squid"
+
 msgid "Error al actualizar la aplicación web"
 msgstr "Error updating the web application"
+
+msgid "¿Estás seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio."
+msgstr "Are you sure you want to reload Squid? This will apply configuration changes without interrupting the service."
+
+msgid "¿Estás seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio."
+msgstr "Are you sure you want to restart Squid? This will temporarily interrupt the service."
 
 msgid "¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente."
 msgstr "Are you sure you want to update the Squid service? Save your configuration before continuing; the service will restart automatically."
@@ -4743,9 +4755,6 @@ msgstr "Are you sure you want to update SquidStats? The web interface, features,
 
 msgid "Error al cargar notificaciones"
 msgstr "Error loading notifications"
-
-msgid "No hay notificaciones"
-msgstr "No notifications"
 
 msgid "No hay notificaciones sin leer"
 msgstr "No unread notifications"
@@ -4797,6 +4806,3 @@ msgstr "{count} day ago"
 
 msgid "Hace {count} días"
 msgstr "{count} days ago"
-
-msgid "Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!"
-msgstr "All notifications will appear here. Stay tuned for system updates!"
