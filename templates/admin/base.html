@@ -199,7 +199,7 @@
         }
 
         async function reloadSquid() {
-            showCustomConfirm({{ _('¿Está seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio.')|tojson }}, async () => {
+            showCustomConfirm({{ _('¿Estás seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio.')|tojson }}, async () => {
                 try {
                     const response = await fetch('/api/reload-squid', { 
                         method: 'POST',
@@ -221,7 +221,7 @@
         }
 
         async function restartSquid() {
-            showCustomConfirm({{ _('¿Está seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio.')|tojson }}, async () => {
+            showCustomConfirm({{ _('¿Estás seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio.')|tojson }}, async () => {
                 try {
                     const response = await fetch('/api/restart-squid', { 
                         method: 'POST',
