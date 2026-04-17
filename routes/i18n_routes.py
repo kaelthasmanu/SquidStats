@@ -22,11 +22,13 @@ def set_language(lang):
 
     session["lang"] = selected_lang
 
-    referrer = (request.referrer or "").replace("\\", "")
+    referrer = request.referrer or ""
     parsed_referrer = urlparse(referrer)
-    redirect_target = (
-        referrer if not parsed_referrer.netloc and not parsed_referrer.scheme else "/"
-    )
+    # Use only the path component to prevent open redirects
+    path = parsed_referrer.path or "/"
+    if parsed_referrer.query:
+        path += "?" + parsed_referrer.query
+    redirect_target = path if path.startswith("/") else "/"
 
     response = make_response(redirect(redirect_target))
     response.set_cookie(
