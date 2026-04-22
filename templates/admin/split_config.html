@@ -297,7 +297,7 @@
             const data = await response.json();
 
             if (data.status === 'success') {
-                toastr.success(data.message, 'Éxito');
+                toastr.success(data.message, '{{ _('Éxito') }}');
 
                 // Show results
                 resultsArea.classList.remove('hidden');
@@ -305,15 +305,15 @@
                     <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
                         <p class="font-semibold text-emerald-800 mb-2">
                             <i class="fas fa-check-circle mr-2"></i>
-                            Configuración dividida exitosamente
+                            {{ _('Configuración dividida exitosamente') }}
                         </p>
                         <p class="text-sm text-emerald-700">
-                            Se generaron <strong>${data.data.total_files}</strong> archivos en 
+                            {{ _('Se generaron') }} <strong>${data.data.total_files}</strong> {{ _('archivos en') }} 
                             <code class="bg-emerald-100 px-2 py-0.5 rounded">${data.data.output_dir}</code>
                         </p>
                     </div>
                     <div class="mt-4">
-                        <p class="font-semibold text-gray-800 mb-2">Archivos generados:</p>
+                        <p class="font-semibold text-gray-800 mb-2">{{ _('Archivos generados:') }}</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                             ${Object.entries(data.data.files).map(([filename, lines]) => `
                                 <div class="flex justify-between items-center bg-gray-50 px-3 py-2 rounded">

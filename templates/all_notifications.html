@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error loading notifications:', error);
-                showToast(i18n.errorLoadNotifications, 'error');
+                showToast(i18n.errorLoadNotifications || 'Error loading notifications:', 'error');
             });
     }
 
@@ -298,15 +298,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const sourceMap = {
             squid: i18n.squidSource || 'Squid',
             git: i18n.gitSource || 'Git',
-            system: i18n.systemSource || 'Sistema',
-            security: i18n.securitySource || 'Seguridad',
-            users: i18n.usersSource || 'Usuarios'
+            system: i18n.systemSource || 'System',
+            security: i18n.securitySource || 'Security',
+            users: i18n.usersSource || 'Users'
         };
         const typeLabels = {
             error: i18n.errorType || 'Error',
-            warning: i18n.warningType || 'Advertencia',
-            success: i18n.successType || 'Éxito',
-            info: i18n.infoType || 'Información'
+            warning: i18n.warningType || 'Warning',
+            success: i18n.successType || 'Success',
+            info: i18n.infoType || 'Info'
         };
 
         container.innerHTML = notifications.map(notification => `
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             git: i18n.gitSource || 'Git',
                                             system: i18n.systemSource || 'Sistema',
                                             security: i18n.securitySource || 'Seguridad',
-                                            users: i18n.usersSource || 'Usuarios'
+                                            users: i18n.usersSource || 'Users'
                                         };
                                         return sourceMap[notification.source] || notification.source.toUpperCase();
                                     })()}

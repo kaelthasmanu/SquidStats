@@ -233,7 +233,7 @@
                             <td class="p-2 border">{% if q.used_mb > q.quota_mb %}{{ _("Excedido") }}{% else %}-{% endif %}</td>
                             <td class="p-2 border flex gap-2">
                                 <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='user'; editModal.username='{{ q.username }}'; editModal.group_name='{{ q.group_name or '' }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='user';">{{ _("Editar") }}</button>
-                                <form method="POST" action="/admin/quota/user/delete" onsubmit="return confirm('¿Eliminar la cuota del usuario {{ q.username }}?');">
+                                <form method="POST" action="/admin/quota/user/delete" onsubmit="return confirm({{ _('¿Eliminar la cuota del usuario %(username)s?', username=q.username)|tojson }});">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden" name="username" value="{{ q.username }}" />
                                     <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">{{ _("Eliminar") }}</button>
@@ -289,7 +289,7 @@
                                 <td class="p-2 border">{{ q.quota_mb }}</td>
                                 <td class="p-2 border flex gap-2">
                                     <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" @click="editModal.isOpen=true; editModal.type='group'; editModal.group_name='{{ q.group_name }}'; editModal.quota_mb='{{ q.quota_mb }}'; activeTab='group';">{{ _("Editar") }}</button>
-                                    <form method="POST" action="/admin/quota/group/delete" onsubmit="return confirm('¿Eliminar la cuota del grupo {{ q.group_name }}?');">
+                                    <form method="POST" action="/admin/quota/group/delete" onsubmit="return confirm({{ _('¿Eliminar la cuota del grupo %(group_name)s?', group_name=q.group_name)|tojson }});">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                         <input type="hidden" name="group_name" value="{{ q.group_name }}" />
                                         <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">{{ _("Eliminar") }}</button>

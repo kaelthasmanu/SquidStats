@@ -845,13 +845,14 @@ function backupManager() {
                 this.showStatus(data.message, data.status === 'success' ? 'success' : 'error');
                 if (data.status === 'success') await this.loadBackups();
             } catch {
-                this.showStatus('Error al ejecutar la salva', 'error');
+                this.showStatus('{{ _('Error al ejecutar la salva') }}', 'error');
             } finally {
                 this.loadingManual = false;
             }
         },
         async deleteBackup(filename) {
-            if (!confirm(`¿Eliminar la salva "${filename}"?`)) return;
+            const confirmMessage = '{{ _('¿Eliminar la salva "%(filename)s"?', filename='%(filename)s') }}'.replace('%(filename)s', filename);
+            if (!confirm(confirmMessage)) return;
             try {
                 const resp = await fetch('/admin/backup/delete/' + encodeURIComponent(filename), {
                     method: 'DELETE',

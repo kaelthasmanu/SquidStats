@@ -112,12 +112,12 @@
                 <button @click="saveConfig()" :disabled="savingCfg"
                     class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
                     <i class="fas fa-save"></i>
-                    <span x-text="savingCfg ? 'Guardando…' : 'Guardar'"></span>
+                    <span x-text="savingCfg ? '{{ _('Guardando…') }}' : '{{ _('Guardar') }}'"></span>
                 </button>
                 <button @click="testConnection()" :disabled="testingConn"
                     class="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
                     <i class="fas fa-plug"></i>
-                    <span x-text="testingConn ? 'Probando…' : 'Probar'"></span>
+                    <span x-text="testingConn ? '{{ _('Probando…') }}' : '{{ _('Probar') }}'"></span>
                 </button>
             </div>
 
@@ -339,9 +339,7 @@ function ldapApp() {
 
         init() {
             if (this.cfg.host || this.cfg.base_dn || this.cfg.bind_dn) {
-                this.clientNotice = 'Configuración cargada desde la base de datos.';
-            } else {
-                this.loadLocalConfig();
+                this.clientNotice = '{{ _('Configuración cargada desde la base de datos.') }}';
             }
             this.$watch('cfg', () => { this.saveLocalConfig(); }, { deep: true });
         },
@@ -359,7 +357,7 @@ function ldapApp() {
                         ...safeData,
                         use_ssl: safeData.use_ssl === true || safeData.use_ssl === 'true',
                     };
-                    this.clientNotice = 'Configuración cargada desde el navegador. Los cambios se guardan localmente.';
+                    this.clientNotice = '{{ _('Configuración cargada desde el navegador. Los cambios se guardan localmente.') }}';
                 }
             } catch (error) {
                 console.warn('[LDAP DEBUG] loadLocalConfig error', error);
@@ -370,7 +368,7 @@ function ldapApp() {
             try {
                 const { bind_password, ...safeCfg } = this.cfg;
                 localStorage.setItem(this.storageKey, JSON.stringify(safeCfg));
-                this.clientNotice = 'Configuración guardada localmente en el navegador.';
+                this.clientNotice = '{{ _('Configuración guardada localmente en el navegador.') }}';
             } catch (error) {
                 console.warn('[LDAP DEBUG] saveLocalConfig error', error);
             }
@@ -379,7 +377,7 @@ function ldapApp() {
         clearLocalConfig() {
             try {
                 localStorage.removeItem(this.storageKey);
-                this.clientNotice = 'Configuración local eliminada.';
+                this.clientNotice = '{{ _('Configuración local eliminada.') }}';
             } catch (error) {
                 console.warn('[LDAP DEBUG] clearLocalConfig error', error);
             }
@@ -387,20 +385,20 @@ function ldapApp() {
 
         statusBadgeClass() {
             const map = {
-                "Conectado":  "bg-green-100 text-green-800",
-                "Error":      "bg-red-100 text-red-800",
-                "Sin probar": "bg-gray-100 text-gray-600",
-                "Probando…":  "bg-yellow-100 text-yellow-800",
+                "{{ _('Conectado') }}":  "bg-green-100 text-green-800",
+                "{{ _('Error') }}":      "bg-red-100 text-red-800",
+                "{{ _('Sin probar') }}": "bg-gray-100 text-gray-600",
+                "{{ _('Probando…') }}":  "bg-yellow-100 text-yellow-800",
             };
             return map[this.connectionStatus] || "bg-gray-100 text-gray-600";
         },
 
         statusDotClass() {
             const map = {
-                "Conectado":  "bg-green-500",
-                "Error":      "bg-red-500",
-                "Sin probar": "bg-gray-400",
-                "Probando…":  "bg-yellow-400",
+                "{{ _('Conectado') }}":  "bg-green-500",
+                "{{ _('Error') }}":      "bg-red-500",
+                "{{ _('Sin probar') }}": "bg-gray-400",
+                "{{ _('Probando…') }}":  "bg-yellow-400",
             };
             return map[this.connectionStatus] || "bg-gray-400";
         },
@@ -422,7 +420,7 @@ function ldapApp() {
                 const data = await res.json();
                 this.showAlert(data.message, data.status === 'success' ? 'success' : 'error');
             } catch {
-                this.showAlert('Error al guardar la configuración.', 'error');
+                this.showAlert('{{ _('Error al guardar la configuración.') }}', 'error');
             } finally {
                 this.savingCfg = false;
             }
@@ -430,7 +428,7 @@ function ldapApp() {
 
         async testConnection() {
             this.testingConn = true;
-            this.connectionStatus = "Probando…";
+            this.connectionStatus = "{{ _('Probando…') }}";
             try {
                 const res = await fetch('/admin/api/ldap/test', {
                     method: 'POST',

@@ -91,15 +91,22 @@ def create_app():
         # 1. Check session
         lang = session.get("lang")
         if lang and lang in Config.BABEL_SUPPORTED_LOCALES:
+            logger.debug(f"get_locale: using session lang={lang}")
             return lang
         # 2. Check cookie
         lang = request.cookies.get("lang")
         if lang and lang in Config.BABEL_SUPPORTED_LOCALES:
+            logger.debug(f"get_locale: using cookie lang={lang}")
             return lang
         # 3. Check Accept-Language header
-        return request.accept_languages.best_match(
+        best_match = request.accept_languages.best_match(
             Config.BABEL_SUPPORTED_LOCALES, default=Config.BABEL_DEFAULT_LOCALE
         )
+        logger.debug(
+            f"get_locale: using Accept-Language best_match={best_match} "
+            f"(Accept-Language={request.headers.get('Accept-Language')})"
+        )
+        return best_match
 
     Babel(app, locale_selector=get_locale)
 

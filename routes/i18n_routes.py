@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 from flask import Blueprint, jsonify, make_response, redirect, request, session
 from flask_babel import gettext as _
+from loguru import logger
 
 from config import Config
 
@@ -20,6 +21,10 @@ def set_language(lang):
     canonical_locales = {locale: locale for locale in supported_locales}
     selected_lang = canonical_locales.get(lang, Config.BABEL_DEFAULT_LOCALE)
 
+    logger.debug(
+        f"set_language: requested={lang} selected={selected_lang} "
+        f"session_lang={session.get('lang')} referrer={request.referrer}"
+    )
     session["lang"] = selected_lang
 
     referrer = request.referrer or ""
@@ -105,6 +110,17 @@ def get_translations():
         "mark_as_read": _("Marcar como leída"),
         "mark_all_read": _("Marcar todas como leídas"),
         "delete_all": _("Eliminar todas"),
+        "squidSource": _("Squid"),
+        "gitSource": _("Git"),
+        "systemSource": _("Sistema"),
+        "securitySource": _("Seguridad"),
+        "usersSource": _("Usuarios"),
+        "errorType": _("Error"),
+        "warningType": _("Advertencia"),
+        "successType": _("Éxito"),
+        "infoType": _("Información"),
+        "errorLoadNotifications": _("Error al cargar notificaciones:"),
+        "notificationDeleted": _("Notificación eliminada"),
         # Squid updates
         "confirm_squid_update": _("¿Deseas actualizar Squid?"),
         "confirm_web_update": _("¿Deseas actualizar SquidStats?"),
