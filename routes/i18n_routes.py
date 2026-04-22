@@ -21,7 +21,7 @@ def set_language(lang):
     canonical_locales = {locale: locale for locale in supported_locales}
     selected_lang = canonical_locales.get(lang, Config.BABEL_DEFAULT_LOCALE)
 
-    logger.debug(
+    logger.info(
         f"set_language: requested={lang} selected={selected_lang} "
         f"session_lang={session.get('lang')} referrer={request.referrer}"
     )
