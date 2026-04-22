@@ -4114,6 +4114,10 @@ msgstr "System Type"
 msgid "Ver Resumen"
 msgstr "View Summary"
 
+#: templates/index.html:43
+msgid "Ver Detalles"
+msgstr "View Details"
+
 #: templates/partials/conexiones.html:234
 msgid "IP del Cliente"
 msgstr "Client IP"
