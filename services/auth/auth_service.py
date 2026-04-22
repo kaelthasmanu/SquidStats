@@ -31,7 +31,14 @@ class AuthConfig:
     # Session settings
     SESSION_COOKIE_NAME = "squidstats_token"
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = os.getenv("FLASK_ENV", "development") == "production"
+    if "SESSION_COOKIE_SECURE" in os.environ:
+        SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "false").lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+    else:
+        SESSION_COOKIE_SECURE = os.getenv("FLASK_ENV", "development") == "production"
     SESSION_COOKIE_SAMESITE = "Lax"
 
     # Security settings
