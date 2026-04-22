@@ -488,6 +488,50 @@ msgstr "Mark all as read"
 msgid "Eliminar todas"
 msgstr "Delete all"
 
+#: routes/i18n_routes.py:90
+msgid "Squid"
+msgstr "Squid"
+
+#: routes/i18n_routes.py:91
+msgid "Git"
+msgstr "Git"
+
+#: routes/i18n_routes.py:92
+msgid "Sistema"
+msgstr "System"
+
+#: routes/i18n_routes.py:93
+msgid "Seguridad"
+msgstr "Security"
+
+#: routes/i18n_routes.py:94
+msgid "Usuarios"
+msgstr "Users"
+
+#: routes/i18n_routes.py:95
+msgid "Error"
+msgstr "Error"
+
+#: routes/i18n_routes.py:96
+msgid "Advertencia"
+msgstr "Warning"
+
+#: routes/i18n_routes.py:97
+msgid "Éxito"
+msgstr "Success"
+
+#: routes/i18n_routes.py:98
+msgid "Información"
+msgstr "Information"
+
+#: routes/i18n_routes.py:99
+msgid "Error al cargar notificaciones:"
+msgstr "Error loading notifications:"
+
+#: routes/i18n_routes.py:100
+msgid "Notificación eliminada"
+msgstr "Notification deleted"
+
 #: routes/i18n_routes.py:91
 msgid "¿Deseas actualizar Squid?"
 msgstr "Do you want to update Squid?"
