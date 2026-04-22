@@ -488,6 +488,82 @@ msgstr "Mark all as read"
 msgid "Eliminar todas"
 msgstr "Delete all"
 
+#: templates/admin/split_config.html:307
+msgid "Configuración dividida exitosamente"
+msgstr "Configuration split successfully"
+
+#: templates/admin/split_config.html:311
+msgid "Se generaron"
+msgstr "Generated"
+
+#: templates/admin/split_config.html:312
+msgid "archivos en"
+msgstr "files in"
+
+#: templates/admin/split_config.html:317
+msgid "Archivos generados:"
+msgstr "Generated files:"
+
+#: templates/admin/database.html:851
+msgid "Error al guardar la configuración."
+msgstr "Error saving the configuration."
+
+#: templates/admin/database.html:858
+msgid "Error al ejecutar la salva"
+msgstr "Error executing the backup"
+
+#: templates/admin/database.html:861
+msgid "¿Eliminar la salva \"%(filename)s\"?"
+msgstr "Delete the backup \"%(filename)s\"?"
+
+#: templates/admin/quota.html:236
+msgid "¿Eliminar la cuota del usuario %(username)s?"
+msgstr "Delete the quota for user %(username)s?"
+
+#: templates/admin/quota.html:292
+msgid "¿Eliminar la cuota del grupo %(group_name)s?"
+msgstr "Delete the quota for group %(group_name)s?"
+
+#: templates/partials/auditoria.html:41
+msgid "Auditoría Técnica"
+msgstr "Technical Audit"
+
+#: templates/admin/ldap_config.html:391
+msgid "Probando…"
+msgstr "Testing..."
+
+#: templates/admin/ldap_config.html:388
+msgid "Sin probar"
+msgstr "Untested"
+
+#: templates/admin/ldap_config.html:392
+msgid "Conectado"
+msgstr "Connected"
+
+#: templates/admin/ldap_config.html:394
+msgid "Error"
+msgstr "Error"
+
+#: templates/admin/ldap_config.html:401
+msgid "Error al guardar la configuración."
+msgstr "Error saving the configuration."
+
+#: templates/admin/ldap_config.html:419
+msgid "Configuración cargada desde la base de datos."
+msgstr "Configuration loaded from the database."
+
+#: templates/admin/ldap_config.html:426
+msgid "Configuración cargada desde el navegador. Los cambios se guardan localmente."
+msgstr "Configuration loaded from the browser. Changes are saved locally."
+
+#: templates/admin/ldap_config.html:435
+msgid "Configuración guardada localmente en el navegador."
+msgstr "Configuration saved locally in the browser."
+
+#: templates/admin/ldap_config.html:443
+msgid "Configuración local eliminada."
+msgstr "Local configuration removed."
+
 #: routes/i18n_routes.py:90
 msgid "Squid"
 msgstr "Squid"
