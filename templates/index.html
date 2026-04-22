@@ -39,6 +39,9 @@
   <script>
     let isDetailedView = true;
 
+    const SUMMARY_LABEL = "{{ _('Ver Resumen') }}";
+    const DETAILS_LABEL = "{{ _('Ver Detalles') }}";
+
     function applyViewState() {
       const contents = document.querySelectorAll("[data-accordion-content]");
       const icons = document.querySelectorAll(".user-accordion .fa-chevron-down");
@@ -49,11 +52,11 @@
       if (isDetailedView) {
         contents.forEach((content) => content.style.display = '');
         icons.forEach((icon) => icon.classList.add("rotate-180"));
-        toggleAllButton.textContent = "Ver Resumen";
+        toggleAllButton.textContent = SUMMARY_LABEL;
       } else {
         contents.forEach((content) => content.style.display = 'none');
         icons.forEach((icon) => icon.classList.remove("rotate-180"));
-        toggleAllButton.textContent = "Ver Detalles";
+        toggleAllButton.textContent = DETAILS_LABEL;
       }
     }
 
