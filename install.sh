@@ -157,7 +157,7 @@ checkPackages() {
             echo "Todos los paquetes necesarios ya están instalados"
         fi
     else
-        packages="git python3 python3-pip python3-venv libmariadb-dev curl build-essential libssl-dev python3-dev libpq-dev"
+        packages="git python3 python3-pip python3-venv libmariadb-dev curl build-essential libssl-dev python3-dev libpq-dev libcairo2-dev libpango1.0-dev"
 
         for pkg in $packages; do
             if ! dpkg -l | grep -q "^ii  $pkg "; then
