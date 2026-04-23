@@ -14,6 +14,7 @@ from utils.colors import color_map
 # WeasyPrint is optional; if missing, PDF endpoint returns friendly error.
 try:
     from weasyprint import CSS, HTML
+
     logger.info("WeasyPrint loaded successfully")
 except Exception as e:
     CSS = None
