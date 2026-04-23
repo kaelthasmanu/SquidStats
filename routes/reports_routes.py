@@ -14,10 +14,11 @@ from utils.colors import color_map
 # WeasyPrint is optional; if missing, PDF endpoint returns friendly error.
 try:
     from weasyprint import CSS, HTML
-except (ImportError, OSError):
+    logger.info("WeasyPrint loaded successfully")
+except Exception as e:
     CSS = None
     HTML = None
-    logger.warning("WeasyPrint unavailable: PDF report generation disabled. ")
+    logger.exception(f"WeasyPrint import failed: {e}")
 
 reports_bp = Blueprint("reports", __name__)
 
@@ -264,6 +265,15 @@ def auditoria_logs():
 
 @reports_bp.route("/auditoria/download/pdf", methods=["GET"])
 def auditoria_download_pdf():
+    if HTML is None or CSS is None:
+        logger.error("PDF export requested but WeasyPrint is unavailable.")
+        return render_template(
+            "error.html",
+            message=(
+                "PDF no disponible: weasyprint o sus librerías nativas no están instaladas. "
+            ),
+        ), 503
+
     audit_type = request.args.get("audit_type", "top_users_data")
     # Keep incoming parameters as strings; list endpoints can be comma-separated.
     params = {
