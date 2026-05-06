@@ -4269,8 +4269,13 @@ msgid "Top 20 Usuarios por Datos Transmitidos"
 msgstr "Top 20 Users by Transmitted Data"
 
 #: templates/partials/graph_reports.html:60
+#: templates/partials/graph_reports.html:70
 msgid "Distribución de Códigos HTTP"
 msgstr "HTTP Code Distribution"
+
+#: templates/partials/graph_reports.html:67
+msgid "Países más visitados"
+msgstr "Most Visited Countries"
 
 #: templates/partials/graph_reports.html:70
 msgid "Top 20 Páginas Más Visitadas"
