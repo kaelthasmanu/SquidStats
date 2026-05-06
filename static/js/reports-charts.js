@@ -87,6 +87,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const el = document.getElementById(canvasId);
     if (!el || !payload) return;
 
+    const colors = payload.colors || CHART_COLORS.slice(0, payload.data.length);
+
     new Chart(el.getContext("2d"), {
       type: "pie",
       data: {
@@ -94,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
         datasets: [
           {
             data: payload.data,
-            backgroundColor: payload.colors,
+            backgroundColor: colors,
             borderColor: getBorderColor(),
             borderWidth: 2,
           },
@@ -145,6 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   buildBarChart("usersDataChart", chartData.usersData, "Datos (MB)", "MB");
   buildPieChart("httpCodesChart", chartData.httpCodes);
+  buildPieChart("countriesChart", chartData.countries);
 
   // ─── PDF export ───────────────────────────────────────────────────────────
 
