@@ -476,7 +476,12 @@ function ldapApp() {
         },
 
         async searchUsers() {
-            if (!this.userQuery.trim()) return;
+            if (!this.userQuery.trim()) {
+                if (typeof showNotification === 'function') {
+                    showNotification('{{ _('El campo de búsqueda de usuario no puede estar vacío.') }}', 'error');
+                }
+                return;
+            }
             this.searchingUsers = true;
             this.userSearched  = false;
             this.userResults   = [];

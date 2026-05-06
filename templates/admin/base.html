@@ -9,6 +9,7 @@
     <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
     <script src="{{ url_for('static', filename='src/alpine.min.js') }}" defer></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}">
 </head>
 <body class="bg-gray-50 min-h-screen" x-data="{ sidebarOpen: false }">
     <!-- Navigation -->
@@ -191,6 +192,9 @@
     <!-- Custom Confirm Modal -->
     {% include 'components/confirm_modal.html' %}
 
+    <script src="{{ url_for('static', filename='js/jquery-4.0.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/toastr-config.js') }}"></script>
     <script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
     <script>
         // Get CSRF token from meta tag
