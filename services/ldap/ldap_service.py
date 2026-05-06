@@ -143,10 +143,16 @@ def search_users(cfg: dict, query: str, limit: int = 50) -> dict:
 
 
 def search_groups(cfg: dict, query: str, limit: int = 50) -> dict:
-    """Search groups whose cn matches *query*."""
+    """Search groups whose cn matches *query*.
+
+    If the query is empty, return all groups under the base DN.
+    """
     query = query.strip().replace("*", "").replace("(", "").replace(")", "")
-    escaped_query = _escape_ldap_filter_value(query)
-    filter_str = f"(&(objectClass=group)(cn=*{escaped_query}*))"
+    if query:
+        escaped_query = _escape_ldap_filter_value(query)
+        filter_str = f"(&(objectClass=group)(cn=*{escaped_query}*))"
+    else:
+        filter_str = "(objectClass=group)"
     try:
         conn = _connect(cfg)
         conn.search(

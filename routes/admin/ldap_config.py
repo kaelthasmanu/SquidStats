@@ -140,14 +140,6 @@ def register_routes(bp):
             query = (data.get("q") or "").strip()
         if not query:
             query = request.args.get("q", "").strip()
-        if not query:
-            return jsonify(
-                {
-                    "status": "error",
-                    "message": _("Parámetro 'q' requerido."),
-                    "results": [],
-                }
-            ), 400
         cfg = _load_request_config()
         if not cfg.get("host"):
             return jsonify(
