@@ -1,11 +1,48 @@
 import datetime
+from collections import Counter
 from datetime import timedelta
+from urllib.parse import urlparse
 
 from loguru import logger
 from sqlalchemy import Column, Integer, String, desc, func, inspect
 from sqlalchemy.orm import Session, relationship
 
 from database.database import get_concat_function, get_dynamic_models
+
+
+def _extract_country_from_url(url: str) -> str:
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.hostname
+        if not hostname and url and "://" not in url:
+            hostname = urlparse("http://" + url).hostname
+        hostname = hostname or ""
+        labels = hostname.lower().split(".")
+        if len(labels) < 2:
+            return "Otros"
+
+        if labels[-1] == "uk" and labels[-2] in {
+            "co",
+            "me",
+            "org",
+            "net",
+            "sch",
+            "gov",
+            "ac",
+            "ltd",
+            "plc",
+            "police",
+            "mod",
+        }:
+            return "UK"
+
+        tld = labels[-1]
+        if len(tld) == 2:
+            return tld.upper()
+
+        return "Global"
+    except Exception:
+        return "Otros"
 
 
 def get_important_metrics(db: Session, UserModel, LogModel):
@@ -85,7 +122,24 @@ def get_important_metrics(db: Session, UserModel, LogModel):
             {"url": page[0], "total_data_bytes": page[1]} for page in top_pages_data
         ]
 
-        # 5. Distribución de códigos HTTP
+        # 5. Países más visitados (estimado por TLD del dominio)
+        country_counts = Counter()
+        urls_by_requests = (
+            db.query(LogModel.url, func.sum(LogModel.request_count).label("total_requests"))
+            .group_by(LogModel.url)
+            .order_by(desc("total_requests"))
+            .all()
+        )
+        for url, total_requests in urls_by_requests:
+            country = _extract_country_from_url(url)
+            country_counts[country] += total_requests or 0
+
+        results["top_countries_by_visits"] = [
+            {"country": country, "total_requests": count}
+            for country, count in country_counts.most_common(10)
+        ]
+
+        # 6. Distribución de códigos HTTP
         response_distribution = (
             db.query(LogModel.response, func.count(LogModel.id).label("count"))
             .group_by(LogModel.response)
@@ -98,7 +152,7 @@ def get_important_metrics(db: Session, UserModel, LogModel):
             for resp in response_distribution
         ]
 
-        # 6. Usuarios por IP
+        # 7. Usuarios por IP
         users_per_ip = (
             db.query(
                 UserModel.ip,
