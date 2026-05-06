@@ -125,7 +125,9 @@ def get_important_metrics(db: Session, UserModel, LogModel):
         # 5. Países más visitados (estimado por TLD del dominio)
         country_counts = Counter()
         urls_by_requests = (
-            db.query(LogModel.url, func.sum(LogModel.request_count).label("total_requests"))
+            db.query(
+                LogModel.url, func.sum(LogModel.request_count).label("total_requests")
+            )
             .group_by(LogModel.url)
             .order_by(desc("total_requests"))
             .all()
