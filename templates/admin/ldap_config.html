@@ -501,7 +501,6 @@ function ldapApp() {
         },
 
         async searchGroups() {
-            if (!this.groupQuery.trim()) return;
             this.searchingGroups = true;
             this.groupSearched   = false;
             this.groupResults    = [];
