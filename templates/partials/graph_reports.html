@@ -54,13 +54,29 @@
     </div>
   </div>
 
-  <!-- HTTP codes chart -->
-  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-    <h2 class="text-xl font-bold mb-4 text-gray-800">
-      {{ _("Distribución de Códigos HTTP") }}
-    </h2>
-    <div class="h-96">
-      <canvas id="httpCodesChart"></canvas>
+  <!-- HTTP codes + country charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">
+        {{ _("Distribución de Códigos HTTP") }}
+      </h2>
+      <div class="h-96">
+        <canvas id="httpCodesChart"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-gray-800">
+          {{ _("Países más visitados") }}
+        </h2>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+          {{ _("Beta") }}
+        </span>
+      </div>
+      <div class="h-96">
+        <canvas id="countriesChart"></canvas>
+      </div>
     </div>
   </div>
 
