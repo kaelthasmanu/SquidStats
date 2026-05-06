@@ -4930,3 +4930,8 @@ msgstr "{count} day ago"
 
 msgid "Hace {count} días"
 msgstr "{count} days ago"
+
+#: templates/admin/ldap_config.html:481
+msgid "El campo de búsqueda de usuario no puede estar vacío."
+msgstr "User search field cannot be empty."
+
