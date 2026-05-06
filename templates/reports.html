@@ -73,6 +73,10 @@
         "labels": {{ metrics.http_response_distribution_chart.labels | tojson | safe }},
         "data":   {{ metrics.http_response_distribution_chart.data   | tojson | safe }},
         "colors": {{ metrics.http_response_distribution_chart.colors | tojson | safe }}
+      },
+      "countries": {
+        "labels": {{ metrics.top_countries_by_visits | map(attribute='country') | list | tojson | safe }},
+        "data":   {{ metrics.top_countries_by_visits | map(attribute='total_requests') | list | tojson | safe }}
       }
     }
   </script>
