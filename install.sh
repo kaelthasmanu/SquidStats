@@ -207,7 +207,7 @@ findInstallDir() {
     fi
 
     for dir in $destinos; do
-        if [ -d "$dir" ]; then
+        if [ -f "$dir/app.py" ] && [ -f "$dir/requirements.txt" ]; then
             log_msg "INFO" "Directorio de instalación encontrado: $dir"
             echo "$dir"
             return 0
@@ -258,6 +258,16 @@ updateOrCloneRepo() {
             log_msg "INFO" "Respaldando archivo .env"
             echo ".env existente detectado, se preservará"
             cp .env /tmp/.env.backup
+        fi
+
+        remote_url=$(git remote get-url origin 2>/dev/null || true)
+        if [ -n "$remote_url" ] && echo "$remote_url" | grep -qE '^(git@|ssh://)github.com[:/]'; then
+            log_msg "INFO" "Remote origin usa SSH ($remote_url), cambiando a HTTPS"
+            git remote set-url origin "$repo_url" >> "$LOG_FILE" 2>&1 || {
+                error "No se pudo actualizar la URL remota a HTTPS"
+                return 1
+            }
+            log_msg "INFO" "Remote origin actualizado a $repo_url"
         fi
 
         if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
