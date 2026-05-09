@@ -78,7 +78,7 @@ def flask_app():
         static_folder=str(project_root / "static"),
     )
     app.config["TESTING"] = True
-    app.config["SECRET_KEY"] = "test-secret-key"
+    app.config["SECRET_KEY"] = "test-secret-key"  # noqa: S105
     app.config["WTF_CSRF_ENABLED"] = False
     app.config["SERVER_NAME"] = "localhost"
     app.config["BABEL_DEFAULT_LOCALE"] = "es"

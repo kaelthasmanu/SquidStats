@@ -38,7 +38,7 @@ class TestAuthService:
         from services.auth.auth_service import AuthService
 
         with patch("services.auth.auth_service.Config") as mock_config:
-            mock_config.JWT_SECRET_KEY = "test-secret-key-12345"
+            mock_config.JWT_SECRET_KEY = "test-secret-key-12345"  # noqa: S105
             user_data = {"id": 1, "username": "admin", "role": "admin"}
             token = AuthService.generate_token(user_data)
             assert isinstance(token, str)
@@ -48,7 +48,7 @@ class TestAuthService:
         from services.auth.auth_service import AuthService
 
         with patch("services.auth.auth_service.Config") as mock_config:
-            mock_config.JWT_SECRET_KEY = "test-secret-key-12345"
+            mock_config.JWT_SECRET_KEY = "test-secret-key-12345"  # noqa: S105
             user_data = {"id": 42, "username": "testuser", "role": "admin"}
             token = AuthService.generate_token(user_data)
             payload = AuthService.validate_token(token)

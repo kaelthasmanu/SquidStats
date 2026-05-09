@@ -14,7 +14,7 @@ def _docker_reconfigure() -> tuple[bool, str]:
     if docker_bin is None:
         return False, "Docker no encontrado"
     try:
-        subprocess.run(  # nosec B603
+        subprocess.run(  # nosec B603  # noqa: S603
             [docker_bin, "exec", "squid_proxy", "squid", "-k", "reconfigure"],
             check=True,
             capture_output=True,
@@ -41,7 +41,7 @@ def _local_reconfigure() -> tuple[bool, str]:
     if squid_bin is None:
         return False, "Squid no encontrado"
     try:
-        subprocess.run(  # nosec B603
+        subprocess.run(  # nosec B603  # noqa: S603
             [squid_bin, "-k", "reconfigure"],
             check=True,
             capture_output=True,
@@ -66,7 +66,7 @@ def restart_squid() -> tuple[bool, str, str]:
     systemctl_bin = _get_bin("systemctl")
     if systemctl_bin:
         try:
-            subprocess.run([systemctl_bin, "restart", "squid"], check=True)  # nosec B603
+            subprocess.run([systemctl_bin, "restart", "squid"], check=True)  # nosec B603  # noqa: S603
             return True, "Squid restarted successfully", None
         except subprocess.CalledProcessError as e:
             logger.warning(
@@ -91,7 +91,7 @@ def reload_squid() -> tuple[bool, str, str]:
     systemctl_bin = _get_bin("systemctl")
     if systemctl_bin:
         try:
-            subprocess.run([systemctl_bin, "reload", "squid"], check=True)  # nosec B603
+            subprocess.run([systemctl_bin, "reload", "squid"], check=True)  # nosec B603  # noqa: S603
             return True, "Configuration reloaded successfully", None
         except subprocess.CalledProcessError as e:
             logger.warning(
