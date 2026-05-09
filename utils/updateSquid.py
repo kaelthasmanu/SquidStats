@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import shutil
 import subprocess
 import tempfile
 
@@ -11,28 +12,27 @@ load_dotenv()
 
 
 def update_squid():
+    squid_bin = shutil.which("squid")
     try:
-        pre_check = subprocess.run(["squid", "-v"], capture_output=True, text=True)
-        squid_instalado = pre_check.returncode == 0
+        if squid_bin:
+            pre_check = subprocess.run(  # noqa: S603
+                [squid_bin, "-v"], capture_output=True, text=True
+            )
+            squid_instalado = pre_check.returncode == 0
+        else:
+            squid_instalado = False
     except FileNotFoundError:
         squid_instalado = False
-        try:
-            logger.info(
-                "El binario de Squid no se encontró en el sistema (aún no instalado)"
-            )
-        except Exception:
-            pass
 
     if squid_instalado:
-        try:
-            logger.info(f"Squid ya está instalado: {pre_check.stdout.strip()}")
-        except Exception:
-            pass
+        logger.info(f"Squid ya está instalado: {pre_check.stdout.strip()}")
     else:
-        try:
-            logger.info("Squid no está instalado o no se detectó instalación previa")
-        except Exception:
-            pass
+        logger.info(
+            "El binario de Squid no se encontró en el sistema (aún no instalado)"
+            if not squid_bin
+            else "Squid no está instalado o no se detectó instalación previa"
+        )
+
     try:
         os_info = platform.freedesktop_os_release()
         os_id = os_info.get("ID", "").lower()
@@ -50,8 +50,13 @@ def update_squid():
             env["http_proxy"] = proxy_url
             env["https_proxy"] = proxy_url
 
-        version_info = subprocess.run(
-            ["wget", "-qO-", "https://api.github.com/repos/cuza/squid/releases/latest"],
+        wget_bin = shutil.which("wget")
+        if not wget_bin:
+            logger.error("wget no encontrado en el sistema")
+            return False
+
+        version_info = subprocess.run(  # noqa: S603
+            [wget_bin, "-qO-", "https://api.github.com/repos/cuza/squid/releases/latest"],
             capture_output=True,
             text=True,
             env=env,
@@ -69,8 +74,8 @@ def update_squid():
         package_name = f"squid_{latest_version}-{os_id}-{codename}_amd64.deb"
         download_url = f"https://github.com/cuza/squid/releases/download/{latest_version}/{package_name}"
 
-        check_package = subprocess.run(
-            ["wget", "--spider", download_url], capture_output=True, text=True, env=env
+        check_package = subprocess.run(  # noqa: S603
+            [wget_bin, "--spider", download_url], capture_output=True, text=True, env=env
         )
         if check_package.returncode != 0:
             logger.error(
@@ -82,8 +87,8 @@ def update_squid():
             delete=False, suffix=f"_{package_name}"
         ) as tmp_pkg:
             package_path = tmp_pkg.name
-            download = subprocess.run(
-                ["wget", download_url, "-O", package_path],
+            download = subprocess.run(  # noqa: S603
+                [wget_bin, download_url, "-O", package_path],
                 capture_output=True,
                 text=True,
                 env=env,
@@ -99,28 +104,43 @@ def update_squid():
                 f.write(f'Acquire::http::Proxy "{proxy_url}";\n')
                 f.write(f'Acquire::https::Proxy "{proxy_url}";\n')
 
-        subprocess.run(["apt", "update"], env=apt_env)
+        apt_bin = shutil.which("apt")
+        dpkg_bin = shutil.which("dpkg")
+        cp_bin = shutil.which("cp")
+        chmod_bin = shutil.which("chmod")
+        systemctl_bin = shutil.which("systemctl")
 
-        install = subprocess.run(["dpkg", "-i", "--force-overwrite", package_path])
-        if install.returncode != 0:
-            logger.error("Error instalando el paquete")
-            subprocess.run(["apt", "install", "-f", "-y"], env=apt_env)
+        if apt_bin:
+            subprocess.run([apt_bin, "update"], env=apt_env)  # noqa: S603
 
-        subprocess.run(["cp", f"{os.getcwd()}/./utils/squid", "/etc/init.d/"])
-        subprocess.run(["chmod", "+x", "/etc/init.d/squid"])
-        subprocess.run(["systemctl", "daemon-reload"])
+        if dpkg_bin:
+            install = subprocess.run(  # noqa: S603
+                [dpkg_bin, "-i", "--force-overwrite", package_path]
+            )
+            if install.returncode != 0:
+                logger.error("Error instalando el paquete")
+                if apt_bin:
+                    subprocess.run([apt_bin, "install", "-f", "-y"], env=apt_env)  # noqa: S603
+
+        if cp_bin:
+            subprocess.run([cp_bin, f"{os.getcwd()}/./utils/squid", "/etc/init.d/"])  # noqa: S603
+        if chmod_bin:
+            subprocess.run([chmod_bin, "+x", "/etc/init.d/squid"])  # noqa: S603
+        if systemctl_bin:
+            subprocess.run([systemctl_bin, "daemon-reload"])  # noqa: S603
 
         os.unlink(package_path)
-        squid_check = subprocess.run(["squid", "-v"], capture_output=True, text=True)
 
-        if squid_check.returncode != 0:
-            logger.error("Error en instalación final")
-            return False
+        squid_bin_final = shutil.which("squid")
+        if squid_bin_final:
+            squid_check = subprocess.run(  # noqa: S603
+                [squid_bin_final, "-v"], capture_output=True, text=True
+            )
+            if squid_check.returncode != 0:
+                logger.error("Error en instalación final")
+                return False
 
-        try:
-            logger.info(f"Actualización a {latest_version} completada exitosamente")
-        except Exception:
-            pass
+        logger.info(f"Actualización a {latest_version} completada exitosamente")
         return True
     except Exception:
         logger.exception("Error crítico durante la actualización de Squid")
