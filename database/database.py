@@ -97,8 +97,9 @@ def create_database_if_not_exists():
                 # Verificar si la base de datos existe
                 result = conn.execute(
                     text(
-                        f"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{database_name}'"
-                    )
+                        "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname"
+                    ),
+                    {"dbname": database_name},
                 )
 
                 if not result.fetchone():
@@ -141,8 +142,9 @@ def create_database_if_not_exists():
                     # Verificar si la base de datos existe
                     result = conn.execute(
                         text(
-                            f"SELECT 1 FROM pg_database WHERE datname = '{database_name}'"
-                        )
+                            "SELECT 1 FROM pg_database WHERE datname = :dbname"
+                        ),
+                        {"dbname": database_name},
                     )
 
                     if not result.fetchone():
