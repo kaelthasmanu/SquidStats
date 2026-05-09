@@ -56,7 +56,11 @@ def update_squid():
             return False
 
         version_info = subprocess.run(  # noqa: S603
-            [wget_bin, "-qO-", "https://api.github.com/repos/cuza/squid/releases/latest"],
+            [
+                wget_bin,
+                "-qO-",
+                "https://api.github.com/repos/cuza/squid/releases/latest",
+            ],
             capture_output=True,
             text=True,
             env=env,
@@ -75,7 +79,10 @@ def update_squid():
         download_url = f"https://github.com/cuza/squid/releases/download/{latest_version}/{package_name}"
 
         check_package = subprocess.run(  # noqa: S603
-            [wget_bin, "--spider", download_url], capture_output=True, text=True, env=env
+            [wget_bin, "--spider", download_url],
+            capture_output=True,
+            text=True,
+            env=env,
         )
         if check_package.returncode != 0:
             logger.error(

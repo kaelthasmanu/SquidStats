@@ -34,7 +34,9 @@ def updateSquidStats():
                 response.raise_for_status()
                 tmp_script.write(response.content)
             subprocess.run([shutil.which("chmod") or "chmod", "+x", tmp_script_path])  # noqa: S603
-            subprocess.run([shutil.which("bash") or "bash", tmp_script_path, "--update"], env=env)  # noqa: S603
+            subprocess.run(
+                [shutil.which("bash") or "bash", tmp_script_path, "--update"], env=env
+            )  # noqa: S603
             os.unlink(tmp_script_path)
             return True
         except Exception:
