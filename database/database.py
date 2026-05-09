@@ -141,9 +141,7 @@ def create_database_if_not_exists():
                 with server_engine.connect() as conn:
                     # Verificar si la base de datos existe
                     result = conn.execute(
-                        text(
-                            "SELECT 1 FROM pg_database WHERE datname = :dbname"
-                        ),
+                        text("SELECT 1 FROM pg_database WHERE datname = :dbname"),
                         {"dbname": database_name},
                     )
 
