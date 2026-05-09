@@ -54,7 +54,11 @@ def downgrade() -> None:
     inspector = inspect(conn)
     if inspector.has_table("blacklist_domains"):
         # Drop index first if exists
-        op.drop_index("ix_blacklist_domains_domain", table_name="blacklist_domains", if_exists=True)
+        op.drop_index(
+            "ix_blacklist_domains_domain",
+            table_name="blacklist_domains",
+            if_exists=True,
+        )
         op.drop_table("blacklist_domains")
     else:
         print("'blacklist_domains' does not exist, skipping downgrade for this table")
