@@ -94,33 +94,18 @@ def downgrade() -> None:
     inspector = inspect(conn)
 
     if inspector.has_table("quota_events"):
-        try:
-            op.drop_index("ix_quota_events_created_at", table_name="quota_events")
-        except Exception:
-            pass
+        op.drop_index("ix_quota_events_created_at", table_name="quota_events", if_exists=True)
         op.drop_table("quota_events")
 
     if inspector.has_table("quota_rules"):
-        try:
-            op.drop_index("ix_quota_rules_active", table_name="quota_rules")
-        except Exception:
-            pass
+        op.drop_index("ix_quota_rules_active", table_name="quota_rules", if_exists=True)
         op.drop_table("quota_rules")
 
     if inspector.has_table("quota_groups"):
-        try:
-            op.drop_index("ix_quota_groups_group_name", table_name="quota_groups")
-        except Exception:
-            pass
+        op.drop_index("ix_quota_groups_group_name", table_name="quota_groups", if_exists=True)
         op.drop_table("quota_groups")
 
     if inspector.has_table("quota_users"):
-        try:
-            op.drop_index("ix_quota_users_group_name", table_name="quota_users")
-        except Exception:
-            pass
-        try:
-            op.drop_index("ix_quota_users_username", table_name="quota_users")
-        except Exception:
-            pass
+        op.drop_index("ix_quota_users_group_name", table_name="quota_users", if_exists=True)
+        op.drop_index("ix_quota_users_username", table_name="quota_users", if_exists=True)
         op.drop_table("quota_users")
