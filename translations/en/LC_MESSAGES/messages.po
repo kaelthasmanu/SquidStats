@@ -4653,6 +4653,14 @@ msgstr "Last page"
 msgid "Actividad usuarios"
 msgstr "User Activity"
 
+#: templates/partials/logs.html:30
+msgid "ACTIVIDAD"
+msgstr "Activity"
+
+#: templates/partials/logs.html:65
+msgid "Actividad reciente -"
+msgstr "Recent activity -"
+
 #: routes/logs_routes.py:26
 msgid "Analisis de la Actividad de los Usuarios"
 msgstr "User Activity Analysis"
