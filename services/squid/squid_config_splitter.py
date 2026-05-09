@@ -373,7 +373,7 @@ class SquidConfigSplitter:
         def _run_command(cmd: list[str]) -> dict:
             """Run a validation command and return a result dict."""
             try:
-                result = subprocess.run(  # nosec B603
+                result = subprocess.run(  # nosec B603  # noqa: S603
                     cmd,
                     capture_output=True,
                     text=True,
