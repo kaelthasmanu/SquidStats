@@ -1,24 +1,184 @@
+{% set response_groups = [
+  {'key': 'informational', 'icon': 'fa-info-circle', 'color': 'text-blue-500', 'label': _('Respuestas informativas (100–199)')},
+  {'key': 'successful', 'icon': 'fa-circle-check', 'color': 'text-green-500', 'label': _('Respuestas exitosas (200–299)')},
+  {'key': 'redirection', 'icon': 'fa-arrow-right', 'color': 'text-yellow-500', 'label': _('Mensajes de redirección (300–399)')},
+  {'key': 'clientError', 'icon': 'fa-circle-xmark', 'color': 'text-red-500', 'label': _('Respuestas de error del cliente (400–499)')},
+  {'key': 'serverError', 'icon': 'fa-triangle-exclamation', 'color': 'text-orange-400', 'label': _('Respuestas de error del servidor (500–599)')},
+  {'key': 'unknown', 'icon': 'fa-question', 'color': 'text-gray-500', 'label': _('Otros')},
+] %}
+
 <div class="w-full space-y-6">
-  <div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container"></div>
-  <div id="modals-container"></div>
+  <div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container">
+    {% if users %}
+      {% for user in users %}
+        <div class="user-card group bg-[#f0f2f5] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="{{ user.username|lower }}">
+          <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] z-[1]">
+            <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-300 ease-linear z-0 group-hover:h-full"></div>
+            <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
+            <div class="avatar w-full h-full rounded-full bg-slate-200 flex items-center justify-center text-[2.5rem] text-slate-500 relative transition-all duration-900 ease-in-out group-hover:shadow-[0_0_0_10px_#f7f5ec] group-hover:scale-[0.7] z-[2]">
+              <i class="fas fa-user"></i>
+            </div>
+          </div>
+
+          <div class="user-info mt-[-15px] mb-4 px-[15px]">
+            <h3 class="username font-semibold text-[1.2rem] text-[#1369ce] mb-0">{{ user.username }}</h3>
+            <h4 class="ip-address text-[0.9rem] text-gray-500">{{ user.ip }}</h4>
+          </div>
+
+          <div class="card-action px-[15px] mt-[2px] relative z-[2]">
+            <button class="activity-button w-full bg-[#1369ce] text-white font-bold py-2 rounded-md cursor-pointer transition-all duration-300 text-sm hover:bg-[#0d5bb5] hover:-translate-y-0.5 shadow-md" onclick="window.openLogsModal({{ loop.index0 }})">
+              {{ _('ACTIVIDAD') }}
+            </button>
+          </div>
+
+          <ul class="card-footer absolute bottom-[-80px] left-0 w-full px-4 py-3 bg-[#1369ce] text-white text-sm flex justify-between transition-all duration-500 ease-in-out group-hover:bottom-0 shadow-[0_-4px_6px_rgba(0,0,0,0.2)] z-[1]">
+            <li class="flex flex-col items-center">
+              <span class="label text-xs font-light uppercase tracking-wide">{{ _('Solicitudes') }}:</span>
+              <span class="value font-semib">{{ user.total_requests }}</span>
+            </li>
+            <li class="flex flex-col items-center">
+              <span class="label text-xs font-light uppercase tracking-wide">{{ _('Datos') }}:</span>
+              <span class="value font-semib">{{ user.total_data|format_bytes }}</span>
+            </li>
+          </ul>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-gray-500 text-center p-4 col-span-full">{{ _('No se encontraron datos') }}</div>
+    {% endif %}
+  </div>
+
+  <div id="modals-container">
+    {% for user in users %}
+      <div class="logs-modal hidden fixed inset-0 bg-black bg-opacity-50 z-[1000] justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-{{ loop.index0 }}">
+        <div class="modal-content bg-white p-8 rounded-2xl w-[95%] max-w-[650px] max-h-[85vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
+          <button onclick="window.closeLogsModal({{ loop.index0 }})"
+                  class="close-btn absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full z-50 shadow-md transform transition-all duration-300 hover:bg-red-600 hover:scale-110 hover:rotate-90 hover:shadow-lg"
+                  title="{{ _('Cerrar') }}" aria-label="{{ _('Cerrar') }}">
+            <i class="fas fa-times text-base"></i>
+          </button>
+
+          <div class="flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                <h4 class="logs-title text-base text-gray-500 uppercase tracking-[1px] font-semibold whitespace-nowrap">
+                  {{ _('Actividad reciente -') }}
+                </h4>
+                <div class="flex items-center gap-2">
+                  <span class="username-highlight font-semibold truncate max-w-[120px] text-[#1369ce]">{{ user.username }}</span>
+                  <div id="searchBox-{{ loop.index0 }}" class="relative w-auto h-[38px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md flex items-center border border-gray-300">
+                    <div id="toggleBtn-{{ loop.index0 }}" class="log-search-toggle absolute left-0 top-0 w-[38px] h-[38px] flex items-center justify-center cursor-pointer z-10">
+                      <i class="fas fa-search text-blue-600 text-sm"></i>
+                    </div>
+                    <div id="inputWrapper-{{ loop.index0 }}" class="log-search-wrapper ml-[38px] w-0 h-[38px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
+                      <input id="mysearch-{{ loop.index0 }}" type="text" placeholder="{{ _('Buscar URL...') }}" class="log-search-input w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]" />
+                    </div>
+                    <button id="clearBtn-{{ loop.index0 }}" type="button" class="log-search-clear absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" title="{{ _('Limpiar búsqueda') }}">
+                      <i class="fas fa-times text-lg leading-none"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="response-summary flex justify-end gap-4 items-center mb-4 flex-wrap">
+              {% for group in response_groups %}
+                {% set count = user.response_summary[group.key] %}
+                {% if count > 0 %}
+                  <div class="filter-icon flex items-center gap-1 text-sm cursor-pointer transition-colors"
+                       data-filter-type="{{ group.key }}"
+                       data-active="true"
+                       data-color="{{ group.color }}"
+                       title="{{ group.label }}"
+                       onclick="window.toggleResponseFilter(this, {{ loop.index0 }})">
+                    <i class="fa-solid {{ group.icon }}"></i>
+                    <span>{{ count }}</span>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="logs-list mt-2 max-h-[60vh] overflow-y-auto">
+            {% if user.grouped_logs %}
+              <div class="log-entries-container grid gap-3">
+                {% for log in user.grouped_logs %}
+                  <div class="log-entry relative group p-3 bg-white rounded-lg transition-all duration-300 ease-out shadow-md hover:shadow-2xl hover:-translate-y-1 hover:z-10{% if log.is_grouped %} grouped-log-entry{% endif %}"
+                       data-response-code="{{ log.response }}">
+                    <div class="wave-container absolute inset-0 overflow-hidden rounded-lg">
+                      <div class="wave absolute w-full h-full"></div>
+                    </div>
+                    <div class="relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                      <div class="log-details-grid min-w-0">
+                        <div class="flex items-baseline gap-3">
+                          <span class="log-url text-sm font-medium text-gray-800 truncate">
+                            {{ log.url|truncate(55, True, '...') }}
+                          </span>
+                          {% if log.is_grouped %}
+                            <i class="fas fa-layer-group text-blue-500 ml-2 text-xs" title="{{ _('Solicitudes agrupadas') }}"></i>
+                          {% endif %}
+                        </div>
+                        <div class="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                          <span class="response-badge {% if log.response >= 100 and log.response <= 199 %}bg-blue-400{% elif log.response >= 200 and log.response <= 299 %}bg-green-500{% elif log.response >= 300 and log.response <= 399 %}bg-yellow-400{% elif log.response >= 400 and log.response <= 499 %}bg-red-500{% elif log.response >= 500 and log.response <= 599 %}bg-orange-400{% else %}bg-gray-400{% endif %} inline-block px-2 py-[0.15rem] rounded-md text-[0.65rem] font-medium text-white">
+                            {{ log.response }}
+                          </span>
+                          <span class="log-meta flex items-center gap-1">
+                            <i class="fas fa-hashtag text-gray-400"></i>
+                            {{ log.request_count }} {{ _('reqs') }}
+                          </span>
+                          <span class="log-meta flex items-center gap-1">
+                            <i class="fas fa-database text-gray-400"></i>
+                            {{ log.data_transmitted|format_bytes }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2 flex-shrink-0">
+                        <i class="fa-solid fa-up-right-from-square text-blue-600 hover:text-blue-800 cursor-pointer text-lg"
+                           title="{{ _('Abrir enlace') }}"
+                           onclick="window.open('{{ log.full_url }}', '_blank')"></i>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="no-logs text-gray-500 text-center py-8">{{ _('No hay actividad registrada') }}</div>
+            {% endif %}
+            <div class="no-results hidden text-center py-8 text-gray-500">{{ _('No se encontraron resultados') }}</div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
   <div class="pagination-container flex justify-center items-center mt-12 gap-4">
-    <button id="first-page" aria-label="{{ _("First page") }}" class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
+    <a href="{{ url_for('logs.logs', date=selected_date, search=search_query, page=1) }}"
+       aria-label="{{ _('First page') }}"
+       class="pg-btn first w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none {% if pagination.page <= 1 %}pointer-events-none opacity-50{% endif %}">
       <i class="fas fa-angle-double-left"></i>
-    </button>
-    <button id="prev-page" aria-label="{{ _("Previous page") }}" class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
+    </a>
+    <a href="{{ url_for('logs.logs', date=selected_date, search=search_query, page=pagination.page - 1) if pagination.page > 1 else '#' }}"
+       aria-label="{{ _('Previous page') }}"
+       class="pg-btn prev w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none {% if pagination.page <= 1 %}pointer-events-none opacity-50{% endif %}">
       <i class="fas fa-angle-left"></i>
-    </button>
-    <!-- Here JS will generate the page buttons -->
-    <div class="pagination flex gap-1" id="page-numbers"></div>
-    <button
-      id="next-page"
-      aria-label="{{ _("Next page") }}"
-      class="pg-btn next w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
+    </a>
+    <div class="pagination flex gap-1">
+      {% for page_number in pagination.page_range %}
+        <a href="{{ url_for('logs.logs', date=selected_date, search=search_query, page=page_number) }}"
+           class="pg-btn text-lg px-3 py-1 rounded-full shadow-md font-medium {% if page_number == pagination.page %}bg-blue-500 text-white{% else %}bg-gray-100 text-gray-800 hover:bg-gray-300{% endif %}">
+          {{ page_number }}
+        </a>
+      {% endfor %}
+    </div>
+    <a href="{{ url_for('logs.logs', date=selected_date, search=search_query, page=pagination.page + 1) if pagination.page < pagination.total_pages else '#' }}"
+       aria-label="{{ _('Next page') }}"
+       class="pg-btn next w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none {% if pagination.page >= pagination.total_pages %}pointer-events-none opacity-50{% endif %}">
       <i class="fas fa-angle-right"></i>
-    </button>
-    <button id="last-page" aria-label="{{ _("Last page") }}" class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 cursor-pointer font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none">
+    </a>
+    <a href="{{ url_for('logs.logs', date=selected_date, search=search_query, page=pagination.total_pages) }}"
+       aria-label="{{ _('Last page') }}"
+       class="pg-btn last w-12 h-12 flex items-center justify-center rounded-full bg-white text-blue-600 font-semibold shadow-md transition-all duration-200 ease-in-out text-xl hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none {% if pagination.page >= pagination.total_pages %}pointer-events-none opacity-50{% endif %}">
       <i class="fas fa-angle-double-right"></i>
-    </button>
+    </a>
   </div>
 </div>
 
