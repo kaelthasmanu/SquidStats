@@ -315,6 +315,42 @@ export function applyFiltersToModal(modalIndex) {
   }
 }
 
+export function initLogsModalInteractions() {
+  document.querySelectorAll('.logs-modal').forEach((modal) => {
+    const modalIndex = modal.id?.split('-').pop();
+    const toggleBtn = modal.querySelector('.log-search-toggle');
+    const inputWrapper = modal.querySelector('.log-search-wrapper');
+    const input = modal.querySelector('.log-search-input');
+    const clearBtn = modal.querySelector('.log-search-clear');
+
+    toggleBtn?.addEventListener('click', () => {
+      if (!inputWrapper || !input || !clearBtn) return;
+      const isExpanding = !inputWrapper.classList.contains('w-[180px]');
+      if (isExpanding) {
+        inputWrapper.classList.add('w-[180px]');
+        input.classList.remove('opacity-0');
+        clearBtn.classList.remove('opacity-0');
+        setTimeout(() => input.focus(), 300);
+      } else {
+        inputWrapper.classList.remove('w-[180px]');
+        input.classList.add('opacity-0');
+        clearBtn.classList.add('opacity-0');
+        input.value = '';
+        applyFiltersToModal(modalIndex);
+      }
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      if (!input) return;
+      input.value = '';
+      applyFiltersToModal(modalIndex);
+      input.focus();
+    });
+
+    input?.addEventListener('input', () => applyFiltersToModal(modalIndex));
+  });
+}
+
 export function toggleResponseFilter(el, modalIndex) {
   const isActive = el.dataset.active === "true";
   el.dataset.active = isActive ? "false" : "true";
