@@ -11,6 +11,7 @@ Planned (not yet implemented):
 
 import os
 import re
+import shutil
 import sqlite3
 import subprocess
 from datetime import datetime
@@ -321,7 +322,7 @@ def _mysql_backup(backup_dir: Path, tag: str) -> Path:
     dest = backup_dir / f"squidstats_backup_{tag}_{timestamp}.sql"
 
     cmd = [
-        "mysqldump",
+        shutil.which("mysqldump") or "mysqldump",
         f"--host={host}",
         f"--port={port}",
         f"--user={user}",
@@ -336,7 +337,7 @@ def _mysql_backup(backup_dir: Path, tag: str) -> Path:
         env["MYSQL_PWD"] = password
 
     with open(dest, "w") as f:
-        result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, env=env)
+        result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, env=env)  # noqa: S603
 
     if result.returncode != 0:
         dest.unlink(missing_ok=True)
@@ -371,7 +372,7 @@ def _postgresql_backup(backup_dir: Path, tag: str) -> Path:
     dest = backup_dir / f"squidstats_backup_{tag}_{timestamp}.sql"
 
     cmd = [
-        "pg_dump",
+        shutil.which("pg_dump") or "pg_dump",
         f"--host={host}",
         f"--port={port}",
         f"--username={user}",
@@ -384,7 +385,7 @@ def _postgresql_backup(backup_dir: Path, tag: str) -> Path:
     env["PGPASSWORD"] = password
 
     with open(dest, "w") as f:
-        result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, env=env)
+        result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, env=env)  # noqa: S603
 
     if result.returncode != 0:
         dest.unlink(missing_ok=True)

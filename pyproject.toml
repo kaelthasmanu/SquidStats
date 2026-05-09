@@ -32,14 +32,17 @@ exclude = [
 [tool.ruff.lint]
 # Seleccionar reglas a aplicar
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "C4",
+    "UP",
+    "S",
 ]
+
+
 
 # Ignorar reglas específicas
 ignore = [

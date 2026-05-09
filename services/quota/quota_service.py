@@ -30,7 +30,7 @@ def _ensure_blocked_file(blocked_path: str):
         return
 
     try:
-        subprocess.run(  # nosec B603
+        subprocess.run(  # nosec B603  # noqa: S603
             [docker_bin, "exec", "squid_proxy", "test", "-f", blocked_path],
             check=True,
             capture_output=True,
@@ -38,13 +38,13 @@ def _ensure_blocked_file(blocked_path: str):
         )
     except subprocess.CalledProcessError:
         try:
-            subprocess.run(  # nosec B603
+            subprocess.run(  # nosec B603  # noqa: S603
                 [docker_bin, "exec", "squid_proxy", "touch", blocked_path],
                 check=True,
                 capture_output=True,
                 timeout=10,
             )
-            subprocess.run(  # nosec B603
+            subprocess.run(  # nosec B603  # noqa: S603
                 [docker_bin, "exec", "squid_proxy", "chmod", "640", blocked_path],
                 check=True,
                 capture_output=True,
@@ -65,7 +65,7 @@ def _sync_blocked_file_to_docker(blocked_path: str):
     if docker_bin is None:
         return
     try:
-        subprocess.run(  # nosec B603
+        subprocess.run(  # nosec B603  # noqa: S603
             [docker_bin, "cp", blocked_path, f"squid_proxy:{blocked_path}"],
             check=True,
             capture_output=True,

@@ -112,7 +112,7 @@ class Config:
 
     # Flask settings
     DEBUG = safe_get_env("FLASK_DEBUG", False, var_type=bool)
-    LISTEN_HOST = safe_get_env("LISTEN_HOST") or safe_get_env("FLASK_HOST") or "0.0.0.0"  # nosec B104
+    LISTEN_HOST = safe_get_env("LISTEN_HOST") or safe_get_env("FLASK_HOST") or "0.0.0.0"  # nosec B104  # noqa: S104
     LISTEN_PORT = safe_get_env(
         "LISTEN_PORT", safe_get_env("FLASK_PORT", 5000, var_type=int), var_type=int
     )

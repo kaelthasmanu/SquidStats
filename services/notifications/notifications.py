@@ -520,7 +520,7 @@ def has_remote_commits_with_messages(
             logger.warning("'git' executable not found in PATH")
             return False, []
 
-        subprocess.run(  # nosec B603
+        subprocess.run(  # nosec B603  # noqa: S603
             [git_bin, "fetch"],
             cwd=repo_path,
             check=True,
@@ -528,7 +528,7 @@ def has_remote_commits_with_messages(
             stderr=subprocess.DEVNULL,
             env=env,
         )
-        result = subprocess.run(  # nosec B603
+        result = subprocess.run(  # nosec B603  # noqa: S603
             [
                 git_bin,
                 "rev-list",
@@ -546,7 +546,7 @@ def has_remote_commits_with_messages(
         remote_ahead = int(ahead_behind[0])
 
         if remote_ahead > 0:
-            log_result = subprocess.run(  # nosec B603
+            log_result = subprocess.run(  # nosec B603  # noqa: S603
                 [git_bin, "log", f"{branch}..origin/{branch}", "--pretty=format:%s"],
                 cwd=repo_path,
                 capture_output=True,

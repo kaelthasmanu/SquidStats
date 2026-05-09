@@ -205,7 +205,7 @@ def get_timezone():
             return tz_path.split("zoneinfo/")[-1]
         timedatectl_bin = shutil.which("timedatectl")
         if timedatectl_bin:
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603
                 [timedatectl_bin], stdout=subprocess.PIPE, text=True
             )  # nosec B603
             match = re.search(r"Time zone: (\S+)\s+(\S+/\S+)", result.stdout)
@@ -237,12 +237,12 @@ def get_system_type():
     sw_vers_bin = shutil.which("sw_vers")
     if sw_vers_bin is not None:
         try:
-            result = subprocess.run(  # nosec B603 B607
+            result = subprocess.run(  # nosec B603 B607  # noqa: S603
                 [sw_vers_bin, "-productName"], capture_output=True, text=True, timeout=5
             )
             if result.returncode == 0:
                 name = result.stdout.strip()
-                result = subprocess.run(  # nosec B603 B607
+                result = subprocess.run(  # nosec B603 B607  # noqa: S603
                     [sw_vers_bin, "-productVersion"],
                     capture_output=True,
                     text=True,
@@ -255,8 +255,8 @@ def get_system_type():
 
     # Check for Windows
     try:
-        result = subprocess.run(  # nosec B602 B607
-            'systeminfo | findstr /B /C:"OS Name" /B /C:"OS Version"',
+        result = subprocess.run(  # nosec B602 B607  # noqa: S602
+            'systeminfo | findstr /B /C:"OS Name" /B /C:"OS Version"',  # noqa: S607
             shell=True,
             capture_output=True,
             text=True,
