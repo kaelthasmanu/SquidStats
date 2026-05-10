@@ -305,7 +305,7 @@ function ldapApp() {
         cfgAlert:     { message: "", type: "" },
 
         // Connection status
-        connectionStatus: "Sin probar",
+        connectionStatus: "{{ _('Sin probar') }}",
         clientNotice: "",
 
         // Stats
@@ -439,13 +439,13 @@ function ldapApp() {
                     body: JSON.stringify(this.cfg),
                 });
                 const data = await res.json();
-                this.connectionStatus = data.status === 'success' ? 'Conectado' : 'Error';
+                this.connectionStatus = data.status === 'success' ? "{{ _('Conectado') }}" : "{{ _('Error') }}";
                 this.showAlert(data.message, data.status);
                 if (data.status === 'success') this.loadStats();
             } catch (error) {
                 console.error('[LDAP DEBUG] testConnection error', error);
-                this.connectionStatus = "Error";
-                this.showAlert('Error al conectar.', 'error');
+                this.connectionStatus = "{{ _('Error') }}";
+                this.showAlert('{{ _('Error al conectar.') }}', 'error');
             } finally {
                 this.testingConn = false;
             }
