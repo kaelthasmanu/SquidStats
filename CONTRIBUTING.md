@@ -14,7 +14,7 @@ Thank you for your interest in contributing to SquidStats! This document provide
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/SquidStats.git
+   git clone https://github.com/kaelthasmanu/SquidStats.git
    cd SquidStats
    ```
 
