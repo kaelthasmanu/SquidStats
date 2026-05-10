@@ -257,8 +257,8 @@ def test_integration_wrapper():
         # Inicializar servicio
         print("Inicializando servicio de Telegram...")
         if not initialize_telegram_service():
-            print("❌ No se pudo inicializar el servicio")
-            return False
+            print("⚠️ Telegram no está configurado o está deshabilitado en este entorno de pruebas")
+            pytest.skip("Telegram integration not configured")
         print("✅ Servicio inicializado")
 
         # Health check
@@ -324,7 +324,7 @@ def test_integration_wrapper():
         import traceback
 
         traceback.print_exc()
-        return False
+        pytest.fail(f"Error en test de wrapper: {e}")
 
 
 async def run_async_tests():
@@ -416,7 +416,18 @@ def main():
 
     # Ejecutar tests síncronos (wrapper)
     print("\n🚀 Iniciando tests de wrapper...")
-    sync_result = test_integration_wrapper()
+    sync_result = True
+    try:
+        test_integration_wrapper()
+    except AssertionError as e:
+        print(f"\n❌ Test de wrapper falló: {e}")
+        sync_result = False
+    except Exception as e:
+        print(f"\n❌ Error inesperado en el test de wrapper: {e}")
+        import traceback
+
+        traceback.print_exc()
+        sync_result = False
 
     # Resumen
     print_separator("📊 Resumen de Tests")
