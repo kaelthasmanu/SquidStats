@@ -2,6 +2,7 @@
 Tests for services layer — auth, user, quota logic.
 """
 
+import secrets
 from unittest.mock import patch
 
 from database.models.models import QuotaGroup, QuotaUser
@@ -37,8 +38,9 @@ class TestAuthService:
     def test_generate_token(self):
         from services.auth.auth_service import AuthService
 
+        secret_key = secrets.token_urlsafe(32)
         with patch("services.auth.auth_service.Config") as mock_config:
-            mock_config.JWT_SECRET_KEY = "test-secret-key-12345"  # noqa: S105
+            mock_config.JWT_SECRET_KEY = secret_key
             user_data = {"id": 1, "username": "admin", "role": "admin"}
             token = AuthService.generate_token(user_data)
             assert isinstance(token, str)
@@ -47,8 +49,9 @@ class TestAuthService:
     def test_verify_token_roundtrip(self):
         from services.auth.auth_service import AuthService
 
+        secret_key = secrets.token_urlsafe(32)
         with patch("services.auth.auth_service.Config") as mock_config:
-            mock_config.JWT_SECRET_KEY = "test-secret-key-12345"  # noqa: S105
+            mock_config.JWT_SECRET_KEY = secret_key
             user_data = {"id": 42, "username": "testuser", "role": "admin"}
             token = AuthService.generate_token(user_data)
             payload = AuthService.validate_token(token)
