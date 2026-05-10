@@ -3,6 +3,7 @@ Shared fixtures for SquidStats test suite.
 """
 
 import os
+import secrets
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -78,7 +79,7 @@ def flask_app():
         static_folder=str(project_root / "static"),
     )
     app.config["TESTING"] = True
-    app.config["SECRET_KEY"] = "test-secret-key"  # noqa: S105
+    app.config["SECRET_KEY"] = secrets.token_urlsafe(32)
     app.config["WTF_CSRF_ENABLED"] = False
     app.config["SERVER_NAME"] = "localhost"
     app.config["BABEL_DEFAULT_LOCALE"] = "es"
