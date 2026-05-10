@@ -257,7 +257,9 @@ def test_integration_wrapper():
         # Inicializar servicio
         print("Inicializando servicio de Telegram...")
         if not initialize_telegram_service():
-            print("⚠️ Telegram no está configurado o está deshabilitado en este entorno de pruebas")
+            print(
+                "⚠️ Telegram no está configurado o está deshabilitado en este entorno de pruebas"
+            )
             pytest.skip("Telegram integration not configured")
         print("✅ Servicio inicializado")
 
