@@ -19,5 +19,5 @@ telethon>=1.42.0
 loguru==0.7.3
 weasyprint==68.1
 cryptography==47.0.0
-ldap3==2.9.1
+ldap3==2.10.2rc4
 Flask-Babel==4.0.0
