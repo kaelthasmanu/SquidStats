@@ -235,7 +235,8 @@ def register_quota_scheduler_tasks(scheduler):
                         else:
                             entry = f"{user.username}\n"
                         logger.debug(
-                            "Escribiendo entrada en archivo bloqueados: %s", entry.strip()
+                            "Escribiendo entrada en archivo bloqueados: %s",
+                            entry.strip(),
                         )
                         f.write(entry)
                 if was_missing:
