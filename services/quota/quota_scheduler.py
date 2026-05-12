@@ -11,8 +11,10 @@ from sqlalchemy import inspect as sqlalchemy_inspect
 from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaUser
 from services.quota.quota_service import (
+    _BLOCKED_USERS_PATH,
     _sync_blocked_file_to_docker,
     _sync_quota_squid_rules,
+    clear_blocked_users_file,
 )
 from services.system.system_service import reload_squid
 from utils.admin import SquidConfigManager
@@ -44,11 +46,10 @@ def register_quota_scheduler_tasks(scheduler):
                     try:
                         session_reset.query(QuotaUser).update({QuotaUser.used_mb: 0})
                         session_reset.commit()
-                        blocked_path = "/etc/squid/usuarios_bloqueados.txt"
+                        blocked_path = _BLOCKED_USERS_PATH
                         try:
-                            with open(blocked_path, "w", encoding="utf-8") as f:
-                                f.write("")
-                            _sync_blocked_file_to_docker(blocked_path)
+                            clear_blocked_users_file()
+                            _sync_quota_squid_rules(True)
                         except Exception as e:
                             logger.warning(
                                 f"No se pudo limpiar archivo de usuarios bloqueados: {e}"
@@ -71,7 +72,7 @@ def register_quota_scheduler_tasks(scheduler):
                 return
 
             session = get_session()
-            file_path = "/etc/squid/usuarios_bloqueados.txt"
+            file_path = _BLOCKED_USERS_PATH
 
             # Detectar modo para saber el formato del archivo
             cm = SquidConfigManager()
@@ -221,24 +222,34 @@ def register_quota_scheduler_tasks(scheduler):
                     new_blocked.append(user)
 
             if new_blocked:
-                print(
-                    f"[DEBUG] check_quota_users: {len(new_blocked)} nuevos bloqueos; use_src={use_src}"
+                logger.debug(
+                    "check_quota_users: %d nuevos bloqueos; use_src=%s",
+                    len(new_blocked),
+                    use_src,
                 )
+                was_missing = not os.path.exists(file_path)
                 with open(file_path, "a", encoding="utf-8") as f:
                     for user in new_blocked:
                         if use_src:
-                            line = f"acl usuarios_bloqueados src {user.username}\n"
-                            print(
-                                f"[DEBUG] appending to blocked file (src): {line.strip()}"
-                            )
-                            f.write(line)
+                            entry = f"acl usuarios_bloqueados src {user.username}\n"
                         else:
-                            line = f"{user.username}\n"
-                            print(
-                                f"[DEBUG] appending to blocked file (proxy_auth): {line.strip()}"
-                            )
-                            f.write(line)
+                            entry = f"{user.username}\n"
+                        logger.debug(
+                            "Escribiendo entrada en archivo bloqueados: %s", entry.strip()
+                        )
+                        f.write(entry)
+                if was_missing:
+                    try:
+                        os.chmod(file_path, 0o640)
+                    except Exception as e:
+                        logger.warning(
+                            "No se pudo ajustar permisos de %s: %s", file_path, e
+                        )
                 _sync_blocked_file_to_docker(file_path)
+                # Sincronizar ACL en squid.conf inmediatamente: si el archivo
+                # acaba de ser creado, la ACL debe añadirse ahora sin esperar
+                # al siguiente ciclo del scheduler.
+                _sync_quota_squid_rules(True)
 
                 for user in new_blocked:
                     effective_quota = (
