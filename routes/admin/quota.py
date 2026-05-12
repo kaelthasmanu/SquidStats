@@ -16,7 +16,6 @@ from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
 from services.auth.auth_service import admin_required
 from services.database.admin_helpers import load_env_vars
 from services.quota.quota_service import (
-    _BLOCKED_USERS_PATH,
     _sync_quota_squid_rules,
     clear_blocked_users_file,
 )
