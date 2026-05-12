@@ -215,9 +215,6 @@ def shutdown_app(scheduler, socketio, app=None):
     except Exception as e:
         logger.error(f"Error stopping scheduler: {e}")
 
-    # SocketIO shutdown is handled by process exit. Avoid calling socketio.stop() here.
-    logger.info("Stopping SocketIO (handled by process exit)...")
-
     logger.info("✅ Shutdown complete")
 
 
@@ -228,7 +225,6 @@ def main():
     # Setup scheduler tasks
     setup_scheduler_tasks(scheduler)
     jobs = scheduler.get_jobs()
-    logger.info("Scheduler jobs registered: {}", len(jobs))
 
     def _format_job(job):
         next_run = getattr(job, "next_run_time", None)
@@ -236,16 +232,8 @@ def main():
             next_run = getattr(job, "__dict__", {}).get("next_run_time")
         return f"{getattr(job, 'id', '<unknown>')}@{next_run}"
 
-    logger.info("Scheduler jobs: {}", [_format_job(job) for job in jobs])
-    logger.info("Scheduler running before start: wrapper={}, underlying={}", scheduler.running, getattr(scheduler.scheduler, "running", None))
-    logger.info("Scheduler state before start: wrapper={}, underlying={}", getattr(scheduler, "state", None), getattr(scheduler.scheduler, "state", None))
-
     # Start the scheduler after registering jobs
     scheduler.start()
-    logger.info("Scheduler started")
-    logger.info("Scheduler running after start: wrapper={}, underlying={}", scheduler.running, getattr(scheduler.scheduler, "running", None))
-    logger.info("Scheduler state after start: wrapper={}, underlying={}", getattr(scheduler, "state", None), getattr(scheduler.scheduler, "state", None))
-    logger.info("Scheduler next runs: {}", [_format_job(job) for job in scheduler.get_jobs()])
 
     # Initialize SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
