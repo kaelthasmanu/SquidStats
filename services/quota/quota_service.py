@@ -130,9 +130,6 @@ def _sync_quota_squid_rules(enabled: bool):
         re.search(r"^\s*auth_param\b", cm.config_content, re.MULTILINE)
         and re.search(r"^\s*acl\s+auth\b", cm.config_content, re.MULTILINE)
     )
-    # logger.debug(
-    #     "auth_configured={}, use_src={}", auth_configured, not auth_configured
-    # )
 
     use_src = not auth_configured
     acl_line = _build_acl_line(use_src)
@@ -147,15 +144,6 @@ def _sync_quota_squid_rules(enabled: bool):
         def _matches_acl_entry(line: str) -> bool:
             """Coincide con la ACL o include según el modo."""
             return _is_include_line(line) if use_src else _is_acl_line(line)
-
-        # logger.debug(
-        #     "_apply_changes: enabled={} use_src={} acl_line={} http_line={}",
-        #     enabled,
-        #     use_src,
-        #     acl_line,
-        #     http_line,
-        # )
-
         try:
             if cm.is_modular:
                 previous_acls_content = cm.read_modular_config("100_acls.conf") or ""
@@ -172,10 +160,6 @@ def _sync_quota_squid_rules(enabled: bool):
                 if enabled:
                     if not any(_matches_acl_entry(line) for line in acl_lines):
                         if use_src:
-                            # logger.debug(
-                            #     "_apply_changes: modo src detectado, insertar include {}",
-                            #     acl_line,
-                            # )
                             acl_lines.insert(0, acl_line)
                         else:
                             inserted = False
@@ -205,9 +189,6 @@ def _sync_quota_squid_rules(enabled: bool):
 
                 if enabled:
                     if not any(_is_http_line(line) for line in http_lines):
-                        # logger.debug(
-                        #     "_apply_changes: insertando http_access deny usuarios_bloqueados"
-                        # )
                         inserted = False
                         for i, line in enumerate(http_lines):
                             if line.strip().startswith("http_access "):
@@ -283,9 +264,6 @@ def _sync_quota_squid_rules(enabled: bool):
                     raise RuntimeError("No se pudo guardar squid.conf")
 
             if not config_changed:
-                # logger.debug(
-                #     "No hay cambios en la configuración de Squid, se omite validación y recarga"
-                # )
                 return True
 
             splitter = SquidConfigSplitter(
@@ -332,11 +310,6 @@ def _sync_quota_squid_rules(enabled: bool):
 
     # First try
     ok = _apply_changes(acl_line, http_line, use_src)
-    # logger.debug(
-    #     "_sync_quota_squid_rules: primer intento terminado con ok={} use_src={}",
-    #     ok,
-    #     use_src,
-    # )
 
     # Si falla y no es src, fallback a src (evita vida de proxy_auth mal configurada)
     if not ok and not use_src:
@@ -345,10 +318,6 @@ def _sync_quota_squid_rules(enabled: bool):
         )
         acl_line = _build_acl_line(True)
         ok = _apply_changes(acl_line, http_line, True)
-        # logger.debug(
-        #     "_sync_quota_squid_rules: segundo intento con use_src=True terminado con ok={}",
-        #     ok,
-        # )
 
     if not ok:
         logger.error(
