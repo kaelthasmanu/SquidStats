@@ -27,6 +27,7 @@ def register_quota_scheduler_tasks(scheduler):
         "interval", id="check_quota_users", minutes=1, misfire_grace_time=300
     )
     def check_quota_users():
+        logger.info("check_quota_users task started")
         session = None
         try:
             quota_disabled_flag = Path(__file__).resolve().parents[2] / "quota_disabled"
@@ -46,7 +47,6 @@ def register_quota_scheduler_tasks(scheduler):
                     try:
                         session_reset.query(QuotaUser).update({QuotaUser.used_mb: 0})
                         session_reset.commit()
-                        blocked_path = _BLOCKED_USERS_PATH
                         try:
                             clear_blocked_users_file()
                             _sync_quota_squid_rules(True)

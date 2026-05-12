@@ -138,7 +138,6 @@ def create_app():
     # Pass explicit timezone to avoid tzlocal.get_localzone() failures in containers
     scheduler = APScheduler(scheduler=BackgroundScheduler(timezone=timezone.utc))
     scheduler.init_app(app)
-    scheduler.start()
 
     # Register custom filters
     register_filters(app)
@@ -228,6 +227,25 @@ def main():
 
     # Setup scheduler tasks
     setup_scheduler_tasks(scheduler)
+    jobs = scheduler.get_jobs()
+    logger.info("Scheduler jobs registered: {}", len(jobs))
+
+    def _format_job(job):
+        next_run = getattr(job, "next_run_time", None)
+        if next_run is None:
+            next_run = getattr(job, "__dict__", {}).get("next_run_time")
+        return f"{getattr(job, 'id', '<unknown>')}@{next_run}"
+
+    logger.info("Scheduler jobs: {}", [_format_job(job) for job in jobs])
+    logger.info("Scheduler running before start: wrapper={}, underlying={}", scheduler.running, getattr(scheduler.scheduler, "running", None))
+    logger.info("Scheduler state before start: wrapper={}, underlying={}", getattr(scheduler, "state", None), getattr(scheduler.scheduler, "state", None))
+
+    # Start the scheduler after registering jobs
+    scheduler.start()
+    logger.info("Scheduler started")
+    logger.info("Scheduler running after start: wrapper={}, underlying={}", scheduler.running, getattr(scheduler.scheduler, "running", None))
+    logger.info("Scheduler state after start: wrapper={}, underlying={}", getattr(scheduler, "state", None), getattr(scheduler.scheduler, "state", None))
+    logger.info("Scheduler next runs: {}", [_format_job(job) for job in scheduler.get_jobs()])
 
     # Initialize SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
@@ -275,7 +293,6 @@ def main():
         socketio.run(
             app,
             debug=debug_mode,
-            use_reloader=False,
             host=host,
             port=port,
             allow_unsafe_werkzeug=True,
