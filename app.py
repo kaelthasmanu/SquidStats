@@ -227,12 +227,6 @@ def main():
     # Setup scheduler tasks
     setup_scheduler_tasks(scheduler)
 
-    def _format_job(job):
-        next_run = getattr(job, "next_run_time", None)
-        if next_run is None:
-            next_run = getattr(job, "__dict__", {}).get("next_run_time")
-        return f"{getattr(job, 'id', '<unknown>')}@{next_run}"
-
     # Start the scheduler after registering jobs
     scheduler.start()
 
