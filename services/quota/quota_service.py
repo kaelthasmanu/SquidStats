@@ -49,9 +49,13 @@ def clear_blocked_users_file() -> None:
     try:
         if os.path.exists(_BLOCKED_USERS_PATH):
             os.remove(_BLOCKED_USERS_PATH)
-            logger.info("Archivo de usuarios bloqueados eliminado: %s", _BLOCKED_USERS_PATH)
+            logger.info(
+                "Archivo de usuarios bloqueados eliminado: %s", _BLOCKED_USERS_PATH
+            )
         else:
-            logger.debug("Archivo %s ya no existe, nada que eliminar", _BLOCKED_USERS_PATH)
+            logger.debug(
+                "Archivo %s ya no existe, nada que eliminar", _BLOCKED_USERS_PATH
+            )
     except Exception as e:
         logger.warning("No se pudo eliminar %s: %s", _BLOCKED_USERS_PATH, e)
 
@@ -85,7 +89,9 @@ def _sync_quota_squid_rules(enabled: bool):
     # vacío o inexistente, lo que detendría el servicio de Squid.
     enabled = enabled and _file_has_content(blocked_path)
     logger.debug(
-        "_sync_quota_squid_rules: blocked_path={}, should_enable_acl={}", blocked_path, enabled
+        "_sync_quota_squid_rules: blocked_path={}, should_enable_acl={}",
+        blocked_path,
+        enabled,
     )
 
     def _normalize_line(line: str) -> str:
@@ -125,6 +131,7 @@ def _sync_quota_squid_rules(enabled: bool):
         def _matches_acl_entry(line: str) -> bool:
             """Coincide con la ACL o include según el modo."""
             return _is_include_line(line) if use_src else _is_acl_line(line)
+
         try:
             if cm.is_modular:
                 previous_acls_content = cm.read_modular_config("100_acls.conf") or ""
