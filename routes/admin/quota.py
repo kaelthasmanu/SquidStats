@@ -15,6 +15,10 @@ from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
 from services.auth.auth_service import admin_required
 from services.database.admin_helpers import load_env_vars
+from services.quota.quota_service import (
+    _sync_quota_squid_rules,
+    clear_blocked_users_file,
+)
 
 from .helpers import flash_and_redirect, get_config_manager
 
@@ -182,6 +186,19 @@ def register_routes(bp):
                 "Verifica los permisos del directorio de trabajo.",
                 "admin.manage_quota",
             )
+
+        if current:
+            # Se deshabilitan las cuotas: eliminar bloqueados y sincronizar para quitar
+            # las reglas de squid.conf inmediatamente.
+            try:
+                clear_blocked_users_file()
+                _sync_quota_squid_rules(False)
+            except Exception as exc:
+                logger.warning(
+                    "Cuotas deshabilitadas, pero no se pudo limpiar totalmente la configuración: %s",
+                    exc,
+                )
+
         message = "Cuotas activadas" if not current else "Cuotas desactivadas"
         return flash_and_redirect(True, message, "admin.manage_quota")
 

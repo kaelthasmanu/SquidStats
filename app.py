@@ -4,6 +4,7 @@ import signal
 import sys
 import threading
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
@@ -28,6 +29,9 @@ from services.scheduler.scheduler_tasks import register_scheduler_tasks
 from utils.filters import register_filters
 
 log_level = os.getenv("APP_LOG_LEVEL", "DEBUG" if Config.DEBUG else "INFO")
+# Remove the default loguru stderr handler before adding custom ones,
+# otherwise every message is printed twice (default + explicit add).
+logger.remove()
 logger.add(
     Config.APP_LOG,
     rotation="100 MB",
@@ -58,6 +62,17 @@ shutdown_event = threading.Event()
 
 
 def create_app():
+    # Ensure quota is disabled by default on first run (flag file must exist to disable).
+    _quota_disabled_flag = Path(__file__).resolve().parent / "quota_disabled"
+    if not _quota_disabled_flag.exists():
+        try:
+            _quota_disabled_flag.write_text("disabled\n", encoding="utf-8")
+            logger.info(
+                "Quota system disabled by default (created quota_disabled flag)"
+            )
+        except OSError as e:
+            logger.warning("Could not create quota_disabled flag: %s", e)
+
     # Run database migration at startup
     logger.info("Running database migrations with Alembic...")
     try:
@@ -125,7 +140,6 @@ def create_app():
     # Pass explicit timezone to avoid tzlocal.get_localzone() failures in containers
     scheduler = APScheduler(scheduler=BackgroundScheduler(timezone=timezone.utc))
     scheduler.init_app(app)
-    scheduler.start()
 
     # Register custom filters
     register_filters(app)
@@ -203,9 +217,6 @@ def shutdown_app(scheduler, socketio, app=None):
     except Exception as e:
         logger.error(f"Error stopping scheduler: {e}")
 
-    # SocketIO shutdown is handled by process exit. Avoid calling socketio.stop() here.
-    logger.info("Stopping SocketIO (handled by process exit)...")
-
     logger.info("✅ Shutdown complete")
 
 
@@ -215,6 +226,9 @@ def main():
 
     # Setup scheduler tasks
     setup_scheduler_tasks(scheduler)
+
+    # Start the scheduler after registering jobs
+    scheduler.start()
 
     # Initialize SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
@@ -260,7 +274,11 @@ def main():
 
     try:
         socketio.run(
-            app, debug=debug_mode, host=host, port=port, allow_unsafe_werkzeug=True
+            app,
+            debug=debug_mode,
+            host=host,
+            port=port,
+            allow_unsafe_werkzeug=True,
         )
     except KeyboardInterrupt:
         logger.info("\n⚠️ Keyboard interrupt received")
