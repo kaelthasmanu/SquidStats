@@ -9,12 +9,15 @@ from services.squid.squid_config_splitter import SquidConfigSplitter
 from services.system.system_service import reload_squid
 from utils.admin import SquidConfigManager
 
+_BLOCKED_USERS_PATH = "/etc/squid/usuarios_bloqueados.txt"
+
 
 def _ensure_blocked_file(blocked_path: str):
     """Crea el archivo de bloqueados si no existe, tanto local como en Docker."""
     try:
         if not os.path.exists(blocked_path):
-            open(blocked_path, "a", encoding="utf-8").close()
+            with open(blocked_path, "a", encoding="utf-8"):
+                pass
             os.chmod(blocked_path, 0o640)
             logger.info("Creado archivo de usuarios bloqueados: %s", blocked_path)
         else:
@@ -98,7 +101,7 @@ def _sync_quota_squid_rules(enabled: bool):
         )
         return
 
-    blocked_path = "/etc/squid/usuarios_bloqueados.txt"
+    blocked_path = _BLOCKED_USERS_PATH
     logger.debug(
         "_sync_quota_squid_rules: blocked_path={}, enabled={}", blocked_path, enabled
     )
@@ -293,19 +296,18 @@ def _sync_quota_squid_rules(enabled: bool):
 
             if not validation.get("success"):
                 logger.error(
-                    "Validación de Squid falló al sincronizar reglas de cuota: {} | output={} | error_message={}",
+                    "Validación de Squid falló al sincronizar reglas de cuota | output={} | error_message={}",
                     validation.get("output") or "<sin output>",
                     validation.get("error_message") or "<sin error_message>",
-                    validation.get("error_message") or validation.get("output"),
                 )
-                # logger.debug("Squid validation raw data: {}", validation)
                 # rollback
                 if cm.is_modular:
                     cm.save_modular_config("100_acls.conf", previous_acls_content)
                     cm.save_modular_config(
                         "120_http_access.conf", previous_http_content
                     )
-                cm.save_config(previous_main_content)
+                if previous_main_content:
+                    cm.save_config(previous_main_content)
                 return False
 
             reload_success, reload_msg, _ = reload_squid()
@@ -324,7 +326,8 @@ def _sync_quota_squid_rules(enabled: bool):
             if cm.is_modular:
                 cm.save_modular_config("100_acls.conf", previous_acls_content)
                 cm.save_modular_config("120_http_access.conf", previous_http_content)
-            cm.save_config(previous_main_content)
+            if previous_main_content:
+                cm.save_config(previous_main_content)
             return False
 
     # First try
