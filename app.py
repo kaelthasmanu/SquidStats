@@ -67,7 +67,9 @@ def create_app():
     if not _quota_disabled_flag.exists():
         try:
             _quota_disabled_flag.write_text("disabled\n", encoding="utf-8")
-            logger.info("Quota system disabled by default (created quota_disabled flag)")
+            logger.info(
+                "Quota system disabled by default (created quota_disabled flag)"
+            )
         except OSError as e:
             logger.warning("Could not create quota_disabled flag: %s", e)
 
@@ -224,7 +226,6 @@ def main():
 
     # Setup scheduler tasks
     setup_scheduler_tasks(scheduler)
-    jobs = scheduler.get_jobs()
 
     def _format_job(job):
         next_run = getattr(job, "next_run_time", None)
