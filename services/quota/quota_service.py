@@ -12,54 +12,15 @@ from utils.admin import SquidConfigManager
 _BLOCKED_USERS_PATH = "/etc/squid/usuarios_bloqueados.txt"
 
 
-def _ensure_blocked_file(blocked_path: str):
-    """Crea el archivo de bloqueados si no existe, tanto local como en Docker."""
+def _file_has_content(path: str) -> bool:
+    """Devuelve True si el archivo existe y contiene al menos una línea no vacía."""
     try:
-        if not os.path.exists(blocked_path):
-            with open(blocked_path, "a", encoding="utf-8"):
-                pass
-            os.chmod(blocked_path, 0o640)
-            logger.info("Creado archivo de usuarios bloqueados: %s", blocked_path)
-        else:
-            os.chmod(blocked_path, 0o640)
-    except Exception as e:
-        logger.warning(
-            "No se pudo crear/ajustar permisos locales de %s: %s", blocked_path, e
-        )
-
-    docker_bin = shutil.which("docker")
-    if docker_bin is None:
-        logger.debug("Docker no disponible, omitiendo creación en contenedor")
-        return
-
-    try:
-        subprocess.run(  # nosec B603  # noqa: S603
-            [docker_bin, "exec", "squid_proxy", "test", "-f", blocked_path],
-            check=True,
-            capture_output=True,
-            timeout=10,
-        )
-    except subprocess.CalledProcessError:
-        try:
-            subprocess.run(  # nosec B603  # noqa: S603
-                [docker_bin, "exec", "squid_proxy", "touch", blocked_path],
-                check=True,
-                capture_output=True,
-                timeout=10,
-            )
-            subprocess.run(  # nosec B603  # noqa: S603
-                [docker_bin, "exec", "squid_proxy", "chmod", "640", blocked_path],
-                check=True,
-                capture_output=True,
-                timeout=10,
-            )
-            logger.info("Creado %s dentro del contenedor squid_proxy", blocked_path)
-        except Exception as e:
-            logger.warning(
-                "No se pudo crear %s en contenedor Docker: %s", blocked_path, e
-            )
-    except Exception as e:
-        logger.debug("Error verificando archivo en contenedor: %s", e)
+        if not os.path.exists(path):
+            return False
+        with open(path, encoding="utf-8") as f:
+            return any(line.strip() for line in f)
+    except Exception:
+        return False
 
 
 def _sync_blocked_file_to_docker(blocked_path: str):
@@ -76,6 +37,23 @@ def _sync_blocked_file_to_docker(blocked_path: str):
         )
     except Exception as e:
         logger.debug("No se pudo sincronizar %s a Docker: %s", blocked_path, e)
+
+
+def clear_blocked_users_file() -> None:
+    """Elimina el archivo de usuarios bloqueados del sistema local.
+
+    Debe llamarse cuando se vacía la lista de bloqueados (ej: reinicio mensual).
+    Después de esta llamada, invocar _sync_quota_squid_rules(True) para que las
+    directivas ACL se eliminen de squid.conf al detectar que el archivo no existe.
+    """
+    try:
+        if os.path.exists(_BLOCKED_USERS_PATH):
+            os.remove(_BLOCKED_USERS_PATH)
+            logger.info("Archivo de usuarios bloqueados eliminado: %s", _BLOCKED_USERS_PATH)
+        else:
+            logger.debug("Archivo %s ya no existe, nada que eliminar", _BLOCKED_USERS_PATH)
+    except Exception as e:
+        logger.warning("No se pudo eliminar %s: %s", _BLOCKED_USERS_PATH, e)
 
 
 def _commit_modular_config(cm: SquidConfigManager, filename: str, lines: list[str]):
@@ -102,10 +80,13 @@ def _sync_quota_squid_rules(enabled: bool):
         return
 
     blocked_path = _BLOCKED_USERS_PATH
+    # La ACL solo debe activarse si la cuota está habilitada Y el archivo existe con
+    # contenido real. Esto evita dejar squid.conf con una ACL apuntando a un archivo
+    # vacío o inexistente, lo que detendría el servicio de Squid.
+    enabled = enabled and _file_has_content(blocked_path)
     logger.debug(
-        "_sync_quota_squid_rules: blocked_path={}, enabled={}", blocked_path, enabled
+        "_sync_quota_squid_rules: blocked_path={}, should_enable_acl={}", blocked_path, enabled
     )
-    _ensure_blocked_file(blocked_path)
 
     def _normalize_line(line: str) -> str:
         return line.strip().split("#")[0].strip()
