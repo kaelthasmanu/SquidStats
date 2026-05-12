@@ -225,6 +225,12 @@ def _sync_quota_squid_rules(enabled: bool):
                     raise RuntimeError("No se pudieron guardar 120_http_access.conf")
 
             else:
+                if not cm.config_content and enabled:
+                    logger.error(
+                        "config_content está vacío (posible fallo de carga). "
+                        "Se cancela la modificación de squid.conf para evitar pérdida de datos."
+                    )
+                    return False
                 lines = cm.config_content.split("\n") if cm.config_content else []
                 original_lines = lines.copy()
 
