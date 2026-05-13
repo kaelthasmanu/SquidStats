@@ -21,6 +21,7 @@ from . import (
     quota,
     squid_config,
     system_api,
+    telegram_config,
     users,
 )
 
@@ -40,3 +41,4 @@ logs.register_routes(admin_bp)
 ldap_config.register_routes(admin_bp)
 backup.register_routes(admin_bp)
 system_api.register_routes(admin_bp)
+telegram_config.register_routes(admin_bp)
