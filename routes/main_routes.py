@@ -185,6 +185,7 @@ def install_package():
 def update_web():
     """Route to update the web application"""
     ok = False
+    logger.info("Received web update request")
     try:
         ok = updateSquidStats()
         if ok:
