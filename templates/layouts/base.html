@@ -81,6 +81,26 @@
         .then(function(data) { window._i18n.translations = data; })
         .catch(function() {});
     </script>
+    <!-- Flash messages via toastr -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <script>
+          $(document).ready(function () {
+            {% for category, message in messages %}
+              {% if category == 'success' %}
+                toastr.success({{ message | tojson }});
+              {% elif category == 'error' %}
+                toastr.error({{ message | tojson }});
+              {% elif category == 'warning' %}
+                toastr.warning({{ message | tojson }});
+              {% else %}
+                toastr.info({{ message | tojson }});
+              {% endif %}
+            {% endfor %}
+          });
+        </script>
+      {% endif %}
+    {% endwith %}
     <!-- Page-specific scripts -->
     {% block scripts %}{% endblock scripts %}
   </body>
