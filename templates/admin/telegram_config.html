@@ -1,0 +1,384 @@
+<!-- Telegram Tab -->
+    <div x-show="activeTab === 'telegram'" class="mt-6">
+        <div class="max-w-5xl mx-auto space-y-6" x-data="telegramApp()" x-init="init()">
+
+            <!-- ── Header ──────────────────────────────────────────────────────── -->
+            <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fab fa-telegram text-blue-500 text-2xl"></i>
+                            {{ _("Notificaciones Telegram") }}
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-1">
+                            {{ _("Configura las credenciales y los destinatarios para las alertas automáticas.") }}
+                        </p>
+                    </div>
+                    <!-- Status badge -->
+                    <div>
+                        <span :class="statusBadgeClass()"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold">
+                            <span class="w-2 h-2 rounded-full" :class="statusDotClass()"></span>
+                            <span x-text="connectionStatus"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+                <div class="xl:col-span-1 bg-white shadow rounded-lg border border-gray-200 p-6 space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-cog text-gray-500"></i>
+                        {{ _("Credenciales API") }}
+                    </h3>
+
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <label for="tg_enabled" class="text-sm font-medium text-gray-700 select-none cursor-pointer">
+                            {{ _("Habilitar notificaciones Telegram") }}
+                        </label>
+                        <button type="button" @click="cfg.enabled = !cfg.enabled"
+                            :class="cfg.enabled ? 'bg-blue-600' : 'bg-gray-300'"
+                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
+                            <span :class="cfg.enabled ? 'translate-x-6' : 'translate-x-1'"
+                                class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"></span>
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            {{ _("API ID") }}
+                            <a href="https://my.telegram.org/apps" target="_blank" rel="noopener noreferrer"
+                                class="ml-1 text-blue-500 hover:underline text-xs">
+                                (my.telegram.org)
+                            </a>
+                        </label>
+                        <input x-model="cfg.api_id" type="text" placeholder="12345678"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("API Hash") }}</label>
+                        <input x-model="cfg.api_hash" type="password" autocomplete="off"
+                            :placeholder="hasApiHash ? '{{ _('Guardado — dejar vacío para no cambiar') }}' : 'abc123...'"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            {{ _("Token del Bot") }}
+                            <span class="text-gray-400 font-normal">({{ _("opcional si usa cuenta de usuario") }})</span>
+                        </label>
+                        <input x-model="cfg.bot_token" type="password" autocomplete="off"
+                            :placeholder="hasBotToken ? '{{ _('Guardado — dejar vacío para no cambiar') }}' : '@BotFather token'"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <template x-if="hasBotToken && !cfg.bot_token">
+                            <p class="mt-1 text-xs text-slate-500">
+                                {{ _('Token guardado. Deja este campo vacío para no cambiarlo.') }}
+                            </p>
+                        </template>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            {{ _("Teléfono (cuenta de usuario)") }}
+                            <span class="text-gray-400 font-normal">({{ _("opcional") }})</span>
+                        </label>
+                        <input x-model="cfg.phone" type="text" placeholder="+5491112345678"
+                            :disabled="hasBotToken || cfg.bot_token"
+                            :class="(hasBotToken || cfg.bot_token) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <template x-if="hasBotToken || cfg.bot_token">
+                            <p class="mt-1 text-xs text-amber-600 flex items-center gap-1">
+                                <i class="fas fa-triangle-exclamation"></i>
+                                {{ _("En modo bot este campo debe estar vacío — los bots no pueden usar número de teléfono.") }}
+                            </p>
+                        </template>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Nombre de sesión") }}</label>
+                        <input x-model="cfg.session_name" type="text" placeholder="squidstats_bot"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                        <button @click="saveConfig()" :disabled="saving"
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <i class="fas fa-save"></i>
+                            <span x-text="saving ? '{{ _('Guardando…') }}' : '{{ _('Guardar') }}'"></span>
+                        </button>
+                        <button @click="testConnection()" :disabled="testing"
+                            class="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <i class="fas fa-plug"></i>
+                            <span x-text="testing ? '{{ _('Probando…') }}' : '{{ _('Probar') }}'"></span>
+                        </button>
+                    </div>
+
+                    <template x-if="alert.message">
+                        <div :class="alert.type === 'success'
+                                ? 'bg-green-50 border-green-200 text-green-800'
+                                : 'bg-red-50 border-red-200 text-red-800'"
+                            class="rounded-lg border p-3 text-sm flex items-start gap-2">
+                            <i :class="alert.type === 'success'
+                                    ? 'fas fa-check-circle text-green-600'
+                                    : 'fas fa-exclamation-circle text-red-600'"
+                                class="mt-0.5 flex-shrink-0"></i>
+                            <span x-text="alert.message"></span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="xl:col-span-2 space-y-6">
+
+                    <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                            <i class="fas fa-users text-blue-500"></i>
+                            {{ _("Destinatarios") }}
+                        </h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            {{ _("Introduce un destinatario por línea: @username, ID numérico de usuario o ID de chat/grupo.") }}
+                        </p>
+                        <textarea x-model="recipientsText" rows="6"
+                            placeholder="@usuario1&#10;@usuario2&#10;123456789"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        <p class="text-xs text-gray-400 mt-1">
+                            {{ _("Cada línea es un destinatario independiente.") }}
+                        </p>
+
+                        <div class="mt-4 flex items-center gap-3">
+                            <button @click="sendTestMessage()" :disabled="sendingTest || !cfg.enabled"
+                                class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                                <i class="fab fa-telegram"></i>
+                                <span x-text="sendingTest ? '{{ _('Enviando…') }}' : '{{ _('Enviar mensaje de prueba') }}'"></span>
+                            </button>
+                            <span x-show="!cfg.enabled" class="text-xs text-gray-400 italic">
+                                {{ _("Habilita Telegram para enviar mensajes de prueba.") }}
+                            </span>
+                        </div>
+
+                        <template x-if="testAlert.message">
+                            <div :class="testAlert.type === 'success'
+                                    ? 'bg-green-50 border-green-200 text-green-800'
+                                    : 'bg-red-50 border-red-200 text-red-800'"
+                                class="mt-3 rounded-lg border p-3 text-sm flex items-start gap-2">
+                                <i :class="testAlert.type === 'success'
+                                        ? 'fas fa-check-circle text-green-600'
+                                        : 'fas fa-exclamation-circle text-red-600'"
+                                    class="mt-0.5 flex-shrink-0"></i>
+                                <span x-text="testAlert.message"></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                            <i class="fas fa-info-circle text-gray-400"></i>
+                            {{ _("Estado de la conexión") }}
+                        </h3>
+                        <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                            <div>
+                                <dt class="text-gray-500 font-medium">{{ _("Servicio") }}</dt>
+                                <dd x-text="statusDetails.enabled ? '{{ _('Habilitado') }}' : '{{ _('Deshabilitado') }}'"
+                                    :class="statusDetails.enabled ? 'text-green-700 font-semibold' : 'text-gray-400'"></dd>
+                            </div>
+                            <div>
+                                <dt class="text-gray-500 font-medium">{{ _("Conectado") }}</dt>
+                                <dd x-text="statusDetails.connected ? '{{ _('Sí') }}' : '{{ _('No') }}'"
+                                    :class="statusDetails.connected ? 'text-green-700 font-semibold' : 'text-red-600'"></dd>
+                            </div>
+                            <div>
+                                <dt class="text-gray-500 font-medium">{{ _("Modo") }}</dt>
+                                <dd x-text="statusDetails.bot_mode ? 'Bot' : '{{ _('Cuenta de usuario') }}'"></dd>
+                            </div>
+                            <div>
+                                <dt class="text-gray-500 font-medium">{{ _("Sesión") }}</dt>
+                                <dd class="font-mono text-gray-700" x-text="statusDetails.session || '—'"></dd>
+                            </div>
+                            <template x-if="statusDetails.username">
+                                <div class="col-span-2">
+                                    <dt class="text-gray-500 font-medium">{{ _("Usuario Telegram") }}</dt>
+                                    <dd class="font-mono text-gray-700" x-text="'@' + statusDetails.username"></dd>
+                                </div>
+                            </template>
+                            <template x-if="statusDetails.error">
+                                <div class="col-span-2">
+                                    <dt class="text-gray-500 font-medium text-red-600">{{ _("Error") }}</dt>
+                                    <dd class="text-red-700 text-xs" x-text="statusDetails.error"></dd>
+                                </div>
+                            </template>
+                        </dl>
+                        <button @click="loadStatus()" :disabled="loadingStatus"
+                            class="mt-4 text-sm text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50">
+                            <i class="fas fa-sync-alt" :class="loadingStatus ? 'animate-spin' : ''"></i>
+                            {{ _("Actualizar estado") }}
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+function telegramApp() {
+    return {
+        cfg: {
+            enabled: {{ 'true' if cfg.enabled else 'false' }},
+            api_id: {{ cfg.api_id | tojson }},
+            api_hash: '',
+            bot_token: '',
+            phone: {{ cfg.phone | tojson }},
+            session_name: {{ cfg.session_name | tojson }},
+        },
+        hasApiHash: {{ 'true' if cfg.has_api_hash else 'false' }},
+        hasBotToken: {{ 'true' if cfg.has_bot_token else 'false' }},
+        recipientsText: {{ (cfg.recipients | join('\n')) | tojson }},
+
+        saving: false,
+        testing: false,
+        sendingTest: false,
+        loadingStatus: false,
+
+        alert: { type: '', message: '' },
+        testAlert: { type: '', message: '' },
+
+        connectionStatus: '{{ _('Verificando…') }}',
+        statusDetails: {
+            enabled: false,
+            connected: false,
+            bot_mode: false,
+            session: '',
+            username: null,
+            error: null,
+        },
+
+        async init() {
+            await this.loadStatus();
+        },
+
+        statusBadgeClass() {
+            if (this.statusDetails.connected)
+                return 'bg-green-100 text-green-800';
+            if (this.statusDetails.enabled)
+                return 'bg-yellow-100 text-yellow-800';
+            return 'bg-gray-100 text-gray-500';
+        },
+
+        statusDotClass() {
+            if (this.statusDetails.connected) return 'bg-green-500';
+            if (this.statusDetails.enabled)  return 'bg-yellow-400';
+            return 'bg-gray-400';
+        },
+
+        _recipientsList() {
+            return this.recipientsText
+                .split('\n')
+                .map(r => r.trim())
+                .filter(r => r.length > 0);
+        },
+
+        async saveConfig() {
+            this.saving = true;
+            this.alert = { type: '', message: '' };
+            try {
+                const payload = {
+                    ...this.cfg,
+                    recipients: this._recipientsList(),
+                };
+                const res = await fetch('/admin/api/telegram/save-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    this.alert = { type: 'success', message: data.message };
+                    this.hasApiHash = this.hasApiHash || !!this.cfg.api_hash;
+                    this.hasBotToken = this.hasBotToken || !!this.cfg.bot_token;
+                    this.cfg.api_hash = '';
+                    this.cfg.bot_token = '';
+                    await this.loadStatus();
+                } else {
+                    this.alert = { type: 'error', message: data.message };
+                }
+            } catch (e) {
+                this.alert = { type: 'error', message: '{{ _('Error de red al guardar.') }}' };
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        async testConnection() {
+            this.testing = true;
+            this.alert = { type: '', message: '' };
+            try {
+                const res = await fetch('/admin/api/telegram/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const data = await res.json();
+                this.alert = {
+                    type: data.status === 'success' ? 'success' : 'error',
+                    message: data.message,
+                };
+                await this.loadStatus();
+            } catch (e) {
+                this.alert = { type: 'error', message: '{{ _('Error de red al probar la conexión.') }}' };
+            } finally {
+                this.testing = false;
+            }
+        },
+
+        async sendTestMessage() {
+            this.sendingTest = true;
+            this.testAlert = { type: '', message: '' };
+            try {
+                const res = await fetch('/admin/api/telegram/send-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const data = await res.json();
+                this.testAlert = {
+                    type: data.status === 'success' ? 'success' : 'error',
+                    message: data.message,
+                };
+            } catch (e) {
+                this.testAlert = { type: 'error', message: '{{ _('Error de red al enviar.') }}' };
+            } finally {
+                this.sendingTest = false;
+            }
+        },
+
+        async loadStatus() {
+            this.loadingStatus = true;
+            try {
+                const res = await fetch('/admin/api/telegram/status');
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    this.statusDetails = {
+                        enabled: data.enabled ?? false,
+                        connected: data.connected ?? false,
+                        bot_mode: data.bot_mode ?? false,
+                        session: data.session ?? '',
+                        username: data.username ?? null,
+                        error: data.error ?? null,
+                    };
+                    if (this.statusDetails.connected) {
+                        this.connectionStatus = '{{ _('Conectado') }}';
+                    } else if (this.statusDetails.enabled) {
+                        this.connectionStatus = '{{ _('Desconectado') }}';
+                    } else {
+                        this.connectionStatus = '{{ _('Deshabilitado') }}';
+                    }
+                }
+            } catch (_) {
+                // status is best-effort
+            } finally {
+                this.loadingStatus = false;
+            }
+        },
+    };
+}
+</script>
