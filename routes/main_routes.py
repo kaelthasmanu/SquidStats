@@ -2,7 +2,7 @@ import os
 import time
 from typing import Any
 
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, flash, redirect, render_template, request
 from flask_babel import gettext as _
 from loguru import logger
 
@@ -166,11 +166,19 @@ def install_package():
         ok = update_squid()
         if ok:
             logger.info("SquidStats update (install) completed successfully")
+            flash(_("Squid actualizado correctamente."), "success")
         else:
             logger.warning("update_squid() returned False in /install")
+            flash(
+                _("Error al actualizar Squid. Revise los logs del servidor."), "error"
+            )
     except Exception:
         logger.exception("Error executing update in /install")
-    return redirect(f"/?install_status={'ok' if ok else 'fail'}")
+        flash(
+            _("Error inesperado al actualizar Squid. Revise los logs del servidor."),
+            "error",
+        )
+    return redirect("/")
 
 
 @main_bp.route("/update", methods=["POST"])
@@ -181,11 +189,27 @@ def update_web():
         ok = updateSquidStats()
         if ok:
             logger.info("SquidStats web update completed")
+            flash(
+                _(
+                    "SquidStats actualizado correctamente. El servicio se ha reiniciado."
+                ),
+                "success",
+            )
         else:
             logger.warning("updateSquidStats() returned False in /update")
+            flash(
+                _("Error al actualizar SquidStats. Revise los logs del servidor."),
+                "error",
+            )
     except Exception:
         logger.exception("Error executing update in /update")
-    return redirect(f"/?update_status={'ok' if ok else 'fail'}")
+        flash(
+            _(
+                "Error inesperado al actualizar SquidStats. Revise los logs del servidor."
+            ),
+            "error",
+        )
+    return redirect("/")
 
 
 @main_bp.route("/all-notifications")
