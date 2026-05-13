@@ -71,10 +71,14 @@ def _get_background_loop() -> asyncio.AbstractEventLoop:
         deadline = time.monotonic() + 5.0
         while not _bg_loop.is_running():
             if time.monotonic() > deadline:
-                raise RuntimeError("Telegram background event loop did not start in time")
+                raise RuntimeError(
+                    "Telegram background event loop did not start in time"
+                )
             time.sleep(0.01)
 
-        logger.debug("Telegram background event loop started (thread: telegram-event-loop)")
+        logger.debug(
+            "Telegram background event loop started (thread: telegram-event-loop)"
+        )
         return _bg_loop
 
 
@@ -99,7 +103,6 @@ def async_to_sync(async_func: Callable) -> Callable:
         return run_async(async_func(*args, **kwargs))
 
     return wrapper
-
 
 
 def initialize_telegram_service() -> bool:
