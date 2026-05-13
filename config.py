@@ -121,7 +121,7 @@ class Config:
     LOG_FORMAT = safe_get_env("LOG_FORMAT", "DETAILED").upper()
 
     # Application version
-    VERSION = safe_get_env("VERSION", "2.3.2")
+    VERSION = safe_get_env("VERSION", "2.3.3")
 
     # Authentication settings
     JWT_SECRET_KEY = safe_get_env("JWT_SECRET_KEY", os.urandom(24).hex())
