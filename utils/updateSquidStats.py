@@ -58,7 +58,10 @@ def updateSquidStats():
             os.chmod(tmp_script_path, 0o700)
             args = [sh_bin, tmp_script_path, "--update"]
             try:
-                subprocess.run(args, env=env, check=True, timeout=600)
+                # The external update script is downloaded from the official GitHub
+                # release feed, then written to a temporary file and executed.
+                # This is intentionally executing remote installer content.
+                subprocess.run(args, env=env, check=True, timeout=600)  # noqa: S603
             finally:
                 try:
                     os.remove(tmp_script_path)
