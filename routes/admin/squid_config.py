@@ -40,6 +40,10 @@ def register_routes(bp):
         cm = get_config_manager()
         env_vars = load_env_vars()
         cfg = load_telegram_config()
+        cfg["has_api_hash"] = bool(cfg.get("api_hash"))
+        cfg["has_bot_token"] = bool(cfg.get("bot_token"))
+        cfg["api_hash"] = ""
+        cfg["bot_token"] = ""
         return render_template(
             "admin/config.html",
             config_content=cm.config_content,
