@@ -22,6 +22,7 @@ from database.database import get_session
 from database.models.models import TelegramConfig
 
 _SENSITIVE_FIELDS = ("api_hash", "bot_token")
+_SECRET_PLACEHOLDER = "".join(chr(8226) for _ in range(8))
 
 
 def _default_config() -> dict:
@@ -141,11 +142,11 @@ def save_config(data: dict) -> None:
         # Encrypt sensitive fields only when a non-empty value is provided.
         # An empty string means "leave unchanged" (placeholder masking in the UI).
         new_api_hash = str(data.get("api_hash") or "").strip()
-        if new_api_hash and new_api_hash != "••••••••":
+        if new_api_hash and new_api_hash != _SECRET_PLACEHOLDER:
             row.api_hash = _encrypt(new_api_hash, row.encryption_key)
 
         new_bot_token = str(data.get("bot_token") or "").strip()
-        if new_bot_token and new_bot_token != "••••••••":
+        if new_bot_token and new_bot_token != _SECRET_PLACEHOLDER:
             row.bot_token = _encrypt(new_bot_token, row.encryption_key)
 
         session.commit()
