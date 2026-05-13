@@ -187,9 +187,9 @@ def register_routes(bp):
     def telegram_send_test():
         try:
             from services.notifications.telegram_integration import (
-                send_telegram_notification,
                 _telegram_service,
                 initialize_telegram_service,
+                send_telegram_notification,
             )
 
             if _telegram_service is None:
@@ -234,13 +234,9 @@ def register_routes(bp):
 
             cfg = load_config()
             if not cfg.get("enabled"):
-                message = _(
-                    "Telegram está deshabilitado en la configuración."
-                )
+                message = _("Telegram está deshabilitado en la configuración.")
             elif not cfg.get("recipients"):
-                message = _(
-                    "No hay destinatarios configurados para Telegram."
-                )
+                message = _("No hay destinatarios configurados para Telegram.")
             else:
                 message = _(
                     "No se pudo enviar el mensaje. Verifique la configuración y los destinatarios."
