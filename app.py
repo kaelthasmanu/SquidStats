@@ -25,6 +25,10 @@ from services.notifications.notifications import (
     start_notification_monitor,
     stop_notification_monitor,
 )
+from services.notifications.telegram_integration import (
+    cleanup_telegram,
+    initialize_telegram_service,
+)
 from services.scheduler.scheduler_tasks import register_scheduler_tasks
 from utils.filters import register_filters
 
@@ -41,18 +45,7 @@ logger.add(
 )
 logger.add(sys.stderr, level=log_level, colorize=True)
 
-# Import Telegram integration (optional)
-try:
-    from services.notifications.telegram_integration import (
-        cleanup_telegram,
-        initialize_telegram_service,
-    )
-
-    TELEGRAM_AVAILABLE = True
-except Exception:
-    TELEGRAM_AVAILABLE = False
-    initialize_telegram_service = None
-    cleanup_telegram = None
+TELEGRAM_AVAILABLE = True
 
 # Load environment variables
 load_dotenv()
