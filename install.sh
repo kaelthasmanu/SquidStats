@@ -250,39 +250,40 @@ updateOrCloneRepo() {
 
     log_msg "INFO" "Actualizando repositorio en $found_dir"
     echo "El directorio $found_dir ya existe, intentando actualizar con git pull..."
-    cd "$found_dir"
 
-    if [ -d ".git" ]; then
-        if [ -f ".env" ]; then
-            env_exists=true
-            log_msg "INFO" "Respaldando archivo .env"
-            echo ".env existente detectado, se preservará"
-            cp .env /tmp/.env.backup
-        fi
-
-        remote_url=$(git remote get-url origin 2>/dev/null || true)
-        if [ -n "$remote_url" ] && echo "$remote_url" | grep -qE '^(git@|ssh://)github.com[:/]'; then
-            log_msg "INFO" "Remote origin usa SSH ($remote_url), cambiando a HTTPS"
-            git remote set-url origin "$repo_url" >> "$LOG_FILE" 2>&1 || {
-                error "No se pudo actualizar la URL remota a HTTPS"
-                return 1
-            }
-            log_msg "INFO" "Remote origin actualizado a $repo_url"
-        fi
-
-        if git fetch origin "$branch" && git checkout "$branch" && git pull origin "$branch"; then
-            [ "$env_exists" = true ] && mv /tmp/.env.backup .env
-            log_msg "OK" "Repositorio actualizado exitosamente en la rama '$branch'"
-            echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
-            return 0
-        else
-            log_msg "ERROR" "Error al actualizar el repositorio con git pull"
-            echo "❌ Error al actualizar el repositorio."
-            return 1
-        fi
-    else
+    if [ ! -d "$found_dir/.git" ]; then
         log_msg "ERROR" "El directorio $found_dir no es un repositorio git"
         echo "⚠️ El directorio $found_dir existe pero no es un repositorio git. No se puede actualizar automáticamente."
+        return 1
+    fi
+
+    if [ -f "$found_dir/.env" ]; then
+        env_exists=true
+        log_msg "INFO" "Respaldando archivo .env"
+        echo ".env existente detectado, se preservará"
+        cp "$found_dir/.env" /tmp/.env.backup
+    fi
+
+    remote_url=$(git -C "$found_dir" remote get-url origin 2>/dev/null || true)
+    if [ -n "$remote_url" ] && echo "$remote_url" | grep -qE '^(git@|ssh://)github.com[:/]'; then
+        log_msg "INFO" "Remote origin usa SSH ($remote_url), cambiando a HTTPS"
+        git -C "$found_dir" remote set-url origin "$repo_url" >> "$LOG_FILE" 2>&1 || {
+            error "No se pudo actualizar la URL remota a HTTPS"
+            return 1
+        }
+        log_msg "INFO" "Remote origin actualizado a $repo_url"
+    fi
+
+    if git -C "$found_dir" fetch origin "$branch" && \
+       git -C "$found_dir" checkout "$branch" && \
+       git -C "$found_dir" pull origin "$branch"; then
+        [ "$env_exists" = true ] && mv /tmp/.env.backup "$found_dir/.env"
+        log_msg "OK" "Repositorio actualizado exitosamente en la rama '$branch'"
+        echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
+        return 0
+    else
+        log_msg "ERROR" "Error al actualizar el repositorio con git pull"
+        echo "❌ Error al actualizar el repositorio."
         return 1
     fi
 }
