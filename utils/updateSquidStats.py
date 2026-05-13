@@ -11,13 +11,16 @@ load_dotenv()
 
 
 def updateSquidStats():
+    logger.info("Starting SquidStats web update process")
     try:
         proxy_url = os.getenv("HTTP_PROXY", "")
         https_proxy_url = os.getenv("HTTPS_PROXY", proxy_url)
         env = os.environ.copy()
         if proxy_url:
+            logger.debug("HTTP proxy configured")
             env["http_proxy"] = proxy_url
         if https_proxy_url:
+            logger.debug("HTTPS proxy configured")
             env["https_proxy"] = https_proxy_url
 
         proxies = None
@@ -39,7 +42,9 @@ def updateSquidStats():
                 logger.error("No se pudo obtener la última versión desde GitHub API")
                 return False
 
+            logger.info(f"Latest release tag resolved: {latest_tag}")
             script_url = f"https://github.com/kaelthasmanu/SquidStats/releases/download/{latest_tag}/install.sh"
+            logger.info(f"Downloading update script from {script_url}")
             response = requests.get(
                 script_url,
                 proxies=proxies,
@@ -55,18 +60,23 @@ def updateSquidStats():
                 tmp_script.write(response.content)
                 tmp_script_path = tmp_script.name
 
+            logger.debug(f"Written update script to temporary file: {tmp_script_path}")
             os.chmod(tmp_script_path, 0o700)
             args = [sh_bin, tmp_script_path, "--update"]
+            logger.info(f"Executing update script with command: {args}")
             try:
                 # The external update script is downloaded from the official GitHub
                 # release feed, then written to a temporary file and executed.
                 # This is intentionally executing remote installer content.
                 subprocess.run(args, env=env, check=True, timeout=600)  # noqa: S603
+                logger.info("Update script executed successfully")
             finally:
                 try:
                     os.remove(tmp_script_path)
                 except OSError:
-                    pass
+                    logger.warning(
+                        f"Unable to remove temporary update script: {tmp_script_path}"
+                    )
             return True
         except Exception:
             logger.exception("Error descargando el script de actualización")
