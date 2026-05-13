@@ -6,6 +6,9 @@ from loguru import logger
 
 from services.auth.auth_service import admin_required, api_auth_required
 from services.database.admin_helpers import load_env_vars, save_env_vars
+from services.notifications.telegram_config_service import (
+    load_config as load_telegram_config,
+)
 from services.squid.config_service import save_config as service_save_config
 from services.squid.split_config_service import (
     get_split_files_info as service_get_split_files_info,
@@ -36,10 +39,12 @@ def register_routes(bp):
     def view_config():
         cm = get_config_manager()
         env_vars = load_env_vars()
+        cfg = load_telegram_config()
         return render_template(
             "admin/config.html",
             config_content=cm.config_content,
             env_vars=env_vars,
+            cfg=cfg,
         )
 
     @bp.route("/config/edit", methods=["GET", "POST"])
