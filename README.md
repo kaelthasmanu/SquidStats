@@ -291,7 +291,7 @@ sudo ./install.sh --update
     Note: for use MARIADB need your own database running
    ```bash
    # Application Version
-   VERSION="2.3.2"
+   VERSION="2.3.3"
    
    # Security Keys
    SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
