@@ -40,6 +40,9 @@ from services.database.admin_helpers import (
 from services.database.db_admin_service import (
     delete_table_data as service_delete_table_data,
 )
+from services.notifications.telegram_config_service import (
+    load_config as load_telegram_config,
+)
 from services.security.blacklist_service import (
     delete_blacklist_by_source_url,
     get_url_blacklists_with_counts,
@@ -124,10 +127,12 @@ def admin_dashboard():
 @admin_required
 def view_config():
     env_vars = load_env_vars()
+    cfg = load_telegram_config()
     return render_template(
         "admin/config.html",
         config_content=config_manager.config_content,
         env_vars=env_vars,
+        cfg=cfg,
     )
 
 

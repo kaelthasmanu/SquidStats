@@ -135,6 +135,7 @@ def async_retry(max_attempts: int = 3, delay: float = 1.0, backoff: float = 2.0)
 class TelegramService:
     _instance: Optional["TelegramService"] = None
     _lock = asyncio.Lock()
+    _session_lock = asyncio.Lock()
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -253,11 +254,12 @@ class TelegramService:
     async def session(self):
         """Context manager for Telegram session"""
         await self._ensure_connected()
-        try:
-            yield self._client
-        except Exception as e:
-            logger.error(f"Error in Telegram session: {e}")
-            raise
+        async with self._session_lock:
+            try:
+                yield self._client
+            except Exception as e:
+                logger.error(f"Error in Telegram session: {e}")
+                raise
 
     def _format_message(
         self,
@@ -285,6 +287,14 @@ class TelegramService:
     async def _resolve_recipient(self, recipient: str | int) -> InputPeerUser | int:
         if isinstance(recipient, int):
             return recipient
+
+        # In bot mode, Telegram does not allow resolving phone numbers.
+        # Only integer user/chat IDs or @username strings are valid.
+        if self.bot_token and recipient.startswith("+"):
+            raise TelegramSendError(
+                f"Bot mode does not support phone-number recipients. "
+                f"Use the integer chat/user ID instead of '{recipient}'."
+            )
 
         # Check cache
         if recipient in self._recipients:
@@ -421,9 +431,9 @@ class TelegramService:
                 status["connected"] = True
                 status["user_id"] = me.id
                 status["username"] = getattr(me, "username", None)
-        except Exception:
+        except Exception as exc:
             logger.exception("Health check failed")
-            status["error"] = "Health check failed"
+            status["error"] = str(exc) or "Health check failed"
 
         return status
 

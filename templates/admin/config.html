@@ -245,44 +245,5 @@
         </div>
     </div>
     
-    <!-- Telegram Tab -->
-    <div x-show="activeTab === 'telegram'" class="mt-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ _("Configuración de Telegram") }}</h3>
-            <button @click="editing = !editing" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
-                <i class="fas fa-edit mr-2"></i>{{ _("Editar") }}
-            </button>
-        </div>
-        
-        <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
-            {% for key in ['TELEGRAM_ENABLED', 'TELEGRAM_API_ID', 'TELEGRAM_API_HASH', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_PHONE', 'TELEGRAM_SESSION_NAME', 'TELEGRAM_RECIPIENTS'] %}
-            {% set value = env_vars.get(key, '') %}
-            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
-                {% if key == 'TELEGRAM_ENABLED' %}
-                <select name="{{ key }}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
-                    <option value="true" {% if value.lower() == 'true' %}selected{% endif %}>True</option>
-                    <option value="false" {% if value.lower() == 'false' %}selected{% endif %}>False</option>
-                </select>
-                {% else %}
-                <input type="text" name="{{ key }}" value="{{ value }}" 
-                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
-                {% endif %}
-            </div>
-            {% endfor %}
-            <div class="md:col-span-2 flex justify-center mt-4">
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md">
-                    <i class="fas fa-save mr-2"></i>{{ _("Guardar Cambios") }}
-                </button>
-            </div>
-        </form>
-        
-        <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['TELEGRAM_ENABLED', 'TELEGRAM_API_ID', 'TELEGRAM_API_HASH', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_PHONE', 'TELEGRAM_SESSION_NAME', 'TELEGRAM_RECIPIENTS'] %}{{ key }}="{{ env_vars.get(key, '') }}"
-{% endfor %}</pre>
-        </div>
-    </div>
-</div>
+    {% include "admin/telegram_config.html" %}
 {% endblock %}

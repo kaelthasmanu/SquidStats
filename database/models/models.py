@@ -196,6 +196,24 @@ class ThrottledUser(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
+class TelegramConfig(Base):
+    """Single-row table that stores Telegram notification settings."""
+
+    __tablename__ = "telegram_config"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    enabled = Column(Integer, nullable=False, default=0)
+    api_id = Column(String(50), nullable=False, default="")
+    api_hash = Column(String(512), nullable=False, default="")
+    bot_token = Column(String(512), nullable=False, default="")
+    phone = Column(String(50), nullable=False, default="")
+    session_name = Column(String(100), nullable=False, default="squidstats_bot")
+    recipients = Column(Text, nullable=False, default="")
+    encryption_key = Column(String(512), nullable=True)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
 class LdapConfig(Base):
     """Single-row table that stores LDAP / Active Directory connection settings."""
 

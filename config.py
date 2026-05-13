@@ -132,15 +132,6 @@ class Config:
     )
     FIRST_PASSWORD = safe_get_env("FIRST_PASSWORD", "")
 
-    # Telegram Notifications
-    TELEGRAM_ENABLED = safe_get_env("TELEGRAM_ENABLED", False, var_type=bool)
-    TELEGRAM_API_ID = safe_get_env("TELEGRAM_API_ID", None)
-    TELEGRAM_API_HASH = safe_get_env("TELEGRAM_API_HASH", None)
-    TELEGRAM_BOT_TOKEN = safe_get_env("TELEGRAM_BOT_TOKEN", None)
-    TELEGRAM_SESSION_NAME = safe_get_env("TELEGRAM_SESSION_NAME", "squidstats_bot")
-    TELEGRAM_PHONE = safe_get_env("TELEGRAM_PHONE", None)
-    TELEGRAM_RECIPIENTS = safe_get_list("TELEGRAM_RECIPIENTS", [])
-
     # Proxy settings
     HTTP_PROXY = safe_get_env("HTTP_PROXY", "")
     HTTPS_PROXY = safe_get_env("HTTPS_PROXY", "")

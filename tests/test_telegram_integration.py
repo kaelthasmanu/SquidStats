@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Script de prueba para la integración de Telegram
-Ejecutar: python test_telegram_integration.py
+Integration tests for the Telegram notification service.
+All configuration is read from the database via telegram_config_service.
+Run: pytest tests/test_telegram_integration.py -v
 """
 
 import asyncio
@@ -10,16 +11,14 @@ from pathlib import Path
 
 import pytest
 
-# Agregar el directorio raíz al path
+# Add the project root to path so imports work when executed directly.
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Import dotenv and load before other project imports
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Now import project modules (they may depend on env vars)
-from config import Config  # noqa: E402
+from services.notifications.telegram_config_service import load_config  # noqa: E402
 from services.notifications.telegram_integration import (  # noqa: E402
     initialize_telegram_service,
     send_security_alert_telegram,
@@ -45,50 +44,61 @@ def print_separator(title=""):
 
 
 def check_configuration():
-    """Verificar configuración de Telegram"""
+    """Verify Telegram configuration from the database."""
     print_separator("Verificación de Configuración")
 
-    print(f"TELEGRAM_ENABLED: {Config.TELEGRAM_ENABLED}")
-    print(
-        f"TELEGRAM_API_ID: {'✓ Configurado' if Config.TELEGRAM_API_ID else '✗ No configurado'}"
-    )
-    print(
-        f"TELEGRAM_API_HASH: {'✓ Configurado' if Config.TELEGRAM_API_HASH else '✗ No configurado'}"
-    )
-    print(
-        f"TELEGRAM_BOT_TOKEN: {'✓ Configurado' if Config.TELEGRAM_BOT_TOKEN else '✗ No configurado'}"
-    )
-    print(
-        f"TELEGRAM_PHONE: {'✓ Configurado' if Config.TELEGRAM_PHONE else '✗ No configurado'}"
-    )
-    print(f"TELEGRAM_SESSION_NAME: {Config.TELEGRAM_SESSION_NAME}")
-    print(
-        f"TELEGRAM_RECIPIENTS: {Config.TELEGRAM_RECIPIENTS if Config.TELEGRAM_RECIPIENTS else '✗ No configurado'}"
-    )
+    cfg = load_config()
 
-    if not Config.TELEGRAM_ENABLED:
-        print("\n⚠️ TELEGRAM_ENABLED=false - Habilita en el archivo .env")
+    print(f"TELEGRAM_ENABLED: {cfg['enabled']}")
+    print(
+        f"TELEGRAM_API_ID: {'✓ Configurado' if cfg.get('api_id') else '✗ No configurado'}"
+    )
+    print(
+        f"TELEGRAM_API_HASH: {'✓ Configurado' if cfg.get('api_hash') else '✗ No configurado'}"
+    )
+    print(
+        f"TELEGRAM_BOT_TOKEN: {'✓ Configurado' if cfg.get('bot_token') else '✗ No configurado'}"
+    )
+    print(
+        f"TELEGRAM_PHONE: {'✓ Configurado' if cfg.get('phone') else '✗ No configurado'}"
+    )
+    print(f"TELEGRAM_SESSION_NAME: {cfg.get('session_name')}")
+    recipients = cfg.get("recipients", [])
+    print(f"TELEGRAM_RECIPIENTS: {recipients if recipients else '✗ No configurado'}")
+
+    if not cfg["enabled"]:
+        print(
+            "\n⚠️ Telegram deshabilitado — actívalo desde Admin → Telegram Configuration"
+        )
         return False
 
-    if not Config.TELEGRAM_API_ID or not Config.TELEGRAM_API_HASH:
+    if not cfg.get("api_id") or not cfg.get("api_hash"):
         print("\n❌ Faltan credenciales de API")
         print("   Obtén tus credenciales en: https://my.telegram.org/apps")
         return False
 
-    if not Config.TELEGRAM_BOT_TOKEN and not Config.TELEGRAM_PHONE:
+    if not cfg.get("bot_token") and not cfg.get("phone"):
         print("\n❌ Falta BOT_TOKEN o PHONE")
-        print("   Configura TELEGRAM_BOT_TOKEN o TELEGRAM_PHONE")
+        print("   Configura bot_token o phone desde el panel de administración")
         return False
 
-    if not Config.TELEGRAM_RECIPIENTS or not any(
-        r.strip() for r in Config.TELEGRAM_RECIPIENTS
-    ):
+    if not cfg.get("recipients") or not any(r.strip() for r in cfg["recipients"]):
         print("\n❌ Faltan destinatarios")
-        print("   Configura TELEGRAM_RECIPIENTS en el archivo .env")
+        print("   Configura los destinatarios desde Admin → Telegram Configuration")
         return False
 
     print("\n✅ Configuración completa")
     return True
+
+
+def _require_telegram_config():
+    """Skip the test if Telegram is not configured in the DB."""
+    cfg = load_config()
+    if not cfg.get("enabled") or not cfg.get("api_id") or not cfg.get("api_hash"):
+        pytest.skip(
+            "Telegram not configured in DB — set via Admin → Telegram Configuration"
+        )
+    return cfg
 
 
 @pytest.mark.asyncio
@@ -96,14 +106,16 @@ async def test_connection():
     """Probar conexión a Telegram"""
     print_separator("Test de Conexión")
 
+    cfg = _require_telegram_config()
+
     try:
         service = get_telegram_service(
-            api_id=int(Config.TELEGRAM_API_ID),
-            api_hash=Config.TELEGRAM_API_HASH,
-            bot_token=Config.TELEGRAM_BOT_TOKEN,
-            phone=Config.TELEGRAM_PHONE,
-            session_name=Config.TELEGRAM_SESSION_NAME,
-            enabled=Config.TELEGRAM_ENABLED,
+            api_id=int(cfg["api_id"]),
+            api_hash=cfg["api_hash"],
+            bot_token=cfg.get("bot_token") or None,
+            phone=cfg.get("phone") or None,
+            session_name=cfg.get("session_name") or "squidstats_bot",
+            enabled=True,
         )
 
         print("Conectando a Telegram...")
@@ -144,11 +156,15 @@ async def test_send_basic_notification():
     """Probar envío de notificación básica"""
     print_separator("Test de Notificación Básica")
 
+    cfg = _require_telegram_config()
+    recipients = cfg.get("recipients", [])
+    if not recipients:
+        pytest.skip("No recipients configured in DB")
+
     try:
         service = get_telegram_service()
         await service.connect()
 
-        recipients = [r.strip() for r in Config.TELEGRAM_RECIPIENTS if r.strip()]
         recipient = recipients[0]
 
         print(f"Enviando notificación de prueba a: {recipient}")
@@ -181,11 +197,15 @@ async def test_priority_notifications():
     """Probar notificaciones con diferentes prioridades"""
     print_separator("Test de Prioridades")
 
+    cfg = _require_telegram_config()
+    recipients = cfg.get("recipients", [])
+    if not recipients:
+        pytest.skip("No recipients configured in DB")
+
     try:
         service = get_telegram_service()
         await service.connect()
 
-        recipients = [r.strip() for r in Config.TELEGRAM_RECIPIENTS if r.strip()]
         recipient = recipients[0]
 
         priorities = [
@@ -219,11 +239,15 @@ async def test_formatted_notifications():
     """Probar notificaciones con datos extra"""
     print_separator("Test de Mensajes Formateados")
 
+    cfg = _require_telegram_config()
+    recipients = cfg.get("recipients", [])
+    if not recipients:
+        pytest.skip("No recipients configured in DB")
+
     try:
         service = get_telegram_service()
         await service.connect()
 
-        recipients = [r.strip() for r in Config.TELEGRAM_RECIPIENTS if r.strip()]
         recipient = recipients[0]
 
         print("Enviando notificación con metadata...")
