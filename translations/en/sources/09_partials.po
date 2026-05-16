@@ -1,0 +1,613 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/partials/auditoria.html:41
+msgid "Auditoría Técnica"
+msgstr "Technical Audit"
+
+#: templates/all_notifications.html:79 templates/partials/cache_stats.html:4
+msgid "Sistema"
+msgstr "System"
+
+#: templates/all_notifications.html:105 templates/partials/black_list.html:89
+msgid "Mostrando"
+msgstr "Showing"
+
+#: templates/auditoria_pdf.html:41 templates/partials/black_list.html:27
+msgid "Total peticiones:"
+msgstr "Total requests:"
+
+#: templates/index.html:25 templates/partials/conexiones.html:496
+msgid "Aplicar"
+msgstr "Apply"
+
+#: templates/partials/black_list.html:23 templates/reports_pdf.html:24
+msgid "Total usuarios:"
+msgstr "Total users:"
+
+#: templates/partials/conexiones.html:335
+#: templates/partials/graph_reports.html:77 templates/reports_pdf.html:50
+msgid "URL"
+msgstr "URL"
+
+#: templates/partials/auditoria.html:9
+msgid "Tipo de Auditoría"
+msgstr "Audit Type"
+
+#: templates/partials/auditoria.html:16
+msgid "Resumen por Usuario"
+msgstr "Summary by User"
+
+#: templates/partials/auditoria.html:18
+msgid "Top 10 Usuarios (Datos)"
+msgstr "Top 10 Users (Data)"
+
+#: templates/partials/auditoria.html:19
+msgid "Top 15 URLs (Datos)"
+msgstr "Top 15 URLs (Data)"
+
+#: templates/partials/auditoria.html:20
+msgid "Top 10 Usuarios (Peticiones)"
+msgstr "Top 10 Users (Requests)"
+
+#: templates/partials/auditoria.html:21
+msgid "Top 10 IPs (Datos)"
+msgstr "Top 10 IPs (Data)"
+
+#: templates/partials/auditoria.html:23
+msgid "Total de Datos Consumidos"
+msgstr "Total Consumed Data"
+
+#: templates/partials/auditoria.html:26
+msgid "Actividad Diaria"
+msgstr "Daily Activity"
+
+#: templates/partials/auditoria.html:33
+msgid "Búsqueda por Palabra Clave"
+msgstr "Keyword Search"
+
+#: templates/partials/auditoria.html:38
+msgid "Actividad en Redes Sociales"
+msgstr "Social Media Activity"
+
+#: templates/partials/auditoria.html:43
+msgid "Actividad por Dirección IP"
+msgstr "Activity by IP Address"
+
+#: templates/partials/auditoria.html:48
+msgid "Análisis por Código de Respuesta"
+msgstr "Response Code Analysis"
+
+#: templates/partials/auditoria.html:67
+msgid "-- Todos --"
+msgstr "-- All --"
+
+#: templates/partials/auditoria.html:71
+msgid "Palabra Clave"
+msgstr "Keyword"
+
+#: templates/partials/auditoria.html:72
+msgid "Ej: juegos, descargas..."
+msgstr "E.g.: games, downloads..."
+
+#: templates/partials/auditoria.html:75
+msgid "Dirección IP"
+msgstr "IP Address"
+
+#: templates/partials/auditoria.html:76
+msgid "Ej: 192.168.1.100"
+msgstr "E.g.: 192.168.1.100"
+
+#: templates/partials/auditoria.html:79
+msgid "Redes Sociales"
+msgstr "Social Media"
+
+#: templates/partials/auditoria.html:83
+msgid "Facebook"
+msgstr "Facebook"
+
+#: templates/partials/auditoria.html:85 templates/partials/auditoria.html:91
+#: templates/partials/auditoria.html:97 templates/partials/auditoria.html:103
+#: templates/partials/auditoria.html:109 templates/partials/auditoria.html:115
+#: templates/partials/auditoria.html:121
+msgid "Selección múltiple"
+msgstr "Multiple selection"
+
+#: templates/partials/auditoria.html:89
+msgid "Instagram"
+msgstr "Instagram"
+
+#: templates/partials/auditoria.html:95
+msgid "YouTube"
+msgstr "YouTube"
+
+#: templates/partials/auditoria.html:101
+msgid "Twitter/X"
+msgstr "Twitter/X"
+
+#: templates/partials/auditoria.html:107
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+#: templates/partials/auditoria.html:119
+msgid "Pinterest"
+msgstr "Pinterest"
+
+#: templates/partials/auditoria.html:126
+msgid "Código HTTP"
+msgstr "HTTP Code"
+
+#: templates/partials/auditoria.html:128
+msgid "-- Seleccione un código --"
+msgstr "-- Select a code --"
+
+#: templates/partials/auditoria.html:130
+msgid "200 OK"
+msgstr "200 OK"
+
+#: templates/partials/auditoria.html:133
+msgid "301 Moved Permanently"
+msgstr "301 Moved Permanently"
+
+#: templates/partials/auditoria.html:134
+msgid "302 Found"
+msgstr "302 Found"
+
+#: templates/partials/auditoria.html:135
+msgid "304 Not Modified"
+msgstr "304 Not Modified"
+
+#: templates/partials/auditoria.html:138
+msgid "400 Bad Request"
+msgstr "400 Bad Request"
+
+#: templates/partials/auditoria.html:139
+msgid "401 Unauthorized"
+msgstr "401 Unauthorized"
+
+#: templates/partials/auditoria.html:140
+msgid "403 Forbidden"
+msgstr "403 Forbidden"
+
+#: templates/partials/auditoria.html:141
+msgid "404 Not Found"
+msgstr "404 Not Found"
+
+#: templates/partials/auditoria.html:144
+msgid "500 Internal Server Error"
+msgstr "500 Internal Server Error"
+
+#: templates/partials/auditoria.html:145
+msgid "502 Bad Gateway"
+msgstr "502 Bad Gateway"
+
+#: templates/partials/auditoria.html:146
+msgid "503 Service Unavailable"
+msgstr "503 Service Unavailable"
+
+#: templates/partials/auditoria.html:147
+msgid "504 Gateway Timeout"
+msgstr "504 Gateway Timeout"
+
+#: templates/partials/auditoria.html:156
+msgid "Fecha del Reporte"
+msgstr "Report Date"
+
+#: templates/partials/auditoria.html:165
+msgid "Fecha de Fin"
+msgstr "End Date"
+
+#: templates/partials/auditoria.html:174
+msgid "Generar Reporte"
+msgstr "Generate Report"
+
+#: templates/partials/auditoria.html:189
+msgid "Seleccione los filtros y genere un reporte"
+msgstr "Select filters and generate a report"
+
+#: templates/partials/auditoria.html:191
+msgid "Los resultados de su auditoría aparecerán aquí."
+msgstr "Your audit results will appear here."
+
+#: templates/partials/black_list.html:10
+msgid "Análisis parcial — límite de dominios activo"
+msgstr "Partial analysis — domain limit active"
+
+#: templates/partials/black_list.html:12
+msgid "La blacklist contiene más de"
+msgstr "The blacklist contains more than"
+
+#: templates/partials/black_list.html:12
+msgid ""
+"dominios activos. Para evitar un alto consumo de recursos, la consulta se"
+" ha limitado a los primeros"
+msgstr ""
+"active domains. To avoid high resource consumption, the query has been "
+"limited to the first"
+
+#: templates/partials/black_list.html:13
+msgid ""
+"dominios. Es posible que algunos accesos bloqueados no aparezcan en este "
+"listado."
+msgstr "domains. Some blocked accesses may not appear in this list."
+
+#: templates/partials/black_list.html:32
+msgid "Mostrar:"
+msgstr "Show:"
+
+#: templates/partials/black_list.html:57
+msgid "Intentos Bloqueados"
+msgstr "Blocked Attempts"
+
+#: templates/partials/black_list.html:80
+msgid "No se encontraron registros"
+msgstr "No records found"
+
+#: templates/partials/black_list.html:81
+msgid "No hay actividad en sitios bloqueados para mostrar."
+msgstr "No activity on blocked sites to show."
+
+#: templates/partials/black_list.html:89
+msgid "usuarios en esta página."
+msgstr "users on this page."
+
+#: templates/partials/cache_stats.html:8
+msgid "Caché"
+msgstr "Cache"
+
+#: templates/partials/cache_stats.html:11
+msgid "Red"
+msgstr "Network"
+
+#: templates/partials/cache_stats.html:22
+msgid "Estadísticas del Sistema"
+msgstr "System Statistics"
+
+#: templates/partials/cache_stats.html:34
+#: templates/partials/cache_stats.html:172
+msgid "CPU"
+msgstr "CPU"
+
+#: templates/partials/cache_stats.html:36
+msgid "núcleos"
+msgstr "cores"
+
+#: templates/partials/cache_stats.html:44
+#: templates/partials/cache_stats.html:57
+msgid "0G"
+msgstr "0G"
+
+#: templates/partials/cache_stats.html:47
+#: templates/partials/cache_stats.html:177
+msgid "RAM"
+msgstr "RAM"
+
+#: templates/partials/cache_stats.html:60
+#: templates/partials/cache_stats.html:182
+msgid "SWAP"
+msgstr "SWAP"
+
+#: templates/partials/cache_stats.html:72
+msgid "Información del Sistema"
+msgstr "System Information"
+
+#: templates/partials/cache_stats.html:80
+msgid "Nombre del Host"
+msgstr "Host Name"
+
+#: templates/partials/cache_stats.html:91
+msgid "Direcciones IP"
+msgstr "IP Addresses"
+
+#: templates/partials/cache_stats.html:103
+msgid "Sistema Operativo"
+msgstr "Operating System"
+
+#: templates/partials/cache_stats.html:114
+msgid "Tiempo Encendido"
+msgstr "Uptime"
+
+#: templates/partials/cache_stats.html:125
+msgid "Zona Horaria"
+msgstr "Time Zone"
+
+#: templates/partials/cache_stats.html:136
+msgid "Hora Local"
+msgstr "Local Time"
+
+#: templates/partials/cache_stats.html:151
+msgid "Gráficas del Sistema"
+msgstr "System Charts"
+
+#: templates/partials/cache_stats.html:164
+msgid "24 Horas"
+msgstr "24 Hours"
+
+#: templates/partials/cache_stats.html:203
+msgid "Estadísticas de Caché"
+msgstr "Cache Statistics"
+
+#: templates/partials/cache_stats.html:220
+#: templates/partials/cache_stats.html:237
+#: templates/partials/conexiones.html:269
+#: templates/partials/conexiones.html:383
+#: templates/partials/graph_reports.html:103
+msgid "MB"
+msgstr "MB"
+
+#: templates/partials/cache_stats.html:224
+#: templates/partials/cache_stats.html:241
+#: templates/partials/graph_reports.html:25
+msgid "GB"
+msgstr "GB"
+
+#: templates/partials/cache_stats.html:263
+msgid "Tráfico de Red"
+msgstr "Network Traffic"
+
+#: templates/partials/conexiones.html:7
+msgid "Proxies:"
+msgstr "Proxies:"
+
+#: templates/partials/conexiones.html:62
+msgid "Servidor Squid:"
+msgstr "Squid Server:"
+
+#: templates/partials/conexiones.html:76
+msgid "Total Bandwidth"
+msgstr "Total Bandwidth"
+
+#: templates/partials/conexiones.html:97
+msgid "Usuarios Activos"
+msgstr "Active Users"
+
+#: templates/partials/conexiones.html:108
+msgid "Conexiones Totales"
+msgstr "Total Connections"
+
+#: templates/partials/conexiones.html:126
+msgid "Tiempo Activo"
+msgstr "Active Time"
+
+#: templates/partials/conexiones.html:141
+msgid "Peticiones HTTP"
+msgstr "HTTP Requests"
+
+#: templates/partials/conexiones.html:156
+msgid "Peticiones/Min"
+msgstr "Requests/Min"
+
+#: templates/partials/conexiones.html:171
+msgid "Estado Squid"
+msgstr "Squid Status"
+
+#: templates/partials/conexiones.html:173
+msgid "Conectado"
+msgstr "Connected"
+
+#: templates/partials/conexiones.html:174
+msgid "Error Parsing"
+msgstr "Parsing Error"
+
+#: templates/partials/conexiones.html:175
+msgid "Timeout"
+msgstr "Timeout"
+
+#: templates/partials/conexiones.html:176
+msgid "Rechazado"
+msgstr "Rejected"
+
+#: templates/partials/conexiones.html:177
+msgid "Error DNS"
+msgstr "DNS Error"
+
+#: templates/partials/conexiones.html:191
+msgid "Tipo de Sistema"
+msgstr "System Type"
+
+#: templates/partials/conexiones.html:204
+msgid "Ver Resumen"
+msgstr "View Summary"
+
+#: templates/partials/conexiones.html:234
+msgid "IP del Cliente"
+msgstr "Client IP"
+
+#: templates/partials/conexiones.html:239
+msgid "Conexiones totales de este usuario"
+msgstr "Total connections for this user"
+
+#: templates/partials/conexiones.html:251
+msgid "Total de velocidad del usuario"
+msgstr "Total user speed"
+
+#: templates/partials/conexiones.html:267
+msgid "Total de datos transferidos"
+msgstr "Total transferred data"
+
+#: templates/partials/conexiones.html:272
+msgid "Total de solicitudes"
+msgstr "Total requests"
+
+#: templates/partials/conexiones.html:306
+msgid "Desbloquear"
+msgstr "Unblock"
+
+#: templates/partials/conexiones.html:311
+msgid "Resetear conexiones"
+msgstr "Reset connections"
+
+#: templates/partials/conexiones.html:311
+msgid "(Próx.)"
+msgstr "(Next)"
+
+#: templates/partials/conexiones.html:329
+msgid "Duración"
+msgstr "Duration"
+
+#: templates/partials/conexiones.html:332
+msgid "Método"
+msgstr "Method"
+
+#: templates/partials/conexiones.html:338
+msgid "Datos"
+msgstr "Data"
+
+#: templates/partials/conexiones.html:341
+msgid "Velocidad"
+msgstr "Speed"
+
+#: templates/partials/conexiones.html:344
+msgid "Delay Pool"
+msgstr "Delay Pool"
+
+#: templates/partials/conexiones.html:347
+msgid "Solicitudes"
+msgstr "Requests"
+
+#: templates/partials/conexiones.html:350
+msgid "Dir. Remota"
+msgstr "Remote Dir."
+
+#: templates/partials/conexiones.html:384
+msgid "N/A"
+msgstr "N/A"
+
+#: templates/partials/conexiones.html:394
+msgid "Pool"
+msgstr "Pool"
+
+#: templates/partials/conexiones.html:439
+msgid "Esta acción bloqueará todo el tráfico del usuario. Se añadirá"
+msgstr "This action will block all user traffic. It will be added"
+
+#: templates/partials/conexiones.html:440
+msgid "http_access deny"
+msgstr "http_access deny"
+
+#: templates/partials/conexiones.html:441
+msgid "en Squid y se guardará en la base de datos para persistencia."
+msgstr "in Squid and will be saved in the database for persistence."
+
+#: templates/partials/conexiones.html:446
+msgid "Confirmar bloqueo"
+msgstr "Confirm block"
+
+#: templates/partials/conexiones.html:464
+msgid ""
+"Se eliminará el bloqueo activo para esta IP y se recargará la "
+"configuración de Squid."
+msgstr ""
+"The active block for this IP will be removed and Squid configuration will"
+" be reloaded."
+
+#: templates/partials/conexiones.html:487
+msgid "Asigna la IP del usuario a un"
+msgstr "Assign the user's IP to a"
+
+#: templates/partials/conexiones.html:487
+msgid "delay pool"
+msgstr "delay pool"
+
+#: templates/partials/conexiones.html:487
+msgid ""
+"existente. Sus conexiones estarán sujetas a los límites de ancho de banda"
+" configurados en ese pool."
+msgstr ""
+"existing. Their connections will be subject to the bandwidth limits "
+"configured in that pool."
+
+#: templates/partials/conexiones.html:489
+msgid "Selecciona el delay pool"
+msgstr "Select the delay pool"
+
+#: templates/partials/conexiones.html:491
+msgid "Cargando pools..."
+msgstr "Loading pools..."
+
+#: templates/partials/conexiones.html:514
+msgid ""
+"Se eliminará la restricción de velocidad activa para esta IP y se "
+"recargará la configuración de Squid."
+msgstr ""
+"The active speed restriction for this IP will be removed and Squid "
+"configuration will be reloaded."
+
+#: templates/partials/graph_reports.html:6
+msgid "Usuarios Totales"
+msgstr "Total Users"
+
+#: templates/partials/graph_reports.html:14
+msgid "Registros de Log"
+msgstr "Log Records"
+
+#: templates/partials/graph_reports.html:22
+#: templates/partials/graph_reports.html:86
+msgid "Datos Transmitidos"
+msgstr "Transmitted Data"
+
+#: templates/partials/graph_reports.html:29
+#: templates/partials/graph_reports.html:80
+msgid "Total Requests"
+msgstr "Total Requests"
+
+#: templates/partials/graph_reports.html:40
+msgid "Top 20 Usuarios por Actividad"
+msgstr "Top 20 Users by Activity"
+
+#: templates/partials/graph_reports.html:49
+msgid "Top 20 Usuarios por Datos Transmitidos"
+msgstr "Top 20 Users by Transmitted Data"
+
+#: templates/partials/graph_reports.html:60
+#: templates/partials/graph_reports.html:70
+msgid "Distribución de Códigos HTTP"
+msgstr "HTTP Code Distribution"
+
+#: templates/partials/graph_reports.html:67
+msgid "Países más visitados"
+msgstr "Most Visited Countries"
+
+#: templates/partials/graph_reports.html:70
+msgid "Top 20 Páginas Más Visitadas"
+msgstr "Top 20 Most Visited Pages"
+
+#: templates/partials/graph_reports.html:83
+msgid "Visitas Únicas"
+msgstr "Unique Visits"
+
+#: templates/partials/graph_reports.html:115
+msgid "IPs Compartidas por Múltiples Usuarios"
+msgstr "IPs Shared by Multiple Users"
+
+#: templates/partials/graph_reports.html:122
+msgid "IP"
+msgstr "IP"
+
+#: templates/partials/graph_reports.html:125
+msgid "Número de Usuarios"
+msgstr "Number of Users"
+
+#: templates/partials/logs.html:5
+msgid "First page"
+msgstr "First page"
+
+#: templates/partials/logs.html:8
+msgid "Previous page"
+msgstr "Previous page"
+
+#: templates/partials/logs.html:15
+msgid "Next page"
+msgstr "Next page"
+
+#: templates/partials/logs.html:19
+msgid "Last page"
+msgstr "Last page"
+
+#: templates/partials/logs.html:30
+msgid "ACTIVIDAD"
+msgstr "Activity"
+
+#: templates/partials/logs.html:65
+msgid "Actividad reciente -"
+msgstr "Recent activity -"
