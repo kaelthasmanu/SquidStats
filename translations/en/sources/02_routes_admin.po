@@ -1,0 +1,273 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: routes/admin_routes.py:150
+#, python-format
+msgid "Error saving configuration: %(message)s"
+msgstr "Error saving configuration: %(message)s"
+
+#: routes/admin/squid_config.py:57 routes/admin_routes.py:152
+msgid "Error saving configuration"
+msgstr "Error saving configuration"
+
+#: routes/admin/squid_config.py:82 routes/admin_routes.py:176
+msgid "Variables de entorno guardadas exitosamente"
+msgstr "Environment variables saved successfully"
+
+#: routes/admin/acls.py:50 routes/admin/acls.py:71 routes/admin_routes.py:219
+#: routes/admin_routes.py:237
+msgid "ID de ACL inválido"
+msgstr "Invalid ACL ID"
+
+#: routes/admin/blacklist.py:80 routes/admin_routes.py:310
+msgid "Host de Pi-hole no proporcionado"
+msgstr "Pi-hole host not provided"
+
+#: routes/admin/blacklist.py:88 routes/admin_routes.py:323
+msgid "Sincronización de listas iniciada (en segundo plano)"
+msgstr "List synchronization started (in background)"
+
+#: routes/admin/blacklist.py:101 routes/admin_routes.py:339
+msgid "Archivo importado correctamente"
+msgstr "File imported successfully"
+
+#: routes/admin_routes.py:347
+#, python-format
+msgid "Error al procesar el archivo: %(error)s"
+msgstr "Error processing file: %(error)s"
+
+#: routes/admin/blacklist.py:104 routes/admin_routes.py:349
+msgid "Error al procesar el archivo"
+msgstr "Error processing file"
+
+#: routes/admin/blacklist.py:112 routes/admin_routes.py:358
+msgid "Lista importada desde URL correctamente"
+msgstr "List imported from URL successfully"
+
+#: routes/admin/blacklist.py:114 routes/admin_routes.py:360
+#, python-format
+msgid "Error importando desde URL: %(err)s"
+msgstr "Error importing from URL: %(err)s"
+
+#: routes/admin/blacklist.py:122 routes/admin_routes.py:371
+msgid "No se encontraron dominios para importar"
+msgstr "No domains found to import"
+
+#: routes/admin/blacklist.py:125 routes/admin_routes.py:373
+msgid "Blacklist actualizada exitosamente"
+msgstr "Blacklist updated successfully"
+
+#: routes/admin_routes.py:381
+#, python-format
+msgid "Error al guardar blacklist: %(error)s"
+msgstr "Error saving blacklist: %(error)s"
+
+#: routes/admin/blacklist.py:128 routes/admin_routes.py:383
+msgid "Error al guardar blacklist"
+msgstr "Error saving blacklist"
+
+#: routes/admin/blacklist.py:137 routes/admin_routes.py:393
+msgid "Lista personalizada vacía"
+msgstr "Custom list is empty"
+
+#: routes/admin/blacklist.py:165 routes/admin_routes.py:406
+msgid "Lista personalizada guardada en BLACKLIST_DOMAINS"
+msgstr "Custom list saved to BLACKLIST_DOMAINS"
+
+#: routes/admin_routes.py:414
+#, python-format
+msgid "Error al guardar la lista: %(error)s"
+msgstr "Error saving list: %(error)s"
+
+#: routes/admin/blacklist.py:168 routes/admin_routes.py:416
+msgid "Error al guardar la lista"
+msgstr "Error saving list"
+
+#: routes/admin/http_access.py:37 routes/admin/http_access.py:50
+#: routes/admin/http_access.py:81 routes/admin_routes.py:428
+#: routes/admin_routes.py:448 routes/admin_routes.py:483
+msgid "Índice de regla inválido"
+msgstr "Invalid rule index"
+
+#: routes/admin/users.py:53 routes/admin_routes.py:588
+msgid "Usuario no encontrado"
+msgstr "User not found"
+
+#: routes/admin_routes.py:652 services/database/db_admin_service.py:16
+msgid "Nombre de tabla no proporcionado"
+msgstr "Table name not provided"
+
+#: routes/admin_routes.py:660 services/database/db_admin_service.py:19
+msgid "Nombre de tabla inválido"
+msgstr "Invalid table name"
+
+#: routes/admin_routes.py:668 services/database/db_admin_service.py:24
+msgid "No se puede eliminar estas tablas críticas"
+msgstr "Cannot delete these critical tables"
+
+#: routes/admin_routes.py:682 services/analytics/blacklist_users.py:222
+#: services/database/db_admin_service.py:47
+#: services/database/db_info_service.py:33
+#: services/database/db_info_service.py:150
+msgid "Error interno del servidor"
+msgstr "Internal server error"
+
+#: routes/admin_routes.py:709
+#, python-format
+msgid "Error al cargar la vista: %(error)s"
+msgstr "Error loading view: %(error)s"
+
+#: routes/admin/squid_config.py:105 routes/admin_routes.py:711
+msgid "Error al cargar la vista"
+msgstr "Error loading view"
+
+#: routes/admin_routes.py:738
+msgid ""
+"Archivo requerido no encontrado. Verifique la configuración del archivo "
+"squid.conf."
+msgstr "Required file not found. Please check the squid.conf file configuration."
+
+#: routes/admin_routes.py:747 services/squid/split_config_service.py:47
+msgid "No se tienen permisos suficientes para crear los archivos"
+msgstr "Insufficient permissions to create the files"
+
+#: routes/admin_routes.py:756 services/squid/split_config_service.py:53
+msgid "Error de validación de la configuración"
+msgstr "Configuration validation error"
+
+#: routes/admin_routes.py:769 services/squid/split_config_service.py:59
+msgid "Error interno al dividir la configuración"
+msgstr "Internal error splitting configuration"
+
+#: routes/admin/blacklist.py:177 routes/admin_routes.py:793
+msgid "URL no proporcionada"
+msgstr "URL not provided"
+
+#: routes/admin/blacklist.py:183 routes/admin_routes.py:798
+#, python-format
+msgid "Lista eliminada: %(url)s (%(count)s dominios)"
+msgstr "List deleted: %(url)s (%(count)s domains)"
+
+#: routes/admin_routes.py:1221
+msgid "JSON inválido"
+msgstr "Invalid JSON"
+
+#: routes/admin_routes.py:1243
+msgid "Error interno al cambiar estado de blocklist"
+msgstr "Internal error changing blocklist status"
+
+#: routes/logs_routes.py:51
+msgid "Invalid date format"
+msgstr "Invalid date format"
+
+#: routes/admin/backup.py:26
+msgid "Motor de BD desconocido"
+msgstr "Unknown database engine"
+
+#: routes/admin/backup.py:30
+msgid "Frecuencia inválida"
+msgstr "Invalid frequency"
+
+#: routes/admin/backup.py:37
+msgid "Configuración guardada correctamente"
+msgstr "Configuration saved successfully"
+
+#: routes/admin/backup.py:55
+msgid "Error leyendo salvas"
+msgstr "Error reading backups"
+
+#: routes/admin/backup.py:62
+msgid "Archivo no encontrado"
+msgstr "File not found"
+
+#: routes/admin/blacklist.py:156
+msgid "Lista personalizada guardada y archivo custom de Squid actualizado"
+msgstr "Custom list saved and Squid custom file updated"
+
+#: routes/admin/blacklist.py:161
+#, python-format
+msgid ""
+"Lista personalizada guardada en DB, pero no se pudo regenerar el archivo "
+"de Squid: %(msg)s"
+msgstr "Custom list saved to DB, but could not regenerate Squid file: %(msg)s"
+
+#: routes/admin/ldap_config.py:39
+msgid "Configuración LDAP guardada."
+msgstr "LDAP configuration saved."
+
+#: routes/admin/ldap_config.py:44
+msgid "Error al guardar la configuración."
+msgstr "Error saving configuration."
+
+#: routes/admin/ldap_config.py:64
+msgid "No se ha configurado el servidor LDAP."
+msgstr "LDAP server has not been configured."
+
+#: routes/admin/ldap_config.py:76
+msgid "Error interno al probar LDAP."
+msgstr "Internal error testing LDAP."
+
+#: routes/admin/ldap_config.py:92 routes/admin/ldap_config.py:125
+#: routes/admin/ldap_config.py:154 routes/admin/ldap_config.py:183
+msgid "LDAP no configurado."
+msgstr "LDAP not configured."
+
+#: routes/admin/ldap_config.py:118 routes/admin/ldap_config.py:147
+msgid "Parámetro 'q' requerido."
+msgstr "Parameter 'q' required."
+
+#: routes/admin/ldap_config.py:176
+msgid "Parámetro 'username' requerido."
+msgstr "Parameter 'username' required."
+
+#: routes/logs_routes.py:24
+msgid "Actividad usuarios"
+msgstr "User Activity"
+
+#: routes/logs_routes.py:26
+msgid "Analisis de la Actividad de los Usuarios"
+msgstr "User Activity Analysis"
+
+#: routes/logs_routes.py:90
+msgid "Registros Bloqueados"
+msgstr "Blocked Records"
+
+#: routes/logs_routes.py:92
+msgid "Peticiones que deberian ser bloqueadas o fueron bloqueadas"
+msgstr "Requests that should be or were blocked"
+
+#: routes/main_routes.py:119
+msgid "Inicio Dashboard"
+msgstr "Dashboard Home"
+
+#: routes/main_routes.py:211
+msgid "Todas las Notificaciones"
+msgstr "All Notifications"
+
+#: routes/main_routes.py:213
+msgid "Historial completo de notificaciones del sistema"
+msgstr "Complete system notification history"
+
+#: routes/main_routes.py:235
+msgid "Error al cargar las notificaciones"
+msgstr "Error loading notifications"
+
+#: routes/reports_routes.py:67
+msgid "Reportes y gráficas"
+msgstr "Reports and Charts"
+
+#: routes/reports_routes.py:69
+msgid "Top de la Actividad de los Usuarios y comportamiento"
+msgstr "Top User Activity and Behavior"
+
+#: routes/reports_routes.py:258
+msgid "Centro de Auditoría"
+msgstr "Audit Center"
+
+#: routes/reports_routes.py:260
+msgid "Herramienta para el análisis de actividad y seguridad."
+msgstr "Tool for activity and security analysis."
+
+#: routes/stats_routes.py:70
+msgid "Estadísticas del comportamiento del Sistema"
+msgstr "System Behavior Statistics"
