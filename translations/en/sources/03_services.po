@@ -1,0 +1,103 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: services/analytics/auditoria_service.py:41
+#: services/analytics/auditoria_service.py:116
+#: services/analytics/auditoria_service.py:212
+#: services/analytics/auditoria_service.py:283
+#: services/analytics/auditoria_service.py:454
+#: services/analytics/auditoria_service.py:534
+#: services/analytics/auditoria_service.py:637
+#: services/analytics/auditoria_service.py:680
+#: services/analytics/auditoria_service.py:726
+#: services/analytics/auditoria_service.py:771
+msgid "No data for the selected dates."
+msgstr "No data for the selected dates."
+
+#: services/analytics/auditoria_service.py:123
+msgid "No valid domains specified for search."
+msgstr "No valid domains specified for search."
+
+#: services/analytics/auditoria_service.py:355
+msgid "Invalid date format. Use YYYY-MM-DD."
+msgstr "Invalid date format. Use YYYY-MM-DD."
+
+#: services/analytics/auditoria_service.py:399
+msgid "A database error occurred while calculating daily activity."
+msgstr "A database error occurred while calculating daily activity."
+
+#: services/analytics/auditoria_service.py:403
+msgid "An unexpected error occurred while calculating daily activity."
+msgstr "An unexpected error occurred while calculating daily activity."
+
+#: services/analytics/auditoria_service.py:1149
+msgid "Tipo de auditoría inválido"
+msgstr "Invalid audit type"
+
+#: services/analytics/auditoria_service.py:1169
+msgid "Error interno ejecutando la auditoría"
+msgstr "Internal error running audit"
+
+#: services/auth/auth_service.py:469 services/auth/auth_service.py:489
+msgid "Por favor, inicia sesión para acceder a esta página."
+msgstr "Please log in to access this page."
+
+#: services/auth/auth_service.py:494 services/auth/auth_service.py:536
+msgid "No tienes permisos para acceder a esta página."
+msgstr "You do not have permission to access this page."
+
+#: services/auth/auth_service.py:512 services/auth/auth_service.py:531
+msgid "Necesitas iniciar sesión como admin."
+msgstr "You need to log in as admin."
+
+#: services/database/backup_service.py:463
+msgid "Nombre de archivo inválido"
+msgstr "Invalid filename"
+
+#: services/database/backup_service.py:466
+msgid "La salva no existe"
+msgstr "Backup does not exist"
+
+#: services/database/db_admin_service.py:32
+msgid "La tabla no existe"
+msgstr "Table does not exist"
+
+#: services/database/db_admin_service.py:42
+msgid "Datos de la tabla eliminados correctamente"
+msgstr "Table data deleted successfully"
+
+#: services/database/db_info_service.py:197
+msgid "Error al ejecutar la verificación"
+msgstr "Error running verification"
+
+#: services/ldap/ldap_service.py:54
+msgid "Conexión exitosa al servidor LDAP/AD."
+msgstr "Successfully connected to LDAP/AD server."
+
+#: services/ldap/ldap_service.py:190
+msgid "Usuario no encontrado."
+msgstr "User not found."
+
+#: services/notifications/notifications.py:302
+msgid "fa-times-circle"
+msgstr "fa-times-circle"
+
+#: services/squid/split_config_service.py:42
+msgid "Archivo requerido no encontrado."
+msgstr "Required file not found."
+
+#: services/squid/squid_config_splitter.py:623
+msgid "No se tienen permisos suficientes para leer los archivos"
+msgstr "Insufficient permissions to read the files"
+
+#: services/squid/squid_config_splitter.py:631
+msgid "Error interno al obtener los archivos"
+msgstr "Internal error getting files"
+
+#: services/squid/ssl_bump_service.py:27
+msgid "Error al detectar la configuración SSL Bump"
+msgstr "Error detecting SSL Bump configuration"
+
+#: services/system/system_info.py:194
+msgid "Internal error"
+msgstr "Internal error"
