@@ -1,0 +1,1136 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/database.html:851
+msgid "Error al guardar la configuración."
+msgstr "Error saving the configuration."
+
+#: templates/admin/database.html:858
+msgid "Error al ejecutar la salva"
+msgstr "Error executing the backup"
+
+#: templates/admin/database.html:861
+msgid "¿Eliminar la salva \"%(filename)s\"?"
+msgstr "Delete the backup \"%(filename)s\"?"
+
+#: templates/admin/quota.html:236
+msgid "¿Eliminar la cuota del usuario %(username)s?"
+msgstr "Delete the quota for user %(username)s?"
+
+#: templates/admin/quota.html:292
+msgid "¿Eliminar la cuota del grupo %(group_name)s?"
+msgstr "Delete the quota for group %(group_name)s?"
+
+#: templates/admin/ldap_config.html:163 templates/admin/quota.html:29
+#: templates/admin/quota.html:105 templates/admin/quota.html:146
+#: templates/admin/quota.html:189 templates/admin/quota.html:219
+#: templates/admin/user_form.html:38 templates/admin/users.html:17
+#: templates/auth/login.html:98 templates/partials/auditoria.html:56
+#: templates/reports_pdf.html:33
+msgid "Usuario"
+msgstr "User"
+
+#: templates/admin/blacklist.html:7
+msgid "Blacklist - Gestor de Listas"
+msgstr "Blacklist - List Manager"
+
+#: templates/admin/blacklist.html:12
+msgid "Pi-hole"
+msgstr "Pi-hole"
+
+#: templates/admin/blacklist.html:15
+msgid "AdGuard"
+msgstr "AdGuard"
+
+#: templates/admin/blacklist.html:18 templates/admin/blacklist.html:291
+msgid "DNSmasq"
+msgstr "DNSmasq"
+
+#: templates/admin/blacklist.html:21
+msgid "Personalizada"
+msgstr "Custom"
+
+#: templates/admin/blacklist.html:24 templates/admin/blacklist.html:357
+msgid "Importar"
+msgstr "Import"
+
+#: templates/admin/blacklist.html:31
+msgid "Integración Pi-hole"
+msgstr "Pi-hole Integration"
+
+#: templates/admin/blacklist.html:32 templates/admin/blacklist.html:292
+msgid "Funcionalidad en Beta"
+msgstr "Functionality in Beta"
+
+#: templates/admin/blacklist.html:32 templates/admin/blacklist.html:292
+msgid "BETA"
+msgstr "BETA"
+
+#: templates/admin/blacklist.html:34
+msgid ""
+"Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí "
+"puedes configurar conexión y ver el estado."
+msgstr ""
+"Connect and sync blocked lists from a Pi-hole server. Here you can "
+"configure the connection and check the status."
+
+#: templates/admin/blacklist.html:39
+msgid "Pi-hole Host"
+msgstr "Pi-hole Host"
+
+#: templates/admin/blacklist.html:40
+msgid "192.168.1.2 or example.com"
+msgstr "192.168.1.2 or example.com"
+
+#: templates/admin/blacklist.html:43
+msgid "API Token"
+msgstr "API Token"
+
+#: templates/admin/blacklist.html:44
+msgid "Token (opcional)"
+msgstr "Token (optional)"
+
+#: templates/admin/blacklist.html:48
+msgid "Probar Conexión"
+msgstr "Test Connection"
+
+#: templates/admin/blacklist.html:52
+msgid "Sincronizar Listas"
+msgstr "Sync Lists"
+
+#: templates/admin/blacklist.html:59
+msgid "Integración AdGuard"
+msgstr "AdGuard Integration"
+
+#: templates/admin/blacklist.html:60
+msgid "Soporte para fuentes y listas públicas compatibles con AdGuard."
+msgstr "Support for sources and public lists compatible with AdGuard."
+
+#: templates/admin/blacklist.html:63
+msgid "URL de la lista"
+msgstr "List URL"
+
+#: templates/admin/blacklist.html:66
+msgid "Agregar Lista"
+msgstr "Add List"
+
+#: templates/admin/blacklist.html:71
+msgid "Listas importadas"
+msgstr "Imported Lists"
+
+#: templates/admin/blacklist.html:80 templates/admin/blacklist.html:310
+msgid "Activa en Squid"
+msgstr "Active in Squid"
+
+#: templates/admin/blacklist.html:83 templates/admin/blacklist.html:313
+msgid "Inactiva"
+msgstr "Inactive"
+
+#: templates/admin/blacklist.html:111
+msgid "Eliminar lista y dominios"
+msgstr "Delete list and domains"
+
+#: templates/admin/blacklist.html:294
+msgid "Exporta o importa reglas en formato compatible con dnsmasq."
+msgstr "Export or import rules in dnsmasq-compatible format."
+
+#: templates/admin/blacklist.html:296
+msgid "Exportar archivo hosts"
+msgstr "Export hosts file"
+
+#: templates/admin/blacklist.html:304
+msgid "Lista Personalizada"
+msgstr "Custom List"
+
+#: templates/admin/blacklist.html:305
+msgid "Añade dominios manualmente o pega una lista separada por comas/lineas."
+msgstr "Add domains manually or paste a comma/line separated list."
+
+#: templates/admin/blacklist.html:338
+msgid ""
+"example.com\n"
+"example.org"
+msgstr ""
+"example.com\n"
+"example.org"
+
+#: templates/admin/blacklist.html:349
+msgid "Importar listas"
+msgstr "Import lists"
+
+#: templates/admin/blacklist.html:350
+msgid "Importa desde archivos locales o pega URLs de listas públicas."
+msgstr "Import from local files or paste public list URLs."
+
+#: templates/admin/blacklist.html:354
+msgid "Subir archivo"
+msgstr "Upload file"
+
+#: templates/admin/clean_data.html:3
+msgid "Limpiar Datos - Administrador Squid Proxy"
+msgstr "Clean Data - Squid Proxy Administrator"
+
+#: templates/admin/clean_data.html:10 templates/admin/clean_data.html:57
+#: templates/admin/database.html:41 templates/admin/database.html:598
+#: templates/admin/database.html:643
+msgid "Limpiar Datos"
+msgstr "Clean Data"
+
+#: templates/admin/clean_data.html:12 templates/admin/database.html:600
+msgid "Selecciona una tabla y elimina todos sus datos"
+msgstr "Select a table and delete all its data"
+
+#: templates/admin/clean_data.html:129
+msgid "Selecciona una tabla..."
+msgstr "Select a table..."
+
+#: templates/admin/clean_data.html:20 templates/admin/database.html:608
+msgid "¡Advertencia!"
+msgstr "Warning!"
+
+#: templates/admin/clean_data.html:21 templates/admin/database.html:609
+msgid ""
+"Esta acción es irreversible. Una vez eliminados los datos, no se pueden "
+"recuperar."
+msgstr "This action is irreversible. Once data is deleted, it cannot be recovered."
+
+#: templates/admin/clean_data.html:31 templates/admin/database.html:619
+msgid "Eliminar Datos de Tabla"
+msgstr "Delete Table Data"
+
+#: templates/admin/clean_data.html:40 templates/admin/database.html:626
+msgid "Seleccionar Tabla"
+msgstr "Select Table"
+
+#: templates/admin/clean_data.html:43 templates/admin/database.html:629
+msgid "Cargando tablas..."
+msgstr "Loading tables..."
+
+#: templates/admin/clean_data.html:51 templates/admin/database.html:636
+msgid "Información de la Tabla"
+msgstr "Table Information"
+
+#: templates/admin/clean_data.html:71 templates/admin/database.html:657
+msgid "Información Importante"
+msgstr "Important Information"
+
+#: templates/admin/clean_data.html:73 templates/admin/database.html:659
+msgid "Solo se eliminan los datos de la tabla, no la estructura"
+msgstr "Only table data is deleted, not the structure"
+
+#: templates/admin/clean_data.html:74 templates/admin/database.html:660
+msgid "Las tablas con sufijo de fecha (ej: log_20240121) son tablas diarias"
+msgstr "Tables with date suffix (e.g.: log_20240121) are daily tables"
+
+#: templates/admin/clean_data.html:75 templates/admin/database.html:661
+msgid "Algunas tablas son críticas para el funcionamiento del sistema"
+msgstr "Some tables are critical for system operation"
+
+#: templates/admin/clean_data.html:76 templates/admin/database.html:662
+msgid "Se recomienda hacer un respaldo antes de eliminar datos importantes"
+msgstr "Making a backup before deleting important data is recommended"
+
+#: templates/admin/database.html:3
+msgid "Base de Datos - Administrador Squid Proxy"
+msgstr "Database - Squid Proxy Administrator"
+
+#: templates/admin/database.html:12
+msgid "Monitor de salud, copias de seguridad y gestión de datos"
+msgstr "Health monitoring, backups, and data management"
+
+#: templates/admin/database.html:25
+msgid "Resumen DB"
+msgstr "DB Summary"
+
+#: templates/admin/database.html:33
+msgid "Salvas de BD"
+msgstr "Database Backups"
+
+#: templates/admin/database.html:55
+msgid "Cargando información de la base de datos..."
+msgstr "Loading database information..."
+
+#: templates/admin/database.html:69
+msgid "Reintentar"
+msgstr "Retry"
+
+#: templates/admin/database.html:100
+msgid "Salud de la BD:"
+msgstr "Database health:"
+
+#: templates/admin/database.html:110
+msgid "La base de datos tiene páginas dañadas."
+msgstr "The database has damaged pages."
+
+#: templates/admin/database.html:114
+msgid "Haz un respaldo y ejecuta"
+msgstr "Make a backup and run"
+
+#: templates/admin/database.html:114
+msgid "VACUUM"
+msgstr "VACUUM"
+
+#: templates/admin/database.html:114
+msgid "o restaura desde una copia sana."
+msgstr "or restore from a healthy copy."
+
+#: templates/admin/database.html:119
+msgid "Fragmentación:"
+msgstr "Fragmentation:"
+
+#: templates/admin/database.html:121
+msgid "— dentro del rango normal"
+msgstr "— within normal range"
+
+#: templates/admin/database.html:122
+msgid "— considera ejecutar VACUUM"
+msgstr "— consider running VACUUM"
+
+#: templates/admin/database.html:123
+msgid "— ejecuta VACUUM urgentemente"
+msgstr "— run VACUUM urgently"
+
+#: templates/admin/database.html:127 templates/admin/database.html:152
+msgid "Motor"
+msgstr "Engine"
+
+#: templates/admin/database.html:127
+msgid "operando con normalidad"
+msgstr "operating normally"
+
+#: templates/admin/database.html:138 templates/admin/database.html:498
+#: templates/admin/ldap_config.html:38 templates/admin/ldap_config.html:50
+msgid "Actualizar"
+msgstr "Update"
+
+#: templates/admin/database.html:162
+msgid "Tamaño Total"
+msgstr "Total Size"
+
+#: templates/admin/database.html:172
+msgid "Tablas"
+msgstr "Tables"
+
+#: templates/admin/database.html:182
+msgid "Registros Totales"
+msgstr "Total Records"
+
+#: templates/admin/database.html:195
+msgid "Detalles SQLite"
+msgstr "SQLite Details"
+
+#: templates/admin/database.html:200
+msgid "Tamaño de Página"
+msgstr "Page Size"
+
+#: templates/admin/database.html:205
+msgid "Páginas Totales"
+msgstr "Total Pages"
+
+#: templates/admin/database.html:210
+msgid "Páginas Libres"
+msgstr "Free Pages"
+
+#: templates/admin/database.html:215
+msgid "Modo Journal"
+msgstr "Journal Mode"
+
+#: templates/admin/database.html:220
+msgid "Auto-Vacuum"
+msgstr "Auto-Vacuum"
+
+#: templates/admin/database.html:225
+msgid "Fragmentación"
+msgstr "Fragmentation"
+
+#: templates/admin/database.html:240
+msgid "Detalle de Corrupción"
+msgstr "Corruption Detail"
+
+#: templates/admin/database.html:256
+msgid "Versión del Motor"
+msgstr "Engine Version"
+
+#: templates/admin/database.html:267
+msgid "Verificación de Integridad"
+msgstr "Integrity Check"
+
+#: templates/admin/database.html:272
+msgid ""
+"Verifica la integridad estructural de la base de datos en busca de "
+"posibles errores o corrupción."
+msgstr ""
+"Verify the structural integrity of the database looking for possible "
+"errors or corruption."
+
+#: templates/admin/database.html:274
+msgid "Esta operación puede tardar varios minutos en bases de datos grandes."
+msgstr "This operation may take several minutes on large databases."
+
+#: templates/admin/database.html:280
+msgid "Verificando..."
+msgstr "Verifying..."
+
+#: templates/admin/database.html:280
+msgid "Verificar Integridad"
+msgstr "Verify Integrity"
+
+#: templates/admin/database.html:294
+msgid "Sin errores detectados — la base de datos está íntegra."
+msgstr "No errors detected — the database is intact."
+
+#: templates/admin/database.html:294
+msgid "Se encontraron errores de integridad."
+msgstr "Integrity errors were found."
+
+#: templates/admin/database.html:296
+msgid "error(es) detectado(s)"
+msgstr "error(s) detected"
+
+#: templates/admin/database.html:320
+msgid "Salvas de Base de Datos"
+msgstr "Database Backups"
+
+#: templates/admin/database.html:321
+msgid "Configura y gestiona las copias de seguridad automáticas"
+msgstr "Configure and manage automatic backups"
+
+#: templates/admin/database.html:346
+msgid "Total Salvas"
+msgstr "Total Backups"
+
+#: templates/admin/database.html:355
+msgid "Última Salva"
+msgstr "Last Backup"
+
+#: templates/admin/database.html:364
+msgid "Espacio Total"
+msgstr "Total Space"
+
+#: templates/admin/database.html:377
+msgid "Configuración de Salvas"
+msgstr "Backup Configuration"
+
+#: templates/admin/database.html:386
+msgid "Motor de Base de Datos"
+msgstr "Database Engine"
+
+#: templates/admin/database.html:391
+msgid "SQLite"
+msgstr "SQLite"
+
+#: templates/admin/database.html:392
+msgid "MySQL / MariaDB"
+msgstr "MySQL / MariaDB"
+
+#: templates/admin/database.html:393
+msgid "PostgreSQL"
+msgstr "PostgreSQL"
+
+#: templates/admin/database.html:402 templates/admin/database.html:408
+msgid "Requiere"
+msgstr "Requires"
+
+#: templates/admin/database.html:402 templates/admin/database.html:408
+msgid "instalado en el servidor."
+msgstr "installed on the server."
+
+#: templates/admin/database.html:416
+msgid "Frecuencia"
+msgstr "Frequency"
+
+#: templates/admin/database.html:421
+msgid "Diaria — máx. 3 por semana"
+msgstr "Daily — max. 3 per week"
+
+#: templates/admin/database.html:422
+msgid "Diaria — máx. 3 por mes"
+msgstr "Daily — max. 3 per month"
+
+#: templates/admin/database.html:438
+msgid "Retención máxima"
+msgstr "Maximum retention"
+
+#: templates/admin/database.html:441
+msgid "Fijo: 3 salvas"
+msgstr "Fixed: 3 backups"
+
+#: templates/admin/database.html:452
+msgid ""
+"Se mantienen las 3 salvas más recientes. Las más antiguas se eliminan "
+"automáticamente."
+msgstr "The 3 most recent backups are kept. Oldest ones are automatically deleted."
+
+#: templates/admin/database.html:459
+msgid "Directorio de Salvas"
+msgstr "Backup Directory"
+
+#: templates/admin/database.html:464
+msgid "Ruta absoluta donde se guardarán las salvas"
+msgstr "Absolute path where backups will be saved"
+
+#: templates/admin/database.html:470
+msgid "Salvas automáticas"
+msgstr "Automatic Backups"
+
+#: templates/admin/database.html:471
+msgid "Habilitar programación automática"
+msgstr "Enable automatic scheduling"
+
+#: templates/admin/database.html:495
+msgid "Historial de Salvas"
+msgstr "Backup History"
+
+#: templates/admin/database.html:506
+msgid "Cargando salvas..."
+msgstr "Loading backups..."
+
+#: templates/admin/database.html:516
+msgid "No hay salvas disponibles"
+msgstr "No backups available"
+
+#: templates/admin/database.html:517
+msgid "Realiza una salva manual o activa las automáticas"
+msgstr "Perform a manual backup or enable automatic backups"
+
+#: templates/admin/database.html:522
+msgid "0\" class=\"flex-1 overflow-auto\">"
+msgstr ""
+
+#: templates/admin/database.html:526
+msgid "Archivo"
+msgstr "File"
+
+#: templates/admin/database.html:527 templates/admin/quota.html:347
+#: templates/partials/auditoria.html:160
+msgid "Fecha"
+msgstr "Date"
+
+#: templates/admin/database.html:528
+msgid "Tamaño"
+msgstr "Size"
+
+#: templates/admin/database.html:530 templates/admin/quota.html:281
+msgid "Acción"
+msgstr "Action"
+
+#: templates/admin/database.html:543
+msgid "Reciente"
+msgstr "Recent"
+
+#: templates/admin/database.html:561
+msgid "Descargar"
+msgstr "Download"
+
+#: templates/admin/database.html:578
+msgid "0\" class=\"px-6 py-3 bg-gray-50 border-t border-gray-100\">"
+msgstr ""
+
+#: templates/admin/database.html:581
+msgid "Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente."
+msgstr "Maximum 3 backups per period. Oldest ones are automatically deleted."
+
+#: templates/admin/database.html:725 templates/admin/database.html:753
+msgid "0 B"
+msgstr "0 B"
+
+#: templates/admin/database.html:740
+msgid "Corrupción detectada"
+msgstr "Database corruption detected"
+
+#: templates/admin/database.html:741
+msgid "Saludable"
+msgstr "Healthy"
+
+#: templates/admin/database.html:741
+msgid "Crítico"
+msgstr "Critical"
+
+#: templates/admin/database.html:752
+msgid "Sin salvas"
+msgstr "No backups"
+
+#: templates/admin/database.html:754
+msgid "Guardando..."
+msgstr "Loading..."
+
+#: templates/admin/database.html:755
+msgid "Salva Manual"
+msgstr "Manual Backup"
+
+#: templates/admin/database.html:756
+msgid "Guardar Configuración"
+msgstr "Save Configuration"
+
+#: templates/admin/database.html:757
+msgid "Se ejecuta diariamente, conservando máx. 3 salvas por semana"
+msgstr "Runs daily, keeping a maximum of 3 backups per week"
+
+#: templates/admin/database.html:758
+msgid "Se ejecuta diariamente, conservando máx. 3 salvas por mes"
+msgstr "Runs daily, keeping a maximum of 3 backups per month"
+
+#: templates/admin/delay_pools.html:6
+msgid "Gestión de Delay Pools"
+msgstr "Delay Pool Management"
+
+#: templates/admin/delay_pools.html:8
+msgid "Agregar Pool"
+msgstr "Add Pool"
+
+#: templates/admin/delay_pools.html:31
+msgid "¿Qué son los Delay Pools?"
+msgstr "What are Delay Pools?"
+
+#: templates/admin/delay_pools.html:32
+msgid ""
+"Los delay pools permiten limitar el ancho de banda de ciertas solicitudes"
+" basadas en criterios específicos, proporcionando un control justo del "
+"tráfico."
+msgstr ""
+"Delay pools allow limiting bandwidth for certain requests based on "
+"specific criteria, providing fair traffic control."
+
+#: templates/admin/delay_pools.html:33
+msgid "Clases disponibles:"
+msgstr "Available classes:"
+
+#: templates/admin/delay_pools.html:35 templates/admin/delay_pools.html:207
+msgid "Clase 1:"
+msgstr "Class 1:"
+
+#: templates/admin/delay_pools.html:35 templates/admin/delay_pools.html:207
+msgid "Un solo bucket agregado para todos los clientes"
+msgstr "A single aggregate bucket for all clients"
+
+#: templates/admin/delay_pools.html:36 templates/admin/delay_pools.html:220
+msgid "Clase 2:"
+msgstr "Class 2:"
+
+#: templates/admin/delay_pools.html:36
+msgid "Bucket agregado + buckets individuales por host (/24)"
+msgstr "Aggregate bucket + individual buckets per host (/24)"
+
+#: templates/admin/delay_pools.html:37 templates/admin/delay_pools.html:238
+msgid "Clase 3:"
+msgstr "Class 3:"
+
+#: templates/admin/delay_pools.html:37
+msgid "Buckets por subred + buckets individuales por host (/16)"
+msgstr "Buckets per subnet + individual buckets per host (/16)"
+
+#: templates/admin/delay_pools.html:38
+msgid "Clase 4:"
+msgstr "Class 4:"
+
+#: templates/admin/delay_pools.html:38 templates/admin/delay_pools.html:72
+msgid "Como clase 3 + buckets por usuario autenticado"
+msgstr "Like class 3 + buckets per authenticated user"
+
+#: templates/admin/delay_pools.html:39 templates/admin/delay_pools.html:261
+msgid "Clase 5:"
+msgstr "Class 5:"
+
+#: templates/admin/delay_pools.html:39
+msgid "Basado en tags de external_acl_type"
+msgstr "Based on external_acl_type tags"
+
+#: templates/admin/delay_pools.html:41
+msgid "Limitaciones importantes:"
+msgstr "Important limitations:"
+
+#: templates/admin/delay_pools.html:43
+msgid "No limita overheads como TCP, ICP, DNS, etc."
+msgstr "Does not limit overheads like TCP, ICP, DNS, etc."
+
+#: templates/admin/delay_pools.html:44
+msgid "Incompatible con slow aborts; usa quick abort bajo"
+msgstr "Incompatible with slow aborts; use quick abort under"
+
+#: templates/admin/delay_pools.html:45
+msgid "Una conexión puede tomar todo el ancho de banda de un bucket"
+msgstr "One connection can take all the bandwidth of a bucket"
+
+#: templates/admin/delay_pools.html:46
+msgid "En Squid"
+msgstr "In Squid"
+
+#: templates/admin/delay_pools.html:59
+msgid "Pool #"
+msgstr "Pool #"
+
+#: templates/admin/delay_pools.html:61
+msgid "Clase"
+msgstr "Class"
+
+#: templates/admin/delay_pools.html:66
+msgid "Bucket único agregado para todos los clientes"
+msgstr "Single aggregate bucket for all clients"
+
+#: templates/admin/delay_pools.html:68
+msgid "Bucket agregado + 255 buckets por host (red /24)"
+msgstr "Aggregate bucket + 255 buckets per host (/24 network)"
+
+#: templates/admin/delay_pools.html:70
+msgid "Buckets por subred + buckets por host (red /16)"
+msgstr "Buckets per subnet + buckets per host (/16 network)"
+
+#: templates/admin/delay_pools.html:74
+msgid "Buckets basados en tags de external_acl_type"
+msgstr "Buckets based on external_acl_type tags"
+
+#: templates/admin/delay_pools.html:93 templates/admin/delay_pools.html:202
+msgid "Parámetros de Velocidad:"
+msgstr "Speed Parameters:"
+
+#: templates/admin/delay_pools.html:101 templates/admin/delay_pools.html:103
+#: templates/admin/delay_pools.html:106
+msgid "Agregado:"
+msgstr "Aggregate:"
+
+#: templates/admin/delay_pools.html:104 templates/admin/delay_pools.html:108
+msgid "Individual (por host):"
+msgstr "Individual (per host):"
+
+#: templates/admin/delay_pools.html:107
+msgid "Red:"
+msgstr "Network:"
+
+#: templates/admin/delay_pools.html:110
+msgid "Formato: restore/max (bytes por segundo)"
+msgstr "Format: restore/max (bytes per second)"
+
+#: templates/admin/delay_pools.html:118 templates/admin/delay_pools.html:333
+msgid "Reglas de Acceso:"
+msgstr "Access Rules:"
+
+#: templates/admin/delay_pools.html:141
+msgid "Para ver los delay pools debes iniciar sesión."
+msgstr "You must log in to view delay pools."
+
+#: templates/admin/delay_pools.html:142
+msgid "Inicia sesión con una cuenta de administrador para acceder a esta sección."
+msgstr "Log in with an administrator account to access this section."
+
+#: templates/admin/delay_pools.html:144
+msgid "Iniciar sesión"
+msgstr "Log In"
+
+#: templates/admin/delay_pools.html:150
+msgid "No hay delay pools configurados"
+msgstr "No delay pools configured"
+
+#: templates/admin/delay_pools.html:156
+msgid "¿Ya tienes delay pools configurados?"
+msgstr "Do you already have delay pools configured?"
+
+#: templates/admin/delay_pools.html:164
+msgid "Crear primer Pool"
+msgstr "Create first Pool"
+
+#: templates/admin/delay_pools.html:175
+msgid "Agregar Nuevo Delay Pool"
+msgstr "Add New Delay Pool"
+
+#: templates/admin/delay_pools.html:181 templates/admin/delay_pools.html:307
+msgid "Número de Pool:"
+msgstr "Pool number:"
+
+#: templates/admin/delay_pools.html:185
+msgid "Número único del pool (1-255)"
+msgstr "Unique pool number (1-255)"
+
+#: templates/admin/delay_pools.html:189 templates/admin/delay_pools.html:313
+msgid "Clase de Pool:"
+msgstr "Pool class:"
+
+#: templates/admin/delay_pools.html:192
+msgid "Seleccione una clase..."
+msgstr "Select a class..."
+
+#: templates/admin/delay_pools.html:193 templates/admin/delay_pools.html:316
+msgid "Clase 1 - Bucket único agregado"
+msgstr "Class 1 - Single aggregate bucket"
+
+#: templates/admin/delay_pools.html:194 templates/admin/delay_pools.html:317
+msgid "Clase 2 - Agregado + por host (/24)"
+msgstr "Class 2 - Aggregate + per host (/24)"
+
+#: templates/admin/delay_pools.html:195 templates/admin/delay_pools.html:318
+msgid "Clase 3 - Agregado + red + por host (/16)"
+msgstr "Class 3 - Aggregate + network + per host (/16)"
+
+#: templates/admin/delay_pools.html:196 templates/admin/delay_pools.html:319
+msgid "Clase 4 - Como clase 3 + por usuario"
+msgstr "Class 4 - Like class 3 + per user"
+
+#: templates/admin/delay_pools.html:197 templates/admin/delay_pools.html:320
+msgid "Clase 5 - Basado en tags"
+msgstr "Class 5 - Tag-based"
+
+#: templates/admin/delay_pools.html:210
+msgid "Agregado (restore/max en bytes/seg):"
+msgstr "Aggregate (restore/max in bytes/sec):"
+
+#: templates/admin/delay_pools.html:213
+msgid "Ej: 64000/64000 = 512 Kbps"
+msgstr "E.g.: 64000/64000 = 512 Kbps"
+
+#: templates/admin/delay_pools.html:220
+msgid "Bucket agregado + 255 buckets individuales por host"
+msgstr "Aggregate bucket + 255 individual buckets per host"
+
+#: templates/admin/delay_pools.html:223 templates/admin/delay_pools.html:241
+msgid "Agregado (restore/max):"
+msgstr "Aggregate (restore/max):"
+
+#: templates/admin/delay_pools.html:228 templates/admin/delay_pools.html:252
+msgid "Individual por host (restore/max):"
+msgstr "Individual per host (restore/max):"
+
+#: templates/admin/delay_pools.html:231
+msgid "Usa -1/-1 para deshabilitar este bucket"
+msgstr "Use -1/-1 to disable this bucket"
+
+#: templates/admin/delay_pools.html:238
+msgid "Buckets por subred + por host"
+msgstr "Buckets per subnet + per host"
+
+#: templates/admin/delay_pools.html:246
+msgid "Por red (restore/max):"
+msgstr "Per network (restore/max):"
+
+#: templates/admin/delay_pools.html:249
+msgid "Usa -1/-1 para deshabilitar"
+msgstr "Use -1/-1 to disable"
+
+#: templates/admin/delay_pools.html:261
+msgid "Basado en tags de external_acl_type (un bucket por tag)"
+msgstr "Based on external_acl_type tags (one bucket per tag)"
+
+#: templates/admin/delay_pools.html:264
+msgid "Parámetros por tag (restore/max):"
+msgstr "Parameters per tag (restore/max):"
+
+#: templates/admin/delay_pools.html:272
+msgid "Reglas de Acceso (ACLs):"
+msgstr "Access Rules (ACLs):"
+
+#: templates/admin/delay_pools.html:278 templates/admin/delay_pools.html:339
+msgid "Agregar regla de acceso"
+msgstr "Add access rule"
+
+#: templates/admin/delay_pools.html:289
+msgid "Crear Pool"
+msgstr "Create Pool"
+
+#: templates/admin/delay_pools.html:300
+msgid "Editar Delay Pool"
+msgstr "Edit Delay Pool"
+
+#: templates/admin/delay_pools.html:325
+msgid "Parámetros:"
+msgstr "Parameters:"
+
+#: templates/admin/delay_pools.html:329
+msgid "Formato: restore/max (bytes/seg)"
+msgstr "Format: restore/max (bytes/sec)"
+
+#: templates/admin/quota.html:8
+msgid "Cuotas de Usuario(Mensual) - Administración Squid"
+msgstr "User Quotas (Monthly) - Squid Administration"
+
+#: templates/admin/quota.html:12
+msgid "Resumen"
+msgstr "Summary"
+
+#: templates/admin/quota.html:13
+msgid "Por Usuario"
+msgstr "By User"
+
+#: templates/admin/quota.html:14
+msgid "Por Grupo"
+msgstr "By Group"
+
+#: templates/admin/quota.html:15
+msgid "Reglas"
+msgstr "Rules"
+
+#: templates/admin/quota.html:16
+msgid "Histórico"
+msgstr "History"
+
+#: templates/admin/quota.html:22
+msgid "Editar cuota"
+msgstr "Edit quota"
+
+#: templates/admin/quota.html:33 templates/admin/quota.html:201
+msgid "Grupo (opcional)"
+msgstr "Group (optional)"
+
+#: templates/admin/quota.html:34 templates/admin/quota.html:202
+msgid "Nombre de grupo"
+msgstr "Group name"
+
+#: templates/admin/quota.html:40 templates/admin/quota.html:106
+#: templates/admin/quota.html:261 templates/admin/quota.html:279
+msgid "Grupo"
+msgstr "Group"
+
+#: templates/admin/quota.html:46 templates/admin/quota.html:107
+#: templates/admin/quota.html:205 templates/admin/quota.html:220
+#: templates/admin/quota.html:265 templates/admin/quota.html:280
+msgid "Cuota (MB)"
+msgstr "Quota (MB)"
+
+#: templates/admin/quota.html:61
+msgid "Resumen de Cuotas"
+msgstr "Quota Summary"
+
+#: templates/admin/quota.html:62
+msgid ""
+"Visualiza el estado general de las cuotas de ancho de banda y límites de "
+"datos para los usuarios y grupos."
+msgstr ""
+"View the general status of bandwidth quotas and data limits for users and"
+" groups."
+
+#: templates/admin/quota.html:67
+msgid "Activa o desactiva el control de cuotas para usuarios y grupos"
+msgstr "Enable or disable quota control for users and groups"
+
+#: templates/admin/quota.html:79
+msgid "Pools configurados"
+msgstr "Configured pools"
+
+#: templates/admin/quota.html:83 templates/admin/quota.html:95
+#: templates/admin/quota.html:215
+msgid "Usuarios con cuota"
+msgstr "Users with Quota"
+
+#: templates/admin/quota.html:87
+msgid "Incidentes de exceso"
+msgstr "Excess incidents"
+
+#: templates/admin/quota.html:96
+msgid "Ver y filtrar en tiempo real por nombre de usuario."
+msgstr "View and filter in real time by username."
+
+#: templates/admin/quota.html:98 templates/partials/auditoria.html:58
+msgid "Buscar usuario..."
+msgstr "Search user..."
+
+#: templates/admin/quota.html:108
+msgid "Usado (MB)"
+msgstr "Used (MB)"
+
+#: templates/admin/quota.html:120 templates/admin/quota.html:233
+msgid "Excedido"
+msgstr "Exceeded"
+
+#: templates/admin/quota.html:120
+msgid "Normal"
+msgstr "Normal"
+
+#: templates/admin/quota.html:125 templates/admin/quota.html:246
+msgid "No hay usuarios con cuota configurada"
+msgstr "No users with quota configured"
+
+#: templates/admin/quota.html:136
+msgid "Usuarios bloqueados"
+msgstr "Blocked Users"
+
+#: templates/admin/quota.html:137
+msgid "Datos extraídos del archivo de bloqueos de quota."
+msgstr "Data extracted from quota block file."
+
+#: templates/admin/quota.html:139
+msgid "Buscar bloqueado..."
+msgstr "Search blocked..."
+
+#: templates/admin/quota.html:147 templates/admin/quota.html:350
+msgid "Detalle"
+msgstr "Detail"
+
+#: templates/admin/quota.html:148
+msgid "Registro"
+msgstr "Record"
+
+#: templates/admin/quota.html:162
+msgid "No se encontraron bloqueos (archivo vacío o no existe)."
+msgstr "No blocks found (file empty or does not exist)."
+
+#: templates/admin/quota.html:172
+msgid "Cuotas por Usuario"
+msgstr "Quotas by User"
+
+#: templates/admin/quota.html:173
+msgid "Configura y revisa cuotas específicas por usuario de Squid."
+msgstr "Configure and review specific quotas per Squid user."
+
+#: templates/admin/quota.html:180
+msgid "Cuota global con el usuario"
+msgstr "Global quota with user"
+
+#: templates/admin/quota.html:181
+msgid "Si creas un usuario llamado"
+msgstr "If you create a user named"
+
+#: templates/admin/quota.html:181
+msgid "y le asignas una cuota, ese límite se aplicará automáticamente a"
+msgstr "and assign a quota to it, that limit will automatically apply to"
+
+#: templates/admin/quota.html:181
+msgid "todos los usuarios que no tengan una cuota individual"
+msgstr "all users without an individual quota"
+
+#: templates/admin/quota.html:191
+msgid "Información sobre el usuario default"
+msgstr "Information about the default user"
+
+#: templates/admin/quota.html:193
+msgid "💡 Usuario"
+msgstr "💡 User"
+
+#: templates/admin/quota.html:194
+msgid "Si creas un usuario con el nombre"
+msgstr "If you create a user with the name"
+
+#: templates/admin/quota.html:194
+msgid "y le asignas una cuota, esa cuota actuará como"
+msgstr "and assign a quota to it, that quota will act as a"
+
+#: templates/admin/quota.html:194
+msgid "límite global"
+msgstr "global limit"
+
+#: templates/admin/quota.html:194
+msgid ""
+"para todos los usuarios que no tengan una cuota individual configurada. "
+"La cuota individual siempre tiene prioridad sobre la global."
+msgstr ""
+"for all users without an individual quota configured. Individual quota "
+"always has priority over the global one."
+
+#: templates/admin/quota.html:198
+msgid "Nombre de usuario"
+msgstr "Username"
+
+#: templates/admin/quota.html:206
+msgid "Ej. 2048"
+msgstr "E.g. 2048"
+
+#: templates/admin/quota.html:209
+msgid "Guardar Cuota"
+msgstr "Save Quota"
+
+#: templates/admin/quota.html:221
+msgid "Uso (MB)"
+msgstr "Usage (MB)"
+
+#: templates/admin/quota.html:255
+msgid "Cuotas por Grupo"
+msgstr "Quotas by Group"
+
+#: templates/admin/quota.html:256
+msgid "Define límites grupales para los usuarios conectados al proxy."
+msgstr "Define group limits for users connected to the proxy."
+
+#: templates/admin/quota.html:262
+msgid "Nombre del grupo"
+msgstr "Group name"
+
+#: templates/admin/quota.html:266
+msgid "Ej. 10240"
+msgstr "E.g. 10240"
+
+#: templates/admin/quota.html:269
+msgid "Guardar Grupo"
+msgstr "Save Group"
+
+#: templates/admin/quota.html:275
+msgid "Grupos con cuota"
+msgstr "Groups with quota"
+
+#: templates/admin/quota.html:302
+msgid "No hay grupos con cuota configurada"
+msgstr "No groups with quota configured"
+
+#: templates/admin/quota.html:311
+msgid "Reglas de Control"
+msgstr "Control Rules"
+
+#: templates/admin/quota.html:312
+msgid ""
+"Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el "
+"acceso o degradar la velocidad)."
+msgstr ""
+"Define the behavior when exceeding the quota. (For example: block access "
+"or throttle speed)."
+
+#: templates/admin/quota.html:314
+msgid "Regla activa:"
+msgstr "Active rule:"
+
+#: templates/admin/quota.html:320
+msgid "Política de excedente"
+msgstr "Excess policy"
+
+#: templates/admin/quota.html:322
+msgid "Información sobre la política por defecto"
+msgstr "Information about the default policy"
+
+#: templates/admin/quota.html:324
+msgid "🔒 Política por defecto:"
+msgstr "🔒 Default policy:"
+
+#: templates/admin/quota.html:324 templates/admin/quota.html:330
+#: templates/partials/conexiones.html:301
+msgid "Bloquear"
+msgstr "Block"
+
+#: templates/admin/quota.html:325
+msgid ""
+"Aunque no haya ninguna regla guardada, el sistema aplica automáticamente "
+"la política de"
+msgstr "Even if no rule is saved, the system automatically applies the policy of"
+
+#: templates/admin/quota.html:325
+msgid ""
+"cuando un usuario supera su cuota. Guarda explícitamente \"Bloquear\" si "
+"quieres que quede registrado."
+msgstr ""
+"when a user exceeds their quota. Explicitly save \\\"Block\\\" if you "
+"want it recorded."
+
+#: templates/admin/quota.html:331
+msgid "Degradar velocidad (próximamente)"
+msgstr "Throttle speed (coming soon)"
+
+#: templates/admin/quota.html:332
+msgid "Solo notificar (próximamente)"
+msgstr "Notify only (coming soon)"
+
+#: templates/admin/quota.html:335
+msgid "Guardar Regla"
+msgstr "Save Rule"
+
+#: templates/admin/quota.html:340
+msgid "Histórico de Eventos de Cuotas"
+msgstr "Quota Event History"
+
+#: templates/admin/quota.html:341
+msgid "Revisa las acciones registradas cuando usuarios superaron sus límites."
+msgstr "Review registered actions when users exceeded their limits."
+
+#: templates/admin/quota.html:348
+msgid "Usuario/Grupo"
+msgstr "User/Group"
+
+#: templates/admin/quota.html:349
+msgid "Evento"
+msgstr "Event"
+
+#: templates/admin/quota.html:365
+msgid "No hay registros disponibles"
+msgstr "No records available"
