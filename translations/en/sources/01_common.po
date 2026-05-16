@@ -1,0 +1,577 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: routes/api_routes.py:86 routes/api_routes.py:119 routes/api_routes.py:152
+#: routes/logs_routes.py:54
+msgid "Internal server error"
+msgstr "Internal server error"
+
+#: routes/api_routes.py:99
+msgid "Invalid JSON body"
+msgstr "Invalid JSON body"
+
+#: routes/api_routes.py:112
+msgid "Bad request"
+msgstr "Bad request"
+
+#: routes/api_routes.py:115
+msgid "Invalid numeric value"
+msgstr "Invalid numeric value"
+
+#: routes/auth_routes.py:90
+#, python-format
+msgid "¡Bienvenido, %(username)s!"
+msgstr "Welcome, %(username)s!"
+
+#: routes/auth_routes.py:145
+msgid "Has cerrado sesión correctamente."
+msgstr "You have logged out successfully."
+
+#: routes/auth_routes.py:192
+msgid "Access denied. This endpoint is only accessible from localhost."
+msgstr "Access denied. This endpoint is only accessible from localhost."
+
+#: routes/auth_routes.py:202
+msgid "Username and new_password are required."
+msgstr "Username and new_password are required."
+
+#: routes/auth_routes.py:205
+msgid "Password must be at least 8 characters long."
+msgstr "Password must be at least 8 characters long."
+
+#: routes/auth_routes.py:215
+msgid "Password updated successfully."
+msgstr "Password updated successfully."
+
+#: routes/auth_routes.py:218
+msgid "Failed to update password. User may not exist."
+msgstr "Failed to update password. User may not exist."
+
+#: routes/i18n_routes.py:31 templates/components/confirm_modal.html:14
+#: templates/partials/conexiones.html:468
+#: templates/partials/conexiones.html:518
+msgid "Confirmar"
+msgstr "Confirm"
+
+#: routes/i18n_routes.py:32 templates/admin/acls.html:44
+#: templates/admin/acls.html:82 templates/admin/acls_modals.html:142
+#: templates/admin/acls_modals.html:218 templates/admin/blacklist.html:342
+#: templates/admin/delay_pools.html:285 templates/admin/delay_pools.html:346
+#: templates/admin/edit_config.html:19 templates/admin/http_access.html:240
+#: templates/admin/http_access.html:298 templates/admin/quota.html:51
+#: templates/admin/quota.html:210 templates/admin/quota.html:270
+#: templates/admin/user_form.html:54 templates/components/confirm_modal.html:11
+#: templates/partials/conexiones.html:444
+#: templates/partials/conexiones.html:466
+#: templates/partials/conexiones.html:494
+#: templates/partials/conexiones.html:516
+msgid "Cancelar"
+msgstr "Cancel"
+
+#: routes/i18n_routes.py:33 templates/admin/blacklist.html:341
+#: templates/admin/quota.html:52
+msgid "Guardar"
+msgstr "Save"
+
+#: routes/i18n_routes.py:34 templates/admin/acls.html:114
+#: templates/admin/acls_new.html:155 templates/admin/database.html:566
+#: templates/admin/delay_pools.html:84 templates/admin/http_access.html:123
+#: templates/admin/quota.html:239 templates/admin/quota.html:295
+#: templates/admin/users.html:48 templates/admin/users.html:52
+msgid "Eliminar"
+msgstr "Delete"
+
+#: routes/i18n_routes.py:35 templates/admin/acls.html:111
+#: templates/admin/acls_new.html:150 templates/admin/config.html:37
+#: templates/admin/config.html:81 templates/admin/config.html:114
+#: templates/admin/config.html:151 templates/admin/config.html:188
+#: templates/admin/config.html:220 templates/admin/config.html:253
+#: templates/admin/delay_pools.html:80 templates/admin/http_access.html:118
+#: templates/admin/quota.html:235 templates/admin/quota.html:291
+#: templates/admin/users.html:44
+msgid "Editar"
+msgstr "Edit"
+
+#: routes/i18n_routes.py:36 templates/admin/split_config.html:193
+msgid "Cerrar"
+msgstr "Close"
+
+#: routes/i18n_routes.py:37
+msgid "Cargando..."
+msgstr "Loading..."
+
+#: routes/i18n_routes.py:38 templates/partials/conexiones.html:178
+msgid "Error"
+msgstr "Error"
+
+#: routes/i18n_routes.py:39
+msgid "Éxito"
+msgstr "Success"
+
+#: routes/i18n_routes.py:40 templates/admin/database.html:741
+#: templates/admin/split_config.html:143
+msgid "Advertencia"
+msgstr "Warning"
+
+#: routes/i18n_routes.py:41 templates/all_notifications.html:71
+msgid "Información"
+msgstr "Information"
+
+#: routes/i18n_routes.py:42
+msgid "Sí"
+msgstr "Yes"
+
+#: routes/i18n_routes.py:43
+msgid "No"
+msgstr "No"
+
+#: routes/i18n_routes.py:44 templates/admin/ldap_config.html:153
+#: templates/admin/ldap_config.html:205
+msgid "Buscar"
+msgstr "Search"
+
+#: routes/i18n_routes.py:45 templates/admin/acls.html:97
+#: templates/admin/quota.html:223 templates/admin/split_config.html:96
+#: templates/admin/users.html:21 templates/partials/conexiones.html:279
+#: templates/partials/conexiones.html:284
+msgid "Acciones"
+msgstr "Actions"
+
+#: routes/i18n_routes.py:46
+msgid "Volver"
+msgstr "Back"
+
+#: routes/i18n_routes.py:47 templates/partials/black_list.html:105
+#: templates/partials/black_list.html:109
+msgid "Siguiente"
+msgstr "Next"
+
+#: routes/i18n_routes.py:48 templates/partials/black_list.html:95
+#: templates/partials/black_list.html:99
+msgid "Anterior"
+msgstr "Previous"
+
+#: routes/i18n_routes.py:49
+msgid "de"
+msgstr "of"
+
+#: routes/i18n_routes.py:50 templates/partials/conexiones.html:23
+msgid "Todos"
+msgstr "All"
+
+#: routes/i18n_routes.py:51
+msgid "Ninguno"
+msgstr "None"
+
+#: routes/i18n_routes.py:52 templates/admin/dashboardAdmin.html:99
+#: templates/admin/dashboardAdmin.html:191
+#: templates/admin/dashboardAdmin.html:213 templates/admin/users.html:32
+msgid "Activo"
+msgstr "Active"
+
+#: routes/i18n_routes.py:53 templates/admin/dashboardAdmin.html:104
+#: templates/admin/dashboardAdmin.html:221 templates/admin/users.html:32
+msgid "Inactivo"
+msgstr "Inactive"
+
+#: routes/i18n_routes.py:54
+msgid "Habilitado"
+msgstr "Enabled"
+
+#: routes/i18n_routes.py:55
+msgid "Deshabilitado"
+msgstr "Disabled"
+
+#: routes/i18n_routes.py:56
+msgid "Desconocido"
+msgstr "Unknown"
+
+#: routes/i18n_routes.py:57
+msgid "Sin datos"
+msgstr "No data"
+
+#: routes/i18n_routes.py:58
+msgid "Sin resultados"
+msgstr "No results"
+
+#: routes/i18n_routes.py:59
+msgid "Campo requerido"
+msgstr "Required field"
+
+#: routes/i18n_routes.py:61 templates/partials/conexiones.html:434
+msgid "Bloquear usuario"
+msgstr "Block user"
+
+#: routes/i18n_routes.py:62 templates/partials/conexiones.html:460
+msgid "Desbloquear usuario"
+msgstr "Unblock user"
+
+#: routes/i18n_routes.py:63 templates/partials/conexiones.html:290
+#: templates/partials/conexiones.html:482
+msgid "Reducir velocidad"
+msgstr "Reduce speed"
+
+#: routes/i18n_routes.py:64 templates/partials/conexiones.html:295
+#: templates/partials/conexiones.html:510
+msgid "Restaurar velocidad"
+msgstr "Restore speed"
+
+#: routes/i18n_routes.py:65
+msgid "¿Estás seguro de que deseas bloquear a este usuario?"
+msgstr "Are you sure you want to block this user?"
+
+#: routes/i18n_routes.py:66
+msgid "¿Estás seguro de que deseas desbloquear a este usuario?"
+msgstr "Are you sure you want to unblock this user?"
+
+#: routes/i18n_routes.py:67
+msgid "¿Estás seguro de que deseas reducir la velocidad de este usuario?"
+msgstr "Are you sure you want to reduce this user's speed?"
+
+#: routes/i18n_routes.py:68
+msgid "¿Estás seguro de que deseas restaurar la velocidad de este usuario?"
+msgstr "Are you sure you want to restore this user's speed?"
+
+#: routes/i18n_routes.py:69
+msgid "Operación exitosa"
+msgstr "Operation successful"
+
+#: routes/i18n_routes.py:70
+msgid "Error en la operación"
+msgstr "Error in operation"
+
+#: routes/i18n_routes.py:71
+msgid "Error de conexión"
+msgstr "Connection error"
+
+#: routes/i18n_routes.py:72
+msgid "Selecciona un delay pool válido"
+msgstr "Select a valid delay pool"
+
+#: routes/i18n_routes.py:73
+msgid "conexiones"
+msgstr "Connections"
+
+#: routes/i18n_routes.py:74
+msgid "No hay conexiones activas"
+msgstr "No active connections"
+
+#: routes/i18n_routes.py:75
+msgid "Anónimo"
+msgstr "Anonymous"
+
+#: routes/i18n_routes.py:77 templates/admin/database.html:64
+msgid "Error al cargar los datos"
+msgstr "Error loading data"
+
+#: routes/i18n_routes.py:78
+msgid "No se encontraron datos"
+msgstr "No data found"
+
+#: routes/i18n_routes.py:79
+msgid "Conexiones activas"
+msgstr "Active Connections"
+
+#: routes/i18n_routes.py:80
+msgid "Ancho de banda total"
+msgstr "Total bandwidth"
+
+#: routes/i18n_routes.py:81
+msgid "Usuarios únicos"
+msgstr "Unique Users"
+
+#: routes/i18n_routes.py:83 templates/admin/navbar.html:13
+#: templates/admin/navbar.html:30 templates/admin/navbar.html:83
+#: templates/admin/navbar.html:100 templates/components/navbar.html:14
+#: templates/components/navbar.html:31 templates/components/navbar.html:84
+#: templates/components/navbar.html:101
+msgid "Notificaciones"
+msgstr "Notifications"
+
+#: routes/i18n_routes.py:84 templates/admin/navbar.html:37
+#: templates/admin/navbar.html:107 templates/components/navbar.html:38
+#: templates/components/navbar.html:108
+msgid "Cargando notificaciones..."
+msgstr "Loading notifications..."
+
+#: routes/i18n_routes.py:85 templates/all_notifications.html:206
+msgid "No hay notificaciones"
+msgstr "No notifications"
+
+#: routes/i18n_routes.py:86 templates/admin/navbar.html:41
+#: templates/admin/navbar.html:111 templates/components/navbar.html:42
+#: templates/components/navbar.html:112
+msgid "Ver todas las notificaciones"
+msgstr "View all notifications"
+
+#: routes/i18n_routes.py:87 templates/all_notifications.html:186
+msgid "Marcar como leída"
+msgstr "Mark as read"
+
+#: routes/i18n_routes.py:88
+msgid "Marcar todas como leídas"
+msgstr "Mark all as read"
+
+#: routes/i18n_routes.py:89 templates/all_notifications.html:54
+msgid "Eliminar todas"
+msgstr "Delete all"
+
+#: routes/i18n_routes.py:90
+msgid "Squid"
+msgstr "Squid"
+
+#: routes/i18n_routes.py:91
+msgid "Git"
+msgstr "Git"
+
+#: routes/i18n_routes.py:92
+msgid "Sistema"
+msgstr "System"
+
+#: routes/i18n_routes.py:93
+msgid "Seguridad"
+msgstr "Security"
+
+#: routes/i18n_routes.py:94
+msgid "Usuarios"
+msgstr "Users"
+
+#: routes/i18n_routes.py:95
+msgid "Error"
+msgstr "Error"
+
+#: routes/i18n_routes.py:96
+msgid "Advertencia"
+msgstr "Warning"
+
+#: routes/i18n_routes.py:97
+msgid "Éxito"
+msgstr "Success"
+
+#: routes/i18n_routes.py:98
+msgid "Información"
+msgstr "Information"
+
+#: routes/i18n_routes.py:99
+msgid "Error al cargar notificaciones:"
+msgstr "Error loading notifications:"
+
+#: routes/i18n_routes.py:100
+msgid "Notificación eliminada"
+msgstr "Notification deleted"
+
+#: routes/i18n_routes.py:91
+msgid "¿Deseas actualizar Squid?"
+msgstr "Do you want to update Squid?"
+
+#: routes/i18n_routes.py:92
+msgid "¿Deseas actualizar SquidStats?"
+msgstr "Do you want to update SquidStats?"
+
+#: routes/i18n_routes.py:93
+msgid "Actualizando..."
+msgstr "Updating..."
+
+#: routes/i18n_routes.py:94
+msgid "Actualización completada"
+msgstr "Update completed"
+
+#: routes/i18n_routes.py:95
+msgid "Error en la actualización"
+msgstr "Error during update"
+
+#: routes/i18n_routes.py:97
+msgid "¿Estás seguro de que deseas eliminar esto?"
+msgstr "Are you sure you want to delete this?"
+
+#: routes/i18n_routes.py:98
+msgid "Esta acción no se puede deshacer"
+msgstr "This action cannot be undone"
+
+#: routes/i18n_routes.py:99
+msgid "Guardado correctamente"
+msgstr "Saved successfully"
+
+#: routes/i18n_routes.py:100
+msgid "Eliminado correctamente"
+msgstr "Deleted successfully"
+
+#: routes/i18n_routes.py:101
+msgid "Error al guardar"
+msgstr "Error saving"
+
+#: routes/i18n_routes.py:102
+msgid "Error al eliminar"
+msgstr "Error deleting"
+
+#: routes/i18n_routes.py:103
+msgid "Error al cargar"
+msgstr "Error loading"
+
+#: routes/i18n_routes.py:105
+msgid "Generando reporte..."
+msgstr "Generating report..."
+
+#: routes/i18n_routes.py:106
+msgid "Reporte listo"
+msgstr "Report ready"
+
+#: routes/i18n_routes.py:107 templates/partials/auditoria.html:178
+msgid "Descargar PDF"
+msgstr "Download PDF"
+
+#: routes/i18n_routes.py:108
+msgid "No hay datos para el reporte"
+msgstr "No data for the report"
+
+#: routes/i18n_routes.py:109 templates/reports_pdf.html:33
+msgid "Visitas"
+msgstr "Visits"
+
+#: routes/i18n_routes.py:110
+msgid "Número de Visitas"
+msgstr "Number of Visits"
+
+#: routes/i18n_routes.py:112
+msgid "Aciertos de caché"
+msgstr "Cache hits"
+
+#: routes/i18n_routes.py:113
+msgid "Fallos de caché"
+msgstr "Cache misses"
+
+#: routes/i18n_routes.py:114
+msgid "Tasa de aciertos"
+msgstr "Hit rate"
+
+#: routes/i18n_routes.py:116
+msgid "Filtrar por fecha"
+msgstr "Filter by date"
+
+#: routes/i18n_routes.py:117
+msgid "Filtrar por usuario"
+msgstr "Filter by user"
+
+#: routes/i18n_routes.py:118
+msgid "Exportar"
+msgstr "Export"
+
+#: routes/i18n_routes.py:120
+msgid "Dominio bloqueado"
+msgstr "Blocked domain"
+
+#: routes/i18n_routes.py:121
+msgid "Dominio desbloqueado"
+msgstr "Unblocked domain"
+
+#: routes/i18n_routes.py:122
+msgid "Agregar dominio"
+msgstr "Add Domain"
+
+#: routes/i18n_routes.py:124
+msgid "Cuota excedida"
+msgstr "Quota exceeded"
+
+#: routes/i18n_routes.py:125
+msgid "Cuota restante"
+msgstr "Remaining quota"
+
+#: routes/i18n_routes.py:127
+msgid "ACL agregada"
+msgstr "ACL added"
+
+#: routes/i18n_routes.py:128
+msgid "ACL eliminada"
+msgstr "ACL deleted"
+
+#: routes/i18n_routes.py:129
+msgid "ACL actualizada"
+msgstr "ACL updated"
+
+#: routes/i18n_routes.py:131
+msgid "Creando respaldo..."
+msgstr "Creating backup..."
+
+#: routes/i18n_routes.py:132
+msgid "Respaldo creado"
+msgstr "Backup created"
+
+#: routes/i18n_routes.py:133
+msgid "Respaldo eliminado"
+msgstr "Backup deleted"
+
+#: routes/i18n_routes.py:134
+msgid "¿Estás seguro de que deseas eliminar este respaldo?"
+msgstr "Are you sure you want to delete this backup?"
+
+#: routes/i18n_routes.py:135
+msgid "Restaurando respaldo..."
+msgstr "Restoring backup..."
+
+#: routes/i18n_routes.py:137
+msgid "Recargando Squid..."
+msgstr "Reloading Squid..."
+
+#: routes/i18n_routes.py:138
+msgid "Reiniciando Squid..."
+msgstr "Restarting Squid..."
+
+#: routes/i18n_routes.py:139
+msgid "Squid recargado"
+msgstr "Squid reloaded"
+
+#: routes/i18n_routes.py:140
+msgid "Squid reiniciado"
+msgstr "Squid restarted"
+
+#: routes/i18n_routes.py:142
+msgid "Bytes enviados"
+msgstr "Bytes sent"
+
+#: routes/i18n_routes.py:143
+msgid "Bytes recibidos"
+msgstr "Bytes received"
+
+#: routes/i18n_routes.py:144
+msgid "Peticiones"
+msgstr "Requests"
+
+#: routes/i18n_routes.py:145
+msgid "Tráfico"
+msgstr "Traffic"
+
+#: routes/i18n_routes.py:147 templates/partials/cache_stats.html:158
+msgid "Hoy"
+msgstr "Today"
+
+#: routes/i18n_routes.py:148
+msgid "Ayer"
+msgstr "Yesterday"
+
+#: routes/i18n_routes.py:149
+msgid "Últimos 7 días"
+msgstr "Last 7 days"
+
+#: routes/i18n_routes.py:150
+msgid "Últimos 30 días"
+msgstr "Last 30 days"
+
+#: routes/i18n_routes.py:151
+msgid "Desde"
+msgstr "From"
+
+#: routes/i18n_routes.py:152
+msgid "Hasta"
+msgstr "To"
+
+#: routes/i18n_routes.py:154
+msgid "Buscar auditoría"
+msgstr "Search audit"
+
+#: routes/i18n_routes.py:155
+msgid "Actividad del usuario"
+msgstr "User activity"
+
+#: routes/i18n_routes.py:156
+msgid "Rango de fechas"
+msgstr "Date Range"
