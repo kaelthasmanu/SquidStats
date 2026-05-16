@@ -664,10 +664,6 @@ main() {
         
         echo "Verificando Dependecias de python..."
         installDependencies "$install_dir"
-        echo "Compilando traducciones..."
-        "$install_dir/venv/bin/pybabel" compile -d "$install_dir/translations" >> "$LOG_FILE" 2>&1 && \
-            ok "Traducciones compiladas correctamente" || \
-            log_msg "WARN" "No se pudieron compilar las traducciones"
         echo "Actualizando versión en .env..."
         updateEnvVersion "$install_dir"
         
