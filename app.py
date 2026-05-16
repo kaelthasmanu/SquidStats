@@ -87,6 +87,26 @@ def create_app():
     except Exception as e:
         logger.error(f"Error migrating BLACKLIST_DOMAINS into DB: {e}")
 
+    # Compile Babel translations from sources/ at startup
+    try:
+        from tools.build_messages import compile_po, merge_sources, write_messages_po
+
+        _translations_dir = Path(__file__).resolve().parent / "translations"
+        for _lang_dir in _translations_dir.iterdir():
+            if not _lang_dir.is_dir():
+                continue
+            _sources_dir = _lang_dir / "sources"
+            _output_path = _lang_dir / "LC_MESSAGES" / "messages.po"
+            if _sources_dir.exists():
+                logger.info(f"Building translations for lang: {_lang_dir.name}")
+                _entries = merge_sources(_sources_dir)
+                if _entries:
+                    write_messages_po(_output_path, _entries, _lang_dir.name)
+        compile_po(_translations_dir)
+        logger.info("✓ Babel translations compiled successfully")
+    except Exception as e:
+        logger.warning(f"Could not compile translations at startup: {e}")
+
     app = Flask(__name__, static_folder="./static")
     app.config.from_object(Config())
 
