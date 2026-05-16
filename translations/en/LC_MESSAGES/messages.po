@@ -1,22 +1,26 @@
 # English translations for SquidStats.
-# Edit this file directly and then run:
-#   pybabel compile -d translations
+# Edit the files under sources/ and then run:
+#   python tools/build_messages.py
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-04-15 21:19-0400\n"
-"PO-Revision-Date: 2026-04-15 13:15-0400\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Project-Id-Version: SquidStats\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-16 14:32+0000\n"
+"PO-Revision-Date: 2026-05-16 14:32+0000\n"
+"Last-Translator: \n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.18.0\n"
+"Generated-By: build_messages.py\n"
 
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: routes/api_routes.py:86 routes/api_routes.py:119 routes/api_routes.py:152
 #: routes/logs_routes.py:54
 msgid "Internal server error"
@@ -117,19 +121,24 @@ msgid "Cargando..."
 msgstr "Loading..."
 
 #: routes/i18n_routes.py:38 templates/partials/conexiones.html:178
+#: routes/i18n_routes.py:95
+#: templates/admin/ldap_config.html:394
 msgid "Error"
 msgstr "Error"
 
 #: routes/i18n_routes.py:39
+#: routes/i18n_routes.py:97
 msgid "Éxito"
 msgstr "Success"
 
 #: routes/i18n_routes.py:40 templates/admin/database.html:741
 #: templates/admin/split_config.html:143
+#: routes/i18n_routes.py:96
 msgid "Advertencia"
 msgstr "Warning"
 
 #: routes/i18n_routes.py:41 templates/all_notifications.html:71
+#: routes/i18n_routes.py:98
 msgid "Información"
 msgstr "Information"
 
@@ -333,22 +342,32 @@ msgid "Eliminar todas"
 msgstr "Delete all"
 
 #: routes/i18n_routes.py:90
+#: templates/admin/config.html:13 templates/admin/navbar.html:126
+#: templates/admin/navbar.html:185 templates/all_notifications.html:78
+#: templates/components/navbar.html:125 templates/components/navbar.html:204
 msgid "Squid"
 msgstr "Squid"
 
 #: routes/i18n_routes.py:91
+#: templates/all_notifications.html:82
 msgid "Git"
 msgstr "Git"
 
 #: routes/i18n_routes.py:92
+#: templates/all_notifications.html:79 templates/partials/cache_stats.html:4
 msgid "Sistema"
 msgstr "System"
 
 #: routes/i18n_routes.py:93
+#: templates/admin/config.html:19 templates/all_notifications.html:80
 msgid "Seguridad"
 msgstr "Security"
 
 #: routes/i18n_routes.py:94
+#: templates/admin/base.html:130 templates/admin/navbar.html:64
+#: templates/admin/navbar.html:165 templates/all_notifications.html:81
+#: templates/components/navbar.html:65 templates/components/navbar.html:180
+#: templates/partials/graph_reports.html:128
 msgid "Usuarios"
 msgstr "Users"
 
@@ -576,6 +595,9 @@ msgstr "User activity"
 msgid "Rango de fechas"
 msgstr "Date Range"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: routes/admin_routes.py:150
 #, python-format
 msgid "Error saving configuration: %(message)s"
@@ -698,6 +720,7 @@ msgstr "Error loading view"
 
 #: routes/admin_routes.py:738
 msgid ""
+""
 "Archivo requerido no encontrado. Verifique la configuración del archivo "
 "squid.conf."
 msgstr "Required file not found. Please check the squid.conf file configuration."
@@ -762,6 +785,7 @@ msgstr "Custom list saved and Squid custom file updated"
 #: routes/admin/blacklist.py:161
 #, python-format
 msgid ""
+""
 "Lista personalizada guardada en DB, pero no se pudo regenerar el archivo "
 "de Squid: %(msg)s"
 msgstr "Custom list saved to DB, but could not regenerate Squid file: %(msg)s"
@@ -771,6 +795,8 @@ msgid "Configuración LDAP guardada."
 msgstr "LDAP configuration saved."
 
 #: routes/admin/ldap_config.py:44
+#: templates/admin/database.html:851
+#: templates/admin/ldap_config.html:401
 msgid "Error al guardar la configuración."
 msgstr "Error saving configuration."
 
@@ -847,6 +873,9 @@ msgstr "Tool for activity and security analysis."
 msgid "Estadísticas del comportamiento del Sistema"
 msgstr "System Behavior Statistics"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: services/analytics/auditoria_service.py:41
 #: services/analytics/auditoria_service.py:116
 #: services/analytics/auditoria_service.py:212
@@ -948,6 +977,9 @@ msgstr "Error detecting SSL Bump configuration"
 msgid "Internal error"
 msgstr "Internal error"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: templates/admin/split_config.html:307
 msgid "Configuración dividida exitosamente"
 msgstr "Configuration split successfully"
@@ -1082,9 +1114,11 @@ msgstr "for better modular management."
 #: templates/admin/acls.html:135 templates/admin/delay_pools.html:158
 #: templates/admin/http_access.html:142
 msgid ""
+""
 "Si ya está dividido, verifica que los archivos estén en el directorio "
 "correcto o edítalos directamente desde"
 msgstr ""
+""
 "If already split, verify files are in the correct directory or edit them "
 "directly from"
 
@@ -1376,9 +1410,11 @@ msgstr "RC"
 #: templates/admin/acls_new.html:24 templates/admin/delay_pools.html:21
 #: templates/admin/http_access.html:24 templates/admin/split_config.html:108
 msgid ""
+""
 "Por favor, no la uses en producción de momento. Úsala únicamente en un "
 "entorno de prueba."
 msgstr ""
+""
 "Please do not use it in production yet. Use it only in a testing "
 "environment."
 
@@ -1504,6 +1540,7 @@ msgstr "HTTP Access Rules"
 
 #: templates/admin/http_access.html:8
 msgid ""
+""
 "Las reglas se evalúan en orden. La primera coincidencia determina el "
 "acceso."
 msgstr "Rules are evaluated in order. The first match determines access."
@@ -1526,6 +1563,7 @@ msgstr "The first matching rule applies (allow or deny)"
 
 #: templates/admin/http_access.html:38
 msgid ""
+""
 "Si ninguna regla coincide, se aplica el comportamiento contrario a la "
 "última regla"
 msgstr "If no rule matches, the opposite behavior of the last rule is applied"
@@ -1798,9 +1836,11 @@ msgstr "BETA"
 
 #: templates/admin/blacklist.html:34
 msgid ""
+""
 "Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí "
 "puedes configurar conexión y ver el estado."
 msgstr ""
+""
 "Connect and sync blocked lists from a Pi-hole server. Here you can "
 "configure the connection and check the status."
 
@@ -1878,9 +1918,11 @@ msgstr "Add domains manually or paste a comma/line separated list."
 
 #: templates/admin/blacklist.html:338
 msgid ""
+""
 "example.com\n"
 "example.org"
 msgstr ""
+""
 "example.com\n"
 "example.org"
 
@@ -1920,6 +1962,7 @@ msgstr "Warning!"
 
 #: templates/admin/clean_data.html:21 templates/admin/database.html:609
 msgid ""
+""
 "Esta acción es irreversible. Una vez eliminados los datos, no se pueden "
 "recuperar."
 msgstr "This action is irreversible. Once data is deleted, it cannot be recovered."
@@ -2087,9 +2130,11 @@ msgstr "Integrity Check"
 
 #: templates/admin/database.html:272
 msgid ""
+""
 "Verifica la integridad estructural de la base de datos en busca de "
 "posibles errores o corrupción."
 msgstr ""
+""
 "Verify the structural integrity of the database looking for possible "
 "errors or corruption."
 
@@ -2187,6 +2232,7 @@ msgstr "Fixed: 3 backups"
 
 #: templates/admin/database.html:452
 msgid ""
+""
 "Se mantienen las 3 salvas más recientes. Las más antiguas se eliminan "
 "automáticamente."
 msgstr "The 3 most recent backups are kept. Oldest ones are automatically deleted."
@@ -2314,10 +2360,12 @@ msgstr "What are Delay Pools?"
 
 #: templates/admin/delay_pools.html:32
 msgid ""
+""
 "Los delay pools permiten limitar el ancho de banda de ciertas solicitudes"
 " basadas en criterios específicos, proporcionando un control justo del "
 "tráfico."
 msgstr ""
+""
 "Delay pools allow limiting bandwidth for certain requests based on "
 "specific criteria, providing fair traffic control."
 
@@ -2619,9 +2667,11 @@ msgstr "Quota Summary"
 
 #: templates/admin/quota.html:62
 msgid ""
+""
 "Visualiza el estado general de las cuotas de ancho de banda y límites de "
 "datos para los usuarios y grupos."
 msgstr ""
+""
 "View the general status of bandwidth quotas and data limits for users and"
 " groups."
 
@@ -2736,9 +2786,11 @@ msgstr "global limit"
 
 #: templates/admin/quota.html:194
 msgid ""
+""
 "para todos los usuarios que no tengan una cuota individual configurada. "
 "La cuota individual siempre tiene prioridad sobre la global."
 msgstr ""
+""
 "for all users without an individual quota configured. Individual quota "
 "always has priority over the global one."
 
@@ -2792,9 +2844,11 @@ msgstr "Control Rules"
 
 #: templates/admin/quota.html:312
 msgid ""
+""
 "Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el "
 "acceso o degradar la velocidad)."
 msgstr ""
+""
 "Define the behavior when exceeding the quota. (For example: block access "
 "or throttle speed)."
 
@@ -2821,15 +2875,18 @@ msgstr "Block"
 
 #: templates/admin/quota.html:325
 msgid ""
+""
 "Aunque no haya ninguna regla guardada, el sistema aplica automáticamente "
 "la política de"
 msgstr "Even if no rule is saved, the system automatically applies the policy of"
 
 #: templates/admin/quota.html:325
 msgid ""
+""
 "cuando un usuario supera su cuota. Guarda explícitamente \"Bloquear\" si "
 "quieres que quede registrado."
 msgstr ""
+""
 "when a user exceeds their quota. Explicitly save \\\"Block\\\" if you "
 "want it recorded."
 
@@ -2865,6 +2922,9 @@ msgstr "Event"
 msgid "No hay registros disponibles"
 msgstr "No records available"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: templates/admin/navbar.html:7 templates/auth/login.html:59
 #: templates/auth/login.html:63 templates/components/navbar.html:8
 msgid "SquidStats"
@@ -2967,6 +3027,9 @@ msgstr "Back to Main Dashboard"
 msgid "SquidStats v"
 msgstr "SquidStats v"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: templates/admin/ldap_config.html:391
 msgid "Probando…"
 msgstr "Testing..."
@@ -2976,6 +3039,7 @@ msgid "Sin probar"
 msgstr "Untested"
 
 #: templates/admin/ldap_config.html:392
+#: templates/partials/conexiones.html:173
 msgid "Conectado"
 msgstr "Connected"
 
@@ -3360,9 +3424,11 @@ msgstr "No configurations found"
 
 #: templates/admin/dashboardAdmin.html:120
 msgid ""
+""
 "No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración "
 "de Squid."
 msgstr ""
+""
 "No ACLs, HTTP rules, or delay pools were detected in your Squid "
 "configuration."
 
@@ -3372,10 +3438,12 @@ msgstr "Is your configuration already split into modules?"
 
 #: templates/admin/dashboardAdmin.html:123
 msgid ""
+""
 "Si ya tienes tu configuración organizada en archivos separados (por "
 "ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede"
 " leerla directamente sin necesidad de unificarla."
 msgstr ""
+""
 "If you already have your configuration organized in separate files (e.g.:"
 " acls.conf, http_access.conf, delay_pools.conf), SquidStats can read it "
 "directly without needing to unify it."
@@ -3476,9 +3544,11 @@ msgstr "Showing last"
 
 #: templates/admin/logs.html:21
 msgid ""
+""
 "líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes "
 "del mensaje."
 msgstr ""
+""
 "lines. Use the filter to quickly find errors, IPs, or parts of the "
 "message."
 
@@ -3556,6 +3626,9 @@ msgstr "Update SquidStats web application"
 msgid "Web"
 msgstr "Web"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: templates/partials/auditoria.html:41
 msgid "Auditoría Técnica"
 msgstr "Technical Audit"
@@ -3770,14 +3843,17 @@ msgstr "The blacklist contains more than"
 
 #: templates/partials/black_list.html:12
 msgid ""
+""
 "dominios activos. Para evitar un alto consumo de recursos, la consulta se"
 " ha limitado a los primeros"
 msgstr ""
+""
 "active domains. To avoid high resource consumption, the query has been "
 "limited to the first"
 
 #: templates/partials/black_list.html:13
 msgid ""
+""
 "dominios. Es posible que algunos accesos bloqueados no aparezcan en este "
 "listado."
 msgstr "domains. Some blocked accesses may not appear in this list."
@@ -4042,9 +4118,11 @@ msgstr "Confirm block"
 
 #: templates/partials/conexiones.html:464
 msgid ""
+""
 "Se eliminará el bloqueo activo para esta IP y se recargará la "
 "configuración de Squid."
 msgstr ""
+""
 "The active block for this IP will be removed and Squid configuration will"
 " be reloaded."
 
@@ -4058,9 +4136,11 @@ msgstr "delay pool"
 
 #: templates/partials/conexiones.html:487
 msgid ""
+""
 "existente. Sus conexiones estarán sujetas a los límites de ancho de banda"
 " configurados en ese pool."
 msgstr ""
+""
 "existing. Their connections will be subject to the bandwidth limits "
 "configured in that pool."
 
@@ -4074,9 +4154,11 @@ msgstr "Loading pools..."
 
 #: templates/partials/conexiones.html:514
 msgid ""
+""
 "Se eliminará la restricción de velocidad activa para esta IP y se "
 "recargará la configuración de Squid."
 msgstr ""
+""
 "The active speed restriction for this IP will be removed and Squid "
 "configuration will be reloaded."
 
@@ -4159,6 +4241,9 @@ msgstr "Activity"
 msgid "Actividad reciente -"
 msgstr "Recent activity -"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: templates/auditoria_pdf.html:6
 msgid "Auditoría -"
 msgstr "Audit -"
@@ -4301,6 +4386,9 @@ msgstr "Data (MB)"
 msgid "Distribución de códigos HTTP"
 msgstr "HTTP code distribution"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: templates/all_notifications.html:41
 msgid "No leídas"
 msgstr "Unread"
@@ -4363,19 +4451,25 @@ msgstr "Delete notification"
 
 #: templates/all_notifications.html:207
 msgid ""
+""
 "Todas las notificaciones aparecerán aquí. ¡Mantente atento a las "
 "actualizaciones del sistema!"
 msgstr "All notifications will appear here. Stay tuned for system updates!"
 
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
 #: templates/error.html:6
 msgid "Error - Squid Monitor"
 msgstr "Error - Squid Monitor"
 
 #: templates/error.html:45
 msgid ""
+""
 "Disculpamos las molestias. Por favor, intenta de nuevo más tarde o "
 "contacta al soporte si el problema persiste."
 msgstr ""
+""
 "We apologize for the inconvenience. Please try again later or contact "
 "support if the problem persists."
 
@@ -4665,3 +4759,9 @@ msgstr "{count} day ago"
 
 msgid "Hace {count} días"
 msgstr "{count} days ago"
+
+msgid "Swap Usada"
+msgstr "Swap Used"
+
+msgid "SWAP Usada: "
+msgstr "SWAP Used: "

@@ -638,3 +638,9 @@ msgstr "{count} day ago"
 
 msgid "Hace {count} días"
 msgstr "{count} days ago"
+
+msgid "Swap Usada"
+msgstr "Swap Used"
+
+msgid "SWAP Usada: "
+msgstr "SWAP Used: "
