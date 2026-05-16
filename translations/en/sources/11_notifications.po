@@ -1,0 +1,72 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/all_notifications.html:41
+msgid "No leídas"
+msgstr "Unread"
+
+#: templates/all_notifications.html:48
+msgid "Marcar todas"
+msgstr "Mark all"
+
+#: templates/all_notifications.html:65
+msgid "Filtrar por:"
+msgstr "Filter by:"
+
+#: templates/all_notifications.html:67
+msgid "Todos los tipos"
+msgstr "All types"
+
+#: templates/all_notifications.html:68
+msgid "Errores"
+msgstr "Errors"
+
+#: templates/all_notifications.html:69
+msgid "Advertencias"
+msgstr "Warnings"
+
+#: templates/all_notifications.html:70
+msgid "Éxitos"
+msgstr "Successes"
+
+#: templates/all_notifications.html:77
+msgid "Todas las fuentes"
+msgstr "All sources"
+
+#: templates/all_notifications.html:82
+msgid "Git"
+msgstr "Git"
+
+#: templates/all_notifications.html:88
+msgid "Todos los estados"
+msgstr "All statuses"
+
+#: templates/all_notifications.html:89
+msgid "Sin leer"
+msgstr "Unread"
+
+#: templates/all_notifications.html:90
+msgid "Leída"
+msgstr "Read"
+
+#: templates/all_notifications.html:96
+msgid "Limpiar filtros"
+msgstr "Clear filters"
+
+#: templates/all_notifications.html:115 templates/blacklist.html:6
+msgid "Página"
+msgstr "Page"
+
+#: templates/all_notifications.html:162
+msgid "No leída"
+msgstr "Unread"
+
+#: templates/all_notifications.html:192
+msgid "Eliminar notificación"
+msgstr "Delete notification"
+
+#: templates/all_notifications.html:207
+msgid ""
+"Todas las notificaciones aparecerán aquí. ¡Mantente atento a las "
+"actualizaciones del sistema!"
+msgstr "All notifications will appear here. Stay tuned for system updates!"
