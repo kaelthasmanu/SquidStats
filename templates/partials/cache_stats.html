@@ -225,13 +225,15 @@
           </p>
           {% endif %}{% endset %} {{ flip_card(icon='fas fa-hdd',
           title='Espacio total', back_title='Espacio total',
-          description='Tamaño total del disco asignado a la caché de
-          Squid.', extra_html=total_space_html) }} {% else %} {{
-          flip_card(icon='fas fa-hdd', title='Espacio total',
+          description='Tamaño total del disco asignado a la caché de Squid.', extra_html=total_space_html) }}
+          {% else %}
+          {% set no_space_html %}
+            <p class="text-xl text-red-600">No disponible</p>
+          {% endset %}
+          {{ flip_card(icon='fas fa-hdd', title='Espacio total',
           back_title='Espacio total', description='Tamaño total del disco
-          asignado a la caché de Squid.', extra_html='
-          <p class="text-xl text-red-600">No disponible</p>
-          ') }} {% endif %} {% set used_space_html %}{% if
+          asignado a la caché de Squid.', extra_html=no_space_html) }}
+          {% endif %} {% set used_space_html %}{% if
           (cache_stats.fs_space_used / 1024) < 1024 %}
           <p class="text-xl text-blue-800" data-stat="espacio_usado">
             {{ (cache_stats.fs_space_used / 1024)|int }} {{ _("MB") }}

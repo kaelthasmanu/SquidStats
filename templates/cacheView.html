@@ -260,7 +260,7 @@
         labels: [],
         datasets: [
           {
-            label: "Swap Usada",
+            label: {{ _('Swap Usada') | tojson }},
             data: [],
             borderColor: "#10b981",
             backgroundColor: "rgba(16, 185, 129, 0.1)",
@@ -282,7 +282,7 @@
           ...chartOptions.plugins,
           tooltip: {
             callbacks: {
-              label: (ctx) => "SWAP Usada: " + formatSizeCompact(ctx.raw),
+              label: (ctx) => {{ _('SWAP Usada: ') | tojson }} + formatSizeCompact(ctx.raw),
             },
           },
         },
