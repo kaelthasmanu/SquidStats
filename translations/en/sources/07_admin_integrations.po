@@ -1,0 +1,294 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/ldap_config.html:391
+msgid "Probando…"
+msgstr "Testing..."
+
+#: templates/admin/ldap_config.html:388
+msgid "Sin probar"
+msgstr "Untested"
+
+#: templates/admin/ldap_config.html:392
+msgid "Conectado"
+msgstr "Connected"
+
+#: templates/admin/ldap_config.html:394
+msgid "Error"
+msgstr "Error"
+
+#: templates/admin/ldap_config.html:401
+msgid "Error al guardar la configuración."
+msgstr "Error saving the configuration."
+
+#: templates/admin/ldap_config.html:419
+msgid "Configuración cargada desde la base de datos."
+msgstr "Configuration loaded from the database."
+
+#: templates/admin/ldap_config.html:426
+msgid "Configuración cargada desde el navegador. Los cambios se guardan localmente."
+msgstr "Configuration loaded from the browser. Changes are saved locally."
+
+#: templates/admin/ldap_config.html:435
+msgid "Configuración guardada localmente en el navegador."
+msgstr "Configuration saved locally in the browser."
+
+#: templates/admin/ldap_config.html:443
+msgid "Configuración local eliminada."
+msgstr "Local configuration removed."
+
+#: templates/admin/base.html:133 templates/admin/ldap_config.html:14
+msgid "LDAP / Active Directory"
+msgstr "LDAP / Active Directory"
+
+#: templates/admin/ldap_config.html:3
+msgid "LDAP / Active Directory | Admin Squid"
+msgstr "LDAP / Active Directory | Squid Admin"
+
+#: templates/admin/ldap_config.html:16
+msgid "Configura la conexión y explora el directorio."
+msgstr "Configure the connection and explore the directory."
+
+#: templates/admin/ldap_config.html:35
+msgid "Total Usuarios"
+msgstr "Total Users"
+
+#: templates/admin/ldap_config.html:47
+msgid "Total Grupos"
+msgstr "Total Groups"
+
+#: templates/admin/ldap_config.html:62
+msgid "Configuración de conexión"
+msgstr "Connection Configuration"
+
+#: templates/admin/ldap_config.html:66
+msgid "Servidor (host)"
+msgstr "Server (host)"
+
+#: templates/admin/ldap_config.html:73
+msgid "Puerto"
+msgstr "Port"
+
+#: templates/admin/ldap_config.html:78
+msgid "Autenticación"
+msgstr "Authentication"
+
+#: templates/admin/ldap_config.html:81
+msgid "SIMPLE (LDAP)"
+msgstr "SIMPLE (LDAP)"
+
+#: templates/admin/ldap_config.html:82
+msgid "NTLM (AD)"
+msgstr "NTLM (AD)"
+
+#: templates/admin/ldap_config.html:89
+msgid "Usar SSL / LDAPS"
+msgstr "Use SSL / LDAPS"
+
+#: templates/admin/ldap_config.html:93
+msgid "Bind DN / Usuario"
+msgstr "Bind DN / User"
+
+#: templates/admin/ldap_config.html:94
+msgid "CN=admin,DC=empresa,DC=com"
+msgstr "CN=admin,DC=company,DC=com"
+
+#: templates/admin/ldap_config.html:99
+msgid "Contraseña Bind"
+msgstr "Bind Password"
+
+#: templates/admin/ldap_config.html:105
+msgid "Base DN"
+msgstr "Base DN"
+
+#: templates/admin/ldap_config.html:106
+msgid "DC=empresa,DC=com"
+msgstr "DC=company,DC=com"
+
+#: templates/admin/ldap_config.html:144
+msgid "Buscar Usuarios"
+msgstr "Search Users"
+
+#: templates/admin/ldap_config.html:148
+msgid "Nombre, usuario, email…"
+msgstr "Name, user, email..."
+
+#: templates/admin/ldap_config.html:165
+msgid "Departamento"
+msgstr "Department"
+
+#: templates/admin/ldap_config.html:166
+msgid "Grupos"
+msgstr "Groups"
+
+#: templates/admin/ldap_config.html:179
+msgid "Ver grupos del usuario"
+msgstr "View user groups"
+
+#: templates/admin/ldap_config.html:180
+msgid "Ver grupos"
+msgstr "View groups"
+
+#: templates/admin/ldap_config.html:188
+msgid "No se encontraron usuarios."
+msgstr "No users found."
+
+#: templates/admin/ldap_config.html:196
+msgid "Buscar Grupos"
+msgstr "Search Groups"
+
+#: templates/admin/ldap_config.html:200
+msgid "Nombre del grupo…"
+msgstr "Group name..."
+
+#: templates/admin/ldap_config.html:214
+msgid "Descripción"
+msgstr "Description"
+
+#: templates/admin/ldap_config.html:215
+msgid "Miembros"
+msgstr "Members"
+
+#: templates/admin/ldap_config.html:231
+msgid "No se encontraron grupos."
+msgstr "No groups found."
+
+#: templates/admin/ldap_config.html:241
+msgid "Grupos de"
+msgstr "Groups of"
+
+#: templates/admin/ldap_config.html:244
+msgid "Limpiar"
+msgstr "Clear"
+
+#: templates/admin/ldap_config.html:250
+msgid "Cargando grupos…"
+msgstr "Loading groups..."
+
+#: templates/admin/ldap_config.html:263
+msgid "grupo(s) encontrado(s)"
+msgstr "group(s) found"
+
+#: templates/admin/ldap_config.html:277
+msgid "Este usuario no pertenece a ningún grupo."
+msgstr "This user does not belong to any group."
+
+#: templates/admin/telegram_config.html:11
+msgid "Notificaciones Telegram"
+msgstr "Telegram Notifications"
+
+#: templates/admin/telegram_config.html:13
+msgid "Configura las credenciales y los destinatarios para las alertas automáticas."
+msgstr "Configure credentials and recipients for automatic alerts."
+
+#: templates/admin/telegram_config.html:22
+msgid "Credenciales API"
+msgstr "API Credentials"
+
+#: templates/admin/telegram_config.html:37
+msgid "Habilitar notificaciones Telegram"
+msgstr "Enable Telegram notifications"
+
+#: templates/admin/telegram_config.html:50
+msgid "API ID"
+msgstr "API ID"
+
+#: templates/admin/telegram_config.html:61
+msgid "API Hash"
+msgstr "API Hash"
+
+#: templates/admin/telegram_config.html:67
+msgid "Guardado — dejar vacío para no cambiar"
+msgstr "Saved — leave empty to keep unchanged"
+
+#: templates/admin/telegram_config.html:74
+msgid "Token del Bot"
+msgstr "Bot Token"
+
+#: templates/admin/telegram_config.html:84
+msgid "(opcional si usa cuenta de usuario)"
+msgstr "(optional if using a user account)"
+
+#: templates/admin/telegram_config.html:89
+msgid "Teléfono (cuenta de usuario)"
+msgstr "Phone (user account)"
+
+#: templates/admin/telegram_config.html:96
+msgid "(opcional)"
+msgstr "(optional)"
+
+#: templates/admin/telegram_config.html:103
+msgid "En modo bot este campo debe estar vacío — los bots no pueden usar número de teléfono."
+msgstr "In bot mode this field must be empty — bots cannot use a phone number."
+
+#: templates/admin/telegram_config.html:105
+msgid "Nombre de sesión"
+msgstr "Session name"
+
+#: templates/admin/telegram_config.html:114
+msgid "Guardando…"
+msgstr "Saving..."
+
+#: templates/admin/telegram_config.html:117
+msgid "Probar"
+msgstr "Test"
+
+#: templates/admin/telegram_config.html:158
+msgid "Destinatarios"
+msgstr "Recipients"
+
+#: templates/admin/telegram_config.html:160
+msgid "Introduce un destinatario por línea: @username, ID numérico de usuario o ID de chat/grupo."
+msgstr "Enter one recipient per line: @username, numeric user ID, or chat/group ID."
+
+#: templates/admin/telegram_config.html:168
+msgid "Cada línea es un destinatario independiente."
+msgstr "Each line is a separate recipient."
+
+#: templates/admin/telegram_config.html:178
+msgid "Enviar mensaje de prueba"
+msgstr "Send test message"
+
+#: templates/admin/telegram_config.html:180
+msgid "Habilita Telegram para enviar mensajes de prueba."
+msgstr "Enable Telegram to send test messages."
+
+#: templates/admin/telegram_config.html:182
+msgid "Estado de la conexión"
+msgstr "Connection status"
+
+#: templates/admin/telegram_config.html:188
+msgid "Servicio"
+msgstr "Service"
+
+#: templates/admin/telegram_config.html:193
+msgid "Modo"
+msgstr "Mode"
+
+#: templates/admin/telegram_config.html:198
+msgid "Sesión"
+msgstr "Session"
+
+#: templates/admin/telegram_config.html:202
+msgid "Usuario Telegram"
+msgstr "Telegram user"
+
+#: templates/admin/telegram_config.html:214
+msgid "Actualizar estado"
+msgstr "Refresh status"
+
+#: templates/admin/telegram_config.html:230
+msgid "Verificando…"
+msgstr "Checking..."
+
+#: templates/admin/telegram_config.html:341
+msgid "Error de red al guardar."
+msgstr "Network error while saving."
+
+#: templates/admin/telegram_config.html:352
+msgid "Error de red al probar la conexión."
+msgstr "Network error while testing the connection."
+
+#: templates/admin/ldap_config.html:481
+msgid "El campo de búsqueda de usuario no puede estar vacío."
+msgstr "User search field cannot be empty."
