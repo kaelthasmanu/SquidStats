@@ -1,0 +1,314 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/base.html:130 templates/admin/navbar.html:64
+#: templates/admin/navbar.html:165 templates/all_notifications.html:81
+#: templates/components/navbar.html:65 templates/components/navbar.html:180
+#: templates/partials/graph_reports.html:128
+msgid "Usuarios"
+msgstr "Users"
+
+#: templates/admin/base.html:7 templates/admin/base.html:27
+msgid "Administrador Squid Proxy"
+msgstr "Squid Proxy Administrator"
+
+#: templates/admin/base.html:24
+msgid "SquidStats logo"
+msgstr "SquidStats logo"
+
+#: templates/admin/base.html:28
+msgid "Admin Squid"
+msgstr "Squid Admin"
+
+#: templates/admin/base.html:33
+msgid "Recarga la configuración de Squid sin reiniciar el servicio"
+msgstr "Reload Squid configuration without restarting the service"
+
+#: templates/admin/base.html:35
+msgid "Recargar"
+msgstr "Reload"
+
+#: templates/admin/base.html:37
+msgid "Reinicia Squid y vuelve a aplicar la configuración desde cero"
+msgstr "Restart Squid and reapply configuration from scratch"
+
+#: templates/admin/base.html:39
+msgid "Reiniciar"
+msgstr "Restart"
+
+#: templates/admin/base.html:42 templates/components/navbar.html:135
+msgid "Idioma"
+msgstr "Language"
+
+#: templates/admin/base.html:88
+msgid "Gestionar Usuarios"
+msgstr "Manage Users"
+
+#: templates/admin/base.html:97
+msgid "Cerrar Sesión"
+msgstr "Log Out"
+
+#: templates/admin/base.html:115
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: templates/admin/base.html:118
+msgid "Dashboard Admin"
+msgstr "Admin Dashboard"
+
+#: templates/admin/base.html:125
+msgid "Dividir Squid Config"
+msgstr "Split Squid Config"
+
+#: templates/admin/base.html:132
+msgid "Configuraciones LDAP/Active Directory"
+msgstr "LDAP/Active Directory Settings"
+
+#: templates/admin/base.html:140
+msgid "ACLs"
+msgstr "ACLs"
+
+#: templates/admin/base.html:146 templates/admin/dashboardAdmin.html:41
+msgid "Delay Pools"
+msgstr "Delay Pools"
+
+#: templates/admin/base.html:152
+msgid "HTTP Access"
+msgstr "HTTP Access"
+
+#: templates/admin/base.html:156 templates/admin/base.html:157
+msgid "Cuotas"
+msgstr "Quotas"
+
+#: templates/admin/base.html:158 templates/partials/conexiones.html:280
+#: templates/partials/conexiones.html:285
+msgid "Beta"
+msgstr "Beta"
+
+#: templates/admin/base.html:161 templates/admin/navbar.html:72
+#: templates/admin/navbar.html:173 templates/components/navbar.html:73
+#: templates/components/navbar.html:188
+msgid "Blacklist"
+msgstr "Blacklist"
+
+#: templates/admin/base.html:164
+msgid "Logs"
+msgstr "Logs"
+
+#: templates/admin/dashboardAdmin.html:6
+msgid "Dashboard - Resumen del Sistema"
+msgstr "Dashboard - System Summary"
+
+#: templates/admin/dashboardAdmin.html:15
+msgid "Total ACLs"
+msgstr "Total ACLs"
+
+#: templates/admin/dashboardAdmin.html:67
+msgid "Reglas HTTP"
+msgstr "HTTP Rules"
+
+#: templates/admin/dashboardAdmin.html:97
+msgid "SSL Bump"
+msgstr "SSL Bump"
+
+#: templates/admin/dashboardAdmin.html:119
+msgid "No se encontraron configuraciones"
+msgstr "No configurations found"
+
+#: templates/admin/dashboardAdmin.html:120
+msgid ""
+"No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración "
+"de Squid."
+msgstr ""
+"No ACLs, HTTP rules, or delay pools were detected in your Squid "
+"configuration."
+
+#: templates/admin/dashboardAdmin.html:122
+msgid "¿Tu configuración ya está dividida en módulos?"
+msgstr "Is your configuration already split into modules?"
+
+#: templates/admin/dashboardAdmin.html:123
+msgid ""
+"Si ya tienes tu configuración organizada en archivos separados (por "
+"ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede"
+" leerla directamente sin necesidad de unificarla."
+msgstr ""
+"If you already have your configuration organized in separate files (e.g.:"
+" acls.conf, http_access.conf, delay_pools.conf), SquidStats can read it "
+"directly without needing to unify it."
+
+#: templates/admin/dashboardAdmin.html:126
+msgid "Gestionar Configuración Modular"
+msgstr "Manage Modular Configuration"
+
+#: templates/admin/dashboardAdmin.html:129
+msgid "Editar squid.conf"
+msgstr "Edit squid.conf"
+
+#: templates/admin/dashboardAdmin.html:140
+msgid "Acciones Rápidas"
+msgstr "Quick Actions"
+
+#: templates/admin/dashboardAdmin.html:143
+#: templates/admin/dashboardAdmin.html:149
+msgid "Deshabilitado por errores de configuración"
+msgstr "Disabled due to configuration errors"
+
+#: templates/admin/dashboardAdmin.html:145
+#: templates/admin/dashboardAdmin.html:157
+msgid "Editar Configuración"
+msgstr "Edit Configuration"
+
+#: templates/admin/dashboardAdmin.html:146
+msgid "Modificar archivo squid.conf (deshabilitado)"
+msgstr "Modify squid.conf file (disabled)"
+
+#: templates/admin/dashboardAdmin.html:152
+msgid "Crear nueva regla de acceso (deshabilitado)"
+msgstr "Create new access rule (disabled)"
+
+#: templates/admin/dashboardAdmin.html:158
+msgid "Modificar archivo squid.conf"
+msgstr "Modify squid.conf file"
+
+#: templates/admin/dashboardAdmin.html:164
+msgid "Crear nueva regla de acceso"
+msgstr "Create new access rule"
+
+#: templates/admin/dashboardAdmin.html:170
+msgid "Ver Logs"
+msgstr "View Logs"
+
+#: templates/admin/dashboardAdmin.html:171
+msgid "Revisar logs del sistema"
+msgstr "Review system logs"
+
+#: templates/admin/dashboardAdmin.html:176
+msgid "Reiniciar Squid"
+msgstr "Restart Squid"
+
+#: templates/admin/dashboardAdmin.html:177
+msgid "Reiniciar el servicio"
+msgstr "Restart the service"
+
+#: templates/admin/dashboardAdmin.html:184
+msgid "Estado del Sistema"
+msgstr "System Status"
+
+#: templates/admin/dashboardAdmin.html:189
+msgid "Servicio Squid"
+msgstr "Squid Service"
+
+#: templates/admin/dashboardAdmin.html:200
+msgid "No cargada"
+msgstr "Not loaded"
+
+#: templates/admin/dashboardAdmin.html:202
+msgid "Cargada"
+msgstr "Loaded"
+
+#: templates/admin/dashboardAdmin.html:209
+msgid "SSL Bump (MITM)"
+msgstr "SSL Bump (MITM)"
+
+#: templates/admin/dashboardAdmin.html:218
+msgid "cert:"
+msgstr "cert:"
+
+#: templates/admin/logs.html:8
+msgid "Líneas a mostrar:"
+msgstr "Lines to show:"
+
+#: templates/admin/logs.html:18
+msgid "Buscar texto en los logs"
+msgstr "Search text in logs"
+
+#: templates/admin/logs.html:19
+msgid "Alternar n.º de línea"
+msgstr "Toggle line number"
+
+#: templates/admin/logs.html:21
+msgid "Mostrando últimas"
+msgstr "Showing last"
+
+#: templates/admin/logs.html:21
+msgid ""
+"líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes "
+"del mensaje."
+msgstr ""
+"lines. Use the filter to quickly find errors, IPs, or parts of the "
+"message."
+
+#: templates/admin/logs.html:28
+msgid "líneas"
+msgstr "lines"
+
+#: templates/admin/navbar.html:46 templates/components/navbar.html:47
+msgid "Toggle menu"
+msgstr "Toggle menu"
+
+#: templates/admin/navbar.html:54 templates/components/navbar.html:55
+msgid "Panel principal con conexiones activas"
+msgstr "Main panel with active connections"
+
+#: templates/admin/navbar.html:56 templates/admin/navbar.html:155
+#: templates/components/navbar.html:57 templates/components/navbar.html:170
+msgid "Inicio"
+msgstr "Home"
+
+#: templates/admin/navbar.html:58 templates/components/navbar.html:59
+msgid "Estadísticas de rendimiento del cache"
+msgstr "Cache performance statistics"
+
+#: templates/admin/navbar.html:60 templates/admin/navbar.html:161
+#: templates/components/navbar.html:61 templates/components/navbar.html:176
+msgid "Estadísticas"
+msgstr "Statistics"
+
+#: templates/admin/navbar.html:62 templates/components/navbar.html:63
+msgid "Actividad y logs de usuarios"
+msgstr "User activity and logs"
+
+#: templates/admin/navbar.html:66 templates/components/navbar.html:67
+msgid "Reportes y gráficas avanzadas"
+msgstr "Reports and advanced charts"
+
+#: templates/admin/navbar.html:68 templates/admin/navbar.html:169
+#: templates/components/navbar.html:69 templates/components/navbar.html:184
+msgid "Reportes"
+msgstr "Reports"
+
+#: templates/admin/navbar.html:70 templates/components/navbar.html:71
+msgid "Sitios bloqueados y actividad restringida"
+msgstr "Blocked sites and restricted activity"
+
+#: templates/admin/navbar.html:74 templates/components/navbar.html:75
+msgid "Auditoría de actividad por usuario y fecha"
+msgstr "Activity audit by user and date"
+
+#: templates/admin/navbar.html:76 templates/admin/navbar.html:177
+#: templates/components/navbar.html:77 templates/components/navbar.html:192
+msgid "Auditoría"
+msgstr "Audit"
+
+#: templates/admin/navbar.html:118 templates/components/navbar.html:118
+msgid "Panel de administración del sistema"
+msgstr "System administration panel"
+
+#: templates/admin/navbar.html:120 templates/components/navbar.html:120
+#: templates/components/navbar.html:200
+msgid "Admin"
+msgstr "Admin"
+
+#: templates/admin/navbar.html:124 templates/components/navbar.html:123
+msgid "Actualizar paquetes y configuración de Squid"
+msgstr "Update Squid packages and configuration"
+
+#: templates/admin/navbar.html:129 templates/components/navbar.html:128
+msgid "Actualizar aplicación web SquidStats"
+msgstr "Update SquidStats web application"
+
+#: templates/admin/navbar.html:131 templates/admin/navbar.html:189
+#: templates/components/navbar.html:130 templates/components/navbar.html:208
+msgid "Web"
+msgstr "Web"
