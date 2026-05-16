@@ -240,12 +240,22 @@ def compile_po(translations_dir: Path) -> bool:
     pybabel_cmd = ["pybabel", "compile", "-d", str(translations_dir)]
     print(f"\n  Running: pybabel compile -d {translations_dir}")
     try:
-        result = subprocess.run(pybabel_cmd, capture_output=True, text=True)
+        result = subprocess.run(  # noqa: S603
+            pybabel_cmd,
+            capture_output=True,
+            text=True,
+            shell=False,
+        )
         if result.returncode == 0:
             print(result.stdout or "  Compilation successful.")
             return True
         # Fallback to module invocation
-        result2 = subprocess.run(cmd, capture_output=True, text=True)
+        result2 = subprocess.run(  # noqa: S603
+            cmd,
+            capture_output=True,
+            text=True,
+            shell=False,
+        )
         if result2.returncode == 0:
             print(result2.stdout or "  Compilation successful.")
             return True
@@ -255,7 +265,12 @@ def compile_po(translations_dir: Path) -> bool:
         )
         return False
     except FileNotFoundError:
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(  # noqa: S603
+            cmd,
+            capture_output=True,
+            text=True,
+            shell=False,
+        )
         if result.returncode == 0:
             print(result.stdout or "  Compilation successful.")
             return True
