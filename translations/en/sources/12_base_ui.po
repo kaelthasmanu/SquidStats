@@ -1,0 +1,640 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/error.html:6
+msgid "Error - Squid Monitor"
+msgstr "Error - Squid Monitor"
+
+#: templates/error.html:45
+msgid ""
+"Disculpamos las molestias. Por favor, intenta de nuevo más tarde o "
+"contacta al soporte si el problema persiste."
+msgstr ""
+"We apologize for the inconvenience. Please try again later or contact "
+"support if the problem persists."
+
+#: templates/error.html:47
+msgid "Volver al Inicio"
+msgstr "Back to Home"
+
+#: templates/index.html:18
+msgid "Intervalo de refresco (segundos)"
+msgstr "Refresh interval (seconds)"
+
+#: templates/logsView.html:13
+msgid "Buscar por usuario..."
+msgstr "Search by user..."
+
+#: templates/logsView.html:16
+msgid "Limpiar búsqueda"
+msgstr "Clear search"
+
+#: templates/macros.html:6
+msgid "Gbps"
+msgstr "Gbps"
+
+#: templates/macros.html:8
+msgid "Mbps"
+msgstr "Mbps"
+
+#: templates/macros.html:10
+msgid "Kbps"
+msgstr "Kbps"
+
+#: templates/macros.html:12
+msgid "0 kbps"
+msgstr "0 kbps"
+
+#: templates/components/confirm_modal.html:6
+msgid "Confirmar Acción"
+msgstr "Confirm action"
+
+#: templates/components/loading_spinner.html:2
+msgid "Importando lista"
+msgstr "Importing list"
+
+#: templates/components/loading_spinner.html:13
+msgid "Importando lista de bloqueo"
+msgstr "Importing block list"
+
+#: templates/components/loading_spinner.html:14
+msgid "Validando URL y procesando dominios..."
+msgstr "Validating URL and processing domains..."
+
+#: templates/components/navbar.html:7
+msgid "Logo SquidStats"
+msgstr "SquidStats Logo"
+
+#: templates/index.html:43
+msgid "Ver Detalles"
+msgstr "View Details"
+
+#~ msgid "0\" x-text=\"integrityResult.error_count + ' error(es) detectado(s)'\">"
+#~ msgstr ""
+
+#~ msgid "0\" class=\"mt-2 space-y-1\">"
+#~ msgstr ""
+
+#~ msgid "{editor}: Editing failed"
+#~ msgstr "{editor}: Editing failed"
+
+#~ msgid "{editor}: Editing failed: {e}"
+#~ msgstr "{editor}: Editing failed: {e}"
+
+#~ msgid "{text} {deprecated_message}"
+#~ msgstr "{text} {deprecated_message}"
+
+#~ msgid "Options"
+#~ msgstr "Options"
+
+#~ msgid "Got unexpected extra argument ({args})"
+#~ msgid_plural "Got unexpected extra arguments ({args})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+#~ msgstr "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+
+#~ msgid "Aborted!"
+#~ msgstr "Aborted!"
+
+#~ msgid "Commands"
+#~ msgstr "Commands"
+
+#~ msgid "Missing command."
+#~ msgstr "Missing command."
+
+#~ msgid "No such command {name!r}."
+#~ msgstr "No such command {name!r}."
+
+#~ msgid "Value must be an iterable."
+#~ msgstr "Value must be an iterable."
+
+#~ msgid "Takes {nargs} values but 1 was given."
+#~ msgid_plural "Takes {nargs} values but {len} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+#~ msgstr ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+
+#~ msgid "env var: {var}"
+#~ msgstr "env var: {var}"
+
+#~ msgid "default: {default}"
+#~ msgstr "default: {default}"
+
+#~ msgid "required"
+#~ msgstr "required"
+
+#~ msgid "(dynamic)"
+#~ msgstr "(dynamic)"
+
+#~ msgid "%(prog)s, version %(version)s"
+#~ msgstr "%(prog)s, version %(version)s"
+
+#~ msgid "Show the version and exit."
+#~ msgstr "Show the version and exit."
+
+#~ msgid "Show this message and exit."
+#~ msgstr "Show this message and exit."
+
+#~ msgid "Error: {message}"
+#~ msgstr "Error: {message}"
+
+#~ msgid "Try '{command} {option}' for help."
+#~ msgstr "Try '{command} {option}' for help."
+
+#~ msgid "Invalid value: {message}"
+#~ msgstr "Invalid value: {message}"
+
+#~ msgid "Invalid value for {param_hint}: {message}"
+#~ msgstr "Invalid value for {param_hint}: {message}"
+
+#~ msgid "Missing argument"
+#~ msgstr "Missing argument"
+
+#~ msgid "Missing option"
+#~ msgstr "Missing option"
+
+#~ msgid "Missing parameter"
+#~ msgstr "Missing parameter"
+
+#~ msgid "Missing {param_type}"
+#~ msgstr "Missing {param_type}"
+
+#~ msgid "Missing parameter: {param_name}"
+#~ msgstr "Missing parameter: {param_name}"
+
+#~ msgid "No such option: {name}"
+#~ msgstr "No such option: {name}"
+
+#~ msgid "Did you mean {possibility}?"
+#~ msgid_plural "(Possible options: {possibilities})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "unknown error"
+#~ msgstr "unknown error"
+
+#~ msgid "Could not open file {filename!r}: {message}"
+#~ msgstr "Could not open file {filename!r}: {message}"
+
+#~ msgid "Usage:"
+#~ msgstr "Usage:"
+
+#~ msgid "Argument {name!r} takes {nargs} values."
+#~ msgstr "Argument {name!r} takes {nargs} values."
+
+#~ msgid "Option {name!r} does not take a value."
+#~ msgstr "Option {name!r} does not take a value."
+
+#~ msgid "Option {name!r} requires an argument."
+#~ msgid_plural "Option {name!r} requires {nargs} arguments."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Shell completion is not supported for Bash versions older than 4.4."
+#~ msgstr "Shell completion is not supported for Bash versions older than 4.4."
+
+#~ msgid "Couldn't detect Bash version, shell completion is not supported."
+#~ msgstr "Couldn't detect Bash version, shell completion is not supported."
+
+#~ msgid "Repeat for confirmation"
+#~ msgstr "Repeat for confirmation"
+
+#~ msgid "Error: The value you entered was invalid."
+#~ msgstr "Error: The value you entered was invalid."
+
+#~ msgid "Error: {e.message}"
+#~ msgstr "Error: {e.message}"
+
+#~ msgid "Error: The two entered values do not match."
+#~ msgstr "Error: The two entered values do not match."
+
+#~ msgid "Error: invalid input"
+#~ msgstr "Error: invalid input"
+
+#~ msgid "Press any key to continue..."
+#~ msgstr "Press any key to continue..."
+
+#~ msgid ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+#~ msgstr ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+
+#~ msgid "{value!r} is not {choice}."
+#~ msgid_plural "{value!r} is not one of {choices}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "{value!r} does not match the format {format}."
+#~ msgid_plural "{value!r} does not match the formats {formats}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "{value!r} is not a valid {number_type}."
+#~ msgstr "{value!r} is not a valid {number_type}."
+
+#~ msgid "{value} is not in the range {range}."
+#~ msgstr "{value} is not in the range {range}."
+
+#~ msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+#~ msgstr "{value!r} is not a valid boolean. Recognized values: {states}"
+
+#~ msgid "{value!r} is not a valid UUID."
+#~ msgstr "{value!r} is not a valid UUID."
+
+#~ msgid "file"
+#~ msgstr "file"
+
+#~ msgid "directory"
+#~ msgstr "directory"
+
+#~ msgid "path"
+#~ msgstr "path"
+
+#~ msgid "{name} {filename!r} does not exist."
+#~ msgstr "{name} {filename!r} does not exist."
+
+#~ msgid "{name} {filename!r} is a file."
+#~ msgstr "{name} {filename!r} is a file."
+
+#~ msgid "{name} {filename!r} is a directory."
+#~ msgstr "{name} {filename!r} is a directory."
+
+#~ msgid "{name} {filename!r} is not readable."
+#~ msgstr "{name} {filename!r} is not readable."
+
+#~ msgid "{name} {filename!r} is not writable."
+#~ msgstr "{name} {filename!r} is not writable."
+
+#~ msgid "{name} {filename!r} is not executable."
+#~ msgstr "{name} {filename!r} is not executable."
+
+#~ msgid "{len_type} values are required, but {len_value} was given."
+#~ msgid_plural "{len_type} values are required, but {len_value} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "This field is required."
+#~ msgstr "This field is required."
+
+#~ msgid "File does not have an approved extension: {extensions}"
+#~ msgstr "File does not have an approved extension: {extensions}"
+
+#~ msgid "File does not have an approved extension."
+#~ msgstr "File does not have an approved extension."
+
+#~ msgid "Invalid field name '%s'."
+#~ msgstr "Invalid field name '%s'."
+
+#~ msgid "Field must be equal to %(other_name)s."
+#~ msgstr "Field must be equal to %(other_name)s."
+
+#~ msgid "Field must be at least %(min)d character long."
+#~ msgid_plural "Field must be at least %(min)d characters long."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field cannot be longer than %(max)d character."
+#~ msgid_plural "Field cannot be longer than %(max)d characters."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field must be exactly %(max)d character long."
+#~ msgid_plural "Field must be exactly %(max)d characters long."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field must be between %(min)d and %(max)d characters long."
+#~ msgstr "Field must be between %(min)d and %(max)d characters long."
+
+#~ msgid "Number must be at least %(min)s."
+#~ msgstr "Number must be at least %(min)s."
+
+#~ msgid "Number must be at most %(max)s."
+#~ msgstr "Number must be at most %(max)s."
+
+#~ msgid "Number must be between %(min)s and %(max)s."
+#~ msgstr "Number must be between %(min)s and %(max)s."
+
+#~ msgid "Invalid input."
+#~ msgstr "Invalid input."
+
+#~ msgid "Invalid email address."
+#~ msgstr "Invalid email address."
+
+#~ msgid "Invalid IP address."
+#~ msgstr "Invalid IP address."
+
+#~ msgid "Invalid Mac address."
+#~ msgstr "Invalid Mac address."
+
+#~ msgid "Invalid URL."
+#~ msgstr "Invalid URL."
+
+#~ msgid "Invalid UUID."
+#~ msgstr "Invalid UUID."
+
+#~ msgid "Invalid value, must be one of: %(values)s."
+#~ msgstr "Invalid value, must be one of: %(values)s."
+
+#~ msgid "Invalid value, can't be any of: %(values)s."
+#~ msgstr "Invalid value, can't be any of: %(values)s."
+
+#~ msgid "This field cannot be edited."
+#~ msgstr "This field cannot be edited."
+
+#~ msgid "This field is disabled and cannot have a value."
+#~ msgstr "This field is disabled and cannot have a value."
+
+#~ msgid "Invalid CSRF Token."
+#~ msgstr "Invalid CSRF Token."
+
+#~ msgid "CSRF token missing."
+#~ msgstr "CSRF token missing."
+
+#~ msgid "CSRF failed."
+#~ msgstr "CSRF failed."
+
+#~ msgid "CSRF token expired."
+#~ msgstr "CSRF token expired."
+
+#~ msgid "Invalid Choice: could not coerce."
+#~ msgstr "Invalid Choice: could not coerce."
+
+#~ msgid "Choices cannot be None."
+#~ msgstr "Choices cannot be None."
+
+#~ msgid "Not a valid choice."
+#~ msgstr "Not a valid choice."
+
+#~ msgid "Invalid choice(s): one or more data inputs could not be coerced."
+#~ msgstr "Invalid choice(s): one or more data inputs could not be coerced."
+
+#~ msgid "'%(value)s' is not a valid choice for this field."
+#~ msgid_plural "'%(value)s' are not valid choices for this field."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Not a valid datetime value."
+#~ msgstr "Not a valid datetime value."
+
+#~ msgid "Not a valid date value."
+#~ msgstr "Not a valid date value."
+
+#~ msgid "Not a valid time value."
+#~ msgstr "Not a valid time value."
+
+#~ msgid "Not a valid week value."
+#~ msgstr "Not a valid week value."
+
+#~ msgid "Not a valid integer value."
+#~ msgstr "Not a valid integer value."
+
+#~ msgid "Not a valid decimal value."
+#~ msgstr "Not a valid decimal value."
+
+#~ msgid "Not a valid float value."
+#~ msgstr "Not a valid float value."
+
+msgid "Reporte generado exitosamente"
+msgstr "Report generated successfully"
+
+msgid "Auditoría completada"
+msgstr "Audit completed"
+
+msgid "Error de conexión con el servidor"
+msgstr "Server connection error"
+
+msgid "Error de red"
+msgstr "Network error"
+
+msgid "Error en la auditoría"
+msgstr "Audit error"
+
+msgid "Por favor, seleccione un usuario."
+msgstr "Please select a user."
+
+msgid "Por favor, ingrese una palabra clave."
+msgstr "Please enter a keyword."
+
+msgid "Por favor, ingrese una dirección IP."
+msgstr "Please enter an IP address."
+
+msgid "Por favor, seleccione un código de respuesta."
+msgstr "Please select a response code."
+
+msgid "Por favor, seleccione al menos una red social."
+msgstr "Please select at least one social network."
+
+msgid "Error interno: Renderers no cargados."
+msgstr "Internal error: Renderers not loaded."
+
+msgid "Distribución de Peticiones para {user} el {date}"
+msgstr "Request Distribution for {user} on {date}"
+
+msgid "Total de Peticiones en el día:"
+msgstr "Total Requests for the day:"
+
+msgid "No se encontraron peticiones para la fecha y usuario seleccionado."
+msgstr "No requests found for the selected date and user."
+
+msgid "Resultados para la palabra clave {keyword} para: {user}"
+msgstr "Results for keyword {keyword} for: {user}"
+
+msgid "Resultados de Búsqueda para la IP: {ip}"
+msgstr "Search Results for IP: {ip}"
+
+msgid "Resultados por Código de Respuesta {code} para: {user}"
+msgstr "Results by Response Code {code} for: {user}"
+
+msgid "Actividad en Redes Sociales ({sites}) para: {user}"
+msgstr "Social Media Activity ({sites}) for: {user}"
+
+msgid "Tipo de reporte no reconocido."
+msgstr "Unknown report type."
+
+msgid "Error de red o del servidor:"
+msgstr "Network or server error:"
+
+msgid "No se encontraron registros."
+msgstr "No records found."
+
+msgid "Hora (Últ. Acceso)"
+msgstr "Time (Last Access)"
+
+msgid "Intentos"
+msgstr "Attempts"
+
+msgid "Resumen de Actividad"
+msgstr "Activity Summary"
+
+msgid "Peticiones Totales"
+msgstr "Total Requests"
+
+msgid "GB Consumidos"
+msgstr "GB Consumed"
+
+msgid "Resumen de Respuestas"
+msgstr "Response Summary"
+
+msgid "Top 15 Dominios Visitados"
+msgstr "Top 15 Visited Domains"
+
+msgid "Distribución de Respuestas HTTP"
+msgstr "HTTP Response Distribution"
+
+msgid "Top 10 Usuarios por Consumo de Datos"
+msgstr "Top 10 Users by Data Consumption"
+
+msgid "Datos Consumidos"
+msgstr "Data Consumed"
+
+msgid "Top 15 URLs por Consumo de Datos"
+msgstr "Top 15 URLs by Data Consumption"
+
+msgid "Top 10 Usuarios por Peticiones"
+msgstr "Top 10 Users by Requests"
+
+msgid "Top 10 IPs por Consumo de Datos"
+msgstr "Top 10 IPs by Data Consumption"
+
+msgid "Peticiones por Hora"
+msgstr "Requests per Hour"
+
+msgid "Hora del Día"
+msgstr "Time of Day"
+
+msgid "Número de Peticiones"
+msgstr "Number of Requests"
+
+msgid "Total de Datos Consumidos del {startDate} al {endDate}"
+msgstr "Total Data Consumed from {startDate} to {endDate}"
+
+msgid "Total de datos consumidos en el período seleccionado"
+msgstr "Total data consumed in the selected period"
+
+msgid "peticiones totales"
+msgstr "total requests"
+
+msgid "tablas procesadas"
+msgstr "tables processed"
+
+msgid "Equivalente a {bytes} bytes"
+msgstr "Equivalent to {bytes} bytes"
+
+msgid "Error al cargar la lista de usuarios"
+msgstr "Error loading user list"
+
+msgid "Error de carga"
+msgstr "Load error"
+
+msgid "Fecha de Inicio"
+msgstr "Start Date"
+
+msgid "Seleccionar usuario..."
+msgstr "Select user..."
+
+msgid "Buscar usuario... (Opcional)"
+msgstr "Search user... (Optional)"
+
+msgid "No hay notificaciones nuevas"
+msgstr "No new notifications"
+
+msgid "Error HTTP:"
+msgstr "HTTP Error:"
+
+msgid "Error del servidor al marcar como leída:"
+msgstr "Server error marking as read:"
+
+msgid "Error al marcar notificación como leída:"
+msgstr "Error marking notification as read:"
+
+msgid "Error al obtener notificaciones:"
+msgstr "Error fetching notifications:"
+
+msgid "Error al actualizar Squid"
+msgstr "Error updating Squid"
+
+msgid "Error al recargar Squid"
+msgstr "Error reloading Squid"
+
+msgid "Error al reiniciar Squid"
+msgstr "Error restarting Squid"
+
+msgid "Error al actualizar la aplicación web"
+msgstr "Error updating the web application"
+
+msgid "¿Estás seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio."
+msgstr "Are you sure you want to reload Squid? This will apply configuration changes without interrupting the service."
+
+msgid "¿Estás seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio."
+msgstr "Are you sure you want to restart Squid? This will temporarily interrupt the service."
+
+msgid "¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente."
+msgstr "Are you sure you want to update the Squid service? Save your configuration before continuing; the service will restart automatically."
+
+msgid "¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad."
+msgstr "Are you sure you want to update SquidStats? The web interface, features, and security fixes will be updated."
+
+msgid "Error al cargar notificaciones"
+msgstr "Error loading notifications"
+
+msgid "No hay notificaciones sin leer"
+msgstr "No unread notifications"
+
+msgid "¿Estás seguro de que quieres eliminar esta notificación?"
+msgstr "Are you sure you want to delete this notification?"
+
+msgid "Notificación eliminada"
+msgstr "Notification deleted"
+
+msgid "Error al eliminar notificación:"
+msgstr "Error deleting notification:"
+
+msgid "¿Estás seguro de que quieres eliminar TODAS las notificaciones? Esta acción no se puede deshacer."
+msgstr "Are you sure you want to delete ALL notifications? This action cannot be undone."
+
+msgid "Todas las notificaciones han sido eliminadas"
+msgstr "All notifications have been deleted"
+
+msgid "Error al eliminar notificaciones:"
+msgstr "Error deleting notifications:"
+
+msgid "Filtros limpiados"
+msgstr "Filters cleared"
+
+msgid "Error de conexión:"
+msgstr "Connection error:"
+
+msgid "Error desconocido"
+msgstr "Unknown error"
+
+msgid "Hace unos momentos"
+msgstr "A few moments ago"
+
+msgid "Hace {count} minuto"
+msgstr "{count} minute ago"
+
+msgid "Hace {count} minutos"
+msgstr "{count} minutes ago"
+
+msgid "Hace {count} hora"
+msgstr "{count} hour ago"
+
+msgid "Hace {count} horas"
+msgstr "{count} hours ago"
+
+msgid "Hace {count} día"
+msgstr "{count} day ago"
+
+msgid "Hace {count} días"
+msgstr "{count} days ago"
