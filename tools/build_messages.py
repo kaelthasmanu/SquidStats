@@ -8,7 +8,6 @@ Usage:
 """
 
 import argparse
-import os
 import re
 import subprocess
 import sys
@@ -19,14 +18,15 @@ from pathlib import Path
 # PO entry dataclass
 # ---------------------------------------------------------------------------
 
+
 class PoEntry:
     """Holds one PO message entry."""
 
     def __init__(self):
-        self.comments: list[str] = []       # # …  and #: … and #, …
-        self.msgid: list[str] = []          # one or more lines
+        self.comments: list[str] = []  # # …  and #: … and #, …
+        self.msgid: list[str] = []  # one or more lines
         self.msgid_plural: list[str] = []
-        self.msgstr: list[str] = []         # singular or msgstr[0], [1] …
+        self.msgstr: list[str] = []  # singular or msgstr[0], [1] …
         self.msgstr_plural: dict[int, list[str]] = {}
         self.obsolete: bool = False
 
@@ -54,7 +54,7 @@ class PoEntry:
 
 def _render_field(name: str, parts: list[str]) -> str:
     if len(parts) == 1:
-        return f'{name} {parts[0]}'
+        return f"{name} {parts[0]}"
     # multiline
     return f'{name} ""\n' + "\n".join(parts)
 
@@ -63,11 +63,12 @@ def _render_field(name: str, parts: list[str]) -> str:
 # Simple PO parser
 # ---------------------------------------------------------------------------
 
+
 def parse_po_entries(text: str) -> list[PoEntry]:
     """Return all non-header entries from a PO file text."""
     entries: list[PoEntry] = []
     current = PoEntry()
-    state = "idle"          # idle | comments | msgid | msgid_plural | msgstr | msgstr_plural
+    state = "idle"  # idle | comments | msgid | msgid_plural | msgstr | msgstr_plural
 
     def flush():
         nonlocal current
@@ -118,18 +119,18 @@ def parse_po_entries(text: str) -> list[PoEntry]:
 
         # Keywords
         if line.startswith("msgid_plural "):
-            value = line[len("msgid_plural "):]
+            value = line[len("msgid_plural ") :]
             current.msgid_plural = [value]
             state = "msgid_plural"
             continue
 
         if line.startswith("msgid "):
-            value = line[len("msgid "):]
+            value = line[len("msgid ") :]
             current.msgid = [value]
             state = "msgid"
             continue
 
-        m = re.match(r'^msgstr\[(\d+)\] (.+)$', line)
+        m = re.match(r"^msgstr\[(\d+)\] (.+)$", line)
         if m:
             idx = int(m.group(1))
             current.msgstr_plural[idx] = [m.group(2)]
@@ -137,7 +138,7 @@ def parse_po_entries(text: str) -> list[PoEntry]:
             continue
 
         if line.startswith("msgstr "):
-            value = line[len("msgstr "):]
+            value = line[len("msgstr ") :]
             current.msgstr = [value]
             state = "msgstr"
             continue
@@ -186,7 +187,7 @@ def merge_sources(sources_dir: Path) -> list[PoEntry]:
         print(f"  [!] No .po files found in {sources_dir}", file=sys.stderr)
         return []
 
-    seen: dict[str, PoEntry] = {}   # msgid → entry (deduplication)
+    seen: dict[str, PoEntry] = {}  # msgid → entry (deduplication)
     for po_file in po_files:
         print(f"  Reading {po_file.name}")
         text = po_file.read_text(encoding="utf-8")
@@ -221,12 +222,20 @@ def write_messages_po(output_path: Path, entries: list[PoEntry], lang: str) -> N
             blocks.append(entry.render())
 
     output_path.write_text("\n\n".join(blocks) + "\n", encoding="utf-8")
-    print(f"  Written → {output_path}  ({len(regular)} entries, {len(obsolete)} obsolete)")
+    print(
+        f"  Written → {output_path}  ({len(regular)} entries, {len(obsolete)} obsolete)"
+    )
 
 
 def compile_po(translations_dir: Path) -> bool:
-    cmd = [sys.executable, "-m", "babel.messages.frontend", "compile",
-           "-d", str(translations_dir)]
+    cmd = [
+        sys.executable,
+        "-m",
+        "babel.messages.frontend",
+        "compile",
+        "-d",
+        str(translations_dir),
+    ]
     # Try the pybabel CLI as fallback
     pybabel_cmd = ["pybabel", "compile", "-d", str(translations_dir)]
     print(f"\n  Running: pybabel compile -d {translations_dir}")
@@ -240,8 +249,10 @@ def compile_po(translations_dir: Path) -> bool:
         if result2.returncode == 0:
             print(result2.stdout or "  Compilation successful.")
             return True
-        print(f"  [ERROR] pybabel compile failed:\n{result.stderr}\n{result2.stderr}",
-              file=sys.stderr)
+        print(
+            f"  [ERROR] pybabel compile failed:\n{result.stderr}\n{result2.stderr}",
+            file=sys.stderr,
+        )
         return False
     except FileNotFoundError:
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -256,11 +267,15 @@ def compile_po(translations_dir: Path) -> bool:
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Merge sources/*.po → messages.po and compile.")
+    parser = argparse.ArgumentParser(
+        description="Merge sources/*.po → messages.po and compile."
+    )
     parser.add_argument("--lang", default="en", help="Language code (default: en)")
-    parser.add_argument("--no-compile", action="store_true",
-                        help="Skip pybabel compile step")
+    parser.add_argument(
+        "--no-compile", action="store_true", help="Skip pybabel compile step"
+    )
     args = parser.parse_args()
 
     # Resolve paths relative to the project root (one level up from tools/)
