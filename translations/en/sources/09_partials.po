@@ -548,7 +548,7 @@ msgstr "Transmitted Data"
 
 #: templates/partials/graph_reports.html:29
 #: templates/partials/graph_reports.html:80
-msgid "Total Requests"
+msgid "Total de Peticiones"
 msgstr "Total Requests"
 
 #: templates/partials/graph_reports.html:40

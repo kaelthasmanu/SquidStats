@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SquidStats\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-16 14:32+0000\n"
-"PO-Revision-Date: 2026-05-16 14:32+0000\n"
+"POT-Creation-Date: 2026-05-16 14:41+0000\n"
+"PO-Revision-Date: 2026-05-16 14:41+0000\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
@@ -4177,7 +4177,7 @@ msgstr "Transmitted Data"
 
 #: templates/partials/graph_reports.html:29
 #: templates/partials/graph_reports.html:80
-msgid "Total Requests"
+msgid "Total de Peticiones"
 msgstr "Total Requests"
 
 #: templates/partials/graph_reports.html:40
