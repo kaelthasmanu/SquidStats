@@ -49,6 +49,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Mark repository safe for git
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       # ── 2. Resolve package version ──────────────────────────────────────
       - name: Determine package version
         id: version
