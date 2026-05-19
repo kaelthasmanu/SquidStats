@@ -68,6 +68,11 @@ override_dh_strip:
 override_dh_shlibdeps:
 	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info || true
 
+override_dh_dwz:
+	# Skip DWZ compression for bundled venv Python extension modules.
+	# The package contains many .so/.abi3 libs and no separate debug packages.
+	true
+
 override_dh_fixperms:
 	dh_fixperms
 	# Config file must not be world-readable (may contain secrets)
