@@ -214,6 +214,7 @@ jobs:
           RELEASE_NAME="${{ steps.release.outputs.release_name }}"
           RELEASE_BODY="${{ steps.release.outputs.release_body }}"
           TARGET_REF="${GITHUB_SHA}"
+          ASSET_NAME=$(basename dist/*.deb)
 
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
             gh release edit "$TAG_NAME" \
@@ -227,4 +228,13 @@ jobs:
               --notes "$RELEASE_BODY"
           fi
 
-          gh release upload "$TAG_NAME" dist/*.deb --clobber
+          RELEASE_ID=$(gh api repos/${GITHUB_REPOSITORY}/releases/tags/$TAG_NAME --jq .id)
+          if [ -n "$RELEASE_ID" ]; then
+            ASSET_ID=$(gh api repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID/assets --jq ".[] | select(.name==\"$ASSET_NAME\") | .id")
+            if [ -n "$ASSET_ID" ]; then
+              echo "Deleting existing asset $ASSET_NAME ($ASSET_ID)"
+              gh api repos/${GITHUB_REPOSITORY}/releases/assets/$ASSET_ID -X DELETE
+            fi
+          fi
+
+          gh release upload "$TAG_NAME" dist/*.deb
