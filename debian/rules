@@ -1,0 +1,74 @@
+#!/usr/bin/make -f
+
+# Uncomment to enable verbose debhelper output
+#export DH_VERBOSE = 1
+
+PACKAGE    = squidstats
+DESTDIR    = $(CURDIR)/debian/$(PACKAGE)
+OPT_DIR    = $(DESTDIR)/opt/$(PACKAGE)
+VENV_BUILD = $(CURDIR)/debian/.build-venv
+VENV_FINAL = /opt/$(PACKAGE)/venv
+VENV_DEST  = $(OPT_DIR)/venv
+APP_DEST   = $(OPT_DIR)/app
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	@echo "=== Building SquidStats Python virtual environment ==="
+	python3 -m venv --copies $(VENV_BUILD)
+	$(VENV_BUILD)/bin/pip3 install --upgrade pip setuptools wheel
+	$(VENV_BUILD)/bin/pip3 install --no-cache-dir -r requirements.txt
+	@echo "=== Build complete ==="
+
+override_dh_auto_install:
+	# ── Application directories ──────────────────────────────────────────
+	install -d $(APP_DEST)
+	install -d $(VENV_DEST)
+	install -d $(DESTDIR)/etc/$(PACKAGE)
+	install -d $(DESTDIR)/var/log/$(PACKAGE)
+	install -d $(DESTDIR)/var/lib/$(PACKAGE)
+
+	# ── Copy application source files ────────────────────────────────────
+	cp app.py config.py manage_db.py alembic.ini babel.cfg $(APP_DEST)/
+	cp requirements.txt $(APP_DEST)/
+	cp -r alembic/   $(APP_DEST)/
+	cp -r database/  $(APP_DEST)/
+	cp -r parsers/   $(APP_DEST)/
+	cp -r routes/    $(APP_DEST)/
+	cp -r services/  $(APP_DEST)/
+	cp -r static/    $(APP_DEST)/
+	cp -r templates/ $(APP_DEST)/
+	cp -r tools/     $(APP_DEST)/
+	cp -r translations/ $(APP_DEST)/
+	cp -r utils/     $(APP_DEST)/
+
+	# ── Copy virtual environment and relocate embedded paths ─────────────
+	cp -a $(VENV_BUILD)/. $(VENV_DEST)/
+	# Fix shebang lines and pyvenv.cfg to use the final install path
+	find $(VENV_DEST)/bin -maxdepth 1 -type f \
+		-exec sed -i "s|$(VENV_BUILD)|$(VENV_FINAL)|g" {} \;
+	sed -i "s|home = $(VENV_BUILD)/bin|home = $(VENV_FINAL)/bin|g" \
+		$(VENV_DEST)/pyvenv.cfg
+	# Remove build-time __pycache__ to keep the package clean
+	find $(VENV_DEST) -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
+	find $(APP_DEST)  -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
+
+	# ── Configuration template ───────────────────────────────────────────
+	install -m 0640 example.env $(DESTDIR)/etc/$(PACKAGE)/squidstats.env
+
+override_dh_auto_test:
+	@echo "Tests are run in a separate CI stage; skipping here."
+
+# Prevent stripping of Python .so files (can break extensions)
+override_dh_strip:
+	dh_strip --no-automatic-dbgsym
+
+# Disable shlibdeps for the venv contents – they are self-contained
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info || true
+
+override_dh_fixperms:
+	dh_fixperms
+	# Config file must not be world-readable (may contain secrets)
+	chmod 0640 $(DESTDIR)/etc/$(PACKAGE)/squidstats.env 2>/dev/null || true
