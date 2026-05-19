@@ -7,7 +7,8 @@ case "$1" in
         rm -rf /var/log/squidstats
         rm -rf /var/lib/squidstats
         rm -rf /etc/squidstats
-
+        # Remove package-created app .env if present
+        rm -f /opt/SquidStats/app/.env
         # Remove dedicated system user and group
         if getent passwd squidstats > /dev/null 2>&1; then
             deluser --system squidstats 2>/dev/null || true
