@@ -31,6 +31,39 @@ case "$1" in
             chmod 0640 /etc/squidstats/squidstats.env
         fi
 
+        # ── Create application .env configuration file if missing ───────
+        if [ ! -f /opt/SquidStats/app/.env ]; then
+            cat > /opt/SquidStats/app/.env <<'EOF'
+VERSION=2.3.2
+SQUID_HOST="127.0.0.1"
+SQUID_PORT=3128
+# Multi-proxy load-balancing (optional): comma-separated host:port list.
+# When set, overrides SQUID_HOST/SQUID_PORT for the active-connections page.
+# Example: SQUID_HOSTS="192.168.0.10:3128,192.168.0.11:3128"
+SQUID_HOSTS=
+LOG_FORMAT=DETAILED
+FLASK_DEBUG=True
+DATABASE_TYPE="SQLITE"
+SQUID_LOG="/var/log/squid/access.log"
+SQUID_CACHE_LOG="/var/log/squid/cache.log"
+DATABASE_STRING_CONNECTION="./squidstats.db"
+REFRESH_INTERVAL=60
+HTTP_PROXY=""
+HTTPS_PROXY=
+NO_PROXY=
+SQUID_CONFIG_PATH=/etc/squid/squid.conf
+ACL_FILES_DIR=/etc/squid/acl
+LISTEN_HOST="0.0.0.0"
+LISTEN_PORT=5000
+FIRST_PASSWORD="mipasswordsegura"
+JWT_EXPIRY_HOURS=24
+MAX_LOGIN_ATTEMPTS=5
+LOCKOUT_DURATION_MINUTES=15
+EOF
+            chown root:squidstats /opt/SquidStats/app/.env
+            chmod 0640 /opt/SquidStats/app/.env
+        fi
+
         # ── Create Python virtualenv on the target system ────────────────
         if [ ! -d /opt/SquidStats/venv ]; then
             python3 -m venv /opt/SquidStats/venv
