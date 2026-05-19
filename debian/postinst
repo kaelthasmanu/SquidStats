@@ -39,9 +39,16 @@ case "$1" in
         fi
 
         # ── Application directory ownership ──────────────────────────────
-        # The app code is owned by root; only the venv needs to be readable
+        # The app code is owned by root and group-owned by squidstats so the
+        # service user can execute and write only where needed.
         chown -R root:squidstats /opt/SquidStats/
-        chmod -R o-rwx           /opt/SquidStats/
+        find /opt/SquidStats/ -type d -exec chmod 2750 {} +
+        find /opt/SquidStats/ -type f -exec chmod 0640 {} +
+        chmod -R g+rwX /opt/SquidStats/
+
+        # Ensure the runtime logs directory exists and is writable.
+        install -d -m 2770 -o squidstats -g squidstats /opt/SquidStats/app/logs
+
         # Allow the service user to write to the data directory
         chown -R squidstats:squidstats /var/lib/squidstats/
         ;;
