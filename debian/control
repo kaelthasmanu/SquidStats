@@ -23,12 +23,9 @@ Rules-Requires-Root: no
 Package: squidstats
 Architecture: any
 Depends: ${misc:Depends},
-         ${shlibs:Depends},
          python3 (>= 3.11),
-         adduser,
-         libpq5,
-         libldap-2.5-0 | libldap-2.4-2
-Recommends: squid | squid3
+         adduser
+Recommends: squid
 Suggests: postgresql | mariadb-server
 Description: Web-based Squid proxy statistics and monitoring dashboard
  SquidStats is a Flask web application that provides real-time analysis
