@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    purge)
+        # Remove runtime data and configuration
+        rm -rf /var/log/squidstats
+        rm -rf /var/lib/squidstats
+        rm -rf /etc/squidstats
+
+        # Remove dedicated system user and group
+        if getent passwd squidstats > /dev/null 2>&1; then
+            deluser --system squidstats 2>/dev/null || true
+        fi
+        if getent group squidstats > /dev/null 2>&1; then
+            delgroup --system squidstats 2>/dev/null || true
+        fi
+        ;;
+
+    remove)
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload 2>/dev/null || true
+        fi
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
