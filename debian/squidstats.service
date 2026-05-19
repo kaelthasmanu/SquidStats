@@ -9,7 +9,7 @@ Type=simple
 User=squidstats
 Group=squidstats
 WorkingDirectory=/opt/SquidStats/app
-ExecStart=/opt/SquidStats/venv/bin/python3 /opt/squidstats/app/app.py
+ExecStart=/opt/SquidStats/venv/bin/python3 /opt/SquidStats/app/app.py
 Restart=on-failure
 RestartSec=5
 
