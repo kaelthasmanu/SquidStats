@@ -199,11 +199,32 @@ jobs:
           echo "release_name=${RELEASE_NAME}" >> "$GITHUB_OUTPUT"
           echo "release_body=${RELEASE_BODY}" >> "$GITHUB_OUTPUT"
 
+      - name: Install GitHub CLI
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y --no-install-recommends gh
+
       - name: Attach .deb to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.release.outputs.release_tag }}
-          name: ${{ steps.release.outputs.release_name }}
-          body: ${{ steps.release.outputs.release_body }}
-          files: dist/*.deb
-          fail_on_unmatched_files: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TAG_NAME="${{ steps.release.outputs.release_tag }}"
+          RELEASE_NAME="${{ steps.release.outputs.release_name }}"
+          RELEASE_BODY="${{ steps.release.outputs.release_body }}"
+          TARGET_REF="${GITHUB_SHA}"
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release edit "$TAG_NAME" \
+              --title "$RELEASE_NAME" \
+              --notes "$RELEASE_BODY" \
+              --target "$TARGET_REF"
+          else
+            gh release create "$TAG_NAME" \
+              --target "$TARGET_REF" \
+              --title "$RELEASE_NAME" \
+              --notes "$RELEASE_BODY"
+          fi
+
+          gh release upload "$TAG_NAME" dist/*.deb --clobber
