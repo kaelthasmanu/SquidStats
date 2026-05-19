@@ -1,0 +1,45 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        # ── Create dedicated system user ──────────────────────────────────
+        if ! getent passwd squidstats > /dev/null 2>&1; then
+            adduser \
+                --system \
+                --group \
+                --no-create-home \
+                --home /var/lib/squidstats \
+                --shell /usr/sbin/nologin \
+                --gecos "SquidStats web application" \
+                squidstats
+        fi
+
+        # Add to the proxy group so the service can read squid access logs
+        if getent group proxy > /dev/null 2>&1; then
+            usermod -aG proxy squidstats 2>/dev/null || true
+        fi
+
+        # ── Runtime directories ───────────────────────────────────────────
+        install -d -m 0750 -o squidstats -g squidstats /var/log/squidstats
+        install -d -m 0750 -o squidstats -g squidstats /var/lib/squidstats
+
+        # ── Configuration file ────────────────────────────────────────────
+        # On first install the example config is the real config; protect it
+        if [ -f /etc/squidstats/squidstats.env ]; then
+            chown root:squidstats /etc/squidstats/squidstats.env
+            chmod 0640 /etc/squidstats/squidstats.env
+        fi
+
+        # ── Application directory ownership ──────────────────────────────
+        # The app code is owned by root; only the venv needs to be readable
+        chown -R root:squidstats /opt/squidstats/
+        chmod -R o-rwx           /opt/squidstats/
+        # Allow the service user to write to the data directory
+        chown -R squidstats:squidstats /var/lib/squidstats/
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
