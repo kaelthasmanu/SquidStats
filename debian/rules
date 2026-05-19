@@ -16,16 +16,11 @@ APP_DEST   = $(OPT_DIR)/app
 	dh $@
 
 override_dh_auto_build:
-	@echo "=== Building SquidStats Python virtual environment ==="
-	python3 -m venv --copies $(VENV_BUILD)
-	$(VENV_BUILD)/bin/pip3 install --upgrade pip setuptools wheel
-	$(VENV_BUILD)/bin/pip3 install --no-cache-dir -r requirements.txt
-	@echo "=== Build complete ==="
+	@echo "=== No build step for SquidStats application package ==="
 
 override_dh_auto_install:
-	# ── Application directories ───────────────────────────squid───────────────
+	# ── Application directories ───────────────────────────────────────────
 	install -d $(APP_DEST)
-	install -d $(VENV_DEST)
 	install -d $(DESTDIR)/etc/$(PACKAGE)
 	install -d $(DESTDIR)/var/log/$(PACKAGE)
 	install -d $(DESTDIR)/var/lib/$(PACKAGE)
@@ -44,17 +39,6 @@ override_dh_auto_install:
 	cp -r translations/ $(APP_DEST)/
 	cp -r utils/     $(APP_DEST)/
 
-	# ── Copy virtual environment and relocate embedded paths ─────────────
-	cp -a $(VENV_BUILD)/. $(VENV_DEST)/
-	# Fix shebang lines only in text wrapper scripts, not binaries.
-	find $(VENV_DEST)/bin -maxdepth 1 -type f \
-		-exec grep -Iq . {} \; -exec sed -i "s|$(VENV_BUILD)|$(VENV_FINAL)|g" {} \;
-	sed -i "s|home = $(VENV_BUILD)/bin|home = $(VENV_FINAL)/bin|g" \
-		$(VENV_DEST)/pyvenv.cfg
-	# Remove build-time __pycache__ to keep the package clean
-	find $(VENV_DEST) -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
-	find $(APP_DEST)  -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
-
 	# ── Configuration template ───────────────────────────────────────────
 	install -m 0640 example.env $(DESTDIR)/etc/$(PACKAGE)/squidstats.env
 
@@ -65,19 +49,6 @@ override_dh_auto_test:
 override_dh_strip:
 	dh_strip --no-automatic-dbgsym
 
-# Exclude the bundled venv from ELF dependency scanning.
-# All native libraries (psycopg2-binary, cryptography, bcrypt, etc.) ship
-# as manylinux wheels inside the venv and carry their own shared libs,
-# so auto-detected system deps like libldap-2.5-0 / libpq5 / libssl are
-# wrong and break cross-distro portability.
-override_dh_shlibdeps:
-	dh_shlibdeps -X$(INSTALL_ROOT)/venv/
-
-override_dh_dwz:
-	# Skip DWZ compression for bundled venv modules.
-	# The package contains many Python extension modules and no separate
-	# debuginfo packages, so dwz can fail on bundled wheels.
-	true
 override_dh_fixperms:
 	dh_fixperms
 	# Config file must not be world-readable (may contain secrets)
