@@ -31,6 +31,13 @@ case "$1" in
             chmod 0640 /etc/squidstats/squidstats.env
         fi
 
+        # ── Create Python virtualenv on the target system ────────────────
+        if [ ! -d /opt/SquidStats/venv ]; then
+            python3 -m venv /opt/SquidStats/venv
+            /opt/SquidStats/venv/bin/python3 -m pip install --upgrade pip setuptools wheel
+            /opt/SquidStats/venv/bin/pip install --no-cache-dir -r /opt/SquidStats/app/requirements.txt
+        fi
+
         # ── Application directory ownership ──────────────────────────────
         # The app code is owned by root; only the venv needs to be readable
         chown -R root:squidstats /opt/SquidStats/
