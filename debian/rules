@@ -46,9 +46,9 @@ override_dh_auto_install:
 
 	# ── Copy virtual environment and relocate embedded paths ─────────────
 	cp -a $(VENV_BUILD)/. $(VENV_DEST)/
-	# Fix shebang lines and pyvenv.cfg to use the final install path
+	# Fix shebang lines only in text wrapper scripts, not binaries.
 	find $(VENV_DEST)/bin -maxdepth 1 -type f \
-		-exec sed -i "s|$(VENV_BUILD)|$(VENV_FINAL)|g" {} \;
+		-exec grep -Iq . {} \; -exec sed -i "s|$(VENV_BUILD)|$(VENV_FINAL)|g" {} \;
 	sed -i "s|home = $(VENV_BUILD)/bin|home = $(VENV_FINAL)/bin|g" \
 		$(VENV_DEST)/pyvenv.cfg
 	# Remove build-time __pycache__ to keep the package clean
