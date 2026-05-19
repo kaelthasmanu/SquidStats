@@ -72,6 +72,12 @@ override_dh_strip:
 # wrong and break cross-distro portability.
 override_dh_shlibdeps:
 	dh_shlibdeps -X$(INSTALL_ROOT)/venv/
+
+override_dh_dwz:
+	# Skip DWZ compression for bundled venv modules.
+	# The package contains many Python extension modules and no separate
+	# debuginfo packages, so dwz can fail on bundled wheels.
+	true
 override_dh_fixperms:
 	dh_fixperms
 	# Config file must not be world-readable (may contain secrets)
