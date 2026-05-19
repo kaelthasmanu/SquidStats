@@ -33,8 +33,8 @@ case "$1" in
 
         # ── Application directory ownership ──────────────────────────────
         # The app code is owned by root; only the venv needs to be readable
-        chown -R root:squidstats /opt/squidstats/
-        chmod -R o-rwx           /opt/squidstats/
+        chown -R root:squidstats /opt/SquidStats/
+        chmod -R o-rwx           /opt/SquidStats/
         # Allow the service user to write to the data directory
         chown -R squidstats:squidstats /var/lib/squidstats/
         ;;
