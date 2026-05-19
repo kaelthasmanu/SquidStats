@@ -5,9 +5,10 @@
 
 PACKAGE    = squidstats
 DESTDIR    = $(CURDIR)/debian/$(PACKAGE)
-OPT_DIR    = $(DESTDIR)/opt/$(PACKAGE)
+INSTALL_ROOT = /opt/SquidStats
+OPT_DIR    = $(DESTDIR)$(INSTALL_ROOT)
 VENV_BUILD = $(CURDIR)/debian/.build-venv
-VENV_FINAL = /opt/$(PACKAGE)/venv
+VENV_FINAL = $(INSTALL_ROOT)/venv
 VENV_DEST  = $(OPT_DIR)/venv
 APP_DEST   = $(OPT_DIR)/app
 
@@ -70,13 +71,7 @@ override_dh_strip:
 # so auto-detected system deps like libldap-2.5-0 / libpq5 / libssl are
 # wrong and break cross-distro portability.
 override_dh_shlibdeps:
-	dh_shlibdeps -X/opt/squidstats/venv/
-
-override_dh_dwz:
-	# Skip DWZ compression for bundled venv Python extension modules.
-	# The package contains many .so/.abi3 libs and no separate debug packages.
-	true
-
+	dh_shlibdeps -X$(INSTALL_ROOT)/venv/
 override_dh_fixperms:
 	dh_fixperms
 	# Config file must not be world-readable (may contain secrets)
