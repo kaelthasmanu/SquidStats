@@ -189,3 +189,7 @@ quota_disabled
 !README.md
 !README_es.md
 !CONTRIBUTING.md
+
+
+# Language files
+*.po
