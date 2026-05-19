@@ -62,7 +62,8 @@ jobs:
           elif echo "${{ github.ref }}" | grep -q '^refs/tags/v'; then
             VERSION="${GITHUB_REF_NAME#v}"
           else
-            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+            # --match 'v*' ensures CI-generated tags (ci-...) are never used
+            LAST_TAG=$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo "v0.0.0")
             SHORT_SHA=$(git rev-parse --short HEAD)
             VERSION="${LAST_TAG#v}+git${SHORT_SHA}"
           fi
