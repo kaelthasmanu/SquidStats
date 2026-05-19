@@ -1,0 +1,187 @@
+name: Build Debian Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version without "v" prefix (e.g. 2.3.3). Leave empty to derive from last tag.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write   # needed to attach assets to a GitHub Release
+
+jobs:
+  build-deb:
+    name: Build .deb – ${{ matrix.distro }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ubuntu-24.04   
+            container: ubuntu:24.04
+          - distro: ubuntu-26.04   
+            container: ubuntu:26.04
+          - distro: debian-12      
+            container: debian:12
+          - distro: debian-13      
+            container: debian:13
+
+    container:
+      image: ${{ matrix.container }}
+      options: --user root
+
+    steps:
+      # ── 0. Bootstrap shell tools not present in minimal images ──────────
+      - name: Install base utilities
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
+            git ca-certificates curl
+
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 2. Resolve package version ──────────────────────────────────────
+      - name: Determine package version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif echo "${{ github.ref }}" | grep -q '^refs/tags/v'; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${LAST_TAG#v}+git${SHORT_SHA}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "deb_version=${VERSION}-1"  >> "$GITHUB_OUTPUT"
+          echo "Packaging version: ${VERSION}"
+
+      # ── 3. Install build-time dependencies ──────────────────────────────
+      - name: Install build dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
+            debhelper \
+            devscripts \
+            fakeroot \
+            lintian \
+            build-essential \
+            python3 \
+            python3-pip \
+            python3-venv \
+            python3-dev \
+            libssl-dev \
+            libffi-dev \
+            libpq-dev \
+            libldap2-dev \
+            libsasl2-dev \
+            pkg-config
+
+      # ── 4. Stamp debian/changelog with the current version ──────────────
+      - name: Update debian/changelog
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          DEB_VERSION: ${{ steps.version.outputs.deb_version }}
+        run: |
+          MAINTAINER="Kaelthas <kaelthasmanu@users.noreply.github.com>"
+          DATE=$(date -R)
+
+          # Collect commits since previous tag (max 30 lines)
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            CHANGES=$(git log --pretty=format:"  * %s" "${PREV_TAG}..HEAD" | head -30)
+          else
+            CHANGES="  * Initial Debian packaging."
+          fi
+          [ -z "$CHANGES" ] && CHANGES="  * No notable changes."
+
+          # Write a fresh changelog (prepend to any existing one)
+          {
+            printf 'squidstats (%s) stable; urgency=low\n\n' "$DEB_VERSION"
+            echo "$CHANGES"
+            printf '\n -- %s  %s\n' "$MAINTAINER" "$DATE"
+          } > debian/changelog.new
+
+          # Append old entries if they exist
+          if [ -f debian/changelog ]; then
+            cat debian/changelog >> debian/changelog.new
+          fi
+          mv debian/changelog.new debian/changelog
+
+          echo "=== debian/changelog (first 10 lines) ==="
+          head -10 debian/changelog
+
+      # ── 5. Build the binary .deb package ────────────────────────────────
+      - name: Build Debian package
+        run: |
+          chmod +x debian/rules debian/postinst debian/prerm debian/postrm
+          dpkg-buildpackage -b -us -uc -rfakeroot 2>&1 | tee build.log
+          echo "=== Built packages ==="
+          ls -lh ../*.deb || ls -lh *.deb
+
+      # ── 6. Validate with lintian ─────────────────────────────────────────
+      - name: Run lintian
+        continue-on-error: true   # advisory – does not fail the build
+        run: |
+          DEB=$(ls ../*.deb 2>/dev/null | head -1 || ls *.deb 2>/dev/null | head -1)
+          echo "Linting: $DEB"
+          lintian --profile debian --tag-display-limit 0 "$DEB" \
+            2>&1 | tee lintian.txt || true
+          echo "=== Lintian summary ==="
+          grep -E '^(E|W|I|P):' lintian.txt | sort | uniq -c | sort -rn | head -30 || true
+
+      # ── 7. Show package information ──────────────────────────────────────
+      - name: Package info
+        run: |
+          DEB=$(ls ../*.deb 2>/dev/null | head -1 || ls *.deb 2>/dev/null | head -1)
+          echo "=== dpkg-deb info ==="
+          dpkg-deb --info "$DEB"
+          echo ""
+          echo "=== Installed file list (first 40) ==="
+          dpkg-deb --contents "$DEB" | head -40
+
+      # ── 8. Move .deb to workspace for upload steps ───────────────────────
+      - name: Collect artifacts
+        run: |
+          mkdir -p dist
+          cp ../*.deb dist/ 2>/dev/null || cp *.deb dist/ || true
+          ls -lh dist/
+
+      # ── 9. Upload .deb as workflow artifact ──────────────────────────────
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: squidstats-${{ steps.version.outputs.version }}-${{ matrix.distro }}
+          path: dist/*.deb
+          retention-days: 30
+
+      # ── 10. Upload lintian report ─────────────────────────────────────────
+      - name: Upload lintian report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lintian-${{ matrix.distro }}
+          path: lintian.txt
+          retention-days: 7
+          if-no-files-found: ignore
+
+      # ── 11. Attach .deb to the GitHub Release (tag pushes only) ──────────
+      - name: Attach .deb to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.deb
+          fail_on_unmatched_files: true
