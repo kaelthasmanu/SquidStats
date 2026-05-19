@@ -1,0 +1,47 @@
+Source: squidstats
+Section: web
+Priority: optional
+Maintainer: Kaelthas <kaelthasmanu@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13),
+               python3 (>= 3.11),
+               python3-pip,
+               python3-venv,
+               python3-dev,
+               build-essential,
+               libssl-dev,
+               libffi-dev,
+               libpq-dev,
+               libldap2-dev,
+               libsasl2-dev,
+               pkg-config
+Standards-Version: 4.6.2
+Homepage: https://github.com/kaelthasmanu/SquidStats
+Vcs-Git: https://github.com/kaelthasmanu/SquidStats.git
+Vcs-Browser: https://github.com/kaelthasmanu/SquidStats
+Rules-Requires-Root: no
+
+Package: squidstats
+Architecture: any
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+         python3 (>= 3.11),
+         adduser,
+         libpq5,
+         libldap-2.5-0 | libldap-2.4-2
+Recommends: squid | squid3
+Suggests: postgresql | mariadb-server
+Description: Web-based Squid proxy statistics and monitoring dashboard
+ SquidStats is a Flask web application that provides real-time analysis
+ and statistics for Squid proxy servers, including user monitoring,
+ bandwidth tracking, access log analysis, and reporting.
+ .
+ Features:
+  - Real-time user monitoring and bandwidth statistics
+  - Access log analysis with filtering and PDF export
+  - ACL and blacklist domain management
+  - LDAP/Active Directory authentication integration
+  - Per-user and per-group quota management
+  - Telegram bot notifications
+  - Multi-language support (English and Spanish)
+  - Database support: SQLite, PostgreSQL, MariaDB/MySQL
+  - Backup and restore functionality
