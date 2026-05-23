@@ -13,11 +13,11 @@ pytz
 requests==2.34.2
 #icapclient3
 uvicorn==0.47.0
-PyJWT==2.12.1
+PyJWT==2.13.0
 bcrypt==5.0.0
 telethon>=1.42.0
 loguru==0.7.3
 weasyprint==68.1
-cryptography==47.0.0
+cryptography==48.0.0
 ldap3==2.10.2rc4
 Flask-Babel==4.0.0
