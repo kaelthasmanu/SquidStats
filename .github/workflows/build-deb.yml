@@ -232,13 +232,4 @@ jobs:
               --notes "$RELEASE_BODY"
           fi
 
-          RELEASE_ID=$(gh api repos/${GITHUB_REPOSITORY}/releases/tags/$TAG_NAME --jq .id)
-          if [ -n "$RELEASE_ID" ]; then
-            ASSET_ID=$(gh api repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID/assets --jq ".[] | select(.name==\"$ASSET_NAME\") | .id")
-            if [ -n "$ASSET_ID" ]; then
-              echo "Deleting existing asset $ASSET_NAME ($ASSET_ID)"
-              gh api repos/${GITHUB_REPOSITORY}/releases/assets/$ASSET_ID -X DELETE
-            fi
-          fi
-
-          gh release upload "$TAG_NAME" dist/*.deb
+          gh release upload --clobber "$TAG_NAME" dist/*.deb
