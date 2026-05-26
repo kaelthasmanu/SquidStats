@@ -56,6 +56,8 @@ jobs:
       # ── 2. Resolve package version ──────────────────────────────────────
       - name: Determine package version
         id: version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           EXAMPLE_VERSION=$(grep -E '^\s*VERSION=' .example.env | head -n1 | cut -d'=' -f2- | tr -d '"\r' | xargs || true)
 
@@ -66,10 +68,21 @@ jobs:
           elif echo "${{ github.ref }}" | grep -q '^refs/tags/v'; then
             VERSION="${GITHUB_REF_NAME#v}"
           else
-            # --match 'v*' ensures CI-generated tags (ci-...) are never used
-            LAST_TAG=$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo "v0.0.0")
-            SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="${LAST_TAG#v}+git${SHORT_SHA}"
+            LATEST_RELEASE_TAG=$(curl -sSfL \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" 2>/dev/null \
+              | grep -m1 '"tag_name"' \
+              | sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
+
+            if [ -n "$LATEST_RELEASE_TAG" ]; then
+              VERSION="${LATEST_RELEASE_TAG#v}"
+            else
+              # --match 'v*' ensures CI-generated tags (ci-...) are never used
+              LAST_TAG=$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo "v0.0.0")
+              SHORT_SHA=$(git rev-parse --short HEAD)
+              VERSION="${LAST_TAG#v}+git${SHORT_SHA}"
+            fi
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "deb_version=${VERSION}-1"  >> "$GITHUB_OUTPUT"
@@ -204,21 +217,30 @@ jobs:
           REPO="${GITHUB_REPOSITORY}"
 
           if echo "${GITHUB_REF}" | grep -q '^refs/tags/v'; then
+            RELEASE_ID=$(gh api repos/$REPO/releases/tags/${GITHUB_REF_NAME} --jq '.id' 2>/dev/null || true)
             TAG_NAME="${GITHUB_REF_NAME}"
           else
+            RELEASE_ID=$(gh api repos/$REPO/releases/latest --jq '.id' 2>/dev/null || true)
             TAG_NAME=$(gh api repos/$REPO/releases/latest --jq '.tag_name' 2>/dev/null || true)
-            if [ -z "$TAG_NAME" ]; then
-              echo "Failed to detect the latest existing release for $REPO." >&2
-              echo "gh version:" >&2
-              gh --version >&2 || true
-              echo "gh auth status:" >&2
-              gh auth status >&2 || true
-              echo "gh api repos/$REPO/releases --jq '.[0].tag_name':" >&2
-              gh api repos/$REPO/releases --jq '.[0].tag_name' >&2 || true
-              echo "Create a release manually first and re-run the workflow." >&2
-              exit 1
-            fi
-            echo "Using latest existing release: $TAG_NAME"
           fi
 
-          gh release upload --clobber "$TAG_NAME" dist/squidstats_${{ steps.version.outputs.version }}.deb
+          if [ -z "$RELEASE_ID" ]; then
+            echo "Failed to detect the existing release for $REPO." >&2
+            echo "gh version:" >&2
+            gh --version >&2 || true
+            echo "gh auth status:" >&2
+            gh auth status >&2 || true
+            echo "Create a release manually first and re-run the workflow." >&2
+            exit 1
+          fi
+
+          echo "Using release: $TAG_NAME (ID: $RELEASE_ID)"
+          ASSET_NAME="squidstats_${{ steps.version.outputs.version }}.deb"
+
+          EXISTING_ASSET_ID=$(gh api repos/$REPO/releases/$RELEASE_ID/assets --jq ".[] | select(.name==\"$ASSET_NAME\") | .id" 2>/dev/null || true)
+          if [ -n "$EXISTING_ASSET_ID" ]; then
+            echo "Deleting existing asset $ASSET_NAME ($EXISTING_ASSET_ID)"
+            gh api repos/$REPO/releases/assets/$EXISTING_ASSET_ID -X DELETE
+          fi
+
+          gh release upload --clobber "$RELEASE_ID" dist/$ASSET_NAME
