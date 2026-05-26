@@ -209,27 +209,17 @@ jobs:
           apt-get update -qq
           apt-get install -y --no-install-recommends gh
 
-      - name: Attach .deb to GitHub Release
+      - name: Upload .deb to existing GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           TAG_NAME="${{ steps.release.outputs.release_tag }}"
-          RELEASE_NAME="${{ steps.release.outputs.release_name }}"
-          RELEASE_BODY="${{ steps.release.outputs.release_body }}"
-          TARGET_REF="${GITHUB_SHA}"
           ASSET_NAME=$(basename dist/*.deb)
 
-          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            gh release edit "$TAG_NAME" \
-              --title "$RELEASE_NAME" \
-              --notes "$RELEASE_BODY" \
-              --target "$TARGET_REF"
-          else
-            gh release create "$TAG_NAME" \
-              --target "$TARGET_REF" \
-              --title "$RELEASE_NAME" \
-              --notes "$RELEASE_BODY"
+          if ! gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Release '$TAG_NAME' does not exist. Create it manually first and re-run the workflow." >&2
+            exit 1
           fi
 
           gh release upload --clobber "$TAG_NAME" dist/*.deb
