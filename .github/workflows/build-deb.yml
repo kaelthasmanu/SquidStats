@@ -196,12 +196,21 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
+          REPO="${GITHUB_REPOSITORY}"
+
           if echo "${GITHUB_REF}" | grep -q '^refs/tags/v'; then
             TAG_NAME="${GITHUB_REF_NAME}"
           else
-            TAG_NAME=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || true)
+            TAG_NAME=$(gh api repos/$REPO/releases/latest --jq '.tag_name' 2>/dev/null || true)
             if [ -z "$TAG_NAME" ]; then
-              echo "No existing release found. Create a release manually first and re-run the workflow." >&2
+              echo "Failed to detect the latest existing release for $REPO." >&2
+              echo "gh version:" >&2
+              gh --version >&2 || true
+              echo "gh auth status:" >&2
+              gh auth status >&2 || true
+              echo "gh api repos/$REPO/releases --jq '.[0].tag_name':" >&2
+              gh api repos/$REPO/releases --jq '.[0].tag_name' >&2 || true
+              echo "Create a release manually first and re-run the workflow." >&2
               exit 1
             fi
             echo "Using latest existing release: $TAG_NAME"
