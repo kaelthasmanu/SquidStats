@@ -185,24 +185,6 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-      - name: Determine release metadata
-        id: release
-        run: |
-          if echo "${GITHUB_REF}" | grep -q '^refs/tags/v'; then
-            TAG_NAME="${GITHUB_REF_NAME}"
-            RELEASE_NAME="Release ${GITHUB_REF_NAME}"
-            RELEASE_BODY="Automatic Debian package build for tag ${GITHUB_REF_NAME}."
-          else
-            SAFE_REF_NAME=$(echo "${GITHUB_REF_NAME}" | tr '/\\' '--')
-            SHORT_SHA=$(git rev-parse --short HEAD)
-            TAG_NAME="ci-${SAFE_REF_NAME}-${SHORT_SHA}"
-            RELEASE_NAME="CI build ${GITHUB_REF_NAME} ${SHORT_SHA}"
-            RELEASE_BODY="Automatic Debian package build for push to ${GITHUB_REF}."
-          fi
-          echo "release_tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
-          echo "release_name=${RELEASE_NAME}" >> "$GITHUB_OUTPUT"
-          echo "release_body=${RELEASE_BODY}" >> "$GITHUB_OUTPUT"
-
       - name: Install GitHub CLI
         run: |
           export DEBIAN_FRONTEND=noninteractive
@@ -214,12 +196,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          TAG_NAME="${{ steps.release.outputs.release_tag }}"
-          ASSET_NAME=$(basename dist/*.deb)
-
-          if ! gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            echo "Release '$TAG_NAME' does not exist. Create it manually first and re-run the workflow." >&2
-            exit 1
+          if echo "${GITHUB_REF}" | grep -q '^refs/tags/v'; then
+            TAG_NAME="${GITHUB_REF_NAME}"
+          else
+            TAG_NAME=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || true)
+            if [ -z "$TAG_NAME" ]; then
+              echo "No existing release found. Create a release manually first and re-run the workflow." >&2
+              exit 1
+            fi
+            echo "Using latest existing release: $TAG_NAME"
           fi
 
+          ASSET_NAME=$(basename dist/*.deb)
           gh release upload --clobber "$TAG_NAME" dist/*.deb
