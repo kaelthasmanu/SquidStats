@@ -57,8 +57,12 @@ jobs:
       - name: Determine package version
         id: version
         run: |
+          EXAMPLE_VERSION=$(grep -E '^\s*VERSION=' .example.env | head -n1 | cut -d'=' -f2- | tr -d '"\r' | xargs || true)
+
           if [ -n "${{ github.event.inputs.version }}" ]; then
             VERSION="${{ github.event.inputs.version }}"
+          elif [ -n "$EXAMPLE_VERSION" ]; then
+            VERSION="$EXAMPLE_VERSION"
           elif echo "${{ github.ref }}" | grep -q '^refs/tags/v'; then
             VERSION="${GITHUB_REF_NAME#v}"
           else
