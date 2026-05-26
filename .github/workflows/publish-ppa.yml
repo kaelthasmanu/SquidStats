@@ -1,0 +1,82 @@
+name: Publish to Ubuntu PPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version (e.g. 2.3.3). Leave empty to use example.env.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  publish-ppa:
+    name: Publish to PPA
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 2. Resolve package version ──────────────────────────────────────
+      - name: Determine package version
+        id: version
+        run: |
+          EXAMPLE_VERSION=$(grep -E '^\s*VERSION=' .example.env | head -n1 | cut -d'=' -f2- | tr -d '"\r' | xargs || true)
+
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [ -n "$EXAMPLE_VERSION" ]; then
+            VERSION="$EXAMPLE_VERSION"
+          else
+            VERSION="0.0.0"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Package version: ${VERSION}"
+
+      # ── 3. Create source tarball ─────────────────────────────────────────
+      - name: Create source tarball
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          PKG_DIR="squidstats-${VERSION}"
+
+          mkdir -p "ppa-build/${PKG_DIR}"
+
+          rsync -a \
+            --exclude='.git' \
+            --exclude='debian' \
+            --exclude='.github' \
+            --exclude='.venv' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='*.session' \
+            --exclude='.env' \
+            --exclude='ppa-build' \
+            --exclude='dist' \
+            ./ "ppa-build/${PKG_DIR}/"
+
+          mkdir -p ppa-build/tarball
+          tar -czf "ppa-build/tarball/squidstats_${VERSION}.orig.tar.gz" \
+            -C ppa-build "${PKG_DIR}"
+
+          echo "=== Created tarball ==="
+          ls -lh ppa-build/tarball/
+
+      # ── 4. Publish to PPA ────────────────────────────────────────────────
+      - name: Publish to Ubuntu PPA
+        uses: yuezk/publish-ppa-package@v2
+        with:
+          repository: kaelthasmanu/squidstats
+          gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE }}
+          tarball: ppa-build/tarball/squidstats_${{ steps.version.outputs.version }}.orig.tar.gz
+          debian_dir: debian
+          deb_email: manuelalberto.gorrin@gmail.com
+          deb_fullname: Manuel Alberto Gorrin
+          series: "noble resolute"
+          keep_changelog: "true"
