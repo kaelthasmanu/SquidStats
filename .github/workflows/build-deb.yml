@@ -243,4 +243,4 @@ jobs:
             gh api repos/$REPO/releases/assets/$EXISTING_ASSET_ID -X DELETE
           fi
 
-          gh release upload --clobber "$RELEASE_ID" dist/$ASSET_NAME
+          gh release upload --clobber "$TAG_NAME" dist/$ASSET_NAME
