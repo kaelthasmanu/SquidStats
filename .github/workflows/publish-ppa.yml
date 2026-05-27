@@ -68,13 +68,16 @@ jobs:
           ls -lh ppa-build/tarball/
 
       # ── 4. Prepare debian directory for PPA ─────────────────────────────
-      # debhelper-compat (= 13) is a virtual package not resolvable by
-      # mk-build-deps inside the action container. Replace it with the
-      # real debhelper package dependency.
+      # The action container runs Ubuntu focal with debhelper 12.
+      # Replace the inline debhelper-compat (= 13) with debhelper (>= 12~)
+      # and add a compat file so the container can install build deps.
+      # Launchpad build servers (noble/resolute) have debhelper 13+ and
+      # will build the final package correctly.
       - name: Prepare debian directory for PPA
         run: |
           cp -r debian ppa-debian
-          sed -i 's/debhelper-compat (= 13)/debhelper (>= 13~)/' ppa-debian/control
+          sed -i 's/debhelper-compat (= 13)/debhelper (>= 12~)/' ppa-debian/control
+          echo "12" > ppa-debian/compat
           echo "=== Build-Depends after fix ==="
           grep 'Build-Depends' ppa-debian/control
 
