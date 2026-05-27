@@ -1,6 +1,5 @@
 import os
 import re
-import shutil
 import subprocess  # nosec B404
 import tempfile
 from dataclasses import dataclass
@@ -254,20 +253,6 @@ class SquidConfigSplitter:
         if not os.path.exists(self.input_file):
             raise FileNotFoundError(f"File not found: {self.input_file}")
 
-        # Backup of squid.conf is disabled by user request.
-        # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        # backup_file = f"{self.input_file}.bak{timestamp}"
-        # try:
-        #     shutil.copy2(self.input_file, backup_file)
-        #     logger.info(f"Backup created: {backup_file}")
-        # except PermissionError:
-        #     logger.exception("Permission denied to create backup file: %s", backup_file)
-        #     raise RuntimeError("Permission denied to create backup file")
-        # except Exception:
-        #     logger.exception("Failed to create backup file: %s", backup_file)
-        #     raise RuntimeError("Failed to create backup file")
-        logger.info("Backup creation disabled: no .bak file generated")
-
         # Create the output directory if it doesn't exist
         try:
             if not os.path.exists(self.output_dir):
@@ -509,31 +494,6 @@ class SquidConfigSplitter:
             "output": res["output"],
             "return_code": res["returncode"],
         }
-
-    def _rollback_changes(self, backup_file: str, generated_files: list[str]) -> None:
-        """
-        Rollback changes by restoring the backup and deleting generated files.
-        """
-        try:
-            # Restore backup
-            if os.path.exists(backup_file):
-                shutil.copy2(backup_file, self.input_file)
-                logger.info(f"Restored backup from {backup_file} to {self.input_file}")
-            else:
-                logger.error(f"Backup file not found: {backup_file}")
-
-            # Delete generated files
-            for filename in generated_files:
-                file_path = os.path.join(self.output_dir, filename)
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-                    logger.info(f"Deleted generated file: {file_path}")
-
-            logger.info("Rollback completed successfully.")
-
-        except Exception:
-            logger.exception("Error during rollback")
-            raise RuntimeError("Rollback failed")
 
     def _generate_main_config(self, buffers: dict[str, list[str]]) -> None:
         header = [
