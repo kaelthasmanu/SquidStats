@@ -1,0 +1,4 @@
+# These bundled/minified JS files are third-party assets intentionally
+# included as part of the web application. Unminified sources are available
+# from their respective upstream projects.
+squidstats source: source-is-missing
