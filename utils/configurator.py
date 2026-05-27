@@ -40,7 +40,6 @@ def extract_squid_config(input_file):
     except Exception as e:
         print(f"Error reading file {input_file}: {e}")
         return
-        lines = f.readlines()
 
     for line in lines:
         stripped = line.strip()
