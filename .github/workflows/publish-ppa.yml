@@ -67,7 +67,18 @@ jobs:
           echo "=== Created tarball ==="
           ls -lh ppa-build/tarball/
 
-      # ── 4. Publish to PPA ────────────────────────────────────────────────
+      # ── 4. Prepare debian directory for PPA ─────────────────────────────
+      # debhelper-compat (= 13) is a virtual package not resolvable by
+      # mk-build-deps inside the action container. Replace it with the
+      # real debhelper package dependency.
+      - name: Prepare debian directory for PPA
+        run: |
+          cp -r debian ppa-debian
+          sed -i 's/debhelper-compat (= 13)/debhelper (>= 13~)/' ppa-debian/control
+          echo "=== Build-Depends after fix ==="
+          grep 'Build-Depends' ppa-debian/control
+
+      # ── 5. Publish to PPA ────────────────────────────────────────────────
       - name: Publish to Ubuntu PPA
         uses: yuezk/publish-ppa-package@v2
         with:
@@ -75,7 +86,7 @@ jobs:
           gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE }}
           tarball: ppa-build/tarball/squidstats_${{ steps.version.outputs.version }}.orig.tar.gz
-          debian_dir: debian
+          debian_dir: ppa-debian
           deb_email: manuelalberto.gorrin@gmail.com
           deb_fullname: Manuel Alberto Gorrin Reyes
           series: "noble resolute"
