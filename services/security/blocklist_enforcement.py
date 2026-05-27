@@ -373,8 +373,10 @@ def _remove_acl_line(cm, acl_line: str):
         if acl_content is not None:
             new_lines = _strip_acl_and_comment(acl_content.split("\n"), acl_line)
             cm.save_modular_config("100_acls.conf", "\n".join(new_lines))
+        # In modular mode squid.conf contains only include directives generated
+        # by SquidConfigSplitter — never write raw config content into it.
+        return
 
-    # Always update monolithic config as well
     lines = cm.config_content.split("\n")
     new_lines = _strip_acl_and_comment(lines, acl_line)
     cm.save_config("\n".join(new_lines))
