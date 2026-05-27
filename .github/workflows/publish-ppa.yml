@@ -68,15 +68,15 @@ jobs:
           ls -lh ppa-build/tarball/
 
       # ── 4. Prepare debian directory for PPA ─────────────────────────────
-      # The action container runs Ubuntu focal with debhelper 12.
-      # Replace the inline debhelper-compat (= 13) with debhelper (>= 12~)
-      # and add a compat file so the container can install build deps.
-      # Launchpad build servers (noble/resolute) have debhelper 13+ and
-      # will build the final package correctly.
+      # The action container runs Ubuntu focal (debhelper 12, python3 3.8).
+      # Relax Build-Depends so mk-build-deps can install them inside the
+      # container; the actual package is built on Launchpad servers (noble/
+      # resolute) which have debhelper 13+ and python3 3.11+.
       - name: Prepare debian directory for PPA
         run: |
           cp -r debian ppa-debian
           sed -i 's/debhelper-compat (= 13)/debhelper (>= 12~)/' ppa-debian/control
+          sed -i 's/python3 (>= 3\.11)/python3/' ppa-debian/control
           echo "12" > ppa-debian/compat
           echo "=== Build-Depends after fix ==="
           grep 'Build-Depends' ppa-debian/control
