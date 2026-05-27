@@ -182,7 +182,7 @@ jobs:
             echo "No Debian package found to collect." >&2
             exit 1
           fi
-          cp "$DEB" dist/squidstats_${{ steps.version.outputs.version }}.deb
+          cp "$DEB" dist/squidstats_${{ steps.version.outputs.version }}_${{ matrix.distro }}.deb
           ls -lh dist/
 
       # ── 9. Upload .deb as workflow artifact ──────────────────────────────
@@ -190,7 +190,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: squidstats-${{ steps.version.outputs.version }}-${{ matrix.distro }}
-          path: dist/squidstats_${{ steps.version.outputs.version }}.deb
+          path: dist/squidstats_${{ steps.version.outputs.version }}_${{ matrix.distro }}.deb
           retention-days: 30
 
       # ── 10. Upload lintian report ─────────────────────────────────────────
@@ -235,7 +235,7 @@ jobs:
           fi
 
           echo "Using release: $TAG_NAME (ID: $RELEASE_ID)"
-          ASSET_NAME="squidstats_${{ steps.version.outputs.version }}.deb"
+          ASSET_NAME="squidstats_${{ steps.version.outputs.version }}_${{ matrix.distro }}.deb"
 
           EXISTING_ASSET_ID=$(gh api repos/$REPO/releases/$RELEASE_ID/assets --jq ".[] | select(.name==\"$ASSET_NAME\") | .id" 2>/dev/null || true)
           if [ -n "$EXISTING_ASSET_ID" ]; then
