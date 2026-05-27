@@ -78,7 +78,7 @@ jobs:
         fi
 
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Configure Squid (Alpine)
       if: matrix.distro == 'alpine'
