@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import subprocess  # nosec B404
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -214,6 +215,40 @@ class SquidConfigSplitter:
 
         return self.unknown_file
 
+    @staticmethod
+    def _atomic_write(path: str, content: str, encoding: str = "utf-8") -> None:
+        """Write *content* to *path* atomically via a temp file + os.replace.
+
+        A plain open(path, 'w') truncates the file immediately; if the process
+        dies mid-write the config file ends up empty/corrupt.  Writing to a
+        temporary file in the same directory and calling os.replace() is atomic
+        on POSIX — the destination is either the old content or the new content,
+        never a partial write.
+        """
+        abs_path = os.path.abspath(path)
+        dir_name = os.path.dirname(abs_path)
+        tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding=encoding,
+                dir=dir_name,
+                delete=False,
+                suffix=".squidstats.tmp",
+            ) as tmp:
+                tmp.write(content)
+                tmp_path = tmp.name
+            os.replace(tmp_path, abs_path)
+        except Exception:
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.unlink(tmp_path)
+                except Exception as cleanup_err:
+                    logger.warning(
+                        "Could not remove temporary file %s: %s", tmp_path, cleanup_err
+                    )
+            raise
+
     def split_config(self) -> dict[str, int]:
         # Verify that the input file exists
         if not os.path.exists(self.input_file):
@@ -251,11 +286,15 @@ class SquidConfigSplitter:
                 f"Failed to create output directory: {self.output_dir}"
             ) from e
 
+        # Read original content into memory so we can restore squid.conf atomically
+        # if validation fails after _generate_main_config() has already overwritten it.
+        # (File-based backup is intentionally disabled; in-memory copy avoids I/O cost.)
+        with open(self.input_file, encoding="utf-8") as f:
+            _original_content = f.read()
+
         buffers: dict[str, list[str]] = {}
         pending_comments: list[str] = []
         results: dict[str, int] = {}
-        backup_file = None
-        results["_backup_file"] = backup_file
 
         try:
             with open(self.input_file, encoding="utf-8") as f:
@@ -323,8 +362,7 @@ class SquidConfigSplitter:
             for filename, content in sorted(buffers.items()):
                 path = os.path.join(self.output_dir, filename)
                 try:
-                    with open(path, "w", encoding="utf-8") as f:
-                        f.writelines(content)
+                    self._atomic_write(path, "".join(content))
                     results[filename] = len(content)
                     logger.info(f"[OK] {path} ({len(content)} lines)")
                 except PermissionError:
@@ -346,11 +384,17 @@ class SquidConfigSplitter:
                     "Squid configuration validation failed. Rolling back changes. Error: %s",
                     error_details,
                 )
-                if backup_file:
-                    self._rollback_changes(backup_file, list(buffers.keys()))
-                else:
-                    logger.warning(
-                        "No backup file available: no rollback will be performed"
+                # Restore squid.conf from the in-memory copy taken before any
+                # writes.  _generate_main_config() has already overwritten it with
+                # include-only content, so this is the only way to get it back.
+                try:
+                    self._atomic_write(self.input_file, _original_content)
+                    logger.info(
+                        "squid.conf rolled back to original content successfully"
+                    )
+                except Exception:
+                    logger.exception(
+                        "Rollback of squid.conf FAILED — manual intervention required!"
                     )
                 raise RuntimeError(
                     f"Squid configuration validation failed. Changes have been reverted.\n\nSquid output:\n{error_details}"
@@ -509,9 +553,7 @@ class SquidConfigSplitter:
                 includes.append(f"include {include_path}\n")
 
         try:
-            with open(self.input_file, "w", encoding="utf-8") as f:
-                f.writelines(header)
-                f.writelines(includes)
+            self._atomic_write(self.input_file, "".join(header) + "".join(includes))
             logger.info(
                 f"Main configuration file regenerated with {len(includes)} includes in correct dependency order"
             )
