@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import tempfile
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -165,9 +166,51 @@ class SquidConfigManager:
             self.config_content = ""
             return False
 
+    @staticmethod
+    def _atomic_write(path: str, content: str, encoding: str = "utf-8") -> None:
+        """Write *content* to *path* atomically: write to a temp file then os.replace.
+
+        Using open(path, 'w') truncates the file immediately; if the process is
+        interrupted mid-write squid.conf ends up empty/corrupt.  Writing to a
+        temporary file in the same directory and calling os.replace() is atomic
+        on POSIX — the destination is either the old file or the new file, never
+        a partial write.
+        """
+        abs_path = os.path.abspath(path)
+        dir_name = os.path.dirname(abs_path)
+        tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding=encoding,
+                dir=dir_name,
+                delete=False,
+                suffix=".squidstats.tmp",
+            ) as tmp:
+                tmp.write(content)
+                tmp_path = tmp.name
+            os.replace(tmp_path, abs_path)
+        except Exception:
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.unlink(tmp_path)
+                except Exception as cleanup_err:
+                    logger.warning(
+                        "Could not remove temporary file %s: %s", tmp_path, cleanup_err
+                    )
+            raise
+
     def save_config(self, content):
         if not self.is_valid:
             logger.error("Cannot save configuration: invalid environment")
+            return False
+
+        # Guard: never blank squid.conf — an empty file would bring down Squid
+        if not content or not content.strip():
+            logger.error(
+                "Refusing to save empty/whitespace-only content to squid.conf: "
+                "this would disable the Squid proxy"
+            )
             return False
 
         try:
@@ -180,8 +223,7 @@ class SquidConfigManager:
             if not backup_created:
                 logger.warning("Could not create backup, but continuing with save...")
 
-            with open(self.config_path, "w", encoding="utf-8") as f:
-                f.write(content)
+            self._atomic_write(self.config_path, content)
 
             self.config_content = content
             logger.info(f"Configuration saved successfully to: {self.config_path}")
@@ -200,6 +242,20 @@ class SquidConfigManager:
     def create_backup(self):
         if not self.is_valid:
             logger.error("Cannot create backup: invalid environment")
+            return False
+        try:
+            backup_path = f"{self.config_path}.bak"
+            shutil.copy2(self.config_path, backup_path)
+            logger.info(f"Backup created: {backup_path}")
+            return True
+        except FileNotFoundError:
+            logger.warning(f"Config file not found for backup: {self.config_path}")
+            return False
+        except PermissionError:
+            logger.error(f"No permission to create backup for: {self.config_path}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error creating backup: {e}")
             return False
 
     def get_acls(self):
@@ -644,8 +700,7 @@ class SquidConfigManager:
                 except Exception as e:
                     logger.warning(f"Could not create backup for {filename}: {e}")
 
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
+            self._atomic_write(filepath, content)
 
             logger.info(f"Saved modular config: {filename}")
             return True
