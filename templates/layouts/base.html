@@ -26,6 +26,21 @@
       {% include 'components/navbar.html' %}
       <!-- Main content with MORE SPACE for the navbar -->
       <main class="min-h-screen pt-16 lg:pt-20 pb-20">
+        {% if is_deb_install %}
+        <div class="w-full bg-amber-50 border-b border-amber-300 px-4 py-3">
+          <div class="max-w-7xl mx-auto flex items-start gap-3 text-amber-800">
+            <i class="fas fa-box-open mt-0.5 flex-shrink-0"></i>
+            <p class="text-sm">
+              <span class="font-semibold">{{ _("Instalación .deb detectada.") }}</span>
+              {{ _("Esta versión fue instalada con un paquete .deb y no puede actualizarse desde el botón \"Web\".") }}
+              {{ _("Para actualizar, descargue e instale la última versión desde") }}
+              <a href="https://github.com/kaelthasmanu/SquidStats/releases/latest"
+                 target="_blank" rel="noopener noreferrer"
+                 class="font-semibold underline hover:text-amber-900">GitHub Releases</a>.
+            </p>
+          </div>
+        </div>
+        {% endif %}
         <!-- UNIFIED MAIN CONTAINER -->
         <div class="w-full px-4 sm:px-6 lg:px-8">
           {% block header %}
