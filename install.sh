@@ -35,12 +35,12 @@ log_msg() {
 }
 
 error() {
-    echo -e "\n\033[1;41m$1\033[0m\n"
+    printf "\n\033[1;41m%s\033[0m\n\n" "$1"
     log_msg "ERROR" "$1"
 }
 
 ok() {
-    echo -e "\n\033[1;42m$1\033[0m\n"
+    printf "\n\033[1;42m%s\033[0m\n\n" "$1"
     log_msg "OK" "$1"
 }
 
@@ -279,13 +279,13 @@ updateOrCloneRepo() {
 
     if git -C "$found_dir" fetch origin "$branch" && \
        git -C "$found_dir" checkout "$branch" && \
-       git -C "$found_dir" pull origin "$branch"; then
+       git -C "$found_dir" reset --hard "origin/$branch"; then
         [ "$env_exists" = true ] && mv /tmp/.env.backup "$found_dir/.env"
         log_msg "OK" "Repositorio actualizado exitosamente en la rama '$branch'"
         echo "✅ Repositorio actualizado exitosamente en la rama '$branch'"
         return 0
     else
-        log_msg "ERROR" "Error al actualizar el repositorio con git pull"
+        log_msg "ERROR" "Error al actualizar el repositorio"
         echo "❌ Error al actualizar el repositorio."
         return 1
     fi
@@ -470,7 +470,7 @@ configureDatabase() {
         echo "Modo no interactivo: configurando SQLite por defecto"
         choice=1
     else
-        echo -e "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m"
+        printf "\n\033[1;44mCONFIGURACIÓN DE BASE DE DATOS\033[0m\n"
         echo "Seleccione el tipo de base de datos:"
         echo "1) SQLite (por defecto)"
         echo "2) MariaDB (necesitas tener mariadb ejecutándose)"
@@ -583,7 +583,7 @@ uninstallSquidStats() {
     destino=$(findInstallDir)
 
     log_msg "INFO" "Iniciando proceso de desinstalación"
-    echo -e "\n\033[1;43mDESINSTALACIÓN DE SQUIDSTATS\033[0m"
+    printf "\n\033[1;43mDESINSTALACIÓN DE SQUIDSTATS\033[0m\n"
     echo "Esta operación eliminará completamente SquidStats del sistema."
 
     if [ -z "$destino" ]; then
