@@ -14,7 +14,7 @@ from services.notifications.notifications import get_all_notifications
 from services.squid.fetch_data import fetch_all_squid_data
 from services.system.system_info import get_system_type
 from utils.updateSquid import update_squid
-from utils.updateSquidStats import updateSquidStats
+from utils.updateSquidStats import is_deb_installation, updateSquidStats
 
 main_bp = Blueprint("main", __name__)
 
@@ -35,7 +35,7 @@ def filter_valid_users(grouped_connections):
 def inject_app_version():
     """Inject the application version into all templates"""
     version = getattr(Config, "VERSION", None) or os.getenv("VERSION", "-")
-    return {"app_version": version}
+    return {"app_version": version, "is_deb_install": is_deb_installation()}
 
 
 def _build_error_page(message: str, status: int = 500):
@@ -184,8 +184,18 @@ def install_package():
 @main_bp.route("/update", methods=["POST"])
 def update_web():
     """Route to update the web application"""
-    ok = False
     logger.info("Received web update request")
+    if is_deb_installation():
+        flash(
+            _(
+                "Esta instalación fue realizada con un paquete .deb y no puede "
+                "actualizarse desde aquí. Descargue e instale la última versión: "
+                "dpkg -i squidstats_<version>.deb"
+            ),
+            "warning",
+        )
+        return redirect("/")
+    ok = False
     try:
         ok = updateSquidStats()
         if ok:
