@@ -10,8 +10,29 @@ from loguru import logger
 load_dotenv()
 
 
+_DEB_INSTALL_PATHS = {"/opt/SquidStats/app", "/usr/share/squidstats"}
+
+
 def updateSquidStats():
     logger.info("Starting SquidStats web update process")
+
+    install_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if install_dir in _DEB_INSTALL_PATHS:
+        logger.error(
+            "Deb-based installation detected in %s. "
+            "This installation cannot be updated with this script. "
+            "Please use the .deb package to update: dpkg -i squidstats_<version>.deb",
+            install_dir,
+        )
+        return False
+    if not os.path.isdir(os.path.join(install_dir, ".git")):
+        logger.error(
+            "No git repository found in %s. "
+            "Cannot perform automatic update.",
+            install_dir,
+        )
+        return False
+
     try:
         proxy_url = os.getenv("HTTP_PROXY", "")
         https_proxy_url = os.getenv("HTTPS_PROXY", proxy_url)
