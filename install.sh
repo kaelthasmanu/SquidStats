@@ -199,7 +199,7 @@ checkSquidLog() {
 }
 
 findInstallDir() {
-    local destinos="/opt/SquidStats /usr/share/squidstats /opt/squidstats"
+    local destinos="/opt/SquidStats/app /opt/SquidStats /usr/share/squidstats /opt/squidstats"
 
     # Agregar el directorio actual si contiene archivos de SquidStats
     if [ -f "app.py" ] && [ -f "requirements.txt" ] && [ -d ".git" ]; then
@@ -241,10 +241,13 @@ updateOrCloneRepo() {
         fi
     fi
 
-    if [ "$found_dir" = "/usr/share/squidstats" ]; then
-        log_msg "WARN" "Instalación .deb detectada en /usr/share/squidstats, no se puede actualizar con git"
-        echo "ℹ️ Instalación detectada en /usr/share/squidstats. Esta versión fue instalada desde un .deb y no puede actualizarse con git."
-        echo "Por favor, use el gestor de paquetes de su distribución para actualizar."
+    if [ "$found_dir" = "/usr/share/squidstats" ] || [ "$found_dir" = "/opt/SquidStats/app" ]; then
+        log_msg "WARN" "Instalación .deb detectada en $found_dir, no se puede actualizar con este script"
+        echo "ℹ️ Instalación detectada en $found_dir. Esta versión fue instalada desde un paquete .deb"
+        echo "   y no puede actualizarse con este script."
+        echo ""
+        echo "Para actualizar, descargue e instale la nueva versión del paquete .deb:"
+        echo "  dpkg -i squidstats_<version>.deb"
         return 1
     fi
 
@@ -649,7 +652,10 @@ main() {
         echo "Verificando paquetes instalados..."
         checkPackages
         echo "Actualizando Servicio..."
-        updateOrCloneRepo
+        if ! updateOrCloneRepo; then
+            error "No se puede continuar con la actualización"
+            return 1
+        fi
         
         # Find the installation directory
         local install_dir=$(findInstallDir)
