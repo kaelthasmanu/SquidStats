@@ -653,3 +653,6 @@ msgstr "This version was installed with a .deb package and cannot be updated usi
 
 msgid "Para actualizar, descargue e instale la última versión desde"
 msgstr "To update, download and install the latest version from"
+
+msgid "Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Para actualizar, descargue e instale la última versión desde GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest"
+msgstr "This installation was done with a .deb package and cannot be updated from here. To update, download and install the latest version from GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest"
