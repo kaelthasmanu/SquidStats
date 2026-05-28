@@ -232,6 +232,7 @@
 <script defer src="{{ url_for('static', filename='src/alpine.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
 <script>
+  const IS_DEB_INSTALL = {{ is_deb_install | tojson }};
   // Enhanced Navbar Functionality with Real-time Notifications
   document.addEventListener("DOMContentLoaded", function () {
     // Tooltip functionality
@@ -657,6 +658,14 @@
   }
 
   function confirmWebUpdate() {
+    if (IS_DEB_INSTALL) {
+      showCustomConfirm(
+        {{ _("Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Para actualizar, descargue e instale la última versión desde GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest") | tojson }},
+        function() {},
+        { onlyClose: true }
+      );
+      return;
+    }
     showCustomConfirm(
       {{ _('¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad.')|tojson }},
       async () => {
