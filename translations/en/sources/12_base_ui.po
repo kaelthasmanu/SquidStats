@@ -644,3 +644,12 @@ msgstr "Swap Used"
 
 msgid "SWAP Usada: "
 msgstr "SWAP Used: "
+
+msgid "Instalación .deb detectada."
+msgstr "Deb package installation detected."
+
+msgid "Esta versión fue instalada con un paquete .deb y no puede actualizarse desde el botón \"Web\"."
+msgstr "This version was installed with a .deb package and cannot be updated using the \"Web\" button."
+
+msgid "Para actualizar, descargue e instale la última versión desde"
+msgstr "To update, download and install the latest version from"
