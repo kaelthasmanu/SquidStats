@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SquidStats\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-27 18:46+0000\n"
-"PO-Revision-Date: 2026-05-27 18:46+0000\n"
+"POT-Creation-Date: 2026-05-28 17:39+0000\n"
+"PO-Revision-Date: 2026-05-28 17:39+0000\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
@@ -872,6 +872,9 @@ msgstr "Tool for activity and security analysis."
 #: routes/stats_routes.py:70
 msgid "Estadísticas del comportamiento del Sistema"
 msgstr "System Behavior Statistics"
+
+msgid "Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Descargue e instale la última versión: dpkg -i squidstats_<version>.deb"
+msgstr "This installation was done with a .deb package and cannot be updated from here. Download and install the latest version: dpkg -i squidstats_<version>.deb"
 
 # SquidStats — English translations
 # Edit this file here and keep it in sync manually if desired.
@@ -4765,3 +4768,12 @@ msgstr "Swap Used"
 
 msgid "SWAP Usada: "
 msgstr "SWAP Used: "
+
+msgid "Instalación .deb detectada."
+msgstr "Deb package installation detected."
+
+msgid "Esta versión fue instalada con un paquete .deb y no puede actualizarse desde el botón \"Web\"."
+msgstr "This version was installed with a .deb package and cannot be updated using the \"Web\" button."
+
+msgid "Para actualizar, descargue e instale la última versión desde"
+msgstr "To update, download and install the latest version from"
