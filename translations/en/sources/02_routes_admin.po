@@ -271,3 +271,6 @@ msgstr "Tool for activity and security analysis."
 #: routes/stats_routes.py:70
 msgid "Estadísticas del comportamiento del Sistema"
 msgstr "System Behavior Statistics"
+
+msgid "Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Descargue e instale la última versión: dpkg -i squidstats_<version>.deb"
+msgstr "This installation was done with a .deb package and cannot be updated from here. Download and install the latest version: dpkg -i squidstats_<version>.deb"
