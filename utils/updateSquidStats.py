@@ -13,11 +13,17 @@ load_dotenv()
 _DEB_INSTALL_PATHS = {"/opt/SquidStats/app", "/usr/share/squidstats"}
 
 
+def is_deb_installation() -> bool:
+    """Return True when the app is running from a .deb-managed installation path."""
+    install_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return install_dir in _DEB_INSTALL_PATHS
+
+
 def updateSquidStats():
     logger.info("Starting SquidStats web update process")
 
     install_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if install_dir in _DEB_INSTALL_PATHS:
+    if is_deb_installation():
         logger.error(
             "Deb-based installation detected in %s. "
             "This installation cannot be updated with this script. "
