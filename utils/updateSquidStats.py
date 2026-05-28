@@ -33,8 +33,7 @@ def updateSquidStats():
         return False
     if not os.path.isdir(os.path.join(install_dir, ".git")):
         logger.error(
-            "No git repository found in %s. "
-            "Cannot perform automatic update.",
+            "No git repository found in %s. Cannot perform automatic update.",
             install_dir,
         )
         return False
