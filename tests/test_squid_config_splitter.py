@@ -54,8 +54,11 @@ class TestClassifyLine:
             ("delay_pools 3", "110_delay_pools.conf"),
             ("delay_class 1 2", "110_delay_pools.conf"),
             ("no_cache deny QUERY", "115_cache_control.conf"),
-            # cache_peer matches both 30_cache.conf and 115_cache_control.conf (ambiguous)
-            # so we test it separately below
+            (
+                "cache_peer proxy1.alinet.cu parent 3128 0 round-robin proxy-only",
+                "115_cache_control.conf",
+            ),
+            ("cache_peer_access proxy1 allow all", "115_cache_control.conf"),
             ("never_direct allow all", "115_cache_control.conf"),
             ("http_access allow localhost", "120_http_access.conf"),
             ("http_access deny all", "120_http_access.conf"),
