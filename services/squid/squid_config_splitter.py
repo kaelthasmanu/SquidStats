@@ -88,7 +88,9 @@ class SquidConfigSplitter:
             Rule(
                 "30_cache.conf",
                 [
-                    re.compile(r"^cache_(?!log\b|mgr\b|store_log\b|access_log\b)"),
+                    re.compile(
+                        r"^cache_(?!log\b|mgr\b|store_log\b|access_log\b|peer(?:\b|_))"
+                    ),
                     re.compile(r"^maximum_object_"),
                     re.compile(r"^minimum_object_"),
                     re.compile(r"^memory_"),
