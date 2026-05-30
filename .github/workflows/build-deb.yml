@@ -59,7 +59,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          EXAMPLE_VERSION=$(grep -E '^\s*VERSION=' .example.env | head -n1 | cut -d'=' -f2- | tr -d '"\r' | xargs || true)
+          EXAMPLE_VERSION=$(grep -E '^\s*VERSION=' example.env | head -n1 | cut -d'=' -f2- | tr -d '"\r' | xargs || true)
 
           if [ -n "${{ github.event.inputs.version }}" ]; then
             VERSION="${{ github.event.inputs.version }}"
