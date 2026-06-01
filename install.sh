@@ -293,7 +293,7 @@ updateOrCloneRepo() {
 
 updateEnvVersion() {
     local install_dir="${1:-/opt/SquidStats}"
-    local CURRENT_VERSION="2.3.3"  # Variable de versión actual del script
+    local CURRENT_VERSION="2.4"  # Variable de versión actual del script
     local env_file="$install_dir/.env"
     
     log_msg "INFO" "Verificando versión en .env ($env_file)"
@@ -346,7 +346,7 @@ createEnvFile() {
         log_msg "INFO" "Creando archivo .env en $env_file"
         echo "Creando archivo de configuración .env..."
         cat >"$env_file" <<EOF
-VERSION=2.3.3
+VERSION=2.4
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
 SQUID_HOSTS=
