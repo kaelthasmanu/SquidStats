@@ -116,12 +116,27 @@ def _throttled_ips_filepath(cm, pool_number: int) -> str:
 
 
 def _find_acl_insert_index(lines: list[str]) -> int:
-    """Return where to insert an ACL before any access or delay rules."""
+    """Return the index where a new ACL should be inserted.
+
+    Prefer inserting after the last existing ACL block.
+    If no ACLs exist, insert before the first access/delay rule.
+    Otherwise append to the end.
+    """
+    last_acl_idx = -1
+    first_access_idx = len(lines)
     for i, line in enumerate(lines):
         stripped = line.strip()
-        if stripped.startswith("http_access ") or stripped.startswith("delay_access "):
-            return i
-    return len(lines)
+        if stripped.startswith("acl "):
+            last_acl_idx = i
+        elif (
+            stripped.startswith("http_access ")
+            or stripped.startswith("delay_access ")
+        ) and first_access_idx == len(lines):
+            first_access_idx = i
+
+    if last_acl_idx != -1:
+        return last_acl_idx + 1
+    return first_access_idx
 
 
 def _add_acl_src_file(acl_name: str, filepath: str, cm) -> bool:
