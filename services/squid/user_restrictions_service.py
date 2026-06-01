@@ -115,6 +115,15 @@ def _throttled_ips_filepath(cm, pool_number: int) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _find_acl_insert_index(lines: list[str]) -> int:
+    """Return where to insert an ACL before any access or delay rules."""
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("http_access ") or stripped.startswith("delay_access "):
+            return i
+    return len(lines)
+
+
 def _add_acl_src_file(acl_name: str, filepath: str, cm) -> bool:
     """Add `acl <acl_name> src "<filepath>"` idempotently."""
     acl_line = f'acl {acl_name} src "{filepath}"'
@@ -133,8 +142,9 @@ def _add_acl_src_file(acl_name: str, filepath: str, cm) -> bool:
         if acl_line in cm.config_content:
             return True
         lines = cm.config_content.split("\n")
-        lines.append(comment)
-        lines.append(acl_line)
+        insert_idx = _find_acl_insert_index(lines)
+        lines.insert(insert_idx, comment)
+        lines.insert(insert_idx + 1, acl_line)
         return bool(cm.save_config("\n".join(lines)))
     except Exception:
         logger.exception("Error adding ACL src: %s", acl_name)
