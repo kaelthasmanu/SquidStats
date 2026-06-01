@@ -23,7 +23,10 @@ import re
 from loguru import logger
 
 from database.models.models import BlockedUser, ThrottledUser
-from services.squid.http_access_service import add_http_deny_blocklist
+from services.squid.http_access_service import (
+    add_http_deny_blocklist,
+    remove_http_deny_blocklist,
+)
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -256,6 +259,14 @@ def _sync_throttled_file(db, cm, pool_number: int) -> bool:
     return _write_ip_file(filepath, active_ips, restrictions_dir)
 
 
+def _cleanup_blocked_rules_if_empty(db, cm) -> None:
+    """Remove SquidStats blocklist rules when no active blocked IPs remain."""
+    active_blocked = db.query(BlockedUser).filter_by(active=1).count()
+    if active_blocked == 0:
+        _remove_acl_src(BLOCKED_ACL_NAME, cm)
+        remove_http_deny_blocklist(BLOCKED_ACL_NAME, cm)
+
+
 # ---------------------------------------------------------------------------
 # Public API: Block / Unblock
 # ---------------------------------------------------------------------------
@@ -317,6 +328,7 @@ def unblock_user(username: str, ip: str, db, cm) -> tuple[bool, str]:
         return False, "Error al actualizar la base de datos"
 
     _sync_blocked_file(db, cm)
+    _cleanup_blocked_rules_if_empty(db, cm)
     return True, f"Usuario {username} ({ip}) desbloqueado"
 
 
@@ -409,6 +421,9 @@ def sync_restrictions(db, cm) -> None:
         filepath = _blocked_ips_filepath(cm)
         _add_acl_src_file(BLOCKED_ACL_NAME, filepath, cm)
         add_http_deny_blocklist(BLOCKED_ACL_NAME, cm)
+    else:
+        _remove_acl_src(BLOCKED_ACL_NAME, cm)
+        remove_http_deny_blocklist(BLOCKED_ACL_NAME, cm)
 
     # Throttled users (per pool)
     rows = db.query(ThrottledUser.pool_number).filter_by(active=1).distinct().all()
