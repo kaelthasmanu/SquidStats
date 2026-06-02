@@ -63,8 +63,8 @@
         <p class="text-sm text-gray-600 mb-4">{{ _("Lista de IPs que actualmente están bloqueadas en la base de datos.") }}</p>
 
         {% if blocked_users %}
-        <div class="overflow-x-auto bg-white rounded shadow border">
-            <table class="min-w-full text-left text-sm text-gray-700">
+        <div class="overflow-x-auto bg-white rounded shadow border" id="blocked-users-table-container">
+            <table id="blocked-users-table" class="min-w-full text-left text-sm text-gray-700">
                 <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                     <tr>
                         <th class="px-4 py-3">{{ _("Usuario") }}</th>
@@ -300,10 +300,49 @@
                 showCustomConfirm(
                     `¿Estás seguro de que deseas eliminar el usuario bloqueado ${username} de la base de datos? Esta acción también actualizará el archivo de IPs bloqueadas.`,
                     function() {
-                        if (pendingDeleteForm) {
-                            pendingDeleteForm.submit();
-                            pendingDeleteForm = null;
+                        if (!pendingDeleteForm) {
+                            return;
                         }
+                        const blockedUserId = pendingDeleteForm.querySelector('input[name="blocked_user_id"]').value;
+                        const csrfToken = pendingDeleteForm.querySelector('input[name="csrf_token"]').value;
+                        fetch('/admin/blacklist/delete-blocked-user', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken,
+                            },
+                            body: JSON.stringify({ blocked_user_id: blockedUserId }),
+                        })
+                        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+                        .then(function(result) {
+                            if (result.ok && result.data.status === 'success') {
+                                showToast(result.data.message, 'success');
+                                const row = pendingDeleteForm.closest('tr');
+                                if (row) {
+                                    row.remove();
+                                }
+                                const tbody = document.querySelector('#blocked-users-table tbody');
+                                if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                                    const container = document.getElementById('blocked-users-table-container');
+                                    if (container) {
+                                        const emptyText = "{{ _('No hay IPs bloqueadas en la base de datos.') }}";
+                                        container.innerHTML = `
+                                            <div class="bg-gray-50 p-4 rounded border text-sm text-gray-600">
+                                                ${emptyText}
+                                            </div>
+                                        `;
+                                    }
+                                }
+                            } else {
+                                showToast(result.data.message || 'Error al eliminar usuario bloqueado', 'error');
+                            }
+                        })
+                        .catch(function() {
+                            showToast('Error de conexión al servidor', 'error');
+                        })
+                        .finally(function() {
+                            pendingDeleteForm = null;
+                        });
                     }
                 );
             });
