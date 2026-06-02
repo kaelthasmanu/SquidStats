@@ -92,6 +92,7 @@
                         <td class="px-4 py-3">
                             <form method="POST" action="/admin/blacklist/delete-blocked-user" class="delete-blocked-user-form inline">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="blocked_user_id" value="{{ user.id }}" />
                                 <input type="hidden" name="username" value="{{ user.username }}" />
                                 <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm">{{ _("Eliminar") }}</button>
                             </form>
