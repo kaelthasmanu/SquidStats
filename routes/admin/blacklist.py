@@ -24,7 +24,6 @@ from services.security.blocklist_enforcement import (
     get_enforced_blocklist_urls,
 )
 from services.squid.user_restrictions_service import (
-    unblock_user,
     _sync_blocked_file,
 )
 
@@ -57,11 +56,7 @@ def register_routes(bp):
                 .all()
             )
             blacklist = "\n".join([r.domain for r in rows])
-            blocked_users = (
-                session.query(BlockedUser)
-                .order_by(BlockedUser.ip)
-                .all()
-            )
+            blocked_users = session.query(BlockedUser).order_by(BlockedUser.ip).all()
         finally:
             session.close()
 
@@ -254,9 +249,7 @@ def register_routes(bp):
             logger.exception("Error eliminando usuario bloqueado")
             if data:
                 return json_error(_("Error al eliminar usuario bloqueado"), 500, str(e))
-            flash_error_with_details(
-                _("Error al eliminar usuario bloqueado"), e
-            )
+            flash_error_with_details(_("Error al eliminar usuario bloqueado"), e)
         finally:
             session.close()
 
