@@ -129,8 +129,7 @@ def _find_acl_insert_index(lines: list[str]) -> int:
         if stripped.startswith("acl "):
             last_acl_idx = i
         elif (
-            stripped.startswith("http_access ")
-            or stripped.startswith("delay_access ")
+            stripped.startswith("http_access ") or stripped.startswith("delay_access ")
         ) and first_access_idx == len(lines):
             first_access_idx = i
 
