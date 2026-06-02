@@ -202,20 +202,20 @@ def register_routes(bp):
     @bp.route("/blacklist/delete-blocked-user", methods=["POST"])
     @admin_required
     def blacklist_delete_blocked_user():
-        ip = request.form.get("ip")
-        if not ip:
-            flash(_("IP no proporcionada"), "error")
+        username = request.form.get("username")
+        if not username:
+            flash(_("Usuario no proporcionado"), "error")
             return redirect(url_for("admin.manage_blacklist"))
 
         session = get_session()
         cm = get_config_manager()
         try:
-            record = session.query(BlockedUser).filter_by(ip=ip, active=1).first()
+            record = session.query(BlockedUser).filter_by(username=username, active=1).first()
             if not record:
-                flash(_("No se encontró la IP bloqueada"), "error")
+                flash(_("No se encontró el usuario bloqueado"), "error")
                 return redirect(url_for("admin.manage_blacklist"))
 
-            ok, msg = unblock_user(record.username or ip, ip, session, cm)
+            ok, msg = unblock_user(username, record.ip, session, cm)
             if ok:
                 flash(msg, "success")
             else:
