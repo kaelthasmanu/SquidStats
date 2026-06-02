@@ -292,7 +292,7 @@
             });
         });
 
-        const deleteBlockedUserConfirmTemplate = {{ _('¿Estás seguro de que deseas eliminar el usuario bloqueado %(username)s de la base de datos? Esta acción también actualizará el archivo de IPs bloqueadas.')|tojson }};
+        const deleteBlockedUserConfirmTemplate = {{ _('¿Estás seguro de que deseas eliminar el usuario bloqueado %s de la base de datos? Esta acción también actualizará el archivo de IPs bloqueadas.')|tojson }};
         const deleteBlockedUserErrorText = {{ _('Error al eliminar usuario bloqueado')|tojson }};
         const deleteBlockedUserConnectionErrorText = {{ _('Error de conexión al servidor')|tojson }};
 
@@ -301,7 +301,7 @@
                 e.preventDefault();
                 pendingDeleteForm = form;
                 const username = form.querySelector('input[name="username"]').value;
-                const confirmMessage = deleteBlockedUserConfirmTemplate.replace('%(username)s', username);
+                const confirmMessage = deleteBlockedUserConfirmTemplate.replace('%s', username);
                 showCustomConfirm(
                     confirmMessage,
                     function() {
