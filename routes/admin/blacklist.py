@@ -205,15 +205,26 @@ def register_routes(bp):
     @bp.route("/blacklist/delete-blocked-user", methods=["POST"])
     @admin_required
     def blacklist_delete_blocked_user():
-        blocked_user_id = request.form.get("blocked_user_id")
+        data = request.get_json(silent=True)
+        if data:
+            blocked_user_id = data.get("blocked_user_id")
+        else:
+            blocked_user_id = request.form.get("blocked_user_id")
+
         if not blocked_user_id:
-            flash(_("ID del usuario no proporcionado"), "error")
+            message = _("ID del usuario no proporcionado")
+            if data:
+                return json_error(message)
+            flash(message, "error")
             return redirect(url_for("admin.manage_blacklist"))
 
         try:
             blocked_user_id = int(blocked_user_id)
         except ValueError:
-            flash(_("ID del usuario inválido"), "error")
+            message = _("ID del usuario inválido")
+            if data:
+                return json_error(message)
+            flash(message, "error")
             return redirect(url_for("admin.manage_blacklist"))
 
         session = get_session()
@@ -221,25 +232,28 @@ def register_routes(bp):
         try:
             record = session.query(BlockedUser).filter_by(id=blocked_user_id).first()
             if not record:
-                flash(_("No se encontró el usuario bloqueado"), "error")
+                message = _("No se encontró el usuario bloqueado")
+                if data:
+                    return json_error(message)
+                flash(message, "error")
                 return redirect(url_for("admin.manage_blacklist"))
 
             username = record.username or record.ip
-            record_ip = record.ip
             session.delete(record)
             session.commit()
             _sync_blocked_file(session, cm)
-            flash(
-                _(
-                    "Usuario bloqueado %(username)s eliminado y archivo de IPs actualizado"
-                )
-                % {"username": username},
-                "success",
-            )
+            message = _(
+                "Usuario bloqueado %(username)s eliminado y archivo de IPs actualizado"
+            ) % {"username": username}
+            if data:
+                return json_success(message)
+            flash(message, "success")
             return redirect(url_for("admin.manage_blacklist"))
         except Exception as e:
             session.rollback()
             logger.exception("Error eliminando usuario bloqueado")
+            if data:
+                return json_error(_("Error al eliminar usuario bloqueado"), 500, str(e))
             flash_error_with_details(
                 _("Error al eliminar usuario bloqueado"), e
             )
