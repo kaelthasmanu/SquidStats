@@ -5,7 +5,7 @@ from flask_babel import gettext as _
 from loguru import logger
 
 from database.database import get_session
-from database.models.models import BlacklistDomain
+from database.models.models import BlacklistDomain, BlockedUser
 from services.analytics.blacklist_users import invalidate_blacklist_cache
 from services.auth.auth_service import admin_required, api_auth_required
 from services.database.admin_helpers import load_env_vars
@@ -23,6 +23,7 @@ from services.security.blocklist_enforcement import (
     enable_single_blocklist,
     get_enforced_blocklist_urls,
 )
+from services.squid.user_restrictions_service import unblock_user
 
 from .helpers import (
     flash_and_redirect,
@@ -53,6 +54,11 @@ def register_routes(bp):
                 .all()
             )
             blacklist = "\n".join([r.domain for r in rows])
+            blocked_users = (
+                session.query(BlockedUser)
+                .order_by(BlockedUser.ip)
+                .all()
+            )
         finally:
             session.close()
 
@@ -68,6 +74,7 @@ def register_routes(bp):
             env_vars=env_vars,
             blacklist=blacklist,
             url_lists=url_lists,
+            blocked_users=blocked_users,
             custom_enforced=custom_enforced,
         )
 
@@ -190,6 +197,37 @@ def register_routes(bp):
             % {"url": url, "count": count},
             "success",
         )
+        return redirect(url_for("admin.manage_blacklist"))
+
+    @bp.route("/blacklist/delete-blocked-user", methods=["POST"])
+    @admin_required
+    def blacklist_delete_blocked_user():
+        ip = request.form.get("ip")
+        if not ip:
+            flash(_("IP no proporcionada"), "error")
+            return redirect(url_for("admin.manage_blacklist"))
+
+        session = get_session()
+        cm = get_config_manager()
+        try:
+            record = session.query(BlockedUser).filter_by(ip=ip, active=1).first()
+            if not record:
+                flash(_("No se encontró la IP bloqueada"), "error")
+                return redirect(url_for("admin.manage_blacklist"))
+
+            ok, msg = unblock_user(record.username or ip, ip, session, cm)
+            if ok:
+                flash(msg, "success")
+            else:
+                flash(msg, "error")
+        except Exception as e:
+            logger.exception("Error eliminando IP bloqueada")
+            flash_error_with_details(
+                _("Error al eliminar IP bloqueada"), e
+            )
+        finally:
+            session.close()
+
         return redirect(url_for("admin.manage_blacklist"))
 
     @bp.route("/api/blocklist/toggle", methods=["POST"])
