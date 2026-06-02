@@ -292,13 +292,18 @@
             });
         });
 
+        const deleteBlockedUserConfirmTemplate = {{ _('¿Estás seguro de que deseas eliminar el usuario bloqueado %(username)s de la base de datos? Esta acción también actualizará el archivo de IPs bloqueadas.')|tojson }};
+        const deleteBlockedUserErrorText = {{ _('Error al eliminar usuario bloqueado')|tojson }};
+        const deleteBlockedUserConnectionErrorText = {{ _('Error de conexión al servidor')|tojson }};
+
         document.querySelectorAll('.delete-blocked-user-form').forEach(function(form) {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 pendingDeleteForm = form;
                 const username = form.querySelector('input[name="username"]').value;
+                const confirmMessage = deleteBlockedUserConfirmTemplate.replace('%(username)s', username);
                 showCustomConfirm(
-                    `¿Estás seguro de que deseas eliminar el usuario bloqueado ${username} de la base de datos? Esta acción también actualizará el archivo de IPs bloqueadas.`,
+                    confirmMessage,
                     function() {
                         if (!pendingDeleteForm) {
                             return;
@@ -325,7 +330,7 @@
                                 if (tbody && tbody.querySelectorAll('tr').length === 0) {
                                     const container = document.getElementById('blocked-users-table-container');
                                     if (container) {
-                                        const emptyText = "{{ _('No hay IPs bloqueadas en la base de datos.') }}";
+                                        const emptyText = {{ _('No hay IPs bloqueadas en la base de datos.')|tojson }};
                                         container.innerHTML = `
                                             <div class="bg-gray-50 p-4 rounded border text-sm text-gray-600">
                                                 ${emptyText}
@@ -334,11 +339,11 @@
                                     }
                                 }
                             } else {
-                                showToast(result.data.message || 'Error al eliminar usuario bloqueado', 'error');
+                                showToast(result.data.message || deleteBlockedUserErrorText, 'error');
                             }
                         })
                         .catch(function() {
-                            showToast('Error de conexión al servidor', 'error');
+                            showToast(deleteBlockedUserConnectionErrorText, 'error');
                         })
                         .finally(function() {
                             pendingDeleteForm = null;
