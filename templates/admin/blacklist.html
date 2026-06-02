@@ -20,6 +20,9 @@
         <button @click="activeTab = 'custom'" :class="activeTab === 'custom' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
             {{ _("Personalizada") }}
         </button>
+        <button @click="activeTab = 'blocked_users'" :class="activeTab === 'blocked_users' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
+            {{ _("IPs bloqueadas") }}
+        </button>
         <button @click="activeTab = 'import'" :class="activeTab === 'import' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="py-2 px-4 border-b-2 font-medium text-sm whitespace-nowrap">
             {{ _("Importar") }}
         </button>
@@ -52,6 +55,57 @@
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">{{ _("Sincronizar Listas") }}</button>
         </form>
             </div>
+    </div>
+
+    <!-- Blocked IPs Tab -->
+    <div x-show="activeTab === 'blocked_users'" class="mt-6">
+        <h3 class="text-lg font-semibold mb-3">{{ _("IPs bloqueadas") }}</h3>
+        <p class="text-sm text-gray-600 mb-4">{{ _("Lista de IPs que actualmente están bloqueadas en la base de datos.") }}</p>
+
+        {% if blocked_users %}
+        <div class="overflow-x-auto bg-white rounded shadow border">
+            <table class="min-w-full text-left text-sm text-gray-700">
+                <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                    <tr>
+                        <th class="px-4 py-3">{{ _("Usuario") }}</th>
+                        <th class="px-4 py-3">{{ _("IP") }}</th>
+                        <th class="px-4 py-3">{{ _("Notas") }}</th>
+                        <th class="px-4 py-3">{{ _("Estado") }}</th>
+                        <th class="px-4 py-3">{{ _("Creado") }}</th>
+                        <th class="px-4 py-3">{{ _("Acciones") }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in blocked_users %}
+                    <tr class="border-t last:border-b">
+                        <td class="px-4 py-3">{{ user.username }}</td>
+                        <td class="px-4 py-3 font-mono text-sm text-gray-800">{{ user.ip }}</td>
+                        <td class="px-4 py-3">{{ user.notes or '-' }}</td>
+                        <td class="px-4 py-3">
+                            {% if user.active %}
+                                <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">{{ _("Activo") }}</span>
+                            {% else %}
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-600">{{ _("Inactivo") }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="px-4 py-3">
+                            <form method="POST" action="/admin/blacklist/delete-blocked-user" class="delete-blocked-user-form inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="ip" value="{{ user.ip }}" />
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm">{{ _("Eliminar") }}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="bg-gray-50 p-4 rounded border text-sm text-gray-600">
+            {{ _("No hay IPs bloqueadas en la base de datos.") }}
+        </div>
+        {% endif %}
     </div>
 
     <!-- AdGuard Tab -->
@@ -227,6 +281,23 @@
                 const url = form.querySelector('input[name="source_url"]').value;
                 showCustomConfirm(
                     `¿Estás seguro de que deseas eliminar la siguiente lista?\n\nURL: ${url}\n\nEsta acción es irreversible y eliminará todos los dominios asociados.`,
+                    function() {
+                        if (pendingDeleteForm) {
+                            pendingDeleteForm.submit();
+                            pendingDeleteForm = null;
+                        }
+                    }
+                );
+            });
+        });
+
+        document.querySelectorAll('.delete-blocked-user-form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                pendingDeleteForm = form;
+                const ip = form.querySelector('input[name="ip"]').value;
+                showCustomConfirm(
+                    `¿Estás seguro de que deseas eliminar la IP bloqueada ${ip} de la base de datos? Esta acción también actualizará el archivo de IPs bloqueadas.`,
                     function() {
                         if (pendingDeleteForm) {
                             pendingDeleteForm.submit();
