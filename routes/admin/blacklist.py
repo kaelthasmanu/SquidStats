@@ -23,7 +23,10 @@ from services.security.blocklist_enforcement import (
     enable_single_blocklist,
     get_enforced_blocklist_urls,
 )
-from services.squid.user_restrictions_service import unblock_user
+from services.squid.user_restrictions_service import (
+    unblock_user,
+    _sync_blocked_file,
+)
 
 from .helpers import (
     flash_and_redirect,
@@ -202,28 +205,43 @@ def register_routes(bp):
     @bp.route("/blacklist/delete-blocked-user", methods=["POST"])
     @admin_required
     def blacklist_delete_blocked_user():
-        username = request.form.get("username")
-        if not username:
-            flash(_("Usuario no proporcionado"), "error")
+        blocked_user_id = request.form.get("blocked_user_id")
+        if not blocked_user_id:
+            flash(_("ID del usuario no proporcionado"), "error")
+            return redirect(url_for("admin.manage_blacklist"))
+
+        try:
+            blocked_user_id = int(blocked_user_id)
+        except ValueError:
+            flash(_("ID del usuario inválido"), "error")
             return redirect(url_for("admin.manage_blacklist"))
 
         session = get_session()
         cm = get_config_manager()
         try:
-            record = session.query(BlockedUser).filter_by(username=username, active=1).first()
+            record = session.query(BlockedUser).filter_by(id=blocked_user_id).first()
             if not record:
                 flash(_("No se encontró el usuario bloqueado"), "error")
                 return redirect(url_for("admin.manage_blacklist"))
 
-            ok, msg = unblock_user(username, record.ip, session, cm)
-            if ok:
-                flash(msg, "success")
-            else:
-                flash(msg, "error")
+            username = record.username or record.ip
+            record_ip = record.ip
+            session.delete(record)
+            session.commit()
+            _sync_blocked_file(session, cm)
+            flash(
+                _(
+                    "Usuario bloqueado %(username)s eliminado y archivo de IPs actualizado"
+                )
+                % {"username": username},
+                "success",
+            )
+            return redirect(url_for("admin.manage_blacklist"))
         except Exception as e:
-            logger.exception("Error eliminando IP bloqueada")
+            session.rollback()
+            logger.exception("Error eliminando usuario bloqueado")
             flash_error_with_details(
-                _("Error al eliminar IP bloqueada"), e
+                _("Error al eliminar usuario bloqueado"), e
             )
         finally:
             session.close()
