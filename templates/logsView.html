@@ -1,46 +1,47 @@
-
-{% extends 'layouts/base.html' %}
-{% block styles %}{% endblock styles %}
-
-{% block header_actions %}
-  <form method="get" class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4">
-    <div class="filters-container flex gap-4 items-center w-full max-w-4xl mx-auto">
-      <div class="date-filter w-full max-w-sm mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative">
-        <input
-          type="date"
-          name="date"
-          id="date-filter"
-          value="{{ selected_date }}"
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12"
-        />
-      </div>
-
-      <div class="search-container flex items-center bg-white rounded-[0.5rem] shadow-md overflow-hidden w-full max-w-xl relative">
-        <input
-          type="text"
-          name="search"
-          id="username-search"
-          value="{{ search_query }}"
-          placeholder="{{ _('Buscar por usuario...') }}"
-          class="search-input w-full pl-4 pr-10 py-3 rounded-[0.5rem] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 h-12"
-        />
-
-        <button
-          type="submit"
-          class="absolute right-3 h-full flex items-center justify-center text-gray-500 hover:text-gray-800"
-          title="{{ _('Buscar') }}"
-        >
-          <i class="fas fa-magnifying-glass"></i>
-        </button>
-      </div>
+{% extends 'layouts/base.html' %} {% block styles %}{% endblock styles %} {%
+block header_actions %}
+<form
+  method="get"
+  class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4"
+>
+  <div
+    class="filters-container flex gap-4 items-center w-full max-w-4xl mx-auto"
+  >
+    <div
+      class="date-filter w-full max-w-sm mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative"
+    >
+      <input
+        type="date"
+        name="date"
+        id="date-filter"
+        value="{{ selected_date }}"
+        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 shadow-sm text-sm text-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12"
+      />
     </div>
-  </form>
-{% endblock header_actions %}
 
-{% block content %}
-    {% include 'partials/logs.html' %}
-{% endblock %}
+    <div
+      class="search-container flex items-center bg-white dark:bg-gray-800 rounded-[0.5rem] shadow-md overflow-hidden w-full max-w-xl relative"
+    >
+      <input
+        type="text"
+        name="search"
+        id="username-search"
+        value="{{ search_query }}"
+        placeholder="{{ _('Buscar por usuario...') }}"
+        class="search-input w-full pl-4 pr-10 py-3 rounded-[0.5rem] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 dark:text-gray-100 h-12"
+      />
 
-{% block scripts %}
-    <script type="module" src="static/js/dashboard.js"></script>
+      <button
+        type="submit"
+        class="absolute right-3 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100"
+        title="{{ _('Buscar') }}"
+      >
+        <i class="fas fa-magnifying-glass"></i>
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock header_actions %} {% block content %} {% include
+'partials/logs.html' %} {% endblock %} {% block scripts %}
+<script type="module" src="static/js/dashboard.js"></script>
 {% endblock scripts %}

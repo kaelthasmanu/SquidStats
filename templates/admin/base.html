@@ -6,12 +6,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}{{ _("Administrador Squid Proxy") }}{% endblock %}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"/>
+    {% include 'components/theme_head.html' %}
     <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
     <script src="{{ url_for('static', filename='src/alpine.min.js') }}" defer></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}">
 </head>
-<body class="bg-gray-50 min-h-screen" x-data="{ sidebarOpen: false }">
+<body class="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300" x-data="{ sidebarOpen: false }">
     <!-- Navigation -->
     <nav class="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white shadow-xl border-b border-blue-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,6 +39,9 @@
                     <button onclick="restartSquid()" title="{{ _("Reinicia Squid y vuelve a aplicar la configuración desde cero") }}" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-2 md:py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center text-sm md:text-base">
                         <i class="fas fa-power-off mr-2"></i>
                         <span class="hidden sm:inline">{{ _("Reiniciar") }}</span>
+                    </button>
+                    <button data-theme-toggle type="button" title="{{ _('Cambiar tema claro/oscuro') }}" aria-label="{{ _('Cambiar tema claro/oscuro') }}" class="flex items-center justify-center w-10 h-10 text-white bg-blue-800 bg-opacity-60 hover:bg-blue-700 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        <i class="fas fa-moon"></i>
                     </button>
                     <div class="relative" x-data="{ langOpen: false }">
                         <button @click="langOpen = !langOpen" @click.outside="langOpen = false" title="{{ _("Idioma") }}" class="flex items-center space-x-2 text-white bg-blue-800 bg-opacity-60 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
@@ -109,59 +113,59 @@
     <div class="flex relative">
         <!-- Mobile sidebar overlay -->
         <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" style="display: none;"></div>
-        <aside class="w-64 bg-white shadow-lg min-h-screen">
+        <aside class="w-64 bg-white dark:bg-gray-800 shadow-lg min-h-screen transition-colors duration-300">
             <nav class="mt-8">
                 <div class="px-4 space-y-2">
-                    <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-home mr-3"></i>{{ _("Dashboard") }} 
                     </a>
-                    <a href="{{ url_for('admin.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.admin_dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-home mr-3"></i>{{ _("Dashboard Admin") }}
                     </a>
-                    <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.view_config') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-cog mr-3"></i>{{ _("Configuración") }}
                     </a>
-                    <a href="{{ url_for('admin.split_config_view') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.split_config_view') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <span class="flex items-center">
                             <i class="fas fa-code-branch mr-3"></i>{{ _("Dividir Squid Config") }}
                         </span>
                         <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("RC") }}</span>
                     </a>
-                    <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_users') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-users mr-3"></i>{{ _("Usuarios") }}
                     </a>
-                    <a href="{{ url_for('admin.ldap_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="{{ _("Configuraciones LDAP/Active Directory") }}">
+                    <a href="{{ url_for('admin.ldap_config') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors" title="{{ _("Configuraciones LDAP/Active Directory") }}">
                         <i class="fas fa-network-wired mr-3"></i>{{ _("LDAP / Active Directory") }}
                     </a>
-                    <a href="{{ url_for('admin.database_view') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.database_view') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-database mr-3"></i>{{ _("Base de Datos") }}
                     </a>
-                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_acls') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <span class="flex items-center">
                             <i class="fas fa-shield-alt mr-3"></i>{{ _("ACLs") }}
                         </span>
                         <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("RC") }}</span>
                     </a>
-                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_delay_pools') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <span class="flex items-center">
                             <i class="fas fa-clock mr-3"></i>{{ _("Delay Pools") }}
                         </span>
                         <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("RC") }}</span>
                     </a>
-                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.manage_http_access') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <span class="flex items-center">
                             <i class="fas fa-key mr-3"></i>{{ _("HTTP Access") }}
                         </span>
                         <span class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("RC") }}</span>
                     </a>
-                    <a href="/admin/quota" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="{{ _("Cuotas") }}">
+                    <a href="/admin/quota" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors" title="{{ _("Cuotas") }}">
                         <i class="fas fa-tachometer-alt mr-3"></i>{{ _("Cuotas") }}
                         <span class="ml-2 text-xs font-semibold text-white bg-yellow-500 px-2 py-0.5 rounded">{{ _("Beta") }}</span>
                     </a>
-                    <a href="/admin/blacklist" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="/admin/blacklist" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-ban mr-3"></i>{{ _("Blacklist") }}
                     </a>
-                    <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+                    <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors">
                         <i class="fas fa-file-alt mr-3"></i>{{ _("Logs") }}
                     </a>
 
@@ -196,6 +200,7 @@
     <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/toastr-config.js') }}"></script>
     <script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
     <script>
         // Get CSRF token from meta tag
         function getCsrfToken() {

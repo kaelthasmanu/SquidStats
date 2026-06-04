@@ -25,20 +25,20 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+            class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-white/10 z-50"
             style="display: none">
-            <div class="py-2 px-4 border-b border-gray-200 flex items-center justify-between">
-              <span class="font-semibold text-gray-800">{{ _("Notificaciones") }}</span>
+            <div class="py-2 px-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <span class="font-semibold text-gray-800 dark:text-gray-100">{{ _("Notificaciones") }}</span>
               <button @click="open = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                 <i class="fas fa-times"></i>
               </button>
             </div>
-            <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 notifications-mobile">
-              <li class="px-4 py-3 text-gray-500 text-center">
+            <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700 notifications-mobile">
+              <li class="px-4 py-3 text-gray-500 dark:text-gray-400 text-center">
                 {{ _("Cargando notificaciones...") }}
               </li>
             </ul>
-            <div class="py-2 px-4 text-center border-t border-gray-200">
+            <div class="py-2 px-4 text-center border-t border-gray-200 dark:border-gray-700">
                 <a href="/all-notifications" class="text-sm text-blue-600 hover:underline">{{ _("Ver todas las notificaciones") }}</a>
             </div>
           </div>
@@ -95,20 +95,20 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+            class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-white/10 z-50"
             style="display: none">
-            <div class="py-2 px-4 border-b border-gray-200 flex items-center justify-between">
-              <span class="font-semibold text-gray-800">{{ _("Notificaciones") }}</span>
+            <div class="py-2 px-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <span class="font-semibold text-gray-800 dark:text-gray-100">{{ _("Notificaciones") }}</span>
               <button @click="open = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                 <i class="fas fa-times"></i>
               </button>
             </div>
-            <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 notifications">
-              <li class="px-4 py-3 text-gray-500 text-center">
+            <ul class="max-h-72 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700 notifications">
+              <li class="px-4 py-3 text-gray-500 dark:text-gray-400 text-center">
                 {{ _("Cargando notificaciones...") }}
               </li>
             </ul>
-            <div class="py-2 px-4 text-center border-t border-gray-200">
+            <div class="py-2 px-4 text-center border-t border-gray-200 dark:border-gray-700">
                 <a href="/all-notifications" class="text-sm text-blue-600 hover:underline">{{ _("Ver todas las notificaciones") }}</a>
             </div>
           </div>
@@ -130,13 +130,18 @@
             <span>{{ _("Web") }}</span>
           </button>
 
+          <!-- Theme Toggle (dark mode) -->
+          <button data-theme-toggle type="button" class="flex items-center justify-center w-9 h-9 text-gray-200 rounded-lg transition-all duration-300 hover:text-white hover:bg-white/10" data-tooltip="{{ _('Cambiar tema claro/oscuro') }}" aria-label="{{ _('Cambiar tema claro/oscuro') }}">
+            <i class="fas fa-moon"></i>
+          </button>
+
           <!-- Language Switcher -->
           <div class="relative" x-data="{ langOpen: false }">
             <button @click="langOpen = !langOpen" @click.outside="langOpen = false" class="flex items-center gap-1 px-3 py-2 text-gray-200 rounded-lg font-medium text-sm transition-all duration-300 hover:text-white hover:bg-white/10" data-tooltip="{{ _('Idioma') }}">
               <i class="fas fa-globe"></i>
               <span class="uppercase">{{ get_locale() }}</span>
             </button>
-            <div x-show="langOpen" x-transition class="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden" style="display: none;">
+            <div x-show="langOpen" x-transition class="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden" style="display: none;">
               {% for code, name in LANGUAGES.items() %}
               <a href="{{ url_for('i18n.set_language', lang=code) }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors {% if get_locale() == code %}bg-blue-50 font-semibold text-blue-700{% endif %}">
                 {{ name }}
@@ -218,6 +223,13 @@
           {% if get_locale() == code %}<i class="fas fa-check text-xs"></i>{% endif %}
         </a>
         {% endfor %}
+      </div>
+      <!-- Theme Toggle - Mobile -->
+      <div class="flex gap-2 mb-4">
+        <button data-theme-toggle type="button" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm text-gray-300 hover:text-white hover:bg-white/10 ring-1 ring-white/20 transition-all duration-300" aria-label="{{ _('Cambiar tema claro/oscuro') }}">
+          <i class="fas fa-moon"></i>
+          <span>{{ _("Tema claro / oscuro") }}</span>
+        </button>
       </div>
     </div>
   </div>
@@ -423,7 +435,7 @@
                         
                         // Create list item safely
                         const li = document.createElement('li');
-                        li.className = `px-4 py-3 flex items-start hover:bg-gray-50 cursor-pointer notification-item ${
+                        li.className = `px-4 py-3 flex items-start hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer notification-item ${
                             notification.read ? 'opacity-60' : ''
                         }`;
                         li.dataset.id = notification.id;
@@ -438,12 +450,12 @@
                         contentDiv.className = 'flex-1';
                         
                         const sourceP = document.createElement('p');
-                        sourceP.className = 'text-sm font-medium text-gray-900';
+                        sourceP.className = 'text-sm font-medium text-gray-900 dark:text-gray-100';
                         sourceP.textContent = notification.source === 'squid' ? 'Squid' : 
                                               notification.source === 'git' ? 'Git' : 'Sistema';
                         
                         const messageP = document.createElement('p');
-                        messageP.className = 'text-sm text-gray-700 mt-1';
+                        messageP.className = 'text-sm text-gray-700 dark:text-gray-300 mt-1';
                         messageP.textContent = notification.message;
                         
                         const timeSpan = document.createElement('span');
@@ -467,7 +479,7 @@
                     });
                 } else {
                     ul.innerHTML = `
-                        <li class='px-4 py-3 text-gray-500 text-center'>
+                        <li class='px-4 py-3 text-gray-500 dark:text-gray-400 text-center'>
                             No hay notificaciones nuevas
                         </li>
                     `;

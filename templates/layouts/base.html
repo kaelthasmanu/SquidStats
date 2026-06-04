@@ -1,26 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ get_locale() }}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    {% include 'components/theme_head.html' %}
     <title>{{ page_title or 'Dashboard Squid' }}</title>
     <!-- Dynamic favicon -->
-    <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon"/>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename=page_icon) }}"
+      type="image/x-icon"
+    />
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
-    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}"/> <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/> <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='dist/output.css')}}"
+    />
+    <!-- Tailwind CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='all.min.css') }}"
+    />
+    <!-- Font Awesome -->
     <!-- Logs CSS Custom-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}"/>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='logs.css') }}"
+    />
     <!-- Toastr CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}"/>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/toastr.min.css') }}"
+    />
     <!-- Toastr Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr-custom.css') }}"/>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/toastr-custom.css') }}"
+    />
     <!-- Page-specific styles -->
     {% block styles %}{% endblock styles %}
   </head>
-  <body class="overflow-x-hidden overflow-auto" style="visibility: hidden" onload="document.body.style.visibility='visible';">
+  <body
+    class="overflow-x-hidden overflow-auto bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300"
+    style="visibility: hidden"
+    onload="document.body.style.visibility = 'visible'"
+  >
     <!-- Common navigation bar -->
     <div class="relative">
       {% include 'components/navbar.html' %}
@@ -29,28 +58,40 @@
         <!-- UNIFIED MAIN CONTAINER -->
         <div class="w-full px-4 sm:px-6 lg:px-8">
           {% block header %}
-            <!-- Default header - IMPROVED FOR RESPONSIVE -->
-            <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-              <!-- Title and subtitle -->
-              <div class="flex items-center flex-shrink-0">
-                {% if icon %}
-                <i class="{{icon}} text-2xl sm:text-3xl text-blue-600 mr-3 sm:mr-4"></i>
-                {% endif %}
-                <div class="min-w-0">
-                  <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 truncate">{{page_title}}</h1>
-                  <p class="text-gray-500 text-sm sm:text-base mt-1 line-clamp-2">
-                    {{subtitle}}
-                  </p>
-                </div>
-              </div>
-              
-              <!-- Header actions area - editable by pages -->
-              <div class="flex items-center justify-start lg:justify-end flex-wrap gap-2 sm:gap-3 min-w-0">
-                {% block header_actions %}
-                  <!-- Empty by default - pages can add content here -->
-                {% endblock %}
+          <!-- Default header - IMPROVED FOR RESPONSIVE -->
+          <div
+            class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8"
+          >
+            <!-- Title and subtitle -->
+            <div class="flex items-center flex-shrink-0">
+              {% if icon %}
+              <i
+                class="{{icon}} text-2xl sm:text-3xl text-blue-600 mr-3 sm:mr-4"
+              ></i>
+              {% endif %}
+              <div class="min-w-0">
+                <h1
+                  class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 truncate"
+                >
+                  {{page_title}}
+                </h1>
+                <p
+                  class="text-gray-500 dark:text-gray-400 text-sm sm:text-base mt-1 line-clamp-2"
+                >
+                  {{subtitle}}
+                </p>
               </div>
             </div>
+
+            <!-- Header actions area - editable by pages -->
+            <div
+              class="flex items-center justify-start lg:justify-end flex-wrap gap-2 sm:gap-3 min-w-0"
+            >
+              {% block header_actions %}
+              <!-- Empty by default - pages can add content here -->
+              {% endblock %}
+            </div>
+          </div>
           {% endblock %}
           <!-- Content area - editable by pages -->
           <div class="max-w-7xl mx-auto w-full">
@@ -61,6 +102,8 @@
     </div>
     <!-- Footer -->
     {% include 'components/footer.html' %}
+    <!-- Theme toggle (dark mode) -->
+    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
     <!-- Socket.IO -->
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <!-- Flowbite scripts (UI components) -->
@@ -75,32 +118,39 @@
     <script>
       window._i18n = window._i18n || {};
       window._i18n.locale = "{{ get_locale() }}";
-      window.__ = function(key) { return (window._i18n.translations && window._i18n.translations[key]) || key; };
+      window.__ = function (key) {
+        return (
+          (window._i18n.translations && window._i18n.translations[key]) || key
+        );
+      };
       fetch("{{ url_for('i18n.get_translations') }}")
-        .then(function(r) { return r.json(); })
-        .then(function(data) { window._i18n.translations = data; })
-        .catch(function() {});
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          window._i18n.translations = data;
+        })
+        .catch(function () {});
     </script>
     <!-- Flash messages via toastr -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <script>
-          $(document).ready(function () {
-            {% for category, message in messages %}
-              {% if category == 'success' %}
-                toastr.success({{ message | tojson }});
-              {% elif category == 'error' %}
-                toastr.error({{ message | tojson }});
-              {% elif category == 'warning' %}
-                toastr.warning({{ message | tojson }});
-              {% else %}
-                toastr.info({{ message | tojson }});
-              {% endif %}
-            {% endfor %}
-          });
-        </script>
-      {% endif %}
-    {% endwith %}
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <script>
+      $(document).ready(function () {
+        {% for category, message in messages %}
+          {% if category == 'success' %}
+            toastr.success({{ message | tojson }});
+          {% elif category == 'error' %}
+            toastr.error({{ message | tojson }});
+          {% elif category == 'warning' %}
+            toastr.warning({{ message | tojson }});
+          {% else %}
+            toastr.info({{ message | tojson }});
+          {% endif %}
+        {% endfor %}
+      });
+    </script>
+    {% endif %} {% endwith %}
     <!-- Page-specific scripts -->
     {% block scripts %}{% endblock scripts %}
   </body>

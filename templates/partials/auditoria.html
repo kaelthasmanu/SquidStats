@@ -1,16 +1,16 @@
 
 <div class="w-full space-y-6">
-  <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-black/30 mb-8">
     <form id="audit-form" class="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6">
       <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="md:col-span-2">
           <label
             for="audit-type"
-            class="block text-sm font-semibold text-gray-700 mb-1">{{ _("Tipo de Auditoría") }}</label>
+            class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{{ _("Tipo de Auditoría") }}</label>
           <select
             id="audit-type"
             name="audit_type"
-            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
+            class="w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
             <optgroup label="Actividad General">
               <option value="user_summary" data-requires="user">
                 {{ _("Resumen por Usuario") }}
@@ -53,11 +53,11 @@
 
         <div id="conditional-inputs" class="contents">
           <div id="user-filter-container" class="conditional-input">
-            <label for="username-filter" class="block text-sm font-semibold text-gray-700 mb-1">{{ _("Usuario") }}</label>
+            <label for="username-filter" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{{ _("Usuario") }}</label>
             <div class="relative">
-              <input type="text" id="user-search-input" placeholder="{{ _("Buscar usuario...") }}" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 pr-8" autocomplete="off"/>
+              <input type="text" id="user-search-input" placeholder="{{ _("Buscar usuario...") }}" class="w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 pr-8" autocomplete="off"/>
               <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-              <div id="user-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
+              <div id="user-dropdown" class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 overflow-y-auto hidden">
                 <div id="user-options-container">
                   <!-- Options will be filled dynamically -->
                 </div>
@@ -68,15 +68,15 @@
             </select>
           </div>
           <div id="keyword-input-container" class="conditional-input">
-            <label for="keyword-input" class="block text-sm font-semibold text-gray-700 mb-1">{{ _("Palabra Clave") }}</label>
-            <input type="text" id="keyword-input" name="keyword" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-50" placeholder="{{ _("Ej: juegos, descargas...") }}"/>
+            <label for="keyword-input" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{{ _("Palabra Clave") }}</label>
+            <input type="text" id="keyword-input" name="keyword" class="w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-700 dark:text-gray-100" placeholder="{{ _("Ej: juegos, descargas...") }}"/>
           </div>
           <div id="ip-input-container" class="conditional-input">
-            <label for="ip-input" class="block text-sm font-semibold text-gray-700 mb-1">{{ _("Dirección IP") }}</label>
-            <input type="text" id="ip-input" name="ip_address" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-50" placeholder="{{ _("Ej: 192.168.1.100") }}"/>
+            <label for="ip-input" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{{ _("Dirección IP") }}</label>
+            <input type="text" id="ip-input" name="ip_address" class="w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-700 dark:text-gray-100" placeholder="{{ _("Ej: 192.168.1.100") }}"/>
           </div>
           <div id="social-media-input-container" class="conditional-input md:col-span-2">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ _("Redes Sociales") }}</label>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{{ _("Redes Sociales") }}</label>
             <div id="social-media-chips" class="flex flex-wrap gap-3">
               <div class="relative group">
                 <button type="button" class="social-chip" data-value="Facebook">
@@ -123,8 +123,8 @@
             </div>
           </div>
           <div id="response-code-input-container" class="conditional-input">
-            <label for="response-code-input" class="block text-sm font-semibold text-gray-700 mb-1">{{ _("Código HTTP") }}</label>
-            <select id="response-code-input" name="response_code" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50">
+            <label for="response-code-input" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{{ _("Código HTTP") }}</label>
+            <select id="response-code-input" name="response_code" class="w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
               <option value="">{{ _("-- Seleccione un código --") }}</option>
               <optgroup label="Respuestas Exitosas (2xx)">
                 <option value="200">{{ _("200 OK") }}</option>
@@ -151,19 +151,19 @@
         </div>
       </div>
 
-      <div class="lg:col-span-1 bg-slate-50 border border-slate-200 rounded-lg p-4 h-fit">
-        <h3 class="text-md font-semibold text-slate-800 mb-4 border-b pb-2">
+      <div class="lg:col-span-1 bg-slate-50 dark:bg-gray-900/40 border border-slate-200 dark:border-gray-700 rounded-lg p-4 h-fit">
+        <h3 class="text-md font-semibold text-slate-800 dark:text-gray-100 mb-4 border-b border-slate-200 dark:border-gray-700 pb-2">
           {{ _("Fecha del Reporte") }}
         </h3>
         <div class="space-y-4">
           <div id="start-date-container">
-            <label for="start-date" class="block text-sm font-semibold text-gray-700 mb-1">{{ _("Fecha") }}</label>
-            <input type="date" id="start-date" name="start_date" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"/>
+            <label for="start-date" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">{{ _("Fecha") }}</label>
+            <input type="date" id="start-date" name="start_date" class="w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-gray-100"/>
           </div>
           <div id="end-date-container">
-            <label for="end-date" class="block text-sm font-semibold text-gray-700 mb-1"
+            <label for="end-date" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1"
               >{{ _("Fecha de Fin") }}</label>
-            <input type="date" id="end-date" name="end_date" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50"/>
+            <input type="date" id="end-date" name="end_date" class="w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-gray-100"/>
           </div>
         </div>
       </div>
@@ -182,8 +182,8 @@
   </div>
 
   <div id="audit-results-container" class="space-y-4">
-    <div class="bg-white p-6 rounded-lg shadow-lg min-h-[300px] flex items-center justify-center">
-      <div class="text-center text-gray-500 py-10">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-black/30 min-h-[300px] flex items-center justify-center">
+      <div class="text-center text-gray-500 dark:text-gray-400 py-10">
         <i class="fas fa-clipboard-list text-5xl mb-4 text-gray-300"></i>
         <h3 class="text-xl font-semibold">
           {{ _("Seleccione los filtros y genere un reporte") }}

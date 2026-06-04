@@ -1,24 +1,17 @@
-{% extends 'layouts/base.html' %}
-
-{% block header_actions %}
-<div class="bg-gray-100 px-4 py-2 rounded-lg shadow-sm">
-    <span class="text-sm font-medium text-gray-600">
-        {{ _("Página") }} {{ pagination.page }} de {{ pagination.total_pages }}
-    </span>
+{% extends 'layouts/base.html' %} {% block header_actions %}
+<div class="bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm">
+  <span class="text-sm font-medium text-gray-600 dark:text-gray-300">
+    {{ _("Página") }} {{ pagination.page }} de {{ pagination.total_pages }}
+  </span>
 </div>
-{% endblock header_actions %}
- 
-{% block content %} 
-    {% include 'partials/black_list.html' %} 
-{% endblock %}
-
-{% block scripts %}
+{% endblock header_actions %} {% block content %} {% include
+'partials/black_list.html' %} {% endblock %} {% block scripts %}
 <script>
-    function updateQueryParam(param, value) {
-        const url = new URL(window.location.href);
-        url.searchParams.set(param, value);
-        url.searchParams.set('page', '1');
-        return url.toString();
-    }
+  function updateQueryParam(param, value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set(param, value);
+    url.searchParams.set("page", "1");
+    return url.toString();
+  }
 </script>
 {% endblock scripts %}

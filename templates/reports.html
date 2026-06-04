@@ -1,86 +1,121 @@
-{% extends 'layouts/base.html' %}
-
-{% block header_actions %}
-  <div class="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 w-full xs:w-auto">
-    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-200 flex-shrink-0">
-      <div class="reports-date-picker flex items-center gap-2">
-        <div class="flex items-center justify-center w-6 h-6 bg-indigo-50 rounded-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/>
-          </svg>
-        </div>
-
-        <input
-          id="reports-date"
-          type="text"
-          datepicker
-          datepicker-orientation="bottom"
-          datepicker-autohide
-          datepicker-container="body"
-          class="w-28 xs:w-32 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors duration-200"
-        />
-
-        <button
-          id="reports-go"
-          class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs xs:text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+{% extends 'layouts/base.html' %} {% block header_actions %}
+<div
+  class="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 w-full xs:w-auto"
+>
+  <div
+    class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-200 flex-shrink-0"
+  >
+    <div class="reports-date-picker flex items-center gap-2">
+      <div
+        class="flex items-center justify-center w-6 h-6 bg-indigo-50 rounded-md"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-3 w-3 text-indigo-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-          {{ _("Ver") }}
-        </button>
-
-        <button
-          id="reports-export-pdf"
-          class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs xs:text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5 5 5-5" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15V3" />
-          </svg>
-          {{ _("PDF") }}
-        </button>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"
+          />
+        </svg>
       </div>
+
+      <input
+        id="reports-date"
+        type="text"
+        datepicker
+        datepicker-orientation="bottom"
+        datepicker-autohide
+        datepicker-container="body"
+        class="w-28 xs:w-32 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors duration-200"
+      />
+
+      <button
+        id="reports-go"
+        class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs xs:text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-3 w-3 mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+        {{ _("Ver") }}
+      </button>
+
+      <button
+        id="reports-export-pdf"
+        class="inline-flex items-center justify-center px-2 py-1 border border-transparent text-xs xs:text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-3 w-3 mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M7 10l5 5 5-5"
+          />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15V3" />
+        </svg>
+        {{ _("PDF") }}
+      </button>
     </div>
   </div>
-{% endblock header_actions %}
-
-{% block styles %}
-  <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
-{% endblock styles %}
-
-{% block content %}
-  {% include 'partials/graph_reports.html' %}
-{% endblock content %}
-
-{% block scripts %}
-  {# Chart data injected as JSON so inline Jinja expressions are evaluated server-side
-     and all JS behaviour lives in the external reports-charts.js file. #}
-  <script type="application/json" id="chart-data">
-    {
-      "usersActivity": {
-        "labels": {{ metrics.top_users_by_activity | map(attribute='username') | list | tojson | safe }},
-        "data":   {{ metrics.top_users_by_activity | map(attribute='total_visits') | list | tojson | safe }}
-      },
-      "usersData": {
-        "labels": {{ metrics.top_users_by_data_transferred | map(attribute='username') | list | tojson | safe }},
-        "data":   {{ metrics.top_users_by_data_transferred | map(attribute='total_data_bytes') | map('divide', 1048576) | list | tojson | safe }}
-      },
-      "httpCodes": {
-        "labels": {{ metrics.http_response_distribution_chart.labels | tojson | safe }},
-        "data":   {{ metrics.http_response_distribution_chart.data   | tojson | safe }},
-        "colors": {{ metrics.http_response_distribution_chart.colors | tojson | safe }}
-      },
-      "countries": {
-        "labels": {{ metrics.top_countries_by_visits | map(attribute='country') | list | tojson | safe }},
-        "data":   {{ metrics.top_countries_by_visits | map(attribute='total_requests') | list | tojson | safe }}
-      }
+</div>
+{% endblock header_actions %} {% block styles %}
+<script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
+{% endblock styles %} {% block content %} {% include
+'partials/graph_reports.html' %} {% endblock content %} {% block scripts %} {#
+Chart data injected as JSON so inline Jinja expressions are evaluated
+server-side and all JS behaviour lives in the external reports-charts.js file.
+#}
+<script type="application/json" id="chart-data">
+  {
+    "usersActivity": {
+      "labels": {{ metrics.top_users_by_activity | map(attribute='username') | list | tojson | safe }},
+      "data":   {{ metrics.top_users_by_activity | map(attribute='total_visits') | list | tojson | safe }}
+    },
+    "usersData": {
+      "labels": {{ metrics.top_users_by_data_transferred | map(attribute='username') | list | tojson | safe }},
+      "data":   {{ metrics.top_users_by_data_transferred | map(attribute='total_data_bytes') | map('divide', 1048576) | list | tojson | safe }}
+    },
+    "httpCodes": {
+      "labels": {{ metrics.http_response_distribution_chart.labels | tojson | safe }},
+      "data":   {{ metrics.http_response_distribution_chart.data   | tojson | safe }},
+      "colors": {{ metrics.http_response_distribution_chart.colors | tojson | safe }}
+    },
+    "countries": {
+      "labels": {{ metrics.top_countries_by_visits | map(attribute='country') | list | tojson | safe }},
+      "data":   {{ metrics.top_countries_by_visits | map(attribute='total_requests') | list | tojson | safe }}
     }
-  </script>
+  }
+</script>
 
-  <script src="{{ url_for('static', filename='js/reports-datepicker.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/reports-charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/reports-datepicker.js') }}"></script>
+<script src="{{ url_for('static', filename='js/reports-charts.js') }}"></script>
 {% endblock scripts %}

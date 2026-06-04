@@ -1,32 +1,43 @@
 <div class="w-full space-y-6">
   <!-- Main metrics cards -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-700">
+    <div
+      class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+    >
+      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
         {{ _("Usuarios Totales") }}
       </h3>
       <p class="text-2xl font-bold text-blue-600">
         {{ metrics.total_stats.total_users }}
       </p>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-700">
+    <div
+      class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+    >
+      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
         {{ _("Registros de Log") }}
       </h3>
       <p class="text-2xl font-bold text-green-600">
         {{ metrics.total_stats.total_log_entries }}
       </p>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-700">
+    <div
+      class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+    >
+      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
         {{ _("Datos Transmitidos") }}
       </h3>
       <p class="text-2xl font-bold text-purple-600">
-        {{ "%.2f"|format(metrics.total_stats.total_data_transmitted / (1024**3)) }} {{ _("GB") }}
+        {{ "%.2f"|format(metrics.total_stats.total_data_transmitted / (1024**3))
+        }} {{ _("GB") }}
       </p>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-700">{{ _("Total de Peticiones") }}</h3>
+    <div
+      class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+    >
+      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
+        {{ _("Total de Peticiones") }}
+      </h3>
       <p class="text-2xl font-bold text-orange-600">
         {{ metrics.total_stats.total_requests }}
       </p>
@@ -35,8 +46,10 @@
 
   <!-- Main charts -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <h2 class="text-xl font-bold mb-4 text-gray-800">
+    <div
+      class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+    >
+      <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
         {{ _("Top 20 Usuarios por Actividad") }}
       </h2>
       <div class="h-80">
@@ -44,8 +57,10 @@
       </div>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <h2 class="text-xl font-bold mb-4 text-gray-800">
+    <div
+      class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+    >
+      <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
         {{ _("Top 20 Usuarios por Datos Transmitidos") }}
       </h2>
       <div class="h-80">
@@ -56,8 +71,10 @@
 
   <!-- HTTP codes + country charts -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <h2 class="text-xl font-bold mb-4 text-gray-800">
+    <div
+      class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+    >
+      <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
         {{ _("Distribución de Códigos HTTP") }}
       </h2>
       <div class="h-96">
@@ -65,12 +82,16 @@
       </div>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div
+      class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+    >
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold text-gray-800">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
           {{ _("Países más visitados") }}
         </h2>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+        <span
+          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800"
+        >
           {{ _("Beta") }}
         </span>
       </div>
@@ -81,42 +102,63 @@
   </div>
 
   <!-- Most visited pages table -->
-  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-    <h2 class="text-xl font-bold mb-4 text-gray-800">
+  <div
+    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+  >
+    <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
       {{ _("Top 20 Páginas Más Visitadas") }}
     </h2>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-900/50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            >
               {{ _("URL") }}
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            >
               {{ _("Total de Peticiones") }}
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            >
               {{ _("Visitas Únicas") }}
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            >
               {{ _("Datos Transmitidos") }}
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody
+          class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+        >
           {% for page in metrics.top_pages %}
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 truncate max-w-xs">
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-xs"
+            >
               {{ page.url }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
+            >
               {{ page.total_requests }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
+            >
               {{ page.unique_visits }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ "%.2f"|format(page.total_data_bytes / (1024**2)) }} {{ _("MB") }}
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
+            >
+              {{ "%.2f"|format(page.total_data_bytes / (1024**2)) }} {{ _("MB")
+              }}
             </td>
           </tr>
           {% endfor %}
@@ -126,35 +168,51 @@
   </div>
 
   <!-- Shared IPs table -->
-  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-    <h2 class="text-xl font-bold mb-4 text-gray-800">
+  <div
+    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+  >
+    <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
       {{ _("IPs Compartidas por Múltiples Usuarios") }}
     </h2>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-900/50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            >
               {{ _("IP") }}
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            >
               {{ _("Número de Usuarios") }}
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            >
               {{ _("Usuarios") }}
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody
+          class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+        >
           {% for ip in metrics.users_per_ip %}
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100"
+            >
               {{ ip.ip }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
+            >
               {{ ip.user_count }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
+            >
               {{ ip.usernames }}
             </td>
           </tr>

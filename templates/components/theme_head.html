@@ -1,0 +1,19 @@
+<!-- Dark mode setup: configure Tailwind CDN for class strategy + prevent FOUC -->
+<style type="text/tailwindcss">
+  @custom-variant dark (&:where(.dark, .dark *));
+</style>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("squidstats-theme");
+      var prefersDark =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (t === "dark" || (!t && prefersDark)) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    } catch (e) {}
+  })();
+</script>
