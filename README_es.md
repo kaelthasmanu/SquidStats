@@ -193,7 +193,7 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
 
 **SquidStats requiere una configuración adecuada del Cache Manager para funcionar correctamente.** Por favor sigue la [documentación oficial del Cache Manager de Squid](https://wiki.squid-cache.org/Features/CacheManager/Index) para una configuración completa.
 
-**Pasos de Configuración Esenciales:**
+**Pasos de Configuración Esenciales(Versiones mas altas que la 7 no se necesita la ACL solo la parte del Manager Access):**
 
 1. **Configurar Controles de Acceso del Cache Manager** en `/etc/squid/squid.conf`:
    ```bash
