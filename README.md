@@ -272,8 +272,10 @@ sudo ./install.sh --update
 ./install.sh --help
 ```
 
-## Installation
+## Installation(.deb installation is current beta)
 SquidStats can be installed using prebuilt `.deb` packages or by using the official Ubuntu PPA repository.
+
+**Important:** The `.deb` package installations are **not compatible** with the script-based installation. You must choose **one or the other** — do not combine them. Install SquidStats using only one of the two methods.
 
 ### Installation via `.deb` package
 
