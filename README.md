@@ -47,12 +47,12 @@
           </ul>
         </li>
         <li>
-          <a href="#instalación">Instalación</a>
+          <a href="#installation">Installation</a>
           <ul>
-            <li><a href="#instalación-mediante-paquete-deb">Instalación mediante paquete `.deb`</a></li>
-            <li><a href="#instalación-desde-el-ppa-oficial-ubuntu">Instalación desde el PPA oficial (Ubuntu)</a></li>
-            <li><a href="#actualización">Actualización</a></li>
-            <li><a href="#verificación-de-la-instalación">Verificación de la instalación</a></li>
+            <li><a href="#installation-via-deb-package">Installation via .deb package</a></li>
+            <li><a href="#installation-from-official-ppa-ubuntu">Installation from official PPA (Ubuntu)</a></li>
+            <li><a href="#update">Update</a></li>
+            <li><a href="#verify-installation">Verify installation</a></li>
           </ul>
         </li>
         <li>
@@ -272,27 +272,27 @@ sudo ./install.sh --update
 ./install.sh --help
 ```
 
-## Instalación
-SquidStats puede instalarse mediante paquetes `.deb` precompilados o utilizando el repositorio PPA oficial para Ubuntu.
+## Installation
+SquidStats can be installed using prebuilt `.deb` packages or by using the official Ubuntu PPA repository.
 
-### Instalación mediante paquete `.deb`
+### Installation via `.deb` package
 
-1. Acceda a la sección de **Releases** del proyecto: [https://github.com/kaelthasmanu/SquidStats/releases](https://github.com/kaelthasmanu/SquidStats/releases)
-2. Descargue el paquete correspondiente a su distribución y versión. Actualmente se proporcionan paquetes para:
+1. Visit the project's **Releases** page: [https://github.com/kaelthasmanu/SquidStats/releases](https://github.com/kaelthasmanu/SquidStats/releases)
+2. Download the package that matches your distribution and version. Currently available packages include:
    - Debian 12
    - Debian 13
    - Ubuntu 24.04 LTS
    - Ubuntu 26.04 LTS
 
-> **Nota:** Los nombres de los archivos incluyen el número de versión de SquidStats, por lo que pueden variar entre lanzamientos. Descargue siempre la versión más reciente disponible para su distribución.
+> **Note:** Package names include the SquidStats version number and may change between releases. Always download the latest version available for your distribution.
 
-3. Instale el paquete descargado:
+3. Install the downloaded package:
 
 ```bash
 sudo dpkg -i squidstats_*.deb
 ```
 
-4. Si el sistema informa de dependencias pendientes, ejecútelas con:
+4. If the system reports unmet dependencies, install them with:
 
 ```bash
 sudo apt install -f
@@ -300,17 +300,17 @@ sudo apt install -f
 
 ---
 
-### Instalación desde el PPA oficial (Ubuntu)
-La forma recomendada de instalar SquidStats en Ubuntu es mediante el PPA oficial, ya que permite recibir actualizaciones automáticamente a través del gestor de paquetes del sistema.
+### Installation from the official PPA (Ubuntu)
+The recommended way to install SquidStats on Ubuntu is via the official PPA, which allows you to receive updates automatically through the system package manager.
 
-#### Añadir el repositorio
+#### Add the repository
 
 ```bash
 sudo add-apt-repository ppa:kaelthasmanu/squidstats
 sudo apt update
 ```
 
-#### Instalar SquidStats
+#### Install SquidStats
 
 ```bash
 sudo apt install squidstats
@@ -318,8 +318,8 @@ sudo apt install squidstats
 
 ---
 
-## Actualización
-Si SquidStats fue instalado desde el PPA, las nuevas versiones estarán disponibles mediante las actualizaciones habituales del sistema:
+## Update
+If SquidStats was installed from the PPA, new versions will be available through the system updates:
 
 ```bash
 sudo apt update
@@ -328,14 +328,14 @@ sudo apt upgrade
 
 ---
 
-## Verificación de la instalación
-Para comprobar que la instalación se ha realizado correctamente:
+## Verify installation
+To verify the installation was successful:
 
 ```bash
 squidstats --version
 ```
 
-Si el comando devuelve la versión instalada, SquidStats está listo para utilizarse.
+If the command returns the installed version, SquidStats is ready to use.
 
 ## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 
