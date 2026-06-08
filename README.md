@@ -47,6 +47,15 @@
           </ul>
         </li>
         <li>
+          <a href="#instalación">Instalación</a>
+          <ul>
+            <li><a href="#instalación-mediante-paquete-deb">Instalación mediante paquete `.deb`</a></li>
+            <li><a href="#instalación-desde-el-ppa-oficial-ubuntu">Instalación desde el PPA oficial (Ubuntu)</a></li>
+            <li><a href="#actualización">Actualización</a></li>
+            <li><a href="#verificación-de-la-instalación">Verificación de la instalación</a></li>
+          </ul>
+        </li>
+        <li>
           <a href="#installation-manual">Installation Manual</a>
           <ul>
             <li><a href="#forwarding-squid-logs-from-a-remote-squid-host-important">Forwarding Squid logs from remote host</a></li>
@@ -252,7 +261,7 @@ or
 #### Installation Options
 The installer now supports multiple modes:
 
-```bashAdd commentMore actions
+```bash
 # Full installation (interactive)
 sudo ./install.sh
 
@@ -262,6 +271,71 @@ sudo ./install.sh --update
 # Show help
 ./install.sh --help
 ```
+
+## Instalación
+SquidStats puede instalarse mediante paquetes `.deb` precompilados o utilizando el repositorio PPA oficial para Ubuntu.
+
+### Instalación mediante paquete `.deb`
+
+1. Acceda a la sección de **Releases** del proyecto: [https://github.com/kaelthasmanu/SquidStats/releases](https://github.com/kaelthasmanu/SquidStats/releases)
+2. Descargue el paquete correspondiente a su distribución y versión. Actualmente se proporcionan paquetes para:
+   - Debian 12
+   - Debian 13
+   - Ubuntu 24.04 LTS
+   - Ubuntu 26.04 LTS
+
+> **Nota:** Los nombres de los archivos incluyen el número de versión de SquidStats, por lo que pueden variar entre lanzamientos. Descargue siempre la versión más reciente disponible para su distribución.
+
+3. Instale el paquete descargado:
+
+```bash
+sudo dpkg -i squidstats_*.deb
+```
+
+4. Si el sistema informa de dependencias pendientes, ejecútelas con:
+
+```bash
+sudo apt install -f
+```
+
+---
+
+### Instalación desde el PPA oficial (Ubuntu)
+La forma recomendada de instalar SquidStats en Ubuntu es mediante el PPA oficial, ya que permite recibir actualizaciones automáticamente a través del gestor de paquetes del sistema.
+
+#### Añadir el repositorio
+
+```bash
+sudo add-apt-repository ppa:kaelthasmanu/squidstats
+sudo apt update
+```
+
+#### Instalar SquidStats
+
+```bash
+sudo apt install squidstats
+```
+
+---
+
+## Actualización
+Si SquidStats fue instalado desde el PPA, las nuevas versiones estarán disponibles mediante las actualizaciones habituales del sistema:
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+---
+
+## Verificación de la instalación
+Para comprobar que la instalación se ha realizado correctamente:
+
+```bash
+squidstats --version
+```
+
+Si el comando devuelve la versión instalada, SquidStats está listo para utilizarse.
 
 ## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 
@@ -742,23 +816,6 @@ git push origin feature-name
 ```
 
 4.Open a pull request.
-
-<!-- **Contributors**
-
-<table style="width:100%">
-  <tr>
-    <th><b>Kaelthas</b></th>
-    <th><b>Alexminator</b></th>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/kaelthasmanu"><img src="https://avatars.githubusercontent.com/u/39976595?v=4" width=150px height=150px alt="kaelthasmanu"/></a></td>
-    <td align="center"><a href="https://github.com/alexminator"><img src="https://avatars.githubusercontent.com/u/9116486?s=400&v=4" width=150px height=150px alt="alexminator"/></a></td>
-  </tr>
-  <tr>
-    <td align="center"></a> <a href="https://www.linkedin.com/in/manuel-gorrin-095242238/"><img src="assets/linkedin-48.png" width="32px" height="32px"></a><a href="https://t.me/king_0f_deathhh"><img src="assets/telegram-app-48.png" width="32px" height="32px"></a></td>
-    <td align="center"><a href="https://twitter.com/alexminator99"><img src="assets/x_48.png" width="32px" height="32px"></a> <a href="https://www.linkedin.com/in/alexander-rivas-73532037/"><img src="assets/linkedin-48.png" width="32px" height="32px"></a><a href="https://t.me/Alexminator"><img src="assets/telegram-app-48.png" width="32px" height="32px"></a></td>
-  </tr>
-</table> -->
 
 ## License
 
