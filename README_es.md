@@ -265,7 +265,7 @@ sudo ./install.sh --update
 
 ## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
 
-### Instalación Manual
+### Instalación Manual(De la forma dificil)
 
 1. Clonar el repositorio:
    ```bash
