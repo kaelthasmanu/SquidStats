@@ -19,18 +19,139 @@ def is_deb_installation() -> bool:
     return install_dir in _DEB_INSTALL_PATHS
 
 
+def _run_git_command(args, cwd, env, capture_output=True, timeout=120):
+    return subprocess.run(
+        ["git", *args],
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE if capture_output else None,
+        stderr=subprocess.PIPE if capture_output else None,
+        text=True,
+        timeout=timeout,
+    )
+
+
+def _repo_has_head(install_dir, env):
+    result = _run_git_command(["rev-parse", "--verify", "HEAD"], install_dir, env)
+    return result.returncode == 0
+
+
+def _detect_remote_branch(install_dir, env):
+    for branch in ("main", "master"):
+        result = _run_git_command(["ls-remote", "--heads", "origin", branch], install_dir, env)
+        if result.returncode == 0 and result.stdout.strip():
+            return branch
+    return None
+
+
+def _prepare_deb_git_repo(install_dir, env):
+    git_dir = os.path.join(install_dir, ".git")
+    repo_initialized = False
+    if not os.path.isdir(git_dir):
+        logger.info("Initializing git repository in deb-installed path: %s", install_dir)
+        result = _run_git_command(["init"], install_dir, env)
+        if result.returncode != 0:
+            logger.error("Failed to initialize git repository: %s", result.stderr.strip())
+            return False
+        repo_initialized = True
+
+    result = _run_git_command(["remote", "get-url", "origin"], install_dir, env)
+    origin_url = result.stdout.strip() if result.returncode == 0 else None
+    if origin_url != "https://github.com/kaelthasmanu/SquidStats.git":
+        if origin_url:
+            logger.info(
+                "Updating git origin remote URL from %s to %s",
+                origin_url,
+                "https://github.com/kaelthasmanu/SquidStats.git",
+            )
+            result = _run_git_command(
+                ["remote", "set-url", "origin", "https://github.com/kaelthasmanu/SquidStats.git"],
+                install_dir,
+                env,
+            )
+        else:
+            logger.info(
+                "Adding git origin remote: %s",
+                "https://github.com/kaelthasmanu/SquidStats.git",
+            )
+            result = _run_git_command(
+                ["remote", "add", "origin", "https://github.com/kaelthasmanu/SquidStats.git"],
+                install_dir,
+                env,
+            )
+        if result.returncode != 0:
+            logger.error("Failed to configure git origin remote: %s", result.stderr.strip())
+            return False
+
+    result = _run_git_command(["fetch", "--tags", "origin"], install_dir, env)
+    if result.returncode != 0:
+        logger.error("Failed to fetch from origin: %s", result.stderr.strip())
+        return False
+
+    branch = _detect_remote_branch(install_dir, env)
+    if not branch:
+        logger.error("No supported remote branch found on origin")
+        return False
+
+    if repo_initialized or not _repo_has_head(install_dir, env):
+        logger.info("Checking out branch %s from origin", branch)
+        result = _run_git_command(["checkout", "-B", branch, f"origin/{branch}"], install_dir, env)
+        if result.returncode != 0:
+            logger.error(
+                "Failed to checkout branch %s from origin: %s",
+                branch,
+                result.stderr.strip(),
+            )
+            return False
+
+    return True
+
+
+def _update_deb_installation(install_dir, env):
+    if not _prepare_deb_git_repo(install_dir, env):
+        return False
+
+    branch = _detect_remote_branch(install_dir, env)
+    if not branch:
+        return False
+
+    result = _run_git_command(["pull", "--ff-only", "origin", branch], install_dir, env)
+    if result.returncode == 0:
+        logger.info("Git pull succeeded on deb installation")
+        return True
+
+    status = _run_git_command(["status", "--porcelain"], install_dir, env)
+    if status.returncode == 0 and status.stdout.strip():
+        logger.error(
+            "Git pull failed because the working tree has modified files:\n%s",
+            status.stdout.strip(),
+        )
+    else:
+        logger.error(
+            "Git pull failed: %s",
+            result.stderr.strip() or result.stdout.strip(),
+        )
+    return False
+
+
 def updateSquidStats():
     logger.info("Starting SquidStats web update process")
 
     install_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    env = os.environ.copy()
+    proxy_url = os.getenv("HTTP_PROXY", "")
+    https_proxy_url = os.getenv("HTTPS_PROXY", proxy_url)
+    if proxy_url:
+        logger.debug("HTTP proxy configured")
+        env["http_proxy"] = proxy_url
+    if https_proxy_url:
+        logger.debug("HTTPS proxy configured")
+        env["https_proxy"] = https_proxy_url
+
     if is_deb_installation():
-        logger.error(
-            "Deb-based installation detected in %s. "
-            "This installation cannot be updated with this script. "
-            "Please use the .deb package to update: dpkg -i squidstats_<version>.deb",
-            install_dir,
-        )
-        return False
+        logger.info("Detected deb-installed SquidStats; updating via git pull")
+        return _update_deb_installation(install_dir, env)
+
     if not os.path.isdir(os.path.join(install_dir, ".git")):
         logger.error(
             "No git repository found in %s. Cannot perform automatic update.",
@@ -39,16 +160,6 @@ def updateSquidStats():
         return False
 
     try:
-        proxy_url = os.getenv("HTTP_PROXY", "")
-        https_proxy_url = os.getenv("HTTPS_PROXY", proxy_url)
-        env = os.environ.copy()
-        if proxy_url:
-            logger.debug("HTTP proxy configured")
-            env["http_proxy"] = proxy_url
-        if https_proxy_url:
-            logger.debug("HTTPS proxy configured")
-            env["https_proxy"] = https_proxy_url
-
         proxies = None
         if proxy_url or https_proxy_url:
             proxies = {
