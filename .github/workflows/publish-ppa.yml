@@ -92,6 +92,18 @@ jobs:
           gpg --batch --list-keys --keyid-format LONG
           echo "GPG key import debug complete"
 
+      - name: Configure dput for passive FTP
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          cat > ~/.dput.cf <<'EOF'
+          [DEFAULT]
+          passive_ftp = yes
+          EOF
+          chmod 600 ~/.dput.cf
+          echo "Created ~/.dput.cf with passive_ftp = yes"
+          dput -p || true
+
       # ── 5. Publish to PPA ────────────────────────────────────────────────
       - name: Publish to Ubuntu PPA
         uses: yuezk/publish-ppa-package@v2
