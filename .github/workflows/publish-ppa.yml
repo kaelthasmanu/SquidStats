@@ -81,6 +81,17 @@ jobs:
           echo "=== Build-Depends after fix ==="
           grep 'Build-Depends' ppa-debian/control
 
+      - name: Debug GPG key imported for PPA upload
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.PPA_GPG_PASSPHRASE }}
+        run: |
+          set -e
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --batch --list-secret-keys --keyid-format LONG
+          gpg --batch --list-keys --keyid-format LONG
+          echo "GPG key import debug complete"
+
       # ── 5. Publish to PPA ────────────────────────────────────────────────
       - name: Publish to Ubuntu PPA
         uses: yuezk/publish-ppa-package@v2
