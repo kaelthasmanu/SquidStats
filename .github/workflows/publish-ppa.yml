@@ -125,6 +125,10 @@ jobs:
           echo "=== Fingerprint Selected ==="
           echo "$GPG_KEY_FINGERPRINT"
 
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent || true
+
           echo "=== Test Sign ==="
           test_file="$(mktemp)"
           printf 'hola\n' > "$test_file"
@@ -165,6 +169,7 @@ jobs:
 
           for series in $SERIES_LIST; do
             ubuntu_version="$(distro-info --series "$series" -r | awk '{ print $1 }')"
+            echo "Series=$series Ubuntu=$ubuntu_version"
             build_root="$(mktemp -d)"
 
             cp "$TARBALL" "$build_root/"
@@ -198,8 +203,17 @@ jobs:
                   -p"$sign_with_gpg"
               fi
 
+              which dput || true
+              dput --version || true
+
               echo "=== Files to upload ==="
               ls -lah ..
+
+              echo "=== Distribution ==="
+              grep '^Distribution:' ../*_source.changes || true
+
+              echo "=== Changes file ==="
+              head -40 ../*_source.changes || true
 
               echo "=== Verify signatures ==="
               gpg --verify ../*_source.changes || true
@@ -208,7 +222,7 @@ jobs:
               echo "=== Launchpad fingerprint ==="
               echo "$GPG_KEY_FINGERPRINT"
 
-              dput-ng ppa:kaelthasmanu/squidstats ../*_source.changes
+              dput ppa:kaelthasmanu/squidstats ../*_source.changes
             )
 
             upload_orig=0
