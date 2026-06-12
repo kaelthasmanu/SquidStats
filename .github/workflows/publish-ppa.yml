@@ -147,7 +147,7 @@ jobs:
                 --newversion "${upstream_version}-ppa1~ubuntu${ubuntu_version}" \
                 "New upstream release"
 
-              mk-build-deps --install --remove --tool='sudo apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
+              sudo mk-build-deps --install --remove --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
 
               if [ "$upload_orig" -eq 1 ]; then
                 debuild -S -sa \
