@@ -86,9 +86,9 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/ppa-home"
           chmod 700 "$GITHUB_WORKSPACE/ppa-home"
           cat > "$GITHUB_WORKSPACE/ppa-home/.dput.cf" <<'EOF'
-[DEFAULT]
-passive_ftp = yes
-EOF
+          [DEFAULT]
+          passive_ftp = yes
+          EOF
           chmod 600 "$GITHUB_WORKSPACE/ppa-home/.dput.cf"
           echo "Created ppa-home/.dput.cf with passive_ftp = yes"
 
