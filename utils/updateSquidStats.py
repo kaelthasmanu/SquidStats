@@ -29,7 +29,9 @@ def _get_git_binary():
 def _run_git_command(args, cwd, env, capture_output=True, timeout=120):
     git_bin = _get_git_binary()
     if not git_bin:
-        return subprocess.CompletedProcess(["git", *args], 1, "", "git executable not found")
+        return subprocess.CompletedProcess(
+            ["git", *args], 1, "", "git executable not found"
+        )
 
     return subprocess.run(  # noqa: S603
         [git_bin, *args],
