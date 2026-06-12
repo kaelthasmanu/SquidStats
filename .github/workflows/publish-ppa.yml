@@ -135,8 +135,7 @@ jobs:
               set -euo pipefail
               cd "$build_root/squidstats-$VERSION"
 
-              debmake '-b:python3'
-              cp -r "$GITHUB_WORKSPACE/ppa-debian/." debian/
+              cp -r "$GITHUB_WORKSPACE/ppa-debian" debian
 
               package_name="$(dpkg-parsechangelog --show-field Source)"
               upstream_version="$(dpkg-parsechangelog --show-field Version | cut -d- -f1)"
