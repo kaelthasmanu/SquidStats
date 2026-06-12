@@ -23,7 +23,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      # ── 2. Resolve package version ──────────────────────────────────────
+      # ── 2. Install packaging tools ──────────────────────────────────────
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debhelper \
+            debmake \
+            devscripts \
+            distro-info \
+            distro-info-data \
+            dput \
+            equivs \
+            gnupg
+
+      # ── 3. Resolve package version ──────────────────────────────────────
       - name: Determine package version
         id: version
         run: |
@@ -39,7 +53,7 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Package version: ${VERSION}"
 
-      # ── 3. Create source tarball ─────────────────────────────────────────
+      # ── 4. Create source tarball ─────────────────────────────────────────
       - name: Create source tarball
         run: |
           VERSION="${{ steps.version.outputs.version }}"
@@ -67,11 +81,7 @@ jobs:
           echo "=== Created tarball ==="
           ls -lh ppa-build/tarball/
 
-      # ── 4. Prepare debian directory for PPA ─────────────────────────────
-      # The action container runs Ubuntu focal (debhelper 12, python3 3.8).
-      # Relax Build-Depends so mk-build-deps can install them inside the
-      # container; the actual package is built on Launchpad servers (noble/
-      # resolute) which have debhelper 13+ and python3 3.11+.
+      # ── 5. Prepare debian directory for PPA ─────────────────────────────
       - name: Prepare debian directory for PPA
         run: |
           cp -r debian ppa-debian
@@ -81,30 +91,78 @@ jobs:
           echo "=== Build-Depends after fix ==="
           grep 'Build-Depends' ppa-debian/control
 
-      - name: Prepare action home with passive dput config
-        run: |
-          mkdir -p "$GITHUB_WORKSPACE/ppa-home"
-          chmod 700 "$GITHUB_WORKSPACE/ppa-home"
-          cat > "$GITHUB_WORKSPACE/ppa-home/.dput.cf" <<'EOF'
-          [DEFAULT]
-          passive_ftp = yes
-          EOF
-          chmod 600 "$GITHUB_WORKSPACE/ppa-home/.dput.cf"
-          echo "Created ppa-home/.dput.cf with passive_ftp = yes"
-
-      # ── 5. Publish to PPA ────────────────────────────────────────────────
+      # ── 6. Publish to PPA ────────────────────────────────────────────────
       - name: Publish to Ubuntu PPA
-        uses: yuezk/publish-ppa-package@v2
         env:
-          HOME: ${{ github.workspace }}/ppa-home
-        with:
-          repository: kaelthasmanu/squidstats
           gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE }}
-          tarball: ppa-build/tarball/squidstats_${{ steps.version.outputs.version }}.orig.tar.gz
-          debian_dir: ppa-debian
-          deb_email: manuelalberto.gorrin@gmail.com
-          deb_fullname: Manuel Alberto Gorrin Reyes
-          series: jammy
-          extra_series: noble resolute
-          debmake_arguments: '-b":python3"'
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ steps.version.outputs.version }}"
+          TARBALL="$GITHUB_WORKSPACE/ppa-build/tarball/squidstats_${VERSION}.orig.tar.gz"
+          SERIES_LIST="jammy noble resolute"
+
+          export DEBEMAIL="manuelalberto.gorrin@gmail.com"
+          export DEBFULLNAME="Manuel Alberto Gorrin Reyes"
+
+          mkdir -p "$HOME/.gnupg"
+          chmod 700 "$HOME/.gnupg"
+
+          if ! echo "$gpg_private_key" | gpg --batch --import; then
+            echo "$gpg_private_key" | base64 --decode | gpg --batch --import
+          fi
+
+          GPG_KEY_FINGERPRINT="$(gpg --batch --with-colons --list-secret-keys | awk -F: '/^fpr:/ { print $10; exit }')"
+          if [ -z "$GPG_KEY_FINGERPRINT" ]; then
+            echo "Unable to determine imported GPG key fingerprint" >&2
+            exit 1
+          fi
+
+          printf '%s\n' '[DEFAULT]' 'passive_ftp = 1' > "$HOME/.dput.cf"
+          chmod 600 "$HOME/.dput.cf"
+
+          upload_orig=1
+
+          for series in $SERIES_LIST; do
+            ubuntu_version="$(distro-info --series "$series" -r | awk '{ print $1 }')"
+            build_root="$(mktemp -d)"
+
+            cp "$TARBALL" "$build_root/"
+            tar -xzf "$TARBALL" -C "$build_root"
+
+            (
+              set -euo pipefail
+              cd "$build_root/squidstats-$VERSION"
+
+              debmake '-b:python3'
+              cp -r "$GITHUB_WORKSPACE/ppa-debian/." debian/
+
+              package_name="$(dpkg-parsechangelog --show-field Source)"
+              upstream_version="$(dpkg-parsechangelog --show-field Version | cut -d- -f1)"
+
+              rm -f debian/changelog
+              dch --create \
+                --distribution "$series" \
+                --package "$package_name" \
+                --newversion "${upstream_version}-ppa1~ubuntu${ubuntu_version}" \
+                "New upstream release"
+
+              mk-build-deps --install --remove --tool='sudo apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
+
+              if [ "$upload_orig" -eq 1 ]; then
+                debuild -S -sa \
+                  -k"$GPG_KEY_FINGERPRINT" \
+                  -p"gpg --batch --passphrase \"$gpg_passphrase\" --pinentry-mode loopback"
+              else
+                debuild -S -sd \
+                  -k"$GPG_KEY_FINGERPRINT" \
+                  -p"gpg --batch --passphrase \"$gpg_passphrase\" --pinentry-mode loopback"
+              fi
+
+              dput ppa:kaelthasmanu/squidstats ../*_source.changes
+            )
+
+            upload_orig=0
+            rm -rf "$build_root"
+          done
