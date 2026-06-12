@@ -185,16 +185,6 @@ def install_package():
 def update_web():
     """Route to update the web application"""
     logger.info("Received web update request")
-    if is_deb_installation():
-        flash(
-            _(
-                "Esta instalación fue realizada con un paquete .deb y no puede "
-                "actualizarse desde aquí. Descargue e instale la última versión: "
-                "dpkg -i squidstats_<version>.deb"
-            ),
-            "warning",
-        )
-        return redirect("/")
     ok = False
     try:
         ok = updateSquidStats()
