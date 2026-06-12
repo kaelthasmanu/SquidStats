@@ -94,8 +94,8 @@ jobs:
       # ── 6. Publish to PPA ────────────────────────────────────────────────
       - name: Publish to Ubuntu PPA
         env:
-          gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
-          gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE }}
+          gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY || secrets.GPG_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE || secrets.GPG_PASSPHRASE }}
         run: |
           set -euo pipefail
 
@@ -118,6 +118,48 @@ jobs:
             echo "Unable to determine imported GPG key fingerprint" >&2
             exit 1
           fi
+
+          echo "=== Secret Keys Imported ==="
+          gpg --list-secret-keys --keyid-format LONG
+
+          echo "=== Fingerprint Selected ==="
+          echo "$GPG_KEY_FINGERPRINT"
+
+          echo "=== Test Sign ==="
+          test_file="$(mktemp)"
+          printf 'hola\n' > "$test_file"
+
+          if [ -n "$gpg_passphrase" ]; then
+            gpg \
+              --batch \
+              --yes \
+              --pinentry-mode loopback \
+              --passphrase "$gpg_passphrase" \
+              --local-user "$GPG_KEY_FINGERPRINT" \
+              --clearsign "$test_file"
+          else
+            gpg \
+              --batch \
+              --yes \
+              --pinentry-mode loopback \
+              --local-user "$GPG_KEY_FINGERPRINT" \
+              --clearsign "$test_file"
+          fi
+
+          echo "TEST OK"
+          rm -f "$test_file" "$test_file.asc"
+
+          sign_with_gpg="$RUNNER_TEMP/sign-with-gpg"
+          cat > "$sign_with_gpg" <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          if [ -n "${GPG_PASSPHRASE:-}" ]; then
+            exec gpg --batch --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" "$@"
+          fi
+          exec gpg --batch --pinentry-mode loopback "$@"
+          EOF
+          chmod 700 "$sign_with_gpg"
+          export GPG_PASSPHRASE="$gpg_passphrase"
 
           printf '%s\n' '[DEFAULT]' 'passive_ftp = 1' > "$HOME/.dput.cf"
           chmod 600 "$HOME/.dput.cf"
@@ -152,11 +194,11 @@ jobs:
               if [ "$upload_orig" -eq 1 ]; then
                 debuild -S -sa \
                   -k"$GPG_KEY_FINGERPRINT" \
-                  -p"gpg --batch --passphrase \"$gpg_passphrase\" --pinentry-mode loopback"
+                  -p"$sign_with_gpg"
               else
                 debuild -S -sd \
                   -k"$GPG_KEY_FINGERPRINT" \
-                  -p"gpg --batch --passphrase \"$gpg_passphrase\" --pinentry-mode loopback"
+                  -p"$sign_with_gpg"
               fi
 
               dput ppa:kaelthasmanu/squidstats ../*_source.changes
