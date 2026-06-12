@@ -81,32 +81,22 @@ jobs:
           echo "=== Build-Depends after fix ==="
           grep 'Build-Depends' ppa-debian/control
 
-      - name: Debug GPG key imported for PPA upload
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.PPA_GPG_PASSPHRASE }}
+      - name: Prepare action home with passive dput config
         run: |
-          set -e
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          gpg --batch --list-secret-keys --keyid-format LONG
-          gpg --batch --list-keys --keyid-format LONG
-          echo "GPG key import debug complete"
-
-      - name: Configure dput for passive FTP
-        run: |
-          mkdir -p ~/.gnupg
-          chmod 700 ~/.gnupg
-          cat > ~/.dput.cf <<'EOF'
-          [DEFAULT]
-          passive_ftp = yes
-          EOF
-          chmod 600 ~/.dput.cf
-          echo "Created ~/.dput.cf with passive_ftp = yes"
-          dput -p || true
+          mkdir -p "$GITHUB_WORKSPACE/ppa-home"
+          chmod 700 "$GITHUB_WORKSPACE/ppa-home"
+          cat > "$GITHUB_WORKSPACE/ppa-home/.dput.cf" <<'EOF'
+[DEFAULT]
+passive_ftp = yes
+EOF
+          chmod 600 "$GITHUB_WORKSPACE/ppa-home/.dput.cf"
+          echo "Created ppa-home/.dput.cf with passive_ftp = yes"
 
       # ── 5. Publish to PPA ────────────────────────────────────────────────
       - name: Publish to Ubuntu PPA
         uses: yuezk/publish-ppa-package@v2
+        env:
+          HOME: ${{ github.workspace }}/ppa-home
         with:
           repository: kaelthasmanu/squidstats
           gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
