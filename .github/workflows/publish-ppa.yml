@@ -33,7 +33,7 @@ jobs:
             devscripts \
             distro-info \
             distro-info-data \
-            dput \
+            dput-ng \
             equivs \
             gnupg
 
@@ -101,7 +101,7 @@ jobs:
 
           VERSION="${{ steps.version.outputs.version }}"
           TARBALL="$GITHUB_WORKSPACE/ppa-build/tarball/squidstats_${VERSION}.orig.tar.gz"
-          SERIES_LIST="jammy noble resolute"
+          SERIES_LIST="jammy noble"
 
           export DEBEMAIL="manuelalberto.gorrin@gmail.com"
           export DEBFULLNAME="Manuel Alberto Gorrin Reyes"
@@ -161,9 +161,6 @@ jobs:
           chmod 700 "$sign_with_gpg"
           export GPG_PASSPHRASE="$gpg_passphrase"
 
-          printf '%s\n' '[DEFAULT]' 'passive_ftp = 1' > "$HOME/.dput.cf"
-          chmod 600 "$HOME/.dput.cf"
-
           upload_orig=1
 
           for series in $SERIES_LIST; do
@@ -201,7 +198,17 @@ jobs:
                   -p"$sign_with_gpg"
               fi
 
-              dput ppa:kaelthasmanu/squidstats ../*_source.changes
+              echo "=== Files to upload ==="
+              ls -lah ..
+
+              echo "=== Verify signatures ==="
+              gpg --verify ../*_source.changes || true
+              gpg --verify ../*.dsc || true
+
+              echo "=== Launchpad fingerprint ==="
+              echo "$GPG_KEY_FINGERPRINT"
+
+              dput-ng ppa:kaelthasmanu/squidstats ../*_source.changes
             )
 
             upload_orig=0
