@@ -19,9 +19,20 @@ def is_deb_installation() -> bool:
     return install_dir in _DEB_INSTALL_PATHS
 
 
+def _get_git_binary():
+    git_bin = shutil.which("git")
+    if not git_bin:
+        logger.error("git executable not found on PATH")
+    return git_bin
+
+
 def _run_git_command(args, cwd, env, capture_output=True, timeout=120):
-    return subprocess.run(
-        ["git", *args],
+    git_bin = _get_git_binary()
+    if not git_bin:
+        return subprocess.CompletedProcess(["git", *args], 1, "", "git executable not found")
+
+    return subprocess.run(  # noqa: S603
+        [git_bin, *args],
         cwd=cwd,
         env=env,
         stdout=subprocess.PIPE if capture_output else None,
@@ -38,7 +49,9 @@ def _repo_has_head(install_dir, env):
 
 def _detect_remote_branch(install_dir, env):
     for branch in ("main", "master"):
-        result = _run_git_command(["ls-remote", "--heads", "origin", branch], install_dir, env)
+        result = _run_git_command(
+            ["ls-remote", "--heads", "origin", branch], install_dir, env
+        )
         if result.returncode == 0 and result.stdout.strip():
             return branch
     return None
@@ -48,10 +61,14 @@ def _prepare_deb_git_repo(install_dir, env):
     git_dir = os.path.join(install_dir, ".git")
     repo_initialized = False
     if not os.path.isdir(git_dir):
-        logger.info("Initializing git repository in deb-installed path: %s", install_dir)
+        logger.info(
+            "Initializing git repository in deb-installed path: %s", install_dir
+        )
         result = _run_git_command(["init"], install_dir, env)
         if result.returncode != 0:
-            logger.error("Failed to initialize git repository: %s", result.stderr.strip())
+            logger.error(
+                "Failed to initialize git repository: %s", result.stderr.strip()
+            )
             return False
         repo_initialized = True
 
@@ -65,7 +82,12 @@ def _prepare_deb_git_repo(install_dir, env):
                 "https://github.com/kaelthasmanu/SquidStats.git",
             )
             result = _run_git_command(
-                ["remote", "set-url", "origin", "https://github.com/kaelthasmanu/SquidStats.git"],
+                [
+                    "remote",
+                    "set-url",
+                    "origin",
+                    "https://github.com/kaelthasmanu/SquidStats.git",
+                ],
                 install_dir,
                 env,
             )
@@ -75,12 +97,19 @@ def _prepare_deb_git_repo(install_dir, env):
                 "https://github.com/kaelthasmanu/SquidStats.git",
             )
             result = _run_git_command(
-                ["remote", "add", "origin", "https://github.com/kaelthasmanu/SquidStats.git"],
+                [
+                    "remote",
+                    "add",
+                    "origin",
+                    "https://github.com/kaelthasmanu/SquidStats.git",
+                ],
                 install_dir,
                 env,
             )
         if result.returncode != 0:
-            logger.error("Failed to configure git origin remote: %s", result.stderr.strip())
+            logger.error(
+                "Failed to configure git origin remote: %s", result.stderr.strip()
+            )
             return False
 
     result = _run_git_command(["fetch", "--tags", "origin"], install_dir, env)
@@ -95,7 +124,9 @@ def _prepare_deb_git_repo(install_dir, env):
 
     if repo_initialized or not _repo_has_head(install_dir, env):
         logger.info("Checking out branch %s from origin", branch)
-        result = _run_git_command(["checkout", "-B", branch, f"origin/{branch}"], install_dir, env)
+        result = _run_git_command(
+            ["checkout", "-B", branch, f"origin/{branch}"], install_dir, env
+        )
         if result.returncode != 0:
             logger.error(
                 "Failed to checkout branch %s from origin: %s",
