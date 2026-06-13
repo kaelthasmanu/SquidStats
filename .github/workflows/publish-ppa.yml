@@ -7,6 +7,10 @@ on:
         description: 'Package version (e.g. 2.4). Leave empty to use example.env.'
         required: false
         default: ''
+      revision:
+        description: 'Revision for the PPA upload (e.g. 2 for ppa2).'
+        required: false
+        default: '1'
 
 permissions:
   contents: read
