@@ -13,31 +13,12 @@ permissions:
 
 jobs:
   publish-ppa:
-    name: Publish to PPA
     runs-on: ubuntu-latest
 
     steps:
-      # ── 1. Checkout ──────────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
-      # ── 2. Install packaging tools ──────────────────────────────────────
-      - name: Install packaging tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            debhelper \
-            debmake \
-            devscripts \
-            distro-info \
-            distro-info-data \
-            dput-ng \
-            equivs \
-            gnupg
-
-      # ── 3. Resolve package version ──────────────────────────────────────
       - name: Determine package version
         id: version
         run: |
@@ -48,183 +29,64 @@ jobs:
           elif [ -n "$EXAMPLE_VERSION" ]; then
             VERSION="$EXAMPLE_VERSION"
           else
-            VERSION="0.0.0"
+            echo "Unable to determine version"
+            exit 1
           fi
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Package version: ${VERSION}"
 
-      # ── 4. Create source tarball ─────────────────────────────────────────
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Create source tarball
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           PKG_DIR="squidstats-${VERSION}"
 
-          mkdir -p "ppa-build/${PKG_DIR}"
+          mkdir -p build/${PKG_DIR}
 
           rsync -a \
             --exclude='.git' \
-            --exclude='debian' \
             --exclude='.github' \
+            --exclude='debian' \
             --exclude='.venv' \
             --exclude='__pycache__' \
             --exclude='*.pyc' \
             --exclude='*.session' \
             --exclude='.env' \
-            --exclude='ppa-build' \
+            --exclude='build' \
             --exclude='dist' \
-            ./ "ppa-build/${PKG_DIR}/"
+            ./ build/${PKG_DIR}/
 
-          mkdir -p ppa-build/tarball
-          tar -czf "ppa-build/tarball/squidstats_${VERSION}.orig.tar.gz" \
-            -C ppa-build "${PKG_DIR}"
+          mkdir -p build/tarball
 
-          echo "=== Created tarball ==="
-          ls -lh ppa-build/tarball/
+          tar -czf \
+            build/tarball/squidstats_${VERSION}.orig.tar.gz \
+            -C build \
+            ${PKG_DIR}
 
-      # ── 5. Prepare debian directory for PPA ─────────────────────────────
-      - name: Prepare debian directory for PPA
+      - name: Prepare Debian directory
         run: |
-          cp -r debian ppa-debian
-          sed -i 's/debhelper-compat (= 13)/debhelper (>= 12~)/' ppa-debian/control
-          sed -i 's/python3 (>= 3\.11)/python3/' ppa-debian/control
-          echo "12" > ppa-debian/compat
-          echo "=== Build-Depends after fix ==="
-          grep 'Build-Depends' ppa-debian/control
+          cp -r debian build/debian
 
-      # ── 6. Publish to PPA ────────────────────────────────────────────────
-      - name: Publish to Ubuntu PPA
-        env:
-          gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY || secrets.GPG_PRIVATE_KEY }}
-          gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE || secrets.GPG_PASSPHRASE }}
-        run: |
-          set -euo pipefail
+          sed -i 's/debhelper-compat (= 13)/debhelper (>= 12~)/' build/debian/control
+          sed -i 's/python3 (>= 3\.11)/python3/' build/debian/control
 
-          VERSION="${{ steps.version.outputs.version }}"
-          TARBALL="$GITHUB_WORKSPACE/ppa-build/tarball/squidstats_${VERSION}.orig.tar.gz"
-          SERIES_LIST="jammy noble"
+          echo "12" > build/debian/compat
 
-          export DEBEMAIL="manuelalberto.gorrin@gmail.com"
-          export DEBFULLNAME="Manuel Alberto Gorrin Reyes"
+      - name: Publish PPA
+        uses: yuezk/publish-ppa-package@v2
+        with:
+          repository: "kaelthasmanu/squidstats"
 
-          mkdir -p "$HOME/.gnupg"
-          chmod 700 "$HOME/.gnupg"
+          gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE }}
 
-          if ! echo "$gpg_private_key" | gpg --batch --import; then
-            echo "$gpg_private_key" | base64 --decode | gpg --batch --import
-          fi
+          tarball: build/tarball/*.orig.tar.gz
+          debian_dir: build/debian
 
-          GPG_KEY_FINGERPRINT="$(gpg --batch --with-colons --list-secret-keys | awk -F: '/^fpr:/ { print $10; exit }')"
-          if [ -z "$GPG_KEY_FINGERPRINT" ]; then
-            echo "Unable to determine imported GPG key fingerprint" >&2
-            exit 1
-          fi
+          deb_email: "manuelalberto.gorrin@gmail.com"
+          deb_fullname: "Manuel Alberto Gorrin Reyes"
 
-          echo "=== Secret Keys Imported ==="
-          gpg --list-secret-keys --keyid-format LONG
+          series: "jammy noble"
 
-          echo "=== Fingerprint Selected ==="
-          echo "$GPG_KEY_FINGERPRINT"
+          revision: 1
 
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpgconf --kill gpg-agent || true
-
-          echo "=== Test Sign ==="
-          test_file="$(mktemp)"
-          printf 'hola\n' > "$test_file"
-
-          if [ -n "$gpg_passphrase" ]; then
-            gpg \
-              --batch \
-              --yes \
-              --pinentry-mode loopback \
-              --passphrase "$gpg_passphrase" \
-              --local-user "$GPG_KEY_FINGERPRINT" \
-              --clearsign "$test_file"
-          else
-            gpg \
-              --batch \
-              --yes \
-              --pinentry-mode loopback \
-              --local-user "$GPG_KEY_FINGERPRINT" \
-              --clearsign "$test_file"
-          fi
-
-          echo "TEST OK"
-          rm -f "$test_file" "$test_file.asc"
-
-          sign_with_gpg="$RUNNER_TEMP/sign-with-gpg"
-          cat > "$sign_with_gpg" <<'EOF'
-          #!/usr/bin/env bash
-          set -euo pipefail
-          if [ -n "${GPG_PASSPHRASE:-}" ]; then
-            exec gpg --batch --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" "$@"
-          fi
-          exec gpg --batch --pinentry-mode loopback "$@"
-          EOF
-          chmod 700 "$sign_with_gpg"
-          export GPG_PASSPHRASE="$gpg_passphrase"
-
-          upload_orig=1
-
-          for series in $SERIES_LIST; do
-            ubuntu_version="$(distro-info --series "$series" -r | awk '{ print $1 }')"
-            echo "Series=$series Ubuntu=$ubuntu_version"
-            build_root="$(mktemp -d)"
-
-            cp "$TARBALL" "$build_root/"
-            tar -xzf "$TARBALL" -C "$build_root"
-
-            (
-              set -euo pipefail
-              cd "$build_root/squidstats-$VERSION"
-
-              cp -r "$GITHUB_WORKSPACE/ppa-debian" debian
-
-              package_name="$(dpkg-parsechangelog --show-field Source)"
-              upstream_version="$(dpkg-parsechangelog --show-field Version | cut -d- -f1)"
-
-              rm -f debian/changelog
-              dch --create \
-                --distribution "$series" \
-                --package "$package_name" \
-                --newversion "${upstream_version}-ppa1~ubuntu${ubuntu_version}" \
-                "New upstream release"
-
-              sudo mk-build-deps --install --remove --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
-
-              if [ "$upload_orig" -eq 1 ]; then
-                debuild -S -sa \
-                  -k"$GPG_KEY_FINGERPRINT" \
-                  -p"$sign_with_gpg"
-              else
-                debuild -S -sd \
-                  -k"$GPG_KEY_FINGERPRINT" \
-                  -p"$sign_with_gpg"
-              fi
-
-              which dput || true
-              dput --version || true
-
-              echo "=== Files to upload ==="
-              ls -lah ..
-
-              echo "=== Distribution ==="
-              grep '^Distribution:' ../*_source.changes || true
-
-              echo "=== Changes file ==="
-              head -40 ../*_source.changes || true
-
-              echo "=== Verify signatures ==="
-              gpg --verify ../*_source.changes || true
-              gpg --verify ../*.dsc || true
-
-              echo "=== Launchpad fingerprint ==="
-              echo "$GPG_KEY_FINGERPRINT"
-
-              dput ppa:kaelthasmanu/squidstats ../*_source.changes
-            )
-
-            upload_orig=0
-            rm -rf "$build_root"
-          done
+          new_version_template: "{VERSION}-ppa{REVISION}~ubuntu{SERIES_VERSION}"
