@@ -1,12 +1,10 @@
 name: Publish to Ubuntu PPA
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       version:
-        description: 'Package version (e.g. 2.4). Leave empty to use tag or example.env.'
+        description: 'Package version (e.g. 2.4). Leave empty to use example.env.'
         required: false
         default: ''
 
@@ -14,28 +12,23 @@ permissions:
   contents: read
 
 jobs:
-  prepare:
+  publish-ppa:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Determine package version
         id: version
         run: |
+          EXAMPLE_VERSION=$(grep -E '^\s*VERSION=' example.env | head -n1 | cut -d'=' -f2- | tr -d '"\r' | xargs || true)
+
           if [ -n "${{ github.event.inputs.version }}" ]; then
             VERSION="${{ github.event.inputs.version }}"
-          elif [ "${{ github.event_name }}" = "release" ]; then
-            VERSION="${{ github.event.release.tag_name }}"
-            VERSION="${VERSION#v}"
+          elif [ -n "$EXAMPLE_VERSION" ]; then
+            VERSION="$EXAMPLE_VERSION"
           else
-            VERSION=$(grep -E '^\s*VERSION=' example.env | head -n1 | cut -d'=' -f2- | tr -d '"\r' | xargs || true)
-          fi
-
-          if [ -z "$VERSION" ]; then
             echo "Unable to determine version"
             exit 1
           fi
@@ -78,36 +71,16 @@ jobs:
 
           echo "12" > build/debian/compat
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ppa-build-${{ steps.version.outputs.version }}
-          path: build/
-
-  publish:
-    needs: prepare
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        series: [noble, jammy]
-      fail-fast: false
-
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ppa-build-${{ needs.prepare.outputs.version }}
-          path: build/
-
-      - name: Publish to Ubuntu PPA (${{ matrix.series }})
+      - name: Publish to Ubuntu PPA
         uses: yuezk/publish-ppa-package@v2
         with:
           repository: kaelthasmanu/squidstats
           gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE }}
-          tarball: build/tarball/squidstats_${{ needs.prepare.outputs.version }}.orig.tar.gz
+          tarball: build/tarball/squidstats_${{ steps.version.outputs.version }}.orig.tar.gz
           debian_dir: build/debian
           deb_email: manuelalberto.gorrin@gmail.com
           deb_fullname: Manuel Alberto Gorrin Reyes
-          series: ${{ matrix.series }}
+          series: "noble"
+          # extra_series: "resolute"  # enable once resolute is activated in the PPA settings
           debmake_arguments: '-b":python3"'
