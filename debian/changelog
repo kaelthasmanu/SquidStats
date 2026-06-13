@@ -1,4 +1,4 @@
-squidstats (2.5) stable; urgency=low
+squidstats (2.5.1) stable; urgency=low
 
   * Initial Debian packaging.
 
