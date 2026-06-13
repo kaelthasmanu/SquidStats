@@ -71,20 +71,16 @@ jobs:
 
           echo "12" > build/debian/compat
 
-      - name: Publish PPA
+      - name: Publish to Ubuntu PPA
         uses: yuezk/publish-ppa-package@v2
         with:
-          repository: "kaelthasmanu/squidstats"
-
+          repository: kaelthasmanu/squidstats
           gpg_private_key: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.PPA_GPG_PASSPHRASE }}
-
-          tarball: build/tarball/*.orig.tar.gz
-          debian_dir: build/debian
-
-          keep_changelog: true
-
-          deb_email: "manuelalberto.gorrin@gmail.com"
-          deb_fullname: "Manuel Alberto Gorrin Reyes"
-
-          series: "jammy noble"
+          tarball: ppa-build/tarball/squidstats_${{ steps.version.outputs.version }}.orig.tar.gz
+          debian_dir: ppa-debian
+          deb_email: manuelalberto.gorrin@gmail.com
+          deb_fullname: Manuel Alberto Gorrin Reyes
+          series: "noble"
+          # extra_series: "resolute"  # enable once resolute is activated in the PPA settings
+          debmake_arguments: '-b":python3"'
