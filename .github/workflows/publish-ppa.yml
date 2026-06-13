@@ -86,5 +86,6 @@ jobs:
           deb_email: manuelalberto.gorrin@gmail.com
           deb_fullname: Manuel Alberto Gorrin Reyes
           series: "noble"
+          revision: ${{ github.event.inputs.revision }}
           # extra_series: "resolute"  # enable once resolute is activated in the PPA settings
           debmake_arguments: '-b":python3"'
