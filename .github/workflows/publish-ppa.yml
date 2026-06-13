@@ -87,6 +87,4 @@ jobs:
 
           series: "jammy noble"
 
-          revision: 1
-
-          new_version_template: "{VERSION}-ppa{REVISION}~ubuntu{SERIES_VERSION}"
+          debmake_arguments: "-b':python3'"
