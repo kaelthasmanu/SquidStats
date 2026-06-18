@@ -270,7 +270,9 @@ def migrate_env_squid_config(auto_confirm: bool = False):
     try:
         existing = session.query(SquidConfig).first()
         if existing:
-            logger.info("squid_config already exists in the database; skipping migration.")
+            logger.info(
+                "squid_config already exists in the database; skipping migration."
+            )
             return
 
         squid_port = env_values.get("squid_port")
@@ -287,9 +289,7 @@ def migrate_env_squid_config(auto_confirm: bool = False):
             squid_host=env_values.get("squid_host", "127.0.0.1"),
             squid_port=env_values.get("squid_port", 3128),
             log_format=env_values.get("log_format", "DEFAULT"),
-            squid_log=env_values.get(
-                "squid_log", "/var/log/squid/access.log"
-            ),
+            squid_log=env_values.get("squid_log", "/var/log/squid/access.log"),
             squid_cache_log=env_values.get(
                 "squid_cache_log", "/var/log/squid/cache.log"
             ),
