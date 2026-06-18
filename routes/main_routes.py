@@ -82,9 +82,9 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
             except Exception:
                 logger.exception(f"Error parsing connections from proxy {label}")
 
-        #if not all_connections and all(not p["ok"] for p in proxy_results):
-            #logger.error("All Squid proxies returned errors")
-            #return None, _build_error_page("No data from any Squid proxy", 502)
+        # if not all_connections and all(not p["ok"] for p in proxy_results):
+        # logger.error("All Squid proxies returned errors")
+        # return None, _build_error_page("No data from any Squid proxy", 502)
 
         connections = all_connections
 
