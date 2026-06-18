@@ -142,6 +142,10 @@ class Config:
 
     # Squid configuration path
     SQUID_CONFIG_PATH = safe_get_env("SQUID_CONFIG_PATH", "/etc/squid/squid.conf")
+    ACL_FILES_DIR = safe_get_env(
+        "ACL_FILES_DIR",
+        os.path.join(os.path.dirname(SQUID_CONFIG_PATH), "squid.d"),
+    )
 
     # Internationalization (i18n)
     BABEL_DEFAULT_LOCALE = safe_get_env("BABEL_DEFAULT_LOCALE", "es")
