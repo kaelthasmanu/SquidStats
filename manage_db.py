@@ -24,7 +24,7 @@ from sqlalchemy import inspect
 
 from alembic import command
 from database.database import get_engine
-from database.models.models import BlacklistDomain
+from database.models.models import BlacklistDomain, SquidConfig
 from services.security.blacklist_service import merge_and_save_blacklist
 
 # Delay import of project modules until runtime (project root added to sys.path above)
@@ -217,6 +217,97 @@ def migrate_env_blacklist(auto_confirm: bool = False):
         return
 
 
+def migrate_env_squid_config(auto_confirm: bool = False):
+    """Migrate Squid environment variables into the squid_config DB table."""
+
+    env_values = {}
+    raw_keys = {
+        "SQUID_HOST": "squid_host",
+        "SQUID_PORT": "squid_port",
+        "LOG_FORMAT": "log_format",
+        "SQUID_LOG": "squid_log",
+        "SQUID_CACHE_LOG": "squid_cache_log",
+        "SQUID_CONFIG_PATH": "squid_config_path",
+        "ACL_FILES_DIR": "acl_files_dir",
+    }
+
+    for env_key, field_name in raw_keys.items():
+        value = os.getenv(env_key)
+        if value is None:
+            continue
+        if (value.startswith('"') and value.endswith('"')) or (
+            value.startswith("'") and value.endswith("'")
+        ):
+            value = value[1:-1]
+        env_values[field_name] = value.strip()
+
+    if not env_values:
+        logger.info("No Squid environment variables found; nothing to migrate.")
+        return
+
+    engine = get_engine()
+    inspector = inspect(engine)
+    table_name = SquidConfig.__tablename__
+    if not inspector.has_table(table_name):
+        logger.error(
+            f"Table '{table_name}' does not exist in the database. Run migrations first."
+        )
+        return
+
+    if not auto_confirm:
+        logger.info(
+            "Squid config env values found. This will create a single row in squid_config."
+        )
+        ans = input("Proceed with migration? (yes/no): ").strip().lower()
+        if ans != "yes":
+            logger.info("Migration cancelled by user.")
+            return
+
+    from sqlalchemy.orm import sessionmaker
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    try:
+        existing = session.query(SquidConfig).first()
+        if existing:
+            logger.info("squid_config already exists in the database; skipping migration.")
+            return
+
+        squid_port = env_values.get("squid_port")
+        if squid_port is not None:
+            try:
+                env_values["squid_port"] = int(squid_port)
+            except ValueError:
+                logger.warning(
+                    f"Invalid SQUID_PORT value '{squid_port}'; using default 3128."
+                )
+                env_values["squid_port"] = 3128
+
+        row = SquidConfig(
+            squid_host=env_values.get("squid_host", "127.0.0.1"),
+            squid_port=env_values.get("squid_port", 3128),
+            log_format=env_values.get("log_format", "DEFAULT"),
+            squid_log=env_values.get(
+                "squid_log", "/var/log/squid/access.log"
+            ),
+            squid_cache_log=env_values.get(
+                "squid_cache_log", "/var/log/squid/cache.log"
+            ),
+            squid_config_path=env_values.get(
+                "squid_config_path", "/etc/squid/squid.conf"
+            ),
+            acl_files_dir=env_values.get("acl_files_dir", ""),
+        )
+        session.add(row)
+        session.commit()
+        logger.info("✓ SQUID environment config migrated into database successfully.")
+    except Exception:
+        session.rollback()
+        logger.exception("Failed migrating Squid config env values into DB")
+    finally:
+        session.close()
+
+
 def show_help():
     """Show help message."""
     help_text = """
@@ -238,6 +329,7 @@ Examples:
   python manage_db.py create "add user email field"  # Create new migration
 
   python manage_db.py migrate-env-blacklist   # Migrate BLACKLIST_DOMAINS from .env to DB
+  python manage_db.py migrate-env-squid-config   # Migrate Squid env vars from .env to DB
 
 For more information, see the Alembic documentation:
 https://alembic.sqlalchemy.org/
@@ -261,6 +353,7 @@ def main():
         "history": show_history,
         "create": lambda: create_migration(sys.argv[2] if len(sys.argv) > 2 else None),
         "migrate-env-blacklist": migrate_env_blacklist,
+        "migrate-env-squid-config": migrate_env_squid_config,
         "help": show_help,
     }
 
