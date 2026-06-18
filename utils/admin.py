@@ -13,7 +13,7 @@ from utils.types import ACL_TYPES_INFO, PREDEFINED_ACLS
 load_dotenv()
 
 SQUID_CONFIG_PATH = Config.SQUID_CONFIG_PATH or "/etc/squid/squid.conf"
-ACL_FILES_DIR = os.getenv("ACL_FILES_DIR") or os.path.join(
+ACL_FILES_DIR = Config.ACL_FILES_DIR or os.path.join(
     os.path.dirname(SQUID_CONFIG_PATH), "squid.d", ""
 )
 
