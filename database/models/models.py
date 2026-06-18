@@ -242,8 +242,12 @@ class SquidConfig(Base):
     squid_port = Column(Integer, nullable=False, default=3128)
     log_format = Column(String(50), nullable=False, default="DEFAULT")
     squid_log = Column(String(512), nullable=False, default="/var/log/squid/access.log")
-    squid_cache_log = Column(String(512), nullable=False, default="/var/log/squid/cache.log")
-    squid_config_path = Column(String(512), nullable=False, default="/etc/squid/squid.conf")
+    squid_cache_log = Column(
+        String(512), nullable=False, default="/var/log/squid/cache.log"
+    )
+    squid_config_path = Column(
+        String(512), nullable=False, default="/etc/squid/squid.conf"
+    )
     acl_files_dir = Column(String(512), nullable=False, default="")
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
