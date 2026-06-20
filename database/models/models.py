@@ -240,6 +240,7 @@ class SquidConfig(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     squid_host = Column(String(255), nullable=False, default="127.0.0.1")
     squid_port = Column(Integer, nullable=False, default=3128)
+    squid_hosts = Column(String(512), nullable=False, default="")
     log_format = Column(String(50), nullable=False, default="DEFAULT")
     squid_log = Column(String(512), nullable=False, default="/var/log/squid/access.log")
     squid_cache_log = Column(
