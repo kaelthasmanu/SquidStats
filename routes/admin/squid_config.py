@@ -10,6 +10,10 @@ from services.notifications.telegram_config_service import (
     load_config as load_telegram_config,
 )
 from services.squid.config_service import save_config as service_save_config
+from services.squid.squid_config_db_service import (
+    SQUID_ENV_KEYS,
+    save_squid_env_vars_to_db,
+)
 from services.squid.split_config_service import (
     get_split_files_info as service_get_split_files_info,
 )
@@ -79,15 +83,39 @@ def register_routes(bp):
         sensitive_vars = {"VERSION"}
 
         env_vars = {}
+        squid_env_vars = {}
         for key in request.form:
-            if key != "csrf_token" and key not in sensitive_vars:
-                env_vars[key] = request.form[key]
+            if key == "csrf_token" or key in sensitive_vars:
+                continue
+            value = request.form[key]
+            if key in SQUID_ENV_KEYS:
+                squid_env_vars[key] = value
+            else:
+                env_vars[key] = value
 
         existing_vars = load_env_vars()
+        # Preserve non-Squid vars normally, and update only existing Squid vars in .env
         for key, value in env_vars.items():
             existing_vars[key] = value
 
+        for key, value in squid_env_vars.items():
+            if key in existing_vars:
+                existing_vars[key] = value
+
         save_env_vars(existing_vars)
+
+        try:
+            save_squid_env_vars_to_db(squid_env_vars)
+        except Exception as e:
+            logger.exception("Error saving Squid env vars to DB")
+            flash(
+                _(
+                    "Las variables de Squid se guardaron en .env, pero no se pudieron guardar en la base de datos: %(error)s"
+                ) % {"error": str(e)},
+                "error",
+            )
+            return redirect(url_for("admin.view_config"))
+
         flash(_("Variables de entorno guardadas exitosamente"), "success")
         return redirect(url_for("admin.view_config"))
 
