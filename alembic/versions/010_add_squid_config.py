@@ -39,6 +39,12 @@ def upgrade() -> None:
                 "squid_port", sa.Integer(), nullable=False, server_default="3128"
             ),
             sa.Column(
+                "squid_hosts",
+                sa.String(length=512),
+                nullable=False,
+                server_default="",
+            ),
+            sa.Column(
                 "log_format",
                 sa.String(length=50),
                 nullable=False,
