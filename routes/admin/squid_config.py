@@ -10,10 +10,6 @@ from services.notifications.telegram_config_service import (
     load_config as load_telegram_config,
 )
 from services.squid.config_service import save_config as service_save_config
-from services.squid.squid_config_db_service import (
-    SQUID_ENV_KEYS,
-    save_squid_env_vars_to_db,
-)
 from services.squid.split_config_service import (
     get_split_files_info as service_get_split_files_info,
 )
@@ -22,6 +18,10 @@ from services.squid.split_config_service import (
 )
 from services.squid.split_config_service import (
     split_config as service_split_config,
+)
+from services.squid.squid_config_db_service import (
+    SQUID_ENV_KEYS,
+    save_squid_env_vars_to_db,
 )
 from services.squid.squid_config_splitter import SquidConfigSplitter
 
