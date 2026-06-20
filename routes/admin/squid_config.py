@@ -111,7 +111,8 @@ def register_routes(bp):
             flash(
                 _(
                     "Las variables de Squid se guardaron en .env, pero no se pudieron guardar en la base de datos: %(error)s"
-                ) % {"error": str(e)},
+                )
+                % {"error": str(e)},
                 "error",
             )
             return redirect(url_for("admin.view_config"))
