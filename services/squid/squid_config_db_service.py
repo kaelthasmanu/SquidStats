@@ -69,6 +69,28 @@ def save_squid_env_vars_to_db(env_vars: dict[str, str]) -> None:
         session.close()
 
 
+def load_squid_config_from_db() -> dict[str, str]:
+    """Load Squid-related configuration values from the squid_config DB row."""
+    session = get_session()
+    try:
+        row = session.query(SquidConfig).first()
+        if not row:
+            return {}
+
+        return {
+            "SQUID_HOST": str(row.squid_host or ""),
+            "SQUID_PORT": str(row.squid_port or ""),
+            "SQUID_HOSTS": str(row.squid_hosts or ""),
+            "LOG_FORMAT": str(row.log_format or ""),
+            "SQUID_LOG": str(row.squid_log or ""),
+            "SQUID_CACHE_LOG": str(row.squid_cache_log or ""),
+            "SQUID_CONFIG_PATH": str(row.squid_config_path or ""),
+            "ACL_FILES_DIR": str(row.acl_files_dir or ""),
+        }
+    finally:
+        session.close()
+
+
 def filter_squid_env_keys(env_vars: dict[str, str]) -> dict[str, str]:
     """Return only Squid-related env vars from the provided mapping."""
     return {k: v for k, v in env_vars.items() if k in SQUID_ENV_KEYS}
