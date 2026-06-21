@@ -14,6 +14,7 @@ from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session
 
 from database.database import Notification, get_session
+from services.squid.squid_config_db_service import load_squid_config_from_db
 
 # Import Telegram integration (optional - fails gracefully if not configured)
 try:
@@ -417,7 +418,13 @@ def delete_all_notifications() -> int:
 def check_squid_log_health():
     """Checks Squid logs health"""
     try:
-        log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
+        log_file = os.getenv("SQUID_LOG", "")
+        if not log_file:
+            squid_db_values = load_squid_config_from_db()
+            log_file = squid_db_values.get("SQUID_LOG", "")
+
+        if not log_file:
+            log_file = "/var/log/squid/access.log"
 
         if not os.path.exists(log_file):
             add_notification(
