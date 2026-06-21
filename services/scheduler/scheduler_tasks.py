@@ -11,6 +11,7 @@ from services.notifications.notifications import (
     has_remote_commits_with_messages,
     set_commit_notifications,
 )
+from services.squid.squid_config_db_service import load_squid_config_from_db
 from services.quota.quota_scheduler import register_quota_scheduler_tasks
 from services.system.metrics_service import MetricsService
 
@@ -31,7 +32,14 @@ def register_scheduler_tasks(scheduler):
 
     @scheduler.task("interval", id="do_job_1", seconds=30, misfire_grace_time=900)
     def init_scheduler():
-        log_file = os.getenv("SQUID_LOG", "/var/log/squid/access.log")
+        log_file = os.getenv("SQUID_LOG", "")
+        if not log_file:
+            squid_db_values = load_squid_config_from_db()
+            log_file = squid_db_values.get("SQUID_LOG", "")
+
+        if not log_file:
+            log_file = "/var/log/squid/access.log"
+
         logger.info(f"Scheduler for file log: {log_file}")
 
         if not os.path.exists(log_file):
