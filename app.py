@@ -78,14 +78,16 @@ def create_app():
         )
         # Continue anyway - the app might still work with existing schema
 
-    # Migrate legacy BLACKLIST_DOMAINS from .env into DB (non-interactive)
+    # Migrate legacy BLACKLIST_DOMAINS and Squid env vars from .env into DB (non-interactive)
     try:
-        from manage_db import migrate_env_blacklist
+        from manage_db import migrate_env_blacklist, migrate_env_squid_config
 
         logger.info("Checking for legacy BLACKLIST_DOMAINS to migrate into DB...")
         migrate_env_blacklist(auto_confirm=True)
+        logger.info("Checking for legacy Squid env vars to migrate into DB...")
+        migrate_env_squid_config(auto_confirm=True)
     except Exception as e:
-        logger.error(f"Error migrating BLACKLIST_DOMAINS into DB: {e}")
+        logger.error(f"Error migrating legacy environment configuration into DB: {e}")
 
     # Compile Babel translations from sources/ at startup
     try:

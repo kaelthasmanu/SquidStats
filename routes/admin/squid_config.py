@@ -19,6 +19,11 @@ from services.squid.split_config_service import (
 from services.squid.split_config_service import (
     split_config as service_split_config,
 )
+from services.squid.squid_config_db_service import (
+    SQUID_ENV_KEYS,
+    load_squid_config_from_db,
+    save_squid_env_vars_to_db,
+)
 from services.squid.squid_config_splitter import SquidConfigSplitter
 
 from .helpers import (
@@ -39,6 +44,13 @@ def register_routes(bp):
     def view_config():
         cm = get_config_manager()
         env_vars = load_env_vars()
+
+        # Fill missing Squid env vars from DB when the key is absent or empty in .env
+        squid_db_values = load_squid_config_from_db()
+        for key in SQUID_ENV_KEYS:
+            if not env_vars.get(key):
+                env_vars[key] = squid_db_values.get(key, "")
+
         cfg = load_telegram_config()
         cfg["has_api_hash"] = bool(cfg.get("api_hash"))
         cfg["has_bot_token"] = bool(cfg.get("bot_token"))
@@ -79,15 +91,40 @@ def register_routes(bp):
         sensitive_vars = {"VERSION"}
 
         env_vars = {}
+        squid_env_vars = {}
         for key in request.form:
-            if key != "csrf_token" and key not in sensitive_vars:
-                env_vars[key] = request.form[key]
+            if key == "csrf_token" or key in sensitive_vars:
+                continue
+            value = request.form[key]
+            if key in SQUID_ENV_KEYS:
+                squid_env_vars[key] = value
+            else:
+                env_vars[key] = value
 
         existing_vars = load_env_vars()
+        # Preserve non-Squid vars normally, and update only existing Squid vars in .env
         for key, value in env_vars.items():
             existing_vars[key] = value
 
+        for key, value in squid_env_vars.items():
+            if key in existing_vars:
+                existing_vars[key] = value
+
         save_env_vars(existing_vars)
+
+        try:
+            save_squid_env_vars_to_db(squid_env_vars)
+        except Exception as e:
+            logger.exception("Error saving Squid env vars to DB")
+            flash(
+                _(
+                    "Las variables de Squid se guardaron en .env, pero no se pudieron guardar en la base de datos: %(error)s"
+                )
+                % {"error": str(e)},
+                "error",
+            )
+            return redirect(url_for("admin.view_config"))
+
         flash(_("Variables de entorno guardadas exitosamente"), "success")
         return redirect(url_for("admin.view_config"))
 

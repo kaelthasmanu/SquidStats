@@ -232,6 +232,28 @@ class LdapConfig(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
+class SquidConfig(Base):
+    """Single-row table that stores Squid runtime configuration values."""
+
+    __tablename__ = "squid_config"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    squid_host = Column(String(255), nullable=False, default="127.0.0.1")
+    squid_port = Column(Integer, nullable=False, default=3128)
+    squid_hosts = Column(String(512), nullable=False, default="")
+    log_format = Column(String(50), nullable=False, default="DEFAULT")
+    squid_log = Column(String(512), nullable=False, default="/var/log/squid/access.log")
+    squid_cache_log = Column(
+        String(512), nullable=False, default="/var/log/squid/cache.log"
+    )
+    squid_config_path = Column(
+        String(512), nullable=False, default="/etc/squid/squid.conf"
+    )
+    acl_files_dir = Column(String(512), nullable=False, default="")
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
 def create_dynamic_models(engine, user_table_name: str, log_table_name: str):
     """Factory to create dynamic user/log models bound to a fresh declarative base.
 

@@ -10,6 +10,7 @@ from .models import (
     QuotaGroup,
     QuotaRule,
     QuotaUser,
+    SquidConfig,
     SystemMetrics,
     User,
 )
@@ -24,6 +25,7 @@ __all__ = [
     "Notification",
     "AdminUser",
     "BackupConfig",
+    "SquidConfig",
     "QuotaUser",
     "QuotaGroup",
     "QuotaRule",
