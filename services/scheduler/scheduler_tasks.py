@@ -11,8 +11,8 @@ from services.notifications.notifications import (
     has_remote_commits_with_messages,
     set_commit_notifications,
 )
-from services.squid.squid_config_db_service import load_squid_config_from_db
 from services.quota.quota_scheduler import register_quota_scheduler_tasks
+from services.squid.squid_config_db_service import load_squid_config_from_db
 from services.system.metrics_service import MetricsService
 
 _DENIED_LOGS_MAX_BYTES = 1 * 1024 * 1024 * 1024  # 1 GB hard limit
