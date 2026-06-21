@@ -681,11 +681,11 @@ Para más detalles, consulta [TELEGRAM_INTEGRATION.md](TELEGRAM_INTEGRATION.md) 
 
 Si olvidaste la contraseña de admin, puedes restablecerla desde el mismo servidor donde corre SquidStats (solo localhost):
 
-1) Asegúrate de que la app esté corriendo (por defecto escucha en `127.0.0.1:8080`, o el `LISTEN_PORT` que definas en `.env`).
+1) Asegúrate de que la app esté corriendo (por defecto escucha en `127.0.0.1:5000`, o el `LISTEN_PORT` que definas en `.env`).
 2) Ejecuta esto en el host de SquidStats:
 
 ```bash
-curl -X POST http://127.0.0.1:8080/auth/reset-password \
+curl -X POST http://127.0.0.1:5000/auth/reset-password \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "new_password": "NuevaClaveSegura123"}'
 ```
@@ -695,7 +695,7 @@ Notas:
 - `new_password` debe tener al menos 8 caracteres.
 - También puedes enviar los datos como formulario si prefieres:
   ```bash
-  curl -X POST http://127.0.0.1:8080/auth/reset-password \
+  curl -X POST http://127.0.0.1:5000/auth/reset-password \
     -d "username=admin" \
     -d "new_password=NuevaClaveSegura123"
   ```
