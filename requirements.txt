@@ -18,6 +18,6 @@ bcrypt==5.0.0
 telethon>=1.43.2
 loguru==0.7.3
 weasyprint==69.0
-cryptography==48.0.1
+cryptography==49.0.0
 ldap3==2.10.2rc4
 Flask-Babel==4.0.0
