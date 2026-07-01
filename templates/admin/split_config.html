@@ -17,33 +17,33 @@
 
     <!-- Info Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-file-code text-blue-600 text-2xl"></i>
                 <div>
-                    <p class="text-gray-600 text-sm">{{ _("Archivo de entrada") }}</p>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">{{ _("Archivo de entrada") }}</p>
                     <p class="font-semibold text-gray-800 text-sm">{{ input_file }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-folder text-emerald-600 text-2xl"></i>
                 <div>
-                    <p class="text-gray-600 text-sm">{{ _("Directorio de salida") }}</p>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">{{ _("Directorio de salida") }}</p>
                     <p class="font-semibold text-gray-800 text-sm">{{ output_dir }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div class="flex items-center space-x-3">
                 <i class="fas fa-layer-group text-amber-600 text-2xl"></i>
                 <div>
-                    <p class="text-gray-600 text-sm">{{ _("Estado") }}</p>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">{{ _("Estado") }}</p>
                     {% if output_exists %}
                         <p class="font-semibold text-emerald-600 text-sm">{{ files_count }} {{ _("archivos generados") }}</p>
                     {% else %}
-                        <p class="font-semibold text-gray-600 text-sm">{{ _("No dividido aún") }}</p>
+                        <p class="font-semibold text-gray-600 dark:text-gray-300 text-sm">{{ _("No dividido aún") }}</p>
                     {% endif %}
                 </div>
             </div>
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Description -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
         <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
             <i class="fas fa-info-circle text-blue-600 mr-2"></i>
             {{ _("¿Qué hace esta funcionalidad?") }}
@@ -69,7 +69,7 @@
     </div>
 
     <!-- Files to be generated -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
         <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
             <i class="fas fa-list text-blue-600 mr-2"></i>
             {{ _("Archivos que se generarán") }}
@@ -90,7 +90,7 @@
     </div>
 
     <!-- Actions -->
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
         <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
             <i class="fas fa-cogs text-blue-600 mr-2"></i>
             {{ _("Acciones") }}
@@ -161,7 +161,7 @@
 
 <!-- Modal para ver archivos generados -->
 <div id="filesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         <!-- Modal Header -->
         <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -184,7 +184,7 @@
         </div>
 
         <!-- Modal Footer -->
-        <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex items-center justify-between border-t">
+        <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 rounded-b-lg flex items-center justify-between border-t">
             <p class="text-sm text-gray-600">
                 <i class="fas fa-info-circle mr-1"></i>
                 {{ _("Directorio:") }} <code class="bg-gray-200 px-2 py-1 rounded text-xs">{{ output_dir }}</code>
@@ -372,7 +372,7 @@
                     content.innerHTML = `
                         <div class="text-center py-8">
                             <i class="fas fa-folder-open text-gray-400 text-6xl mb-4"></i>
-                            <p class="text-gray-600">No se encontraron archivos en el directorio</p>
+                            <p class="text-gray-600 dark:text-gray-300">No se encontraron archivos en el directorio</p>
                         </div>
                     `;
                     return;
@@ -393,7 +393,7 @@
                                     <div class="flex items-start space-x-3 flex-1">
                                         <i class="fas fa-file-code text-blue-500 text-xl mt-1"></i>
                                         <div class="flex-1">
-                                            <p class="font-semibold text-gray-800">${file.filename}</p>
+                                            <p class="font-semibold text-gray-800 dark:text-gray-100">${file.filename}</p>
                                             <div class="mt-2 flex flex-wrap gap-3 text-xs text-gray-600">
                                                 <span class="flex items-center">
                                                     <i class="fas fa-align-left mr-1"></i>

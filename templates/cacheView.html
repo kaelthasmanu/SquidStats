@@ -5,7 +5,7 @@
     <div
         class="relative h-full w-full rounded-xl shadow-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
         <div
-        class="absolute inset-0 bg-white shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
+        class="absolute inset-0 bg-white dark:bg-gray-800 shadow-md rounded-xl flex flex-col items-center justify-center [backface-visibility:hidden]">
         <i class="{{ icon }} text-3xl text-blue-600 mb-2"></i>
         <h3 class="text-lg font-semibold text-gray-800">{{ title }}</h3>
         {% if extra_html %} {{ extra_html | safe }} {% else %}
@@ -117,6 +117,47 @@
     const historySize = 240; // Reducido de 720 a 240 (4 horas de datos con intervalos de 1 minuto)
     let liveDataCounter = 0; // Contador para manejar datos en vivo
 
+    function isDarkMode() {
+      return document.documentElement.classList.contains('dark');
+    }
+    function getChartGridColor() {
+      return isDarkMode() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+    }
+    function getChartTextColor() {
+      return isDarkMode() ? '#94a3b8' : '#374151';
+    }
+
+    function applyChartDarkMode() {
+      Chart.helpers.each(Chart.instances, function(instance) {
+        var opts = instance.config.options;
+        if (opts && opts.scales) {
+          var tc = getChartTextColor();
+          var gc = getChartGridColor();
+          if (opts.scales.x) {
+            if (opts.scales.x.grid) opts.scales.x.grid.color = gc;
+            if (opts.scales.x.ticks) opts.scales.x.ticks.color = tc;
+          }
+          if (opts.scales.y) {
+            if (opts.scales.y.grid) opts.scales.y.grid.color = gc;
+            if (opts.scales.y.ticks) opts.scales.y.ticks.color = tc;
+          }
+        }
+        if (opts && opts.plugins && opts.plugins.legend && opts.plugins.legend.labels) {
+          opts.plugins.legend.labels.color = getChartTextColor();
+        }
+        instance.update();
+      });
+    }
+
+    // Observe dark class changes
+    new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+          setTimeout(applyChartDarkMode, 50);
+        }
+      });
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
     // --- FUNCIONES ORIGINALES (COMPLETAS Y RESTAURADAS) ---
     function getLocalTimeString() {
       const now = new Date();
@@ -189,10 +230,13 @@
       fill: true,
       pointRadius: 2,
       scales: {
-        x: { grid: { color: "rgba(0, 0, 0, 0.05)" } },
-        y: { beginAtZero: true, grid: { color: "rgba(0, 0, 0, 0.05)" } },
+        x: { grid: { color: getChartGridColor() }, ticks: { color: getChartTextColor() } },
+        y: { beginAtZero: true, grid: { color: getChartGridColor() }, ticks: { color: getChartTextColor() } },
       },
-      plugins: { legend: { display: true }, datalabels: { display: false } },
+      plugins: {
+        legend: { display: true, labels: { color: getChartTextColor() } },
+        datalabels: { display: false }
+      },
     };
     const cpuChart = new Chart("cpuChart", {
       type: "line",

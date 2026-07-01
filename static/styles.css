@@ -13,6 +13,177 @@
     --success-color: #10b981;
     --warning-color: #f59e0b;
     --info-color: #3b82f6;
+    /* Theme toggle */
+    --toggle-bg: #e2e8f0;
+    --toggle-fg: #64748b;
+}
+
+/* ─── Dark mode CSS variable overrides ──────────────────────────────────── */
+html.dark {
+    --background-color: #0f172a;
+    --card-background: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --table-header-bg: #1e293b;
+    --table-border: #334155;
+    --table-stripe: #172033;
+    --toggle-bg: #334155;
+    --toggle-fg: #94a3b8;
+}
+
+/* ─── Dark mode global overrides ────────────────────────────────────────── */
+
+/* Notification & dropdown panels */
+html.dark .notification-dropdown-panel,
+html.dark [class*="notifications"] ul li,
+html.dark .lang-dropdown-panel {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+/* User-card (logs view) */
+html.dark .user-card {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+html.dark .user-card .avatar-effect,
+html.dark .user-card .avatar-background,
+html.dark .card-footer {
+    background-color: #1d4ed8;
+}
+html.dark .user-card h3.username {
+    color: #93c5fd;
+}
+html.dark .user-card h4.ip-address {
+    color: #94a3b8;
+}
+html.dark .user-card .activity-button {
+    background-color: #1d4ed8;
+}
+html.dark .user-card .activity-button:hover {
+    background-color: #1e40af;
+}
+
+/* Modal content */
+html.dark .modal-content {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+html.dark .modal-content h4,
+html.dark .modal-content h3,
+html.dark .modal-content h2,
+html.dark .modal-content span.username-highlight {
+    color: #93c5fd;
+}
+
+/* Log entries */
+html.dark .log-entry {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+html.dark .log-entry .log-url {
+    color: #e2e8f0;
+}
+html.dark .log-entry:hover {
+    background-color: #273348;
+}
+html.dark .grouped-log-entry {
+    background-color: #172a3a;
+    border-left-color: #3b82f6;
+}
+
+/* Search box in modal */
+html.dark [id^="searchBox-"] {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+html.dark [id^="mysearch-"] {
+    color: #e2e8f0;
+}
+
+/* Auditor social chips */
+html.dark .social-chip {
+    background-color: #1e293b;
+    color: #94a3b8;
+    border-color: #334155;
+}
+html.dark .social-chip.selected,
+html.dark .social-chip.active {
+    background-color: #1d4ed8;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+/* Notification badges in dropdown */
+html.dark .notifications li,
+html.dark .notifications-mobile li {
+    color: #e2e8f0;
+    border-color: #334155;
+}
+html.dark .notifications li:hover,
+html.dark .notifications-mobile li:hover {
+    background-color: #273348;
+}
+
+/* SVG ring text in cache view */
+html.dark text.fill-gray-500 {
+    fill: #94a3b8;
+}
+html.dark text[class*="fill-"] {
+    fill: #94a3b8;
+}
+
+/* Chart.js canvas dark grid (via JS observer in reports-charts.js) */
+
+/* CacheView flip cards */
+html.dark .flip-card-front,
+html.dark .flip-card-back {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+
+/* Notification read state */
+html.dark .notification-read {
+    background-color: #172033;
+}
+
+/* Pagination buttons */
+html.dark .pagination-btn,
+html.dark [class*="pagination"] a,
+html.dark [class*="pagination"] span {
+    background-color: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+}
+html.dark [class*="pagination"] a:hover {
+    background-color: #273348;
+}
+
+/* Admin panel overrides (admin/base.html) */
+html.dark .admin-sidebar {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+html.dark .admin-content {
+    background-color: #0f172a;
+}
+
+/* Tab buttons (cache_stats) */
+html.dark .main-tab-btn,
+html.dark .tab-btn {
+    color: #94a3b8;
+}
+html.dark .main-tab-btn.active,
+html.dark .tab-btn.active {
+    color: #60a5fa;
+    border-bottom-color: #3b82f6;
+}
+html.dark .main-tab-btn:hover,
+html.dark .tab-btn:hover {
+    color: #93c5fd;
+    background-color: #1e293b;
 }
 
 * {
@@ -201,4 +372,100 @@ body {
     .user-stats {
         margin-top: 0.5rem;
     }
+}
+/* ─── Additional dark mode overrides ──────────────────────────────────────── */
+
+/* Stat cards grid (conexiones page) */
+html.dark .grid .bg-white,
+html.dark .flex .bg-white {
+    background-color: #1e293b;
+}
+
+/* User accordion (additional stat cards with purple/red/orange backgrounds) */
+html.dark .bg-purple-100 { background-color: rgba(126, 34, 206, 0.2); }
+html.dark .bg-red-100    { background-color: rgba(220, 38, 38, 0.2); }
+html.dark .bg-orange-100 { background-color: rgba(234, 88, 12, 0.2); }
+html.dark .bg-teal-100   { background-color: rgba(20, 184, 166, 0.2); }
+html.dark .bg-blue-100   { background-color: rgba(59, 130, 246, 0.2); }
+html.dark .bg-green-100  { background-color: rgba(16, 185, 129, 0.2); }
+html.dark .bg-indigo-100 { background-color: rgba(99, 102, 241, 0.2); }
+
+/* User search dropdown in auditoria */
+html.dark #user-dropdown {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+html.dark #user-dropdown [class*="hover:bg-gray"] {
+    color: #e2e8f0;
+}
+html.dark #user-dropdown .option-item:hover,
+html.dark #user-options-container > div:hover {
+    background-color: #273348;
+    color: #93c5fd;
+}
+
+/* All notifications page - read state */
+html.dark .notification-read {
+    background-color: #172033 !important;
+}
+
+/* Error page */
+html.dark .error-page-bg {
+    background-color: #0f172a;
+}
+
+/* Confirm modal global override */
+html.dark #confirm-modal-overlay > div {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+html.dark #confirm-modal-overlay .confirm-modal-text,
+html.dark #confirm-modal-overlay p {
+    color: #94a3b8;
+}
+html.dark #confirm-modal-overlay h2,
+html.dark #confirm-modal-overlay h3 {
+    color: #f1f5f9;
+}
+
+/* Loading spinner backdrop in dark mode */
+html.dark #loading-spinner {
+    background-color: rgba(15, 23, 42, 0.7);
+}
+
+/* All-notifications page inline styles */
+html.dark .notification-read {
+    background-color: #172033;
+}
+
+/* Cache stats time range and tab buttons */
+html.dark .time-range-btn.active {
+    background-color: #334155;
+    color: #60a5fa;
+}
+html.dark .time-range-btn {
+    color: #94a3b8;
+}
+
+/* Datepicker overrides for dark mode */
+html.dark input[type="date"],
+html.dark input[type="number"],
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="search"],
+html.dark textarea,
+html.dark select {
+    color-scheme: dark;
+}
+
+/* Pagination in blacklist */
+html.dark .px-4.py-2.bg-white.border {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+html.dark .px-4.py-2.bg-white.border:hover {
+    background-color: #273348;
 }

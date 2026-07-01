@@ -11,7 +11,7 @@
   <div class="users-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-screen-xl mx-auto px-4" id="users-container">
     {% if users %}
       {% for user in users %}
-        <div class="user-card group bg-[#f0f2f5] text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="{{ user.username|lower }}">
+        <div class="user-card group bg-[#f0f2f5] dark:bg-gray-800 text-center overflow-hidden relative rounded-lg shadow-md w-full max-w-[320px] mx-auto pt-[25px] pb-[70px]" data-username="{{ user.username|lower }}">
           <div class="avatar-wrapper relative inline-block h-[100px] w-[100px] mb-[15px] z-[1]">
             <div class="avatar-effect absolute w-full h-0 bottom-[135%] left-0 rounded-full bg-[#1369ce] opacity-90 scale-[3] transition-all duration-300 ease-linear z-0 group-hover:h-full"></div>
             <div class="avatar-background absolute inset-0 rounded-full bg-[#1369ce] z-[1]"></div>
@@ -51,7 +51,7 @@
   <div id="modals-container">
     {% for user in users %}
       <div class="logs-modal hidden fixed inset-0 bg-black bg-opacity-50 z-[1000] justify-center items-center transition-all duration-1000 ease-in-out opacity-0" id="logs-modal-{{ loop.index0 }}">
-        <div class="modal-content bg-white p-8 rounded-2xl w-[95%] max-w-[650px] max-h-[85vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
+        <div class="modal-content bg-white dark:bg-gray-800 p-8 rounded-2xl w-[95%] max-w-[650px] max-h-[85vh] overflow-auto shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-1000 ease-in-out relative">
           <button onclick="window.closeLogsModal({{ loop.index0 }})"
                   class="close-btn absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full z-50 shadow-md transform transition-all duration-300 hover:bg-red-600 hover:scale-110 hover:rotate-90 hover:shadow-lg"
                   title="{{ _('Cerrar') }}" aria-label="{{ _('Cerrar') }}">
@@ -61,17 +61,17 @@
           <div class="flex flex-col">
             <div class="flex justify-between items-center mb-4">
               <div class="flex items-center gap-2 min-w-0 flex-wrap">
-                <h4 class="logs-title text-base text-gray-500 uppercase tracking-[1px] font-semibold whitespace-nowrap">
+                <h4 class="logs-title text-base text-gray-500 dark:text-gray-400 uppercase tracking-[1px] font-semibold whitespace-nowrap">
                   {{ _('Actividad reciente -') }}
                 </h4>
                 <div class="flex items-center gap-2">
                   <span class="username-highlight font-semibold truncate max-w-[120px] text-[#1369ce]">{{ user.username }}</span>
-                  <div id="searchBox-{{ loop.index0 }}" class="relative w-auto h-[38px] bg-white rounded-full transition-all duration-500 ease-in-out shadow-md flex items-center border border-gray-300">
+                  <div id="searchBox-{{ loop.index0 }}" class="relative w-auto h-[38px] bg-white dark:bg-gray-800 rounded-full transition-all duration-500 ease-in-out shadow-md flex items-center border border-gray-300 dark:border-gray-600">
                     <div id="toggleBtn-{{ loop.index0 }}" class="log-search-toggle absolute left-0 top-0 w-[38px] h-[38px] flex items-center justify-center cursor-pointer z-10">
                       <i class="fas fa-search text-blue-600 text-sm"></i>
                     </div>
                     <div id="inputWrapper-{{ loop.index0 }}" class="log-search-wrapper ml-[38px] w-0 h-[38px] flex items-center transition-[width] duration-500 ease-in-out overflow-hidden">
-                      <input id="mysearch-{{ loop.index0 }}" type="text" placeholder="{{ _('Buscar URL...') }}" class="log-search-input w-full text-xs px-2 py-1 bg-transparent outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]" />
+                      <input id="mysearch-{{ loop.index0 }}" type="text" placeholder="{{ _('Buscar URL...') }}" class="log-search-input w-full text-xs px-2 py-1 bg-transparent dark:text-gray-100 outline-none opacity-0 transition-opacity duration-300 ease-linear min-w-[150px]" />
                     </div>
                     <button id="clearBtn-{{ loop.index0 }}" type="button" class="log-search-clear absolute right-2 h-full flex items-center justify-center opacity-0 transition-opacity duration-300 text-gray-400 hover:text-gray-700 text-sm" title="{{ _('Limpiar búsqueda') }}">
                       <i class="fas fa-times text-lg leading-none"></i>
@@ -102,7 +102,7 @@
             {% if user.grouped_logs %}
               <div class="log-entries-container grid gap-3">
                 {% for log in user.grouped_logs %}
-                  <div class="log-entry relative group p-3 bg-white rounded-lg transition-all duration-300 ease-out shadow-md hover:shadow-2xl hover:-translate-y-1 hover:z-10{% if log.is_grouped %} grouped-log-entry{% endif %}"
+                  <div class="log-entry relative group p-3 bg-white dark:bg-gray-800 rounded-lg transition-all duration-300 ease-out shadow-md hover:shadow-2xl hover:-translate-y-1 hover:z-10{% if log.is_grouped %} grouped-log-entry{% endif %}"
                        data-response-code="{{ log.response }}">
                     <div class="wave-container absolute inset-0 overflow-hidden rounded-lg">
                       <div class="wave absolute w-full h-full"></div>
@@ -110,14 +110,14 @@
                     <div class="relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                       <div class="log-details-grid min-w-0">
                         <div class="flex items-baseline gap-3">
-                          <span class="log-url text-sm font-medium text-gray-800 truncate">
+                          <span class="log-url text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
                             {{ log.url|truncate(55, True, '...') }}
                           </span>
                           {% if log.is_grouped %}
                             <i class="fas fa-layer-group text-blue-500 ml-2 text-xs" title="{{ _('Solicitudes agrupadas') }}"></i>
                           {% endif %}
                         </div>
-                        <div class="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                        <div class="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                           <span class="response-badge {% if log.response >= 100 and log.response <= 199 %}bg-blue-400{% elif log.response >= 200 and log.response <= 299 %}bg-green-500{% elif log.response >= 300 and log.response <= 399 %}bg-yellow-400{% elif log.response >= 400 and log.response <= 499 %}bg-red-500{% elif log.response >= 500 and log.response <= 599 %}bg-orange-400{% else %}bg-gray-400{% endif %} inline-block px-2 py-[0.15rem] rounded-md text-[0.65rem] font-medium text-white">
                             {{ log.response }}
                           </span>
@@ -141,9 +141,9 @@
                 {% endfor %}
               </div>
             {% else %}
-              <div class="no-logs text-gray-500 text-center py-8">{{ _('No hay actividad registrada') }}</div>
+              <div class="no-logs text-gray-500 dark:text-gray-400 text-center py-8">{{ _('No hay actividad registrada') }}</div>
             {% endif %}
-            <div class="no-results hidden text-center py-8 text-gray-500">{{ _('No se encontraron resultados') }}</div>
+            <div class="no-results hidden text-center py-8 text-gray-500 dark:text-gray-400">{{ _('No se encontraron resultados') }}</div>
           </div>
         </div>
       </div>

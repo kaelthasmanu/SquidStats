@@ -33,7 +33,7 @@
                         {{ _("Credenciales API") }}
                     </h3>
 
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 dark:border-gray-700">
                         <label for="tg_enabled" class="text-sm font-medium text-gray-700 select-none cursor-pointer">
                             {{ _("Habilitar notificaciones Telegram") }}
                         </label>
@@ -54,14 +54,14 @@
                             </a>
                         </label>
                         <input x-model="cfg.api_id" type="text" placeholder="12345678"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
 
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("API Hash") }}</label>
                         <input x-model="cfg.api_hash" type="password" autocomplete="off"
                             :placeholder="hasApiHash ? '{{ _('Guardado — dejar vacío para no cambiar') }}' : 'abc123...'"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         <template x-if="hasApiHash && !cfg.api_hash">
                             <p class="mt-1 text-xs text-slate-500">
                                 {{ _('API Hash guardado. Deja este campo vacío para no cambiarlo.') }}
@@ -76,7 +76,7 @@
                         </label>
                         <input x-model="cfg.bot_token" type="password" autocomplete="off"
                             :placeholder="hasBotToken ? '{{ _('Guardado — dejar vacío para no cambiar') }}' : '@BotFather token'"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         <template x-if="hasBotToken && !cfg.bot_token">
                             <p class="mt-1 text-xs text-slate-500">
                                 {{ _('Token guardado. Deja este campo vacío para no cambiarlo.') }}
@@ -92,7 +92,7 @@
                         <input x-model="cfg.phone" type="text" placeholder="+5491112345678"
                             :disabled="hasBotToken || cfg.bot_token"
                             :class="(hasBotToken || cfg.bot_token) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         <template x-if="hasBotToken || cfg.bot_token">
                             <p class="mt-1 text-xs text-amber-600 flex items-center gap-1">
                                 <i class="fas fa-triangle-exclamation"></i>
@@ -104,7 +104,7 @@
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Nombre de sesión") }}</label>
                         <input x-model="cfg.session_name" type="text" placeholder="squidstats_bot"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
 
                     <div class="flex gap-2 pt-2">
@@ -146,7 +146,7 @@
                         </p>
                         <textarea x-model="recipientsText" rows="6"
                             placeholder="@usuario1&#10;@usuario2&#10;123456789"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                         <p class="text-xs text-gray-400 mt-1">
                             {{ _("Cada línea es un destinatario independiente.") }}
                         </p>

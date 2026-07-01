@@ -3,7 +3,7 @@
 {% block content %}
 {% include 'components/confirm_modal.html' %}
 {% include 'components/loading_spinner.html' %}
-<div x-data="{ activeTab: 'pihole' }" class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+<div x-data="{ activeTab: 'pihole' }" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6">
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">{{ _("Blacklist - Gestor de Listas") }}</h2>
 
     <!-- Tabs -->
@@ -38,12 +38,12 @@
 
         <form method="POST" action="/admin/blacklist/test-connection" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="bg-gray-50 p-4 rounded border">
-                <label class="text-sm font-medium text-gray-700">{{ _("Pi-hole Host") }}</label>
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded border">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ _("Pi-hole Host") }}</label>
                 <input name="host" type="text" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("192.168.1.2 or example.com") }}" />
             </div>
-            <div class="bg-gray-50 p-4 rounded border">
-                <label class="text-sm font-medium text-gray-700">{{ _("API Token") }}</label>
+            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded border">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ _("API Token") }}</label>
                 <input name="token" type="password" class="w-full mt-2 p-2 border rounded" placeholder="{{ _("Token (opcional)") }}" />
             </div>
 
@@ -65,7 +65,7 @@
         {% if blocked_users %}
         <div class="overflow-x-auto bg-white rounded shadow border" id="blocked-users-table-container">
             <table id="blocked-users-table" class="min-w-full text-left text-sm text-gray-700">
-                <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500">
                     <tr>
                         <th class="px-4 py-3">{{ _("Usuario") }}</th>
                         <th class="px-4 py-3">{{ _("IP") }}</th>
@@ -103,7 +103,7 @@
             </table>
         </div>
         {% else %}
-        <div class="bg-gray-50 p-4 rounded border text-sm text-gray-600">
+        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded border text-sm text-gray-600">
             {{ _("No hay IPs bloqueadas en la base de datos.") }}
         </div>
         {% endif %}
@@ -113,9 +113,9 @@
     <div x-show="activeTab === 'adguard'" class="mt-6">
         <h3 class="text-lg font-semibold mb-3">{{ _("Integración AdGuard") }}</h3>
         <p class="text-sm text-gray-600 mb-4">{{ _("Soporte para fuentes y listas públicas compatibles con AdGuard.") }}</p>
-        <form id="importUrlForm" method="POST" action="/admin/blacklist/import" class="bg-gray-50 p-4 rounded border">
+        <form id="importUrlForm" method="POST" action="/admin/blacklist/import" class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <label class="text-sm font-medium text-gray-700">{{ _("URL de la lista") }}</label>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ _("URL de la lista") }}</label>
             <input name="url" type="text" class="w-full mt-2 p-2 border rounded" placeholder="https://example.com/list.txt" />
             <div class="mt-3">
                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">{{ _("Agregar Lista") }}</button>
@@ -332,7 +332,7 @@
                                     if (container) {
                                         const emptyText = {{ _('No hay IPs bloqueadas en la base de datos.')|tojson }};
                                         container.innerHTML = `
-                                            <div class="bg-gray-50 p-4 rounded border text-sm text-gray-600">
+                                            <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded border text-sm text-gray-600">
                                                 ${emptyText}
                                             </div>
                                         `;
@@ -408,7 +408,7 @@
             <span class="inline-block bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-0.5 rounded align-middle border border-yellow-300 shadow-sm animate-pulse" title="{{ _("Funcionalidad en Beta") }}">{{ _("BETA") }}</span>
         </h3>
         <p class="text-sm text-gray-600 mb-4">{{ _("Exporta o importa reglas en formato compatible con dnsmasq.") }}</p>
-        <div class="bg-gray-50 p-4 rounded border">
+        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded border">
             <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">{{ _("Exportar archivo hosts") }}</button>
         </div>
     </div>
@@ -465,9 +465,9 @@ example.org") }}">{{ blacklist }}</textarea>
         <h3 class="text-lg font-semibold mb-3">{{ _("Importar listas") }}</h3>
         <p class="text-sm text-gray-600 mb-4">{{ _("Importa desde archivos locales o pega URLs de listas públicas.") }}</p>
 
-        <form id="importFileForm" method="POST" action="/admin/blacklist/import" enctype="multipart/form-data" class="bg-gray-50 p-4 rounded border">
+        <form id="importFileForm" method="POST" action="/admin/blacklist/import" enctype="multipart/form-data" class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded border">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <label class="text-sm font-medium text-gray-700">{{ _("Subir archivo") }}</label>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ _("Subir archivo") }}</label>
             <input name="file" type="file" class="w-full mt-2" />
             <div class="mt-3">
                 <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">{{ _("Importar") }}</button>

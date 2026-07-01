@@ -1,10 +1,10 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6">
     <div class="flex justify-between items-center mb-4 sm:mb-6">
         <div>
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">{{ _("Gestión de Access Control Lists (ACLs)") }}</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">{{ _("Gestión de Access Control Lists (ACLs)") }}</h2>
             <p class="text-sm text-gray-600 mt-1">{{ _("Define condiciones para controlar el acceso al proxy") }}</p>
         </div>
         <button onclick="showAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">
@@ -102,8 +102,8 @@
                 
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-2">
-                        <h3 class="text-lg font-bold text-gray-800">{{ acl.name }}</h3>
-                        <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded bg-gray-100 text-gray-700 border border-gray-300">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ acl.name }}</h3>
+                        <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded bg-gray-100 text-gray-700 border border-gray-300 dark:border-gray-600">
                             {{ acl.type }}
                         </span>
                         {% if acl.is_slow %}
@@ -126,10 +126,10 @@
                         <i class="fas fa-info-circle mr-1"></i>{{ acl.type_description }}
                     </p>
                     
-                    <div class="bg-gray-50 rounded p-2 border border-gray-200">
+                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded p-2 border border-gray-200 dark:border-gray-700">
                         <div class="flex flex-wrap gap-1">
                             {% for value in acl.value_list %}
-                                <span class="inline-flex px-2 py-1 text-xs font-mono rounded bg-white text-gray-700 border border-gray-300">
+                                <span class="inline-flex px-2 py-1 text-xs font-mono rounded bg-white dark:bg-gray-700 dark:text-gray-200 text-gray-700 border border-gray-300 dark:border-gray-600">
                                     {{ value }}
                                 </span>
                             {% endfor %}

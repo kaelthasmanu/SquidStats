@@ -84,12 +84,21 @@ function showToast(success, message) {
   var msg   = document.getElementById('action-toast-message');
   if (!toast || !icon || !msg) return;
 
-  toast.className = toast.className.replace(/bg-\S+|text-\S+/g, '').trim();
+  var isDark = document.documentElement.classList.contains('dark');
+  toast.className = toast.className.replace(/bg-\S+|text-\S+|dark:\S+/g, '').trim();
   if (success) {
-    toast.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+    if (isDark) {
+      toast.classList.add('bg-green-900', 'text-green-200', 'border', 'border-green-700');
+    } else {
+      toast.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+    }
     icon.className = 'fas fa-circle-check text-green-500 text-lg';
   } else {
-    toast.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+    if (isDark) {
+      toast.classList.add('bg-red-900', 'text-red-200', 'border', 'border-red-700');
+    } else {
+      toast.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+    }
     icon.className = 'fas fa-circle-exclamation text-red-500 text-lg';
   }
   msg.textContent = message;

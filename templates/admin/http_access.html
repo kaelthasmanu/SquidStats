@@ -1,10 +1,10 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6">
     <div class="flex justify-between items-center mb-4 sm:mb-6">
         <div>
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">{{ _("Reglas de Acceso HTTP") }}</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">{{ _("Reglas de Acceso HTTP") }}</h2>
             <p class="text-sm text-gray-600 mt-1">{{ _("Las reglas se evalúan en orden. La primera coincidencia determina el acceso.") }}</p>
         </div>
         <button onclick="showAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">
@@ -79,7 +79,7 @@
                                     <i class="fas fa-link mr-1"></i>{{ acl }}
                                 </span>
                             {% else %}
-                                <span class="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 text-xs font-mono border border-gray-300">
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 text-xs font-mono border border-gray-300 dark:border-gray-600">
                                     {{ acl }}
                                 </span>
                             {% endif %}
@@ -153,7 +153,7 @@
 
 <!-- Add Modal -->
 <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <h3 class="text-2xl font-bold text-gray-800 mb-4">
             <i class="fas fa-plus-circle text-blue-600 mr-2"></i>{{ _("Agregar Regla HTTP Access") }}
         </h3>
@@ -167,7 +167,7 @@
                         <input type="radio" name="action" value="allow" class="mr-3 w-4 h-4" required>
                         <div class="text-center">
                             <i class="fas fa-check-circle text-green-600 text-2xl mb-1"></i>
-                            <p class="font-semibold text-gray-800">{{ _("ALLOW") }}</p>
+                            <p class="font-semibold text-gray-800 dark:text-gray-100">{{ _("ALLOW") }}</p>
                             <p class="text-xs text-gray-600">{{ _("Permitir acceso") }}</p>
                         </div>
                     </label>
@@ -175,7 +175,7 @@
                         <input type="radio" name="action" value="deny" class="mr-3 w-4 h-4" required>
                         <div class="text-center">
                             <i class="fas fa-times-circle text-red-600 text-2xl mb-1"></i>
-                            <p class="font-semibold text-gray-800">{{ _("DENY") }}</p>
+                            <p class="font-semibold text-gray-800 dark:text-gray-100">{{ _("DENY") }}</p>
                             <p class="text-xs text-gray-600">{{ _("Denegar acceso") }}</p>
                         </div>
                     </label>
@@ -231,7 +231,7 @@
             <div class="mb-4">
                 <label class="block text-gray-700 font-semibold mb-2">{{ _("Descripción (opcional):") }}</label>
                 <input type="text" name="description" placeholder="{{ _("Ej: Permitir acceso desde la red local") }}"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
                 <p class="text-xs text-gray-500 mt-1">{{ _("Se agregará como comentario antes de la regla") }}</p>
             </div>
             
@@ -249,7 +249,7 @@
 
 <!-- Edit Modal -->
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <h3 class="text-2xl font-bold text-gray-800 mb-4">
             <i class="fas fa-edit text-blue-600 mr-2"></i>{{ _("Editar Regla HTTP Access") }}
         </h3>
@@ -264,14 +264,14 @@
                         <input type="radio" name="action" value="allow" id="editActionAllow" class="mr-3 w-4 h-4" required>
                         <div class="text-center">
                             <i class="fas fa-check-circle text-green-600 text-2xl mb-1"></i>
-                            <p class="font-semibold text-gray-800">{{ _("ALLOW") }}</p>
+                            <p class="font-semibold text-gray-800 dark:text-gray-100">{{ _("ALLOW") }}</p>
                         </div>
                     </label>
                     <label class="flex items-center justify-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 hover:bg-red-50 transition-all">
                         <input type="radio" name="action" value="deny" id="editActionDeny" class="mr-3 w-4 h-4" required>
                         <div class="text-center">
                             <i class="fas fa-times-circle text-red-600 text-2xl mb-1"></i>
-                            <p class="font-semibold text-gray-800">{{ _("DENY") }}</p>
+                            <p class="font-semibold text-gray-800 dark:text-gray-100">{{ _("DENY") }}</p>
                         </div>
                     </label>
                 </div>
@@ -290,7 +290,7 @@
             <div class="mb-4">
                 <label class="block text-gray-700 font-semibold mb-2">{{ _("Descripción (opcional):") }}</label>
                 <input type="text" name="description" id="editDescription" placeholder="{{ _("Ej: Permitir acceso desde la red local") }}"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
             </div>
             
             <div class="flex space-x-2 justify-end mt-6 pt-4 border-t">
@@ -369,7 +369,7 @@ function addAclInput(mode, value = '') {
     
     aclDiv.innerHTML = `
         <input type="text" name="acls[]" value="${value}" placeholder="Nombre de ACL (ej: localhost, !Safe_ports)" 
-               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500" required>
+               class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500" required>
         <button type="button" onclick="removeAclInput('${mode}', ${counter})" 
                 class="text-red-600 hover:text-red-800 p-2">
             <i class="fas fa-times"></i>

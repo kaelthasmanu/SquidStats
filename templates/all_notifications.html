@@ -59,7 +59,7 @@
 {% block content %}
 <div class="w-full space-y-6">
   <!-- Filters -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
     <div class="flex flex-wrap gap-4 items-center">
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium text-gray-700">{{ _("Filtrar por:") }}</span>
@@ -91,7 +91,7 @@
         </select>
       </div>
       
-      <button id="clear-filters" class="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1">
+      <button id="clear-filters" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 flex items-center gap-1">
         <i class="fas fa-times"></i>
         <span>{{ _("Limpiar filtros") }}</span>
       </button>
@@ -136,10 +136,10 @@
           <!-- Icon -->
           <div class="flex-shrink-0">
             <div class="w-12 h-12 rounded-full flex items-center justify-center 
-                        {% if notification.type == 'error' %}bg-red-100 text-red-600
-                        {% elif notification.type == 'warning' %}bg-yellow-100 text-yellow-600
-                        {% elif notification.type == 'success' %}bg-green-100 text-green-600
-                        {% else %}bg-blue-100 text-blue-600{% endif %}">
+                        {% if notification.type == 'error' %}bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400
+                        {% elif notification.type == 'warning' %}bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400
+                        {% elif notification.type == 'success' %}bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400
+                        {% else %}bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400{% endif %}">
               <i class="fas {{ notification.icon }} text-lg"></i>
             </div>
           </div>

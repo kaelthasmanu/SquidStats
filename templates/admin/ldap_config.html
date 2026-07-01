@@ -27,7 +27,7 @@
 
     <!-- ── Stats Cards ───────────────────────────────────────────────── -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg shadow border border-gray-200 p-6 flex items-center gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 p-6 flex items-center gap-4">
             <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                 <i class="fas fa-users text-blue-600 text-2xl"></i>
             </div>
@@ -39,7 +39,7 @@
                 <i class="fas fa-sync-alt" :class="loadingStats ? 'animate-spin' : ''"></i>
             </button>
         </div>
-        <div class="bg-white rounded-lg shadow border border-gray-200 p-6 flex items-center gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 p-6 flex items-center gap-4">
             <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
                 <i class="fas fa-layer-group text-indigo-600 text-2xl"></i>
             </div>
@@ -65,19 +65,19 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Servidor (host)") }}</label>
                 <input x-model="cfg.host" type="text" placeholder="ldap.empresa.com"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Puerto") }}</label>
                     <input x-model.number="cfg.port" type="number" placeholder="389"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Autenticación") }}</label>
                     <select x-model="cfg.auth_type"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="SIMPLE">{{ _("SIMPLE (LDAP)") }}</option>
                         <option value="NTLM">{{ _("NTLM (AD)") }}</option>
                     </select>
@@ -92,19 +92,19 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Bind DN / Usuario") }}</label>
                 <input x-model="cfg.bind_dn" type="text" placeholder="{{ _("CN=admin,DC=empresa,DC=com") }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Contraseña Bind") }}</label>
                 <input x-model="cfg.bind_password" type="password" autocomplete="current-password" placeholder="••••••••"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Base DN") }}</label>
                 <input x-model="cfg.base_dn" type="text" placeholder="{{ _("DC=empresa,DC=com") }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <!-- Action buttons -->
@@ -146,7 +146,7 @@
                 <div class="flex gap-2 mb-4">
                     <input x-model="userQuery" @keydown.enter="searchUsers()" type="text"
                         placeholder="{{ _("Nombre, usuario, email…") }}"
-                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <button @click="searchUsers()" :disabled="searchingUsers"
                         class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
                         <i class="fas fa-search" :class="searchingUsers ? 'animate-pulse' : ''"></i>
@@ -157,7 +157,7 @@
                 <!-- Results table -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm" x-show="userResults.length > 0">
-                        <thead class="bg-gray-50">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 dark:bg-gray-700/50">
                             <tr>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _("Nombre") }}</th>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">{{ _("Usuario") }}</th>
@@ -198,7 +198,7 @@
                 <div class="flex gap-2 mb-4">
                     <input x-model="groupQuery" @keydown.enter="searchGroups()" type="text"
                         placeholder="{{ _("Nombre del grupo…") }}"
-                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                        class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                     <button @click="searchGroups()" :disabled="searchingGroups"
                         class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
                         <i class="fas fa-search" :class="searchingGroups ? 'animate-pulse' : ''"></i>
@@ -208,7 +208,7 @@
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm" x-show="groupResults.length > 0">
-                        <thead class="bg-gray-50">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 dark:bg-gray-700/50">
                             <tr>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ _("Nombre") }}</th>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">{{ _("Descripción") }}</th>

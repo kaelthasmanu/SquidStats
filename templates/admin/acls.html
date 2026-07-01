@@ -2,9 +2,9 @@
 
 {% block content %}
 <div class="space-y-4 sm:space-y-6">
-    <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">{{ _("Gestión de ACLs") }}</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">{{ _("Gestión de ACLs") }}</h2>
             <button onclick="toggleAddForm()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto">
                 <i class="fas fa-plus mr-2"></i>{{ _("Agregar ACL") }}
             </button>
@@ -17,11 +17,11 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Nombre:") }}</label>
-                    <input type="text" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <input type="text" name="name" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Tipo:") }}</label>
-                    <select name="type" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select name="type" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="src">{{ _("src (IP origen)") }}</option>
                         <option value="dst">{{ _("dst (IP destino)") }}</option>
                         <option value="dstdomain">{{ _("dstdomain (Dominio destino)") }}</option>
@@ -34,7 +34,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Valor:") }}</label>
-                    <input type="text" name="value" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <input type="text" name="value" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="sm:col-span-2 lg:col-span-3 flex flex-col sm:flex-row gap-2 sm:space-x-4 sm:gap-0">
                     <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors">
@@ -55,11 +55,11 @@
                 <input type="hidden" id="editAclId" name="id">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Nombre:") }}</label>
-                    <input type="text" id="editName" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="editName" name="name" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Tipo:") }}</label>
-                    <select id="editType" name="type" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select id="editType" name="type" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="src">{{ _("src (IP origen)") }}</option>
                         <option value="dst">{{ _("dst (IP destino)") }}</option>
                         <option value="dstdomain">{{ _("dstdomain (Dominio destino)") }}</option>
@@ -72,7 +72,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ _("Valor:") }}</label>
-                    <input type="text" id="editValue" name="value" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="editValue" name="value" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="md:col-span-3 flex space-x-4">
                     <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
@@ -89,7 +89,7 @@
         {% if acls and acls|length > 0 %}
         <div class="overflow-x-auto -mx-4 sm:mx-0">
             <table class="w-full table-auto">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 dark:bg-gray-700/50 dark:bg-gray-700/50">
                     <tr>
                         <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("Nombre") }}</th>
                         <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">{{ _("Tipo") }}</th>
@@ -97,9 +97,9 @@
                         <th class="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _("Acciones") }}</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700">
                     {% for acl in acls %}
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 dark:bg-gray-700/50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ acl.name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
