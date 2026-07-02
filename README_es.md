@@ -114,7 +114,7 @@
 
 ## Sobre el Proyecto
 
-_Una herramienta moderna para analizar logs de Squid, proporcionando un panel elegante y fácil de usar para visualizar datos de conexión en tiempo real. Este proyecto ayuda a los administradores de red a monitorear y gestionar las conexiones del proxy Squid de manera efectiva._
+_Una herramienta moderna para analizar logs de Squid, proporcionando un panel fácil de usar para visualizar datos de conexión en tiempo real. Este proyecto ayuda a los administradores de red a monitorear y gestionar las conexiones del proxy Squid de manera efectiva._
 
 **Puedes ver los ejemplos [aquí](https://github.com/kaelthasmanu/SquidStats/tree/main/assets "Examples").**
 
