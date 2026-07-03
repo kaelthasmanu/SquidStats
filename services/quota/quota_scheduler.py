@@ -26,7 +26,7 @@ def register_quota_scheduler_tasks(scheduler):
     """Registra tareas programadas relacionadas con cuotas."""
 
     @scheduler.task(
-        "interval", id="check_quota_users", minutes=1, misfire_grace_time=300
+        "interval", id="check_quota_users", minutes=5, misfire_grace_time=300
     )
     def check_quota_users():
         logger.info("check_quota_users task started")
