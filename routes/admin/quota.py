@@ -16,6 +16,7 @@ from database.models.models import QuotaEvent, QuotaGroup, QuotaRule, QuotaUser
 from services.auth.auth_service import admin_required
 from services.database.admin_helpers import load_env_vars
 from services.quota.quota_service import (
+    _BLOCKED_USERS_PATH,
     _sync_quota_squid_rules,
     clear_blocked_users_file,
 )
@@ -131,7 +132,7 @@ def register_routes(bp):
             )
 
             blocked_users = []
-            block_file = "/etc/squid/usuarios_bloqueados.txt"
+            block_file = _BLOCKED_USERS_PATH
             if os.path.exists(block_file):
                 with open(block_file, encoding="utf-8") as f:
                     for line in f:
