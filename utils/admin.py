@@ -16,6 +16,31 @@ SQUID_CONFIG_PATH = Config.SQUID_CONFIG_PATH or "/etc/squid/squid.conf"
 ACL_FILES_DIR = Config.ACL_FILES_DIR or os.path.join(
     os.path.dirname(SQUID_CONFIG_PATH), "squid.d", ""
 )
+FALLBACK_SQUID_CONFIG_PATH = "/etc/squid/squid.conf"
+FALLBACK_ACL_FILES_DIRS = ["/etc/squid/acls", "/etc/squid/squid.d"]
+
+
+def _normalize_squid_paths(config_path: str, config_dir: str) -> tuple[str, str]:
+    """Return effective Squid config and ACL directory paths.
+
+    If configured paths do not exist, but the standard /etc/squid paths do,
+    prefer a recognized fallback so the app can work in both container and
+    older host environments.
+    """
+    config_path = os.path.abspath(os.path.expanduser(config_path))
+    config_dir = os.path.abspath(os.path.expanduser(config_dir))
+
+    if not os.path.exists(config_path) and config_path != FALLBACK_SQUID_CONFIG_PATH:
+        if os.path.exists(FALLBACK_SQUID_CONFIG_PATH):
+            config_path = FALLBACK_SQUID_CONFIG_PATH
+
+    if not os.path.exists(config_dir):
+        for fallback_dir in FALLBACK_ACL_FILES_DIRS:
+            if os.path.exists(fallback_dir):
+                config_dir = fallback_dir
+                break
+
+    return config_path, config_dir
 
 
 def _join_continuation_lines(content: str) -> str:
@@ -77,7 +102,7 @@ def validate_paths():
                     errors.append(f"No write permissions for: {squid_conf}")
 
     # ACL / modular-config directory — warnings only, never a hard error
-    acl_dir = os.path.abspath(os.path.expanduser(ACL_FILES_DIR))
+    _, acl_dir = _normalize_squid_paths(SQUID_CONFIG_PATH, ACL_FILES_DIR)
     if not os.path.exists(acl_dir):
         logger.warning(
             f"ACL/modular config directory not found: {acl_dir} — "
@@ -93,8 +118,9 @@ def validate_paths():
 
 class SquidConfigManager:
     def __init__(self, config_path=SQUID_CONFIG_PATH, config_dir=ACL_FILES_DIR):
-        self.config_path = config_path
-        self.config_dir = config_dir
+        self.config_path, self.config_dir = _normalize_squid_paths(
+            config_path, config_dir
+        )
         self.config_content = ""
         self.is_valid = False
         self.errors = []
