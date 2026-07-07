@@ -13,7 +13,7 @@ def _get_bin(name: str) -> str | None:
 
 def _docker_container_exists(docker_bin: str, container_name: str) -> bool:
     try:
-        result = subprocess.run( # nosec B603  # noqa: S603
+        result = subprocess.run(  # nosec B603  # noqa: S603
             [
                 docker_bin,
                 "ps",
@@ -29,10 +29,14 @@ def _docker_container_exists(docker_bin: str, container_name: str) -> bool:
         )
         return container_name in result.stdout.splitlines()
     except subprocess.CalledProcessError as e:
-        logger.warning("docker ps falló al verificar el contenedor %s: %s", container_name, e)
+        logger.warning(
+            "docker ps falló al verificar el contenedor %s: %s", container_name, e
+        )
         return False
     except Exception as e:
-        logger.exception("Error verificando contenedor Docker %s: %s", container_name, e)
+        logger.exception(
+            "Error verificando contenedor Docker %s: %s", container_name, e
+        )
         return False
 
 
@@ -80,7 +84,10 @@ def _docker_restart() -> tuple[bool, str]:
             text=True,
             timeout=30,
         )
-        return True, f"Squid Docker container '{DOCKER_CONTAINER_NAME}' restarted successfully"
+        return (
+            True,
+            f"Squid Docker container '{DOCKER_CONTAINER_NAME}' restarted successfully",
+        )
     except subprocess.CalledProcessError as e:
         logger.warning("docker restart falló con estado %s: %s", e.returncode, e)
         return False, str(e)
