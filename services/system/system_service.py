@@ -13,7 +13,7 @@ def _get_bin(name: str) -> str | None:
 
 def _docker_container_exists(docker_bin: str, container_name: str) -> bool:
     try:
-        result = subprocess.run(
+        result = subprocess.run( # nosec B603  # noqa: S603
             [
                 docker_bin,
                 "ps",
