@@ -1,4 +1,4 @@
-from subprocess import CompletedProcess, CalledProcessError
+from subprocess import CalledProcessError, CompletedProcess
 from unittest.mock import patch
 
 from services.system.system_service import (
