@@ -30,6 +30,8 @@ jobs:
 
       - name: Install system dependencies
         run: |
+          sudo rm -f /etc/apt/sources.list.d/*microsoft*.list /etc/apt/sources.list.d/*azure*.list
+          sudo sed -i '/packages.microsoft.com/d' /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev libicapapi-dev python3-dev libpq-dev
 
