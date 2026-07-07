@@ -13,12 +13,17 @@ _BLOCKED_USERS_PATH = "/etc/squid/usuarios_bloqueados.txt"
 
 
 def _file_has_content(path: str) -> bool:
-    """Devuelve True si el archivo existe y contiene al menos una línea no vacía."""
+    """Devuelve True si el archivo existe y contiene al menos una entrada real."""
     try:
         if not os.path.exists(path):
             return False
         with open(path, encoding="utf-8") as f:
-            return any(line.strip() for line in f)
+            for raw in f:
+                line = raw.strip()
+                if not line or line.startswith("#"):
+                    continue
+                return True
+        return False
     except Exception:
         return False
 
@@ -37,6 +42,88 @@ def _sync_blocked_file_to_docker(blocked_path: str):
         )
     except Exception as e:
         logger.debug("No se pudo sincronizar %s a Docker: %s", blocked_path, e)
+
+
+def _parse_blocked_file_line(raw_line: str, use_src: bool) -> str | None:
+    raw = raw_line.strip()
+    if not raw or raw.startswith("#"):
+        return None
+    match = re.match(r"^acl\s+usuarios_bloqueados\s+src\s+(\S+)", raw)
+    if match:
+        return match.group(1)
+    if use_src:
+        return None
+    parts = [part.strip() for part in raw.split(" - ")]
+    return parts[1] if len(parts) > 1 else parts[0]
+
+
+def _read_blocked_usernames(
+    file_path: str, use_src: bool
+) -> tuple[set[str], list[str]]:
+    blocked_usernames: set[str] = set()
+    preserved_lines: list[str] = []
+    if not os.path.exists(file_path):
+        return blocked_usernames, preserved_lines
+
+    try:
+        with open(file_path, encoding="utf-8") as f:
+            for raw_line in f:
+                username = _parse_blocked_file_line(raw_line, use_src)
+                if username is None:
+                    preserved_lines.append(raw_line.rstrip("\n"))
+                else:
+                    blocked_usernames.add(username)
+    except Exception as e:
+        logger.warning("No se pudo leer %s: %s", file_path, e)
+
+    return blocked_usernames, preserved_lines
+
+
+def _render_block_entry(username: str, use_src: bool) -> str:
+    return f"acl usuarios_bloqueados src {username}" if use_src else username
+
+
+def _sync_blocked_users_file(
+    file_path: str, usernames: set[str], use_src: bool
+) -> tuple[bool, set[str]]:
+    existing_blocked, preserved_lines = _read_blocked_usernames(file_path, use_src)
+    output_lines = preserved_lines.copy()
+
+    if usernames:
+        output_lines.extend(
+            _render_block_entry(username, use_src) for username in sorted(usernames)
+        )
+
+    if not output_lines:
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                logger.warning("No se pudo eliminar %s: %s", file_path, e)
+        return False, existing_blocked
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    new_content = "\n".join(output_lines).rstrip() + "\n"
+
+    try:
+        if os.path.exists(file_path):
+            with open(file_path, encoding="utf-8") as f:
+                current_content = f.read()
+            if current_content == new_content:
+                return False, existing_blocked
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(new_content)
+
+        try:
+            os.chmod(file_path, 0o640)
+        except Exception as e:
+            logger.warning("No se pudo fijar permisos en %s: %s", file_path, e)
+
+        return True, existing_blocked
+    except Exception as e:
+        logger.warning("No se pudo escribir %s: %s", file_path, e)
+        return False, existing_blocked
 
 
 def clear_blocked_users_file() -> None:

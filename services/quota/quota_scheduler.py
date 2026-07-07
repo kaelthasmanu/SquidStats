@@ -12,7 +12,9 @@ from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaUser
 from services.quota.quota_service import (
     _BLOCKED_USERS_PATH,
+    _read_blocked_usernames,
     _sync_blocked_file_to_docker,
+    _sync_blocked_users_file,
     _sync_quota_squid_rules,
     clear_blocked_users_file,
 )
@@ -24,7 +26,7 @@ def register_quota_scheduler_tasks(scheduler):
     """Registra tareas programadas relacionadas con cuotas."""
 
     @scheduler.task(
-        "interval", id="check_quota_users", minutes=1, misfire_grace_time=300
+        "interval", id="check_quota_users", minutes=5, misfire_grace_time=300
     )
     def check_quota_users():
         logger.info("check_quota_users task started")
@@ -84,31 +86,7 @@ def register_quota_scheduler_tasks(scheduler):
             )
             use_src = not auth_configured
 
-            blocked_usernames = set()
-            if os.path.exists(file_path):
-                with open(file_path, encoding="utf-8") as f:
-                    for line in f:
-                        text = line.strip()
-                        if not text:
-                            continue
-                        if use_src:
-                            # Formato: acl usuarios_bloqueados src <IP>
-                            m = re.match(
-                                r"^acl\s+usuarios_bloqueados\s+src\s+(\S+)", text
-                            )
-                            if m:
-                                blocked_usernames.add(m.group(1))
-                        else:
-                            # Formato plano: username o "algo - username"
-                            if " - " in text:
-                                parts = text.split(" - ")
-                                blocked_usernames.add(
-                                    parts[1].strip()
-                                    if len(parts) > 1
-                                    else parts[0].strip()
-                                )
-                            else:
-                                blocked_usernames.add(text)
+            existing_blocked_usernames, _ = _read_blocked_usernames(file_path, use_src)
 
             users = session.query(QuotaUser).all()
 
@@ -160,8 +138,9 @@ def register_quota_scheduler_tasks(scheduler):
                     ) + (row.total_bytes or 0)
 
             for user in regular_users:
-                new_mb = int(usage_by_username.get(user.username, 0) / 1024 / 1024)
-                user.used_mb = new_mb
+                user.used_mb = int(
+                    usage_by_username.get(user.username, 0) / 1024 / 1024
+                )
 
             group_quotas = {
                 g.group_name: g.quota_mb for g in session.query(QuotaGroup).all()
@@ -183,8 +162,6 @@ def register_quota_scheduler_tasks(scheduler):
 
             exceeded_users = []
             for user in regular_users:
-                # La cuota efectiva es la propia del usuario; si no tiene,
-                # se usa la cuota global "default" (si está configurada).
                 effective_quota = (
                     user.quota_mb
                     if (user.quota_mb and user.quota_mb > 0)
@@ -199,7 +176,6 @@ def register_quota_scheduler_tasks(scheduler):
                 elif user.group_name and user.group_name in exceeded_groups:
                     exceeded_users.append(user)
 
-            # Usuarios del log que no están en QuotaUser pero superan la cuota global
             if default_quota_mb > 0:
                 known_usernames = {u.username for u in regular_users}
                 for username, total_bytes in usage_by_username.items():
@@ -216,43 +192,27 @@ def register_quota_scheduler_tasks(scheduler):
                             )
                         )
 
-            new_blocked = []
-            for user in exceeded_users:
-                if user.username not in blocked_usernames:
-                    new_blocked.append(user)
+            exceeded_usernames = {user.username for user in exceeded_users}
+            file_changed, _ = _sync_blocked_users_file(
+                file_path, exceeded_usernames, use_src
+            )
+            newly_blocked = [
+                user
+                for user in exceeded_users
+                if user.username not in existing_blocked_usernames
+            ]
 
-            if new_blocked:
-                logger.debug(
-                    "check_quota_users: %d nuevos bloqueos; use_src=%s",
-                    len(new_blocked),
-                    use_src,
-                )
-                was_missing = not os.path.exists(file_path)
-                with open(file_path, "a", encoding="utf-8") as f:
-                    for user in new_blocked:
-                        if use_src:
-                            entry = f"acl usuarios_bloqueados src {user.username}\n"
-                        else:
-                            entry = f"{user.username}\n"
-                        logger.debug(
-                            "Escribiendo entrada en archivo bloqueados: %s",
-                            entry.strip(),
-                        )
-                        f.write(entry)
-                if was_missing:
-                    try:
-                        os.chmod(file_path, 0o640)
-                    except Exception as e:
-                        logger.warning(
-                            "No se pudo ajustar permisos de %s: %s", file_path, e
-                        )
+            if file_changed:
                 _sync_blocked_file_to_docker(file_path)
-                # Sincronizar ACL en squid.conf inmediatamente: si el archivo
-                # acaba de ser creado, la ACL debe añadirse ahora sin esperar
-                # al siguiente ciclo del scheduler.
                 _sync_quota_squid_rules(True)
 
-                for user in new_blocked:
+            if newly_blocked:
+                logger.debug(
+                    "check_quota_users: %d nuevos bloqueos; use_src=%s",
+                    len(newly_blocked),
+                    use_src,
+                )
+                for user in newly_blocked:
                     effective_quota = (
                         user.quota_mb
                         if (user.quota_mb and user.quota_mb > 0)
@@ -283,9 +243,9 @@ def register_quota_scheduler_tasks(scheduler):
                     )
                     session.add(event)
 
-            if new_blocked:
+            if newly_blocked:
                 logger.info(
-                    f"check_quota_users: {len(new_blocked)} nuevos usuarios con cuota excedida escritos en {file_path}"
+                    f"check_quota_users: {len(newly_blocked)} nuevos usuarios con cuota excedida escritos en {file_path}"
                 )
             else:
                 logger.debug("check_quota_users: ningún usuario nuevo excedió la cuota")
