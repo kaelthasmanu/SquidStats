@@ -57,7 +57,9 @@ def _parse_blocked_file_line(raw_line: str, use_src: bool) -> str | None:
     return parts[1] if len(parts) > 1 else parts[0]
 
 
-def _read_blocked_usernames(file_path: str, use_src: bool) -> tuple[set[str], list[str]]:
+def _read_blocked_usernames(
+    file_path: str, use_src: bool
+) -> tuple[set[str], list[str]]:
     blocked_usernames: set[str] = set()
     preserved_lines: list[str] = []
     if not os.path.exists(file_path):
@@ -81,12 +83,16 @@ def _render_block_entry(username: str, use_src: bool) -> str:
     return f"acl usuarios_bloqueados src {username}" if use_src else username
 
 
-def _sync_blocked_users_file(file_path: str, usernames: set[str], use_src: bool) -> tuple[bool, set[str]]:
+def _sync_blocked_users_file(
+    file_path: str, usernames: set[str], use_src: bool
+) -> tuple[bool, set[str]]:
     existing_blocked, preserved_lines = _read_blocked_usernames(file_path, use_src)
     output_lines = preserved_lines.copy()
 
     if usernames:
-        output_lines.extend(_render_block_entry(username, use_src) for username in sorted(usernames))
+        output_lines.extend(
+            _render_block_entry(username, use_src) for username in sorted(usernames)
+        )
 
     if not output_lines:
         if os.path.exists(file_path):
