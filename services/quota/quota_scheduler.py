@@ -138,7 +138,9 @@ def register_quota_scheduler_tasks(scheduler):
                     ) + (row.total_bytes or 0)
 
             for user in regular_users:
-                user.used_mb = int(usage_by_username.get(user.username, 0) / 1024 / 1024)
+                user.used_mb = int(
+                    usage_by_username.get(user.username, 0) / 1024 / 1024
+                )
 
             group_quotas = {
                 g.group_name: g.quota_mb for g in session.query(QuotaGroup).all()
@@ -191,9 +193,13 @@ def register_quota_scheduler_tasks(scheduler):
                         )
 
             exceeded_usernames = {user.username for user in exceeded_users}
-            file_changed, _ = _sync_blocked_users_file(file_path, exceeded_usernames, use_src)
+            file_changed, _ = _sync_blocked_users_file(
+                file_path, exceeded_usernames, use_src
+            )
             newly_blocked = [
-                user for user in exceeded_users if user.username not in existing_blocked_usernames
+                user
+                for user in exceeded_users
+                if user.username not in existing_blocked_usernames
             ]
 
             if file_changed:
