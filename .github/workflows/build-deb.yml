@@ -187,7 +187,7 @@ jobs:
 
       # ── 9. Upload .deb as workflow artifact ──────────────────────────────
       - name: Upload .deb artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: squidstats-${{ steps.version.outputs.version }}-${{ matrix.distro }}
           path: dist/squidstats_${{ steps.version.outputs.version }}_${{ matrix.distro }}.deb
@@ -196,7 +196,7 @@ jobs:
       # ── 10. Upload lintian report ─────────────────────────────────────────
       - name: Upload lintian report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: lintian-${{ matrix.distro }}
           path: lintian.txt
