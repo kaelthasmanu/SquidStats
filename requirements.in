@@ -1,0 +1,34 @@
+# Direct runtime dependencies for SquidStats.
+# This file lists the top-level dependencies; pinned transitive
+# dependencies are generated in requirements.txt via pip-compile.
+#
+# Update requirements.txt:
+#   pip-compile --upgrade --generate-hashes --output-file requirements.txt requirements.in
+
+Flask
+Flask-Babel
+Flask-WTF
+Flask-APScheduler
+Flask-SocketIO
+
+SQLAlchemy
+alembic
+python-dotenv
+
+pymysql
+psycopg2-binary
+
+psutil
+eventlet
+pytz
+requests
+uvicorn
+
+PyJWT
+bcrypt
+cryptography
+
+telethon >= 1.44.0
+loguru
+weasyprint
+ldap3
