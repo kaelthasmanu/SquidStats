@@ -2,7 +2,7 @@ import os
 import time
 from typing import Any
 
-from flask import Blueprint, flash, redirect, render_template, request
+from flask import Blueprint, flash, jsonify, redirect, render_template, request
 from flask_babel import gettext as _
 from loguru import logger
 
@@ -13,10 +13,14 @@ from routes.admin.helpers import sanitize_error_page_message
 from services.notifications.notifications import get_all_notifications
 from services.squid.fetch_data import fetch_all_squid_data
 from services.system.system_info import get_system_type
-from utils.updateSquid import update_squid
-from utils.updateSquidStats import is_deb_installation, updateSquidStats
+from utils.updateSquid import check_squid_update, update_squid
+from utils.updateSquidStats import check_web_update, is_deb_installation, updateSquidStats
 
 main_bp = Blueprint("main", __name__)
+
+# Caché simple en memoria para el estado de actualizaciones (5 minutos)
+_update_status_cache = {"data": None, "timestamp": 0}
+_UPDATE_STATUS_TTL = 300
 
 
 def filter_valid_users(grouped_connections):
@@ -50,6 +54,49 @@ def _build_error_page(message: str, status: int = 500):
         ),
         status,
     )
+
+
+@main_bp.route("/api/update-status")
+def update_status():
+    """Devuelve el estado de actualizaciones disponibles para Squid y la web.
+
+    Utiliza un caché en memoria de 5 minutos para no saturar las APIs de GitHub.
+    """
+    global _update_status_cache
+    now = time.time()
+    cached = _update_status_cache
+    if cached["data"] and (now - cached["timestamp"] < _UPDATE_STATUS_TTL):
+        return jsonify(cached["data"])
+
+    try:
+        squid_status = check_squid_update()
+    except Exception:
+        logger.exception("Error checking Squid update status")
+        squid_status = {
+            "available": False,
+            "current": None,
+            "latest": None,
+            "error": "Error interno al verificar actualización de Squid",
+        }
+
+    try:
+        current_version = getattr(Config, "VERSION", None) or os.getenv("VERSION", "0")
+        web_status = check_web_update(current_version)
+    except Exception:
+        logger.exception("Error checking SquidStats update status")
+        web_status = {
+            "available": False,
+            "current": getattr(Config, "VERSION", None) or os.getenv("VERSION", "0"),
+            "latest": None,
+            "error": "Error interno al verificar actualización de SquidStats",
+        }
+
+    data = {
+        "squid": squid_status,
+        "web": web_status,
+    }
+    _update_status_cache = {"data": data, "timestamp": now}
+    return jsonify(data)
 
 
 def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | None]:
