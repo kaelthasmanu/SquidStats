@@ -29,6 +29,8 @@ Thank you for your interest in contributing to SquidStats! This document provide
    pip install -r requirements.txt
    ```
 
+   > **Note for maintainers:** Direct dependencies are declared in [`requirements.in`](requirements.in). The pinned [`requirements.txt`](requirements.txt) is generated automatically with `pip-compile --upgrade --generate-hashes --output-file requirements.txt requirements.in`.
+
 4. **Run the application**
    ```bash
    python app.py
