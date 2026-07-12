@@ -31,7 +31,7 @@ jobs:
             echo "No high severity issues found."
           fi
       - name: Upload Bandit report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: bandit-high-report
           path: bandit-report.txt
