@@ -299,8 +299,10 @@ def check_web_update(current_version, force_refresh=False):
     """
     global _WEB_UPDATE_CACHE
     now = time.time()
-    if not force_refresh and _WEB_UPDATE_CACHE["data"] and (
-        now - _WEB_UPDATE_CACHE["timestamp"] < _WEB_CACHE_TTL
+    if (
+        not force_refresh
+        and _WEB_UPDATE_CACHE["data"]
+        and (now - _WEB_UPDATE_CACHE["timestamp"] < _WEB_CACHE_TTL)
     ):
         return _WEB_UPDATE_CACHE["data"]
 
