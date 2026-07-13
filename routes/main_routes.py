@@ -14,7 +14,11 @@ from services.notifications.notifications import get_all_notifications
 from services.squid.fetch_data import fetch_all_squid_data
 from services.system.system_info import get_system_type
 from utils.updateSquid import check_squid_update, update_squid
-from utils.updateSquidStats import check_web_update, is_deb_installation, updateSquidStats
+from utils.updateSquidStats import (
+    check_web_update,
+    is_deb_installation,
+    updateSquidStats,
+)
 
 main_bp = Blueprint("main", __name__)
 
