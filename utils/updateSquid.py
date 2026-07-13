@@ -188,7 +188,7 @@ def get_installed_squid_version():
     if not squid_bin:
         return None
     try:
-        result = subprocess.run(
+        result = subprocess.run( # noqa: S603
             [squid_bin, "-v"],
             capture_output=True,
             text=True,
@@ -220,8 +220,10 @@ def check_squid_update(force_refresh=False):
     """
     global _SQUID_UPDATE_CACHE
     now = time.time()
-    if not force_refresh and _SQUID_UPDATE_CACHE["data"] and (
-        now - _SQUID_UPDATE_CACHE["timestamp"] < _UPDATE_CACHE_TTL
+    if (
+        not force_refresh
+        and _SQUID_UPDATE_CACHE["data"]
+        and (now - _SQUID_UPDATE_CACHE["timestamp"] < _UPDATE_CACHE_TTL)
     ):
         return _SQUID_UPDATE_CACHE["data"]
 
