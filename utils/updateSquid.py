@@ -188,7 +188,7 @@ def get_installed_squid_version():
     if not squid_bin:
         return None
     try:
-        result = subprocess.run( # noqa: S603
+        result = subprocess.run(  # noqa: S603
             [squid_bin, "-v"],
             capture_output=True,
             text=True,
