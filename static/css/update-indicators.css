@@ -1,0 +1,248 @@
+/* ==========================================================================
+   SquidStats Update Indicators
+   Professional animated badges and glows for available updates
+   ========================================================================== */
+
+/* Base update badge */
+.update-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: scale(0);
+  visibility: hidden;
+  transition: opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    visibility 0.35s ease;
+  pointer-events: none;
+}
+
+.update-badge.is-visible {
+  display: inline-flex !important;
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
+
+/* Squid update badge */
+.update-badge--squid {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* Web update badge */
+.update-badge--web {
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+}
+
+/* Dot variant (compact mode) */
+.update-badge--dot {
+  min-width: 10px;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+}
+
+/* Pulse ring around the button */
+.update-available::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: 0;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  animation: update-pulse-ring 2.4s ease-out infinite;
+}
+
+.update-available--squid::before {
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+}
+
+.update-available--web::before {
+  box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.55);
+}
+
+@keyframes update-pulse-ring {
+  0% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+  }
+  50% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+  }
+}
+
+.update-available--web.update-available::before {
+  animation-name: update-pulse-ring-web;
+}
+
+@keyframes update-pulse-ring-web {
+  0% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.55);
+  }
+  50% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 0 12px rgba(168, 85, 247, 0);
+  }
+}
+
+/* Shimmer sweep across the button */
+.update-available::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: update-shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+@keyframes update-shimmer {
+  0%, 80%, 100% {
+    left: -100%;
+  }
+  90% {
+    left: 150%;
+  }
+}
+
+/* Icon attention animation */
+.update-icon-attention {
+  animation: update-icon-wiggle 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes update-icon-wiggle {
+  0%, 85%, 100% {
+    transform: rotate(0deg);
+  }
+  88% {
+    transform: rotate(-12deg);
+  }
+  91% {
+    transform: rotate(12deg);
+  }
+  94% {
+    transform: rotate(-8deg);
+  }
+  97% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Floating update tooltip */
+.update-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 50;
+  min-width: max-content;
+  max-width: 260px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(17, 24, 39, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.update-tooltip::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent rgba(17, 24, 39, 0.95) transparent;
+}
+
+.group:hover .update-tooltip,
+.update-btn-wrapper:hover .update-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Mobile version chips */
+.update-chip {
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  color: #ffffff;
+  margin-left: auto;
+  opacity: 0;
+  transform: scale(0.9);
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    visibility 0.3s ease;
+}
+
+.update-chip.is-visible {
+  display: inline-flex !important;
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
+
+.update-chip--squid {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.update-chip--web {
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .update-available::before,
+  .update-available::after,
+  .update-icon-attention {
+    animation: none;
+  }
+
+  .update-available::after {
+    display: none;
+  }
+}

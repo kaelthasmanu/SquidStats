@@ -120,15 +120,23 @@
             <span>{{ _("Admin") }}</span>
           </a>
 
-          <button onclick="confirmSquidUpdate()" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="{{ _("Actualizar paquetes y configuración de Squid") }}">
-            <i class="fas fa-sync-alt"></i>
-            <span>{{ _("Squid") }}</span>
-          </button>
+          <div class="update-btn-wrapper relative inline-block group">
+            <button onclick="confirmSquidUpdate()" id="squid-update-btn" class="action-btn update-btn relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300" data-base-tooltip="{{ _("Actualizar paquetes y configuración de Squid") }}">
+              <span id="squid-update-badge" class="update-badge update-badge--squid hidden">1</span>
+              <i id="squid-update-icon" class="fas fa-sync-alt"></i>
+              <span>{{ _("Squid") }}</span>
+            </button>
+            <div id="squid-update-tooltip" class="update-tooltip"></div>
+          </div>
 
-          <button onclick="confirmWebUpdate()" class="action-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300" data-tooltip="{{ _("Actualizar aplicación web SquidStats") }}">
-            <i class="fas fa-cloud-download-alt"></i>
-            <span>{{ _("Web") }}</span>
-          </button>
+          <div class="update-btn-wrapper relative inline-block group">
+            <button onclick="confirmWebUpdate()" id="web-update-btn" class="action-btn update-btn relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300" data-base-tooltip="{{ _("Actualizar aplicación web SquidStats") }}">
+              <span id="web-update-badge" class="update-badge update-badge--web hidden">1</span>
+              <i id="web-update-icon" class="fas fa-cloud-download-alt"></i>
+              <span>{{ _("Web") }}</span>
+            </button>
+            <div id="web-update-tooltip" class="update-tooltip"></div>
+          </div>
 
           <!-- Language Switcher -->
           <div class="relative" x-data="{ langOpen: false }">
@@ -199,13 +207,13 @@
             <i class="fas fa-cog"></i>
             <span>{{ _("Admin") }}</span>
           </a>
-          <button onclick="confirmSquidUpdate(); mobileMenuOpen = false" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 transition-all duration-300">
-            <i class="fas fa-sync-alt"></i>
-            <span>{{ _("Squid") }}</span>
+          <button onclick="confirmSquidUpdate(); mobileMenuOpen = false" id="squid-update-btn-mobile" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 transition-all duration-300">
+            <i id="squid-update-icon-mobile" class="fas fa-sync-alt"></i>
+            <span class="flex items-center gap-2">{{ _("Squid") }} <span id="squid-update-chip-mobile" class="update-chip update-chip--squid hidden">NEW</span></span>
           </button>
-          <button onclick="confirmWebUpdate(); mobileMenuOpen = false" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 transition-all duration-300">
-            <i class="fas fa-cloud-download-alt"></i>
-            <span>{{ _("Web") }}</span>
+          <button onclick="confirmWebUpdate(); mobileMenuOpen = false" id="web-update-btn-mobile" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 transition-all duration-300">
+            <i id="web-update-icon-mobile" class="fas fa-cloud-download-alt"></i>
+            <span class="flex items-center gap-2">{{ _("Web") }} <span id="web-update-chip-mobile" class="update-chip update-chip--web hidden">NEW</span></span>
           </button>
         </div>
       </div>
@@ -226,6 +234,9 @@
 
 <!-- Custom Confirm Modal -->
 {% include 'components/confirm_modal.html' %}
+
+<!-- Update indicators CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/update-indicators.css') }}" />
 
 <!-- Scripts -->
 <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
@@ -571,12 +582,143 @@
         fetchInitialNotifications();
         connectWebSocket();
     }
+
+    // Update indicators: animated badges/glows when Squid or Web updates are available
+    function initUpdateIndicators() {
+      const UI = {
+        squid: {
+          btn: document.getElementById('squid-update-btn'),
+          badge: document.getElementById('squid-update-badge'),
+          icon: document.getElementById('squid-update-icon'),
+          tooltip: document.getElementById('squid-update-tooltip'),
+          mobileBtn: document.getElementById('squid-update-btn-mobile'),
+          mobileIcon: document.getElementById('squid-update-icon-mobile'),
+          mobileChip: document.getElementById('squid-update-chip-mobile'),
+        },
+        web: {
+          btn: document.getElementById('web-update-btn'),
+          badge: document.getElementById('web-update-badge'),
+          icon: document.getElementById('web-update-icon'),
+          tooltip: document.getElementById('web-update-tooltip'),
+          mobileBtn: document.getElementById('web-update-btn-mobile'),
+          mobileIcon: document.getElementById('web-update-icon-mobile'),
+          mobileChip: document.getElementById('web-update-chip-mobile'),
+        }
+      };
+
+      function updateUi(type, status) {
+        const el = UI[type];
+        if (!el || !el.btn) return;
+
+        const baseTooltip = el.btn.getAttribute('data-base-tooltip') || '';
+        const hasUpdate = status && status.available && status.latest;
+
+        // Desktop badge
+        if (el.badge) {
+          if (hasUpdate) {
+            el.badge.classList.remove('hidden');
+            requestAnimationFrame(() => el.badge.classList.add('is-visible'));
+          } else {
+            el.badge.classList.remove('is-visible');
+            setTimeout(() => el.badge.classList.add('hidden'), 350);
+          }
+        }
+
+        // Desktop glow/ripple
+        if (el.btn) {
+          const glowClass = type === 'squid' ? 'update-available--squid' : 'update-available--web';
+          if (hasUpdate) {
+            el.btn.classList.add('update-available', glowClass);
+          } else {
+            el.btn.classList.remove('update-available', 'update-available--squid', 'update-available--web');
+          }
+        }
+
+        // Desktop icon attention
+        if (el.icon) {
+          if (hasUpdate) {
+            el.icon.classList.add('update-icon-attention');
+          } else {
+            el.icon.classList.remove('update-icon-attention');
+          }
+        }
+
+        // Desktop tooltip
+        if (el.tooltip) {
+          if (hasUpdate) {
+            const msg = type === 'squid'
+              ? {{ _('Nueva versión de Squid disponible:')|tojson }} + ' ' + status.latest
+              : {{ _('Nueva versión de SquidStats disponible:')|tojson }} + ' ' + status.latest;
+            el.tooltip.textContent = msg;
+          } else {
+            el.tooltip.textContent = baseTooltip;
+          }
+        }
+
+        // Mobile chip
+        if (el.mobileChip) {
+          if (hasUpdate) {
+            el.mobileChip.classList.remove('hidden');
+            requestAnimationFrame(() => el.mobileChip.classList.add('is-visible'));
+          } else {
+            el.mobileChip.classList.remove('is-visible');
+            setTimeout(() => el.mobileChip.classList.add('hidden'), 350);
+          }
+        }
+
+        // Mobile icon attention
+        if (el.mobileIcon) {
+          if (hasUpdate) {
+            el.mobileIcon.classList.add('update-icon-attention');
+          } else {
+            el.mobileIcon.classList.remove('update-icon-attention');
+          }
+        }
+      }
+
+      function fetchUpdateStatus() {
+        const cached = sessionStorage.getItem('squidstats_update_status');
+        const cachedAt = sessionStorage.getItem('squidstats_update_status_at');
+        const ttl = 5 * 60 * 1000; // 5 minutos
+        if (cached && cachedAt && (Date.now() - parseInt(cachedAt, 10)) < ttl) {
+          try {
+            const data = JSON.parse(cached);
+            updateUi('squid', data.squid);
+            updateUi('web', data.web);
+            return;
+          } catch (e) {
+            // continuar a fetch fresco
+          }
+        }
+
+        fetch('/api/update-status')
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(data => {
+            sessionStorage.setItem('squidstats_update_status', JSON.stringify(data));
+            sessionStorage.setItem('squidstats_update_status_at', Date.now().toString());
+            updateUi('squid', data.squid);
+            updateUi('web', data.web);
+          })
+          .catch(err => {
+            console.warn('No se pudo obtener el estado de actualizaciones:', err);
+            // En caso de error, ocultar indicadores para no mostrar información stale
+            updateUi('squid', { available: false });
+            updateUi('web', { available: false });
+          });
+      }
+
+      fetchUpdateStatus();
+    }
     
     // Initialize all functionality
     initTooltips();
     initNavbarScroll();
     setActiveLink();
     initNotifications();
+    initUpdateIndicators();
   });
 
   // Close modals when clicking outside

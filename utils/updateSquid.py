@@ -1,14 +1,22 @@
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import tempfile
+import time
 
+import requests
 from dotenv import load_dotenv
 from loguru import logger
 
 load_dotenv()
+
+
+_SQUID_UPDATE_CACHE = {"data": None, "timestamp": 0}
+_UPDATE_CACHE_TTL = 300  # 5 minutos
+_GITHUB_SQUID_API = "https://api.github.com/repos/cuza/squid/releases/latest"
 
 
 def update_squid():
@@ -152,3 +160,123 @@ def update_squid():
     except Exception:
         logger.exception("Error crítico durante la actualización de Squid")
         return False
+
+
+def _parse_version(version_str):
+    """Extrae la tupla numérica de una versión, ignorando prefijos como 'v'."""
+    if not version_str:
+        return (0, 0, 0)
+    cleaned = re.sub(r"^[vV]", "", version_str.strip())
+    parts = re.split(r"[.-]", cleaned)
+    nums = []
+    for part in parts:
+        try:
+            nums.append(int(part))
+        except ValueError:
+            break
+    return tuple(nums) if nums else (0, 0, 0)
+
+
+def _compare_versions(current, latest):
+    """Devuelve True si latest es mayor que current."""
+    return _parse_version(latest) > _parse_version(current)
+
+
+def get_installed_squid_version():
+    """Obtiene la versión instalada de Squid ejecutando 'squid -v'."""
+    squid_bin = shutil.which("squid")
+    if not squid_bin:
+        return None
+    try:
+        result = subprocess.run(  # noqa: S603
+            [squid_bin, "-v"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return None
+        match = re.search(r"Squid Cache: Version ([^\s,]+)", result.stdout)
+        if match:
+            return match.group(1).strip()
+        # Fallback para formatos alternativos
+        match = re.search(r"version ([^\s,]+)", result.stdout, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        return None
+    except Exception:
+        logger.exception("Error obteniendo versión instalada de Squid")
+        return None
+
+
+def check_squid_update(force_refresh=False):
+    """Verifica si existe una versión más reciente de Squid en GitHub.
+
+    Retorna un dict con:
+        - available (bool)
+        - current (str): versión instalada o None
+        - latest (str): última versión en GitHub o None
+        - error (str|None): mensaje de error si falló la consulta
+    """
+    global _SQUID_UPDATE_CACHE
+    now = time.time()
+    if (
+        not force_refresh
+        and _SQUID_UPDATE_CACHE["data"]
+        and (now - _SQUID_UPDATE_CACHE["timestamp"] < _UPDATE_CACHE_TTL)
+    ):
+        return _SQUID_UPDATE_CACHE["data"]
+
+    current_version = get_installed_squid_version()
+    try:
+        proxy_url = os.getenv("HTTP_PROXY", "") or os.getenv("HTTPS_PROXY", "")
+        proxies = None
+        if proxy_url:
+            proxies = {"http": proxy_url, "https": proxy_url}
+
+        response = requests.get(
+            _GITHUB_SQUID_API,
+            proxies=proxies,
+            timeout=30,
+        )
+        response.raise_for_status()
+        latest_version = response.json().get("tag_name", "")
+        if not latest_version:
+            result = {
+                "available": False,
+                "current": current_version,
+                "latest": None,
+                "error": "No se pudo obtener la última versión desde GitHub",
+            }
+            _SQUID_UPDATE_CACHE = {"data": result, "timestamp": now}
+            return result
+
+        if not current_version:
+            result = {
+                "available": False,
+                "current": None,
+                "latest": latest_version,
+                "error": "Squid no está instalado o no se detectó versión",
+            }
+            _SQUID_UPDATE_CACHE = {"data": result, "timestamp": now}
+            return result
+
+        available = _compare_versions(current_version, latest_version)
+        result = {
+            "available": available,
+            "current": current_version,
+            "latest": latest_version,
+            "error": None,
+        }
+        _SQUID_UPDATE_CACHE = {"data": result, "timestamp": now}
+        return result
+    except Exception:
+        logger.exception("Error verificando actualización de Squid")
+        result = {
+            "available": False,
+            "current": current_version,
+            "latest": None,
+            "error": "No se pudo verificar la actualización de Squid",
+        }
+        _SQUID_UPDATE_CACHE = {"data": result, "timestamp": now}
+        return result

@@ -1,7 +1,9 @@
 import os
+import re
 import shutil
 import subprocess
 import tempfile
+import time
 
 import requests
 from dotenv import load_dotenv
@@ -255,3 +257,94 @@ def updateSquidStats():
     except Exception:
         logger.exception("Error crítico en updateSquidStats")
         return False
+
+
+_WEB_UPDATE_CACHE = {"data": None, "timestamp": 0}
+_WEB_CACHE_TTL = 300  # 5 minutos
+_GITHUB_WEB_API = "https://api.github.com/repos/kaelthasmanu/SquidStats/releases/latest"
+
+
+def _parse_web_version(version_str):
+    """Extrae la tupla numérica de una versión, ignorando prefijos como 'v'."""
+    if not version_str:
+        return (0, 0, 0)
+    cleaned = re.sub(r"^[vV]", "", version_str.strip())
+    parts = re.split(r"[.-]", cleaned)
+    nums = []
+    for part in parts:
+        try:
+            nums.append(int(part))
+        except ValueError:
+            break
+    return tuple(nums) if nums else (0, 0, 0)
+
+
+def _web_version_is_newer(current, latest):
+    """Devuelve True si latest es mayor que current."""
+    return _parse_web_version(latest) > _parse_web_version(current)
+
+
+def check_web_update(current_version, force_refresh=False):
+    """Verifica si existe una versión más reciente de SquidStats en GitHub.
+
+    Args:
+        current_version (str): Versión actual de la aplicación (p. ej. Config.VERSION).
+        force_refresh (bool): Ignora el caché y consulta GitHub nuevamente.
+
+    Retorna un dict con:
+        - available (bool)
+        - current (str): versión actual proporcionada
+        - latest (str): última versión en GitHub o None
+        - error (str|None): mensaje de error si falló la consulta
+    """
+    global _WEB_UPDATE_CACHE
+    now = time.time()
+    if (
+        not force_refresh
+        and _WEB_UPDATE_CACHE["data"]
+        and (now - _WEB_UPDATE_CACHE["timestamp"] < _WEB_CACHE_TTL)
+    ):
+        return _WEB_UPDATE_CACHE["data"]
+
+    try:
+        proxy_url = os.getenv("HTTP_PROXY", "") or os.getenv("HTTPS_PROXY", "")
+        proxies = None
+        if proxy_url:
+            proxies = {"http": proxy_url, "https": proxy_url}
+
+        response = requests.get(
+            _GITHUB_WEB_API,
+            proxies=proxies,
+            timeout=30,
+        )
+        response.raise_for_status()
+        latest_version = response.json().get("tag_name", "")
+        if not latest_version:
+            result = {
+                "available": False,
+                "current": current_version,
+                "latest": None,
+                "error": "No se pudo obtener la última versión desde GitHub",
+            }
+            _WEB_UPDATE_CACHE = {"data": result, "timestamp": now}
+            return result
+
+        available = _web_version_is_newer(current_version or "0", latest_version)
+        result = {
+            "available": available,
+            "current": current_version,
+            "latest": latest_version,
+            "error": None,
+        }
+        _WEB_UPDATE_CACHE = {"data": result, "timestamp": now}
+        return result
+    except Exception:
+        logger.exception("Error verificando actualización de SquidStats")
+        result = {
+            "available": False,
+            "current": current_version,
+            "latest": None,
+            "error": "No se pudo verificar la actualización de SquidStats",
+        }
+        _WEB_UPDATE_CACHE = {"data": result, "timestamp": now}
+        return result
