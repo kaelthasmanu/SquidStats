@@ -270,13 +270,13 @@ def check_squid_update(force_refresh=False):
         }
         _SQUID_UPDATE_CACHE = {"data": result, "timestamp": now}
         return result
-    except Exception as e:
-        logger.error(f"Error verificando actualización de Squid: {e}")
+    except Exception:
+        logger.exception("Error verificando actualización de Squid")
         result = {
             "available": False,
             "current": current_version,
             "latest": None,
-            "error": str(e),
+            "error": "No se pudo verificar la actualización de Squid",
         }
         _SQUID_UPDATE_CACHE = {"data": result, "timestamp": now}
         return result
