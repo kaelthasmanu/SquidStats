@@ -338,13 +338,13 @@ def check_web_update(current_version, force_refresh=False):
         }
         _WEB_UPDATE_CACHE = {"data": result, "timestamp": now}
         return result
-    except Exception as e:
-        logger.error(f"Error verificando actualización de SquidStats: {e}")
+    except Exception:
+        logger.exception("Error verificando actualización de SquidStats")
         result = {
             "available": False,
             "current": current_version,
             "latest": None,
-            "error": str(e),
+            "error": "No se pudo verificar la actualización de SquidStats",
         }
         _WEB_UPDATE_CACHE = {"data": result, "timestamp": now}
         return result
