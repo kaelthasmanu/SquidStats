@@ -180,7 +180,7 @@ _Una herramienta moderna para analizar logs de Squid, proporcionando un panel f√
 
 ### Prerrequisitos
 
-- Python 3.10+
+- Python 3.14+
 - Servidor proxy Squid
 
 ```bash
