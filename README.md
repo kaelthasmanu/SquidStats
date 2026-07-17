@@ -792,7 +792,7 @@ sudo rm -rf /opt/squidstats
 ### Upcoming Features
 
 - **Interface Improvements** 🎨
-  - Report export (PDF, Excel)
+  - ~~Report export (PDF, Excel)~~ ✅ **Implemented** 
 
 - **Optimization and Performance** ⚡
   - Enhanced data caching
