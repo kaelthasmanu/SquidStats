@@ -181,7 +181,7 @@ _A modern tool for parsing and analyzing Squid logs, providing a user-friendly d
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.14+
 - Squid proxy server
 
 ```bash
