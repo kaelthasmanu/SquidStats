@@ -1,5 +1,6 @@
 import os
 from datetime import date
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -36,13 +37,41 @@ def get_table_suffix() -> str:
     return date.today().strftime("%Y%m%d")
 
 
+def _normalize_sqlite_path(path_str: str) -> Path:
+    path_str = path_str.strip()
+
+    if path_str in ("", "."):
+        raise ValueError("DATABASE_STRING_CONNECTION for SQLITE must contain a database path")
+
+    if path_str == ":memory:" or path_str == "sqlite:///:memory:":
+        return Path(":memory:")
+
+    if path_str.startswith("sqlite:///"):
+        path_str = path_str[len("sqlite:///"):]
+
+    if not path_str:
+        raise ValueError("DATABASE_STRING_CONNECTION for SQLITE must contain a database path")
+
+    project_root = Path(__file__).resolve().parents[1]
+    db_path = Path(path_str)
+
+    if not db_path.is_absolute():
+        db_path = project_root / db_path
+
+    if path_str.endswith("/") or db_path.is_dir():
+        db_path = db_path / "squidstats.db"
+
+    return db_path
+
+
 def get_database_url() -> str:
     db_type = Config.DATABASE_TYPE
     conn_str = Config.DATABASE_STRING_CONNECTION
     if db_type == "SQLITE":
-        if not conn_str.startswith("sqlite:///"):
-            return f"sqlite:///{conn_str}"
-        return conn_str
+        db_path = _normalize_sqlite_path(conn_str)
+        if str(db_path) == ":memory:":
+            return "sqlite:///:memory:"
+        return f"sqlite:///{db_path}"
     elif db_type in ("MYSQL", "MARIADB"):
         # Ejemplo: mysql+pymysql://user:password@host/dbname
         # El usuario debe poner el string completo en el .env
