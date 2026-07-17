@@ -41,16 +41,20 @@ def _normalize_sqlite_path(path_str: str) -> Path:
     path_str = path_str.strip()
 
     if path_str in ("", "."):
-        raise ValueError("DATABASE_STRING_CONNECTION for SQLITE must contain a database path")
+        raise ValueError(
+            "DATABASE_STRING_CONNECTION for SQLITE must contain a database path"
+        )
 
     if path_str == ":memory:" or path_str == "sqlite:///:memory:":
         return Path(":memory:")
 
     if path_str.startswith("sqlite:///"):
-        path_str = path_str[len("sqlite:///"):]
+        path_str = path_str[len("sqlite:///") :]
 
     if not path_str:
-        raise ValueError("DATABASE_STRING_CONNECTION for SQLITE must contain a database path")
+        raise ValueError(
+            "DATABASE_STRING_CONNECTION for SQLITE must contain a database path"
+        )
 
     project_root = Path(__file__).resolve().parents[1]
     db_path = Path(path_str)
