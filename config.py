@@ -1,8 +1,13 @@
 import os
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 from loguru import logger
+
+# Project root is the directory containing app.py and config.py.
+PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_SQLITE_DB = PROJECT_ROOT / "squidstats.db"
 
 # Try to load environment variables
 try:
@@ -90,10 +95,10 @@ class Config:
     WTF_CSRF_TIME_LIMIT = None  # CSRF tokens don't expire
 
     # Database settings
-    DATABASE_URL = safe_get_env("DATABASE_URL", "sqlite:///squidstats.db")
+    DATABASE_URL = safe_get_env("DATABASE_URL", f"sqlite:///{DEFAULT_SQLITE_DB}")
     DATABASE_TYPE = safe_get_env("DATABASE_TYPE", "SQLITE").upper()
     DATABASE_STRING_CONNECTION = safe_get_env(
-        "DATABASE_STRING_CONNECTION", "/opt/SquidStats/"
+        "DATABASE_STRING_CONNECTION", str(DEFAULT_SQLITE_DB)
     )
 
     # Squid settings
