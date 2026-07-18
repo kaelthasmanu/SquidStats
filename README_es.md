@@ -762,7 +762,7 @@ Para asegurar que la aplicación inicie automáticamente cuando el sistema arran
 
 Este software ha sido probado exhaustivamente y es compatible con Squid versión 6.12 en las siguientes distribuciones:
 
-- **Ubuntu**: 24.04 LTS
+- **Ubuntu**: 24.04 LTS y 26.04 LTS
 - **Debian**: 12 y 13
 - **Alpine Linux**: 3.23.3
 
