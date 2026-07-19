@@ -36,6 +36,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install git for workflow steps
+        run: |
+          dnf -y install git
+
       - name: Mark repository safe for git
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
