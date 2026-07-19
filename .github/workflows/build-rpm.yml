@@ -99,55 +99,55 @@ jobs:
       - name: Write RPM spec file
         run: |
           cat > rpmbuild/SPECS/squidstats.spec <<'EOF'
-            Name: squidstats
-            Version: ${{ steps.version.outputs.rpm_version }}
-            Release: 1%{?dist}
-            Summary: Web-based Squid proxy statistics and monitoring dashboard
-            License: MIT
-            URL: https://github.com/kaelthasmanu/SquidStats
-            Source0: %{name}-%{version}.tar.gz
-            BuildArch: x86_64
-            BuildRequires: python3, python3-pip, python3-virtualenv, python3-devel, openssl-devel, libffi-devel, libpq-devel, openldap-devel, gcc, make
-            Requires: python3, python3-virtualenv, python3-pip, adduser
-            Suggests: squid
-            %description
-            SquidStats is a Flask web application that provides real-time analysis and statistics for Squid proxy servers, including user monitoring, bandwidth tracking, access log analysis, and reporting.
+          Name: squidstats
+          Version: ${{ steps.version.outputs.rpm_version }}
+          Release: 1%{?dist}
+          Summary: Web-based Squid proxy statistics and monitoring dashboard
+          License: MIT
+          URL: https://github.com/kaelthasmanu/SquidStats
+          Source0: %{name}-%{version}.tar.gz
+          BuildArch: x86_64
+          BuildRequires: python3, python3-pip, python3-virtualenv, python3-devel, openssl-devel, libffi-devel, libpq-devel, openldap-devel, gcc, make
+          Requires: python3, python3-virtualenv, python3-pip, adduser
+          Suggests: squid
+          %description
+          SquidStats is a Flask web application that provides real-time analysis and statistics for Squid proxy servers, including user monitoring, bandwidth tracking, access log analysis, and reporting.
 
-            %package -n squidstats
-            Summary: Web-based Squid proxy statistics and monitoring dashboard
-            %description -n squidstats
-            SquidStats is a Flask web application that provides real-time analysis and statistics for Squid proxy servers, including user monitoring, bandwidth tracking, access log analysis, and reporting.
+          %package -n squidstats
+          Summary: Web-based Squid proxy statistics and monitoring dashboard
+          %description -n squidstats
+          SquidStats is a Flask web application that provides real-time analysis and statistics for Squid proxy servers, including user monitoring, bandwidth tracking, access log analysis, and reporting.
 
-            %prep
-            %setup -q
+          %prep
+          %setup -q
 
-            %build
-            # No build step.
+          %build
+          # No build step.
 
-            %install
-            rm -rf %{buildroot}
-            mkdir -p %{buildroot}/opt/SquidStats/app
-            mkdir -p %{buildroot}/opt/SquidStats
-            mkdir -p %{buildroot}/etc/squidstats
-            mkdir -p %{buildroot}/var/log/squidstats
-            mkdir -p %{buildroot}/var/lib/squidstats
-            cp -a app.py config.py manage_db.py alembic.ini babel.cfg requirements.txt %{buildroot}/opt/SquidStats/app/
-            cp -a database parsers routes services static templates tools translations utils %{buildroot}/opt/SquidStats/app/
-            cp -a example.env %{buildroot}/etc/squidstats/squidstats.env
-            install -D -m 0755 debian/squidstats.service %{buildroot}/usr/lib/systemd/system/squidstats.service
+          %install
+          rm -rf %{buildroot}
+          mkdir -p %{buildroot}/opt/SquidStats/app
+          mkdir -p %{buildroot}/opt/SquidStats
+          mkdir -p %{buildroot}/etc/squidstats
+          mkdir -p %{buildroot}/var/log/squidstats
+          mkdir -p %{buildroot}/var/lib/squidstats
+          cp -a app.py config.py manage_db.py alembic.ini babel.cfg requirements.txt %{buildroot}/opt/SquidStats/app/
+          cp -a database parsers routes services static templates tools translations utils %{buildroot}/opt/SquidStats/app/
+          cp -a example.env %{buildroot}/etc/squidstats/squidstats.env
+          install -D -m 0755 debian/squidstats.service %{buildroot}/usr/lib/systemd/system/squidstats.service
 
-            %files
-            %defattr(-,root,root,-)
-            /opt/SquidStats
-            /etc/squidstats/squidstats.env
-            /var/log/squidstats
-            /var/lib/squidstats
-            /usr/lib/systemd/system/squidstats.service
+          %files
+          %defattr(-,root,root,-)
+          /opt/SquidStats
+          /etc/squidstats/squidstats.env
+          /var/log/squidstats
+          /var/lib/squidstats
+          /usr/lib/systemd/system/squidstats.service
 
-            %changelog
-            * $(date +"%a %b %d %Y") Kaelthas <kaelthasmanu@users.noreply.github.com> - ${{ steps.version.outputs.rpm_version }}-1
-            - Built by GitHub Actions RPM workflow.
-          EOF
+          %changelog
+          * $(date +"%a %b %d %Y") Kaelthas <kaelthasmanu@users.noreply.github.com> - ${{ steps.version.outputs.rpm_version }}-1
+          - Built by GitHub Actions RPM workflow.
+        EOF
 
       - name: Build RPM package with rpmbuild
         run: |
