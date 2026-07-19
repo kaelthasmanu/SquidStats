@@ -1,0 +1,234 @@
+name: Build RPM Package
+
+on:
+  push: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version without "v" prefix (e.g. 2.5.1). Leave empty to derive from last tag.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-rpm:
+    name: Build RPM – ${{ matrix.distro }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.container }}
+      options: --user root
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: centos-stream-9
+            container: quay.io/centos/centos:stream9
+          - distro: fedora-40
+            container: registry.fedoraproject.org/fedora:40
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install git for workflow steps
+        run: |
+          dnf -y install git
+
+      - name: Mark repository safe for git
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Determine package version
+        id: version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXAMPLE_VERSION=$(grep -E '^\s*VERSION=' example.env | head -n1 | cut -d'=' -f2- | tr -d '"\r' | xargs || true)
+
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [ -n "$EXAMPLE_VERSION" ]; then
+            VERSION="$EXAMPLE_VERSION"
+          elif echo "${{ github.ref }}" | grep -q '^refs/tags/v'; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            LATEST_RELEASE_TAG=$(curl -sSfL \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" 2>/dev/null \
+              | grep -m1 '"tag_name"' \
+              | sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
+
+            if [ -n "$LATEST_RELEASE_TAG" ]; then
+              VERSION="${LATEST_RELEASE_TAG#v}"
+            else
+              LAST_TAG=$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo "v0.0.0")
+              SHORT_SHA=$(git rev-parse --short HEAD)
+              VERSION="${LAST_TAG#v}+git${SHORT_SHA}"
+            fi
+          fi
+
+          RPM_VERSION=$(printf '%s' "$VERSION" | sed -E 's/\+/git./g; s/[^A-Za-z0-9_.-]+/./g; s/^\.+//; s/\.+$//; s/\.{2,}/./g')
+          RPM_VERSION=${RPM_VERSION:-0.0.0}
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "rpm_version=${RPM_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Packaging version: ${VERSION} (RPM: ${RPM_VERSION})"
+
+      - name: Install build dependencies
+        run: |
+          dnf -y update
+          dnf -y install \
+            git ca-certificates \
+            rpm-build createrepo redhat-rpm-config \
+            python3 python3-pip python3-devel \
+            openssl-devel libffi-devel libpq-devel openldap-devel \
+            gcc make
+
+      - name: Create RPM build tree
+        run: |
+          mkdir -p rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          tar czf rpmbuild/SOURCES/squidstats-${{ steps.version.outputs.rpm_version }}.tar.gz \
+            --transform 's?^?squidstats-${{ steps.version.outputs.rpm_version }}/?' \
+            app.py config.py manage_db.py alembic.ini babel.cfg example.env requirements.txt \
+            debian/conffiles debian/control debian/rules debian/squidstats.service \
+            database parsers routes services static templates tools translations utils
+
+      - name: Write RPM spec file
+        run: |
+          CHANGELOG_DATE=$(LC_ALL=C date -u '+%a %b %d %Y')
+          cat > rpmbuild/SPECS/squidstats.spec <<'EOF'
+          Name: squidstats
+          Version: ${{ steps.version.outputs.rpm_version }}
+          Release: 1%{?dist}
+          %global debug_package %{nil}
+          Summary: Web-based Squid proxy statistics and monitoring dashboard
+          License: MIT
+          URL: https://github.com/kaelthasmanu/SquidStats
+          Source0: %{name}-%{version}.tar.gz
+          BuildArch: x86_64
+          BuildRequires: python3, python3-pip, python3-devel, openssl-devel, libffi-devel, libpq-devel, openldap-devel, gcc, make
+          Requires: python3, python3-pip, shadow-utils
+          Suggests: squid
+          %description
+          SquidStats is a Flask web application that provides real-time analysis and statistics for Squid proxy servers, including user monitoring, bandwidth tracking, access log analysis, and reporting.
+
+          %prep
+          %setup -q
+
+          %build
+          # No build step.
+
+          %install
+          rm -rf %{buildroot}
+          mkdir -p %{buildroot}/opt/SquidStats/app
+          mkdir -p %{buildroot}/opt/SquidStats
+          mkdir -p %{buildroot}/etc/squidstats
+          mkdir -p %{buildroot}/var/log/squidstats
+          mkdir -p %{buildroot}/var/lib/squidstats
+          cp -a app.py config.py manage_db.py alembic.ini babel.cfg requirements.txt %{buildroot}/opt/SquidStats/app/
+          cp -a database parsers routes services static templates tools translations utils %{buildroot}/opt/SquidStats/app/
+          cp -a example.env %{buildroot}/etc/squidstats/squidstats.env
+          install -D -m 0644 debian/squidstats.service %{buildroot}/usr/lib/systemd/system/squidstats.service
+
+          %files
+          %defattr(-,root,root,-)
+          /opt/SquidStats
+          /etc/squidstats/squidstats.env
+          /var/log/squidstats
+          /var/lib/squidstats
+          /usr/lib/systemd/system/squidstats.service
+
+          %changelog
+          * CHANGELOG_DATE Kaelthas <kaelthasmanu@users.noreply.github.com> - ${{ steps.version.outputs.rpm_version }}-1
+          - Built by GitHub Actions RPM workflow.
+          EOF
+          sed -i "s/CHANGELOG_DATE/${CHANGELOG_DATE}/" rpmbuild/SPECS/squidstats.spec
+          grep -E '^(Name|Version|Release|Source0):|^\* ' rpmbuild/SPECS/squidstats.spec
+
+      - name: Build RPM package with rpmbuild
+        run: |
+          set -e
+          SOURCE_ARCHIVE="rpmbuild/SOURCES/squidstats-${{ steps.version.outputs.rpm_version }}.tar.gz"
+          test -s "$SOURCE_ARCHIVE"
+          tar -tzf "$SOURCE_ARCHIVE" | grep -Fx "squidstats-${{ steps.version.outputs.rpm_version }}/example.env"
+          rpmbuild --define "_topdir $PWD/rpmbuild" -ba rpmbuild/SPECS/squidstats.spec 2>&1 | tee build.log
+          mkdir -p dist
+          shopt -s nullglob
+          RPM_FILES=(rpmbuild/RPMS/*/*.rpm rpmbuild/SRPMS/*.src.rpm)
+          if [ ${#RPM_FILES[@]} -eq 0 ]; then
+            echo "No RPM files were built. Listing rpmbuild output:"
+            find rpmbuild -type f | sort
+            exit 1
+          fi
+          cp "${RPM_FILES[@]}" dist/
+          ls -lh dist
+          for RPM in "${RPM_FILES[@]}"; do
+            rpm -qip "$RPM"
+            case "$RPM" in
+              *.src.rpm) ;;
+              *) rpm -qpl "$RPM" | grep -Fx '/etc/squidstats/squidstats.env' ;;
+            esac
+          done
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p dist
+          ls -lh dist
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: squidstats-${{ steps.version.outputs.rpm_version }}-${{ matrix.distro }}
+          path: dist/*.rpm
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Install GitHub CLI
+        if: github.event_name != 'pull_request'
+        run: |
+          dnf -y install dnf-plugins-core 'dnf-command(config-manager)'
+          dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+          dnf -y install gh
+
+      - name: Upload RPM to existing GitHub Release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          REPO="${GITHUB_REPOSITORY}"
+
+          if echo "${GITHUB_REF}" | grep -q '^refs/tags/v'; then
+            RELEASE_ID=$(gh api repos/$REPO/releases/tags/${GITHUB_REF_NAME} --jq '.id' 2>/dev/null || true)
+            TAG_NAME="${GITHUB_REF_NAME}"
+          else
+            RELEASE_ID=$(gh api repos/$REPO/releases/latest --jq '.id' 2>/dev/null || true)
+            TAG_NAME=$(gh api repos/$REPO/releases/latest --jq '.tag_name' 2>/dev/null || true)
+          fi
+
+          if [ -z "$RELEASE_ID" ]; then
+            echo "Failed to detect the existing release for $REPO." >&2
+            exit 1
+          fi
+
+          shopt -s nullglob
+          RPM_FILES=(dist/*.rpm)
+          if [ ${#RPM_FILES[@]} -eq 0 ]; then
+            echo "No RPM artifacts found in dist; skipping GitHub Release upload."
+            exit 0
+          fi
+
+          for RPM in "${RPM_FILES[@]}"; do
+            ASSET_NAME=$(basename "$RPM")
+            EXISTING_ASSET_ID=$(gh api repos/$REPO/releases/$RELEASE_ID/assets --jq ".[] | select(.name==\"$ASSET_NAME\") | .id" 2>/dev/null || true)
+            if [ -n "$EXISTING_ASSET_ID" ]; then
+              gh api repos/$REPO/releases/assets/$EXISTING_ASSET_ID -X DELETE
+            fi
+            gh release upload --repo "$REPO" --clobber "$TAG_NAME" "$RPM"
+          done
