@@ -117,11 +117,6 @@ jobs:
           %description
           SquidStats is a Flask web application that provides real-time analysis and statistics for Squid proxy servers, including user monitoring, bandwidth tracking, access log analysis, and reporting.
 
-          %package -n squidstats
-          Summary: Web-based Squid proxy statistics and monitoring dashboard
-          %description -n squidstats
-          SquidStats is a Flask web application that provides real-time analysis and statistics for Squid proxy servers, including user monitoring, bandwidth tracking, access log analysis, and reporting.
-
           %prep
           %setup -q
 
