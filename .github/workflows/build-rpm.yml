@@ -155,11 +155,18 @@ jobs:
 
       - name: Build RPM package with rpmbuild
         run: |
+          set -e
           rpmbuild --define "_topdir $PWD/rpmbuild" -ba rpmbuild/SPECS/squidstats.spec 2>&1 | tee build.log
           mkdir -p dist
-          cp rpmbuild/RPMS/x86_64/*.rpm dist/ || true
-          cp rpmbuild/SRPMS/*.src.rpm dist/ || true
-          ls -lh dist || true
+          shopt -s nullglob
+          RPM_FILES=(rpmbuild/RPMS/*/*.rpm rpmbuild/SRPMS/*.src.rpm)
+          if [ ${#RPM_FILES[@]} -eq 0 ]; then
+            echo "No RPM files were built. Listing rpmbuild output:"
+            find rpmbuild -type f | sort
+            exit 1
+          fi
+          cp "${RPM_FILES[@]}" dist/
+          ls -lh dist
 
       - name: Collect artifacts
         run: |
@@ -172,10 +179,11 @@ jobs:
           name: squidstats-${{ steps.version.outputs.rpm_version }}-${{ matrix.distro }}
           path: dist/*.rpm
           retention-days: 30
+          if-no-files-found: ignore
 
       - name: Install GitHub CLI
         run: |
-          dnf -y install 'dnf-command(config-manager)'
+          dnf -y install dnf-plugins-core 'dnf-command(config-manager)'
           dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo || true
           dnf -y install gh || true
 
@@ -199,7 +207,14 @@ jobs:
             exit 1
           fi
 
-          for RPM in dist/*.rpm; do
+          shopt -s nullglob
+          RPM_FILES=(dist/*.rpm)
+          if [ ${#RPM_FILES[@]} -eq 0 ]; then
+            echo "No RPM artifacts found in dist; skipping GitHub Release upload."
+            exit 0
+          fi
+
+          for RPM in "${RPM_FILES[@]}"; do
             ASSET_NAME=$(basename "$RPM")
             EXISTING_ASSET_ID=$(gh api repos/$REPO/releases/$RELEASE_ID/assets --jq ".[] | select(.name==\"$ASSET_NAME\") | .id" 2>/dev/null || true)
             if [ -n "$EXISTING_ASSET_ID" ]; then
