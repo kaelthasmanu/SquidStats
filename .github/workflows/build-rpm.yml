@@ -107,6 +107,7 @@ jobs:
           Name: squidstats
           Version: ${{ steps.version.outputs.rpm_version }}
           Release: 1%{?dist}
+          %global debug_package %{nil}
           Summary: Web-based Squid proxy statistics and monitoring dashboard
           License: MIT
           URL: https://github.com/kaelthasmanu/SquidStats
@@ -134,7 +135,7 @@ jobs:
           cp -a app.py config.py manage_db.py alembic.ini babel.cfg requirements.txt %{buildroot}/opt/SquidStats/app/
           cp -a database parsers routes services static templates tools translations utils %{buildroot}/opt/SquidStats/app/
           cp -a example.env %{buildroot}/etc/squidstats/squidstats.env
-          install -D -m 0755 debian/squidstats.service %{buildroot}/usr/lib/systemd/system/squidstats.service
+          install -D -m 0644 debian/squidstats.service %{buildroot}/usr/lib/systemd/system/squidstats.service
 
           %files
           %defattr(-,root,root,-)
