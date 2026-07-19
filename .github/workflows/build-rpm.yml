@@ -230,5 +230,5 @@ jobs:
             if [ -n "$EXISTING_ASSET_ID" ]; then
               gh api repos/$REPO/releases/assets/$EXISTING_ASSET_ID -X DELETE
             fi
-            gh release upload --clobber "$TAG_NAME" "$RPM"
+            gh release upload --repo "$REPO" --clobber "$TAG_NAME" "$RPM"
           done
