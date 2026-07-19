@@ -2,6 +2,7 @@ name: Build RPM Package
 
 on:
   push: {}
+  pull_request: {}
   workflow_dispatch:
     inputs:
       version:
@@ -40,15 +41,6 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Determine package version
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Mark repository safe for git
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Determine package version
         id: version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,16 +70,19 @@ jobs:
             fi
           fi
 
+          RPM_VERSION=$(printf '%s' "$VERSION" | sed -E 's/\+/git./g; s/[^A-Za-z0-9_.-]+/./g; s/^\.+//; s/\.+$//; s/\.{2,}/./g')
+          RPM_VERSION=${RPM_VERSION:-0.0.0}
+
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "rpm_version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Packaging version: ${VERSION}"
+          echo "rpm_version=${RPM_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Packaging version: ${VERSION} (RPM: ${RPM_VERSION})"
 
       - name: Install build dependencies
         run: |
           dnf -y update
           dnf -y install \
             git ca-certificates curl \
-            rpm-build createrepo \
+            rpm-build createrepo redhat-rpm-config \
             python3 python3-pip python3-virtualenv python3-devel \
             openssl-devel libffi-devel libpq-devel openldap-devel \
             gcc make
@@ -176,8 +171,9 @@ EOF
 
       - name: Install GitHub CLI
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends gh
+          dnf -y install 'dnf-command(config-manager)'
+          dnf config-manager --set-enabled crb || true
+          dnf -y install gh || true
 
       - name: Upload RPM to existing GitHub Release
         env:
