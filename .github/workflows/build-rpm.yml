@@ -96,12 +96,13 @@ jobs:
           mkdir -p rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
           tar czf rpmbuild/SOURCES/squidstats-${{ steps.version.outputs.rpm_version }}.tar.gz \
             --transform 's?^?squidstats-${{ steps.version.outputs.rpm_version }}/?' \
-            app.py config.py manage_db.py alembic.ini babel.cfg requirements.txt \
+            app.py config.py manage_db.py alembic.ini babel.cfg example.env requirements.txt \
             debian/conffiles debian/control debian/rules debian/squidstats.service \
             database parsers routes services static templates tools translations utils
 
       - name: Write RPM spec file
         run: |
+          CHANGELOG_DATE=$(LC_ALL=C date -u '+%a %b %d %Y')
           cat > rpmbuild/SPECS/squidstats.spec <<'EOF'
           Name: squidstats
           Version: ${{ steps.version.outputs.rpm_version }}
@@ -112,7 +113,7 @@ jobs:
           Source0: %{name}-%{version}.tar.gz
           BuildArch: x86_64
           BuildRequires: python3, python3-pip, python3-devel, openssl-devel, libffi-devel, libpq-devel, openldap-devel, gcc, make
-          Requires: python3, python3-pip, adduser
+          Requires: python3, python3-pip, shadow-utils
           Suggests: squid
           %description
           SquidStats is a Flask web application that provides real-time analysis and statistics for Squid proxy servers, including user monitoring, bandwidth tracking, access log analysis, and reporting.
@@ -144,13 +145,18 @@ jobs:
           /usr/lib/systemd/system/squidstats.service
 
           %changelog
-          * $(date +"%a %b %d %Y") Kaelthas <kaelthasmanu@users.noreply.github.com> - ${{ steps.version.outputs.rpm_version }}-1
+          * CHANGELOG_DATE Kaelthas <kaelthasmanu@users.noreply.github.com> - ${{ steps.version.outputs.rpm_version }}-1
           - Built by GitHub Actions RPM workflow.
           EOF
+          sed -i "s/CHANGELOG_DATE/${CHANGELOG_DATE}/" rpmbuild/SPECS/squidstats.spec
+          grep -E '^(Name|Version|Release|Source0):|^\* ' rpmbuild/SPECS/squidstats.spec
 
       - name: Build RPM package with rpmbuild
         run: |
           set -e
+          SOURCE_ARCHIVE="rpmbuild/SOURCES/squidstats-${{ steps.version.outputs.rpm_version }}.tar.gz"
+          test -s "$SOURCE_ARCHIVE"
+          tar -tzf "$SOURCE_ARCHIVE" | grep -Fx "squidstats-${{ steps.version.outputs.rpm_version }}/example.env"
           rpmbuild --define "_topdir $PWD/rpmbuild" -ba rpmbuild/SPECS/squidstats.spec 2>&1 | tee build.log
           mkdir -p dist
           shopt -s nullglob
@@ -162,6 +168,13 @@ jobs:
           fi
           cp "${RPM_FILES[@]}" dist/
           ls -lh dist
+          for RPM in "${RPM_FILES[@]}"; do
+            rpm -qip "$RPM"
+            case "$RPM" in
+              *.src.rpm) ;;
+              *) rpm -qpl "$RPM" | grep -Fx '/etc/squidstats/squidstats.env' ;;
+            esac
+          done
 
       - name: Collect artifacts
         run: |
@@ -177,12 +190,14 @@ jobs:
           if-no-files-found: ignore
 
       - name: Install GitHub CLI
+        if: github.event_name != 'pull_request'
         run: |
           dnf -y install dnf-plugins-core 'dnf-command(config-manager)'
-          dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo || true
-          dnf -y install gh || true
+          dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+          dnf -y install gh
 
       - name: Upload RPM to existing GitHub Release
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
