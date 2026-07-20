@@ -53,7 +53,6 @@ jobs:
         run: |
           pip-compile \
             --upgrade \
-            --generate-hashes \
             --output-file requirements.txt \
             requirements.in
 
