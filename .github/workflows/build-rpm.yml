@@ -160,9 +160,10 @@ jobs:
           rpmbuild --define "_topdir $PWD/rpmbuild" -ba rpmbuild/SPECS/squidstats.spec 2>&1 | tee build.log
           mkdir -p dist
           shopt -s nullglob
-          RPM_FILES=(rpmbuild/RPMS/*/*.rpm rpmbuild/SRPMS/*.src.rpm)
+          # SOLO COPIAR ARCHIVOS BINARIOS .rpm, EXCLUIR .src.rpm
+          RPM_FILES=(rpmbuild/RPMS/*/*.rpm)
           if [ ${#RPM_FILES[@]} -eq 0 ]; then
-            echo "No RPM files were built. Listing rpmbuild output:"
+            echo "No RPM binary files were built. Listing rpmbuild output:"
             find rpmbuild -type f | sort
             exit 1
           fi
@@ -170,10 +171,7 @@ jobs:
           ls -lh dist
           for RPM in "${RPM_FILES[@]}"; do
             rpm -qip "$RPM"
-            case "$RPM" in
-              *.src.rpm) ;;
-              *) rpm -qpl "$RPM" | grep -Fx '/etc/squidstats/squidstats.env' ;;
-            esac
+            rpm -qpl "$RPM" | grep -Fx '/etc/squidstats/squidstats.env'
           done
 
       - name: Collect artifacts
