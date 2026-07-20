@@ -85,7 +85,7 @@ jobs:
           sys.path.insert(0, os.getcwd())
 
           try:
-              from app import app
+              from app import create_app
               from database.database import get_engine, create_dynamic_tables
               print("✅ Core imports OK")
           except Exception as e:
