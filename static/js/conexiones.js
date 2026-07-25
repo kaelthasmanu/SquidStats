@@ -12,7 +12,7 @@ function _getCsrf() {
 
 // ── Modal helpers ────────────────────────────────────────────
 function closeAllModals() {
-  ['modal-block', 'modal-unblock', 'modal-throttle', 'modal-unthrottle'].forEach(function(id) {
+  ['modal-block', 'modal-unblock', 'modal-throttle', 'modal-unthrottle', 'modal-reset'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.add('hidden');
   });
@@ -171,6 +171,7 @@ document.addEventListener('click', function(e) {
     if (action === 'unblock')     { _openModal('modal-unblock',     'modal-unblock-subtitle',     user, ip); }
     if (action === 'throttle')    { _openModal('modal-throttle',    'modal-throttle-subtitle',    user, ip); loadDelayPools(); }
     if (action === 'unthrottle')  { _openModal('modal-unthrottle',  'modal-unthrottle-subtitle',  user, ip); }
+    if (action === 'reset')       { _openModal('modal-reset',       'modal-reset-subtitle',       user, ip); }
     return;
   }
 
@@ -188,6 +189,7 @@ document.addEventListener('click', function(e) {
     if (type === 'block')      { _apiAction('/api/connections/block',      { username: _actionUsername, ip: _actionIp }); }
     if (type === 'unblock')    { _apiAction('/api/connections/unblock',    { username: _actionUsername, ip: _actionIp }); }
     if (type === 'unthrottle') { _apiAction('/api/connections/unthrottle', { username: _actionUsername, ip: _actionIp }); }
+    if (type === 'reset')      { _apiAction('/api/connections/reset',      { ip: _actionIp }); }
     if (type === 'throttle') {
       var sel = document.getElementById('throttle-pool-select');
       var poolNum = sel ? parseInt(sel.value) : NaN;
@@ -198,7 +200,7 @@ document.addEventListener('click', function(e) {
   }
 
   // 6. Modal backdrop click
-  var modalIds = ['modal-block', 'modal-unblock', 'modal-throttle', 'modal-unthrottle'];
+  var modalIds = ['modal-block', 'modal-unblock', 'modal-throttle', 'modal-unthrottle', 'modal-reset'];
   if (modalIds.includes(target.id)) {
     closeAllModals();
     return;
