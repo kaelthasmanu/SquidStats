@@ -413,7 +413,7 @@ def run_backup(is_auto: bool = False) -> dict:
     try:
         bdir = _backup_dir(cfg)
     except OSError as e:
-        return {"status": "error", "message": str(e)}
+        return {"status": "error", "message": _("Error al acceder al directorio de salvas")}
     tag = "auto" if is_auto else "manual"
 
     if is_auto:
@@ -435,11 +435,11 @@ def run_backup(is_auto: bool = False) -> dict:
             dest = _postgresql_backup(bdir, tag)
         else:
             return {"status": "error", "message": f"Motor de BD desconocido: {db_type}"}
-    except NotImplementedError as e:
-        return {"status": "error", "message": str(e)}
+    except NotImplementedError:
+        return {"status": "error", "message": _("Funcionalidad de salva no implementada")}
     except Exception as e:
         logger.exception("Backup failed")
-        return {"status": "error", "message": f"Error al crear salva: {e}"}
+        return {"status": "error", "message": _("Error al crear la salva")}
 
     _enforce_retention(bdir)
 
@@ -456,7 +456,7 @@ def delete_backup(filename: str) -> dict:
     try:
         bdir = _backup_dir(cfg)
     except OSError as e:
-        return {"status": "error", "message": str(e)}
+        return {"status": "error", "message": _("Error al acceder al directorio de salvas")}
 
     target = _get_safe_backup_path(bdir, filename)
     if target is None:

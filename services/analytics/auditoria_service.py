@@ -1163,7 +1163,7 @@ def run_audit_operation(db, audit_type, data):
             return result
         return result
     except ValueError as e:
-        return {"error": str(e)}
+        return {"error": _("Valor inválido")}
     except Exception:
         import traceback
 

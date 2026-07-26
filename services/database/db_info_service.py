@@ -89,7 +89,7 @@ def get_db_health():
                     )
             except Exception as qc_err:
                 corruption = True
-                corruption_detail = str(qc_err)
+                corruption_detail = _("No se pudo completar la verificación de integridad")
 
             health["extra"] = {
                 "page_size": page_size,
