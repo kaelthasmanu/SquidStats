@@ -687,7 +687,9 @@ def delete_table_data():
 
     except Exception:
         logger.exception("Error deleting data from table")
-        return jsonify({"status": "error", "message": _("Error interno del servidor")}), 500
+        return jsonify(
+            {"status": "error", "message": _("Error interno del servidor")}
+        ), 500
 
 
 @admin_bp.route("/config/split")
@@ -761,7 +763,12 @@ def split_config():
 
     except Exception:
         logger.exception("Error al dividir el archivo de configuración")
-        return jsonify({"status": "error", "message": _("Error interno al dividir la configuración")}), 500
+        return jsonify(
+            {
+                "status": "error",
+                "message": _("Error interno al dividir la configuración"),
+            }
+        ), 500
 
 
 @admin_bp.route("/api/get-split-files", methods=["GET"])
@@ -1229,4 +1236,9 @@ def blocklist_toggle():
         return jsonify({"status": "error", "message": msg}), 400
     except Exception:
         logger.exception("Error en toggle de blocklist")
-        return jsonify({"status": "error", "message": _("Error interno al cambiar estado de blocklist")}), 500
+        return jsonify(
+            {
+                "status": "error",
+                "message": _("Error interno al cambiar estado de blocklist"),
+            }
+        ), 500
