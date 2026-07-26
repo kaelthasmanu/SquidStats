@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, jsonify, request
 from flask_babel import gettext as _
 from loguru import logger
 from werkzeug.exceptions import BadRequest
