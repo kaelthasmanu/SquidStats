@@ -161,13 +161,12 @@ def _get_safe_backup_path(backup_dir: Path, filename: str) -> Path | None:
     if normalized is None:
         return None
 
-    target = (backup_dir / normalized).resolve()
-    try:
-        target.relative_to(backup_dir.resolve())
-    except ValueError:
+    safe_root = os.path.realpath(backup_dir)
+    fullpath = os.path.realpath(os.path.join(backup_dir, str(normalized)))
+    if not fullpath.startswith(safe_root + os.sep) and fullpath != safe_root:
         return None
 
-    return target
+    return Path(fullpath)
 
 
 def _human_size(size_bytes: int) -> str:
