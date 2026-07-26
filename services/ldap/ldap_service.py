@@ -60,7 +60,10 @@ def test_connection(cfg: dict) -> dict:
         return {"status": "error", "message": _("Error de autenticación LDAP")}
     except Exception:
         logger.exception("Error de conexión LDAP")
-        return {"status": "error", "message": _("Error al conectar con el servidor LDAP")}
+        return {
+            "status": "error",
+            "message": _("Error al conectar con el servidor LDAP"),
+        }
 
 
 def _paged_count(cfg: dict, object_class: str) -> int:
@@ -91,7 +94,12 @@ def get_stats(cfg: dict) -> dict:
         return {"status": "success", "users": user_count, "groups": group_count}
     except Exception as exc:
         logger.error(f"Error al obtener estadísticas LDAP: {exc}")
-        return {"status": "error", "message": _("Error al obtener estadísticas LDAP"), "users": 0, "groups": 0}
+        return {
+            "status": "error",
+            "message": _("Error al obtener estadísticas LDAP"),
+            "users": 0,
+            "groups": 0,
+        }
 
 
 def _escape_ldap_filter_value(value: str) -> str:
@@ -139,7 +147,12 @@ def search_users(cfg: dict, query: str, limit: int = 50) -> dict:
         return {"status": "success", "results": users, "total": len(users)}
     except Exception as exc:
         logger.error(f"Error al buscar usuarios LDAP: {exc}")
-        return {"status": "error", "message": _("Error al buscar usuarios LDAP"), "results": [], "total": 0}
+        return {
+            "status": "error",
+            "message": _("Error al buscar usuarios LDAP"),
+            "results": [],
+            "total": 0,
+        }
 
 
 def search_groups(cfg: dict, query: str, limit: int = 50) -> dict:
@@ -176,7 +189,12 @@ def search_groups(cfg: dict, query: str, limit: int = 50) -> dict:
         return {"status": "success", "results": groups, "total": len(groups)}
     except Exception as exc:
         logger.error(f"Error al buscar grupos LDAP: {exc}")
-        return {"status": "error", "message": _("Error al buscar grupos LDAP"), "results": [], "total": 0}
+        return {
+            "status": "error",
+            "message": _("Error al buscar grupos LDAP"),
+            "results": [],
+            "total": 0,
+        }
 
 
 def get_user_groups(cfg: dict, username: str) -> dict:
@@ -221,7 +239,12 @@ def get_user_groups(cfg: dict, username: str) -> dict:
         }
     except Exception as exc:
         logger.error(f"Error al obtener grupos del usuario LDAP: {exc}")
-        return {"status": "error", "message": _("Error al obtener grupos del usuario"), "groups": [], "user": None}
+        return {
+            "status": "error",
+            "message": _("Error al obtener grupos del usuario"),
+            "groups": [],
+            "user": None,
+        }
 
 
 # ---------------------------------------------------------------------------
