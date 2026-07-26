@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, jsonify, request
 from flask_babel import gettext as _
 from loguru import logger
 from werkzeug.exceptions import BadRequest
@@ -76,17 +76,9 @@ def api_get_all_users():
     try:
         users = get_all_usernames(db)
         return jsonify(users)
-    except Exception as e:
+    except Exception:
         logger.exception("Error retrieving all users")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-
-        resp = {"error": _("Internal server error")}
-        if show_details:
-            resp["details"] = str(e)
-        return jsonify(resp), 500
+        return jsonify({"error": _("Internal server error")}), 500
     finally:
         db.close()
 
@@ -143,16 +135,9 @@ def api_mark_notifications_read():
         return jsonify(
             {"success": True, "unread_count": get_all_notifications()["unread_count"]}
         )
-    except Exception as e:
+    except Exception:
         logger.exception("Error marking notifications as read")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-        resp = {"success": False, "error": _("Internal server error")}
-        if show_details:
-            resp["details"] = str(e)
-        return jsonify(resp), 500
+        return jsonify({"success": False, "error": _("Internal server error")}), 500
 
 
 @api_bp.route("/notifications/<int:notification_id>", methods=["DELETE"])
@@ -163,9 +148,9 @@ def api_delete_notification(notification_id):
             "Notification deleted",
             extra={"unread_count": get_all_notifications()["unread_count"]},
         )
-    except Exception as e:
+    except Exception:
         logger.exception("Error deleting notification")
-        return json_error("Internal server error", 500, details=str(e))
+        return json_error("Internal server error", 500)
 
 
 @api_bp.route("/notifications/delete-all", methods=["DELETE"])
@@ -173,34 +158,32 @@ def api_delete_all_notifications():
     try:
         delete_all_notifications()
         return json_success("All notifications deleted", extra={"unread_count": 0})
-    except Exception as e:
+    except Exception:
         logger.exception("Error deleting all notifications")
-        return json_error("Internal server error", 500, details=str(e))
+        return json_error("Internal server error", 500)
 
 
 @api_bp.route("/restart-squid", methods=["POST"])
 @api_admin_required
 def api_restart_squid():
-    success, message, details = restart_squid()
+    success, message, _details = restart_squid()
     if success:
         return json_success(message)
     return json_error(
         message or "Could not restart squid",
         500,
-        details=str(details) if details else None,
     )
 
 
 @api_bp.route("/reload-squid", methods=["POST"])
 @api_admin_required
 def api_reload_squid():
-    success, message, details = reload_squid()
+    success, message, _details = reload_squid()
     if success:
         return json_success(message)
     return json_error(
         message or "Could not reload squid",
         500,
-        details=str(details) if details else None,
     )
 
 

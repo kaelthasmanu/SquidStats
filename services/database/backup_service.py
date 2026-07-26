@@ -161,13 +161,12 @@ def _get_safe_backup_path(backup_dir: Path, filename: str) -> Path | None:
     if normalized is None:
         return None
 
-    target = (backup_dir / normalized).resolve()
-    try:
-        target.relative_to(backup_dir.resolve())
-    except ValueError:
+    safe_root = os.path.realpath(backup_dir)
+    fullpath = os.path.realpath(os.path.join(backup_dir, str(normalized)))
+    if not fullpath.startswith(safe_root + os.sep) and fullpath != safe_root:
         return None
 
-    return target
+    return Path(fullpath)
 
 
 def _human_size(size_bytes: int) -> str:
@@ -413,8 +412,11 @@ def run_backup(is_auto: bool = False) -> dict:
     frequency = cfg.get("frequency", "daily_weekly")
     try:
         bdir = _backup_dir(cfg)
-    except OSError as e:
-        return {"status": "error", "message": str(e)}
+    except OSError:
+        return {
+            "status": "error",
+            "message": _("Error al acceder al directorio de salvas"),
+        }
     tag = "auto" if is_auto else "manual"
 
     if is_auto:
@@ -436,11 +438,14 @@ def run_backup(is_auto: bool = False) -> dict:
             dest = _postgresql_backup(bdir, tag)
         else:
             return {"status": "error", "message": f"Motor de BD desconocido: {db_type}"}
-    except NotImplementedError as e:
-        return {"status": "error", "message": str(e)}
-    except Exception as e:
+    except NotImplementedError:
+        return {
+            "status": "error",
+            "message": _("Funcionalidad de salva no implementada"),
+        }
+    except Exception:
         logger.exception("Backup failed")
-        return {"status": "error", "message": f"Error al crear salva: {e}"}
+        return {"status": "error", "message": _("Error al crear la salva")}
 
     _enforce_retention(bdir)
 
@@ -456,8 +461,11 @@ def delete_backup(filename: str) -> dict:
     cfg = load_config()
     try:
         bdir = _backup_dir(cfg)
-    except OSError as e:
-        return {"status": "error", "message": str(e)}
+    except OSError:
+        return {
+            "status": "error",
+            "message": _("Error al acceder al directorio de salvas"),
+        }
 
     target = _get_safe_backup_path(bdir, filename)
     if target is None:
