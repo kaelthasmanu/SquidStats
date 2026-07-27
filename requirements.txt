@@ -20,7 +20,7 @@ blinker==1.9.0
     #   flask-socketio
 brotli==1.2.0
     # via fonttools
-certifi==2026.6.17
+certifi==2026.7.22
     # via requests
 cffi==2.1.0
     # via
@@ -120,7 +120,7 @@ python-engineio==4.13.3
     # via python-socketio
 python-socketio==5.16.3
     # via flask-socketio
-pytz==2026.2
+pytz==2026.3.post1
     # via
     #   -r requirements.in
     #   flask-babel
