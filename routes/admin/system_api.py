@@ -92,6 +92,6 @@ def register_routes(bp):
             resp, code = service_delete_table_data(table_name)
             return jsonify(resp), code
 
-        except Exception as e:
+        except Exception:
             logger.exception("Error deleting data from table")
-            return json_error("Error interno del servidor", 500, details=str(e))
+            return json_error("Error interno del servidor", 500)

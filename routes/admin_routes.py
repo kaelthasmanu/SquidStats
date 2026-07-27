@@ -617,26 +617,24 @@ def delete_user(user_id):
 @admin_bp.route("/api/restart-squid", methods=["POST"])
 @api_auth_required
 def restart_squid():
-    success, message, details = service_restart_squid()
+    success, message, _details = service_restart_squid()
     if success:
         return json_success(message)
     return json_error(
         message or "Could not restart squid",
         500,
-        details=str(details) if details else None,
     )
 
 
 @admin_bp.route("/api/reload-squid", methods=["POST"])
 @api_auth_required
 def reload_squid():
-    success, message, details = service_reload_squid()
+    success, message, _details = service_reload_squid()
     if success:
         return json_success(message)
     return json_error(
         message or "Could not reload squid",
         500,
-        details=str(details) if details else None,
     )
 
 
@@ -687,17 +685,11 @@ def delete_table_data():
         resp, code = service_delete_table_data(table_name)
         return jsonify(resp), code
 
-    except Exception as e:
+    except Exception:
         logger.exception("Error deleting data from table")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-
-        resp = {"status": "error", "message": _("Error interno del servidor")}
-        if show_details:
-            resp["details"] = str(e)
-        return jsonify(resp), 500
+        return jsonify(
+            {"status": "error", "message": _("Error interno del servidor")}
+        ), 500
 
 
 @admin_bp.route("/config/split")
@@ -714,16 +706,9 @@ def split_config_view():
             output_exists=data["output_exists"],
             files_count=data["files_count"],
         )
-    except Exception as e:
+    except Exception:
         logger.exception("Error al cargar la vista de división de configuración")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-        if show_details:
-            flash(_("Error al cargar la vista: %(error)s") % {"error": str(e)}, "error")
-        else:
-            flash(_("Error al cargar la vista"), "error")
+        flash(_("Error al cargar la vista"), "error")
         return redirect(url_for("admin.admin_dashboard"))
 
 
@@ -776,20 +761,14 @@ def split_config():
             }
         ), 400
 
-    except Exception as e:
+    except Exception:
         logger.exception("Error al dividir el archivo de configuración")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-
-        resp = {
-            "status": "error",
-            "message": _("Error interno al dividir la configuración"),
-        }
-        if show_details:
-            resp["details"] = str(e)
-        return jsonify(resp), 500
+        return jsonify(
+            {
+                "status": "error",
+                "message": _("Error interno al dividir la configuración"),
+            }
+        ), 500
 
 
 @admin_bp.route("/api/get-split-files", methods=["GET"])
@@ -1255,16 +1234,11 @@ def blocklist_toggle():
         if ok:
             return jsonify({"status": "success", "message": msg})
         return jsonify({"status": "error", "message": msg}), 400
-    except Exception as e:
+    except Exception:
         logger.exception("Error en toggle de blocklist")
-        try:
-            show_details = bool(current_app.debug)
-        except RuntimeError:
-            show_details = False
-        resp = {
-            "status": "error",
-            "message": _("Error interno al cambiar estado de blocklist"),
-        }
-        if show_details:
-            resp["details"] = str(e)
-        return jsonify(resp), 500
+        return jsonify(
+            {
+                "status": "error",
+                "message": _("Error interno al cambiar estado de blocklist"),
+            }
+        ), 500

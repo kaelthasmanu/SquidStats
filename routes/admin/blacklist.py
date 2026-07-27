@@ -248,7 +248,7 @@ def register_routes(bp):
             session.rollback()
             logger.exception("Error eliminando usuario bloqueado")
             if data:
-                return json_error(_("Error al eliminar usuario bloqueado"), 500, str(e))
+                return json_error(_("Error al eliminar usuario bloqueado"), 500)
             flash_error_with_details(_("Error al eliminar usuario bloqueado"), e)
         finally:
             session.close()
@@ -280,10 +280,9 @@ def register_routes(bp):
             if ok:
                 return json_success(msg)
             return json_error(msg)
-        except Exception as e:
+        except Exception:
             logger.exception("Error en toggle de blocklist")
             return json_error(
                 "Error interno al cambiar estado de blocklist",
                 500,
-                details=str(e),
             )

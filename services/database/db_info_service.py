@@ -87,9 +87,11 @@ def get_db_health():
                     corruption_detail = (
                         qc_rows[0][0] if qc_rows else "Sin respuesta del PRAGMA"
                     )
-            except Exception as qc_err:
+            except Exception:
                 corruption = True
-                corruption_detail = str(qc_err)
+                corruption_detail = _(
+                    "No se pudo completar la verificación de integridad"
+                )
 
             health["extra"] = {
                 "page_size": page_size,

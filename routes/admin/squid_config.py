@@ -114,14 +114,13 @@ def register_routes(bp):
 
         try:
             save_squid_env_vars_to_db(squid_env_vars)
-        except Exception as e:
+        except Exception:
             logger.exception("Error saving Squid env vars to DB")
             flash(
                 _(
-                    "Las variables de Squid se guardaron en .env, pero no se pudieron guardar en la base de datos: %(error)s"
-                )
-                % {"error": str(e)},
-                "error",
+                    "Las variables de Squid se guardaron en .env, pero no se pudieron guardar en la base de datos."
+                ),
+                "warning",
             )
             return redirect(url_for("admin.view_config"))
 
@@ -180,12 +179,11 @@ def register_routes(bp):
         except RuntimeError as e:
             logger.error(f"Error de validación: {e}")
             return json_error("Error de validación de la configuración", 400)
-        except Exception as e:
+        except Exception:
             logger.exception("Error al dividir el archivo de configuración")
             return json_error(
                 "Error interno al dividir la configuración",
                 500,
-                details=str(e),
             )
 
     @bp.route("/api/get-split-files", methods=["GET"])

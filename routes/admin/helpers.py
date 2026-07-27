@@ -92,10 +92,7 @@ def _contains_stack_trace_error_hint(text: str) -> bool:
 
 
 def _sanitize_error_details(details: str) -> str:
-    """Sanitize textual error details by redacting stack trace / exception artifacts."""
-    if _contains_stack_trace_error_hint(details):
-        return "[REDACTED; check logs]"
-    return details
+    return "[REDACTED; check logs]"
 
 
 def sanitize_error_page_message(message: str) -> str:
