@@ -40,7 +40,11 @@ def _run_reset(command: list[str], backend: str) -> tuple[bool, str, str | None]
         return False, f"No se pudo ejecutar {backend}", str(exc)
 
     if result.returncode == 0:
-        return True, f"Conexiones activas de {command[-1]} reseteadas mediante {backend}", None
+        return (
+            True,
+            f"Conexiones activas de {command[-1]} reseteadas mediante {backend}",
+            None,
+        )
 
     details = (result.stderr or result.stdout).strip() or None
     logger.warning("%s falló con estado %s: %s", backend, result.returncode, details)
@@ -48,7 +52,11 @@ def _run_reset(command: list[str], backend: str) -> tuple[bool, str, str | None]
         marker in details.lower()
         for marker in ("permission denied", "operation not permitted", "must be root")
     ):
-        return False, "Se requieren privilegios del sistema para resetear conexiones", details
+        return (
+            False,
+            "Se requieren privilegios del sistema para resetear conexiones",
+            details,
+        )
     return False, f"{backend} no pudo resetear las conexiones", details
 
 
