@@ -133,7 +133,7 @@ checkPackages() {
     log_msg "INFO" "Verificando paquetes del sistema ($DISTRO_TYPE)"
 
     if [ "$DISTRO_TYPE" = "alpine" ]; then
-        packages="git python3 py3-pip py3-virtualenv mariadb-dev curl build-base openssl-dev python3-dev postgresql-dev openrc"
+        packages="git python3 py3-pip py3-virtualenv mariadb-dev curl build-base openssl-dev python3-dev postgresql-dev openrc conntrack-tools iptables"
 
         for pkg in $packages; do
             if ! apk info -e "$pkg" >/dev/null 2>&1; then
@@ -157,7 +157,7 @@ checkPackages() {
             echo "Todos los paquetes necesarios ya están instalados"
         fi
     else
-        packages="git python3 python3-pip python3-venv libmariadb-dev curl build-essential libssl-dev python3-dev libpq-dev libcairo2-dev libpango1.0-dev"
+        packages="git python3 python3-pip python3-venv libmariadb-dev curl build-essential libssl-dev python3-dev libpq-dev libcairo2-dev libpango1.0-dev conntrack iptables iptables-persistent"
 
         for pkg in $packages; do
             if ! dpkg -l | grep -q "^ii  $pkg "; then
@@ -182,6 +182,56 @@ checkPackages() {
             echo "Todos los paquetes necesarios ya están instalados"
         fi
     fi
+}
+
+configureFirewall() {
+    log_msg "INFO" "Verificando reglas de firewall para Squid"
+
+    if ! command -v conntrack >/dev/null 2>&1; then
+        log_msg "WARN" "El comando conntrack no está disponible; se omite la configuración del firewall"
+        echo "⚠️ El comando conntrack no está disponible. Se omite la configuración del firewall."
+        return 0
+    fi
+
+    if ! command -v iptables >/dev/null 2>&1; then
+        log_msg "WARN" "El comando iptables no está disponible; no se configurarán reglas de firewall"
+        echo "⚠️ El comando iptables no está disponible. Se omite la configuración del firewall."
+        return 0
+    fi
+
+    local rule=""
+
+    for rule in \
+        "INPUT -p tcp --dport 3128 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT" \
+        "OUTPUT -p tcp --sport 3128 -m conntrack --ctstate ESTABLISHED -j ACCEPT" \
+        "FORWARD -p tcp --dport 3128 -j ACCEPT" \
+        "FORWARD -p tcp --sport 3128 -j ACCEPT"; do
+        if iptables -t filter -C $rule >/dev/null 2>&1; then
+            log_msg "INFO" "Regla iptables ya existente: $rule"
+        else
+            if iptables -t filter -I $rule; then
+                log_msg "OK" "Regla iptables agregada: $rule"
+            else
+                log_msg "ERROR" "No se pudo agregar la regla iptables: $rule"
+                echo "⚠️ No se pudo agregar la regla de firewall: $rule"
+            fi
+        fi
+    done
+
+    if [ "$DISTRO_TYPE" = "debian" ] && command -v netfilter-persistent >/dev/null 2>&1; then
+        if netfilter-persistent save; then
+            log_msg "OK" "Reglas de iptables guardadas con netfilter-persistent"
+            echo "✓ Reglas de iptables guardadas correctamente"
+        else
+            log_msg "ERROR" "No se pudieron guardar las reglas con netfilter-persistent"
+            echo "⚠️ No se pudieron guardar las reglas de iptables"
+        fi
+    elif [ "$DISTRO_TYPE" = "debian" ]; then
+        log_msg "WARN" "netfilter-persistent no está disponible; las reglas no se guardaron"
+        echo "⚠️ netfilter-persistent no está disponible. Las reglas no se guardaron."
+    fi
+
+    return 0
 }
 
 checkSquidLog() {
@@ -651,6 +701,7 @@ main() {
         log_msg "INFO" "=== INICIO ACTUALIZACIÓN ==="
         echo "Verificando paquetes instalados..."
         checkPackages
+        configureFirewall
         echo "Actualizando Servicio..."
         if ! updateOrCloneRepo; then
             error "No se puede continuar con la actualización"
@@ -692,6 +743,7 @@ main() {
         log_msg "INFO" "=== INICIO INSTALACIÓN ==="
         echo "Instalando aplicación web..."
         checkPackages
+        configureFirewall
 
         # Detectar si ya estamos en el directorio del repo (CI/desarrollo local)
         if [ "$NON_INTERACTIVE" = true ] && [ -f "app.py" ] && [ -f "requirements.txt" ]; then

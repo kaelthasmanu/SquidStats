@@ -18,8 +18,9 @@ jobs:
       TZ: Etc/UTC
 
     strategy:
+      fail-fast: false
       matrix:
-        distro: [alpine, ubuntu]
+        distro: [alpine, ubuntu, debian-12, debian-13]
         include:
           - distro: alpine
             container: alpine:latest
@@ -28,6 +29,16 @@ jobs:
             python_packages: "python3 py3-pip py3-virtualenv"
           - distro: ubuntu
             container: ubuntu:latest
+            squid_package: squid
+            squid_service: squid
+            python_packages: "python3 python3-pip python3-venv"
+          - distro: debian-12
+            container: debian:12
+            squid_package: squid
+            squid_service: squid
+            python_packages: "python3 python3-pip python3-venv"
+          - distro: debian-13
+            container: debian:13
             squid_package: squid
             squid_service: squid
             python_packages: "python3 python3-pip python3-venv"
@@ -99,8 +110,8 @@ jobs:
         squid -N -f /etc/squid/squid.conf &
         echo "Squid started with PID $!"
 
-    - name: Configure Squid (Ubuntu)
-      if: matrix.distro == 'ubuntu'
+    - name: Configure Squid (Ubuntu/Debian)
+      if: matrix.distro != 'alpine'
       run: |
         mkdir -p /var/log/squid /var/cache/squid
         chown -R proxy:proxy /var/log/squid /var/cache/squid
