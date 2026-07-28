@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="{{ _('Acceso seguro al panel de administración de SquidStats.') }}">
     <title>{{ _("Login - SquidStats Admin") }}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"/>
     <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
@@ -55,8 +56,9 @@
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-24 h-24 mb-4">
                 <img
-                    src="{{ url_for('static', filename='squidstats.webp') }}"
+                    src="{{ url_for('static', filename='squidstats-128.webp') }}"
                     alt="{{ _("SquidStats") }}"
+                    width="96" height="96"
                     class="w-full h-full object-contain drop-shadow-lg"
                 >
             </div>

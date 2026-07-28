@@ -144,14 +144,6 @@
     }
   }
 
-  // Wait for Flowbite to attach the picker
-  let retries = 0;
-  (function waitForPicker() {
-    if (input.datepicker || retries > 20) {
-      setup();
-    } else {
-      retries++;
-      setTimeout(waitForPicker, 100);
-    }
-  })();
+  // Native date inputs need no library and are ready immediately.
+  setup();
 })();

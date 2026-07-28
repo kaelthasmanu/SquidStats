@@ -306,9 +306,10 @@
                   <i class="fas fa-circle-check text-blue-500 w-4"></i> {{ _("Desbloquear") }}
                 </button>
                 <div class="border-t border-gray-100 my-1"></div>
-                <button type="button" disabled
-                  class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-slate-400 cursor-not-allowed">
-                  <i class="fas fa-rotate text-slate-300 w-4"></i> {{ _("Resetear conexiones") }} <span class="text-xs ml-auto">{{ _("(Próx.)") }}</span>
+                <button type="button"
+                  data-action="reset" data-user="{{ user }}" data-ip="{{ client_ip }}"
+                  class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-orange-700 hover:bg-orange-50 transition-colors duration-150">
+                  <i class="fas fa-rotate text-orange-500 w-4"></i> {{ _("Resetear conexiones") }}
                 </button>
               </div>
             </div>
@@ -422,6 +423,28 @@
 <!-- ============================================================
      MODALES DE ACCIONES
      ============================================================ -->
+
+<!-- Modal: Resetear conexiones -->
+<div id="modal-reset" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-rotate text-orange-500"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-gray-800">{{ _("Resetear conexiones") }}</h3>
+        <p id="modal-reset-subtitle" class="text-sm text-gray-500"></p>
+      </div>
+    </div>
+    <p class="text-sm text-gray-600 mb-6">{{ _("Se cerrarán los estados de red activos asociados a esta IP. Las nuevas conexiones podrán establecerse inmediatamente.") }}</p>
+    <div class="flex justify-end gap-3">
+      <button type="button" data-modal-cancel class="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors">{{ _("Cancelar") }}</button>
+      <button type="button" data-modal-confirm="reset" class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors">
+        <i class="fas fa-rotate mr-1.5"></i> {{ _("Resetear") }}
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: Bloquear usuario -->
 <div id="modal-block" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">

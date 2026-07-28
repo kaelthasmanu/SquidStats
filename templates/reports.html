@@ -12,11 +12,8 @@
 
         <input
           id="reports-date"
-          type="text"
-          datepicker
-          datepicker-orientation="bottom"
-          datepicker-autohide
-          datepicker-container="body"
+          type="date"
+          aria-label="{{ _('Fecha del reporte') }}"
           class="w-28 xs:w-32 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors duration-200"
         />
 
@@ -48,8 +45,6 @@
 
 {% block styles %}
   <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
 {% endblock styles %}
 
 {% block content %}
@@ -57,6 +52,8 @@
 {% endblock content %}
 
 {% block scripts %}
+  <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
   {# Chart data injected as JSON so inline Jinja expressions are evaluated server-side
      and all JS behaviour lives in the external reports-charts.js file. #}
   <script type="application/json" id="chart-data">

@@ -4,23 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="{{ meta_description or _('SquidStats: panel de monitorización, estadísticas y administración para servidores proxy Squid.') }}">
     <title>{{ page_title or 'Dashboard Squid' }}</title>
     <!-- Dynamic favicon -->
     <link rel="icon" href="{{ url_for('static', filename=page_icon) }}" type="image/x-icon"/>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
     <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}"/> <!-- Tailwind CSS -->
+    <link rel="preload" href="{{ url_for('static', filename='webfonts/fa-solid-900.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/> <!-- Font Awesome -->
-    <!-- Logs CSS Custom-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}"/>
     <!-- Toastr CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}" media="print" onload="this.media='all'"/>
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}"/></noscript>
     <!-- Toastr Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr-custom.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr-custom.css') }}" media="print" onload="this.media='all'"/>
     <!-- Page-specific styles -->
     {% block styles %}{% endblock styles %}
   </head>
-  <body class="overflow-x-hidden overflow-auto" style="visibility: hidden" onload="document.body.style.visibility='visible';">
+  <body class="overflow-x-hidden overflow-auto">
     <!-- Common navigation bar -->
     <div class="relative">
       {% include 'components/navbar.html' %}
@@ -62,15 +63,13 @@
     <!-- Footer -->
     {% include 'components/footer.html' %}
     <!-- Socket.IO -->
-    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
-    <!-- Flowbite scripts (UI components) -->
-    <script src="{{ url_for('static', filename='src/flowbite.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <!-- jQuery (requerido por toastr) -->
-    <script src="{{ url_for('static', filename='js/jquery-4.0.0.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/jquery-4.0.0.min.js') }}"></script>
     <!-- Toastr JS -->
-    <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
     <!-- Configuración global de Toastr -->
-    <script src="{{ url_for('static', filename='js/toastr-config.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/toastr-config.js') }}"></script>
     <!-- i18n translations for JavaScript -->
     <script>
       window._i18n = window._i18n || {};
@@ -85,7 +84,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <script>
-          $(document).ready(function () {
+          document.addEventListener('DOMContentLoaded', function () {
             {% for category, message in messages %}
               {% if category == 'success' %}
                 toastr.success({{ message | tojson }});

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="{{ _('Administración y configuración del servidor proxy Squid.') }}">
     <title>{% block title %}{{ _("Administrador Squid Proxy") }}{% endblock %}</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"/>
     <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
@@ -18,11 +19,11 @@
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-3 md:space-x-6">
                     <!-- Mobile menu button -->
-                    <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-white hover:bg-blue-500 p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    <button type="button" aria-label="{{ _('Abrir menú') }}" @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-white hover:bg-blue-500 p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div class="flex items-center space-x-3">
-                        <img src="{{ url_for('static', filename='squidstats.webp') }}" alt="{{ _("SquidStats logo") }}" class="w-8 h-8 object-contain" />
+                        <img src="{{ url_for('static', filename='squidstats-64.webp') }}" alt="" width="32" height="32" class="w-8 h-8 object-contain" />
                         <i class="fas fa-server text-2xl md:text-3xl text-blue-200"></i>
                         <div>
                             <h1 class="text-lg md:text-2xl font-bold hidden sm:block">{{ _("Administrador Squid Proxy") }}</h1>

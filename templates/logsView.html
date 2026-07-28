@@ -1,6 +1,6 @@
 
 {% extends 'layouts/base.html' %}
-{% block styles %}{% endblock styles %}
+{% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}"/>{% endblock %}
 
 {% block header_actions %}
   <form method="get" class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4">

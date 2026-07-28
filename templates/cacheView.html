@@ -24,10 +24,6 @@
 
 {% block styles %}
   <script src="{{ url_for('static', filename='js/tailwindcss.js') }}"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}"/>
-  <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
   <style>
     @keyframes progress {
       0% {
@@ -109,6 +105,8 @@
 {% endblock content %}
 
 {% block scripts %}
+  <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.js') }}"></script>
   <script>
     Chart.register(ChartDataLabels);
 

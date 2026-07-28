@@ -16,6 +16,7 @@ from services.notifications.notifications import (
     get_all_notifications,
     mark_notifications_read,
 )
+from services.squid.connection_reset_service import reset_client_connections
 from services.squid.user_restrictions_service import (
     block_user,
     get_user_status,
@@ -316,6 +317,21 @@ def api_unthrottle_user():
         return json_error("Error interno al restaurar la velocidad", 500)
     finally:
         db.close()
+
+
+@api_bp.route("/connections/reset", methods=["POST"])
+@api_admin_required
+def api_reset_client_connections():
+    data = request.get_json(silent=True) or {}
+    ip = str(data.get("ip", "")).strip()
+    # print(f"=== DEBUG api_reset_client_connections: data={data!r}, ip={ip!r}")
+    if not ip:
+        return json_error("Se requiere el campo 'ip'", 400)
+
+    success, message, details = reset_client_connections(ip)
+    if success:
+        return json_success(message)
+    return json_error(message, 501 if "soportado" in message else 409, details=details)
 
 
 @api_bp.route("/delay-pools", methods=["GET"])

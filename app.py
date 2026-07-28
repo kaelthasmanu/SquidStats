@@ -190,9 +190,23 @@ def create_app():
     # Configure response headers
     @app.after_request
     def set_response_headers(response):
-        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-        response.headers["Pragma"] = "no-cache"
-        response.headers["Expires"] = "0"
+        if request.path.startswith("/static/") and response.status_code == 200:
+            # Static filenames are not content-hashed, so they must remain revalidatable.
+            response.headers["Cache-Control"] = "public, max-age=3600, must-revalidate"
+        else:
+            # Revalidate dynamic/private data without disabling the browser's bfcache.
+            response.headers["Cache-Control"] = "private, no-cache"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=()"
+        )
+        if request.is_secure:
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains"
+            )
         return response
 
     return app, scheduler

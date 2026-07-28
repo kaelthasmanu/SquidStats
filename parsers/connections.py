@@ -107,7 +107,10 @@ def parse_connection_block(block: str, squid_version: str, kid: str | None = Non
             "via_squid",
         ]:
             match = regex.search(block)
-            conn[key] = match.group(1) if match else "N/A"
+            value = match.group(1) if match else "N/A"
+            if key == "client_ip" and match:
+                value = match.group(1).rsplit(":", 1)[0].strip("[]")
+            conn[key] = value
 
     conn["fd_read"] = (
         int(REGEX_MAP["fd_read"].search(block).group(1))
@@ -183,14 +186,13 @@ def group_by_user(connections):
             if indicator is not None
         )
 
+        raw_ip = connection.get("client_ip", "Not found")
         if not is_anonymous:
             key = user
-            client_ip = connection.get("client_ip", "Not found")
+            client_ip = raw_ip
         else:
-            raw_ip = connection.get("client_ip", "Not found")
-            ip_only = raw_ip.split(":")[0] if ":" in raw_ip else raw_ip
-            key = ip_only
-            client_ip = ip_only
+            key = raw_ip
+            client_ip = raw_ip
 
         if not grouped[key]["connections"]:
             grouped[key]["client_ip"] = client_ip

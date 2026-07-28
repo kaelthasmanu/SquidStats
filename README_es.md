@@ -187,6 +187,24 @@ _Una herramienta moderna para analizar logs de Squid, proporcionando un panel f�
 apt install git python3 python3-pip python3-venv libmariadb-dev curl
 ```
 
+#### Resetear conexiones de un cliente
+
+La acción **Resetear conexiones** del menú de un usuario termina los estados
+de red activos asociados a su IP. Es una operación del sistema operativo, no
+una reconfiguración de Squid, y requiere privilegios equivalentes a root:
+
+- **Linux:** instala `conntrack` (`apt install conntrack`) y concede a
+  SquidStats el acceso necesario al binario. Se ejecuta `conntrack -D -s IP`.
+- **macOS/BSD:** la acción usa `pfctl -k IP`; PF debe estar habilitado y el
+  proceso debe poder ejecutar `pfctl` con privilegios administrativos.
+- **Otros sistemas:** la interfaz informa que esta capacidad no está
+  disponible, sin alterar ninguna conexión.
+
+El reseteo solo afecta estados rastreados por el firewall del host. En una
+instalación Docker o con Squid detrás de otro NAT, debe ejecutarse en el host
+que realmente mantiene esos estados; de lo contrario no se podrán cerrar las
+conexiones del cliente por IP.
+
 > **Nota:** Si tu proxy Squid **no usa autenticación de usuario** (es decir, no usas login o contraseña para clientes), puedes mantener el **formato de log por defecto** que viene con Squid. El formato detallado de abajo solo es requerido para compatibilidad completa con reportes basados en usuarios.
 
 - ⚠️ !!Importante solo funciona antes de la version 7.1 ⚠️ Para compatibilidad con logs de usuarios, usa este formato en /etc/squid/squid.conf:
