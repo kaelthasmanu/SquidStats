@@ -701,7 +701,7 @@ main() {
         log_msg "INFO" "=== INICIO ACTUALIZACIÓN ==="
         echo "Verificando paquetes instalados..."
         checkPackages
-        configureFirewall
+        #configureFirewall
         echo "Actualizando Servicio..."
         if ! updateOrCloneRepo; then
             error "No se puede continuar con la actualización"
@@ -743,7 +743,7 @@ main() {
         log_msg "INFO" "=== INICIO INSTALACIÓN ==="
         echo "Instalando aplicación web..."
         checkPackages
-        configureFirewall
+        #configureFirewall
 
         # Detectar si ya estamos en el directorio del repo (CI/desarrollo local)
         if [ "$NON_INTERACTIVE" = true ] && [ -f "app.py" ] && [ -f "requirements.txt" ]; then

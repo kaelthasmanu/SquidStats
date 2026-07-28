@@ -188,6 +188,36 @@ _A modern tool for parsing and analyzing Squid logs, providing a user-friendly d
 apt install git python3 python3-pip python3-venv libmariadb-dev curl
 ```
 
+#### Resetting a client's connections
+
+The **Reset connections** action in a user's menu terminates the active
+network states associated with that user's IP address. This is an operating
+system operation, not a Squid reconfiguration, and requires root-equivalent
+privileges:
+
+- **Linux:** install `conntrack` (`apt install conntrack`) and grant
+  SquidStats the required access to the binary. SquidStats runs
+  `conntrack -D -s IP`.
+- **macOS/BSD:** the action uses `pfctl -k IP`; PF must be enabled, and the
+  process must be allowed to run `pfctl` with administrative privileges.
+- **Other systems:** the interface reports that this capability is not
+  available without modifying any connections.
+
+On Linux, add the following `iptables` rules on the Squid proxy host so that
+`conntrack` can track the proxy connections on port 3128:
+
+```bash
+iptables -t filter -I INPUT -p tcp --dport 3128 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -t filter -I OUTPUT -p tcp --sport 3128 -m state --state ESTABLISHED -j ACCEPT
+iptables -t filter -I FORWARD -p tcp --dport 3128 -j ACCEPT
+iptables -t filter -I FORWARD -p tcp --sport 3128 -j ACCEPT
+```
+
+Resetting only affects states tracked by the host firewall. In a Docker
+installation, or when Squid is behind another NAT device, the operation must
+run on the host that actually maintains those states; otherwise, client
+connections cannot be closed by IP address.
+
 > **Note:** If your Squid proxy **does not use user authentication** (i.e., you do not use login or password for clients), you can keep the **default log format** that comes with Squid. The detailed format below is only required for full compatibility with user-based reports.
 
 - ⚠️ !!Important (Only work before version 7.1) ⚠️ For compatibility with user logs, use this format in /etc/squid/squid.conf:
