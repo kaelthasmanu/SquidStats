@@ -1,4 +1,4 @@
-<nav class="top-0 z-[1000] fixed w-full bg-gradient-to-br from-blue-800 to-blue-900 shadow-lg border-b border-white/10 backdrop-blur-md transition-transform duration-300" x-data="{ mobileMenuOpen: false }">
+<nav class="top-0 left-0 right-0 z-[1000] fixed w-full bg-gradient-to-br from-blue-800 to-blue-900 shadow-lg border-b border-white/10 backdrop-blur-md transition-transform duration-300" x-data="{ mobileMenuOpen: false }">
   <!-- UNIFIED CONTAINER WITH THE REST -->
   <div class="w-full px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto flex items-center justify-between py-4 h-[64px]">
@@ -241,7 +241,7 @@
 <!-- Scripts -->
 <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
 <script defer src="{{ url_for('static', filename='src/alpine.min.js') }}"></script>
-<script defer src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/confirm_modal.js') }}"></script>
 <script>
   const IS_DEB_INSTALL = {{ is_deb_install | tojson }};
   // Enhanced Navbar Functionality with Real-time Notifications
