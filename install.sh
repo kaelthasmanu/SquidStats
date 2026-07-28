@@ -133,7 +133,7 @@ checkPackages() {
     log_msg "INFO" "Verificando paquetes del sistema ($DISTRO_TYPE)"
 
     if [ "$DISTRO_TYPE" = "alpine" ]; then
-        packages="git python3 py3-pip py3-virtualenv mariadb-dev curl build-base openssl-dev python3-dev postgresql-dev openrc conntrack iptables"
+        packages="git python3 py3-pip py3-virtualenv mariadb-dev curl build-base openssl-dev python3-dev postgresql-dev openrc conntrack-tools iptables"
 
         for pkg in $packages; do
             if ! apk info -e "$pkg" >/dev/null 2>&1; then
