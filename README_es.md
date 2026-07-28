@@ -200,6 +200,17 @@ una reconfiguración de Squid, y requiere privilegios equivalentes a root:
 - **Otros sistemas:** la interfaz informa que esta capacidad no está
   disponible, sin alterar ninguna conexión.
 
+En Linux, agrega las siguientes reglas de `iptables` en el servidor proxy
+Squid para que `conntrack` pueda rastrear las conexiones del proxy en el
+puerto 3128:
+
+```bash
+iptables -t filter -I INPUT -p tcp --dport 3128 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -t filter -I OUTPUT -p tcp --sport 3128 -m state --state ESTABLISHED -j ACCEPT
+iptables -t filter -I FORWARD -p tcp --dport 3128 -j ACCEPT
+iptables -t filter -I FORWARD -p tcp --sport 3128 -j ACCEPT
+```
+
 El reseteo solo afecta estados rastreados por el firewall del host. En una
 instalación Docker o con Squid detrás de otro NAT, debe ejecutarse en el host
 que realmente mantiene esos estados; de lo contrario no se podrán cerrar las
