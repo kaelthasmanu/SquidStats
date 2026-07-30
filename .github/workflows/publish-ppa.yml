@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Package version (e.g. 2.5.1). Leave empty to use example.env.'
+        description: 'Package version (e.g. 2.5.2). Leave empty to use example.env.'
         required: false
         default: ''
       revision:
