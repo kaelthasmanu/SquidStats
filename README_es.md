@@ -280,11 +280,11 @@ conexiones del cliente por IP.
 1. Script para instalar:
 
 ```bash
- curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.1/install.sh | sudo bash
+ curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.2/install.sh | sudo bash
 ```
 o
 ```bash
-  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.1/install.sh | sudo bash
+  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.2/install.sh | sudo bash
 ```
 
 #### Opciones de Instalación
@@ -740,7 +740,7 @@ Advertencia: 🚨 La primera ejecución puede causar alto uso de CPU.
 1. Obtener el Script con curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.1/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.2/install.sh
 ```
 
 2. Agregar permisos de ejecución:
