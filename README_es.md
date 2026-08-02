@@ -431,15 +431,6 @@ Si el comando devuelve la versión instalada, SquidStats está listo para utiliz
    # Configuración de Blacklist
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
    
-   # Notificaciones de Telegram (Opcional)
-   TELEGRAM_ENABLED="false"  # Establecer a "true" para habilitar notificaciones de Telegram
-   TELEGRAM_API_ID=""  # Obtener de https://my.telegram.org
-   TELEGRAM_API_HASH=""  # Obtener de https://my.telegram.org
-   TELEGRAM_BOT_TOKEN=""  # Obtener de @BotFather (opcional, para modo bot)
-   TELEGRAM_PHONE=""  # Tu número de teléfono (opcional, para modo usuario)
-   TELEGRAM_SESSION_NAME="squidstats_bot"
-   TELEGRAM_RECIPIENTS=""  # Lista separada por comas de destinatarios (nombres de usuario, números de teléfono o chat IDs)
-   
    # Configuración de Proxy (Opcional)
    HTTP_PROXY=""  # Ejemplo: http://proxy.example.com:8080
    HTTPS_PROXY=""  # Ejemplo: https://proxy.example.com:8443
