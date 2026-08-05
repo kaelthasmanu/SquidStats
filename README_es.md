@@ -216,9 +216,7 @@ instalación Docker o con Squid detrás de otro NAT, debe ejecutarse en el host
 que realmente mantiene esos estados; de lo contrario no se podrán cerrar las
 conexiones del cliente por IP.
 
-> **Nota:** Si tu proxy Squid **no usa autenticación de usuario** (es decir, no usas login o contraseña para clientes), puedes mantener el **formato de log por defecto** que viene con Squid. El formato detallado de abajo solo es requerido para compatibilidad completa con reportes basados en usuarios.
-
-- ⚠️ !!Importante solo funciona antes de la version 7.1 ⚠️ Para compatibilidad con logs de usuarios, usa este formato en /etc/squid/squid.conf:
+- ⚠️ !!Importante solo funciona antes de la versión 7.1 ⚠️ Para despliegues legacy de Squid, usa este formato en `/etc/squid/squid.conf` cuando el servidor sea anterior a la versión 7.1:
 
 ```bash
   logformat detailed \
@@ -226,6 +224,9 @@ conexiones del cliente por IP.
 
   access_log /var/log/squid/access.log detailed
 ```
+
+- SquidStats también soporta el formato de log por defecto de Squid para despliegues más modernos. Para Squid 7.x y posteriores, utiliza el formato `default` estándar.
+- De hecho, la versión actual de SquidStats soporta `detailed` para Squid legacy (antes de 7.x) y el formato `default` para cualquier Squid desde la línea 3.5x en adelante.
 
 #### 🔧 Configuración del Cache Manager (Crítico para SquidStats)
 

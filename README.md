@@ -218,9 +218,7 @@ installation, or when Squid is behind another NAT device, the operation must
 run on the host that actually maintains those states; otherwise, client
 connections cannot be closed by IP address.
 
-> **Note:** If your Squid proxy **does not use user authentication** (i.e., you do not use login or password for clients), you can keep the **default log format** that comes with Squid. The detailed format below is only required for full compatibility with user-based reports.
-
-- ⚠️ !!Important (Only work before version 7.1) ⚠️ For compatibility with user logs, use this format in /etc/squid/squid.conf:
+- ⚠️ !!Important (Only works before version 7.1) ⚠️ For legacy Squid deployments, use this `detailed` log format in `/etc/squid/squid.conf` when running Squid older than 7.1:
 
 ```bash
   logformat detailed \
@@ -228,6 +226,9 @@ connections cannot be closed by IP address.
 
   access_log /var/log/squid/access.log detailed
 ```
+
+- SquidStats also supports the default Squid log format for newer deployments. For Squid 7.x and later, continue using the standard default log format.
+- In fact, current SquidStats supports `detailed` format for legacy Squid versions before 7.x and the default format for any Squid version starting from the 3.5x line and later.
 
 #### 🔧 Cache Manager Configuration (Critical for SquidStats)
 
