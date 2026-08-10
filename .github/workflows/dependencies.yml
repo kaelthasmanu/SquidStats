@@ -45,13 +45,13 @@ jobs:
 
       - name: Install pip-tools
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install "pip<26.0" pip-tools
+          python -m pip install --upgrade "pip==25.3" "pip-tools==7.5.3"
+          python -m pip --version
 
       - name: Compile updated requirements
         id: compile
         run: |
-          pip-compile \
+          python -m piptools compile \
             --upgrade \
             --output-file requirements.txt \
             requirements.in
