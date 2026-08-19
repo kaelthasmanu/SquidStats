@@ -375,14 +375,14 @@ Si el comando devuelve la versión instalada, SquidStats está listo para utiliz
 
 1. Clonar el repositorio:
    ```bash
-   mkdir -p /opt/squidstats
-   git clone https://github.com/kaelthasmanu/SquidStats.git /opt/squidstats
+   mkdir -p /opt/SquidStats
+   git clone https://github.com/kaelthasmanu/SquidStats.git /opt/SquidStats
    ```
 2. Crear un entorno virtual (venv):
 
 ```bash
- cd /opt/squidstats/
- python3 -m venv "/opt/squidstats/venv"
+ cd /opt/SquidStats/
+ python3 -m venv "/opt/SquidStats/venv"
  source venv/bin/activate
  pip install --upgrade pip
 ```
@@ -390,7 +390,7 @@ Si el comando devuelve la versión instalada, SquidStats está listo para utiliz
 3. Instalar requerimientos de Python con pip o pip3:
 
 ```bash
-  pip install -r /opt/squidstats/requirements.txt
+  pip install -r /opt/SquidStats/requirements.txt
 ```
 
 4. Crear un archivo .env en la raíz del proyecto y agregar el siguiente contenido:\
