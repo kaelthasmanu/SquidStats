@@ -1,5 +1,6 @@
 import os
 
+from loguru import logger
 from sqlalchemy import MetaData, Table, func, select, text
 
 
@@ -96,10 +97,21 @@ def get_all_tables_stats(session, engine, db_type):
 
     if db_type == "SQLITE":
         # Batch-fetch all table sizes in one query
-        size_rows = session.execute(
-            text("SELECT name, COALESCE(SUM(pgsize), 0) FROM dbstat GROUP BY name")
-        ).fetchall()
-        sizes = {row[0]: int(row[1]) for row in size_rows}
+        try:
+            size_rows = session.execute(
+                text("SELECT name, COALESCE(SUM(pgsize), 0) FROM dbstat GROUP BY name")
+            ).fetchall()
+            sizes = {row[0]: int(row[1]) for row in size_rows}
+        except Exception as exc:
+            # dbstat is an optional SQLite virtual table.  Some builds do not
+            # include it; table row counts should still be available to the
+            # admin UI, with size shown as zero when it cannot be measured.
+            session.rollback()
+            logger.warning(
+                "SQLite dbstat is unavailable; table sizes will be reported as 0: {}",
+                exc,
+            )
+            sizes = {}
 
         # Reflect all tables once and run COUNT(*) per table
         metadata = MetaData()

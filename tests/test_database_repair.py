@@ -12,6 +12,7 @@ from database.database import (
     repair_database_schema,
 )
 from database.models.models import AdminUser, QuotaUser
+from services.database.admin_helpers import get_all_tables_stats
 
 
 def test_repair_recreates_missing_tables_and_preserves_existing_rows():
@@ -64,3 +65,11 @@ def test_ensure_admin_user_creates_it_once(monkeypatch):
     )
     session.close()
     engine.dispose()
+
+
+def test_sqlite_table_stats_work_without_dbstat(in_memory_engine, db_session):
+    stats = get_all_tables_stats(db_session, in_memory_engine, "SQLITE")
+
+    assert "admin_users" in stats
+    assert stats["admin_users"]["rows"] == 0
+    assert stats["admin_users"]["size"] >= 0

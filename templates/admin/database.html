@@ -873,6 +873,7 @@ function backupManager() {
 // Clean Data (vanilla JS)
 // ──────────────────────────────────────────────────────────
 let tablesData = [];
+const tableLoadErrorMessage = {{ _("No se pudieron cargar las tablas")|tojson }};
 
 function formatSize(bytes) {
     if (bytes === 0 || bytes === null || bytes === undefined) return '0 B';
@@ -912,18 +913,25 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 async function loadTables() {
+    const select = document.getElementById('tableSelect');
     try {
         const response = await fetch('/admin/api/get-tables', {
             method: 'GET',
             headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
         });
         const data = await response.json();
-        if (data.status === 'success') {
-            tablesData = data.tables;
-            populateTableSelect();
+        if (!response.ok || data.status !== 'success') {
+            throw new Error(data.message || `Error HTTP ${response.status}`);
         }
+
+        tablesData = Array.isArray(data.tables) ? data.tables : [];
+        populateTableSelect();
     } catch (error) {
         console.error('Error loading tables:', error);
+        tablesData = [];
+        select.innerHTML = `<option value="">${tableLoadErrorMessage}</option>`;
+        document.getElementById('tableInfo').classList.add('hidden');
+        document.getElementById('actionButtons').classList.add('hidden');
     }
 }
 
