@@ -216,18 +216,6 @@ instalación Docker o con Squid detrás de otro NAT, debe ejecutarse en el host
 que realmente mantiene esos estados; de lo contrario no se podrán cerrar las
 conexiones del cliente por IP.
 
-- ⚠️ !!Importante solo funciona antes de la versión 7.1 ⚠️ Para despliegues legacy de Squid, usa este formato en `/etc/squid/squid.conf` cuando el servidor sea anterior a la versión 7.1:
-
-```bash
-  logformat detailed \
-  "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
-
-  access_log /var/log/squid/access.log detailed
-```
-
-- SquidStats también soporta el formato de log por defecto de Squid para despliegues más modernos. Para Squid 7.x y posteriores, utiliza el formato `default` estándar.
-- De hecho, la versión actual de SquidStats soporta `detailed` para Squid legacy (antes de 7.x) y el formato `default` para cualquier Squid desde la línea 3.5x en adelante.
-
 #### 🔧 Configuración del Cache Manager (Crítico para SquidStats)
 
 **SquidStats requiere una configuración adecuada del Cache Manager para funcionar correctamente.** Por favor sigue la [documentación oficial del Cache Manager de Squid](https://wiki.squid-cache.org/Features/CacheManager/Index) para una configuración completa.

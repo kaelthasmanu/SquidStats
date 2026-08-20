@@ -218,18 +218,6 @@ installation, or when Squid is behind another NAT device, the operation must
 run on the host that actually maintains those states; otherwise, client
 connections cannot be closed by IP address.
 
-- ⚠️ !!Important (Only works before version 7.1) ⚠️ For legacy Squid deployments, use this `detailed` log format in `/etc/squid/squid.conf` when running Squid older than 7.1:
-
-```bash
-  logformat detailed \
-  "%ts.%03tu %>a %ui %un [%tl] \"%rm %ru HTTP/%rv\" %>Hs %<st %rm %ru %>a %mt %<a %<rm %Ss/%Sh %<st
-
-  access_log /var/log/squid/access.log detailed
-```
-
-- SquidStats also supports the default Squid log format for newer deployments. For Squid 7.x and later, continue using the standard default log format.
-- In fact, current SquidStats supports `detailed` format for legacy Squid versions before 7.x and the default format for any Squid version starting from the 3.5x line and later.
-
 #### 🔧 Cache Manager Configuration (Critical for SquidStats)
 
 **SquidStats requires proper Cache Manager configuration to function correctly.** Please follow the [official Squid Cache Manager documentation](https://wiki.squid-cache.org/Features/CacheManager/Index) for complete setup.
