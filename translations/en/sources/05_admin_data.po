@@ -206,6 +206,10 @@ msgstr "Select Table"
 msgid "Cargando tablas..."
 msgstr "Loading tables..."
 
+#: templates/admin/database.html:876
+msgid "No se pudieron cargar las tablas"
+msgstr "Could not load the tables"
+
 #: templates/admin/clean_data.html:51 templates/admin/database.html:636
 msgid "Información de la Tabla"
 msgstr "Table Information"
