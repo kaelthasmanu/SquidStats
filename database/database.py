@@ -1,11 +1,12 @@
 import os
+import re
 import sqlite3
 import time
 import uuid
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from alembic.config import Config as AlembicConfig
 from alembic.runtime.migration import MigrationContext
@@ -47,6 +48,28 @@ dynamic_model_cache: dict[str, Any] = {}
 SQLITE_MIGRATION_RETRY_DELAYS = (1.0, 2.0, 4.0)
 
 
+def _clean_connection_string(connection_string: str | None) -> str:
+    """Remove whitespace and accidental outer quotes from a DB URL."""
+    return str(connection_string or "").strip().strip("\"'").strip()
+
+
+def _parse_server_database_name(connection_string: str) -> tuple[Any, str]:
+    """Parse and validate a database URL used for server-level creation."""
+    cleaned_connection = _clean_connection_string(connection_string)
+    parsed_url = urlparse(cleaned_connection)
+    database_name = unquote(parsed_url.path.lstrip("/")).strip().strip("\"'")
+
+    if not database_name:
+        raise ValueError("No database name found in connection string")
+    if not re.fullmatch(r"[A-Za-z0-9_$.-]+", database_name):
+        raise ValueError(
+            "Database name contains unsupported characters; use only letters, "
+            "numbers, '.', '-', '_' or '$'."
+        )
+
+    return parsed_url, database_name
+
+
 def get_table_suffix() -> str:
     return date.today().strftime("%Y%m%d")
 
@@ -84,7 +107,7 @@ def _normalize_sqlite_path(path_str: str) -> Path:
 
 def get_database_url() -> str:
     db_type = Config.DATABASE_TYPE
-    conn_str = Config.DATABASE_STRING_CONNECTION
+    conn_str = _clean_connection_string(Config.DATABASE_STRING_CONNECTION)
     if db_type == "SQLITE":
         db_path = _normalize_sqlite_path(conn_str)
         if str(db_path) == ":memory:":
@@ -127,54 +150,45 @@ def create_database_if_not_exists():
         return
     elif db_type in ("MYSQL", "MARIADB"):
         try:
-            conn_str = os.getenv("DATABASE_STRING_CONNECTION", "")
-            parsed_url = urlparse(conn_str)
-
-            database_name = parsed_url.path.lstrip("/")
-
-            if not database_name:
-                logger.warning("No database name found in connection string")
-                return
+            conn_str = _clean_connection_string(Config.DATABASE_STRING_CONNECTION)
+            parsed_url, database_name = _parse_server_database_name(conn_str)
 
             server_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"
 
             server_engine = create_engine(server_url, echo=False)
-
-            with server_engine.connect() as conn:
-                # Verificar si la base de datos existe
-                result = conn.execute(
-                    text(
-                        "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname"
-                    ),
-                    {"dbname": database_name},
-                )
-
-                if not result.fetchone():
-                    conn.execute(
+            try:
+                with server_engine.connect() as conn:
+                    # Verificar si la base de datos existe
+                    result = conn.execute(
                         text(
-                            f"CREATE DATABASE IF NOT EXISTS `{database_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-                        )
+                            "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname"
+                        ),
+                        {"dbname": database_name},
                     )
-                    conn.commit()
-                    logger.info(f"Database '{database_name}' created successfully")
-                else:
-                    logger.info(f"Database '{database_name}' already exists")
 
-            server_engine.dispose()
+                    if not result.fetchone():
+                        # Database names cannot be bound as SQL parameters.  The
+                        # name is strictly validated by _parse_server_database_name
+                        # before it reaches this statement.
+                        conn.execute(
+                            text(
+                                f"CREATE DATABASE IF NOT EXISTS `{database_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"  # noqa: S608
+                            )
+                        )
+                        conn.commit()
+                        logger.info(f"Database '{database_name}' created successfully")
+                    else:
+                        logger.info(f"Database '{database_name}' already exists")
+            finally:
+                server_engine.dispose()
 
         except Exception as e:
             logger.error(f"Error creating MySQL/MariaDB database: {e}")
             raise
     elif db_type in ("POSTGRESQL", "POSTGRES"):
         try:
-            conn_str = os.getenv("DATABASE_STRING_CONNECTION", "")
-            parsed_url = urlparse(conn_str)
-
-            database_name = parsed_url.path.lstrip("/")
-
-            if not database_name:
-                logger.warning("No database name found in PostgreSQL connection string")
-                return
+            conn_str = _clean_connection_string(Config.DATABASE_STRING_CONNECTION)
+            parsed_url, database_name = _parse_server_database_name(conn_str)
 
             # Crear URL para conectarse a la base de datos 'postgres' (default)
             server_url = f"{parsed_url.scheme}://{parsed_url.netloc}/postgres"
@@ -182,6 +196,9 @@ def create_database_if_not_exists():
             # Crear engine con autocommit para evitar transacciones automáticas
             server_engine = create_engine(
                 server_url, echo=False, isolation_level="AUTOCOMMIT"
+            )
+            quoted_database_name = server_engine.dialect.identifier_preparer.quote(
+                database_name
             )
 
             try:
@@ -199,7 +216,7 @@ def create_database_if_not_exists():
                             # Primero intentar con template0 para evitar problemas de collation
                             conn.execute(
                                 text(
-                                    f"CREATE DATABASE \"{database_name}\" WITH ENCODING = 'UTF8' TEMPLATE = template0"
+                                    f"CREATE DATABASE {quoted_database_name} WITH ENCODING = 'UTF8' TEMPLATE = template0"  # noqa: S608
                                 )
                             )
                             logger.info(
@@ -210,7 +227,7 @@ def create_database_if_not_exists():
                             try:
                                 conn.execute(
                                     text(
-                                        f"CREATE DATABASE \"{database_name}\" WITH ENCODING = 'UTF8'"
+                                        f"CREATE DATABASE {quoted_database_name} WITH ENCODING = 'UTF8'"  # noqa: S608
                                     )
                                 )
                                 logger.info(
@@ -218,7 +235,9 @@ def create_database_if_not_exists():
                                 )
                             except Exception:
                                 # Como último recurso, crear la base de datos sin especificar encoding
-                                conn.execute(text(f'CREATE DATABASE "{database_name}"'))
+                                conn.execute(
+                                    text(f"CREATE DATABASE {quoted_database_name}")  # noqa: S608
+                                )
                                 logger.info(
                                     f"PostgreSQL database '{database_name}' created successfully with default settings"
                                 )
