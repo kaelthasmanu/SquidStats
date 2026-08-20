@@ -1,4 +1,7 @@
 import os
+import sqlite3
+import time
+import uuid
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -8,13 +11,17 @@ from alembic.config import Config as AlembicConfig
 from alembic.runtime.migration import MigrationContext
 from loguru import logger
 from sqlalchemy import (
+    Column,
+    Integer,
+    MetaData,
+    Table,
     create_engine,
     event,
     func,
     inspect,
     text,
 )
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import sessionmaker
 
 from alembic import command
@@ -32,6 +39,12 @@ from database.models.models import BlacklistDomain, create_dynamic_models
 _engine = None
 _Session = None
 dynamic_model_cache: dict[str, Any] = {}
+
+# SQLite startup failures can be transient when another process is closing the
+# database or when its WAL files are being initialized.  Keep this bounded so
+# a permanent filesystem/corruption problem fails clearly instead of hanging
+# application startup forever.
+SQLITE_MIGRATION_RETRY_DELAYS = (1.0, 2.0, 4.0)
 
 
 def get_table_suffix() -> str:
@@ -399,6 +412,85 @@ def get_dynamic_models(date_suffix: str):
     return DynamicUser, DynamicLog
 
 
+def _verify_sqlite_database(engine):
+    """Verify that SQLite can read, validate, and write the database.
+
+    The write check is performed inside a transaction and rolled back. It
+    exercises the main database file without leaving a sentinel table or
+    changing application data behind.
+    """
+    check_table = f"_squidstats_startup_check_{uuid.uuid4().hex}"
+    check_table_definition = Table(
+        check_table,
+        MetaData(),
+        Column("id", Integer, nullable=False),
+    )
+
+    logger.info("Checking SQLite database access and integrity...")
+    with engine.connect() as connection:
+        quick_check = connection.exec_driver_sql("PRAGMA quick_check").scalar()
+        if str(quick_check).lower() != "ok":
+            raise RuntimeError(
+                f"SQLite integrity check failed: PRAGMA quick_check returned {quick_check!r}"
+            )
+
+        # End any transaction opened implicitly by the read before acquiring
+        # the write lock for the actual read/write capability check.
+        connection.rollback()
+        transaction_started = False
+        try:
+            connection.exec_driver_sql("BEGIN IMMEDIATE")
+            transaction_started = True
+            check_table_definition.create(connection)
+            connection.execute(check_table_definition.insert().values(id=1))
+            connection.rollback()
+            transaction_started = False
+        except Exception:
+            if transaction_started:
+                connection.rollback()
+            raise
+
+    logger.info("✓ SQLite database read/write and integrity checks passed")
+
+
+def _is_transient_sqlite_error(error: Exception) -> bool:
+    """Return whether an SQLite error is worth retrying during startup."""
+    if Config.DATABASE_TYPE != "SQLITE":
+        return False
+
+    candidates = []
+    current = error
+    for _ in range(5):
+        if current is None or current in candidates:
+            break
+        candidates.append(current)
+        current = getattr(current, "orig", None) or getattr(current, "__cause__", None)
+
+    is_sqlite_operational_error = any(
+        isinstance(candidate, (OperationalError, sqlite3.OperationalError))
+        for candidate in candidates
+    )
+    if not is_sqlite_operational_error:
+        return False
+
+    error_text = " ".join(str(candidate).lower() for candidate in candidates)
+    transient_markers = (
+        "database is locked",
+        "database table is locked",
+        "database schema is locked",
+        "disk i/o error",
+        "unable to open database file",
+        "database or disk is full",
+    )
+    return any(marker in error_text for marker in transient_markers)
+
+
+def _dispose_database_engine_after_failure():
+    """Close pooled connections before a migration retry."""
+    if _engine is not None:
+        _engine.dispose()
+
+
 def get_concat_function(column, separator=", "):
     db_type = Config.DATABASE_TYPE
 
@@ -416,7 +508,33 @@ def get_concat_function(column, separator=", "):
 
 
 def migrate_database():
-    """Run Alembic migrations to update the database schema."""
+    """Run migrations with bounded retries for transient SQLite failures."""
+    total_attempts = len(SQLITE_MIGRATION_RETRY_DELAYS) + 1
+
+    for attempt in range(1, total_attempts + 1):
+        try:
+            _migrate_database_once()
+            return
+        except Exception as error:
+            is_last_attempt = attempt == total_attempts
+            if is_last_attempt or not _is_transient_sqlite_error(error):
+                raise
+
+            delay = SQLITE_MIGRATION_RETRY_DELAYS[attempt - 1]
+            logger.warning(
+                "Transient SQLite startup error on migration attempt {}/{}: {}. "
+                "Retrying in {} seconds...",
+                attempt,
+                total_attempts,
+                error,
+                delay,
+            )
+            _dispose_database_engine_after_failure()
+            time.sleep(delay)
+
+
+def _migrate_database_once():
+    """Run one migration attempt, including the SQLite preflight checks."""
     try:
         # Get Alembic configuration
         alembic_ini_path = os.path.join(
@@ -430,6 +548,8 @@ def migrate_database():
                 "please restore alembic.ini for future migrations."
             )
             engine = get_engine()
+            if Config.DATABASE_TYPE == "SQLITE":
+                _verify_sqlite_database(engine)
             repaired_tables = repair_database_schema(engine)
             if repaired_tables:
                 logger.warning(
@@ -442,6 +562,8 @@ def migrate_database():
         alembic_cfg = AlembicConfig(alembic_ini_path)
 
         engine = get_engine()
+        if Config.DATABASE_TYPE == "SQLITE":
+            _verify_sqlite_database(engine)
         with engine.connect() as conn:
             context = MigrationContext.configure(conn)
             current_rev = context.get_current_revision()

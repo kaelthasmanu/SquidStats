@@ -1,13 +1,19 @@
-"""Regression tests for startup database repair."""
+"""Regression tests for startup database repair and SQLite startup checks."""
+
+import sqlite3
 
 import bcrypt
 from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 
+import database.database as db_module
 from config import Config
 from database.base import Base
 from database.database import (
     _ensure_admin_user,
+    _is_transient_sqlite_error,
+    _verify_sqlite_database,
     create_dynamic_models,
     repair_database_schema,
 )
@@ -73,3 +79,51 @@ def test_sqlite_table_stats_work_without_dbstat(in_memory_engine, db_session):
     assert "admin_users" in stats
     assert stats["admin_users"]["rows"] == 0
     assert stats["admin_users"]["size"] >= 0
+
+
+def test_sqlite_startup_check_validates_integrity_and_rolls_back_write(tmp_path):
+    database_path = tmp_path / "startup-check.db"
+    engine = create_engine(f"sqlite:///{database_path}", future=True)
+
+    _verify_sqlite_database(engine)
+
+    assert database_path.exists()
+    tables = set(inspect(engine).get_table_names())
+    assert not any(table.startswith("_squidstats_startup_check_") for table in tables)
+    engine.dispose()
+
+
+def test_transient_sqlite_errors_are_detected():
+    error = OperationalError(
+        "migration",
+        {},
+        sqlite3.OperationalError("database is locked"),
+    )
+
+    assert _is_transient_sqlite_error(error) is True
+    assert _is_transient_sqlite_error(RuntimeError("database is locked")) is False
+
+
+def test_migrate_database_retries_transient_errors(monkeypatch):
+    attempts = []
+    delays = []
+
+    def flaky_migration():
+        attempts.append(len(attempts) + 1)
+        if len(attempts) < 3:
+            raise OperationalError(
+                "migration",
+                {},
+                sqlite3.OperationalError("database is locked"),
+            )
+
+    monkeypatch.setattr(db_module, "_migrate_database_once", flaky_migration)
+    monkeypatch.setattr(
+        db_module, "_dispose_database_engine_after_failure", lambda: None
+    )
+    monkeypatch.setattr(db_module.time, "sleep", delays.append)
+
+    db_module.migrate_database()
+
+    assert attempts == [1, 2, 3]
+    assert delays == [1.0, 2.0]
