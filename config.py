@@ -122,9 +122,6 @@ class Config:
         "LISTEN_PORT", safe_get_env("FLASK_PORT", 5000, var_type=int), var_type=int
     )
 
-    # Log parsing mode: 'DETAILED' (current behavior) or 'DEFAULT' (classic Squid format)
-    LOG_FORMAT = safe_get_env("LOG_FORMAT", "DETAILED").upper()
-
     # Application version
     VERSION = safe_get_env("VERSION", "2.5.2")
 

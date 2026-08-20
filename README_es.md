@@ -409,7 +409,6 @@ Si el comando devuelve la versión instalada, SquidStats está listo para utiliz
    SQUID_CACHE_LOG="/var/log/squid/cache.log"
    SQUID_CONFIG_PATH="/etc/squid/squid.conf"
    ACL_FILES_DIR="/etc/squid/acls"
-   LOG_FORMAT="DETAILED"  # Opciones: DETAILED o DEFAULT
    
    # Configuración de Base de Datos
    DATABASE_TYPE="SQLITE"  # Opciones: SQLITE o MARIADB

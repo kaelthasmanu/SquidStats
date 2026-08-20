@@ -3,6 +3,10 @@ Tests for log line parsers (parsers/log.py).
 """
 
 from parsers.log import (
+    FORMAT_AUTO,
+    FORMAT_DEFAULT,
+    FORMAT_DETAILED,
+    detect_log_format,
     parse_log_line,
     parse_log_line_default,
     parse_log_line_pipe_format,
@@ -125,3 +129,49 @@ class TestDefaultFormat:
         )
         result = parse_log_line_default(line)
         assert result is None
+
+
+class TestAutomaticFormatDetection:
+    def test_detects_default_file_format(self, tmp_path):
+        log_file = tmp_path / "access.log"
+        log_file.write_text(
+            "1609459200.000 1 192.168.1.100 TCP_MISS/200 1234 "
+            "GET http://example.com/page user1 HIER_DIRECT/- text/html\n",
+            encoding="utf-8",
+        )
+
+        assert detect_log_format(log_file) == FORMAT_DEFAULT
+
+    def test_detects_detailed_file_format(self, tmp_path):
+        log_file = tmp_path / "access.log"
+        log_file.write_text(
+            "1609459200.000 192.168.1.100 - user1 "
+            "[20/Aug/2026:14:00:00 -0400] "
+            '"GET http://example.com/page HTTP/1.1" 200 1234 '
+            "GET http://example.com/page 192.168.1.100 text/html "
+            "- TCP_MISS/200 1234\n",
+            encoding="utf-8",
+        )
+
+        assert detect_log_format(log_file) == FORMAT_DETAILED
+
+        result = parse_log_line(
+            log_file.read_text(encoding="utf-8").strip(),
+            format_hint=FORMAT_DETAILED,
+        )
+        assert result == {
+            "ip": "192.168.1.100",
+            "username": "user1",
+            "url": "http://example.com/page",
+            "response": 200,
+            "data_transmitted": 1234,
+            "method": "GET",
+            "status": "200",
+            "is_denied": False,
+        }
+
+    def test_unknown_file_falls_back_to_per_line_detection(self, tmp_path):
+        log_file = tmp_path / "access.log"
+        log_file.write_text("not a Squid access log\n", encoding="utf-8")
+
+        assert detect_log_format(log_file) == FORMAT_AUTO

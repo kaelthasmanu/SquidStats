@@ -224,7 +224,6 @@ def migrate_env_squid_config(auto_confirm: bool = False):
     raw_keys = {
         "SQUID_HOST": "squid_host",
         "SQUID_PORT": "squid_port",
-        "LOG_FORMAT": "log_format",
         "SQUID_LOG": "squid_log",
         "SQUID_CACHE_LOG": "squid_cache_log",
         "SQUID_CONFIG_PATH": "squid_config_path",
@@ -288,7 +287,6 @@ def migrate_env_squid_config(auto_confirm: bool = False):
         row = SquidConfig(
             squid_host=env_values.get("squid_host", "127.0.0.1"),
             squid_port=env_values.get("squid_port", 3128),
-            log_format=env_values.get("log_format", "DEFAULT"),
             squid_log=env_values.get("squid_log", "/var/log/squid/access.log"),
             squid_cache_log=env_values.get(
                 "squid_cache_log", "/var/log/squid/cache.log"

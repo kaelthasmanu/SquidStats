@@ -85,7 +85,7 @@
         <form method="POST" action="{{ url_for('admin.save_env') }}" x-show="editing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             {% set sensitive_vars = ['VERSION', 'JWT_SECRET_KEY', 'FIRST_PASSWORD', 'DATABASE_STRING_CONNECTION'] %}
-            {% for key in ['SQUID_HOST', 'SQUID_PORT', 'SQUID_HOSTS', 'LOG_FORMAT', 'SQUID_LOG', 'SQUID_CACHE_LOG', 'SQUID_CONFIG_PATH', 'ACL_FILES_DIR'] %}
+            {% for key in ['SQUID_HOST', 'SQUID_PORT', 'SQUID_HOSTS', 'SQUID_LOG', 'SQUID_CACHE_LOG', 'SQUID_CONFIG_PATH', 'ACL_FILES_DIR'] %}
             {% set value = env_vars.get(key, '') %}
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">{{ key }}</label>
@@ -101,7 +101,7 @@
         </form>
         
         <div x-show="!editing" class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['SQUID_HOST', 'SQUID_PORT', 'SQUID_HOSTS', 'LOG_FORMAT', 'SQUID_LOG', 'SQUID_CACHE_LOG', 'SQUID_CONFIG_PATH', 'ACL_FILES_DIR'] %}{{ key }}="{{ env_vars.get(key, '') }}"
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">{% for key in ['SQUID_HOST', 'SQUID_PORT', 'SQUID_HOSTS', 'SQUID_LOG', 'SQUID_CACHE_LOG', 'SQUID_CONFIG_PATH', 'ACL_FILES_DIR'] %}{{ key }}="{{ env_vars.get(key, '') }}"
 {% endfor %}</pre>
         </div>
     </div>
