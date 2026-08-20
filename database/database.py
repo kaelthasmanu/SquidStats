@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -14,6 +14,7 @@ from sqlalchemy import (
     inspect,
     text,
 )
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 from alembic import command
@@ -265,6 +266,20 @@ def table_exists(engine, table_name: str) -> bool:
 
 
 def create_dynamic_tables(engine, date_suffix: str = None):
+    """Create every static table and the dynamic tables for one day.
+
+    ``create_all(checkfirst=True)`` is intentionally used here in addition to
+    Alembic.  Alembic tracks *schema versions*, but a table can be deleted
+    manually while the version remains at ``head``; in that case Alembic has
+    no pending migration to run.  SQLAlchemy creates only tables that are
+    absent and leaves existing tables and their data untouched.
+    """
+    existing_tables = set(inspect(engine).get_table_names())
+
+    # All models that inherit from database.base.Base are registered in this
+    # metadata, including tables added in later migrations.
+    Base.metadata.create_all(engine, checkfirst=True)
+
     LogMetadata.__table__.create(engine, checkfirst=True)
     DeniedLog.__table__.create(engine, checkfirst=True)
     SystemMetrics.__table__.create(engine, checkfirst=True)
@@ -294,6 +309,57 @@ def create_dynamic_tables(engine, date_suffix: str = None):
         except Exception as e:
             logger.error(f"Error creating dynamic user/log tables: {e}")
             raise
+
+    created_tables = sorted(
+        set(inspect(engine).get_table_names()).difference(existing_tables)
+    )
+    if created_tables:
+        logger.warning(
+            "Database schema repair created missing tables: {}",
+            ", ".join(created_tables),
+        )
+
+
+def repair_database_schema(engine, date_suffix: str = None) -> list[str]:
+    """Repair missing application tables without deleting or altering data.
+
+    Returns the names of tables created during this repair.  Rows that were
+    previously deleted cannot be recovered by recreating an empty table; a
+    database backup is required for data recovery.
+    """
+    before = set(inspect(engine).get_table_names())
+    current_suffix = date_suffix or get_table_suffix()
+    create_dynamic_tables(engine, date_suffix=current_suffix)
+
+    # Keep historical user/log pairs consistent as well.  If one side of a
+    # known pair was removed, recreate only that side and preserve the other.
+    known_suffixes = {current_suffix}
+    for table_name in inspect(engine).get_table_names():
+        if table_name.startswith(("user_", "log_")):
+            _, suffix = table_name.split("_", 1)
+            if suffix.isdigit() and len(suffix) == 8:
+                known_suffixes.add(suffix)
+
+    for historical_suffix in sorted(known_suffixes):
+        user_table_name, log_table_name = get_dynamic_table_names(historical_suffix)
+        current_tables = set(inspect(engine).get_table_names())
+        if (
+            user_table_name not in current_tables
+            or log_table_name not in current_tables
+        ):
+            create_dynamic_tables(engine, date_suffix=historical_suffix)
+
+    after = set(inspect(engine).get_table_names())
+    created_tables = sorted(after.difference(before))
+
+    missing_static_tables = set(Base.metadata.tables).difference(after)
+    if missing_static_tables:
+        raise RuntimeError(
+            "Database schema repair could not create tables: "
+            + ", ".join(sorted(missing_static_tables))
+        )
+
+    return created_tables
 
 
 def get_dynamic_table_names(date_suffix: str = None) -> tuple[str, str]:
@@ -359,69 +425,64 @@ def migrate_database():
 
         if not os.path.exists(alembic_ini_path):
             logger.warning("alembic.ini not found. Skipping Alembic migrations.")
-            logger.warning("Please run: python manage_db.py init")
+            logger.warning(
+                "Running model-based schema repair instead; "
+                "please restore alembic.ini for future migrations."
+            )
+            engine = get_engine()
+            repaired_tables = repair_database_schema(engine)
+            if repaired_tables:
+                logger.warning(
+                    "Startup database repair recreated: {}",
+                    ", ".join(repaired_tables),
+                )
+            _ensure_admin_user(engine)
             return
 
         alembic_cfg = AlembicConfig(alembic_ini_path)
 
-        # Check if database has been initialized with Alembic
         engine = get_engine()
         with engine.connect() as conn:
             context = MigrationContext.configure(conn)
             current_rev = context.get_current_revision()
+            existing_tables = set(inspect(conn).get_table_names())
 
-            if current_rev is None:
-                # Database not initialized with Alembic yet
-                logger.info("Database not yet initialized with Alembic.")
-                logger.info("Checking if schema already exists...")
+        # If the version table is missing but there is an existing schema,
+        # preserve that schema and repair it before recording its migration
+        # state.  Running the initial migration against a partially existing
+        # schema would try to recreate tables that are already there.
+        application_tables = existing_tables.difference({"alembic_version"})
 
-                inspector = inspect(engine)
-
-                # Check if core tables exist
-                core_tables_exist = (
-                    inspector.has_table("log_metadata")
-                    and inspector.has_table("denied_logs")
-                    and inspector.has_table("system_metrics")
-                    and inspector.has_table("notifications")
-                    and inspector.has_table("admin_users")
-                    and inspector.has_table("blacklist_domains")
-                    and inspector.has_table("quota_users")
-                    and inspector.has_table("quota_groups")
-                    and inspector.has_table("quota_rules")
-                    and inspector.has_table("quota_events")
+        if current_rev is None:
+            logger.info("Database is not currently tracked by Alembic.")
+            if application_tables:
+                logger.info(
+                    "Existing schema detected without migration tracking; "
+                    "repairing missing tables before marking it as current."
                 )
-
-                if core_tables_exist:
-                    # Schema exists, stamp as current version
-                    logger.info(
-                        "Existing schema detected. Marking database as up-to-date..."
-                    )
-                    command.stamp(alembic_cfg, "head")
-                    logger.info("✓ Database marked as up-to-date with migrations.")
-
-                    # Ensure admin user exists
-                    _ensure_admin_user(conn, engine)
-                else:
-                    # No schema exists, run all migrations
-                    logger.info(
-                        "No existing schema found. Running initial migrations..."
-                    )
-                    command.upgrade(alembic_cfg, "head")
-                    logger.info("✓ Database schema created successfully.")
-
-                    # Create admin user after migrations
-                    _ensure_admin_user(conn, engine)
+                repair_database_schema(engine)
+                command.stamp(alembic_cfg, "head")
+                logger.info("✓ Existing database marked as up-to-date with migrations.")
             else:
-                # Database already initialized, run pending migrations
-                logger.info(f"Current database version: {current_rev}")
-                logger.info("Checking for pending migrations...")
-
-                # Run pending migrations
+                logger.info("No existing schema found. Running initial migrations...")
                 command.upgrade(alembic_cfg, "head")
-                logger.info("✓ Database migrations completed successfully.")
+                logger.info("✓ Database schema created successfully.")
+        else:
+            logger.info(f"Current database version: {current_rev}")
+            logger.info("Checking for pending migrations...")
+            command.upgrade(alembic_cfg, "head")
+            logger.info("✓ Database migrations completed successfully.")
 
-                # Ensure admin user exists
-                _ensure_admin_user(conn, engine)
+        # Alembic does not rerun a migration when a table is removed after the
+        # migration reached head.  Always perform this idempotent repair at
+        # startup, including after an entirely new database was migrated.
+        repaired_tables = repair_database_schema(engine)
+        if repaired_tables:
+            logger.warning(
+                "Startup database repair recreated: {}",
+                ", ".join(repaired_tables),
+            )
+        _ensure_admin_user(engine)
 
     except ImportError as e:
         logger.error(f"Alembic not installed: {e}")
@@ -435,33 +496,38 @@ def migrate_database():
         raise
 
 
-def _ensure_admin_user(conn, engine):
+def _ensure_admin_user(engine):
     """Ensure admin user exists, create if not."""
     try:
         inspector = inspect(engine)
 
         if not inspector.has_table("admin_users"):
             logger.warning("admin_users table not found. Cannot create admin user.")
-            return
+            return False
 
-        # Check if admin user exists
-        session = get_session()
+        Session = sessionmaker(bind=engine)
+        session = Session()
         try:
             existing_admin = (
                 session.query(AdminUser).filter_by(username="admin").first()
             )
             if not existing_admin:
                 logger.info("Admin user not found, creating default admin user...")
-                _create_default_admin_user(conn, engine)
-            # else:
-            #     logger.debug("Admin user already exists.")
+                return _create_default_admin_user(session)
+            return False
         finally:
             session.close()
+    except IntegrityError:
+        # Another process may have created the default user between the query
+        # and the insert.  The unique username constraint makes this harmless.
+        logger.info("Admin user was created concurrently by another process.")
+        return False
     except Exception as e:
         logger.warning(f"Could not check/create admin user: {e}")
+        return False
 
 
-def _create_default_admin_user(conn, engine):
+def _create_default_admin_user(session):
     """Create the default admin user using FIRST_PASSWORD from environment."""
     try:
         import bcrypt
@@ -476,42 +542,36 @@ def _create_default_admin_user(conn, engine):
             logger.warning(
                 "Set FIRST_PASSWORD in your .env file to create the admin user."
             )
-            return
+            return False
 
         # Hash the password
         salt = bcrypt.gensalt()
         password_hash = bcrypt.hashpw(first_password.encode("utf-8"), salt)
 
-        # Insert admin user
-        from sqlalchemy import text
-
-        insert_query = text("""
-            INSERT INTO admin_users (username, password_hash, salt, role, is_active, created_at, updated_at)
-            VALUES (:username, :password_hash, :salt, :role, :is_active, :created_at, :updated_at)
-        """)
-
-        from datetime import datetime
-
         now = datetime.now()
-
-        conn.execute(
-            insert_query,
-            {
-                "username": "admin",
-                "password_hash": password_hash.decode("utf-8"),
-                "salt": salt.decode("utf-8"),
-                "role": "admin",
-                "is_active": 1,
-                "created_at": now,
-                "updated_at": now,
-            },
+        session.add(
+            AdminUser(
+                username="admin",
+                password_hash=password_hash.decode("utf-8"),
+                salt=salt.decode("utf-8"),
+                role="admin",
+                is_active=1,
+                created_at=now,
+                updated_at=now,
+            )
         )
-
-        conn.commit()
+        session.commit()
         logger.info("✓ Default admin user created successfully with FIRST_PASSWORD")
+        return True
 
     except ImportError:
         logger.error("bcrypt module not available. Cannot create admin user.")
+        session.rollback()
+    except IntegrityError:
+        # Another process may have created the default user after the lookup.
+        session.rollback()
+        logger.info("Admin user was created concurrently by another process.")
     except Exception as e:
         logger.error(f"Error creating default admin user: {e}")
-        conn.rollback()
+        session.rollback()
+    return False
