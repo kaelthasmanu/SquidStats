@@ -240,11 +240,11 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
 
 1. Install with script:
 ```bash
- curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.2/install.sh | sudo bash
+ curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.3/install.sh | sudo bash
 ```
 or
 ```bash
-  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.2/install.sh | sudo bash
+  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.3/install.sh | sudo bash
 ```
 
 #### Installation Options
@@ -356,7 +356,7 @@ If the command returns the installed version, SquidStats is ready to use.
     Note: for use MARIADB need your own database running
    ```bash
    # Application Version
-   VERSION="2.5.2"
+   VERSION="2.5.3"
    
    # Security Keys
    SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
