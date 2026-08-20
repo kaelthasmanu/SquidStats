@@ -187,35 +187,6 @@ _Una herramienta moderna para analizar logs de Squid, proporcionando un panel f�
 apt install git python3 python3-pip python3-venv libmariadb-dev curl
 ```
 
-#### Resetear conexiones de un cliente
-
-La acción **Resetear conexiones** del menú de un usuario termina los estados
-de red activos asociados a su IP. Es una operación del sistema operativo, no
-una reconfiguración de Squid, y requiere privilegios equivalentes a root:
-
-- **Linux:** instala `conntrack` (`apt install conntrack`) y concede a
-  SquidStats el acceso necesario al binario. Se ejecuta `conntrack -D -s IP`.
-- **macOS/BSD:** la acción usa `pfctl -k IP`; PF debe estar habilitado y el
-  proceso debe poder ejecutar `pfctl` con privilegios administrativos.
-- **Otros sistemas:** la interfaz informa que esta capacidad no está
-  disponible, sin alterar ninguna conexión.
-
-En Linux, agrega las siguientes reglas de `iptables` en el servidor proxy
-Squid para que `conntrack` pueda rastrear las conexiones del proxy en el
-puerto 3128:
-
-```bash
-iptables -t filter -I INPUT -p tcp --dport 3128 -m state --state NEW,ESTABLISHED -j ACCEPT
-iptables -t filter -I OUTPUT -p tcp --sport 3128 -m state --state ESTABLISHED -j ACCEPT
-iptables -t filter -I FORWARD -p tcp --dport 3128 -j ACCEPT
-iptables -t filter -I FORWARD -p tcp --sport 3128 -j ACCEPT
-```
-
-El reseteo solo afecta estados rastreados por el firewall del host. En una
-instalación Docker o con Squid detrás de otro NAT, debe ejecutarse en el host
-que realmente mantiene esos estados; de lo contrario no se podrán cerrar las
-conexiones del cliente por IP.
-
 #### 🔧 Configuración del Cache Manager (Crítico para SquidStats)
 
 **SquidStats requiere una configuración adecuada del Cache Manager para funcionar correctamente.** Por favor sigue la [documentación oficial del Cache Manager de Squid](https://wiki.squid-cache.org/Features/CacheManager/Index) para una configuración completa.
@@ -707,6 +678,36 @@ Notas:
     -d "username=admin" \
     -d "new_password=NuevaClaveSegura123"
   ```
+
+
+#### Resetear conexiones de un cliente
+
+La acción **Resetear conexiones** del menú de un usuario termina los estados
+de red activos asociados a su IP. Es una operación del sistema operativo, no
+una reconfiguración de Squid, y requiere privilegios equivalentes a root:
+
+- **Linux:** instala `conntrack` (`apt install conntrack`) y concede a
+  SquidStats el acceso necesario al binario. Se ejecuta `conntrack -D -s IP`.
+- **macOS/BSD:** la acción usa `pfctl -k IP`; PF debe estar habilitado y el
+  proceso debe poder ejecutar `pfctl` con privilegios administrativos.
+- **Otros sistemas:** la interfaz informa que esta capacidad no está
+  disponible, sin alterar ninguna conexión.
+
+En Linux, agrega las siguientes reglas de `iptables` en el servidor proxy
+Squid para que `conntrack` pueda rastrear las conexiones del proxy en el
+puerto 3128:
+
+```bash
+iptables -t filter -I INPUT -p tcp --dport 3128 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -t filter -I OUTPUT -p tcp --sport 3128 -m state --state ESTABLISHED -j ACCEPT
+iptables -t filter -I FORWARD -p tcp --dport 3128 -j ACCEPT
+iptables -t filter -I FORWARD -p tcp --sport 3128 -j ACCEPT
+```
+
+El reseteo solo afecta estados rastreados por el firewall del host. En una
+instalación Docker o con Squid detrás de otro NAT, debe ejecutarse en el host
+que realmente mantiene esos estados; de lo contrario no se podrán cerrar las
+conexiones del cliente por IP.
 
 ### ⚠️ Alerta de Primera Ejecución ⚠️
 
