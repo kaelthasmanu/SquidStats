@@ -67,7 +67,7 @@ HTTP_METHODS = frozenset(
 )
 
 DETAILED_REQUEST_RE = re.compile(
-    r'^\S+\s+(?P<ip>\S+)\s+(?P<identity>\S+)\s+(?P<username>\S+)\s+'
+    r"^\S+\s+(?P<ip>\S+)\s+(?P<identity>\S+)\s+(?P<username>\S+)\s+"
     r"\[[^\]]*\]\s+"
     r'"(?P<method>\S+)\s+(?P<url>.*?)\s+HTTP/(?P<http_version>[^"]+)"\s+'
     r"(?P<status>\S+)\s+(?P<bytes>\S+)(?:\s+.*)?$"
@@ -295,9 +295,7 @@ def parse_log_line_detailed(line: str):
                 "username": username,
                 "url": quoted_match.group("url"),
                 "response": _response_code(status),
-                "data_transmitted": _bytes_transmitted(
-                    quoted_match.group("bytes")
-                ),
+                "data_transmitted": _bytes_transmitted(quoted_match.group("bytes")),
                 "method": quoted_match.group("method").upper(),
                 "status": status,
                 "is_denied": "TCP_DENIED" in line,
@@ -354,7 +352,9 @@ def parse_log_line_space_format(line):
             "is_denied": "TCP_DENIED" in line,
         }
     except (IndexError, TypeError, ValueError) as error:
-        logger.debug("Unable to parse space DETAILED line: {} ({})", line.strip(), error)
+        logger.debug(
+            "Unable to parse space DETAILED line: {} ({})", line.strip(), error
+        )
         return None
 
 
@@ -395,7 +395,9 @@ def detect_log_format(log_file, sample_lines=32, start_position=0):
                 return FORMAT_DETAILED
             return FORMAT_AUTO
     except OSError as error:
-        logger.warning("Unable to detect log format; using per-line detection: {}", error)
+        logger.warning(
+            "Unable to detect log format; using per-line detection: {}", error
+        )
         return FORMAT_AUTO
 
 
@@ -434,9 +436,7 @@ def process_logs(log_file):
                         f"File truncated (size: {file_size} < position: {last_position})"
                     )
                     last_position = 0
-            detected_format = detect_log_format(
-                log_file, start_position=last_position
-            )
+            detected_format = detect_log_format(log_file, start_position=last_position)
             logger.info(
                 "Detected Squid log format: {}",
                 detected_format,
