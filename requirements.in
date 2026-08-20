@@ -32,3 +32,6 @@ telethon >= 1.44.0
 loguru
 weasyprint
 ldap3
+
+# Test integration
+pytest-asyncio

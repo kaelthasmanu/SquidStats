@@ -112,6 +112,8 @@ pymysql==1.2.0
     # via -r requirements.in
 pyphen==0.18.1
     # via weasyprint
+pytest-asyncio==1.4.0
+    # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via flask-apscheduler
 python-dotenv==1.2.3
