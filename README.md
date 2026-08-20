@@ -370,10 +370,10 @@ If the command returns the installed version, SquidStats is ready to use.
    ACL_FILES_DIR="/etc/squid/acls"
    
    # Database Configuration
-   DATABASE_TYPE="SQLITE"  # Options: SQLITE or MARIADB
+   DATABASE_TYPE="SQLITE"  # Options: SQLITE or MARIADB or MYSQL or POSTGRESQL
    DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db"  # For SQLite: directory path
-   # For MariaDB: connection string mysql+pymysql://user:clave@host:port/db
-   # For Postgresql: connection string postgresql+psycopg2://squidstats:squidstats@127.0.0.1:5432/squidstats
+   # For MariaDB/MySQL: connection string -> mysql+pymysql://user:pass@host:port/db
+   # For Postgresql: connection string -> postgresql+psycopg2://user:pass@127.0.0.1:5432/squidstats
    
    # Flask Application Settings
    FLASK_DEBUG="False"  # Set to True only for development
