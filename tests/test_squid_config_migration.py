@@ -52,7 +52,9 @@ def test_remove_log_format_migration_preserves_squid_config(tmp_path, monkeypatc
             text("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL)")
         )
         connection.execute(
-            text("INSERT INTO alembic_version (version_num) VALUES ('010_add_squid_config')")
+            text(
+                "INSERT INTO alembic_version (version_num) VALUES ('010_add_squid_config')"
+            )
         )
 
     old_database_type = Config.DATABASE_TYPE
@@ -72,6 +74,8 @@ def test_remove_log_format_migration_preserves_squid_config(tmp_path, monkeypatc
     assert {"squid_host", "squid_port", "squid_log"}.issubset(columns)
 
     with engine.connect() as connection:
-        assert connection.execute(text("SELECT COUNT(*) FROM squid_config")).scalar() == 1
+        assert (
+            connection.execute(text("SELECT COUNT(*) FROM squid_config")).scalar() == 1
+        )
 
     engine.dispose()
