@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Package version without "v" prefix (e.g. 2.5.2). Leave empty to derive from last tag.'
+        description: 'Package version without "v" prefix (e.g. 2.5.3). Leave empty to derive from last tag.'
         required: false
         default: ''
 
