@@ -107,7 +107,7 @@ def realtime_data_thread(socketio, shutdown_event=None):
                 None,
                 "",
             ):
-                logger.error(f"get_network_info() returned an error: {network_info}")
+                logger.warning(f"get_network_info() returned an error: {network_info}")
                 network_info = []
 
             # Validar ram_info
@@ -117,7 +117,7 @@ def realtime_data_thread(socketio, shutdown_event=None):
                 None,
                 "",
             ):
-                logger.error(f"get_ram_info() returned an error: {ram_info}")
+                logger.warning(f"get_ram_info() returned an error: {ram_info}")
                 ram_info = {"used": "0 B"}
 
             # Validar swap_info
@@ -127,7 +127,7 @@ def realtime_data_thread(socketio, shutdown_event=None):
                 None,
                 "",
             ):
-                logger.error(f"get_swap_info() returned an error: {swap_info}")
+                logger.warning(f"get_swap_info() returned an error: {swap_info}")
                 swap_info = {"used": "0 B"}
 
             # Validar cpu_info
@@ -137,7 +137,7 @@ def realtime_data_thread(socketio, shutdown_event=None):
                 None,
                 "",
             ):
-                logger.error(f"get_cpu_info() devolvió un error: {cpu_info}")
+                logger.warning(f"get_cpu_info() returned an error: {cpu_info}")
                 cpu_info = {"usage": "0%"}
 
             # Validar network_stats
@@ -147,7 +147,9 @@ def realtime_data_thread(socketio, shutdown_event=None):
                 None,
                 "",
             ):
-                logger.error(f"get_network_stats() returned an error: {network_stats}")
+                logger.warning(
+                    f"get_network_stats() returned an error: {network_stats}"
+                )
                 network_stats = {}
 
             system_info = {
