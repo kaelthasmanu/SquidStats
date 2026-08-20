@@ -19,7 +19,7 @@ def test_connection_string_removes_accidental_outer_quotes():
 
 def test_server_database_name_removes_trailing_quote():
     parsed_url, database_name = _parse_server_database_name(
-        "mysql+pymysql://user:password@localhost:3306/squidstatsdb\""
+        'mysql+pymysql://user:password@localhost:3306/squidstatsdb"'
     )
 
     assert parsed_url.scheme == "mysql+pymysql"
