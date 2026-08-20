@@ -1,11 +1,11 @@
 import os
+import re
 import time
 from datetime import datetime
 
 from loguru import logger
 from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
 
-from config import Config
 from database.database import (
     Base,
     DeniedLog,
@@ -45,8 +45,33 @@ class DatabaseManager:
 BATCH_SIZE = 500
 MAX_RETRIES = 3
 
-# Log parsing mode controlled by .env LOG_FORMAT: 'DETAILED' or 'DEFAULT'
-LOG_FORMAT = getattr(Config, "LOG_FORMAT", "DETAILED").upper()
+# Supported Squid access-log families.  Detection is automatic; these names
+# are also used as parser hints after sampling a file.
+FORMAT_AUTO = "AUTO"
+FORMAT_DEFAULT = "DEFAULT"
+FORMAT_DETAILED = "DETAILED"
+
+HTTP_METHODS = frozenset(
+    {
+        "CONNECT",
+        "DELETE",
+        "GET",
+        "HEAD",
+        "OPTIONS",
+        "PATCH",
+        "POST",
+        "PUT",
+        "TRACE",
+        "NONE",
+    }
+)
+
+DETAILED_REQUEST_RE = re.compile(
+    r'^\S+\s+(?P<ip>\S+)\s+(?P<identity>\S+)\s+(?P<username>\S+)\s+'
+    r"\[[^\]]*\]\s+"
+    r'"(?P<method>\S+)\s+(?P<url>.*?)\s+HTTP/(?P<http_version>[^"]+)"\s+'
+    r"(?P<status>\S+)\s+(?P<bytes>\S+)(?:\s+.*)?$"
+)
 
 
 def find_last_parent_proxy(log_file: str, lines_to_check: int = 5000) -> str | None:
@@ -102,109 +127,195 @@ def get_file_inode(filepath):
         raise
 
 
-def parse_log_line(line):
-    # Universal ignore for specific squid error entries (apply regardless of LOG_FORMAT)
+def _is_number(value: str) -> bool:
     try:
-        line_lower = line.lower() if isinstance(line, str) else ""
-        if (
-            "error:transaction-end-before-headers" in line_lower
-            or "error:invalid-request" in line_lower
-        ):
-            return None
-    except Exception as e:
-        logger.debug("Unexpected error pre-filtering log line: %s", e)
+        float(value)
+        return True
+    except (TypeError, ValueError):
+        return False
 
-    if LOG_FORMAT == "DEFAULT":
-        return parse_log_line_default(line)
 
-    # DETAILED (current behavior)
-    if "cache_object://" in line:
+def _is_integer(value: str) -> bool:
+    return value.isdigit()
+
+
+def _response_code(status: str) -> int:
+    code = status.rsplit("/", 1)[-1]
+    return int(code) if code.isdigit() else 0
+
+
+def _bytes_transmitted(value: str) -> int:
+    return int(value) if _is_integer(value) else 0
+
+
+def _is_default_line(parts: list[str]) -> bool:
+    """Recognize Squid's native access.log layout without parsing it twice."""
+    return bool(
+        len(parts) >= 7
+        and _is_number(parts[0])
+        and _is_number(parts[1])
+        and "/" in parts[3]
+        and _is_integer(parts[3].rsplit("/", 1)[-1])
+        and (parts[4] == "-" or _is_integer(parts[4]))
+        and parts[5].upper() in HTTP_METHODS
+    )
+
+
+def _is_pipe_line(line: str) -> bool:
+    parts = line.strip().split("|")
+    return bool(
+        len(parts) >= 14
+        and _is_number(parts[0])
+        and _is_integer(parts[8])
+        and _is_integer(parts[9])
+        and parts[5].upper() in HTTP_METHODS
+    )
+
+
+def _is_space_detailed_line(parts: list[str]) -> bool:
+    """Recognize the legacy whitespace-separated DETAILED layout."""
+    return bool(
+        len(parts) >= 11
+        and _is_number(parts[0])
+        and parts[5].upper() in HTTP_METHODS
+        and _is_integer(parts[9])
+        and _is_integer(parts[10])
+    )
+
+
+def _is_quoted_detailed_line(line: str):
+    match = DETAILED_REQUEST_RE.match(line.strip())
+    return bool(match and match.group("method").upper() in HTTP_METHODS)
+
+
+def _detect_line_format(line: str) -> str | None:
+    if not isinstance(line, str) or not line.strip():
         return None
-    if "|" in line:
-        return parse_log_line_pipe_format(line)
+
+    if _is_pipe_line(line):
+        return FORMAT_DETAILED
+
     parts = line.split()
-    # Classic Squid format: timestamp elapsed ip code/status bytes method url rfc931 peerstatus/peerhost type
-    if len(parts) >= 10 and (
-        len(parts) > 5
-        and parts[5]
-        in (
-            "CONNECT",
-            "GET",
-            "POST",
-            "HEAD",
-            "PUT",
-            "DELETE",
-            "OPTIONS",
-            "TRACE",
-            "PATCH",
-        )
-    ):
-        try:
-            return {
-                "ip": parts[2],
-                # Keep current behavior: if '-', set None
-                "username": parts[2] if parts[2] != "-" else None,
-                "url": parts[6],
-                "response": int(parts[3].split("/")[-1])
-                if "/" in parts[3] and parts[3].split("/")[-1].isdigit()
-                else 0,
-                "data_transmitted": int(parts[4]) if parts[4].isdigit() else 0,
-                "method": parts[5],
-                "status": parts[3],
-                "is_denied": "TCP_DENIED" in parts[3],
-            }
-        except Exception as e:
-            logger.error(f"Error parsing classic squid log line: {line.strip()} - {e}")
+    if _is_default_line(parts):
+        return FORMAT_DEFAULT
+
+    if _is_quoted_detailed_line(line) or _is_space_detailed_line(parts):
+        return FORMAT_DETAILED
+
+    return None
+
+
+def _ignore_log_line(line: str) -> bool:
+    line_lower = line.lower()
+    return (
+        "cache_object://" in line_lower
+        or "error:transaction-end-before-headers" in line_lower
+        or "error:invalid-request" in line_lower
+    )
+
+
+def parse_log_line(line: str, format_hint: str = FORMAT_AUTO):
+    """Parse one line using a detected format or safe per-line detection."""
+    if not isinstance(line, str) or not line.strip():
+        return None
+
+    try:
+        if _ignore_log_line(line):
             return None
-    # If not classic, try the space format
-    return parse_log_line_space_format(line)
+    except Exception as error:
+        logger.debug("Unexpected error pre-filtering log line: {}", error)
+        return None
+
+    normalized_hint = (format_hint or FORMAT_AUTO).upper()
+    if normalized_hint == FORMAT_DEFAULT:
+        return parse_log_line_default(line)
+    if normalized_hint == FORMAT_DETAILED:
+        return parse_log_line_detailed(line)
+
+    detected_format = _detect_line_format(line)
+    if detected_format == FORMAT_DEFAULT:
+        return parse_log_line_default(line)
+    if detected_format == FORMAT_DETAILED:
+        return parse_log_line_detailed(line)
+    return None
 
 
 def parse_log_line_default(line: str):
+    """Parse Squid's standard format.
+
+    ``timestamp elapsed client_ip result/status bytes method url user
+    hierarchy content-type``
+    """
     try:
+        if _ignore_log_line(line):
+            return None
         parts = line.split()
-        # Must have at least 10 fields; skip internal cache_object lines
-        if len(parts) < 7:
-            return None
-        # Locate URL (may contain spaces only in rare cases; assume standard)
-        # In the typical format, url is at parts[6]
-        url = parts[6] if len(parts) > 6 else None
-        if not url or "cache_object://" in url:
+        if not _is_default_line(parts):
             return None
 
-        ip = parts[2] if len(parts) > 2 else None
-        status = parts[3] if len(parts) > 3 else ""
-        bytes_str = parts[4] if len(parts) > 4 else "0"
-        method = parts[5] if len(parts) > 5 else ""
-        # User field is usually at parts[7]; if '-', use IP as username
+        status = parts[3]
+        ip = parts[2]
         user_field = parts[7] if len(parts) > 7 else "-"
-        username = user_field if user_field != "-" else (ip or "-")
-
-        response = 0
-        if "/" in status:
-            code = status.split("/")[-1]
-            response = int(code) if code.isdigit() else 0
-
-        data_transmitted = int(bytes_str) if bytes_str.isdigit() else 0
-
+        username = user_field if user_field != "-" else ip
         return {
             "ip": ip,
-            "username": username,
-            "url": url,
-            "response": response,
-            "data_transmitted": data_transmitted,
-            "method": method,
+            "username": username if username != "-" else None,
+            "url": parts[6],
+            "response": _response_code(status),
+            "data_transmitted": _bytes_transmitted(parts[4]),
+            "method": parts[5].upper(),
             "status": status,
             "is_denied": "TCP_DENIED" in status,
         }
-    except Exception as e:
-        logger.error(f"Error parsing DEFAULT format line: {line.strip()} - {e}")
+    except (IndexError, TypeError, ValueError) as error:
+        logger.debug("Unable to parse DEFAULT log line: {} ({})", line.strip(), error)
         return None
+
+
+def parse_log_line_detailed(line: str):
+    """Parse the supported legacy DETAILED variants."""
+    if _ignore_log_line(line):
+        return None
+    if _is_pipe_line(line):
+        return parse_log_line_pipe_format(line)
+
+    quoted_match = DETAILED_REQUEST_RE.match(line.strip())
+    if quoted_match:
+        try:
+            identity = quoted_match.group("identity")
+            username = quoted_match.group("username")
+            ip = quoted_match.group("ip")
+            if username == "-":
+                username = identity if identity != "-" else ip
+            if username == "-":
+                username = None
+            status = quoted_match.group("status")
+            return {
+                "ip": ip,
+                "username": username,
+                "url": quoted_match.group("url"),
+                "response": _response_code(status),
+                "data_transmitted": _bytes_transmitted(
+                    quoted_match.group("bytes")
+                ),
+                "method": quoted_match.group("method").upper(),
+                "status": status,
+                "is_denied": "TCP_DENIED" in line,
+            }
+        except (IndexError, TypeError, ValueError) as error:
+            logger.debug(
+                "Unable to parse quoted DETAILED log line: {} ({})",
+                line.strip(),
+                error,
+            )
+            return None
+
+    return parse_log_line_space_format(line)
 
 
 def parse_log_line_pipe_format(line):
     parts = line.strip().split("|")
-    if len(parts) < 14:
+    if not _is_pipe_line(line):
         return None
     try:
         username = parts[3]
@@ -216,58 +327,76 @@ def parse_log_line_pipe_format(line):
             "url": parts[6],
             "response": int(parts[8]),
             "data_transmitted": int(parts[9]),
-            "method": parts[5],
+            "method": parts[5].upper(),
             "status": parts[13],
             "is_denied": "TCP_DENIED" in parts[13],
         }
-    except Exception as e:
-        logger.error(f"Error parsing line with pipe format: {line.strip()} - {e}")
+    except (IndexError, TypeError, ValueError) as error:
+        logger.debug("Unable to parse pipe log line: {} ({})", line.strip(), error)
         return None
 
 
 def parse_log_line_space_format(line):
+    """Parse the legacy whitespace-separated DETAILED variant."""
     try:
         parts = line.split()
-        if len(parts) < 11 or parts[3] == "-":
+        if not _is_space_detailed_line(parts) or parts[3] == "-":
             return None
+        status = parts[4]
         return {
             "ip": parts[1],
             "username": parts[3],
-            "url": parts[7],
-            "response": int(parts[9]) if parts[9].isdigit() else 0,
-            "data_transmitted": int(parts[10]) if parts[10].isdigit() else 0,
-            "method": parts[5] if len(parts) > 5 else "",
-            "status": parts[6] if len(parts) > 6 else "",
+            "url": parts[6],
+            "response": int(parts[9]),
+            "data_transmitted": int(parts[10]),
+            "method": parts[5].upper(),
+            "status": status,
             "is_denied": "TCP_DENIED" in line,
         }
-    except (IndexError, ValueError) as e:
-        logger.error(f"Error parsing line with space format: {line.strip()} - {e}")
+    except (IndexError, TypeError, ValueError) as error:
+        logger.debug("Unable to parse space DETAILED line: {} ({})", line.strip(), error)
         return None
 
 
-def detect_log_format(log_file, sample_lines=10):
+def detect_log_format(log_file, sample_lines=32, start_position=0):
+    """Detect DEFAULT or DETAILED by validating a small sample of lines."""
     try:
-        with open(log_file, encoding="utf-8", errors="replace") as f:
-            pipe_count = 0
-            space_count = 0
+        with open(log_file, encoding="utf-8", errors="replace") as file:
+            if start_position:
+                file.seek(start_position)
 
-            for i, line in enumerate(f):
-                if i >= sample_lines:
+            counts = {FORMAT_DEFAULT: 0, FORMAT_DETAILED: 0}
+            for _ in range(sample_lines):
+                line = file.readline()
+                if not line:
                     break
+                detected = _detect_line_format(line)
+                if detected:
+                    counts[detected] += 1
 
-                if (
-                    "|" in line and line.count("|") > 5
-                ):  # Pipe format typically has many |
-                    pipe_count += 1
-                elif len(line.split()) > 10:  # Space format typically has many fields
-                    space_count += 1
+            # A tail containing only malformed/ignored lines should not force
+            # a wrong format.  Retry from the beginning in that case.
+            if not any(counts.values()) and start_position:
+                file.seek(0)
+                for _ in range(sample_lines):
+                    line = file.readline()
+                    if not line:
+                        break
+                    detected = _detect_line_format(line)
+                    if detected:
+                        counts[detected] += 1
 
-            format_detected = "pipe" if pipe_count > space_count else "space"
-            return format_detected
+            if not any(counts.values()):
+                return FORMAT_AUTO
 
-    except Exception as e:
-        logger.warning(f"Error detecting format, using line detection: {e}")
-        return "auto"  # Fallback to automatic per-line detection
+            if counts[FORMAT_DEFAULT] > counts[FORMAT_DETAILED]:
+                return FORMAT_DEFAULT
+            if counts[FORMAT_DETAILED] > counts[FORMAT_DEFAULT]:
+                return FORMAT_DETAILED
+            return FORMAT_AUTO
+    except OSError as error:
+        logger.warning("Unable to detect log format; using per-line detection: {}", error)
+        return FORMAT_AUTO
 
 
 def process_logs(log_file):
@@ -305,6 +434,13 @@ def process_logs(log_file):
                         f"File truncated (size: {file_size} < position: {last_position})"
                     )
                     last_position = 0
+            detected_format = detect_log_format(
+                log_file, start_position=last_position
+            )
+            logger.info(
+                "Detected Squid log format: {}",
+                detected_format,
+            )
             # logger.info(f"Reading from position: {last_position}")
             user_cache = {}
             logs_to_insert, new_users_to_insert, denied_to_insert = [], [], []
@@ -369,7 +505,7 @@ def process_logs(log_file):
                 for line in f:
                     processed_lines += 1
                     current_position += len(line.encode("utf-8"))
-                    log_data = parse_log_line(line)
+                    log_data = parse_log_line(line, format_hint=detected_format)
                     if not log_data:
                         continue
                     if log_data["is_denied"]:
