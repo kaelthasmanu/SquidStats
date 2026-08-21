@@ -114,7 +114,10 @@
                                 {{ _("Haz un respaldo y ejecuta") }} <strong>{{ _("VACUUM") }}</strong> {{ _("o restaura desde una copia sana.") }}
                             </span>
                         </template>
-                        <template x-if="!health.extra.corruption && health.db_type === 'SQLITE'">
+                        <template x-if="!health.extra.corruption && health.db_type === 'SQLITE' && health.extra.integrity_checked === false">
+                            <span>{{ _("La integridad se verifica manualmente desde el botón Verificar Integridad.") }}</span>
+                        </template>
+                        <template x-if="!health.extra.corruption && health.db_type === 'SQLITE' && health.extra.integrity_checked !== false">
                             <span>
                                 {{ _("Fragmentación:") }}
                                 <strong x-text="health.extra.fragmentation_pct + '%'"></strong>
@@ -738,6 +741,7 @@ function dbHealthPanel() {
 
         get healthStatus() {
             if (this.health?.extra?.corruption) return 'critical';
+            if (this.health?.extra?.integrity_checked === false) return 'warning';
             const frag = this.health?.extra?.fragmentation_pct ?? 0;
             if (frag > 30) return 'critical';
             if (frag > 10) return 'warning';

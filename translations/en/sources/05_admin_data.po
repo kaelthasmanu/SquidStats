@@ -371,6 +371,10 @@ msgstr ""
 msgid "Esta operación puede tardar varios minutos en bases de datos grandes."
 msgstr "This operation may take several minutes on large databases."
 
+#: templates/admin/database.html:119
+msgid "La integridad se verifica manualmente desde el botón Verificar Integridad."
+msgstr "Integrity is checked manually using the Verify Integrity button."
+
 #: templates/admin/database.html:280
 msgid "Verificando..."
 msgstr "Verifying..."
