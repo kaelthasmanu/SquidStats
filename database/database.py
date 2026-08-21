@@ -431,12 +431,13 @@ def get_dynamic_models(date_suffix: str):
     return DynamicUser, DynamicLog
 
 
-def _verify_sqlite_database(engine):
-    """Verify that SQLite can read, validate, and write the database.
+def _verify_sqlite_access(engine):
+    """Verify that SQLite can read and write without changing user data.
 
     The write check is performed inside a transaction and rolled back. It
     exercises the main database file without leaving a sentinel table or
-    changing application data behind.
+    changing application data behind. Full integrity checks are intentionally
+    handled only by the manual administration action.
     """
     check_table = f"_squidstats_startup_check_{uuid.uuid4().hex}"
     check_table_definition = Table(
@@ -445,14 +446,8 @@ def _verify_sqlite_database(engine):
         Column("id", Integer, nullable=False),
     )
 
-    logger.info("Checking SQLite database access and integrity...")
+    logger.info("Checking SQLite database read/write access...")
     with engine.connect() as connection:
-        quick_check = connection.exec_driver_sql("PRAGMA quick_check").scalar()
-        if str(quick_check).lower() != "ok":
-            raise RuntimeError(
-                f"SQLite integrity check failed: PRAGMA quick_check returned {quick_check!r}"
-            )
-
         # End any transaction opened implicitly by the read before acquiring
         # the write lock for the actual read/write capability check.
         connection.rollback()
@@ -469,7 +464,7 @@ def _verify_sqlite_database(engine):
                 connection.rollback()
             raise
 
-    logger.info("✓ SQLite database read/write and integrity checks passed")
+    logger.info("✓ SQLite database read/write check passed")
 
 
 def _is_transient_sqlite_error(error: Exception) -> bool:
@@ -568,7 +563,7 @@ def _migrate_database_once():
             )
             engine = get_engine()
             if Config.DATABASE_TYPE == "SQLITE":
-                _verify_sqlite_database(engine)
+                _verify_sqlite_access(engine)
             repaired_tables = repair_database_schema(engine)
             if repaired_tables:
                 logger.warning(
@@ -582,7 +577,7 @@ def _migrate_database_once():
 
         engine = get_engine()
         if Config.DATABASE_TYPE == "SQLITE":
-            _verify_sqlite_database(engine)
+            _verify_sqlite_access(engine)
         with engine.connect() as conn:
             context = MigrationContext.configure(conn)
             current_rev = context.get_current_revision()

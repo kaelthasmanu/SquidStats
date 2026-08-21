@@ -3,7 +3,7 @@
 import sqlite3
 
 import bcrypt
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 
@@ -13,7 +13,7 @@ from database.base import Base
 from database.database import (
     _ensure_admin_user,
     _is_transient_sqlite_error,
-    _verify_sqlite_database,
+    _verify_sqlite_access,
     create_dynamic_models,
     repair_database_schema,
 )
@@ -81,15 +81,23 @@ def test_sqlite_table_stats_work_without_dbstat(in_memory_engine, db_session):
     assert stats["admin_users"]["size"] >= 0
 
 
-def test_sqlite_startup_check_validates_integrity_and_rolls_back_write(tmp_path):
+def test_sqlite_startup_check_validates_access_and_rolls_back_write(tmp_path):
     database_path = tmp_path / "startup-check.db"
     engine = create_engine(f"sqlite:///{database_path}", future=True)
+    statements = []
 
-    _verify_sqlite_database(engine)
+    @event.listens_for(engine, "before_cursor_execute")
+    def capture_statement(
+        _connection, _cursor, statement, _parameters, _context, _executemany
+    ):
+        statements.append(statement)
+
+    _verify_sqlite_access(engine)
 
     assert database_path.exists()
     tables = set(inspect(engine).get_table_names())
     assert not any(table.startswith("_squidstats_startup_check_") for table in tables)
+    assert not any("quick_check" in statement.lower() for statement in statements)
     engine.dispose()
 
 

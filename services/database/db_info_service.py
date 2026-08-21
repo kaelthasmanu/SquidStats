@@ -40,10 +40,9 @@ def get_tables_info():
 def get_db_health():
     """Return a health snapshot of the database.
 
-    For SQLite, runs PRAGMA quick_check(1) on every call so corruption is
-    detected automatically without the user having to click the integrity
-    check button.  The query stops after the *first* error it finds, keeping
-    latency acceptable even on large databases.
+    SQLite integrity is deliberately not checked here.  A quick_check can
+    scan the complete database, so it is executed only by the explicit
+    integrity-check action in the administration panel.
     """
     session = None
     try:
@@ -77,22 +76,6 @@ def get_db_health():
 
             health["total_size_bytes"] = page_size * page_count
 
-            # ── Corruption probe: quick_check stops at the first bad page ──
-            corruption = False
-            corruption_detail = None
-            try:
-                qc_rows = session.execute(text("PRAGMA quick_check(1)")).fetchall()
-                if not qc_rows or qc_rows[0][0] != "ok":
-                    corruption = True
-                    corruption_detail = (
-                        qc_rows[0][0] if qc_rows else "Sin respuesta del PRAGMA"
-                    )
-            except Exception:
-                corruption = True
-                corruption_detail = _(
-                    "No se pudo completar la verificación de integridad"
-                )
-
             health["extra"] = {
                 "page_size": page_size,
                 "page_count": page_count,
@@ -100,8 +83,9 @@ def get_db_health():
                 "journal_mode": journal_mode,
                 "auto_vacuum": _av.get(auto_vacuum_val, str(auto_vacuum_val)),
                 "fragmentation_pct": fragmentation_pct,
-                "corruption": corruption,
-                "corruption_detail": corruption_detail,
+                "corruption": False,
+                "corruption_detail": None,
+                "integrity_checked": False,
             }
 
             # ── Table stats (may fail on severely corrupted DBs) ──
