@@ -268,6 +268,26 @@ msgstr "Audit Center"
 msgid "Herramienta para el análisis de actividad y seguridad."
 msgstr "Tool for activity and security analysis."
 
+#: routes/admin/database.py:47
+msgid "Selecciona un archivo de logs para importar"
+msgstr "Select a log file to import"
+
+#: routes/admin/database.py:61
+msgid "Importación completada correctamente"
+msgstr "Import completed successfully"
+
+#: routes/admin/database.py:65
+msgid "No se pudo leer el archivo de logs"
+msgstr "The log file could not be read"
+
+#: routes/admin/database.py:67
+msgid "El archivo no contiene logs de Squid válidos"
+msgstr "The file contains no valid Squid logs"
+
+#: routes/admin/database.py:70
+msgid "No se pudo importar el archivo de logs"
+msgstr "The log file could not be imported"
+
 #: routes/stats_routes.py:70
 msgid "Estadísticas del comportamiento del Sistema"
 msgstr "System Behavior Statistics"
