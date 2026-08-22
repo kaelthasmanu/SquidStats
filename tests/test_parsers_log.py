@@ -2,11 +2,17 @@
 Tests for log line parsers (parsers/log.py).
 """
 
+from datetime import datetime
+
+from database.database import get_dynamic_models
+from database.models.models import DeniedLog
 from parsers.log import (
     FORMAT_AUTO,
     FORMAT_DEFAULT,
     FORMAT_DETAILED,
     detect_log_format,
+    get_log_datetime,
+    import_logs,
     parse_log_line,
     parse_log_line_default,
     parse_log_line_pipe_format,
@@ -175,3 +181,50 @@ class TestAutomaticFormatDetection:
         log_file.write_text("not a Squid access log\n", encoding="utf-8")
 
         assert detect_log_format(log_file) == FORMAT_AUTO
+
+
+class TestLogImport:
+    def test_log_datetime_comes_from_first_field(self):
+        line = (
+            "1790000000 1 192.168.1.100 TCP_MISS/200 1234 GET http://example.com user"
+        )
+        assert get_log_datetime(line) is not None
+        assert get_log_datetime("not a timestamp") is None
+
+    def test_import_routes_entries_to_their_daily_tables(self, tmp_path, patched_db):
+        first_datetime = datetime(2026, 8, 16, 12, 0, 0)
+        second_datetime = datetime(2026, 8, 17, 12, 0, 0)
+        first_timestamp = first_datetime.timestamp()
+        second_timestamp = second_datetime.timestamp()
+        log_file = tmp_path / "access.log"
+        log_file.write_text(
+            f"{first_timestamp} 1 192.168.1.100 TCP_MISS/200 1234 "
+            "GET http://first.example user1 HIER_DIRECT/- text/html\n"
+            f"{second_timestamp} 1 192.168.1.101 TCP_MISS/204 42 "
+            "GET http://second.example user2 HIER_DIRECT/- text/html\n",
+            encoding="utf-8",
+        )
+
+        summary = import_logs(str(log_file))
+
+        assert summary["processed_lines"] == 2
+        assert summary["parsed_lines"] == 2
+        assert summary["inserted_logs"] == 2
+        assert summary["inserted_users"] == 2
+        assert [item["date"] for item in summary["dates"]] == [
+            "20260816",
+            "20260817",
+        ]
+
+        for suffix, expected_url in (
+            ("20260816", "http://first.example"),
+            ("20260817", "http://second.example"),
+        ):
+            UserModel, LogModel = get_dynamic_models(suffix)
+            user = patched_db.query(UserModel).one()
+            log = patched_db.query(LogModel).one()
+            assert user.id == log.user_id
+            assert log.url == expected_url
+            assert log.created_at.date().strftime("%Y%m%d") == suffix
+
+        assert patched_db.query(DeniedLog).count() == 0

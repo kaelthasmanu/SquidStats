@@ -1,20 +1,20 @@
 import os
 import re
 import time
+from collections import defaultdict
 from datetime import datetime
+from math import isfinite
 
 from loguru import logger
 from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
 
 from database.database import (
-    Base,
     DeniedLog,
     LogMetadata,
     get_dynamic_models,
     get_dynamic_table_names,
     get_engine,
     get_session,
-    table_exists,
 )
 
 
@@ -125,6 +125,27 @@ def get_file_inode(filepath):
     except Exception as e:
         logger.error(f"Error accessing file: {e}")
         raise
+
+
+def get_log_datetime(line: str) -> datetime | None:
+    """Return the timestamp stored in a Squid access-log line.
+
+    All access-log formats supported by this parser put the Unix timestamp in
+    the first field.  Keeping this separate from the parsed payload lets us
+    preserve the parser's public response shape while still routing imported
+    entries to the correct daily table.
+    """
+    if not isinstance(line, str) or not line.strip():
+        return None
+
+    try:
+        timestamp_token = line.lstrip("\ufeff").split(None, 1)[0]
+        timestamp = float(timestamp_token.split("|", 1)[0])
+        if not isfinite(timestamp) or timestamp < 0:
+            return None
+        return datetime.fromtimestamp(timestamp)
+    except (IndexError, TypeError, ValueError, OSError, OverflowError):
+        return None
 
 
 def _is_number(value: str) -> bool:
@@ -401,207 +422,291 @@ def detect_log_format(log_file, sample_lines=32, start_position=0):
         return FORMAT_AUTO
 
 
+def _new_import_summary() -> dict:
+    return {
+        "processed_lines": 0,
+        "parsed_lines": 0,
+        "skipped_lines": 0,
+        "inserted_logs": 0,
+        "inserted_users": 0,
+        "inserted_denied": 0,
+        "dates": [],
+    }
+
+
+def _date_summary(date_summaries: dict, date_suffix: str) -> dict:
+    if date_suffix not in date_summaries:
+        user_table, log_table = get_dynamic_table_names(date_suffix)
+        date_summaries[date_suffix] = {
+            "date": date_suffix,
+            "user_table": user_table,
+            "log_table": log_table,
+            "inserted_logs": 0,
+            "inserted_users": 0,
+            "inserted_denied": 0,
+        }
+    return date_summaries[date_suffix]
+
+
+def _ingest_log_file(log_file, session, start_position: int = 0) -> tuple[dict, int]:
+    """Ingest a log file into the daily tables selected by each line's date."""
+    summary = _new_import_summary()
+    date_summaries = {}
+    models_by_date = {}
+    user_cache = {}
+    pending_users = defaultdict(list)
+    pending_logs = defaultdict(list)
+    pending_denied = []
+    pending_stats = defaultdict(lambda: {"logs": 0, "users": 0, "denied": 0})
+    start_time = time.time()
+
+    detected_format = detect_log_format(log_file, start_position=start_position)
+    logger.info("Detected Squid log format: {}", detected_format)
+
+    def get_models(date_suffix):
+        if date_suffix not in models_by_date:
+            models = get_dynamic_models(date_suffix)
+            if not models or not models[0] or not models[1]:
+                raise RuntimeError(
+                    f"Could not create daily tables for date suffix {date_suffix}"
+                )
+            models_by_date[date_suffix] = models
+        return models_by_date[date_suffix]
+
+    def commit_batch():
+        if not pending_users and not pending_logs and not pending_denied:
+            return
+
+        for retry_count in range(MAX_RETRIES):
+            try:
+                for _date_suffix, users in pending_users.items():
+                    if users:
+                        session.add_all(users)
+                session.flush()
+
+                for date_suffix, entries in pending_logs.items():
+                    if not entries:
+                        continue
+                    _, dynamic_log = get_models(date_suffix)
+                    mappings = []
+                    for user_ref, mapping in entries:
+                        user_id = (
+                            user_ref.id if not isinstance(user_ref, int) else user_ref
+                        )
+                        mappings.append({**mapping, "user_id": user_id})
+                    session.bulk_insert_mappings(dynamic_log, mappings)
+
+                if pending_denied:
+                    session.add_all(pending_denied)
+                session.commit()
+
+                for date_suffix, users in pending_users.items():
+                    count = len(users)
+                    if count:
+                        summary["inserted_users"] += count
+                        _date_summary(date_summaries, date_suffix)[
+                            "inserted_users"
+                        ] += count
+                for date_suffix, entries in pending_logs.items():
+                    count = len(entries)
+                    if count:
+                        summary["inserted_logs"] += count
+                        _date_summary(date_summaries, date_suffix)["inserted_logs"] += (
+                            count
+                        )
+                for date_suffix, stats in pending_stats.items():
+                    if stats["denied"]:
+                        summary["inserted_denied"] += stats["denied"]
+                        _date_summary(date_summaries, date_suffix)[
+                            "inserted_denied"
+                        ] += stats["denied"]
+
+                pending_users.clear()
+                pending_logs.clear()
+                pending_denied.clear()
+                pending_stats.clear()
+                return
+            except IntegrityError as error:
+                session.rollback()
+                logger.warning(
+                    "Integrity error importing batch (retry {}/{}): {}",
+                    retry_count + 1,
+                    MAX_RETRIES,
+                    error,
+                )
+            except OperationalError as error:
+                session.rollback()
+                if "database is locked" not in str(error).lower():
+                    raise
+                logger.warning(
+                    "Database locked while importing; retrying ({}/{})",
+                    retry_count + 1,
+                    MAX_RETRIES,
+                )
+                time.sleep(0.5 * (retry_count + 1))
+            except SQLAlchemyError:
+                session.rollback()
+                raise
+
+        raise RuntimeError("Could not commit a log import batch")
+
+    current_position = start_position
+    with open(log_file, encoding="utf-8", errors="replace") as file:
+        file.seek(start_position)
+        for line in file:
+            summary["processed_lines"] += 1
+            current_position += len(line.encode("utf-8"))
+
+            log_data = parse_log_line(line, format_hint=detected_format)
+            log_datetime = get_log_datetime(line)
+            if not log_data or log_datetime is None:
+                summary["skipped_lines"] += 1
+                continue
+
+            summary["parsed_lines"] += 1
+            date_suffix = log_datetime.strftime("%Y%m%d")
+            DynamicUser, _ = get_models(date_suffix)
+            date_stats = pending_stats[date_suffix]
+            date_stats["denied"] += int(bool(log_data.get("is_denied")))
+
+            # Some Squid formats use '-' for unauthenticated users.  The IP is
+            # the stable fallback used by the DEFAULT parser as well.
+            username = log_data.get("username") or log_data.get("ip") or "-"
+            ip = log_data.get("ip") or "-"
+
+            if log_data.get("is_denied"):
+                pending_denied.append(
+                    DeniedLog(
+                        username=username,
+                        ip=ip,
+                        url=log_data.get("url") or "-",
+                        method=log_data.get("method") or "",
+                        status=log_data.get("status") or "",
+                        response=log_data.get("response"),
+                        data_transmitted=log_data.get("data_transmitted", 0),
+                        created_at=log_datetime,
+                    )
+                )
+            else:
+                user_key = (date_suffix, username, ip)
+                user_ref = user_cache.get(user_key)
+                if user_ref is None:
+                    existing_user = (
+                        session.query(DynamicUser)
+                        .filter_by(username=username, ip=ip)
+                        .first()
+                    )
+                    if existing_user:
+                        user_ref = existing_user.id
+                    else:
+                        user_ref = DynamicUser(
+                            username=username,
+                            ip=ip,
+                            created_at=log_datetime,
+                        )
+                        pending_users[date_suffix].append(user_ref)
+                        date_stats["users"] += 1
+                    user_cache[user_key] = user_ref
+
+                pending_logs[date_suffix].append(
+                    (
+                        user_ref,
+                        {
+                            "url": log_data.get("url") or "-",
+                            "response": log_data.get("response", 0),
+                            "request_count": 1,
+                            "data_transmitted": log_data.get("data_transmitted", 0),
+                            "created_at": log_datetime,
+                        },
+                    )
+                )
+                date_stats["logs"] += 1
+
+            if (
+                sum(len(items) for items in pending_logs.values())
+                + sum(len(items) for items in pending_users.values())
+                + len(pending_denied)
+                >= BATCH_SIZE
+            ):
+                commit_batch()
+
+    commit_batch()
+    summary["dates"] = [date_summaries[key] for key in sorted(date_summaries)]
+    elapsed = time.time() - start_time
+    logger.info(
+        "Logs inserted: {}, New users: {}, Denied: {} ({} lines in {:.2f}s)",
+        summary["inserted_logs"],
+        summary["inserted_users"],
+        summary["inserted_denied"],
+        summary["processed_lines"],
+        elapsed,
+    )
+    return summary, current_position
+
+
+def import_logs(log_file):
+    """Import a complete log file, routing entries to their daily tables.
+
+    Unlike :func:`process_logs`, this function intentionally does not read or
+    update ``log_metadata``.  It is therefore safe for an administrator to
+    import a rotated or historical file without changing the live tailer's
+    cursor.
+    """
+    if not os.path.exists(log_file):
+        raise FileNotFoundError(log_file)
+
+    session = get_session()
+    try:
+        summary, _ = _ingest_log_file(log_file, session)
+        if summary["parsed_lines"] == 0:
+            raise ValueError("The log file contains no valid Squid access entries")
+        return summary
+    except Exception:
+        session.rollback()
+        logger.exception("Critical error importing log file")
+        raise
+    finally:
+        session.close()
+
+
 def process_logs(log_file):
+    """Process only the new tail of the live log and update its cursor."""
     if not os.path.exists(log_file):
         logger.error(f"File not found: {log_file}")
-        return
-    engine = get_engine()
-    user_table, log_table = get_dynamic_table_names()
-    if not (table_exists(engine, user_table) and table_exists(engine, log_table)):
-        logger.warning(
-            f"User/log tables for date suffix '{datetime.now().strftime('%Y%m%d')}' do not exist. Attempting to recreate..."
-        )
-        try:
-            Base.metadata.create_all(engine, checkfirst=True)
-            logger.info("Tables created successfully.")
-        except Exception as e:
-            logger.error(f"Error creating dynamic tables: {e}")
-            return
+        return _new_import_summary()
+
+    current_inode = get_file_inode(log_file)
+    file_size = os.path.getsize(log_file)
+    session = get_session()
     try:
-        current_inode = get_file_inode(log_file)
-        file_size = os.path.getsize(log_file)
-        date_suffix = datetime.now().strftime("%Y%m%d")
-        DynamicUser, DynamicLog = get_dynamic_models(date_suffix)
-        with DatabaseManager() as session:
-            metadata = session.query(LogMetadata).first()
-            last_position = metadata.last_position if metadata else 0
-            if metadata:
-                if metadata.last_inode != current_inode:
-                    logger.info(
-                        f"Inode changed: {metadata.last_inode} -> {current_inode}. Resetting position."
-                    )
-                    last_position = 0
-                elif file_size < last_position:
-                    logger.warning(
-                        f"File truncated (size: {file_size} < position: {last_position})"
-                    )
-                    last_position = 0
-            detected_format = detect_log_format(log_file, start_position=last_position)
-            logger.info(
-                "Detected Squid log format: {}",
-                detected_format,
-            )
-            # logger.info(f"Reading from position: {last_position}")
-            user_cache = {}
-            logs_to_insert, new_users_to_insert, denied_to_insert = [], [], []
-            processed_lines = inserted_logs = inserted_users = inserted_denied = 0
-            start_time = time.time()
+        metadata = session.query(LogMetadata).first()
+        last_position = metadata.last_position if metadata else 0
+        if metadata:
+            if metadata.last_inode != current_inode:
+                logger.info(
+                    f"Inode changed: {metadata.last_inode} -> {current_inode}. Resetting position."
+                )
+                last_position = 0
+            elif file_size < last_position:
+                logger.warning(
+                    f"File truncated (size: {file_size} < position: {last_position})"
+                )
+                last_position = 0
 
-            def commit_batch():
-                nonlocal inserted_logs, inserted_users, inserted_denied
-                retry_count = 0
-                user_table, log_table = get_dynamic_table_names()
-                while retry_count < MAX_RETRIES:
-                    try:
-                        if new_users_to_insert:
-                            session.bulk_save_objects(new_users_to_insert)
-                            session.flush()
-                            for user in new_users_to_insert:
-                                user_cache[(user.username, user.ip)] = user.id
-                            inserted_users += len(new_users_to_insert)
-                            new_users_to_insert.clear()
-                        if logs_to_insert:
-                            session.bulk_insert_mappings(DynamicLog, logs_to_insert)
-                            inserted_logs += len(logs_to_insert)
-                            logs_to_insert.clear()
-                        if denied_to_insert:
-                            session.bulk_save_objects(denied_to_insert)
-                            inserted_denied += len(denied_to_insert)
-                            denied_to_insert.clear()
-                        session.commit()
-                        return True
-                    except IntegrityError as e:
-                        logger.warning(
-                            f"Integrity error (retry {retry_count + 1}): {e}"
-                        )
-                        session.rollback()
-                        retry_count += 1
-                        if new_users_to_insert:
-                            for user in new_users_to_insert:
-                                key = (user.username, user.ip)
-                                if key in user_cache:
-                                    del user_cache[key]
-                    except OperationalError as e:
-                        if "database is locked" in str(e).lower():
-                            retry_count += 1
-                            logger.warning(
-                                f"Database locked, retrying ({retry_count}/{MAX_RETRIES})..."
-                            )
-                            session.rollback()
-                            time.sleep(0.5 * retry_count)
-                        else:
-                            logger.error(f"Database error: {e}")
-                            session.rollback()
-                            break
-                    except SQLAlchemyError as e:
-                        logger.error(f"Database error: {e}")
-                        session.rollback()
-                        break
-                return False
-
-            with open(log_file, encoding="utf-8", errors="replace") as f:
-                f.seek(last_position)
-                current_position = last_position
-                for line in f:
-                    processed_lines += 1
-                    current_position += len(line.encode("utf-8"))
-                    log_data = parse_log_line(line, format_hint=detected_format)
-                    if not log_data:
-                        continue
-                    if log_data["is_denied"]:
-                        denied_entry = DeniedLog(
-                            username=log_data["username"],
-                            ip=log_data["ip"],
-                            url=log_data["url"],
-                            method=log_data.get("method", ""),
-                            status=log_data.get("status", ""),
-                            response=log_data.get("response"),
-                            data_transmitted=log_data.get("data_transmitted", 0),
-                            created_at=datetime.now(),
-                        )
-                        denied_to_insert.append(denied_entry)
-                        if len(denied_to_insert) >= BATCH_SIZE:
-                            if commit_batch():
-                                logger.info(
-                                    f"Batch denied_logs inserted successfully. Records: {BATCH_SIZE}"
-                                )
-                            else:
-                                logger.error(
-                                    "Error committing denied batch. Continuing with next batch"
-                                )
-                        continue
-                    user_key = (log_data["username"], log_data["ip"])
-                    user_id = user_cache.get(user_key)
-                    if user_id is None:
-                        existing_user = (
-                            session.query(DynamicUser)
-                            .filter_by(username=log_data["username"], ip=log_data["ip"])
-                            .first()
-                        )
-                        if existing_user:
-                            user_id = existing_user.id
-                            user_cache[user_key] = user_id
-                        else:
-                            new_user = DynamicUser(
-                                username=log_data["username"], ip=log_data["ip"]
-                            )
-                            new_users_to_insert.append(new_user)
-                            user_cache[user_key] = None
-                            user_id = None
-                    if user_id is None:
-                        if not commit_batch():
-                            logger.error(
-                                "Critical error committing batch. Aborting batch"
-                            )
-                            continue
-                        existing_user = (
-                            session.query(DynamicUser)
-                            .filter_by(username=log_data["username"], ip=log_data["ip"])
-                            .first()
-                        )
-                        if existing_user:
-                            user_id = existing_user.id
-                            user_cache[user_key] = user_id
-                        else:
-                            logger.error(
-                                f"Usuario no creado: {user_key}. Saltando línea"
-                            )
-                            continue
-                    logs_to_insert.append(
-                        {
-                            "user_id": user_id,
-                            "url": log_data["url"],
-                            "response": log_data["response"],
-                            "request_count": 1,
-                            "data_transmitted": log_data["data_transmitted"],
-                            "created_at": datetime.now(),
-                        }
-                    )
-                    if len(logs_to_insert) >= BATCH_SIZE:
-                        if not commit_batch():
-                            logger.error(
-                                "Error committing batch. Continuing with next batch"
-                            )
-            # Commit any remaining items that didn't fill a full batch
-            if logs_to_insert or new_users_to_insert or denied_to_insert:
-                if not commit_batch():
-                    logger.error("Final commit_batch failed for remaining items")
-            if not metadata:
-                metadata = LogMetadata()
-                session.add(metadata)
-            metadata.last_position = current_position
-            metadata.last_inode = current_inode
-            # Align with LogMetadata model's column
-            metadata.updated_at = datetime.now()
-            session.commit()
-            elapsed = time.time() - start_time
-            # logger.info(f"Processing completed. Lines: {processed_lines}")
-            logger.info(
-                f"Logs inserted: {inserted_logs}, New users: {inserted_users}, Denied: {inserted_denied}"
-            )
-            logger.info(
-                f"Time: {elapsed:.2f}s, Speed: {processed_lines / elapsed:.2f} lps"
-            )
-    except Exception as e:
-        logger.critical(f"Critical error in process_logs: {e}", exc_info=True)
+        summary, current_position = _ingest_log_file(
+            log_file, session, start_position=last_position
+        )
+        if metadata is None:
+            metadata = LogMetadata()
+            session.add(metadata)
+        metadata.last_position = current_position
+        metadata.last_inode = current_inode
+        metadata.updated_at = datetime.now()
+        session.commit()
+        return summary
+    except Exception as error:
+        session.rollback()
+        logger.critical(f"Critical error in process_logs: {error}", exc_info=True)
         raise
+    finally:
+        session.close()
