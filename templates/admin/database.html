@@ -32,6 +32,14 @@
                 <i class="fas fa-save text-base"></i>
                 {{ _("Salvas de BD") }}
             </button>
+            <button @click="activeTab = 'importar'"
+                :class="activeTab === 'importar'
+                    ? 'border-blue-600 text-blue-600 bg-blue-50/40'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+                class="flex items-center gap-2 px-6 py-4 text-sm font-semibold border-b-2 -mb-px transition-colors duration-150 focus:outline-none whitespace-nowrap">
+                <i class="fas fa-file-import text-base"></i>
+                {{ _("Importar Logs") }}
+            </button>
             <button @click="activeTab = 'limpiar'"
                 :class="activeTab === 'limpiar'
                     ? 'border-blue-600 text-blue-600 bg-blue-50/40'
@@ -522,7 +530,7 @@
                 </div>
 
                 <!-- Table -->
-                <div x-show="!loadingList && backups.length > {{ _("0\" class=\"flex-1 overflow-auto\">") }}
+                <div x-show="!loadingList && backups.length > 0" class="flex-1 overflow-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 sticky top-0">
                             <tr>
@@ -578,7 +586,7 @@
                 </div>
 
                 <!-- Footer -->
-                <div x-show="!loadingList && backups.length > {{ _("0\" class=\"px-6 py-3 bg-gray-50 border-t border-gray-100\">") }}
+                <div x-show="!loadingList && backups.length > 0" class="px-6 py-3 bg-gray-50 border-t border-gray-100">
                     <p class="text-xs text-gray-400 flex items-center gap-1">
                         <i class="fas fa-info-circle"></i>
                         {{ _("Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente.") }}
@@ -588,6 +596,104 @@
 
         </div><!-- end grid -->
     </div><!-- end salvas tab -->
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB: IMPORTAR LOGS
+    ════════════════════════════════════════════════════════ -->
+    <div x-show="activeTab === 'importar'" x-data="logImportManager()" class="space-y-6">
+        <div class="max-w-4xl">
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                    <i class="fas fa-file-import mr-3"></i>{{ _("Importar Logs de Squid") }}
+                </h3>
+                <p class="text-gray-600">
+                    {{ _("Carga un archivo access.log histórico para incorporarlo a la base de datos") }}.
+                </p>
+            </div>
+
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-500 text-xl mr-3 mt-1"></i>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-medium mb-1">{{ _("Importación automática por fecha") }}</p>
+                        <p>{{ _("La fecha se obtiene del timestamp de cada línea. Los registros se guardan en las tablas log_YYYYMMDD y sus usuarios en user_YYYYMMDD. Puedes importar un archivo con varios días.") }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                    <h4 class="text-xl font-semibold text-white flex items-center">
+                        <i class="fas fa-upload mr-2"></i>{{ _("Seleccionar archivo") }}
+                    </h4>
+                </div>
+                <form @submit.prevent="submitImport()" class="p-6 space-y-6" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div>
+                        <label for="logImportFile" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ _("Archivo de logs") }}
+                        </label>
+                        <input id="logImportFile" x-ref="file" type="file" required
+                            accept=".log,.txt,text/plain"
+                            class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <p class="mt-2 text-xs text-gray-500">{{ _("Se admiten los formatos de access.log soportados por SquidStats.") }}</p>
+                    </div>
+                    <button type="submit" :disabled="loading"
+                        class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-2.5 rounded-lg shadow hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                        <i :class="loading ? 'fas fa-spinner fa-spin' : 'fas fa-file-import'"></i>
+                        <span x-text="loading ? translations.importing : translations.import"></span>
+                    </button>
+                </form>
+            </div>
+
+            <div x-show="message" x-transition
+                :class="messageType === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'"
+                class="border rounded-lg px-4 py-3 mt-6" style="display:none;">
+                <p class="text-sm font-medium" x-text="message"></p>
+            </div>
+
+            <template x-if="summary">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <h4 class="text-base font-semibold text-gray-800">
+                            <i class="fas fa-chart-bar text-blue-500 mr-2"></i>{{ _("Resultado de la importación") }}
+                        </h4>
+                        <span class="text-sm text-gray-500" x-text="summary.parsed_lines.toLocaleString() + ' {{ _('líneas válidas') }}'"></span>
+                    </div>
+                    <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <p class="text-xs text-blue-600 uppercase font-medium">{{ _("Logs") }}</p>
+                            <p class="text-xl font-bold text-blue-800" x-text="summary.inserted_logs.toLocaleString()"></p>
+                        </div>
+                        <div class="bg-indigo-50 rounded-lg p-4">
+                            <p class="text-xs text-indigo-600 uppercase font-medium">{{ _("Usuarios") }}</p>
+                            <p class="text-xl font-bold text-indigo-800" x-text="summary.inserted_users.toLocaleString()"></p>
+                        </div>
+                        <div class="bg-amber-50 rounded-lg p-4">
+                            <p class="text-xs text-amber-600 uppercase font-medium">{{ _("Denegados") }}</p>
+                            <p class="text-xl font-bold text-amber-800" x-text="summary.inserted_denied.toLocaleString()"></p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-xs text-gray-600 uppercase font-medium">{{ _("Omitidas") }}</p>
+                            <p class="text-xl font-bold text-gray-800" x-text="summary.skipped_lines.toLocaleString()"></p>
+                        </div>
+                    </div>
+                    <div class="px-6 pb-6" x-show="summary.dates && summary.dates.length">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">{{ _("Tablas actualizadas") }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="item in summary.dates" :key="item.date">
+                                <span class="inline-flex items-center gap-2 bg-gray-100 text-gray-700 text-xs font-mono px-3 py-1.5 rounded-full">
+                                    <span x-text="item.log_table"></span>
+                                    <span class="text-gray-500" x-text="'(' + item.inserted_logs.toLocaleString() + ')' "></span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div><!-- end importar tab -->
 
 
     <!-- ═══════════════════════════════════════════════════════
@@ -870,6 +976,56 @@ function backupManager() {
             }
         },
         init() { this.loadBackups(); }
+    };
+}
+
+// ──────────────────────────────────────────────────────────
+// Log importer
+// ──────────────────────────────────────────────────────────
+function logImportManager() {
+    return {
+        loading: false,
+        message: '',
+        messageType: 'success',
+        summary: null,
+        translations: {
+            importing: '{{ _('Importando...') }}',
+            import: '{{ _('Importar logs') }}'
+        },
+        async submitImport() {
+            const input = this.$refs.file;
+            if (!input || !input.files.length) {
+                this.message = '{{ _('Selecciona un archivo de logs') }}';
+                this.messageType = 'error';
+                return;
+            }
+
+            this.loading = true;
+            this.message = '';
+            this.summary = null;
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+            try {
+                const response = await fetch('/admin/api/import-logs', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+                    body: formData
+                });
+                const data = await response.json();
+                if (!response.ok || data.status !== 'success') {
+                    throw new Error(data.message || '{{ _('No se pudo importar el archivo') }}');
+                }
+                this.message = data.message;
+                this.messageType = 'success';
+                this.summary = data.summary;
+                input.value = '';
+            } catch (error) {
+                this.message = error.message || '{{ _('No se pudo importar el archivo') }}';
+                this.messageType = 'error';
+            } finally {
+                this.loading = false;
+            }
+        }
     };
 }
 
