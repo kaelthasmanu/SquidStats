@@ -359,7 +359,8 @@ If the command returns the installed version, SquidStats is ready to use.
    VERSION="2.5.3"
    
    # Security Keys
-   SECRET_KEY="your-secret-key-here"  # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   SECRET_KEY="your-secret-key-here"  
    
    # Squid Configuration
    SQUID_HOST="127.0.0.1"
@@ -370,8 +371,10 @@ If the command returns the installed version, SquidStats is ready to use.
    ACL_FILES_DIR="/etc/squid/acls"
    
    # Database Configuration
-   DATABASE_TYPE="SQLITE"  # Options: SQLITE or MARIADB or MYSQL or POSTGRESQL
-   DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db"  # For SQLite: directory path
+   # Options: SQLITE or MARIADB or MYSQL or POSTGRESQL
+   DATABASE_TYPE="SQLITE"  
+   # For SQLite: directory path
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db" 
    # For MariaDB/MySQL: connection string -> mysql+pymysql://user:pass@host:port/db
    # For Postgresql: connection string -> postgresql+psycopg2://user:pass@127.0.0.1:5432/squidstats
    
@@ -382,7 +385,8 @@ If the command returns the installed version, SquidStats is ready to use.
    REFRESH_INTERVAL="60"
    
    # Authentication & Security
-   FIRST_PASSWORD="mipassword"  # Initial admin password (change after first login)
+   # Initial admin password (change after first login)
+   FIRST_PASSWORD="mipassword"  
    JWT_EXPIRY_HOURS="24"
    MAX_LOGIN_ATTEMPTS="5"
    LOCKOUT_DURATION_MINUTES="15"
@@ -391,9 +395,12 @@ If the command returns the installed version, SquidStats is ready to use.
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
    
    # Proxy Configuration (Optional)
-   HTTP_PROXY=""  # Example: http://proxy.example.com:8080
-   HTTPS_PROXY=""  # Example: https://proxy.example.com:8443
-   NO_PROXY=""  # Comma-separated list of hosts to bypass proxy
+   # Example: http://proxy.example.com:8080
+   HTTP_PROXY=""  
+   # Example: https://proxy.example.com:8443
+   HTTPS_PROXY="" 
+   # Comma-separated list of hosts to bypass proxy
+   NO_PROXY=""  
    ```
   
   ### Forwarding Squid logs from a remote Squid host (important)
