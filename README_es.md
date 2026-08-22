@@ -359,7 +359,8 @@ Si el comando devuelve la versión instalada, SquidStats está listo para utiliz
    VERSION="2"
    
    # Claves de Seguridad
-   SECRET_KEY="your-secret-key-here"  # Generar con: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   # Generar con: python3 -c 'import secrets; print(secrets.token_hex(32))'
+   SECRET_KEY="your-secret-key-here"  
    
    # Configuración de Squid
    SQUID_HOST="127.0.0.1"
@@ -370,19 +371,23 @@ Si el comando devuelve la versión instalada, SquidStats está listo para utiliz
    ACL_FILES_DIR="/etc/squid/acls"
    
    # Configuración de Base de Datos
-   DATABASE_TYPE="SQLITE"  # Opciones: SQLITE or MARIADB or MYSQL or POSTGRESQL
-   DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db"  # Para SQLite: ruta del directorio
+   # Opciones: SQLITE or MARIADB or MYSQL or POSTGRESQL
+   DATABASE_TYPE="SQLITE" 
+   # Para SQLite: ruta del directorio
+   DATABASE_STRING_CONNECTION="/opt/SquidStats/squidstats.db" 
    # Para MariaDB/MySQL: cadena de conexión mysql+pymysql://user:clave@host:port/db
    # Para PostgreSQL: cadena de conexion postgresql+psycopg2://squidstats:squidstats@127.0.0.1:5432/squidstats
    
    # Configuración de la Aplicación Flask
-   FLASK_DEBUG="False"  # Establecer a True solo para desarrollo
+   # Establecer a True solo para desarrollo
+   FLASK_DEBUG="False"  
    LISTEN_HOST="0.0.0.0"
    LISTEN_PORT="5000"
    REFRESH_INTERVAL="60"
    
    # Autenticación y Seguridad
-   FIRST_PASSWORD="mipassword"  # Contraseña inicial del admin (cambiar después del primer login)
+   # Contraseña inicial del admin (cambiar después del primer login)
+   FIRST_PASSWORD="mipassword"  
    JWT_EXPIRY_HOURS="24"
    MAX_LOGIN_ATTEMPTS="5"
    LOCKOUT_DURATION_MINUTES="15"
@@ -391,9 +396,12 @@ Si el comando devuelve la versión instalada, SquidStats está listo para utiliz
    BLACKLIST_DOMAINS="facebook.com,twitter.com,instagram.com,tiktok.com,youtube.com,netflix.com"
    
    # Configuración de Proxy (Opcional)
-   HTTP_PROXY=""  # Ejemplo: http://proxy.example.com:8080
-   HTTPS_PROXY=""  # Ejemplo: https://proxy.example.com:8443
-   NO_PROXY=""  # Lista separada por comas de hosts para omitir el proxy
+   # Ejemplo: http://proxy.example.com:8080
+   HTTP_PROXY=""  
+   # Ejemplo: https://proxy.example.com:8443
+   HTTPS_PROXY=""  
+   # Lista separada por comas de hosts para omitir el proxy
+   NO_PROXY=""  
    ```
   
   ### Reenviar logs de Squid desde un host proxy remoto (importante)
