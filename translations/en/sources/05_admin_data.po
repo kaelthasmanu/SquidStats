@@ -501,10 +501,6 @@ msgstr "No backups available"
 msgid "Realiza una salva manual o activa las automáticas"
 msgstr "Perform a manual backup or enable automatic backups"
 
-#: templates/admin/database.html:522
-msgid "0\" class=\"flex-1 overflow-auto\">"
-msgstr ""
-
 #: templates/admin/database.html:526
 msgid "Archivo"
 msgstr "File"
@@ -529,10 +525,6 @@ msgstr "Recent"
 #: templates/admin/database.html:561
 msgid "Descargar"
 msgstr "Download"
-
-#: templates/admin/database.html:578
-msgid "0\" class=\"px-6 py-3 bg-gray-50 border-t border-gray-100\">"
-msgstr ""
 
 #: templates/admin/database.html:581
 msgid "Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente."
@@ -1142,3 +1134,72 @@ msgstr "Event"
 #: templates/admin/quota.html:365
 msgid "No hay registros disponibles"
 msgstr "No records available"
+
+#: templates/admin/database.html:41
+msgid "Importar Logs"
+msgstr "Import Logs"
+
+#: templates/admin/database.html:608
+msgid "Importar Logs de Squid"
+msgstr "Import Squid Logs"
+
+#: templates/admin/database.html:611
+msgid "Carga un archivo access.log histórico para incorporarlo a la base de datos"
+msgstr "Upload a historical access.log file to add it to the database"
+
+#: templates/admin/database.html:619
+msgid "Importación automática por fecha"
+msgstr "Automatic date-based import"
+
+#: templates/admin/database.html:620
+msgid "La fecha se obtiene del timestamp de cada línea. Los registros se guardan en las tablas log_YYYYMMDD y sus usuarios en user_YYYYMMDD. Puedes importar un archivo con varios días."
+msgstr "The date is read from each line's timestamp. Records are stored in log_YYYYMMDD tables and their users in user_YYYYMMDD tables. You can import a file containing multiple days."
+
+#: templates/admin/database.html:628
+msgid "Seleccionar archivo"
+msgstr "Select file"
+
+#: templates/admin/database.html:635
+msgid "Archivo de logs"
+msgstr "Log file"
+
+#: templates/admin/database.html:640
+msgid "Se admiten los formatos de access.log soportados por SquidStats."
+msgstr "The access.log formats supported by SquidStats are accepted."
+
+#: templates/admin/database.html:660
+msgid "Resultado de la importación"
+msgstr "Import result"
+
+#: templates/admin/database.html:662
+msgid "líneas válidas"
+msgstr "valid lines"
+
+#: templates/admin/database.html:673
+msgid "Denegados"
+msgstr "Denied"
+
+#: templates/admin/database.html:678
+msgid "Omitidas"
+msgstr "Skipped"
+
+#: templates/admin/database.html:683
+msgid "Tablas actualizadas"
+msgstr "Updated tables"
+
+#: templates/admin/database.html:992
+msgid "Importando..."
+msgstr "Importing..."
+
+#: templates/admin/database.html:993
+msgid "Importar logs"
+msgstr "Import logs"
+
+#: templates/admin/database.html:998
+msgid "Selecciona un archivo de logs"
+msgstr "Select a log file"
+
+#: templates/admin/database.html:1016
+#: templates/admin/database.html:1023
+msgid "No se pudo importar el archivo"
+msgstr "The file could not be imported"
