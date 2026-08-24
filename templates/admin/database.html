@@ -608,7 +608,7 @@
                     <i class="fas fa-file-import mr-3"></i>{{ _("Importar Logs de Squid") }}
                 </h3>
                 <p class="text-gray-600">
-                    {{ _("Carga un archivo access.log histórico para incorporarlo a la base de datos") }}.
+                    {{ _("Carga uno o varios archivos access.log históricos para incorporarlos a la base de datos") }}.
                 </p>
             </div>
 
@@ -625,21 +625,79 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
                     <h4 class="text-xl font-semibold text-white flex items-center">
-                        <i class="fas fa-upload mr-2"></i>{{ _("Seleccionar archivo") }}
+                        <i class="fas fa-upload mr-2"></i>{{ _("Seleccionar archivos") }}
                     </h4>
                 </div>
                 <form @submit.prevent="submitImport()" class="p-6 space-y-6" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                    <div>
-                        <label for="logImportFile" class="block text-sm font-medium text-gray-700 mb-2">
-                            {{ _("Archivo de logs") }}
-                        </label>
-                        <input id="logImportFile" x-ref="file" type="file" required
-                            accept=".log,.txt,text/plain"
-                            class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <p class="mt-2 text-xs text-gray-500">{{ _("Se admiten los formatos de access.log soportados por SquidStats.") }}</p>
+                    <input id="logImportFile" x-ref="file" type="file" multiple
+                        accept=".log,.txt,text/plain"
+                        @change="handleFileSelection($event)" @click.stop
+                        class="hidden" />
+
+                    <div x-ref="dropZone"
+                        @click="if (!loading) $refs.file.click()"
+                        @keydown.enter.prevent="if (!loading) $refs.file.click()"
+                        @keydown.space.prevent="if (!loading) $refs.file.click()"
+                        @dragover.prevent="if (!loading) dragging = true"
+                        @dragleave.prevent="dragging = false"
+                        @drop.prevent="dragging = false; if (!loading) handleDrop($event)"
+                        :class="dragging ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/40'"
+                        class="border-2 border-dashed rounded-xl px-6 py-10 text-center cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        role="button" tabindex="0" aria-label="{{ _('Zona para cargar archivos de logs') }}">
+                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                        </div>
+                        <p class="text-base font-semibold text-gray-800">{{ _("Arrastra aquí tus archivos access.log") }}</p>
+                        <p class="mt-1 text-sm text-blue-600 font-medium">{{ _("o haz clic para seleccionarlos") }}</p>
+                        <p class="mt-3 text-xs text-gray-500">{{ _("Puedes seleccionar múltiples archivos a la vez.") }}</p>
                     </div>
-                    <button type="submit" :disabled="loading"
+
+                    <div x-show="files.length > 0" x-transition class="rounded-xl border border-gray-200 bg-white overflow-hidden" style="display:none;">
+                        <div class="flex items-center justify-between gap-3 bg-gray-50 border-b border-gray-200 px-4 py-3">
+                            <p class="text-sm font-semibold text-gray-700">
+                                <span x-text="files.length"></span> {{ _("archivos seleccionados") }}
+                            </p>
+                            <button type="button" @click="clearFiles()" :disabled="loading"
+                                class="text-xs font-medium text-red-600 hover:text-red-800 disabled:opacity-50">
+                                <i class="fas fa-trash-alt mr-1"></i>{{ _("Limpiar selección") }}
+                            </button>
+                        </div>
+                        <div class="max-h-56 overflow-y-auto divide-y divide-gray-100">
+                            <template x-for="file in files" :key="fileKey(file)">
+                                <div class="flex items-center gap-3 px-4 py-3">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="truncate text-sm font-medium text-gray-800" x-text="file.name"></p>
+                                        <p class="text-xs text-gray-500" x-text="formatBytes(file.size)"></p>
+                                    </div>
+                                    <button type="button" @click="removeFile(file)" :disabled="loading"
+                                        :title="translations.removeFile"
+                                        class="h-8 w-8 shrink-0 rounded-full text-gray-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div x-show="loading" x-transition class="rounded-xl border border-blue-100 bg-blue-50/70 p-5" style="display:none;">
+                        <div class="flex items-center justify-between gap-4 mb-2">
+                            <p class="text-sm font-semibold text-blue-900 truncate" x-text="currentFile ? translations.processingFile + ': ' + currentFile : translations.processing"></p>
+                            <span class="text-sm font-bold text-blue-700" x-text="progress + '%'" ></span>
+                        </div>
+                        <div class="h-3 w-full overflow-hidden rounded-full bg-blue-100" role="progressbar" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100" aria-label="{{ _('Progreso de importación') }}">
+                            <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300" :style="`width: ${progress}%`"></div>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between gap-3 text-xs text-blue-700">
+                            <span x-text="currentFileProgress < 100 ? translations.importing : translations.processing"></span>
+                            <span><span x-text="completedFiles"></span> / <span x-text="totalFiles"></span> {{ _("archivos completados") }}</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" :disabled="loading || !files.length"
                         class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-2.5 rounded-lg shadow hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                         <i :class="loading ? 'fas fa-spinner fa-spin' : 'fas fa-file-import'"></i>
                         <span x-text="loading ? translations.importing : translations.import"></span>
@@ -648,12 +706,12 @@
             </div>
 
             <div x-show="message" x-transition
-                :class="messageType === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'"
+                :class="messageType === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (messageType === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-red-50 border-red-200 text-red-800')"
                 class="border rounded-lg px-4 py-3 mt-6" style="display:none;">
                 <p class="text-sm font-medium" x-text="message"></p>
             </div>
 
-            <template x-if="summary">
+            <template x-if="summary && !loading">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                         <h4 class="text-base font-semibold text-gray-800">
@@ -661,7 +719,11 @@
                         </h4>
                         <span class="text-sm text-gray-500" x-text="summary.parsed_lines.toLocaleString() + ' {{ _('líneas válidas') }}'"></span>
                     </div>
-                    <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="p-6 grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="bg-emerald-50 rounded-lg p-4">
+                            <p class="text-xs text-emerald-600 uppercase font-medium">{{ _("Archivos importados") }}</p>
+                            <p class="text-xl font-bold text-emerald-800" x-text="summary.files_processed.toLocaleString()"></p>
+                        </div>
                         <div class="bg-blue-50 rounded-lg p-4">
                             <p class="text-xs text-blue-600 uppercase font-medium">{{ _("Logs") }}</p>
                             <p class="text-xl font-bold text-blue-800" x-text="summary.inserted_logs.toLocaleString()"></p>
@@ -677,6 +739,17 @@
                         <div class="bg-gray-50 rounded-lg p-4">
                             <p class="text-xs text-gray-600 uppercase font-medium">{{ _("Omitidas") }}</p>
                             <p class="text-xl font-bold text-gray-800" x-text="summary.skipped_lines.toLocaleString()"></p>
+                        </div>
+                    </div>
+                    <div x-show="summary.files_failed > 0" class="px-6 pb-6" style="display:none;">
+                        <p class="text-sm font-semibold text-red-700 mb-2">{{ _("Archivos con error") }}</p>
+                        <div class="space-y-2">
+                            <template x-for="failure in failures" :key="failure.name">
+                                <div class="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+                                    <i class="fas fa-exclamation-circle mt-0.5"></i>
+                                    <span><strong x-text="failure.name"></strong>: <span x-text="failure.message"></span></span>
+                                </div>
+                            </template>
                         </div>
                     </div>
                     <div class="px-6 pb-6" x-show="summary.dates && summary.dates.length">
@@ -985,46 +1058,194 @@ function backupManager() {
 function logImportManager() {
     return {
         loading: false,
+        dragging: false,
+        files: [],
+        progress: 0,
+        currentFile: '',
+        currentFileProgress: 0,
+        completedFiles: 0,
+        totalFiles: 0,
+        failures: [],
         message: '',
         messageType: 'success',
         summary: null,
         translations: {
             importing: '{{ _('Importando...') }}',
-            import: '{{ _('Importar logs') }}'
+            import: '{{ _('Importar archivos') }}',
+            processing: '{{ _('Procesando...') }}',
+            processingFile: '{{ _('Procesando archivo') }}',
+            removeFile: '{{ _('Quitar archivo') }}',
+            connectionError: '{{ _('Error de conexión') }}',
+            fileImportError: '{{ _('No se pudo importar este archivo') }}',
+            noFiles: '{{ _('Selecciona al menos un archivo de logs') }}',
+            allFailed: '{{ _('No se pudo importar ningún archivo') }}',
+            partialSuccess: '{{ _('Algunos archivos se importaron correctamente y otros fallaron') }}',
+            completed: '{{ _('Archivos importados correctamente') }}'
+        },
+        fileKey(file) {
+            return [file.name, file.size, file.lastModified].join(':');
+        },
+        formatBytes(bytes) {
+            if (!bytes) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+            return `${parseFloat((bytes / Math.pow(1024, index)).toFixed(2))} ${units[index]}`;
+        },
+        addFiles(fileList) {
+            if (this.loading) return;
+            const existing = new Set(this.files.map(file => this.fileKey(file)));
+            Array.from(fileList || []).forEach(file => {
+                const key = this.fileKey(file);
+                if (!existing.has(key)) {
+                    this.files.push(file);
+                    existing.add(key);
+                }
+            });
+            if (this.files.length) {
+                this.message = '';
+                this.summary = null;
+            }
+        },
+        handleFileSelection(event) {
+            this.addFiles(event.target.files);
+            event.target.value = '';
+        },
+        handleDrop(event) {
+            this.addFiles(event.dataTransfer.files);
+        },
+        removeFile(file) {
+            if (this.loading) return;
+            const key = this.fileKey(file);
+            this.files = this.files.filter(item => this.fileKey(item) !== key);
+        },
+        clearFiles() {
+            if (this.loading) return;
+            this.files = [];
+            this.message = '';
+            this.summary = null;
+        },
+        emptySummary() {
+            return {
+                processed_lines: 0,
+                parsed_lines: 0,
+                skipped_lines: 0,
+                inserted_logs: 0,
+                inserted_users: 0,
+                inserted_denied: 0,
+                dates: [],
+                files_processed: 0,
+                files_failed: 0
+            };
+        },
+        mergeSummary(target, source) {
+            const counters = [
+                'processed_lines', 'parsed_lines', 'skipped_lines',
+                'inserted_logs', 'inserted_users', 'inserted_denied'
+            ];
+            counters.forEach(key => {
+                target[key] += Number((source && source[key]) || 0);
+            });
+
+            const dates = new Map((target.dates || []).map(item => [item.date, {...item}]));
+            (source && source.dates || []).forEach(item => {
+                const current = dates.get(item.date);
+                if (!current) {
+                    dates.set(item.date, {...item});
+                    return;
+                }
+                ['inserted_logs', 'inserted_users', 'inserted_denied'].forEach(key => {
+                    current[key] = Number(current[key] || 0) + Number(item[key] || 0);
+                });
+            });
+            target.dates = Array.from(dates.values()).sort((a, b) => a.date.localeCompare(b.date));
+        },
+        updateProgress(index, ratio) {
+            if (!this.totalFiles) return;
+            this.currentFileProgress = Math.round(Math.max(0, Math.min(1, ratio)) * 100);
+            this.progress = Math.min(100, Math.round(((index + ratio) / this.totalFiles) * 100));
+        },
+        uploadFile(file, index) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                formData.append('file', file, file.name);
+                xhr.open('POST', '/admin/api/import-logs');
+                if (csrfToken) xhr.setRequestHeader('X-CSRFToken', csrfToken.content);
+                xhr.upload.onprogress = event => {
+                    if (event.lengthComputable) this.updateProgress(index, event.loaded / event.total);
+                };
+                xhr.onload = () => {
+                    let data = {};
+                    try {
+                        data = JSON.parse(xhr.responseText || '{}');
+                    } catch (error) {
+                        reject(new Error(this.translations.fileImportError));
+                        return;
+                    }
+                    if (xhr.status < 200 || xhr.status >= 300 || data.status !== 'success') {
+                        reject(new Error(data.message || this.translations.fileImportError));
+                        return;
+                    }
+                    resolve(data.summary || this.emptySummary());
+                };
+                xhr.onerror = () => reject(new Error(this.translations.connectionError));
+                xhr.onabort = () => reject(new Error(this.translations.connectionError));
+                xhr.send(formData);
+            });
         },
         async submitImport() {
-            const input = this.$refs.file;
-            if (!input || !input.files.length) {
-                this.message = '{{ _('Selecciona un archivo de logs') }}';
+            if (!this.files.length) {
                 this.messageType = 'error';
+                this.message = this.translations.noFiles;
                 return;
             }
 
+            const filesToImport = [...this.files];
             this.loading = true;
             this.message = '';
-            this.summary = null;
-            const formData = new FormData();
-            formData.append('file', input.files[0]);
-            try {
-                const response = await fetch('/admin/api/import-logs', {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
-                    body: formData
-                });
-                const data = await response.json();
-                if (!response.ok || data.status !== 'success') {
-                    throw new Error(data.message || '{{ _('No se pudo importar el archivo') }}');
+            this.summary = this.emptySummary();
+            this.failures = [];
+            this.progress = 0;
+            this.currentFile = '';
+            this.currentFileProgress = 0;
+            this.completedFiles = 0;
+            this.totalFiles = filesToImport.length;
+
+            let importedFiles = 0;
+            for (let index = 0; index < filesToImport.length; index += 1) {
+                const file = filesToImport[index];
+                this.currentFile = file.name;
+                this.updateProgress(index, 0);
+                try {
+                    const summary = await this.uploadFile(file, index);
+                    this.mergeSummary(this.summary, summary);
+                    importedFiles += 1;
+                } catch (error) {
+                    this.failures.push({
+                        name: file.name,
+                        message: error.message || this.translations.fileImportError
+                    });
                 }
-                this.message = data.message;
-                this.messageType = 'success';
-                this.summary = data.summary;
-                input.value = '';
-            } catch (error) {
-                this.message = error.message || '{{ _('No se pudo importar el archivo') }}';
-                this.messageType = 'error';
-            } finally {
-                this.loading = false;
+                this.completedFiles = index + 1;
+                this.updateProgress(index, 1);
             }
+
+            this.summary.files_processed = importedFiles;
+            this.summary.files_failed = this.failures.length;
+            if (!this.failures.length) {
+                this.messageType = 'success';
+                this.message = this.translations.completed;
+            } else if (importedFiles) {
+                this.messageType = 'warning';
+                this.message = this.translations.partialSuccess;
+            } else {
+                this.messageType = 'error';
+                this.message = this.translations.allFailed;
+            }
+            this.files = [];
+            this.currentFile = '';
+            this.loading = false;
         }
     };
 }
