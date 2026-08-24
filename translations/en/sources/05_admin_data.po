@@ -1203,3 +1203,91 @@ msgstr "Select a log file"
 #: templates/admin/database.html:1023
 msgid "No se pudo importar el archivo"
 msgstr "The file could not be imported"
+
+#: templates/admin/database.html:611
+msgid "Carga uno o varios archivos access.log históricos para incorporarlos a la base de datos"
+msgstr "Upload one or more historical access.log files to add them to the database"
+
+#: templates/admin/database.html:1074
+msgid "Importar archivos"
+msgstr "Import files"
+
+#: templates/admin/database.html:628
+msgid "Seleccionar archivos"
+msgstr "Select files"
+
+#: templates/admin/database.html:647
+msgid "Zona para cargar archivos de logs"
+msgstr "Log file upload area"
+
+#: templates/admin/database.html:651
+msgid "Arrastra aquí tus archivos access.log"
+msgstr "Drag your access.log files here"
+
+#: templates/admin/database.html:652
+msgid "o haz clic para seleccionarlos"
+msgstr "or click to select them"
+
+#: templates/admin/database.html:653
+msgid "Puedes seleccionar múltiples archivos a la vez."
+msgstr "You can select multiple files at once."
+
+#: templates/admin/database.html:659
+msgid "archivos seleccionados"
+msgstr "files selected"
+
+#: templates/admin/database.html:663
+msgid "Limpiar selección"
+msgstr "Clear selection"
+
+#: templates/admin/database.html:677
+msgid "Quitar archivo"
+msgstr "Remove file"
+
+#: templates/admin/database.html:691
+msgid "Progreso de importación"
+msgstr "Import progress"
+
+#: templates/admin/database.html:696
+msgid "archivos completados"
+msgstr "files completed"
+
+#: templates/admin/database.html:724
+msgid "Archivos importados"
+msgstr "Imported files"
+
+#: templates/admin/database.html:745
+msgid "Archivos con error"
+msgstr "Files with errors"
+
+#: templates/admin/database.html:1075
+msgid "Procesando..."
+msgstr "Processing..."
+
+#: templates/admin/database.html:1076
+msgid "Procesando archivo"
+msgstr "Processing file"
+
+#: templates/admin/database.html:1078
+msgid "Error de conexión"
+msgstr "Connection error"
+
+#: templates/admin/database.html:1079
+msgid "No se pudo importar este archivo"
+msgstr "This file could not be imported"
+
+#: templates/admin/database.html:1080
+msgid "Selecciona al menos un archivo de logs"
+msgstr "Select at least one log file"
+
+#: templates/admin/database.html:1081
+msgid "No se pudo importar ningún archivo"
+msgstr "No files could be imported"
+
+#: templates/admin/database.html:1082
+msgid "Algunos archivos se importaron correctamente y otros fallaron"
+msgstr "Some files were imported successfully and others failed"
+
+#: templates/admin/database.html:1083
+msgid "Archivos importados correctamente"
+msgstr "Files imported successfully"
