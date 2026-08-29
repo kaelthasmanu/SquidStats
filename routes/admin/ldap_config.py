@@ -45,13 +45,13 @@ def register_routes(bp):
         upload = request.files.get("keytab")
         host_keytab_path = (request.form.get("host_keytab_path") or "").strip()
         squid_runtime = kerberos_service.get_squid_runtime()
-        if not squid_runtime["local_squid"]:
+        if squid_runtime["kind"] == "none":
             return jsonify(
                 {
                     "status": "error",
                     "message": squid_runtime["message"],
                 }
-            ), 409 if squid_runtime["kind"] == "docker" else 503
+            ), 503
         if (upload is None or not (upload.filename or "").strip()) and not host_keytab_path:
             return jsonify(
                 {
@@ -63,7 +63,9 @@ def register_routes(bp):
         try:
             return jsonify(
                 kerberos_service.configure(
-                    upload, host_keytab_path=host_keytab_path
+                    upload,
+                    host_keytab_path=host_keytab_path,
+                    squid_runtime=squid_runtime,
                 )
             )
         except kerberos_service.SquidNotInstalledError:
