@@ -1,0 +1,205 @@
+msgid "KERBEROS_STATUS_SQUID_INSTALLED"
+msgstr "Squid instalado"
+
+#, python-format
+msgid "KERBEROS_STATUS_DOCKER_SQUID_FOUND"
+msgstr "Existe un contenedor de Docker con Squid: %(name)s"
+
+msgid "KERBEROS_ERROR_SQUID_NOT_FOUND"
+msgstr "No hay una instalación de Squid ni un contenedor de Docker"
+
+msgid "KERBEROS_ERROR_SQUID_NOT_INSTALLED"
+msgstr "Squid no está instalado"
+
+msgid "KERBEROS_ERROR_PROXY_USER_NOT_FOUND"
+msgstr "El usuario proxy no existe en el sistema."
+
+msgid "KERBEROS_ERROR_PROXY_GROUP_NOT_FOUND"
+msgstr "El grupo proxy no existe en el sistema."
+
+msgid "KERBEROS_ERROR_INVALID_KEYTAB_EXTENSION"
+msgstr "El archivo debe tener extensión .keytab."
+
+msgid "KERBEROS_ERROR_KEYTAB_TOO_LARGE"
+msgstr "El archivo keytab supera el tamaño máximo permitido."
+
+msgid "KERBEROS_ERROR_EMPTY_KEYTAB"
+msgstr "El archivo keytab está vacío."
+
+msgid "KERBEROS_ERROR_KEYTAB_INSTALL_PERMISSION_DENIED"
+msgstr "No hay permisos suficientes para instalar el keytab como proxy:proxy."
+
+#, python-format
+msgid "KERBEROS_ERROR_COMMAND_NOT_FOUND"
+msgstr "No se encontró el comando: %(command)s"
+
+#, python-format
+msgid "KERBEROS_ERROR_COMMAND_TIMEOUT"
+msgstr "El comando excedió el tiempo límite: %(command)s"
+
+msgid "KERBEROS_ERROR_KLIST_NOT_INSTALLED"
+msgstr "El comando klist no está instalado."
+
+msgid "KERBEROS_ERROR_PRIVILEGE_COMMAND_NOT_FOUND"
+msgstr "No se encontró sudo o runuser para verificar el keytab como proxy."
+
+msgid "KERBEROS_ERROR_KEYTAB_REQUIRED"
+msgstr "Debes subir el archivo .keytab antes de aplicar Kerberos."
+
+msgid "KERBEROS_ERROR_SQUID_CONFIG_INACCESSIBLE"
+msgstr "squid.conf no es accesible"
+
+#, python-format
+msgid "KERBEROS_ERROR_SQUID_CONFIG_ACCESS"
+msgstr "No se puede acceder a la configuración de Squid: %(details)s"
+
+msgid "KERBEROS_ERROR_KEYTAB_PERMISSIONS"
+msgstr "El keytab no tiene propietario proxy:proxy y permisos 0440."
+
+#, python-format
+msgid "KERBEROS_ERROR_KEYTAB_NOT_READABLE"
+msgstr "El usuario proxy no puede leer el keytab. %(details)s"
+
+msgid "KERBEROS_ERROR_SAVE_MODULE_CONFIG"
+msgstr "No se pudo guardar la configuración Kerberos modular."
+
+msgid "KERBEROS_ERROR_ENABLE_MODULE_CONFIG"
+msgstr "No se pudo activar el archivo modular de Kerberos en squid.conf."
+
+msgid "KERBEROS_ERROR_SAVE_SQUID_CONFIG"
+msgstr "No se pudo guardar la configuración de Squid."
+
+#, python-format
+msgid "KERBEROS_ERROR_SQUID_CONFIG_INVALID"
+msgstr "La configuración de Squid tiene errores. squid -k parse: %(details)s"
+
+msgid "KERBEROS_SUCCESS_CONFIGURED"
+msgstr "Kerberos configurado correctamente en Squid."
+
+msgid "KERBEROS_ERROR_APPLY_FAILED"
+msgstr "No se pudo aplicar la configuración Kerberos."
+
+msgid "KERBEROS_TAB_TITLE"
+msgstr "Autenticación Kerberos para Squid"
+
+msgid "KERBEROS_TAB_DESCRIPTION"
+msgstr "Sube el keytab para instalarlo y aplicar la configuración de autenticación en Squid."
+
+msgid "KERBEROS_SQUID_INSTALL_REQUIRED"
+msgstr "Instala Squid en este servidor antes de cargar el keytab y aplicar Kerberos."
+
+msgid "KERBEROS_DOCKER_DETECTED_INFO"
+msgstr "El keytab y la configuración de Squid se instalarán y validarán dentro del contenedor detectado."
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_COPY_TO"
+msgstr "No se pudo copiar el archivo al contenedor Docker de Squid. %(details)s"
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_COPY_FROM"
+msgstr "No se pudo crear una copia de respaldo desde el contenedor Docker de Squid. %(details)s"
+
+msgid "KERBEROS_ERROR_DOCKER_SQUID_CONFIG_NOT_FOUND"
+msgstr "No se encontró el archivo /etc/squid/squid.conf en el contenedor Docker de Squid."
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_KEYTAB_OWNERSHIP"
+msgstr "No se pudo asignar el propietario proxy:proxy al keytab en el contenedor Docker. %(details)s"
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_KEYTAB_MODE"
+msgstr "No se pudieron establecer permisos 0440 al keytab en el contenedor Docker. %(details)s"
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_REMOVE"
+msgstr "No se pudo eliminar el keytab incompleto del contenedor Docker. %(details)s"
+
+msgid "KERBEROS_UPLOAD_KEYTAB"
+msgstr "Cargar archivo keytab"
+
+msgid "KERBEROS_UPLOAD_REQUIRED_INFO"
+msgstr "La configuración no se aplicará si no se sube un archivo .keytab. El archivo se guardará como"
+
+msgid "KERBEROS_LDAP_KERBEROS_REQUIRED_WARNING"
+msgstr "La autenticación Kerberos requiere que el servidor LDAP o Active Directory configurado sea compatible con Kerberos y proporcione un keytab válido del principal de servicio HTTP para el proxy."
+
+msgid "KERBEROS_KEYTAB_FILE"
+msgstr "Archivo .keytab"
+
+msgid "KERBEROS_KEYTAB_HELP"
+msgstr "Debe ser un archivo keytab válido generado para el principal HTTP del proxy."
+
+msgid "KERBEROS_APPLYING"
+msgstr "Aplicando…"
+
+msgid "KERBEROS_UPLOAD_AND_APPLY"
+msgstr "Subir y aplicar Kerberos"
+
+msgid "KERBEROS_COMPLETED_CHECKS"
+msgstr "Verificaciones realizadas"
+
+msgid "KERBEROS_CHECK_HELPER_CONFIG"
+msgstr "Configuración del helper negotiate en Squid"
+
+msgid "KERBEROS_CHECK_KEYTAB_UPLOAD"
+msgstr "Carga del archivo .keytab"
+
+msgid "KERBEROS_CHECK_KEYTAB_PERMISSIONS"
+msgstr "Propietario proxy:proxy y permisos 440"
+
+msgid "KERBEROS_CHECK_KEYTAB_READABLE"
+msgstr "Lectura validada como usuario proxy con klist"
+
+msgid "KERBEROS_CHECK_SQUID_CONFIG"
+msgstr "Validación de squid.conf con squid -k parse"
+
+msgid "KERBEROS_STATUS_TITLE"
+msgstr "Estado de Kerberos"
+
+msgid "KERBEROS_KEYTAB_LABEL"
+msgstr "Keytab"
+
+msgid "KERBEROS_UPLOADED"
+msgstr "Cargado"
+
+msgid "KERBEROS_NOT_UPLOADED"
+msgstr "No cargado"
+
+msgid "KERBEROS_PERMISSIONS_LABEL"
+msgstr "Permisos"
+
+msgid "KERBEROS_OWNER_LABEL"
+msgstr "Propietario"
+
+msgid "KERBEROS_APPLIED"
+msgstr "Aplicada"
+
+msgid "KERBEROS_NOT_APPLIED"
+msgstr "No aplicada"
+
+msgid "KERBEROS_ERROR_SELECT_KEYTAB"
+msgstr "Selecciona un archivo .keytab antes de continuar."
+
+msgid "KERBEROS_OR"
+msgstr "o"
+
+msgid "KERBEROS_HOST_KEYTAB_PATH_LABEL"
+msgstr "Ruta de un keytab existente en este host"
+
+msgid "KERBEROS_HOST_KEYTAB_PATH_PLACEHOLDER"
+msgstr "/ruta/al/HTTP.keytab"
+
+msgid "KERBEROS_HOST_KEYTAB_PATH_HELP"
+msgstr "Indica una ruta absoluta a un archivo .keytab legible en el host donde se ejecuta SquidStats."
+
+msgid "KERBEROS_ERROR_KEYTAB_SOURCE_REQUIRED"
+msgstr "Sube un archivo .keytab o indica su ruta en este host."
+
+msgid "KERBEROS_ERROR_HOST_KEYTAB_PATH_INVALID"
+msgstr "La ruta del keytab debe ser absoluta."
+
+msgid "KERBEROS_ERROR_HOST_KEYTAB_NOT_FOUND"
+msgstr "No se encontró un archivo .keytab en la ruta indicada del host."
+
+msgid "KERBEROS_ERROR_HOST_KEYTAB_NOT_READABLE"
+msgstr "No se puede leer el archivo keytab en la ruta indicada del host."

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SquidStats\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 00:49+0000\n"
-"PO-Revision-Date: 2026-06-02 00:49+0000\n"
+"POT-Creation-Date: 2026-08-29 20:56+0000\n"
+"PO-Revision-Date: 2026-08-29 20:56+0000\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
@@ -266,6 +266,7 @@ msgid "Error en la operación"
 msgstr "Error in operation"
 
 #: routes/i18n_routes.py:71
+#: templates/admin/database.html:1078
 msgid "Error de conexión"
 msgstr "Connection error"
 
@@ -868,6 +869,26 @@ msgstr "Audit Center"
 #: routes/reports_routes.py:260
 msgid "Herramienta para el análisis de actividad y seguridad."
 msgstr "Tool for activity and security analysis."
+
+#: routes/admin/database.py:47
+msgid "Selecciona un archivo de logs para importar"
+msgstr "Select a log file to import"
+
+#: routes/admin/database.py:61
+msgid "Importación completada correctamente"
+msgstr "Import completed successfully"
+
+#: routes/admin/database.py:65
+msgid "No se pudo leer el archivo de logs"
+msgstr "The log file could not be read"
+
+#: routes/admin/database.py:67
+msgid "El archivo no contiene logs de Squid válidos"
+msgstr "The file contains no valid Squid logs"
+
+#: routes/admin/database.py:70
+msgid "No se pudo importar el archivo de logs"
+msgstr "The log file could not be imported"
 
 #: routes/stats_routes.py:70
 msgid "Estadísticas del comportamiento del Sistema"
@@ -1982,6 +2003,10 @@ msgstr "Select Table"
 msgid "Cargando tablas..."
 msgstr "Loading tables..."
 
+#: templates/admin/database.html:876
+msgid "No se pudieron cargar las tablas"
+msgstr "Could not load the tables"
+
 #: templates/admin/clean_data.html:51 templates/admin/database.html:636
 msgid "Información de la Tabla"
 msgstr "Table Information"
@@ -2145,6 +2170,10 @@ msgstr ""
 msgid "Esta operación puede tardar varios minutos en bases de datos grandes."
 msgstr "This operation may take several minutes on large databases."
 
+#: templates/admin/database.html:119
+msgid "La integridad se verifica manualmente desde el botón Verificar Integridad."
+msgstr "Integrity is checked manually using the Verify Integrity button."
+
 #: templates/admin/database.html:280
 msgid "Verificando..."
 msgstr "Verifying..."
@@ -2272,10 +2301,6 @@ msgstr "No backups available"
 msgid "Realiza una salva manual o activa las automáticas"
 msgstr "Perform a manual backup or enable automatic backups"
 
-#: templates/admin/database.html:522
-msgid "0\" class=\"flex-1 overflow-auto\">"
-msgstr ""
-
 #: templates/admin/database.html:526
 msgid "Archivo"
 msgstr "File"
@@ -2300,10 +2325,6 @@ msgstr "Recent"
 #: templates/admin/database.html:561
 msgid "Descargar"
 msgstr "Download"
-
-#: templates/admin/database.html:578
-msgid "0\" class=\"px-6 py-3 bg-gray-50 border-t border-gray-100\">"
-msgstr ""
 
 #: templates/admin/database.html:581
 msgid "Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente."
@@ -2924,6 +2945,159 @@ msgstr "Event"
 #: templates/admin/quota.html:365
 msgid "No hay registros disponibles"
 msgstr "No records available"
+
+#: templates/admin/database.html:41
+msgid "Importar Logs"
+msgstr "Import Logs"
+
+#: templates/admin/database.html:608
+msgid "Importar Logs de Squid"
+msgstr "Import Squid Logs"
+
+#: templates/admin/database.html:611
+msgid "Carga un archivo access.log histórico para incorporarlo a la base de datos"
+msgstr "Upload a historical access.log file to add it to the database"
+
+#: templates/admin/database.html:619
+msgid "Importación automática por fecha"
+msgstr "Automatic date-based import"
+
+#: templates/admin/database.html:620
+msgid "La fecha se obtiene del timestamp de cada línea. Los registros se guardan en las tablas log_YYYYMMDD y sus usuarios en user_YYYYMMDD. Puedes importar un archivo con varios días."
+msgstr "The date is read from each line's timestamp. Records are stored in log_YYYYMMDD tables and their users in user_YYYYMMDD tables. You can import a file containing multiple days."
+
+#: templates/admin/database.html:628
+msgid "Seleccionar archivo"
+msgstr "Select file"
+
+#: templates/admin/database.html:635
+msgid "Archivo de logs"
+msgstr "Log file"
+
+#: templates/admin/database.html:640
+msgid "Se admiten los formatos de access.log soportados por SquidStats."
+msgstr "The access.log formats supported by SquidStats are accepted."
+
+#: templates/admin/database.html:660
+msgid "Resultado de la importación"
+msgstr "Import result"
+
+#: templates/admin/database.html:662
+msgid "líneas válidas"
+msgstr "valid lines"
+
+#: templates/admin/database.html:673
+msgid "Denegados"
+msgstr "Denied"
+
+#: templates/admin/database.html:678
+msgid "Omitidas"
+msgstr "Skipped"
+
+#: templates/admin/database.html:683
+msgid "Tablas actualizadas"
+msgstr "Updated tables"
+
+#: templates/admin/database.html:992
+msgid "Importando..."
+msgstr "Importing..."
+
+#: templates/admin/database.html:993
+msgid "Importar logs"
+msgstr "Import logs"
+
+#: templates/admin/database.html:998
+msgid "Selecciona un archivo de logs"
+msgstr "Select a log file"
+
+#: templates/admin/database.html:1016
+#: templates/admin/database.html:1023
+msgid "No se pudo importar el archivo"
+msgstr "The file could not be imported"
+
+#: templates/admin/database.html:611
+msgid "Carga uno o varios archivos access.log históricos para incorporarlos a la base de datos"
+msgstr "Upload one or more historical access.log files to add them to the database"
+
+#: templates/admin/database.html:1074
+msgid "Importar archivos"
+msgstr "Import files"
+
+#: templates/admin/database.html:628
+msgid "Seleccionar archivos"
+msgstr "Select files"
+
+#: templates/admin/database.html:647
+msgid "Zona para cargar archivos de logs"
+msgstr "Log file upload area"
+
+#: templates/admin/database.html:651
+msgid "Arrastra aquí tus archivos access.log"
+msgstr "Drag your access.log files here"
+
+#: templates/admin/database.html:652
+msgid "o haz clic para seleccionarlos"
+msgstr "or click to select them"
+
+#: templates/admin/database.html:653
+msgid "Puedes seleccionar múltiples archivos a la vez."
+msgstr "You can select multiple files at once."
+
+#: templates/admin/database.html:659
+msgid "archivos seleccionados"
+msgstr "files selected"
+
+#: templates/admin/database.html:663
+msgid "Limpiar selección"
+msgstr "Clear selection"
+
+#: templates/admin/database.html:677
+msgid "Quitar archivo"
+msgstr "Remove file"
+
+#: templates/admin/database.html:691
+msgid "Progreso de importación"
+msgstr "Import progress"
+
+#: templates/admin/database.html:696
+msgid "archivos completados"
+msgstr "files completed"
+
+#: templates/admin/database.html:724
+msgid "Archivos importados"
+msgstr "Imported files"
+
+#: templates/admin/database.html:745
+msgid "Archivos con error"
+msgstr "Files with errors"
+
+#: templates/admin/database.html:1075
+msgid "Procesando..."
+msgstr "Processing..."
+
+#: templates/admin/database.html:1076
+msgid "Procesando archivo"
+msgstr "Processing file"
+
+#: templates/admin/database.html:1079
+msgid "No se pudo importar este archivo"
+msgstr "This file could not be imported"
+
+#: templates/admin/database.html:1080
+msgid "Selecciona al menos un archivo de logs"
+msgstr "Select at least one log file"
+
+#: templates/admin/database.html:1081
+msgid "No se pudo importar ningún archivo"
+msgstr "No files could be imported"
+
+#: templates/admin/database.html:1082
+msgid "Algunos archivos se importaron correctamente y otros fallaron"
+msgstr "Some files were imported successfully and others failed"
+
+#: templates/admin/database.html:1083
+msgid "Archivos importados correctamente"
+msgstr "Files imported successfully"
 
 # SquidStats — English translations
 # Edit this file here and keep it in sync manually if desired.
@@ -4780,3 +4954,209 @@ msgstr "To update, download and install the latest version from"
 
 msgid "Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Para actualizar, descargue e instale la última versión desde GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest"
 msgstr "This installation was done with a .deb package and cannot be updated from here. To update, download and install the latest version from GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest"
+
+msgid "KERBEROS_STATUS_SQUID_INSTALLED"
+msgstr "Squid installed"
+
+#, python-format
+msgid "KERBEROS_STATUS_DOCKER_SQUID_FOUND"
+msgstr "A Docker container with Squid exists: %(name)s"
+
+msgid "KERBEROS_ERROR_SQUID_NOT_FOUND"
+msgstr "No Squid installation or Docker container was found"
+
+msgid "KERBEROS_ERROR_SQUID_NOT_INSTALLED"
+msgstr "Squid is not installed"
+
+msgid "KERBEROS_ERROR_PROXY_USER_NOT_FOUND"
+msgstr "The proxy user does not exist on the system."
+
+msgid "KERBEROS_ERROR_PROXY_GROUP_NOT_FOUND"
+msgstr "The proxy group does not exist on the system."
+
+msgid "KERBEROS_ERROR_INVALID_KEYTAB_EXTENSION"
+msgstr "The file must have a .keytab extension."
+
+msgid "KERBEROS_ERROR_KEYTAB_TOO_LARGE"
+msgstr "The keytab file exceeds the maximum allowed size."
+
+msgid "KERBEROS_ERROR_EMPTY_KEYTAB"
+msgstr "The keytab file is empty."
+
+msgid "KERBEROS_ERROR_KEYTAB_INSTALL_PERMISSION_DENIED"
+msgstr "There are insufficient permissions to install the keytab as proxy:proxy."
+
+#, python-format
+msgid "KERBEROS_ERROR_COMMAND_NOT_FOUND"
+msgstr "Command not found: %(command)s"
+
+#, python-format
+msgid "KERBEROS_ERROR_COMMAND_TIMEOUT"
+msgstr "The command timed out: %(command)s"
+
+msgid "KERBEROS_ERROR_KLIST_NOT_INSTALLED"
+msgstr "The klist command is not installed."
+
+msgid "KERBEROS_ERROR_PRIVILEGE_COMMAND_NOT_FOUND"
+msgstr "Neither sudo nor runuser was found to verify the keytab as proxy."
+
+msgid "KERBEROS_ERROR_KEYTAB_REQUIRED"
+msgstr "You must upload the .keytab file before applying Kerberos."
+
+msgid "KERBEROS_ERROR_SQUID_CONFIG_INACCESSIBLE"
+msgstr "squid.conf is not accessible"
+
+#, python-format
+msgid "KERBEROS_ERROR_SQUID_CONFIG_ACCESS"
+msgstr "Unable to access the Squid configuration: %(details)s"
+
+msgid "KERBEROS_ERROR_KEYTAB_PERMISSIONS"
+msgstr "The keytab does not have proxy:proxy ownership and 0440 permissions."
+
+#, python-format
+msgid "KERBEROS_ERROR_KEYTAB_NOT_READABLE"
+msgstr "The proxy user cannot read the keytab. %(details)s"
+
+msgid "KERBEROS_ERROR_SAVE_MODULE_CONFIG"
+msgstr "Unable to save the modular Kerberos configuration."
+
+msgid "KERBEROS_ERROR_ENABLE_MODULE_CONFIG"
+msgstr "Unable to enable the Kerberos modular file in squid.conf."
+
+msgid "KERBEROS_ERROR_SAVE_SQUID_CONFIG"
+msgstr "Unable to save the Squid configuration."
+
+#, python-format
+msgid "KERBEROS_ERROR_SQUID_CONFIG_INVALID"
+msgstr "The Squid configuration has errors. squid -k parse: %(details)s"
+
+msgid "KERBEROS_SUCCESS_CONFIGURED"
+msgstr "Kerberos configured successfully in Squid."
+
+msgid "KERBEROS_ERROR_APPLY_FAILED"
+msgstr "Unable to apply the Kerberos configuration."
+
+msgid "KERBEROS_TAB_TITLE"
+msgstr "Kerberos Authentication for Squid"
+
+msgid "KERBEROS_TAB_DESCRIPTION"
+msgstr "Upload the keytab to install it and apply the authentication configuration in Squid."
+
+msgid "KERBEROS_SQUID_INSTALL_REQUIRED"
+msgstr "Install Squid on this server before uploading the keytab and applying Kerberos."
+
+msgid "KERBEROS_DOCKER_DETECTED_INFO"
+msgstr "The keytab and Squid configuration will be installed and validated inside the detected container."
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_COPY_TO"
+msgstr "Unable to copy the file to the Squid Docker container. %(details)s"
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_COPY_FROM"
+msgstr "Unable to back up a file from the Squid Docker container. %(details)s"
+
+msgid "KERBEROS_ERROR_DOCKER_SQUID_CONFIG_NOT_FOUND"
+msgstr "The file /etc/squid/squid.conf was not found in the Squid Docker container."
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_KEYTAB_OWNERSHIP"
+msgstr "Unable to assign proxy:proxy ownership to the keytab in the Docker container. %(details)s"
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_KEYTAB_MODE"
+msgstr "Unable to set 0440 permissions on the keytab in the Docker container. %(details)s"
+
+#, python-format
+msgid "KERBEROS_ERROR_DOCKER_REMOVE"
+msgstr "Unable to remove the incomplete keytab from the Docker container. %(details)s"
+
+msgid "KERBEROS_UPLOAD_KEYTAB"
+msgstr "Upload keytab file"
+
+msgid "KERBEROS_UPLOAD_REQUIRED_INFO"
+msgstr "The configuration will not be applied unless a .keytab file is uploaded. The file will be saved as"
+
+msgid "KERBEROS_LDAP_KERBEROS_REQUIRED_WARNING"
+msgstr "Kerberos authentication requires the configured LDAP or Active Directory server to support Kerberos and provide a valid HTTP service-principal keytab for the proxy."
+
+msgid "KERBEROS_KEYTAB_FILE"
+msgstr ".keytab file"
+
+msgid "KERBEROS_KEYTAB_HELP"
+msgstr "It must be a valid keytab file generated for the proxy HTTP principal."
+
+msgid "KERBEROS_APPLYING"
+msgstr "Applying..."
+
+msgid "KERBEROS_UPLOAD_AND_APPLY"
+msgstr "Upload and apply Kerberos"
+
+msgid "KERBEROS_COMPLETED_CHECKS"
+msgstr "Completed checks"
+
+msgid "KERBEROS_CHECK_HELPER_CONFIG"
+msgstr "negotiate helper configuration in Squid"
+
+msgid "KERBEROS_CHECK_KEYTAB_UPLOAD"
+msgstr ".keytab file upload"
+
+msgid "KERBEROS_CHECK_KEYTAB_PERMISSIONS"
+msgstr "proxy:proxy ownership and 440 permissions"
+
+msgid "KERBEROS_CHECK_KEYTAB_READABLE"
+msgstr "Read access validated as proxy user with klist"
+
+msgid "KERBEROS_CHECK_SQUID_CONFIG"
+msgstr "squid.conf validation with squid -k parse"
+
+msgid "KERBEROS_STATUS_TITLE"
+msgstr "Kerberos Status"
+
+msgid "KERBEROS_KEYTAB_LABEL"
+msgstr "Keytab"
+
+msgid "KERBEROS_UPLOADED"
+msgstr "Uploaded"
+
+msgid "KERBEROS_NOT_UPLOADED"
+msgstr "Not uploaded"
+
+msgid "KERBEROS_PERMISSIONS_LABEL"
+msgstr "Permissions"
+
+msgid "KERBEROS_OWNER_LABEL"
+msgstr "Owner"
+
+msgid "KERBEROS_APPLIED"
+msgstr "Applied"
+
+msgid "KERBEROS_NOT_APPLIED"
+msgstr "Not applied"
+
+msgid "KERBEROS_ERROR_SELECT_KEYTAB"
+msgstr "Select a .keytab file before continuing."
+
+msgid "KERBEROS_OR"
+msgstr "or"
+
+msgid "KERBEROS_HOST_KEYTAB_PATH_LABEL"
+msgstr "Existing keytab path on this host"
+
+msgid "KERBEROS_HOST_KEYTAB_PATH_PLACEHOLDER"
+msgstr "/path/to/HTTP.keytab"
+
+msgid "KERBEROS_HOST_KEYTAB_PATH_HELP"
+msgstr "Provide an absolute path to a readable .keytab file on the host running SquidStats."
+
+msgid "KERBEROS_ERROR_KEYTAB_SOURCE_REQUIRED"
+msgstr "Upload a .keytab file or provide its path on this host."
+
+msgid "KERBEROS_ERROR_HOST_KEYTAB_PATH_INVALID"
+msgstr "The keytab path must be absolute."
+
+msgid "KERBEROS_ERROR_HOST_KEYTAB_NOT_FOUND"
+msgstr "No .keytab file was found at the specified host path."
+
+msgid "KERBEROS_ERROR_HOST_KEYTAB_NOT_READABLE"
+msgstr "The keytab file at the specified host path cannot be read."
