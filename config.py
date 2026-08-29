@@ -148,6 +148,17 @@ class Config:
         "ACL_FILES_DIR",
         os.path.join(os.path.dirname(SQUID_CONFIG_PATH), "squid.d"),
     )
+    SQUID_KERBEROS_KEYTAB_PATH = safe_get_env(
+        "SQUID_KERBEROS_KEYTAB_PATH", "/etc/squid/HTTP.keytab"
+    )
+    SQUID_KERBEROS_HELPER_PATH = safe_get_env(
+        "SQUID_KERBEROS_HELPER_PATH",
+        "/usr/lib/squid/negotiate_kerberos_auth",
+    )
+    SQUID_KERBEROS_SERVICE_PRINCIPAL = safe_get_env(
+        "SQUID_KERBEROS_SERVICE_PRINCIPAL",
+        "HTTP/proxy.inutil.cu@INUTIL.CU",
+    )
 
     # Internationalization (i18n)
     BABEL_DEFAULT_LOCALE = safe_get_env("BABEL_DEFAULT_LOCALE", "es")
