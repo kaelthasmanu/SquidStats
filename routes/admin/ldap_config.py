@@ -6,6 +6,7 @@ from loguru import logger
 
 from services.auth.auth_service import admin_required, api_auth_required
 from services.ldap import ldap_config_service, ldap_service
+from services.squid import kerberos_service
 
 
 def _load_request_config():
@@ -23,7 +24,64 @@ def register_routes(bp):
     @admin_required
     def ldap_config_view():
         cfg = ldap_config_service.load_config()
-        return render_template("admin/ldap_config.html", cfg=cfg)
+        return render_template(
+            "admin/ldap_config.html",
+            cfg=cfg,
+            kerberos_status=kerberos_service.get_status(),
+        )
+
+    # ------------------------------------------------------------------
+    # Kerberos authentication for Squid
+    # ------------------------------------------------------------------
+
+    @bp.route("/api/ldap/kerberos/status", methods=["GET"])
+    @api_auth_required
+    def kerberos_status():
+        return jsonify(kerberos_service.get_status())
+
+    @bp.route("/api/ldap/kerberos/configure", methods=["POST"])
+    @api_auth_required
+    def kerberos_configure():
+        upload = request.files.get("keytab")
+        if not kerberos_service.squid_is_installed():
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": kerberos_service.SQUID_NOT_INSTALLED_MESSAGE,
+                }
+            ), 503
+        if upload is None or not (upload.filename or "").strip():
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": _(
+                        "Debes subir el archivo .keytab antes de aplicar Kerberos."
+                    ),
+                }
+            ), 400
+
+        try:
+            return jsonify(kerberos_service.configure(upload))
+        except kerberos_service.SquidNotInstalledError:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": kerberos_service.SQUID_NOT_INSTALLED_MESSAGE,
+                }
+            ), 503
+        except kerberos_service.KeytabRequiredError as exc:
+            return jsonify({"status": "error", "message": str(exc)}), 400
+        except kerberos_service.KerberosConfigurationError as exc:
+            logger.error(f"Error de configuración Kerberos: {exc}")
+            return jsonify({"status": "error", "message": str(exc)}), 422
+        except Exception:
+            logger.exception("Error inesperado al configurar Kerberos en Squid")
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": _("No se pudo aplicar la configuración Kerberos."),
+                }
+            ), 500
 
     # ------------------------------------------------------------------
     # Save configuration
