@@ -4,6 +4,22 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-6" x-data="ldapApp()" x-init="init()">
+    <div class="bg-white shadow rounded-lg border border-gray-200 p-2" role="tablist" aria-label="{{ _('Configuración de LDAP') }}">
+        <div class="flex flex-col sm:flex-row gap-2">
+            <button type="button" id="ldap-tab-button" role="tab" aria-selected="true"
+                aria-controls="ldap-tab-panel" onclick="setLdapTab('ldap')"
+                class="flex-1 rounded-lg px-4 py-3 text-sm font-semibold transition-colors bg-blue-600 text-white shadow">
+                <i class="fas fa-network-wired mr-2"></i>{{ _('LDAP / Active Directory') }}
+            </button>
+            <button type="button" id="kerberos-tab-button" role="tab" aria-selected="false"
+                aria-controls="kerberos-tab-panel" onclick="setLdapTab('kerberos')"
+                class="flex-1 rounded-lg px-4 py-3 text-sm font-semibold transition-colors text-gray-600 hover:bg-indigo-50 hover:text-indigo-700">
+                <i class="fas fa-key mr-2"></i>{{ _('Autenticación Kerberos para Squid') }}
+            </button>
+        </div>
+    </div>
+
+    <div id="ldap-tab-panel" role="tabpanel" aria-labelledby="ldap-tab-button" class="space-y-6">
 
     <!-- ── Header ────────────────────────────────────────────────────── -->
     <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
@@ -280,15 +296,150 @@
 
         </div>
     </div>
+
+    <div id="kerberos-tab-panel" role="tabpanel" aria-labelledby="kerberos-tab-button" hidden class="space-y-6">
+        <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-key text-indigo-600"></i>
+                        {{ _('Autenticación Kerberos para Squid') }}
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">
+                        {{ _('Sube el keytab para instalarlo y aplicar la configuración de autenticación en Squid.') }}
+                    </p>
+                </div>
+                <span x-show="kerberosStatus.squid_installed" class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
+                    <i class="fas fa-check-circle"></i>{{ _('squid instalado') }}
+                </span>
+                <span x-show="!kerberosStatus.squid_installed" class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-red-100 text-red-800 text-sm font-semibold">
+                    <i class="fas fa-exclamation-circle"></i>squid no esta instalado
+                </span>
+            </div>
+        </div>
+
+        <div x-show="!kerberosStatus.squid_installed" class="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 flex items-start gap-3">
+            <i class="fas fa-exclamation-triangle mt-1"></i>
+            <div>
+                <p class="font-semibold">squid no esta instalado</p>
+                <p class="text-sm mt-1">{{ _('Instala Squid en este servidor antes de cargar el keytab y aplicar Kerberos.') }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="xl:col-span-2 bg-white shadow rounded-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                    <i class="fas fa-upload text-indigo-500"></i>{{ _('Cargar archivo keytab') }}
+                </h3>
+                <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 text-sm mb-5">
+                    <i class="fas fa-lock mr-2"></i>
+                    {{ _('La configuración no se aplicará si no se sube un archivo .keytab. El archivo se guardará como') }}
+                    <code class="font-mono" x-text="kerberosStatus.keytab_path || '/etc/squid/HTTP.keytab'"></code>.
+                </div>
+
+                <form @submit.prevent="applyKerberos" enctype="multipart/form-data" class="space-y-4">
+                    <div>
+                        <label for="kerberos-keytab" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ _('Archivo .keytab') }}
+                        </label>
+                        <input id="kerberos-keytab" x-ref="keytab" type="file" accept=".keytab"
+                            :disabled="!kerberosStatus.squid_installed || applyingKerberos"
+                            class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <p class="text-xs text-gray-500 mt-2">{{ _('Debe ser un archivo keytab válido generado para el principal HTTP del proxy.') }}</p>
+                    </div>
+                    <button type="submit" :disabled="!kerberosStatus.squid_installed || applyingKerberos"
+                        class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-shield-alt"></i>
+                        <span x-text="applyingKerberos ? '{{ _('Aplicando…') }}' : '{{ _('Subir y aplicar Kerberos') }}'"></span>
+                    </button>
+                </form>
+
+                <template x-if="kerberosAlert.message">
+                    <div :class="kerberosAlert.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'"
+                        class="mt-5 rounded-lg border p-3 text-sm flex items-start gap-2">
+                        <i :class="kerberosAlert.type === 'success' ? 'fas fa-check-circle text-green-600' : 'fas fa-exclamation-circle text-red-600'" class="mt-0.5"></i>
+                        <span x-text="kerberosAlert.message"></span>
+                    </div>
+                </template>
+            </div>
+
+            <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                    <i class="fas fa-list-ol text-indigo-500"></i>{{ _('Verificaciones realizadas') }}
+                </h3>
+                <ol class="space-y-3 text-sm text-gray-700">
+                    <li class="flex gap-3"><span class="font-bold text-indigo-600">7.</span><span>{{ _('Configuración del helper negotiate en Squid') }}</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-indigo-600">8.</span><span>{{ _('Carga del archivo .keytab') }}</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-indigo-600">9.</span><span>{{ _('Propietario proxy:proxy y permisos 440') }}</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-indigo-600">10.</span><span>{{ _('Lectura validada como usuario proxy con klist') }}</span></li>
+                    <li class="flex gap-3"><span class="font-bold text-indigo-600">11.</span><span>{{ _('Validación de squid.conf con squid -k parse') }}</span></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ _('Estado de Kerberos') }}</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <p class="text-gray-500">{{ _('Keytab') }}</p>
+                    <p class="font-semibold" :class="kerberosStatus.keytab && kerberosStatus.keytab.exists ? 'text-green-700' : 'text-gray-700'"
+                        x-text="kerberosStatus.keytab && kerberosStatus.keytab.exists ? '{{ _('Cargado') }}' : '{{ _('No cargado') }}'"></p>
+                </div>
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <p class="text-gray-500">{{ _('Permisos') }}</p>
+                    <p class="font-semibold" x-text="kerberosStatus.keytab && kerberosStatus.keytab.mode ? kerberosStatus.keytab.mode : '—'"></p>
+                </div>
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <p class="text-gray-500">{{ _('Propietario') }}</p>
+                    <p class="font-semibold" x-text="kerberosStatus.keytab && kerberosStatus.keytab.owner ? kerberosStatus.keytab.owner + ':' + kerberosStatus.keytab.group : '—'"></p>
+                </div>
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <p class="text-gray-500">{{ _('Configuración') }}</p>
+                    <p class="font-semibold" :class="kerberosStatus.configured ? 'text-green-700' : 'text-gray-700'"
+                        x-text="kerberosStatus.configured ? '{{ _('Aplicada') }}' : '{{ _('No aplicada') }}'"></p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-4" x-text="kerberosStatus.keytab_path"></p>
+        </div>
+    </div>
 </div>
 
 <script type="application/json" id="ldap-config-data">
 {{ cfg | tojson | safe }}
 </script>
 
+<script type="application/json" id="kerberos-status-data">
+{{ kerberos_status | tojson | safe }}
+</script>
+
 <script>
+function setLdapTab(tabName) {
+    const tabs = {
+        ldap: {
+            button: document.getElementById('ldap-tab-button'),
+            panel: document.getElementById('ldap-tab-panel'),
+        },
+        kerberos: {
+            button: document.getElementById('kerberos-tab-button'),
+            panel: document.getElementById('kerberos-tab-panel'),
+        },
+    };
+
+    Object.entries(tabs).forEach(([name, tab]) => {
+        const selected = name === tabName;
+        tab.panel.hidden = !selected;
+        tab.button.setAttribute('aria-selected', String(selected));
+        tab.button.classList.toggle('bg-blue-600', selected && name === 'ldap');
+        tab.button.classList.toggle('bg-indigo-600', selected && name === 'kerberos');
+        tab.button.classList.toggle('text-white', selected);
+        tab.button.classList.toggle('shadow', selected);
+        tab.button.classList.toggle('text-gray-600', !selected);
+    });
+}
+
 function ldapApp() {
     const initialCfg = JSON.parse(document.getElementById('ldap-config-data').textContent || '{}');
+    const initialKerberosStatus = JSON.parse(document.getElementById('kerberos-status-data').textContent || '{}');
     return {
         // Config form
         cfg: {
@@ -329,6 +480,11 @@ function ldapApp() {
         membershipGroups:  [],
         loadingMembership: false,
         membershipError:   "",
+
+        // Kerberos configuration
+        kerberosStatus: initialKerberosStatus,
+        applyingKerberos: false,
+        kerberosAlert: { message: "", type: "" },
 
         storageKey: "squidstats_ldap_config",
 
@@ -406,6 +562,56 @@ function ldapApp() {
         showAlert(message, type = "success") {
             this.cfgAlert = { message, type };
             setTimeout(() => { this.cfgAlert = { message: "", type: "" }; }, 4000);
+        },
+
+        showKerberosAlert(message, type = "success") {
+            this.kerberosAlert = { message, type };
+        },
+
+        async loadKerberosStatus() {
+            try {
+                const res = await fetch('/admin/api/ldap/kerberos/status', {
+                    headers: { 'X-CSRFToken': this.csrfToken() },
+                });
+                if (res.ok) this.kerberosStatus = await res.json();
+            } catch (error) {
+                console.error('[KERBEROS DEBUG] status error', error);
+            }
+        },
+
+        async applyKerberos() {
+            const file = this.$refs.keytab && this.$refs.keytab.files[0];
+            if (!file) {
+                this.showKerberosAlert('{{ _('Selecciona un archivo .keytab antes de continuar.') }}', 'error');
+                return;
+            }
+            if (!file.name.toLowerCase().endsWith('.keytab')) {
+                this.showKerberosAlert('{{ _('El archivo debe tener extensión .keytab.') }}', 'error');
+                return;
+            }
+
+            this.applyingKerberos = true;
+            this.kerberosAlert = { message: "", type: "" };
+            const formData = new FormData();
+            formData.append('keytab', file);
+            try {
+                const res = await fetch('/admin/api/ldap/kerberos/configure', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': this.csrfToken() },
+                    body: formData,
+                });
+                const data = await res.json();
+                this.showKerberosAlert(data.message, data.status === 'success' ? 'success' : 'error');
+                if (data.status === 'success') {
+                    this.$refs.keytab.value = '';
+                    await this.loadKerberosStatus();
+                }
+            } catch (error) {
+                console.error('[KERBEROS DEBUG] configure error', error);
+                this.showKerberosAlert('{{ _('No se pudo aplicar la configuración Kerberos.') }}', 'error');
+            } finally {
+                this.applyingKerberos = false;
+            }
         },
 
         // ── Actions ────────────────────────────────────────────────────
