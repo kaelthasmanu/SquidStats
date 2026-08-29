@@ -43,32 +43,32 @@ def register_routes(bp):
     @api_auth_required
     def kerberos_configure():
         upload = request.files.get("keytab")
-        if not kerberos_service.squid_is_installed():
+        squid_runtime = kerberos_service.get_squid_runtime()
+        if not squid_runtime["local_squid"]:
             return jsonify(
                 {
                     "status": "error",
-                    "message": kerberos_service.SQUID_NOT_INSTALLED_MESSAGE,
+                    "message": squid_runtime["message"],
                 }
-            ), 503
+            ), 409 if squid_runtime["kind"] == "docker" else 503
         if upload is None or not (upload.filename or "").strip():
             return jsonify(
                 {
                     "status": "error",
-                    "message": _(
-                        "Debes subir el archivo .keytab antes de aplicar Kerberos."
-                    ),
+                    "message": _("KERBEROS_ERROR_KEYTAB_REQUIRED"),
                 }
             ), 400
 
         try:
             return jsonify(kerberos_service.configure(upload))
         except kerberos_service.SquidNotInstalledError:
+            squid_runtime = kerberos_service.get_squid_runtime()
             return jsonify(
                 {
                     "status": "error",
-                    "message": kerberos_service.SQUID_NOT_INSTALLED_MESSAGE,
+                    "message": squid_runtime["message"],
                 }
-            ), 503
+            ), 409 if squid_runtime["kind"] == "docker" else 503
         except kerberos_service.KeytabRequiredError as exc:
             return jsonify({"status": "error", "message": str(exc)}), 400
         except kerberos_service.KerberosConfigurationError as exc:
@@ -79,7 +79,7 @@ def register_routes(bp):
             return jsonify(
                 {
                     "status": "error",
-                    "message": _("No se pudo aplicar la configuración Kerberos."),
+                    "message": _("KERBEROS_ERROR_APPLY_FAILED"),
                 }
             ), 500
 
