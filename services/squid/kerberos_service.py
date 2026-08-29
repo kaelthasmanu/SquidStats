@@ -218,8 +218,9 @@ def _restore(snapshot: _FileSnapshot) -> None:
             logger.warning("Unable to restore owner for %s", snapshot.path)
 
 
-def _save_uploaded_keytab(upload, destination: Path) -> None:
-    filename = (getattr(upload, "filename", "") or "").strip()
+def _save_keytab_stream(stream, filename: str, destination: Path) -> None:
+    """Copy a validated keytab stream to Squid's destination atomically."""
+    filename = filename.strip()
     if not filename.lower().endswith(".keytab"):
         raise KerberosConfigurationError(
             _("KERBEROS_ERROR_INVALID_KEYTAB_EXTENSION")
@@ -234,7 +235,7 @@ def _save_uploaded_keytab(upload, destination: Path) -> None:
         ) as temporary:
             temporary_path = temporary.name
             while True:
-                chunk = upload.stream.read(1024 * 1024)
+                chunk = stream.read(1024 * 1024)
                 if not chunk:
                     break
                 total += len(chunk)
@@ -268,6 +269,27 @@ def _save_uploaded_keytab(upload, destination: Path) -> None:
                 os.unlink(temporary_path)
             except OSError:
                 pass
+
+
+def _save_uploaded_keytab(upload, destination: Path) -> None:
+    filename = (getattr(upload, "filename", "") or "").strip()
+    _save_keytab_stream(upload.stream, filename, destination)
+
+
+def _save_host_keytab(host_keytab_path: str, destination: Path) -> None:
+    """Copy a keytab file selected by its absolute path on the application host."""
+    source = Path(host_keytab_path).expanduser()
+    if not source.is_absolute():
+        raise KerberosConfigurationError(_("KERBEROS_ERROR_HOST_KEYTAB_PATH_INVALID"))
+    if not source.is_file():
+        raise KerberosConfigurationError(_("KERBEROS_ERROR_HOST_KEYTAB_NOT_FOUND"))
+    try:
+        with source.open("rb") as keytab_file:
+            _save_keytab_stream(keytab_file, source.name, destination)
+    except PermissionError as exc:
+        raise KerberosConfigurationError(
+            _("KERBEROS_ERROR_HOST_KEYTAB_NOT_READABLE")
+        ) from exc
 
 
 def _keytab_permissions(path: Path) -> dict:
@@ -469,12 +491,18 @@ def get_status() -> dict:
     }
 
 
-def configure(upload, config_manager: SquidConfigManager | None = None) -> dict:
+def configure(
+    upload=None,
+    config_manager: SquidConfigManager | None = None,
+    *,
+    host_keytab_path: str | None = None,
+) -> dict:
     """Install a keytab and apply Kerberos configuration transactionally."""
     squid_binary = _require_squid()
-    if upload is None or not (getattr(upload, "filename", "") or "").strip():
+    has_upload = upload is not None and (getattr(upload, "filename", "") or "").strip()
+    if not has_upload and not (host_keytab_path or "").strip():
         raise KeytabRequiredError(
-            _("KERBEROS_ERROR_KEYTAB_REQUIRED")
+            _("KERBEROS_ERROR_KEYTAB_SOURCE_REQUIRED")
         )
 
     keytab = _keytab_path()
@@ -499,7 +527,10 @@ def configure(upload, config_manager: SquidConfigManager | None = None) -> dict:
     auth_snapshot: _FileSnapshot | None = None
 
     try:
-        _save_uploaded_keytab(upload, keytab)
+        if has_upload:
+            _save_uploaded_keytab(upload, keytab)
+        else:
+            _save_host_keytab(host_keytab_path.strip(), keytab)
         permissions = _keytab_permissions(keytab)
         if not permissions["permissions_ok"]:
             raise KerberosConfigurationError(
