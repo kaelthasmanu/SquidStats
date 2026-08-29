@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import pwd
+import re
 import shutil
 import stat
 import subprocess  # nosec B404
@@ -11,6 +12,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from flask_babel import gettext as _
 from loguru import logger
 
 from config import Config
@@ -20,7 +22,7 @@ KEYTAB_MODE = 0o440
 KEYTAB_USER = "proxy"
 KEYTAB_GROUP = "proxy"
 MAX_KEYTAB_SIZE = 16 * 1024 * 1024
-SQUID_NOT_INSTALLED_MESSAGE = "squid no esta instalado"
+DEFAULT_SQUID_PORT = "3128"
 
 KERBEROS_CONFIG_START = "# SQUIDSTATS KERBEROS AUTH START"
 KERBEROS_CONFIG_END = "# SQUIDSTATS KERBEROS AUTH END"
@@ -65,10 +67,77 @@ def squid_is_installed() -> bool:
     return _squid_binary() is not None
 
 
+def _docker_binary() -> str | None:
+    """Return Docker's executable when it is installed on the host."""
+    return shutil.which("docker")
+
+
+def _is_squid_docker_container(name: str, ports: str) -> bool:
+    """Identify a running Squid container by name or the standard proxy port."""
+    if "squid" in name.casefold():
+        return True
+    return re.search(rf"(?<!\d){DEFAULT_SQUID_PORT}(?!\d)", ports) is not None
+
+
+def _find_docker_squid_container() -> dict[str, str] | None:
+    """Return the first running Docker container that appears to run Squid."""
+    docker = _docker_binary()
+    if docker is None:
+        return None
+
+    success, output = _run(
+        [docker, "ps", "--format", "{{.ID}}\t{{.Names}}\t{{.Ports}}"]
+    )
+    if not success:
+        logger.debug("Unable to inspect Docker containers: {}", output)
+        return None
+
+    for line in output.splitlines():
+        parts = line.split("\t", 2)
+        if len(parts) != 3:
+            continue
+        container_id, name, ports = (part.strip() for part in parts)
+        if _is_squid_docker_container(name, ports):
+            return {"id": container_id, "name": name, "ports": ports}
+    return None
+
+
+def get_squid_runtime() -> dict:
+    """Detect local Squid first, then a running Docker-based Squid if needed."""
+    binary = _squid_binary()
+    if binary:
+        return {
+            "kind": "local",
+            "message": _("KERBEROS_STATUS_SQUID_INSTALLED"),
+            "local_squid": True,
+            "docker_container": None,
+        }
+
+    # Docker must only be queried when the local executable is unavailable.
+    container = _find_docker_squid_container()
+    if container:
+        return {
+            "kind": "docker",
+            "message": _(
+                "KERBEROS_STATUS_DOCKER_SQUID_FOUND",
+                name=container["name"],
+            ),
+            "local_squid": False,
+            "docker_container": container,
+        }
+
+    return {
+        "kind": "none",
+        "message": _("KERBEROS_ERROR_SQUID_NOT_FOUND"),
+        "local_squid": False,
+        "docker_container": None,
+    }
+
+
 def _require_squid() -> str:
     binary = _squid_binary()
     if binary is None:
-        raise SquidNotInstalledError(SQUID_NOT_INSTALLED_MESSAGE)
+        raise SquidNotInstalledError(_("KERBEROS_ERROR_SQUID_NOT_INSTALLED"))
     return binary
 
 
@@ -81,7 +150,7 @@ def _get_proxy_ids() -> tuple[int, int]:
         user = pwd.getpwnam(KEYTAB_USER)
     except KeyError as exc:
         raise KerberosConfigurationError(
-            "El usuario proxy no existe en el sistema."
+            _("KERBEROS_ERROR_PROXY_USER_NOT_FOUND")
         ) from exc
 
     try:
@@ -90,7 +159,7 @@ def _get_proxy_ids() -> tuple[int, int]:
         group_id = grp.getgrnam(KEYTAB_GROUP).gr_gid
     except KeyError as exc:
         raise KerberosConfigurationError(
-            "El grupo proxy no existe en el sistema."
+            _("KERBEROS_ERROR_PROXY_GROUP_NOT_FOUND")
         ) from exc
     return user.pw_uid, group_id
 
@@ -146,14 +215,14 @@ def _restore(snapshot: _FileSnapshot) -> None:
         try:
             os.chown(snapshot.path, snapshot.uid, snapshot.gid)
         except PermissionError:
-            logger.warning("No se pudo restaurar el propietario de %s", snapshot.path)
+            logger.warning("Unable to restore owner for %s", snapshot.path)
 
 
 def _save_uploaded_keytab(upload, destination: Path) -> None:
     filename = (getattr(upload, "filename", "") or "").strip()
     if not filename.lower().endswith(".keytab"):
         raise KerberosConfigurationError(
-            "Debes subir un archivo de keytab con extensión .keytab."
+            _("KERBEROS_ERROR_INVALID_KEYTAB_EXTENSION")
         )
 
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -171,14 +240,14 @@ def _save_uploaded_keytab(upload, destination: Path) -> None:
                 total += len(chunk)
                 if total > MAX_KEYTAB_SIZE:
                     raise KerberosConfigurationError(
-                        "El archivo keytab supera el tamaño máximo permitido."
+                        _("KERBEROS_ERROR_KEYTAB_TOO_LARGE")
                     )
                 temporary.write(chunk)
             temporary.flush()
             os.fsync(temporary.fileno())
 
         if total == 0:
-            raise KerberosConfigurationError("El archivo keytab está vacío.")
+            raise KerberosConfigurationError(_("KERBEROS_ERROR_EMPTY_KEYTAB"))
 
         uid, gid = _get_proxy_ids()
         os.chmod(temporary_path, KEYTAB_MODE)
@@ -191,7 +260,7 @@ def _save_uploaded_keytab(upload, destination: Path) -> None:
         os.chown(destination, uid, gid)
     except PermissionError as exc:
         raise KerberosConfigurationError(
-            "No hay permisos suficientes para instalar el keytab como proxy:proxy."
+            _("KERBEROS_ERROR_KEYTAB_INSTALL_PERMISSION_DENIED")
         ) from exc
     finally:
         if temporary_path:
@@ -243,9 +312,11 @@ def _run(command: list[str]) -> tuple[bool, str]:
             timeout=30,
         )
     except FileNotFoundError:
-        return False, f"No se encontró el comando: {command[0]}"
+        return False, _("KERBEROS_ERROR_COMMAND_NOT_FOUND", command=command[0])
     except subprocess.TimeoutExpired:
-        return False, f"El comando excedió el tiempo límite: {command[0]}"
+        return False, _(
+            "KERBEROS_ERROR_COMMAND_TIMEOUT", command=command[0]
+        )
     except OSError as exc:
         return False, str(exc)
 
@@ -262,7 +333,7 @@ def verify_keytab_readable(path: Path | str) -> tuple[bool, str]:
     keytab = Path(path)
     klist = shutil.which("klist")
     if not klist:
-        return False, "El comando klist no está instalado."
+        return False, _("KERBEROS_ERROR_KLIST_NOT_INSTALLED")
 
     sudo = shutil.which("sudo")
     if sudo:
@@ -274,7 +345,7 @@ def verify_keytab_readable(path: Path | str) -> tuple[bool, str]:
         else:
             return (
                 False,
-                "No se encontró sudo o runuser para verificar el keytab como proxy.",
+                _("KERBEROS_ERROR_PRIVILEGE_COMMAND_NOT_FOUND"),
             )
     return _run(command)
 
@@ -299,7 +370,7 @@ def _remove_managed_block(content: str) -> str:
 def _kerberos_block() -> str:
     return (
         f"{KERBEROS_CONFIG_START}\n"
-        "# Autenticación Kerberos gestionada por SquidStats\n"
+        "# Kerberos authentication managed by SquidStats\n"
         "auth_param negotiate program "
         f"{Config.SQUID_KERBEROS_HELPER_PATH} -k {Config.SQUID_KERBEROS_KEYTAB_PATH} "
         f"-s {Config.SQUID_KERBEROS_SERVICE_PRINCIPAL}\n"
@@ -363,6 +434,7 @@ def _validate_squid_configuration(squid_binary: str) -> tuple[bool, str]:
 
 def get_status() -> dict:
     """Return non-sensitive status information for the Kerberos tab."""
+    runtime = get_squid_runtime()
     keytab = _keytab_path()
     permissions = _keytab_permissions(keytab)
     config_path = Path(Config.SQUID_CONFIG_PATH).expanduser()
@@ -382,7 +454,13 @@ def get_status() -> dict:
         pass
 
     return {
-        "squid_installed": squid_is_installed(),
+        # ``squid_installed`` remains local-only because applying the current
+        # configuration workflow writes host files and invokes local commands.
+        "squid_installed": runtime["local_squid"],
+        "squid_available": runtime["kind"] != "none",
+        "squid_runtime": runtime["kind"],
+        "squid_status_message": runtime["message"],
+        "docker_container": runtime["docker_container"],
         "keytab_path": str(keytab),
         "keytab": permissions,
         "configured": configured,
@@ -396,7 +474,7 @@ def configure(upload, config_manager: SquidConfigManager | None = None) -> dict:
     squid_binary = _require_squid()
     if upload is None or not (getattr(upload, "filename", "") or "").strip():
         raise KeytabRequiredError(
-            "Debes subir el archivo .keytab antes de aplicar Kerberos."
+            _("KERBEROS_ERROR_KEYTAB_REQUIRED")
         )
 
     keytab = _keytab_path()
@@ -405,10 +483,13 @@ def configure(upload, config_manager: SquidConfigManager | None = None) -> dict:
         details = (
             "; ".join(manager.errors)
             if manager.errors
-            else "squid.conf no es accesible"
+            else _("KERBEROS_ERROR_SQUID_CONFIG_INACCESSIBLE")
         )
         raise KerberosConfigurationError(
-            f"No se puede acceder a la configuración de Squid: {details}"
+            _(
+                "KERBEROS_ERROR_SQUID_CONFIG_ACCESS",
+                details=details,
+            )
         )
 
     main_path = Path(manager.config_path)
@@ -422,13 +503,16 @@ def configure(upload, config_manager: SquidConfigManager | None = None) -> dict:
         permissions = _keytab_permissions(keytab)
         if not permissions["permissions_ok"]:
             raise KerberosConfigurationError(
-                "El keytab no tiene propietario proxy:proxy y permisos 0440."
+                _("KERBEROS_ERROR_KEYTAB_PERMISSIONS")
             )
 
         readable, read_output = verify_keytab_readable(keytab)
         if not readable:
             raise KerberosConfigurationError(
-                f"El usuario proxy no puede leer el keytab. {read_output}".strip()
+                _(
+                    "KERBEROS_ERROR_KEYTAB_NOT_READABLE",
+                    details=read_output,
+                ).strip()
             )
 
         if manager.is_modular:
@@ -440,32 +524,36 @@ def configure(upload, config_manager: SquidConfigManager | None = None) -> dict:
             new_auth = _add_block(existing_auth, before_http_deny=False)
             if not manager.save_modular_config(KERBEROS_AUTH_FILENAME, new_auth):
                 raise KerberosConfigurationError(
-                    "No se pudo guardar la configuración Kerberos modular."
+                    _("KERBEROS_ERROR_SAVE_MODULE_CONFIG")
                 )
 
             new_main = _add_modular_include(manager.config_content, auth_path)
             if new_main != manager.config_content and not manager.save_config(new_main):
                 raise KerberosConfigurationError(
-                    "No se pudo activar el archivo modular de Kerberos en squid.conf."
+                    _(
+                        "KERBEROS_ERROR_ENABLE_MODULE_CONFIG"
+                    )
                 )
         else:
             existing_main = main_snapshot.content.decode("utf-8")
             new_main = _add_block(existing_main)
             if not manager.save_config(new_main):
                 raise KerberosConfigurationError(
-                    "No se pudo guardar la configuración de Squid."
+                    _("KERBEROS_ERROR_SAVE_SQUID_CONFIG")
                 )
 
         valid, parse_output = _validate_squid_configuration(squid_binary)
         if not valid:
             raise KerberosConfigurationError(
-                "La configuración de Squid tiene errores. "
-                f"squid -k parse: {parse_output}".strip()
+                _(
+                    "KERBEROS_ERROR_SQUID_CONFIG_INVALID",
+                    details=parse_output,
+                ).strip()
             )
 
         return {
             "status": "success",
-            "message": "Kerberos configurado correctamente en Squid.",
+            "message": _("KERBEROS_SUCCESS_CONFIGURED"),
             "keytab_path": str(keytab),
             "owner": "proxy:proxy",
             "mode": "0440",
@@ -474,12 +562,12 @@ def configure(upload, config_manager: SquidConfigManager | None = None) -> dict:
             "squid_installed": True,
         }
     except Exception:
-        logger.exception("Error aplicando la configuración Kerberos de Squid")
+        logger.exception("Failed to apply Squid Kerberos configuration")
         try:
             _restore(keytab_snapshot)
             if auth_snapshot is not None:
                 _restore(auth_snapshot)
             _restore(main_snapshot)
         except Exception:
-            logger.exception("No se pudo restaurar la configuración Kerberos anterior")
+            logger.exception("Failed to restore the previous Kerberos configuration")
         raise
