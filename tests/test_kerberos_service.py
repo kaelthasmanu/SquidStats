@@ -9,6 +9,8 @@ import pytest
 
 from services.squid import kerberos_service as service
 
+DOCKER_CONTAINER_ID = "test-squid-container"
+
 
 class PanelStructureParser(HTMLParser):
     """Records the IDs that contain each element with an ID."""
@@ -56,7 +58,7 @@ class PanelStructureParser(HTMLParser):
                 return
 
 
-class FakeConfigManager:
+class FakeConfigManager(service.SquidConfigManager):
     def __init__(self, config_path, config_dir, *, modular=False):
         self.config_path = str(config_path)
         self.config_dir = str(config_dir)
@@ -160,7 +162,7 @@ def test_runtime_detects_running_docker_squid_by_name_or_port(monkeypatch, name,
         lambda command: (
             command
             == ["/usr/bin/docker", "ps", "--format", "{{.ID}}\t{{.Names}}\t{{.Ports}}"],
-            f"6101536dbb43\t{name}\t{ports}",
+            f"{DOCKER_CONTAINER_ID}\t{name}\t{ports}",
         ),
     )
 
@@ -168,7 +170,7 @@ def test_runtime_detects_running_docker_squid_by_name_or_port(monkeypatch, name,
 
     assert runtime["kind"] == "docker"
     assert runtime["local_squid"] is False
-    assert runtime["docker_container"]["id"] == "6101536dbb43"
+    assert runtime["docker_container"]["id"] == DOCKER_CONTAINER_ID
     assert runtime["docker_container"]["name"] == name
     assert runtime["message"] == "KERBEROS_STATUS_DOCKER_SQUID_FOUND"
 
@@ -230,15 +232,14 @@ def _docker_runtime():
         "kind": "docker",
         "local_squid": False,
         "docker_container": {
-            "id": "6101536dbb43",
+            "id": DOCKER_CONTAINER_ID,
             "name": "squid_proxy",
             "ports": "0.0.0.0:3128->3128/tcp",
         },
     }
 
 
-def _docker_runner(commands, deployed_config, *, parse_succeeds=True):
-    container_id = "6101536dbb43"
+def _docker_runner(commands, deployed_config, container_id, *, parse_succeeds=True):
     keytab_present = False
 
     def run(command):
@@ -289,32 +290,35 @@ def _docker_runner(commands, deployed_config, *, parse_succeeds=True):
 def test_configure_docker_copies_keytab_and_validates_container(monkeypatch):
     commands = []
     deployed_config = []
+    runtime = _docker_runtime()
     monkeypatch.setattr(service, "_docker_binary", lambda: "/usr/bin/docker")
     monkeypatch.setattr(
         service,
         "_run",
-        _docker_runner(commands, deployed_config),
+        _docker_runner(commands, deployed_config, runtime["docker_container"]["id"]),
     )
 
-    result = service.configure(_upload(), squid_runtime=_docker_runtime())
+    result = service.configure(_upload(), squid_runtime=runtime)
 
     assert result["status"] == "success"
     assert result["keytab_path"] == "/etc/squid/HTTP.keytab"
     keytab_copies = [
         command
         for command in commands
-        if command[1] == "cp" and command[-1] == "6101536dbb43:/etc/squid/HTTP.keytab"
+        if command[1] == "cp"
+        and command[-1] == f"{DOCKER_CONTAINER_ID}:{service.DOCKER_SQUID_KEYTAB_PATH}"
     ]
     assert len(keytab_copies) == 1
     assert Path(keytab_copies[0][2]).name == "HTTP.keytab"
     assert any(
-        command[1] == "cp" and command[-1] == "6101536dbb43:/etc/squid/squid.conf"
+        command[1] == "cp"
+        and command[-1] == f"{DOCKER_CONTAINER_ID}:{service.DOCKER_SQUID_CONFIG_PATH}"
         for command in commands
     )
     assert [
         "/usr/bin/docker",
         "exec",
-        "6101536dbb43",
+        DOCKER_CONTAINER_ID,
         "chown",
         "proxy:proxy",
         "/etc/squid/HTTP.keytab",
@@ -324,7 +328,7 @@ def test_configure_docker_copies_keytab_and_validates_container(monkeypatch):
         "exec",
         "--user",
         "proxy",
-        "6101536dbb43",
+        DOCKER_CONTAINER_ID,
         "klist",
         "-k",
         "/etc/squid/HTTP.keytab",
@@ -332,7 +336,7 @@ def test_configure_docker_copies_keytab_and_validates_container(monkeypatch):
     assert [
         "/usr/bin/docker",
         "exec",
-        "6101536dbb43",
+        DOCKER_CONTAINER_ID,
         "squid",
         "-k",
         "parse",
@@ -343,25 +347,31 @@ def test_configure_docker_copies_keytab_and_validates_container(monkeypatch):
 def test_configure_docker_restores_files_when_squid_parse_fails(monkeypatch):
     commands = []
     deployed_config = []
+    runtime = _docker_runtime()
     monkeypatch.setattr(service, "_docker_binary", lambda: "/usr/bin/docker")
     monkeypatch.setattr(
         service,
         "_run",
-        _docker_runner(commands, deployed_config, parse_succeeds=False),
+        _docker_runner(
+            commands,
+            deployed_config,
+            runtime["docker_container"]["id"],
+            parse_succeeds=False,
+        ),
     )
 
     with pytest.raises(
         service.KerberosConfigurationError,
         match="KERBEROS_ERROR_SQUID_CONFIG_INVALID",
     ):
-        service.configure(_upload(), squid_runtime=_docker_runtime())
+        service.configure(_upload(), squid_runtime=runtime)
 
     assert len(deployed_config) == 2
     assert deployed_config[-1] == "http_access deny all\n"
     assert [
         "/usr/bin/docker",
         "exec",
-        "6101536dbb43",
+        DOCKER_CONTAINER_ID,
         "rm",
         "-f",
         "/etc/squid/HTTP.keytab",
