@@ -96,6 +96,7 @@
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="SIMPLE">{{ _("SIMPLE (LDAP)") }}</option>
                         <option value="NTLM">{{ _("NTLM (AD)") }}</option>
+                        <option value="KERBEROS">{{ _("LDAP_AUTH_TYPE_KERBEROS") }}</option>
                     </select>
                 </div>
             </div>
@@ -105,13 +106,22 @@
                 <label for="use_ssl" class="text-sm text-gray-700">{{ _("Usar SSL / LDAPS") }}</label>
             </div>
 
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Bind DN / Usuario") }}</label>
-                <input x-model="cfg.bind_dn" type="text" placeholder="{{ _("CN=admin,DC=empresa,DC=com") }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div x-show="cfg.auth_type === 'KERBEROS'" class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 text-xs flex items-start gap-2">
+                <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                <p>{{ _("LDAP_KERBEROS_AUTH_HELP") }}</p>
             </div>
 
             <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">
+                    <span x-show="cfg.auth_type !== 'KERBEROS'">{{ _("Bind DN / Usuario") }}</span>
+                    <span x-show="cfg.auth_type === 'KERBEROS'">{{ _("LDAP_KERBEROS_PRINCIPAL_LABEL") }}</span>
+                </label>
+                <input x-model="cfg.bind_dn" type="text"
+                    :placeholder="cfg.auth_type === 'KERBEROS' ? '{{ _("LDAP_KERBEROS_PRINCIPAL_PLACEHOLDER") }}' : '{{ _("CN=admin,DC=empresa,DC=com") }}'"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div x-show="cfg.auth_type !== 'KERBEROS'">
                 <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Contraseña Bind") }}</label>
                 <input x-model="cfg.bind_password" type="password" autocomplete="current-password" placeholder="••••••••"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
