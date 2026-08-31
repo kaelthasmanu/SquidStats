@@ -17,6 +17,8 @@ from loguru import logger
 from database.database import get_session
 from database.models.models import LdapConfig
 
+SUPPORTED_AUTH_TYPES = {"SIMPLE", "NTLM", "KERBEROS"}
+
 
 def _default_config() -> dict:
     return {
@@ -110,7 +112,10 @@ def save_config(cfg: dict) -> None:
         row.host = cfg.get("host", "")
         row.port = int(cfg.get("port", 389) or 389)
         row.use_ssl = 1 if cfg.get("use_ssl") else 0
-        row.auth_type = cfg.get("auth_type", "SIMPLE")
+        auth_type = str(cfg.get("auth_type", "SIMPLE")).upper()
+        row.auth_type = (
+            auth_type if auth_type in SUPPORTED_AUTH_TYPES else "SIMPLE"
+        )
         row.bind_dn = cfg.get("bind_dn", "")
         row.base_dn = cfg.get("base_dn", "")
         row.updated_at = datetime.now()

@@ -5,7 +5,9 @@ from typing import Any
 from flask_babel import gettext as _
 from ldap3 import (
     ALL,
+    KERBEROS,
     NTLM,
+    SASL,
     SIMPLE,
     SUBTREE,
     Connection,
@@ -21,6 +23,47 @@ from loguru import logger
 # ---------------------------------------------------------------------------
 
 
+class KerberosClientUnavailableError(RuntimeError):
+    """Raised when the optional GSSAPI client is unavailable."""
+
+
+class KerberosCredentialsUnavailableError(RuntimeError):
+    """Raised when the selected Kerberos principal has no usable credentials."""
+
+
+class KerberosServicePrincipalNotFoundError(RuntimeError):
+    """Raised when LDAP's Kerberos service principal is absent from the KDC."""
+
+
+def _require_kerberos_client() -> None:
+    """Ensure ldap3 can perform its SASL/GSSAPI Kerberos bind."""
+    try:
+        import gssapi  # noqa: F401
+    except ImportError as exc:
+        raise KerberosClientUnavailableError from exc
+
+
+def _is_missing_kerberos_credentials(exc: Exception) -> bool:
+    try:
+        from gssapi.raw.exceptions import MissingCredentialsError
+    except ImportError:
+        return False
+    return isinstance(exc, MissingCredentialsError)
+
+
+def _is_missing_kerberos_service_principal(exc: Exception) -> bool:
+    """Return whether an exception chain reports an unknown LDAP service SPN."""
+    seen: set[int] = set()
+    current: Exception | None = exc
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        if "Server not found in Kerberos database" in str(current):
+            return True
+        next_exception = current.__cause__ or current.__context__
+        current = next_exception if isinstance(next_exception, Exception) else None
+    return False
+
+
 def _make_server(host: str, port: int, use_ssl: bool) -> Server:
     tls = Tls(validate=0) if use_ssl else None  # 0 = ssl.CERT_NONE
     return Server(host, port=port, use_ssl=use_ssl, tls=tls, get_info=ALL)
@@ -29,11 +72,30 @@ def _make_server(host: str, port: int, use_ssl: bool) -> Server:
 def _connect(cfg: dict) -> Connection:
     """Return an authenticated & bound ldap3 Connection or raise."""
     server = _make_server(cfg["host"], int(cfg["port"]), cfg["use_ssl"])
-    auth_method = NTLM if cfg["auth_type"] == "NTLM" else SIMPLE
+    auth_type = str(cfg.get("auth_type", "SIMPLE")).upper()
+    if auth_type == "KERBEROS":
+        _require_kerberos_client()
+        try:
+            return Connection(
+                server,
+                user=cfg.get("bind_dn") or None,
+                authentication=SASL,
+                sasl_mechanism=KERBEROS,
+                auto_bind=True,
+                raise_exceptions=True,
+            )
+        except Exception as exc:
+            if _is_missing_kerberos_credentials(exc):
+                raise KerberosCredentialsUnavailableError from exc
+            if _is_missing_kerberos_service_principal(exc):
+                raise KerberosServicePrincipalNotFoundError from exc
+            raise
+
+    auth_method = NTLM if auth_type == "NTLM" else SIMPLE
     conn = Connection(
         server,
-        user=cfg["bind_dn"],
-        password=cfg["bind_password"],
+        user=cfg.get("bind_dn", ""),
+        password=cfg.get("bind_password", ""),
         authentication=auth_method,
         auto_bind=True,
         raise_exceptions=True,
@@ -55,9 +117,40 @@ def test_connection(cfg: dict) -> dict:
             "status": "success",
             "message": _("Conexión exitosa al servidor LDAP/AD."),
         }
+    except KerberosClientUnavailableError:
+        logger.exception("Kerberos GSSAPI client is unavailable")
+        return {
+            "status": "error",
+            "message": _("LDAP_ERROR_KERBEROS_CLIENT_UNAVAILABLE"),
+        }
+    except KerberosCredentialsUnavailableError:
+        logger.exception("Kerberos credentials are unavailable")
+        return {
+            "status": "error",
+            "message": _(
+                "No hay credenciales Kerberos disponibles. Obtenga un ticket con kinit y vuelva a intentarlo."
+            ),
+        }
+    except KerberosServicePrincipalNotFoundError:
+        logger.exception("LDAP Kerberos service principal was not found")
+        return {
+            "status": "error",
+            "message": _(
+                "El servidor LDAP no tiene un principal Kerberos válido. Configure el FQDN de un controlador de dominio."
+            ),
+        }
     except core.exceptions.LDAPBindError:
         logger.exception("LDAP bind falló")
         return {"status": "error", "message": _("Error de autenticación LDAP")}
+    except core.exceptions.LDAPSocketOpenError:
+        logger.exception("No se pudo abrir la conexión LDAP")
+        return {
+            "status": "error",
+            "message": _(
+                "No se pudo resolver o conectar con el servidor LDAP configurado: %(host)s."
+            )
+            % {"host": cfg.get("host", "")},
+        }
     except Exception:
         logger.exception("Error de conexión LDAP")
         return {
