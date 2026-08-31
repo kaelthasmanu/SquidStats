@@ -52,7 +52,9 @@ def register_routes(bp):
                     "message": squid_runtime["message"],
                 }
             ), 503
-        if (upload is None or not (upload.filename or "").strip()) and not host_keytab_path:
+        if (
+            upload is None or not (upload.filename or "").strip()
+        ) and not host_keytab_path:
             return jsonify(
                 {
                     "status": "error",
