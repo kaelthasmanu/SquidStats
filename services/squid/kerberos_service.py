@@ -231,9 +231,7 @@ def _write_keytab_stream(stream, filename: str, destination: Path) -> None:
     """Write a validated keytab stream atomically without setting ownership."""
     filename = filename.strip()
     if not filename.lower().endswith(".keytab"):
-        raise KerberosConfigurationError(
-            _("KERBEROS_ERROR_INVALID_KEYTAB_EXTENSION")
-        )
+        raise KerberosConfigurationError(_("KERBEROS_ERROR_INVALID_KEYTAB_EXTENSION"))
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary_path: str | None = None
@@ -307,9 +305,7 @@ def _save_host_keytab(host_keytab_path: str, destination: Path) -> None:
         ) from exc
 
 
-def _stage_keytab(
-    upload, host_keytab_path: str | None, destination: Path
-) -> None:
+def _stage_keytab(upload, host_keytab_path: str | None, destination: Path) -> None:
     """Write an uploaded or host keytab into a private temporary location."""
     has_upload = upload is not None and (getattr(upload, "filename", "") or "").strip()
     if has_upload:
@@ -376,9 +372,7 @@ def _run(command: list[str]) -> tuple[bool, str]:
     except FileNotFoundError:
         return False, _("KERBEROS_ERROR_COMMAND_NOT_FOUND", command=command[0])
     except subprocess.TimeoutExpired:
-        return False, _(
-            "KERBEROS_ERROR_COMMAND_TIMEOUT", command=command[0]
-        )
+        return False, _("KERBEROS_ERROR_COMMAND_TIMEOUT", command=command[0])
     except OSError as exc:
         return False, str(exc)
 
@@ -562,9 +556,7 @@ def _docker_keytab_permissions(
     }
 
 
-def _set_docker_keytab_permissions(
-    docker_binary: str, container_id: str
-) -> dict:
+def _set_docker_keytab_permissions(docker_binary: str, container_id: str) -> dict:
     """Set and verify the mandated keytab ownership and permissions in Docker."""
     ownership_set, ownership_output = _docker_exec(
         docker_binary,
@@ -598,9 +590,7 @@ def _set_docker_keytab_permissions(
     return permissions
 
 
-def _verify_docker_keytab_readable(
-    docker_binary: str, container_id: str
-) -> None:
+def _verify_docker_keytab_readable(docker_binary: str, container_id: str) -> None:
     """Verify that the container's proxy user can read the installed keytab."""
     readable, output = _docker_exec(
         docker_binary,
@@ -710,9 +700,7 @@ def _validate_squid_configuration(squid_binary: str) -> tuple[bool, str]:
     return _run([squid_binary, "-k", "parse"])
 
 
-def _configure_docker(
-    upload, host_keytab_path: str | None, runtime: dict
-) -> dict:
+def _configure_docker(upload, host_keytab_path: str | None, runtime: dict) -> dict:
     """Install and validate the Kerberos setup in a running Squid container."""
     docker_binary = _docker_binary()
     container = runtime.get("docker_container") or {}
@@ -837,7 +825,9 @@ def get_status() -> dict:
             modular = "include" in main_content.lower() and "squid.d" in main_content
             configured = KERBEROS_CONFIG_START in main_content
             if modular and not configured:
-                auth_path = Path(Config.ACL_FILES_DIR).expanduser() / KERBEROS_AUTH_FILENAME
+                auth_path = (
+                    Path(Config.ACL_FILES_DIR).expanduser() / KERBEROS_AUTH_FILENAME
+                )
                 if auth_path.is_file():
                     configured = KERBEROS_CONFIG_START in auth_path.read_text(
                         encoding="utf-8"
@@ -871,9 +861,7 @@ def configure(
     """Install a keytab and apply Kerberos configuration transactionally."""
     has_upload = upload is not None and (getattr(upload, "filename", "") or "").strip()
     if not has_upload and not (host_keytab_path or "").strip():
-        raise KeytabRequiredError(
-            _("KERBEROS_ERROR_KEYTAB_SOURCE_REQUIRED")
-        )
+        raise KeytabRequiredError(_("KERBEROS_ERROR_KEYTAB_SOURCE_REQUIRED"))
 
     runtime = squid_runtime or get_squid_runtime()
     if runtime["kind"] == "docker":
@@ -909,9 +897,7 @@ def configure(
             _save_host_keytab(host_keytab_path.strip(), keytab)
         permissions = _keytab_permissions(keytab)
         if not permissions["permissions_ok"]:
-            raise KerberosConfigurationError(
-                _("KERBEROS_ERROR_KEYTAB_PERMISSIONS")
-            )
+            raise KerberosConfigurationError(_("KERBEROS_ERROR_KEYTAB_PERMISSIONS"))
 
         readable, read_output = verify_keytab_readable(keytab)
         if not readable:
@@ -930,24 +916,18 @@ def configure(
             )
             new_auth = _add_block(existing_auth, before_http_deny=False)
             if not manager.save_modular_config(KERBEROS_AUTH_FILENAME, new_auth):
-                raise KerberosConfigurationError(
-                    _("KERBEROS_ERROR_SAVE_MODULE_CONFIG")
-                )
+                raise KerberosConfigurationError(_("KERBEROS_ERROR_SAVE_MODULE_CONFIG"))
 
             new_main = _add_modular_include(manager.config_content, auth_path)
             if new_main != manager.config_content and not manager.save_config(new_main):
                 raise KerberosConfigurationError(
-                    _(
-                        "KERBEROS_ERROR_ENABLE_MODULE_CONFIG"
-                    )
+                    _("KERBEROS_ERROR_ENABLE_MODULE_CONFIG")
                 )
         else:
             existing_main = main_snapshot.content.decode("utf-8")
             new_main = _add_block(existing_main)
             if not manager.save_config(new_main):
-                raise KerberosConfigurationError(
-                    _("KERBEROS_ERROR_SAVE_SQUID_CONFIG")
-                )
+                raise KerberosConfigurationError(_("KERBEROS_ERROR_SAVE_SQUID_CONFIG"))
 
         valid, parse_output = _validate_squid_configuration(squid_binary)
         if not valid:
