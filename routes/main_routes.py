@@ -9,7 +9,7 @@ from loguru import logger
 from config import Config
 from parsers.connections import group_by_user, parse_raw_data
 from parsers.squid_info import fetch_squid_info_stats
-from routes.admin.helpers import sanitize_error_page_message
+from routes.admin.helpers import json_error, json_success, sanitize_error_page_message
 from services.notifications.notifications import get_all_notifications
 from services.squid.fetch_data import fetch_all_squid_data
 from services.system.system_info import get_system_type
@@ -212,23 +212,31 @@ def index():
 @main_bp.route("/install", methods=["POST"])
 def install_package():
     """Route to install/update Squid packages"""
-    ok = False
     try:
-        ok = update_squid()
+        ok, error_message = update_squid()
         if ok:
             logger.info("SquidStats update (install) completed successfully")
-            flash(_("Squid actualizado correctamente."), "success")
-        else:
-            logger.warning("update_squid() returned False in /install")
-            flash(
-                _("Error al actualizar Squid. Revise los logs del servidor."), "error"
-            )
+            message = _("Squid actualizado correctamente.")
+            if request.accept_mimetypes.best == "application/json":
+                return json_success(message)
+            flash(message, "success")
+            return redirect("/")
+
+        logger.warning("update_squid() returned False in /install")
+        message = error_message or _(
+            "Error al actualizar Squid. Revise los logs del servidor."
+        )
+        if request.accept_mimetypes.best == "application/json":
+            return json_error(message, 503)
+        flash(message, "error")
     except Exception:
         logger.exception("Error executing update in /install")
-        flash(
-            _("Error inesperado al actualizar Squid. Revise los logs del servidor."),
-            "error",
+        message = _(
+            "Error inesperado al actualizar Squid. Revise los logs del servidor."
         )
+        if request.accept_mimetypes.best == "application/json":
+            return json_error(message, 500)
+        flash(message, "error")
     return redirect("/")
 
 
