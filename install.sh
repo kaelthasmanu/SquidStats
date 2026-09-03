@@ -6,6 +6,8 @@ NON_INTERACTIVE=false
 DISTRO_TYPE=""
 # Archivo de log
 LOG_FILE="/tmp/squidstats_install.log"
+# Versión que se guarda en el archivo .env de la instalación.
+CURRENT_VERSION="2.5.3"
 
 init_log() {
     local install_dir="${1:-}"
@@ -341,44 +343,124 @@ updateOrCloneRepo() {
     fi
 }
 
-updateEnvVersion() {
-    local install_dir="${1:-/opt/SquidStats}"
-    local CURRENT_VERSION="2.5.3"  # Variable de versión actual del script
-    local env_file="$install_dir/.env"
-    
-    log_msg "INFO" "Verificando versión en .env ($env_file)"
-    
-    if [ ! -f "$env_file" ]; then
-        log_msg "WARN" "Archivo .env no encontrado en $env_file"
-        echo "⚠️ Archivo .env no encontrado en $env_file"
+loadCurrentVersionFromInstalledScript() {
+    local install_dir="${1:-}"
+    local installer_file="$install_dir/install.sh"
+    local installed_version=""
+
+    if [ ! -f "$installer_file" ]; then
+        error "No se encontró install.sh en $install_dir para determinar CURRENT_VERSION"
         return 1
     fi
-    
-    # Leer la versión actual del .env
-    local env_version=$(grep "^VERSION=" "$env_file" | cut -d'=' -f2)
-    
-    # Comparar versiones
-    if [ "$env_version" != "$CURRENT_VERSION" ]; then
-        log_msg "INFO" "Actualizando VERSION de $env_version a $CURRENT_VERSION"
-        echo "Actualizando VERSION de $env_version a $CURRENT_VERSION en .env..."
-        
-        # Verificar si existe la línea VERSION en .env
-        if grep -q "^VERSION=" "$env_file"; then
-            # Actualizar VERSION existente
-            sed -i "s/^VERSION=.*/VERSION=$CURRENT_VERSION/" "$env_file"
-            log_msg "OK" "VERSION actualizada a $CURRENT_VERSION en .env"
-            echo "✅ VERSION actualizada a $CURRENT_VERSION en .env"
-        else
-            # Agregar VERSION al inicio del archivo si no existe
-            sed -i "1iVERSION=$CURRENT_VERSION" "$env_file"
-            log_msg "OK" "VERSION agregada: $CURRENT_VERSION en .env"
-            echo "✅ VERSION agregada: $CURRENT_VERSION en .env"
-        fi
-    else
-        log_msg "INFO" "VERSION ya está actualizada ($CURRENT_VERSION)"
-        echo "✓ VERSION ya está actualizada ($CURRENT_VERSION)"
+
+    installed_version=$(awk '
+        /^[[:space:]]*(local[[:space:]]+)?CURRENT_VERSION="/ {
+            value = $0
+            sub(/^[^"]*"/, "", value)
+            sub(/".*$/, "", value)
+            print value
+            exit
+        }
+    ' "$installer_file")
+
+    case "$installed_version" in
+        "" | *[!A-Za-z0-9._+-]*)
+            error "CURRENT_VERSION no es válida en $installer_file"
+            return 1
+            ;;
+    esac
+
+    CURRENT_VERSION="$installed_version"
+    log_msg "INFO" "CURRENT_VERSION cargada desde $installer_file: $CURRENT_VERSION"
+    return 0
+}
+
+updateEnvVersion() {
+    local install_dir="${1:-/opt/SquidStats}"
+    local env_file="$install_dir/.env"
+    local temp_env_file=""
+    local env_version=""
+
+    log_msg "INFO" "Verificando versión en .env ($env_file)"
+
+    if [ ! -f "$env_file" ]; then
+        error "Archivo .env no encontrado en $env_file"
+        return 1
     fi
-    
+
+    if [ -z "$CURRENT_VERSION" ]; then
+        error "CURRENT_VERSION no está definida; no se puede actualizar $env_file"
+        return 1
+    fi
+
+    env_version=$(awk '
+        /^[[:space:]]*(export[[:space:]]+)?VERSION[[:space:]]*=/ {
+            value = $0
+            sub(/^[^=]*=[[:space:]]*/, "", value)
+            print value
+            exit
+        }
+    ' "$env_file")
+    log_msg "INFO" "Normalizando VERSION de ${env_version:-sin definir} a $CURRENT_VERSION"
+    echo "Actualizando VERSION a $CURRENT_VERSION en .env..."
+
+    # Usar un temporal en el mismo directorio permite reemplazar el archivo de forma atómica.
+    temp_env_file=$(mktemp "${env_file}.tmp.XXXXXX") || {
+        error "No se pudo crear un archivo temporal para actualizar $env_file"
+        return 1
+    }
+
+    # Conservar permisos y propietario antes de reemplazar el archivo.
+    if ! cp -p "$env_file" "$temp_env_file"; then
+        rm -f "$temp_env_file"
+        error "No se pudo preparar la actualización de $env_file"
+        return 1
+    fi
+
+    # Normaliza cualquier formato admitido de VERSION y elimina definiciones duplicadas.
+    if ! awk -v version="$CURRENT_VERSION" '
+        /^[[:space:]]*(export[[:space:]]+)?VERSION[[:space:]]*=/ {
+            if (!version_written) {
+                print "VERSION=" version
+                version_written = 1
+            }
+            next
+        }
+        { print }
+        END {
+            if (!version_written) {
+                print "VERSION=" version
+            }
+        }
+    ' "$env_file" > "$temp_env_file"; then
+        rm -f "$temp_env_file"
+        error "No se pudo actualizar VERSION en $env_file"
+        return 1
+    fi
+
+    if ! mv "$temp_env_file" "$env_file"; then
+        rm -f "$temp_env_file"
+        error "No se pudo reemplazar $env_file con la VERSION actualizada"
+        return 1
+    fi
+
+    if ! awk -v version="$CURRENT_VERSION" '
+        $0 == "VERSION=" version {
+            exact_matches++
+        }
+        /^[[:space:]]*(export[[:space:]]+)?VERSION[[:space:]]*=/ {
+            version_entries++
+        }
+        END {
+            exit !(exact_matches == 1 && version_entries == 1)
+        }
+    ' "$env_file"; then
+        error "No se pudo verificar VERSION=$CURRENT_VERSION en $env_file"
+        return 1
+    fi
+
+    log_msg "OK" "VERSION actualizada a $CURRENT_VERSION en .env"
+    echo "✅ VERSION actualizada a $CURRENT_VERSION en .env"
     return 0
 }
 
@@ -396,7 +478,7 @@ createEnvFile() {
         log_msg "INFO" "Creando archivo .env en $env_file"
         echo "Creando archivo de configuración .env..."
         cat >"$env_file" <<EOF
-VERSION=2.5.3
+VERSION=$CURRENT_VERSION
 SQUID_HOST=127.0.0.1
 SQUID_PORT=3128
 SQUID_HOSTS=
@@ -717,11 +799,19 @@ main() {
 
         # Mover log al directorio de instalación
         init_log "$install_dir"
+
+        if ! loadCurrentVersionFromInstalledScript "$install_dir"; then
+            error "No se pudo determinar la versión instalada para actualizar .env"
+            return 1
+        fi
         
         echo "Verificando Dependecias de python..."
         installDependencies "$install_dir"
         echo "Actualizando versión en .env..."
-        updateEnvVersion "$install_dir"
+        if ! updateEnvVersion "$install_dir"; then
+            error "No se pudo actualizar VERSION en $install_dir/.env"
+            return 1
+        fi
         
         if [ "$install_dir" = "/opt/SquidStats" ] || [ "$install_dir" = "/usr/share/squidstats" ] || [ "$install_dir" = "/opt/squidstats" ]; then
             echo "Reiniciando Servicio..."
