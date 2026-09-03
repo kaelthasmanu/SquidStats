@@ -17,9 +17,13 @@ load_dotenv()
 _SQUID_UPDATE_CACHE = {"data": None, "timestamp": 0}
 _UPDATE_CACHE_TTL = 300  # 5 minutos
 _GITHUB_SQUID_API = "https://api.github.com/repos/cuza/squid/releases/latest"
+WGET_NOT_INSTALLED_MESSAGE = (
+    "wget no está instalado en el sistema. Instálelo con: sudo apt-get install wget."
+)
 
 
-def update_squid():
+def update_squid() -> tuple[bool, str | None]:
+    """Actualiza Squid y devuelve el resultado y un mensaje de error seguro."""
     squid_bin = shutil.which("squid")
     try:
         if squid_bin:
@@ -49,8 +53,9 @@ def update_squid():
         ).lower()
 
         if os_id not in ["ubuntu", "debian"] or not codename:
-            print("Sistema operativo no compatible", "error")
-            return False
+            message = "Sistema operativo no compatible para actualizar Squid."
+            logger.error(message)
+            return False, message
 
         proxy_url = os.getenv("HTTP_PROXY", "")
         env = os.environ.copy()
@@ -60,8 +65,8 @@ def update_squid():
 
         wget_bin = shutil.which("wget")
         if not wget_bin:
-            logger.error("wget no encontrado en el sistema")
-            return False
+            logger.error(WGET_NOT_INSTALLED_MESSAGE)
+            return False, WGET_NOT_INSTALLED_MESSAGE
 
         version_info = subprocess.run(  # noqa: S603
             [
@@ -74,14 +79,16 @@ def update_squid():
             env=env,
         )
         if version_info.returncode != 0:
-            logger.error("Error obteniendo información de versión")
-            return False
+            message = "No se pudo obtener la información de versión de Squid."
+            logger.error(message)
+            return False, message
 
         try:
             latest_version = json.loads(version_info.stdout)["tag_name"]
         except (json.JSONDecodeError, KeyError):
-            logger.error("Error procesando versión")
-            return False
+            message = "No se pudo procesar la versión disponible de Squid."
+            logger.error(message)
+            return False, message
 
         package_name = f"squid_{latest_version}-{os_id}-{codename}_amd64.deb"
         download_url = f"https://github.com/cuza/squid/releases/download/{latest_version}/{package_name}"
@@ -93,10 +100,12 @@ def update_squid():
             env=env,
         )
         if check_package.returncode != 0:
-            logger.error(
-                f"Paquete no disponible para {os_id.capitalize()} {codename.capitalize()}"
+            message = (
+                f"Paquete no disponible para "
+                f"{os_id.capitalize()} {codename.capitalize()}."
             )
-            return False
+            logger.error(message)
+            return False, message
 
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=f"_{package_name}"
@@ -109,8 +118,9 @@ def update_squid():
                 env=env,
             )
         if download.returncode != 0:
-            logger.error("Error descargando el paquete")
-            return False
+            message = "No se pudo descargar el paquete de Squid."
+            logger.error(message)
+            return False, message
 
         apt_env = env.copy()
         if proxy_url:
@@ -152,14 +162,15 @@ def update_squid():
                 [squid_bin_final, "-v"], capture_output=True, text=True
             )
             if squid_check.returncode != 0:
-                logger.error("Error en instalación final")
-                return False
+                message = "La instalación final de Squid no se pudo verificar."
+                logger.error(message)
+                return False, message
 
         logger.info(f"Actualización a {latest_version} completada exitosamente")
-        return True
+        return True, None
     except Exception:
         logger.exception("Error crítico durante la actualización de Squid")
-        return False
+        return False, "Se produjo un error inesperado al actualizar Squid."
 
 
 def _parse_version(version_str):

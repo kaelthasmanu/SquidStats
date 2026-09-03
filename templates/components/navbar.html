@@ -783,14 +783,21 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
+              'Accept': 'application/json',
               'X-CSRFToken': getCSRFToken()
             },
             body: new URLSearchParams({ csrf_token: getCSRFToken() })
           });
-          if (response.ok) {
+          const data = await response.json().catch(() => ({}));
+          if (response.ok && data.status === 'success') {
             window.location.reload();
           } else {
-            alert({{ _('Error al actualizar Squid')|tojson }});
+            const message = data.message || {{ _('Error al actualizar Squid')|tojson }};
+            if (window.toastr) {
+              toastr.error(message, {{ _('Error al actualizar Squid')|tojson }});
+            } else {
+              alert(message);
+            }
           }
         } catch (error) {
           alert({{ _('Error de conexión')|tojson }});
