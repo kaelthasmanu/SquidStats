@@ -26,9 +26,9 @@ case "$1" in
 
         # ── Configuration file ────────────────────────────────────────────
         # On first install the example config is the real config; protect it
-        if [ -f /etc/squidstats/squidstats.env ]; then
-            chown root:squidstats /etc/squidstats/squidstats.env
-            chmod 0640 /etc/squidstats/squidstats.env
+        if [ -f /opt/SquidStats/app/.env ]; then
+            chown root:squidstats /opt/SquidStats/app/.env
+            chmod 0640 /opt/SquidStats/app/.env
         fi
 
         # ── Create application .env configuration file if missing ───────
