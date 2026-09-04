@@ -132,7 +132,7 @@ class Config:
     LOCKOUT_DURATION_MINUTES = safe_get_env(
         "LOCKOUT_DURATION_MINUTES", 15, var_type=int
     )
-    FIRST_PASSWORD = safe_get_env("FIRST_PASSWORD", "")
+    FIRST_PASSWORD = safe_get_env("FIRST_PASSWORD", "admin")
 
     # Proxy settings
     HTTP_PROXY = safe_get_env("HTTP_PROXY", "")
