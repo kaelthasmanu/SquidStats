@@ -123,6 +123,21 @@ msgstr "La configuración no se aplicará si no se sube un archivo .keytab. El a
 msgid "KERBEROS_LDAP_KERBEROS_REQUIRED_WARNING"
 msgstr "La autenticación Kerberos requiere que el servidor LDAP o Active Directory configurado sea compatible con Kerberos y proporcione un keytab válido del principal de servicio HTTP para el proxy."
 
+msgid "LDAP_AUTH_TYPE_KERBEROS"
+msgstr "KERBEROS (LDAP/AD)"
+
+msgid "LDAP_KERBEROS_AUTH_HELP"
+msgstr "La exploración del directorio usará SASL/GSSAPI. SquidStats debe tener un ticket Kerberos válido para este principal (por ejemplo, obtenido desde un keytab) y el nombre del servidor debe coincidir con el principal de servicio LDAP."
+
+msgid "LDAP_KERBEROS_PRINCIPAL_LABEL"
+msgstr "Principal Kerberos"
+
+msgid "LDAP_KERBEROS_PRINCIPAL_PLACEHOLDER"
+msgstr "squidstats@EXAMPLE.COM"
+
+msgid "LDAP_ERROR_KERBEROS_CLIENT_UNAVAILABLE"
+msgstr "El cliente GSSAPI de Kerberos no está instalado en este servidor."
+
 msgid "KERBEROS_KEYTAB_FILE"
 msgstr "Archivo .keytab"
 
