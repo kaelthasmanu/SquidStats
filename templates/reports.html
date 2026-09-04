@@ -13,6 +13,7 @@
         <input
           id="reports-date"
           type="date"
+          value="{{ selected_date.isoformat() if selected_date else '' }}"
           aria-label="{{ _('Fecha del reporte') }}"
           class="w-28 xs:w-32 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors duration-200"
         />
@@ -74,6 +75,11 @@
       "countries": {
         "labels": {{ metrics.top_countries_by_visits | map(attribute='country') | list | tojson | safe }},
         "data":   {{ metrics.top_countries_by_visits | map(attribute='total_requests') | list | tojson | safe }}
+      },
+      "hourlyActivity": {
+        "labels": {{ metrics.hourly_activity | map(attribute='hour') | list | tojson | safe }},
+        "requests": {{ metrics.hourly_activity | map(attribute='requests') | list | tojson | safe }},
+        "data": {{ metrics.hourly_activity | map(attribute='data_bytes') | map('divide', 1048576) | list | tojson | safe }}
       }
     }
   </script>
