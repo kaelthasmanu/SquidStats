@@ -3,7 +3,10 @@
 # Uncomment to enable verbose debhelper output
 #export DH_VERBOSE = 1
 
-PACKAGE    = SquidStats
+# This must match the binary package name in debian/control.  Debian's
+# package staging directory is debian/<binary-package>, while the installed
+# application directory intentionally retains its existing capitalisation.
+PACKAGE    = squidstats
 DESTDIR    = $(CURDIR)/debian/$(PACKAGE)
 INSTALL_ROOT = /opt/SquidStats
 OPT_DIR    = $(DESTDIR)$(INSTALL_ROOT)
@@ -40,7 +43,7 @@ override_dh_auto_install:
 	cp -r utils/     $(APP_DEST)/
 
 	# ── Configuration template ───────────────────────────────────────────
-	install -m 0640 example.env $(DESTDIR)/opt/$(PACKAGE)/app/.env
+	install -m 0640 example.env $(APP_DEST)/.env
 
 override_dh_auto_test:
 	@echo "Tests are run in a separate CI stage; skipping here."
@@ -52,4 +55,4 @@ override_dh_strip:
 override_dh_fixperms:
 	dh_fixperms
 	# Config file must not be world-readable (may contain secrets)
-	chmod 0640 $(DESTDIR)/opt/$(PACKAGE)/app/.env 2>/dev/null || true
+	chmod 0640 $(APP_DEST)/.env 2>/dev/null || true
