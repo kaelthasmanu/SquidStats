@@ -8,6 +8,7 @@
       <p class="text-2xl font-bold text-blue-600">
         {{ metrics.total_stats.total_users }}
       </p>
+      <p class="mt-1 text-xs text-gray-500">{{ _("Usuarios únicos con actividad") }}</p>
     </div>
     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
       <h3 class="text-lg font-semibold text-gray-700">
@@ -16,6 +17,7 @@
       <p class="text-2xl font-bold text-green-600">
         {{ metrics.total_stats.total_log_entries }}
       </p>
+      <p class="mt-1 text-xs text-gray-500">{{ _("Eventos registrados") }}</p>
     </div>
     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
       <h3 class="text-lg font-semibold text-gray-700">
@@ -24,14 +26,58 @@
       <p class="text-2xl font-bold text-purple-600">
         {{ "%.2f"|format(metrics.total_stats.total_data_transmitted / (1024**3)) }} {{ _("GB") }}
       </p>
+      <p class="mt-1 text-xs text-gray-500">
+        {{ _("Promedio:") }} {{ "%.1f"|format(metrics.average_data_per_request / 1024) }} {{ _("KB por petición") }}
+      </p>
     </div>
     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
       <h3 class="text-lg font-semibold text-gray-700">{{ _("Total de Peticiones") }}</h3>
       <p class="text-2xl font-bold text-orange-600">
         {{ metrics.total_stats.total_requests }}
       </p>
+      <p class="mt-1 text-xs text-gray-500">{{ _("Redirecciones:") }} {{ metrics.redirect_requests }}</p>
     </div>
   </div>
+
+  <!-- Health and security metrics -->
+  <section class="rounded-lg border border-slate-200 bg-slate-50 p-4 sm:p-5">
+    <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+      <h2 class="text-xl font-bold text-gray-800">{{ _("Calidad y seguridad del tráfico") }}</h2>
+      <p class="text-sm text-gray-500">{{ _("Indicadores calculados para la fecha seleccionada") }}</p>
+    </div>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-lg border border-emerald-100 bg-white p-4 shadow-sm">
+        <h3 class="text-sm font-semibold text-gray-700">{{ _("Tasa de éxito HTTP") }}</h3>
+        <p class="text-2xl font-bold text-emerald-600">{{ "%.1f"|format(metrics.successful_request_rate) }}%</p>
+        <p class="mt-1 text-xs text-gray-500">{{ metrics.success_requests }} {{ _("peticiones 2xx") }}</p>
+      </div>
+      <div class="rounded-lg border border-red-100 bg-white p-4 shadow-sm">
+        <h3 class="text-sm font-semibold text-gray-700">{{ _("Errores HTTP") }}</h3>
+        <p class="text-2xl font-bold text-red-600">{{ "%.1f"|format(metrics.error_request_rate) }}%</p>
+        <p class="mt-1 text-xs text-gray-500">
+          {{ metrics.error_requests }} · {{ metrics.client_error_requests }} 4xx / {{ metrics.server_error_requests }} 5xx
+        </p>
+      </div>
+      <div class="rounded-lg border border-amber-100 bg-white p-4 shadow-sm">
+        <h3 class="text-sm font-semibold text-gray-700">{{ _("Accesos bloqueados") }}</h3>
+        <p class="text-2xl font-bold text-amber-600">{{ metrics.blocked_requests }}</p>
+        <p class="mt-1 text-xs text-gray-500">
+          {{ "%.1f"|format(metrics.blocked_request_rate) }}% · {{ metrics.blocked_users }} {{ _("Usuarios afectados") }} / {{ metrics.blocked_ips }} IPs
+        </p>
+      </div>
+      <div class="rounded-lg border border-indigo-100 bg-white p-4 shadow-sm">
+        <h3 class="text-sm font-semibold text-gray-700">{{ _("Destinos únicos") }}</h3>
+        <p class="text-2xl font-bold text-indigo-600">{{ metrics.unique_domains }}</p>
+        <p class="mt-1 text-xs text-gray-500">
+          {% if metrics.total_stats.total_requests %}
+            {{ _("Hora pico:") }} {{ "%02d:00"|format(metrics.peak_hour.hour) }}
+          {% else %}
+            {{ _("Sin actividad") }}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </section>
 
   <!-- Main charts -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -54,7 +100,18 @@
     </div>
   </div>
 
-  <!-- HTTP codes + country charts -->
+  <!-- Traffic trend -->
+  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+      <h2 class="text-xl font-bold text-gray-800">{{ _("Actividad por hora") }}</h2>
+      <p class="text-sm text-gray-500">{{ _("Peticiones y datos transferidos durante la fecha seleccionada") }}</p>
+    </div>
+    <div class="h-80">
+      <canvas id="hourlyActivityChart"></canvas>
+    </div>
+  </div>
+
+  <!-- HTTP codes + destination TLD charts -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <h2 class="text-xl font-bold mb-4 text-gray-800">
@@ -66,13 +123,15 @@
     </div>
 
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold text-gray-800">
-          {{ _("Países más visitados") }}
-        </h2>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-          {{ _("Beta") }}
-        </span>
+      <div class="flex items-start justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">
+            {{ _("Destinos por TLD") }}
+          </h2>
+          <p class="mt-1 text-sm text-gray-500">
+            {{ _("Estimado a partir del dominio de destino; no es geolocalización.") }}
+          </p>
+        </div>
       </div>
       <div class="h-96">
         <canvas id="countriesChart"></canvas>
@@ -96,7 +155,7 @@
               {{ _("Total de Peticiones") }}
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {{ _("Visitas Únicas") }}
+              {{ _("Usuarios únicos") }}
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               {{ _("Datos Transmitidos") }}
@@ -119,9 +178,100 @@
               {{ "%.2f"|format(page.total_data_bytes / (1024**2)) }} {{ _("MB") }}
             </td>
           </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+              {{ _("No hay actividad para esta fecha.") }}
+            </td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Destination and high-consumption rankings -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">
+        {{ _("Top dominios de destino") }}
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {{ _("Dominio") }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {{ _("Peticiones") }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {{ _("Datos Transmitidos") }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for domain in metrics.top_domains %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 truncate max-w-xs">
+                {{ domain.domain }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                {{ domain.total_requests }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                {{ "%.2f"|format(domain.total_data_bytes / (1024**2)) }} {{ _("MB") }}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">
+                {{ _("No hay destinos identificables para esta fecha.") }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">
+        {{ _("URLs con mayor consumo de datos") }}
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {{ _("URL") }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {{ _("Datos Transmitidos") }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for page in metrics.top_pages_by_data %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 truncate max-w-xs">
+                {{ page.url }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                {{ "%.2f"|format(page.total_data_bytes / (1024**2)) }} {{ _("MB") }}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="2" class="px-4 py-4 text-center text-sm text-gray-500">
+                {{ _("No hay actividad para esta fecha.") }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -156,6 +306,12 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ ip.usernames }}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+              {{ _("No se detectaron IPs compartidas.") }}
             </td>
           </tr>
           {% endfor %}

@@ -137,6 +137,85 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // ─── Hourly traffic chart ────────────────────────────────────────────────
+
+  function buildHourlyActivityChart(payload) {
+    const el = document.getElementById("hourlyActivityChart");
+    if (!el || !payload) return;
+
+    const labels = (payload.labels || []).map(
+      (hour) => `${String(hour).padStart(2, "0")}:00`
+    );
+
+    new Chart(el.getContext("2d"), {
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            type: "bar",
+            label: "Peticiones",
+            data: payload.requests || [],
+            yAxisID: "requests",
+            backgroundColor: "#3B82F6B3",
+            borderColor: "#2563EB",
+            borderWidth: 1,
+            borderRadius: 4,
+          },
+          {
+            type: "line",
+            label: "Datos (MB)",
+            data: payload.data || [],
+            yAxisID: "data",
+            borderColor: "#8B5CF6",
+            backgroundColor: "#8B5CF633",
+            pointBackgroundColor: "#8B5CF6",
+            pointRadius: 3,
+            tension: 0.25,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { labels: { color: getTextColor() } },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const value = Number(context.raw || 0);
+                const suffix = context.dataset.yAxisID === "data" ? " MB" : "";
+                return `${context.dataset.label}: ${value.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                })}${suffix}`;
+              },
+            },
+          },
+          datalabels: { display: false },
+        },
+        scales: {
+          x: {
+            ticks: { autoSkip: true, maxTicksLimit: 12, color: getTextColor() },
+          },
+          requests: {
+            position: "left",
+            beginAtZero: true,
+            title: { display: true, text: "Peticiones", color: getTextColor() },
+            ticks: { color: getTextColor(), precision: 0 },
+          },
+          data: {
+            position: "right",
+            beginAtZero: true,
+            title: { display: true, text: "Datos (MB)", color: getTextColor() },
+            ticks: { color: getTextColor() },
+            grid: { drawOnChartArea: false },
+          },
+        },
+      },
+    });
+  }
+
   // ─── Initialize charts ────────────────────────────────────────────────────
 
   buildBarChart(
@@ -146,6 +225,7 @@ document.addEventListener("DOMContentLoaded", function () {
     ""
   );
   buildBarChart("usersDataChart", chartData.usersData, "Datos (MB)", "MB");
+  buildHourlyActivityChart(chartData.hourlyActivity);
   buildPieChart("httpCodesChart", chartData.httpCodes);
   buildPieChart("countriesChart", chartData.countries);
 
@@ -204,12 +284,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const opts = instance.config.options;
             if (opts && opts.scales) {
               const textColor = getTextColor();
-              if (opts.scales.y && opts.scales.y.ticks) {
-                opts.scales.y.ticks.color = textColor;
-              }
-              if (opts.scales.x && opts.scales.x.ticks) {
-                opts.scales.x.ticks.color = textColor;
-              }
+              Object.values(opts.scales).forEach(function (scale) {
+                if (scale.ticks) scale.ticks.color = textColor;
+                if (scale.title) scale.title.color = textColor;
+              });
             }
             if (opts && opts.plugins && opts.plugins.legend && opts.plugins.legend.labels) {
               opts.plugins.legend.labels.color = getTextColor();

@@ -133,13 +133,13 @@ jobs:
           mkdir -p %{buildroot}/var/lib/squidstats
           cp -a app.py config.py manage_db.py alembic.ini babel.cfg requirements.txt %{buildroot}/opt/SquidStats/app/
           cp -a database parsers routes services static templates tools translations utils %{buildroot}/opt/SquidStats/app/
-          cp -a example.env %{buildroot}/etc/squidstats/squidstats.env
+          cp -a example.env %{buildroot}/opt/SquidStats/app/.env
           install -D -m 0644 debian/squidstats.service %{buildroot}/usr/lib/systemd/system/squidstats.service
 
           %files
           %defattr(-,root,root,-)
           /opt/SquidStats
-          /etc/squidstats/squidstats.env
+          /opt/SquidStats/app/.env
           /var/log/squidstats
           /var/lib/squidstats
           /usr/lib/systemd/system/squidstats.service
@@ -171,7 +171,7 @@ jobs:
           ls -lh dist
           for RPM in "${RPM_FILES[@]}"; do
             rpm -qip "$RPM"
-            rpm -qpl "$RPM" | grep -Fx '/etc/squidstats/squidstats.env'
+            rpm -qpl "$RPM" | grep -Fx '/opt/SquidStats/app/.env'
           done
 
       - name: Collect artifacts

@@ -29,7 +29,8 @@ def reports():
     db = None
     try:
         db = get_session()
-        current_date = datetime.now().strftime("%Y%m%d")
+        selected_date = date.today()
+        current_date = selected_date.strftime("%Y%m%d")
         logger.info(f"Generating reports for date: {current_date}")
         UserModel, LogModel = get_dynamic_models(current_date)
 
@@ -38,7 +39,9 @@ def reports():
                 "error.html", message="Error loading data for reports"
             ), 500
 
-        metrics = get_important_metrics(db, UserModel, LogModel)
+        metrics = get_important_metrics(
+            db, UserModel, LogModel, report_date=selected_date
+        )
 
         if not metrics:
             return render_template(
@@ -70,6 +73,7 @@ def reports():
             page_title=_("Reportes y gráficas"),
             icon="fas fa-chart-simple",
             subtitle=_("Top de la Actividad de los Usuarios y comportamiento"),
+            selected_date=selected_date,
         )
     except Exception as e:
         logger.error(f"Error en ruta /reports: {str(e)}", exc_info=True)
@@ -117,7 +121,7 @@ def reports_download_pdf():
                 "error.html", message="Error cargando datos para la fecha solicitada"
             ), 500
 
-        metrics = get_important_metrics(db, UserModel, LogModel)
+        metrics = get_important_metrics(db, UserModel, LogModel, report_date=selected)
         if not metrics:
             return render_template(
                 "error.html", message="No hay datos para la fecha solicitada"
@@ -192,7 +196,7 @@ def reports_for_date(date_str: str):
                 "error.html", message="Error loading data for requested date"
             ), 500
 
-        metrics = get_important_metrics(db, UserModel, LogModel)
+        metrics = get_important_metrics(db, UserModel, LogModel, report_date=selected)
 
         if not metrics:
             return render_template(
@@ -224,6 +228,7 @@ def reports_for_date(date_str: str):
             page_title=_("Reportes y gráficas") + f" - {selected.isoformat()}",
             icon="fas fa-chart-simple",
             subtitle=_("Top de la Actividad de los Usuarios y comportamiento"),
+            selected_date=selected,
         )
     except Exception:
         logger.exception("Error generating reports for specific date")

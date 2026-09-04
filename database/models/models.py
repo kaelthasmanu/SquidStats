@@ -59,7 +59,9 @@ class DeniedLog(Base):
     status = Column(String(255), nullable=False)
     response = Column(Integer, nullable=True)
     data_transmitted = Column(BigInteger, default=0)
-    created_at = Column(DateTime, default=datetime.now)
+    # Reports filter blocked requests by day, so keep that lookup indexed even
+    # when the retained denied-log history is large.
+    created_at = Column(DateTime, default=datetime.now, index=True)
 
 
 class SystemMetrics(Base):

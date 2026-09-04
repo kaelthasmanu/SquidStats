@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SquidStats\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-29 20:56+0000\n"
-"PO-Revision-Date: 2026-08-29 20:56+0000\n"
+"POT-Creation-Date: 2026-09-04 03:50+0000\n"
+"PO-Revision-Date: 2026-09-04 03:50+0000\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
@@ -303,6 +303,7 @@ msgid "Ancho de banda total"
 msgstr "Total bandwidth"
 
 #: routes/i18n_routes.py:81
+#: templates/partials/graph_reports.html
 msgid "Usuarios únicos"
 msgstr "Unique Users"
 
@@ -553,6 +554,7 @@ msgid "Bytes recibidos"
 msgstr "Bytes received"
 
 #: routes/i18n_routes.py:144
+#: templates/partials/graph_reports.html templates/reports_pdf.html
 msgid "Peticiones"
 msgstr "Requests"
 
@@ -4394,6 +4396,114 @@ msgstr "IP"
 msgid "Número de Usuarios"
 msgstr "Number of Users"
 
+#: templates/partials/graph_reports.html
+msgid "Usuarios únicos con actividad"
+msgstr "Unique users with activity"
+
+#: templates/partials/graph_reports.html
+msgid "Eventos registrados"
+msgstr "Recorded events"
+
+#: templates/partials/graph_reports.html
+msgid "Promedio:"
+msgstr "Average:"
+
+#: templates/partials/graph_reports.html
+msgid "KB por petición"
+msgstr "KB per request"
+
+#: templates/partials/graph_reports.html
+msgid "Redirecciones:"
+msgstr "Redirects:"
+
+#: templates/partials/graph_reports.html
+msgid "Calidad y seguridad del tráfico"
+msgstr "Traffic quality and security"
+
+#: templates/partials/graph_reports.html
+msgid "Indicadores calculados para la fecha seleccionada"
+msgstr "Indicators calculated for the selected date"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Tasa de éxito HTTP:"
+msgstr "HTTP success rate:"
+
+#: templates/partials/graph_reports.html
+msgid "Tasa de éxito HTTP"
+msgstr "HTTP success rate"
+
+#: templates/partials/graph_reports.html
+msgid "peticiones 2xx"
+msgstr "2xx requests"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Errores HTTP:"
+msgstr "HTTP errors:"
+
+#: templates/partials/graph_reports.html
+msgid "Errores HTTP"
+msgstr "HTTP errors"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Accesos bloqueados:"
+msgstr "Blocked requests:"
+
+#: templates/partials/graph_reports.html
+msgid "Accesos bloqueados"
+msgstr "Blocked requests"
+
+#: templates/partials/graph_reports.html
+msgid "Usuarios afectados"
+msgstr "Affected users"
+
+#: templates/partials/graph_reports.html
+msgid "Destinos únicos"
+msgstr "Unique destinations"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Hora pico:"
+msgstr "Peak hour:"
+
+#: templates/partials/graph_reports.html
+msgid "Sin actividad"
+msgstr "No activity"
+
+#: templates/partials/graph_reports.html
+msgid "Actividad por hora"
+msgstr "Hourly activity"
+
+#: templates/partials/graph_reports.html
+msgid "Peticiones y datos transferidos durante la fecha seleccionada"
+msgstr "Requests and data transferred during the selected date"
+
+#: templates/partials/graph_reports.html
+msgid "Destinos por TLD"
+msgstr "Destinations by TLD"
+
+#: templates/partials/graph_reports.html
+msgid "Estimado a partir del dominio de destino; no es geolocalización."
+msgstr "Estimated from the destination domain; this is not geolocation."
+
+#: templates/partials/graph_reports.html
+msgid "No hay actividad para esta fecha."
+msgstr "There is no activity for this date."
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Top dominios de destino"
+msgstr "Top destination domains"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "No hay destinos identificables para esta fecha."
+msgstr "There are no identifiable destinations for this date."
+
+#: templates/partials/graph_reports.html
+msgid "URLs con mayor consumo de datos"
+msgstr "URLs with the highest data usage"
+
+#: templates/partials/graph_reports.html
+msgid "No se detectaron IPs compartidas."
+msgstr "No shared IPs were detected."
+
 #: templates/partials/logs.html:5
 msgid "First page"
 msgstr "First page"
@@ -5079,6 +5189,21 @@ msgstr "The configuration will not be applied unless a .keytab file is uploaded.
 
 msgid "KERBEROS_LDAP_KERBEROS_REQUIRED_WARNING"
 msgstr "Kerberos authentication requires the configured LDAP or Active Directory server to support Kerberos and provide a valid HTTP service-principal keytab for the proxy."
+
+msgid "LDAP_AUTH_TYPE_KERBEROS"
+msgstr "KERBEROS (LDAP/AD)"
+
+msgid "LDAP_KERBEROS_AUTH_HELP"
+msgstr "Directory browsing will use SASL/GSSAPI. SquidStats must have a valid Kerberos ticket for this principal (for example, obtained from a keytab), and the server name must match the LDAP service principal."
+
+msgid "LDAP_KERBEROS_PRINCIPAL_LABEL"
+msgstr "Kerberos principal"
+
+msgid "LDAP_KERBEROS_PRINCIPAL_PLACEHOLDER"
+msgstr "squidstats@EXAMPLE.COM"
+
+msgid "LDAP_ERROR_KERBEROS_CLIENT_UNAVAILABLE"
+msgstr "The Kerberos GSSAPI client is not installed on this server."
 
 msgid "KERBEROS_KEYTAB_FILE"
 msgstr ".keytab file"

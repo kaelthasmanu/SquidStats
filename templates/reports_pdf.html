@@ -24,6 +24,11 @@
         <p>{{ _("Total usuarios:") }} {{ metrics.total_stats.total_users | default(0) }}</p>
         <p>{{ _("Total solicitudes:") }} {{ metrics.total_stats.total_requests | default(0) }}</p>
         <p>{{ _("Datos consumidos (MB):") }} {{ ((metrics.total_stats.total_data_transmitted | default(0)) / 1048576) | round(2) }}</p>
+        <p>{{ _("Tasa de éxito HTTP:") }} {{ metrics.successful_request_rate | default(0) | round(1) }}%</p>
+        <p>{{ _("Errores HTTP:") }} {{ metrics.error_requests | default(0) }} ({{ metrics.error_request_rate | default(0) | round(1) }}%)</p>
+        <p>{{ _("Accesos bloqueados:") }} {{ metrics.blocked_requests | default(0) }} ({{ metrics.blocked_request_rate | default(0) | round(1) }}%)</p>
+        <p>{{ _("Destinos únicos:") }} {{ metrics.unique_domains | default(0) }}</p>
+        <p>{{ _("Hora pico:") }} {{ "%02d:00" | format(metrics.peak_hour.hour | default(0)) }}</p>
     </div>
 
     <div class="box">
@@ -55,6 +60,26 @@
                     <td>{{ item.url }}</td>
                     <td>{{ ((item.total_data_bytes | default(0)) / 1048576) | round(2) }}</td>
                 </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="box">
+        <h2>{{ _("Top dominios de destino") }}</h2>
+        <table class="table">
+            <thead>
+                <tr><th>{{ _("Dominio") }}</th><th>{{ _("Peticiones") }}</th><th>{{ _("Datos (MB)") }}</th></tr>
+            </thead>
+            <tbody>
+            {% for item in metrics.top_domains %}
+                <tr>
+                    <td>{{ item.domain }}</td>
+                    <td>{{ item.total_requests }}</td>
+                    <td>{{ ((item.total_data_bytes | default(0)) / 1048576) | round(2) }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="3">{{ _("No hay destinos identificables para esta fecha.") }}</td></tr>
             {% endfor %}
             </tbody>
         </table>

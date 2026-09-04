@@ -588,6 +588,122 @@ msgstr "IP"
 msgid "Número de Usuarios"
 msgstr "Number of Users"
 
+#: templates/partials/graph_reports.html
+msgid "Usuarios únicos con actividad"
+msgstr "Unique users with activity"
+
+#: templates/partials/graph_reports.html
+msgid "Eventos registrados"
+msgstr "Recorded events"
+
+#: templates/partials/graph_reports.html
+msgid "Promedio:"
+msgstr "Average:"
+
+#: templates/partials/graph_reports.html
+msgid "KB por petición"
+msgstr "KB per request"
+
+#: templates/partials/graph_reports.html
+msgid "Redirecciones:"
+msgstr "Redirects:"
+
+#: templates/partials/graph_reports.html
+msgid "Calidad y seguridad del tráfico"
+msgstr "Traffic quality and security"
+
+#: templates/partials/graph_reports.html
+msgid "Indicadores calculados para la fecha seleccionada"
+msgstr "Indicators calculated for the selected date"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Tasa de éxito HTTP:"
+msgstr "HTTP success rate:"
+
+#: templates/partials/graph_reports.html
+msgid "Tasa de éxito HTTP"
+msgstr "HTTP success rate"
+
+#: templates/partials/graph_reports.html
+msgid "peticiones 2xx"
+msgstr "2xx requests"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Errores HTTP:"
+msgstr "HTTP errors:"
+
+#: templates/partials/graph_reports.html
+msgid "Errores HTTP"
+msgstr "HTTP errors"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Accesos bloqueados:"
+msgstr "Blocked requests:"
+
+#: templates/partials/graph_reports.html
+msgid "Accesos bloqueados"
+msgstr "Blocked requests"
+
+#: templates/partials/graph_reports.html
+msgid "Usuarios afectados"
+msgstr "Affected users"
+
+#: templates/partials/graph_reports.html
+msgid "Destinos únicos"
+msgstr "Unique destinations"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Hora pico:"
+msgstr "Peak hour:"
+
+#: templates/partials/graph_reports.html
+msgid "Sin actividad"
+msgstr "No activity"
+
+#: templates/partials/graph_reports.html
+msgid "Actividad por hora"
+msgstr "Hourly activity"
+
+#: templates/partials/graph_reports.html
+msgid "Peticiones y datos transferidos durante la fecha seleccionada"
+msgstr "Requests and data transferred during the selected date"
+
+#: templates/partials/graph_reports.html
+msgid "Destinos por TLD"
+msgstr "Destinations by TLD"
+
+#: templates/partials/graph_reports.html
+msgid "Estimado a partir del dominio de destino; no es geolocalización."
+msgstr "Estimated from the destination domain; this is not geolocation."
+
+#: templates/partials/graph_reports.html
+msgid "Usuarios únicos"
+msgstr "Unique users"
+
+#: templates/partials/graph_reports.html
+msgid "No hay actividad para esta fecha."
+msgstr "There is no activity for this date."
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Top dominios de destino"
+msgstr "Top destination domains"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Peticiones"
+msgstr "Requests"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "No hay destinos identificables para esta fecha."
+msgstr "There are no identifiable destinations for this date."
+
+#: templates/partials/graph_reports.html
+msgid "URLs con mayor consumo de datos"
+msgstr "URLs with the highest data usage"
+
+#: templates/partials/graph_reports.html
+msgid "No se detectaron IPs compartidas."
+msgstr "No shared IPs were detected."
+
 #: templates/partials/logs.html:5
 msgid "First page"
 msgstr "First page"
