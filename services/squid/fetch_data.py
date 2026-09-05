@@ -12,8 +12,17 @@ load_dotenv()
 
 SQUID_HOST = Config.SQUID_HOST
 SQUID_PORT = Config.SQUID_PORT
-SQUID_MGR_USER = os.getenv("SQUID_MGR_USER")
 SQUID_MGR_PASS = os.getenv("SQUID_MGR_PASS")
+
+
+def _manager_auth_header() -> str:
+    """Return the Cache Manager Basic Auth header when a password is set."""
+    if not SQUID_MGR_PASS:
+        return ""
+
+    credentials = f":{SQUID_MGR_PASS}".encode()
+    token = base64.b64encode(credentials).decode("ascii")
+    return f"Authorization: Basic {token}"
 
 
 def get_squid_hosts() -> list[tuple[str, int]]:
@@ -88,11 +97,9 @@ def fetch_squid_data():
             "Accept: */*",
             "Connection: close",
         ]
-        if SQUID_MGR_USER and SQUID_MGR_PASS:
-            token = base64.b64encode(
-                f"{SQUID_MGR_USER}:{SQUID_MGR_PASS}".encode()
-            ).decode()
-            headers.append(f"Authorization: Basic {token}")
+        auth_header = _manager_auth_header()
+        if auth_header:
+            headers.append(auth_header)
 
         path_request = (
             "GET /squid-internal-mgr/active_requests HTTP/1.1\r\n"
@@ -102,19 +109,6 @@ def fetch_squid_data():
         response_text = _send_http_request(
             SQUID_HOST, SQUID_PORT, path_request, timeout=5.0
         )
-
-        # If Squid returns 400 Bad Request, try legacy cache_object form
-        first_line = response_text.splitlines()[0] if response_text else ""
-        if " 400 " in first_line or "Bad Request" in response_text:
-            legacy_request = (
-                f"GET cache_object://{SQUID_HOST}/active_requests HTTP/1.0\r\n"
-                f"Host: {host_header}\r\n"
-                "User-Agent: SquidStats/1.0\r\n"
-                "Accept: */*\r\n\r\n"
-            )
-            response_text = _send_http_request(
-                SQUID_HOST, SQUID_PORT, legacy_request, timeout=5.0
-            )
 
         return response_text
     except Exception:
@@ -131,11 +125,9 @@ def fetch_squid_data_from_host(host: str, port: int) -> str:
             "Accept: */*",
             "Connection: close",
         ]
-        if SQUID_MGR_USER and SQUID_MGR_PASS:
-            token = base64.b64encode(
-                f"{SQUID_MGR_USER}:{SQUID_MGR_PASS}".encode()
-            ).decode()
-            headers.append(f"Authorization: Basic {token}")
+        auth_header = _manager_auth_header()
+        if auth_header:
+            headers.append(auth_header)
 
         path_request = (
             "GET /squid-internal-mgr/active_requests HTTP/1.1\r\n"
@@ -143,16 +135,6 @@ def fetch_squid_data_from_host(host: str, port: int) -> str:
             + "\r\n\r\n"
         )
         response_text = _send_http_request(host, port, path_request, timeout=5.0)
-
-        first_line = response_text.splitlines()[0] if response_text else ""
-        if " 400 " in first_line or "Bad Request" in response_text:
-            legacy_request = (
-                f"GET cache_object://{host}/active_requests HTTP/1.0\r\n"
-                f"Host: {host_header}\r\n"
-                "User-Agent: SquidStats/1.0\r\n"
-                "Accept: */*\r\n\r\n"
-            )
-            response_text = _send_http_request(host, port, legacy_request, timeout=5.0)
 
         return response_text
     except Exception:

@@ -13,10 +13,19 @@ load_dotenv()
 
 SQUID_HOST = Config.SQUID_HOST
 SQUID_PORT = Config.SQUID_PORT
-SQUID_MGR_USER = os.getenv("SQUID_MGR_USER")
 SQUID_MGR_PASS = os.getenv("SQUID_MGR_PASS")
 
 _SQUID_DATE_FMT = "%a, %d %b %Y %H:%M:%S %Z"
+
+
+def _manager_auth_header() -> str:
+    """Return the Cache Manager Basic Auth header when a password is set."""
+    if not SQUID_MGR_PASS:
+        return ""
+
+    credentials = f":{SQUID_MGR_PASS}".encode()
+    token = base64.b64encode(credentials).decode("ascii")
+    return f"Authorization: Basic {token}"
 
 
 def _parse_squid_date(line: str) -> datetime:
@@ -97,11 +106,9 @@ def fetch_squid_info_stats():
             "Accept: */*",
             "Connection: close",
         ]
-        if SQUID_MGR_USER and SQUID_MGR_PASS:
-            token = base64.b64encode(
-                f"{SQUID_MGR_USER}:{SQUID_MGR_PASS}".encode()
-            ).decode()
-            headers.append(f"Authorization: Basic {token}")
+        auth_header = _manager_auth_header()
+        if auth_header:
+            headers.append(auth_header)
 
         modern_req = (
             "GET /squid-internal-mgr/info HTTP/1.1\r\n"
@@ -111,18 +118,6 @@ def fetch_squid_info_stats():
         response_text = _send_http_request(
             SQUID_HOST, int(SQUID_PORT), modern_req, timeout=5.0
         )
-
-        first_line = response_text.splitlines()[0] if response_text else ""
-        if " 400 " in first_line or "Bad Request" in response_text:
-            legacy_req = (
-                f"GET cache_object://{SQUID_HOST}/info HTTP/1.0\r\n"
-                f"Host: {host_header}\r\n"
-                "User-Agent: SquidStats/1.0\r\n"
-                "Accept: */*\r\n\r\n"
-            )
-            response_text = _send_http_request(
-                SQUID_HOST, int(SQUID_PORT), legacy_req, timeout=5.0
-            )
 
         parts = response_text.split("\r\n\r\n", 1)
         data = parts[1] if len(parts) > 1 else response_text
