@@ -1,3 +1,5 @@
+import base64
+import os
 import re
 import re as _re
 import socket
@@ -12,6 +14,17 @@ load_dotenv()
 
 SQUID_HOST = Config.SQUID_HOST
 SQUID_PORT = Config.SQUID_PORT
+SQUID_MGR_PASS = os.getenv("SQUID_MGR_PASS")
+
+
+def _manager_auth_header() -> str:
+    """Return the Cache Manager Basic Auth header with trailing CRLF."""
+    if not SQUID_MGR_PASS:
+        return ""
+
+    credentials = f":{SQUID_MGR_PASS}".encode()
+    token = base64.b64encode(credentials).decode("ascii")
+    return f"Authorization: Basic {token}\r\n"
 
 
 def fetch_squid_cache_stats():
@@ -37,29 +50,25 @@ def fetch_squid_cache_stats():
         "connection_status": "connected",
     }
     try:
+        auth_header = _manager_auth_header()
         requests_to_try = [
             (
                 f"GET /squid-internal-mgr/storedir HTTP/1.1\r\n"
                 f"Host: {SQUID_HOST}:{SQUID_PORT}\r\n"
-                "Connection: close\r\n\r\n"
-            ),
-            f"GET cache_object://{SQUID_HOST}/storedir HTTP/1.0\r\n\r\n",
-            (
-                f"GET cache_object://{SQUID_HOST}/storedir HTTP/1.1\r\n"
-                f"Host: {SQUID_HOST}\r\n"
+                f"{auth_header}"
                 "Connection: close\r\n\r\n"
             ),
             (
                 f"GET /storedir HTTP/1.1\r\n"
                 f"Host: {SQUID_HOST}\r\n"
+                f"{auth_header}"
                 "Connection: close\r\n\r\n"
             ),
-            "GET cache_object://localhost/storedir HTTP/1.0\r\n\r\n",
-            ("GET cache_object://127.0.0.1/storedir HTTP/1.0\r\n\r\n"),
-            "GET mgr:storedir HTTP/1.0\r\n\r\n",
+            f"GET mgr:storedir HTTP/1.0\r\n{auth_header}\r\n",
             (
                 "GET mgr:storedir HTTP/1.1\r\n"
                 f"Host: {SQUID_HOST}\r\n"
+                f"{auth_header}"
                 "Connection: close\r\n\r\n"
             ),
         ]
