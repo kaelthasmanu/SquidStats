@@ -229,6 +229,8 @@ apt install git python3 python3-pip python3-venv libmariadb-dev curl
 
 **⚠️ Nota de Seguridad:** El Cache Manager proporciona información sensible sobre tu servidor proxy. Siempre restringe el acceso a direcciones IP confiables y considera usar autenticación para entornos de producción.
 
+Cuando el Cache Manager tenga autenticación, define `SQUID_MGR_PASS` en el `.env` de SquidStats.
+
 **Problemas Comunes Sin Configuración Adecuada:**
 - Estadísticas vacías o faltantes en el panel de SquidStats
 - Errores de "Connection refused" al acceder a datos de cache
@@ -369,6 +371,9 @@ Si el comando devuelve la versión instalada, SquidStats está listo para utiliz
    SQUID_CACHE_LOG="/var/log/squid/cache.log"
    SQUID_CONFIG_PATH="/etc/squid/squid.conf"
    ACL_FILES_DIR="/etc/squid/acls"
+
+   # Credenciales opcionales del Cache Manager (solo contraseña)
+   SQUID_MGR_PASS=""
    
    # Configuración de Base de Datos
    # Opciones: SQLITE or MARIADB or MYSQL or POSTGRESQL
