@@ -496,9 +496,6 @@ ACL_FILES_DIR=/etc/squid/config/acls
 LISTEN_HOST=0.0.0.0
 LISTEN_PORT=5000
 FIRST_PASSWORD="admin"
-JWT_EXPIRY_HOURS=24
-MAX_LOGIN_ATTEMPTS=5
-LOCKOUT_DURATION_MINUTES=15
 EOF
         ok "Archivo .env creado correctamente en $env_file"
         return 0
