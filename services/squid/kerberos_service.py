@@ -816,6 +816,7 @@ def get_status() -> dict:
         modular = False
     else:
         keytab = _keytab_path()
+        keytab_path = str(keytab)
         permissions = _keytab_permissions(keytab)
         config_path = str(Path(Config.SQUID_CONFIG_PATH).expanduser())
         configured = False
