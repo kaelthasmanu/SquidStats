@@ -709,7 +709,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.3.1/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.3/install.sh
 ```
 
 2. Add permission execution:
@@ -812,9 +812,6 @@ sudo rm -rf /opt/squidstats
 
 ### Upcoming Features
 
-- **Interface Improvements** 🎨
-  - ~~Report export (PDF, Excel)~~ ✅ **Implemented** 
-
 - **Optimization and Performance** ⚡
   - Enhanced data caching
   - Historical log compression
@@ -850,8 +847,7 @@ _The SquidStats project is released under the <a href="https://github.com/kaelth
 
 > **_Need help?_**
 > **_Feel free to contact me 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
-
-Related project: ([CuCuota](https://github.com/kaelthasmanu/cucuota))
+> **_You can also reach me on Telegram: [@king_0f_deathhh](https://t.me/king_0f_deathhh)_**
 
 ## Technologies Used
 
