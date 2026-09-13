@@ -38,7 +38,12 @@
     <li>
       <a href="#empezando">Empezando</a>
       <ul>
-        <li><a href="#prerrequisitos">Prerrequisitos</a></li>
+        <li>
+          <a href="#prerrequisitos">Prerrequisitos</a>
+          <ul>
+            <li><a href="#kerberos-spnego">Autenticación Kerberos / SPNEGO</a></li>
+          </ul>
+        </li>
         <li>
           <a href="#script-de-instalación">Script de Instalación</a>
           <ul>
@@ -236,6 +241,41 @@ Cuando el Cache Manager tenga autenticación, define `SQUID_MGR_PASS` en el `.en
 - Errores de "Connection refused" al acceder a datos de cache
 - Información de conexiones en tiempo real faltante
 - Reportes incompletos de ancho de banda y actividad de usuarios
+
+<a name="kerberos-spnego"></a>
+#### Autenticación Kerberos / SPNEGO (proxy explícito)
+
+Kerberos usa el esquema HTTP <code>Negotiate</code>; por tanto Squid debe actuar como <strong>proxy directo/explícito</strong>, no como proxy transparente/interceptado. Configura el navegador o PAC con el FQDN del proxy, por ejemplo <code>http://inutil.cu:3128</code>; ese mismo nombre debe coincidir con el SPN.
+
+Antes de aplicarlo, verifica que el paquete de Squid incluya <code>negotiate_kerberos_auth</code>, que la ruta real del helper sea la de tu distribución y que las herramientas Kerberos estén instaladas. Esta configuración usa <code>auth_param</code>, disponible en Squid con autenticación habilitada hasta v7; Squid v8 ya no admite esa directiva. En Active Directory, el SPN <code>HTTP/inutil.cu</code> debe ser único y pertenecer a la cuenta de servicio; el keytab debe contener el principal exactamente igual, <code>HTTP/inutil.cu@INUTIL.CU</code>, y el usuario que ejecuta Squid debe poder leerlo. El panel usa <code>cache_effective_user</code> o el usuario predeterminado informado por el runtime para comprobarlo; declara <code>cache_effective_user</code> si no puede determinarlo. DNS, el FQDN configurado en los clientes y el realm también deben coincidir. No uses una IP o un alias que no tenga SPN. El SPN completo con <code>@REALM</code> es preferible; <code>HTTP/inutil.cu</code> sin realm también es una sintaxis válida del helper cuando el realm predeterminado de Kerberos es el correcto.
+
+Agrega <strong>un solo</strong> helper <code>negotiate</code> activo y ajusta las rutas, FQDN, realm y red autorizada:
+
+~~~conf
+# No actives simultáneamente las alternativas NTLM ni un segundo helper negotiate.
+auth_param negotiate program /usr/lib/squid/negotiate_kerberos_auth -k /var/run/squid/HTTP.keytab -s HTTP/inutil.cu@INUTIL.CU
+auth_param negotiate children 10 startup=5 idle=3
+auth_param negotiate keep_alive on
+
+# Cualquier identidad Kerberos válida satisface esta ACL.
+acl kerberos_auth proxy_auth REQUIRED
+
+# Conserva antes los deny de seguridad/puertos y excepciones del Cache Manager.
+# Esto desafía a clientes sin autenticar antes de un allow como localnet.
+http_access deny !kerberos_auth
+http_access allow localnet
+http_access deny all
+~~~
+
+El orden de <code>http_access</code> es decisivo: las excepciones del Cache Manager (<code>http_access allow ... manager</code> y <code>http_access deny manager</code>) y los deny de puertos/seguridad existentes deben ir antes de la regla Kerberos; esta va antes del primer <code>allow</code> de clientes y del <code>http_access deny all</code> final. La regla negada <code>http_access deny !kerberos_auth</code> hace que Squid desafíe al cliente antes de un <code>allow localnet</code> posterior; un <code>allow kerberos_auth</code> aislado no basta para todos los clientes. El texto anterior es sintaxis literal de <code>squid.conf</code>: usa <code>auth_param</code> y <code>keep_alive</code>, <strong>no</strong> <code>auth\_param</code> ni <code>keep\_alive</code> con escapes de Markdown.
+
+En el panel de administración, abre <code>/admin/kerberos-config</code> para indicar <code>helper_path</code>, <code>keytab_path</code>, <code>service_principal</code>, <code>children</code>/<code>startup</code>/<code>idle</code>, <code>keep_alive</code>, la opción de quitar el realm si aplica, la ACL y su regla de acceso. Revisa el bloque generado, aplica la regla y recarga Squid solo después de comprobarlo con <code>sudo squid -f /ruta/squid.conf -k parse</code>; una vez válido, usa <code>sudo systemctl reload squid</code> (o el mecanismo de recarga de tu distribución). Quitar el realm cambia la identidad de logs y cuotas: con <code>-r</code> normalmente será <code>usuario</code>; sin esa opción normalmente será <code>usuario@REALM</code>, por lo que las cuotas deben usar el mismo formato.
+
+<strong>Paquete Debian:</strong> la unidad incluida ejecuta la aplicación sin privilegios y protege <code>/etc/squid</code> con <code>ProtectSystem=full</code>. Por ello la pantalla Kerberos se muestra en modo manual: puedes generar y copiar la vista previa, pero no escribirá <code>squid.conf</code> ni keytabs. Aplica el bloque con un procedimiento administrativo controlado. Otros despliegues conservan el modo administrado salvo que configuren esta variable. <code>SQUIDSTATS_SQUID_CONFIG_WRITE_MODE=managed</code> es una opción explícita solo después de desplegar un mecanismo privilegiado independiente, restringido a los archivos necesarios y auditado; cambiar esa variable por sí solo no concede permisos. No otorgues escritura amplia sobre <code>/etc/squid</code> ni acceso amplio a los keytabs al proceso web.
+
+Si Squid se ejecuta en Docker, el <code>SQUID_CONFIG_PATH</code> que edita SquidStats debe estar montado en el archivo que realmente carga el contenedor (por ejemplo, <code>./squid.conf:/etc/squid/squid.conf</code>). Si la configuración es modular, monta también el directorio que contiene <code>50_auth.conf</code> y <code>120_http_access.conf</code>; montar únicamente el archivo principal no basta. Define <code>SQUID_RUNTIME=docker</code> para que las comprobaciones y la recarga se hagan dentro del contenedor; úsalo de forma explícita, en vez de <code>auto</code>, si también existe un binario Squid en el host. <code>SQUID_DOCKER_CONTAINER=squid_proxy</code> es el valor predeterminado y <code>SQUID_CONTAINER_CONFIG_PATH</code> solo hace falta si Squid usa otra ruta interna. El proceso de SquidStats necesita acceso al cliente/socket Docker para esas verificaciones. El keytab debe montarse de forma segura en el contenedor: el panel nunca lo copia.
+
+No uses la función de dividir <code>squid.conf</code> mientras haya Kerberos/Negotiate activo. SquidStats la bloquea para no alterar el orden de los <code>include</code> ni separar los bloques gestionados; migra o deshabilita Kerberos desde esta pantalla antes de dividir la configuración.
 
 ### Script de Instalación
 

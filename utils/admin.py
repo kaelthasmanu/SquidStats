@@ -1,7 +1,11 @@
+import fcntl
+import glob
 import os
 import re
 import shutil
 import tempfile
+import threading
+from contextlib import contextmanager
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -18,6 +22,74 @@ ACL_FILES_DIR = Config.ACL_FILES_DIR or os.path.join(
 )
 FALLBACK_SQUID_CONFIG_PATH = "/etc/squid/squid.conf"
 FALLBACK_ACL_FILES_DIRS = ["/etc/squid/acls", "/etc/squid/squid.d"]
+
+# All Squid configuration writers use this lock file for the short interval
+# between comparing a loaded snapshot and atomically replacing a file.  The
+# in-process RLock avoids self-deadlock when a multi-file transaction invokes
+# ``save_config``/``save_modular_config`` while it already owns the lock; the
+# advisory flock coordinates separate web/scheduler worker processes.
+_SQUID_WRITE_LOCKS_GUARD = threading.Lock()
+_SQUID_WRITE_LOCKS: dict[str, threading.RLock] = {}
+_SQUID_WRITE_LOCK_STATE = threading.local()
+
+
+@contextmanager
+def squid_config_write_lock(config_path: str = SQUID_CONFIG_PATH):
+    """Serialize Squid configuration read-modify-write transactions.
+
+    The lock is held on the real configuration directory, which keeps it
+    shared by app/scheduler processes using the same Squid configuration
+    volume without creating a file that could be picked up by a wildcard
+    ``include``. A process that cannot read that directory cannot safely
+    inspect and replace the configuration, so failure is intentionally
+    fail-closed.
+    """
+    effective_config_path = config_path
+    if config_path == SQUID_CONFIG_PATH:
+        effective_config_path, _unused_config_dir = _normalize_squid_paths(
+            SQUID_CONFIG_PATH, ACL_FILES_DIR
+        )
+    lock_key = os.path.dirname(
+        os.path.realpath(os.path.abspath(effective_config_path))
+    )
+    held = getattr(_SQUID_WRITE_LOCK_STATE, "held", None)
+    if held is None:
+        held = {}
+        _SQUID_WRITE_LOCK_STATE.held = held
+
+    existing = held.get(lock_key)
+    if existing is not None:
+        existing["depth"] += 1
+        try:
+            yield
+        finally:
+            existing["depth"] -= 1
+        return
+
+    with _SQUID_WRITE_LOCKS_GUARD:
+        thread_lock = _SQUID_WRITE_LOCKS.setdefault(lock_key, threading.RLock())
+
+    thread_lock.acquire()
+    file_descriptor: int | None = None
+    try:
+        flags = os.O_RDONLY
+        if hasattr(os, "O_DIRECTORY"):
+            flags |= os.O_DIRECTORY
+        file_descriptor = os.open(lock_key, flags)
+        fcntl.flock(file_descriptor, fcntl.LOCK_EX)
+        held[lock_key] = {"descriptor": file_descriptor, "depth": 1}
+        yield
+    finally:
+        current = held.get(lock_key)
+        if current is not None:
+            held.pop(lock_key, None)
+            try:
+                fcntl.flock(current["descriptor"], fcntl.LOCK_UN)
+            finally:
+                os.close(current["descriptor"])
+        elif file_descriptor is not None:
+            os.close(file_descriptor)
+        thread_lock.release()
 
 
 def _normalize_squid_paths(config_path: str, config_dir: str) -> tuple[str, str]:
@@ -43,6 +115,71 @@ def _normalize_squid_paths(config_path: str, config_dir: str) -> tuple[str, str]
     return config_path, config_dir
 
 
+def _replacement_ownership(
+    previous_metadata, *, warn: bool = True
+) -> tuple[int, int]:
+    """Return ownership that an atomic replacement can safely restore.
+
+    An unprivileged service may replace a configuration file through a
+    directory ACL even when that file is owned by root.  It cannot restore
+    root ownership afterwards.  It can, however, retain a group to which it
+    belongs, which preserves a common ``root:proxy 0640`` arrangement.  Do
+    not replace a non-world-readable file if neither guarantee is available:
+    Squid could lose access to its configuration after an otherwise valid
+    write.
+    """
+    effective_uid = os.geteuid()
+    effective_gid = os.getegid()
+    if effective_uid == 0:
+        return previous_metadata.st_uid, previous_metadata.st_gid
+
+    effective_groups = {effective_gid, *os.getgroups()}
+    target_group = previous_metadata.st_gid
+    if target_group not in effective_groups:
+        if not (previous_metadata.st_mode & 0o004):
+            raise PermissionError(
+                "No se puede conservar el grupo de un squid.conf no legible "
+                "globalmente; usa un grupo accesible para SquidStats o un "
+                "mecanismo de administración privilegiado."
+            )
+        if warn:
+            logger.warning(
+                "Replacing Squid configuration without its original group because "
+                "it is world-readable"
+            )
+        return -1, -1
+
+    if warn and previous_metadata.st_uid != effective_uid:
+        logger.warning(
+            "Replacing root-owned Squid configuration as an unprivileged user; "
+            "the replacement will be owned by the service account",
+        )
+    return -1, target_group if target_group != effective_gid else -1
+
+
+def can_atomically_replace_file(path: str) -> bool:
+    """Whether this process can safely use :meth:`_atomic_write` for *path*.
+
+    Replacing a file atomically needs write *and* search permission on the
+    resolved parent directory. Testing only ``os.access(file, W_OK)`` is both
+    misleading (a directory ACL can be sufficient) and misses a later
+    ``NamedTemporaryFile``/``os.replace`` failure.  Metadata preservation is
+    checked here as well so the preflight does not promise a write that would
+    make a protected Squid config unreadable.
+    """
+    try:
+        target = os.path.realpath(os.path.abspath(path))
+        directory = os.path.dirname(target)
+        if not os.path.isfile(target) or not os.access(target, os.R_OK):
+            return False
+        if not os.access(directory, os.W_OK | os.X_OK):
+            return False
+        _replacement_ownership(os.stat(target), warn=False)
+    except (OSError, PermissionError):
+        return False
+    return True
+
+
 def _join_continuation_lines(content: str) -> str:
     """Join lines ending with a backslash with the following line."""
     lines = content.splitlines()
@@ -60,7 +197,9 @@ def _join_continuation_lines(content: str) -> str:
     return "\n".join(result)
 
 
-def validate_paths():
+def validate_paths(
+    config_path: str = SQUID_CONFIG_PATH, config_dir: str = ACL_FILES_DIR
+):
     """Validate the squid.conf path (hard errors) and the ACL directory (warnings only).
 
     Returns a list of *hard* error strings that block SquidConfigManager
@@ -70,7 +209,7 @@ def validate_paths():
     """
     errors = []
 
-    cfg = os.path.abspath(os.path.expanduser(SQUID_CONFIG_PATH))
+    cfg = os.path.abspath(os.path.expanduser(config_path))
 
     if os.path.isdir(cfg):
         squid_conf = os.path.join(cfg, "squid.conf")
@@ -82,8 +221,11 @@ def validate_paths():
             else:
                 if not os.access(squid_conf, os.R_OK):
                     errors.append(f"No read permissions for: {squid_conf}")
-                if not os.access(squid_conf, os.W_OK):
-                    errors.append(f"No write permissions for: {squid_conf}")
+                if not can_atomically_replace_file(squid_conf):
+                    errors.append(
+                        "No safe atomic write permissions for Squid configuration: "
+                        f"{squid_conf}"
+                    )
     else:
         squid_conf = cfg
         if not os.path.exists(squid_conf):
@@ -98,11 +240,14 @@ def validate_paths():
             if os.path.isfile(squid_conf):
                 if not os.access(squid_conf, os.R_OK):
                     errors.append(f"No read permissions for: {squid_conf}")
-                if not os.access(squid_conf, os.W_OK):
-                    errors.append(f"No write permissions for: {squid_conf}")
+                if not can_atomically_replace_file(squid_conf):
+                    errors.append(
+                        "No safe atomic write permissions for Squid configuration: "
+                        f"{squid_conf}"
+                    )
 
     # ACL / modular-config directory — warnings only, never a hard error
-    _, acl_dir = _normalize_squid_paths(SQUID_CONFIG_PATH, ACL_FILES_DIR)
+    _, acl_dir = _normalize_squid_paths(config_path, config_dir)
     if not os.path.exists(acl_dir):
         logger.warning(
             f"ACL/modular config directory not found: {acl_dir} — "
@@ -110,7 +255,7 @@ def validate_paths():
         )
     elif not os.path.isdir(acl_dir):
         logger.warning(f"ACL path is not a directory: {acl_dir}")
-    elif not os.access(acl_dir, os.W_OK):
+    elif not os.access(acl_dir, os.W_OK | os.X_OK):
         logger.warning(f"No write permissions in ACL directory: {acl_dir}")
 
     return errors
@@ -122,6 +267,7 @@ class SquidConfigManager:
             config_path, config_dir
         )
         self.config_content = ""
+        self._modular_content_snapshots: dict[str, str | None] = {}
         self.is_valid = False
         self.errors = []
         self.is_modular = False  # Flag to check if using modular configs
@@ -133,7 +279,7 @@ class SquidConfigManager:
             self._check_modular_config()
 
     def _validate_environment(self):
-        self.errors = validate_paths()
+        self.errors = validate_paths(self.config_path, self.config_dir)
 
         if self.errors:
             for error in self.errors:
@@ -202,9 +348,17 @@ class SquidConfigManager:
         on POSIX — the destination is either the old file or the new file, never
         a partial write.
         """
-        abs_path = os.path.abspath(path)
+        # Replace the resolved target rather than a symlink itself.  Squid
+        # packages sometimes expose squid.conf through a symlink; replacing
+        # that link would leave the daemon reading a different file after the
+        # next restart.
+        abs_path = os.path.realpath(os.path.abspath(path))
         dir_name = os.path.dirname(abs_path)
         tmp_path = None
+        try:
+            previous_metadata = os.stat(abs_path)
+        except FileNotFoundError:
+            previous_metadata = None
         try:
             with tempfile.NamedTemporaryFile(
                 mode="w",
@@ -215,6 +369,30 @@ class SquidConfigManager:
             ) as tmp:
                 tmp.write(content)
                 tmp_path = tmp.name
+                if previous_metadata is not None:
+                    # ``NamedTemporaryFile`` starts at 0600 and belongs to
+                    # SquidStats. Replacing a config file with it without
+                    # restoring metadata can make Squid unable to read its
+                    # own configuration after a successful-looking update.
+                    restore_uid, restore_gid = _replacement_ownership(
+                        previous_metadata
+                    )
+                    if restore_uid != -1 or restore_gid != -1:
+                        os.fchown(
+                            tmp.fileno(),
+                            restore_uid,
+                            restore_gid,
+                        )
+                    # Copy mode and supported ACL/xattr metadata after the
+                    # ownership change. This is important for installations
+                    # that grant the Squid account access with a POSIX ACL.
+                    shutil.copystat(abs_path, tmp_path, follow_symlinks=False)
+                else:
+                    # Generated .conf modules contain no keytab material;
+                    # make them readable by Squid even when the web process
+                    # and Squid do not share a primary group. Existing files
+                    # keep their stricter administrator-selected mode above.
+                    os.fchmod(tmp.fileno(), 0o644)
             os.replace(tmp_path, abs_path)
         except Exception:
             if tmp_path and os.path.exists(tmp_path):
@@ -240,20 +418,31 @@ class SquidConfigManager:
             return False
 
         try:
-            # Skip write if content hasn't changed
-            if self.config_content == content:
-                logger.debug("Main config unchanged, skipping write")
+            with squid_config_write_lock(self.config_path):
+                # Skip write if content hasn't changed.  This deliberately
+                # does not overwrite a newer on-disk version merely to make a
+                # stale manager's snapshot current again.
+                if self.config_content == content:
+                    logger.debug("Main config unchanged, skipping write")
+                    return True
+
+                with open(self.config_path, encoding="utf-8") as current_file:
+                    current_content = current_file.read()
+                if current_content != self.config_content:
+                    logger.warning(
+                        "Refusing stale write to squid.conf; reload the configuration and retry"
+                    )
+                    return False
+
+                backup_created = self.create_backup()
+                if not backup_created:
+                    logger.warning("Could not create backup, but continuing with save...")
+
+                self._atomic_write(self.config_path, content)
+
+                self.config_content = content
+                logger.info(f"Configuration saved successfully to: {self.config_path}")
                 return True
-
-            backup_created = self.create_backup()
-            if not backup_created:
-                logger.warning("Could not create backup, but continuing with save...")
-
-            self._atomic_write(self.config_path, content)
-
-            self.config_content = content
-            logger.info(f"Configuration saved successfully to: {self.config_path}")
-            return True
 
         except PermissionError:
             logger.error(f"No write permissions for: {self.config_path}")
@@ -620,16 +809,52 @@ class SquidConfigManager:
             return []
 
     def _check_modular_config(self):
-        """Check if the main config file uses modular includes."""
+        """Check whether active includes point at the configured module directory."""
         if not self.config_content:
             return
 
-        # Check if config contains include directives pointing to squid.d
-        self.is_modular = (
-            "include" in self.config_content.lower()
-            and "squid.d" in self.config_content
-        )
+        config_dir = os.path.abspath(self.config_dir)
+        include_dirs: list[str] = []
+        for raw_line in _join_continuation_lines(self.config_content).splitlines():
+            line = raw_line.split("#", 1)[0].strip()
+            match = re.match(r"^include\s+(.+)$", line, re.IGNORECASE)
+            if not match:
+                continue
+            raw_include_path = os.path.expanduser(match.group(1).strip().strip('"'))
+            include_path = os.path.abspath(
+                raw_include_path
+                if os.path.isabs(raw_include_path)
+                else os.path.join(os.path.dirname(self.config_path), raw_include_path)
+            )
+            filename = os.path.basename(include_path)
+            # A standalone text include may be an ACL value list. A .conf
+            # include (including a glob) is a real configuration module.
+            if ".conf" in filename:
+                include_dirs.append(os.path.dirname(include_path))
+
+        self.is_modular = bool(include_dirs)
         if self.is_modular:
+            # Old installers sometimes leave ACL_FILES_DIR pointing at an ACL
+            # value-list directory while squid.conf includes squid.d/conf.d.
+            # Prefer the directory actually referenced by Squid so writes go
+            # to active files rather than an unrelated folder.
+            if config_dir in include_dirs:
+                selected_dir = config_dir
+            else:
+                selected_dir = next(
+                    (
+                        directory
+                        for directory in include_dirs
+                        if "squid.d" in directory.casefold()
+                    ),
+                    include_dirs[0],
+                )
+            if selected_dir != config_dir:
+                logger.info(
+                    "Using modular configuration directory referenced by Squid: {}",
+                    selected_dir,
+                )
+                self.config_dir = selected_dir
             logger.info("Modular configuration detected")
 
     def list_modular_configs(self) -> list[dict[str, str]]:
@@ -670,9 +895,12 @@ class SquidConfigManager:
     def read_modular_config(self, filename: str) -> str | None:
         """Read a specific modular configuration file."""
         filepath = os.path.join(self.config_dir, filename)
+        if not hasattr(self, "_modular_content_snapshots"):
+            self._modular_content_snapshots = {}
 
         if not os.path.exists(filepath):
             logger.error(f"Config file not found: {filepath}")
+            self._modular_content_snapshots[filename] = None
             return None
 
         if not filepath.endswith(".conf"):
@@ -682,15 +910,103 @@ class SquidConfigManager:
         try:
             with open(filepath, encoding="utf-8") as f:
                 content = f.read()
+            self._modular_content_snapshots[filename] = content
             # logger.debug(f"Read modular config: {filename}")
             return content
         except Exception as e:
             logger.error(f"Error reading modular config {filename}: {e}")
             return None
 
+    def has_proxy_authentication(self) -> bool:
+        """Return whether Squid has a usable ``proxy_auth`` identity ACL.
+
+        Authentication directives may be placed in ``50_auth.conf`` after a
+        split, in the main file, or in another active include. Consumers such
+        as quota accounting must inspect only files Squid actually loads: a
+        stale, unreferenced ``50_auth.conf`` must not switch quota accounting
+        to usernames when the proxy has no active authentication helper.
+        """
+        if not self.is_valid:
+            return False
+
+        content = "\n".join(
+            _join_continuation_lines(item)
+            for item in self._active_configuration_contents()
+        )
+        has_helper = bool(
+            re.search(
+                r"^\s*auth_param\s+\S+\s+program\b",
+                content,
+                re.IGNORECASE | re.MULTILINE,
+            )
+        )
+        has_identity_acl = bool(
+            re.search(
+                r"^\s*acl\s+\S+(?:\s+-\S+)*\s+proxy_auth\b",
+                content,
+                re.IGNORECASE | re.MULTILINE,
+            )
+        )
+        return has_helper and has_identity_acl
+
+    def _active_configuration_contents(self) -> list[str]:
+        """Read active Squid include files, bounded against value-list files.
+
+        This deliberately follows only actual ``include`` directives (and
+        their globs), not every file in ``config_dir``.  It is small and
+        private because it supports configuration status checks rather than
+        attempting to be a full Squid parser.
+        """
+        main_content = self.config_content or ""
+        contents = [main_content]
+        main_path = os.path.realpath(self.config_path)
+        seen = {main_path}
+
+        def visit(content: str, directory: str, depth: int = 0) -> None:
+            if depth >= 8:
+                logger.warning("Maximum Squid include depth reached")
+                return
+            for raw_line in _join_continuation_lines(content).splitlines():
+                line = raw_line.split("#", 1)[0].strip()
+                match = re.match(r"^include\s+(.+)$", line, re.IGNORECASE)
+                if not match:
+                    continue
+                include_path = os.path.expanduser(match.group(1).strip().strip('"'))
+                pattern = os.path.abspath(
+                    include_path
+                    if os.path.isabs(include_path)
+                    else os.path.join(directory, include_path)
+                )
+                try:
+                    candidates = sorted(glob.glob(pattern))
+                except OSError:
+                    continue
+                for candidate in candidates:
+                    real_candidate = os.path.realpath(candidate)
+                    if (
+                        real_candidate in seen
+                        or not os.path.isfile(real_candidate)
+                    ):
+                        continue
+                    try:
+                        if os.path.getsize(real_candidate) > 1024 * 1024:
+                            continue
+                        with open(real_candidate, encoding="utf-8") as included:
+                            included_content = included.read()
+                    except (OSError, UnicodeDecodeError):
+                        continue
+                    seen.add(real_candidate)
+                    contents.append(included_content)
+                    visit(included_content, os.path.dirname(real_candidate), depth + 1)
+
+        visit(main_content, os.path.dirname(main_path))
+        return contents
+
     def save_modular_config(self, filename: str, content: str) -> bool:
         """Save content to a specific modular configuration file."""
         filepath = os.path.join(self.config_dir, filename)
+        if not hasattr(self, "_modular_content_snapshots"):
+            self._modular_content_snapshots = {}
 
         if not filename.endswith(".conf"):
             logger.error(f"Invalid file extension: {filename}")
@@ -702,34 +1018,46 @@ class SquidConfigManager:
             return False
 
         try:
-            # Skip write if content hasn't changed
-            if os.path.exists(filepath):
+            with squid_config_write_lock(self.config_path):
                 try:
-                    with open(filepath, encoding="utf-8") as f:
-                        existing = f.read()
-                    if existing == content:
-                        # logger.debug(
-                        #     f"Modular config unchanged, skipping write: {filename}"
-                        # )
-                        return True
-                except Exception as e:
-                    logger.debug(
-                        "Could not read existing config for comparison, proceeding with write: %s",
-                        e,
+                    with open(filepath, encoding="utf-8") as current_file:
+                        current_content: str | None = current_file.read()
+                except FileNotFoundError:
+                    current_content = None
+
+                snapshot_known = filename in self._modular_content_snapshots
+                expected_content = self._modular_content_snapshots.get(filename)
+                if snapshot_known and current_content != expected_content:
+                    logger.warning(
+                        "Refusing stale write to modular config %s; reload it and retry",
+                        filename,
                     )
+                    return False
+                if not snapshot_known and current_content is not None and current_content != content:
+                    logger.warning(
+                        "Refusing to overwrite modular config %s without a loaded snapshot",
+                        filename,
+                    )
+                    return False
 
-                # Create single backup before overwriting
-                backup_path = f"{filepath}.bak"
-                try:
-                    shutil.copy2(filepath, backup_path)
-                    logger.debug(f"Backup created: {backup_path}")
-                except Exception as e:
-                    logger.warning(f"Could not create backup for {filename}: {e}")
+                if current_content == content:
+                    self._modular_content_snapshots[filename] = content
+                    return True
 
-            self._atomic_write(filepath, content)
+                if current_content is not None:
+                    # Create single backup before overwriting
+                    backup_path = f"{filepath}.bak"
+                    try:
+                        shutil.copy2(filepath, backup_path)
+                        logger.debug(f"Backup created: {backup_path}")
+                    except Exception as e:
+                        logger.warning(f"Could not create backup for {filename}: {e}")
 
-            logger.info(f"Saved modular config: {filename}")
-            return True
+                self._atomic_write(filepath, content)
+                self._modular_content_snapshots[filename] = content
+
+                logger.info(f"Saved modular config: {filename}")
+                return True
         except Exception as e:
             logger.error(f"Error saving modular config {filename}: {e}")
             return False

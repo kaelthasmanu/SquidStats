@@ -1,14 +1,27 @@
 import hashlib
 import os
 import re
+from contextlib import nullcontext
+from functools import wraps
 
 from loguru import logger
 
 from database.database import get_session
 from database.models.models import BlacklistDomain
+from utils.admin import squid_config_write_lock
 
 BLOCKLIST_DIR_NAME = "blocklists"
 BLOCKLIST_PREFIX = "blocklist_"
+
+# These markers are owned by the dedicated Kerberos/SPNEGO screen.  Keeping
+# the strings local avoids a dependency from the generic ACL editor back into
+# the configuration service, while preventing that editor from changing the
+# identity ACL that makes the authentication policy work.
+_KERBEROS_AUTH_START = "# BEGIN SquidStats Kerberos authentication"
+_KERBEROS_AUTH_END = "# END SquidStats Kerberos authentication"
+_KERBEROS_ACCESS_START = "# BEGIN SquidStats Kerberos access rule"
+_KERBEROS_ACCESS_END = "# END SquidStats Kerberos access rule"
+_KERBEROS_EXCEPTION_ACLS = frozenset({"manager", "localhost"})
 
 # ---------------------------------------------------------------------------
 # Domain validation regex (RFC 1123 compatible)
@@ -18,6 +31,141 @@ _VALID_DOMAIN_RE = re.compile(
     r"[a-z]{2,63}$",
     re.IGNORECASE,
 )
+
+
+def _managed_kerberos_acl_names(config_manager) -> set[str]:
+    """Return names of ACLs inside a SquidStats-managed Kerberos block.
+
+    The normal ACL editor operates on ``100_acls.conf`` in modular layouts,
+    whereas the Kerberos identity ACL intentionally lives in ``50_auth.conf``.
+    Looking at both locations prevents adding a second, incompatible ACL with
+    the same name or editing the managed ACL in a monolithic installation.
+    """
+    contents = [str(getattr(config_manager, "config_content", "") or "")]
+    if bool(getattr(config_manager, "is_modular", False)):
+        try:
+            auth_content = config_manager.read_modular_config("50_auth.conf")
+        except Exception:
+            auth_content = None
+        if auth_content:
+            contents.append(auth_content)
+
+    names: set[str] = set()
+    for content in contents:
+        in_managed_block = False
+        for raw_line in content.splitlines():
+            line = raw_line.strip()
+            if line == _KERBEROS_AUTH_START:
+                in_managed_block = True
+                continue
+            if line == _KERBEROS_AUTH_END:
+                in_managed_block = False
+                continue
+            if not in_managed_block or line.startswith("#"):
+                continue
+            parts = line.split()
+            if len(parts) >= 3 and parts[0].casefold() == "acl":
+                names.add(parts[1].casefold())
+    return names
+
+
+def _is_managed_kerberos_acl(name: str, config_manager) -> bool:
+    return name.casefold() in _managed_kerberos_acl_names(config_manager)
+
+
+def _managed_kerberos_access_is_active(config_manager) -> bool:
+    """Return whether a managed challenge relies on the manager exception.
+
+    The normal HTTP rule editor permits only ``allow manager localhost``
+    before the challenge.  Those ACL definitions must therefore not be
+    broadened through the generic ACL screen while the managed block exists.
+    """
+    contents = [str(getattr(config_manager, "config_content", "") or "")]
+    active_contents = getattr(config_manager, "_active_configuration_contents", None)
+    if callable(active_contents):
+        try:
+            contents.extend(active_contents())
+        except Exception as exc:
+            logger.debug("No se pudieron leer includes activos para ACLs Kerberos: {}", exc)
+    elif bool(getattr(config_manager, "is_modular", False)):
+        try:
+            access_content = config_manager.read_modular_config("120_http_access.conf")
+        except Exception:
+            access_content = None
+        if access_content:
+            contents.append(access_content)
+    return any(
+        _KERBEROS_ACCESS_START in content and _KERBEROS_ACCESS_END in content
+        for content in contents
+    )
+
+
+def _is_protected_kerberos_acl(name: str, config_manager) -> bool:
+    return _is_managed_kerberos_acl(name, config_manager) or (
+        name.casefold() in _KERBEROS_EXCEPTION_ACLS
+        and _managed_kerberos_access_is_active(config_manager)
+    )
+
+
+def _managed_acl_error(name: str) -> tuple[bool, str]:
+    if name.casefold() in _KERBEROS_EXCEPTION_ACLS:
+        return (
+            False,
+            "La ACL manager/localhost participa en la excepción previa a Kerberos; "
+            "modifícala solo después de retirar o revisar Kerberos / SPNEGO.",
+        )
+    return (
+        False,
+        "La ACL Kerberos administrada se modifica desde Kerberos / SPNEGO, no desde ACLs.",
+    )
+
+
+def _refresh_config_manager_for_acl_mutation(config_manager) -> None:
+    """Reload a real config manager while its configuration lock is held.
+
+    The admin application deliberately keeps a manager instance between
+    requests.  Without a refresh, an ACL request that began before a
+    Kerberos apply could check an old configuration and subsequently broaden
+    ``manager`` or ``localhost`` after the Kerberos transaction completed.
+    Reloading under the shared lock makes the protection check and write one
+    transaction.  Small test/dummy managers need not implement this API.
+    """
+    load_config = getattr(config_manager, "load_config", None)
+    if callable(load_config) and load_config() is False:
+        raise RuntimeError("No se pudo recargar squid.conf antes de modificar ACLs")
+
+    check_modular_config = getattr(config_manager, "_check_modular_config", None)
+    if callable(check_modular_config):
+        check_modular_config()
+
+
+def _synchronized_acl_mutation(operation):
+    """Make ACL protection checks and writes atomic with Kerberos applies."""
+
+    @wraps(operation)
+    def wrapped(*args, **kwargs):
+        config_manager = kwargs.get("config_manager")
+        if config_manager is None and args:
+            config_manager = args[-1]
+        config_path = getattr(config_manager, "config_path", None)
+        lock = (
+            squid_config_write_lock(str(config_path))
+            if config_path
+            else nullcontext()
+        )
+        try:
+            with lock:
+                if config_path:
+                    _refresh_config_manager_for_acl_mutation(config_manager)
+                return operation(*args, **kwargs)
+        except Exception:
+            logger.exception("Error sincronizando modificación de ACL con Kerberos")
+            return (
+                False,
+                "No se pudo recargar la configuración de Squid; inténtelo de nuevo.",
+            )
+
+    return wrapped
 
 
 def sanitize_domain_entry(raw: str) -> str | None:
@@ -124,11 +272,14 @@ def sanitize_domain_list(raw_domains: list[str]) -> list[str]:
     return cleaned
 
 
+@_synchronized_acl_mutation
 def add_acl(
     name: str, acl_type: str, values: list, options: list, comment: str, config_manager
 ) -> tuple[bool, str]:
     if not name or not acl_type or not values:
         return False, "Debe proporcionar nombre, tipo y al menos un valor para la ACL"
+    if _is_protected_kerberos_acl(name, config_manager):
+        return _managed_acl_error(name)
 
     acl_parts = ["acl", name]
     if options:
@@ -177,6 +328,7 @@ def add_acl(
         return False, "Error interno al agregar ACL"
 
 
+@_synchronized_acl_mutation
 def edit_acl(
     acl_index: int,
     new_name: str,
@@ -192,6 +344,10 @@ def edit_acl(
             return False, "ACL no encontrada"
 
         target_acl = acls[acl_index]
+        if _is_protected_kerberos_acl(target_acl["name"], config_manager):
+            return _managed_acl_error(target_acl["name"])
+        if _is_protected_kerberos_acl(new_name, config_manager):
+            return _managed_acl_error(new_name)
         target_line = target_acl["line_number"] - 1
 
         acl_parts = ["acl", new_name]
@@ -245,6 +401,7 @@ def edit_acl(
         return False, "Error interno al editar ACL"
 
 
+@_synchronized_acl_mutation
 def delete_acl(acl_index: int, config_manager) -> tuple[bool, str]:
     try:
         acls = config_manager.get_acls()
@@ -252,6 +409,8 @@ def delete_acl(acl_index: int, config_manager) -> tuple[bool, str]:
             return False, "ACL no encontrada"
 
         acl_to_delete = acls[acl_index]
+        if _is_protected_kerberos_acl(acl_to_delete["name"], config_manager):
+            return _managed_acl_error(acl_to_delete["name"])
         target_line = acl_to_delete["line_number"] - 1
 
         if config_manager.is_modular:
@@ -383,6 +542,7 @@ def _build_acl_lines(
     return new_lines
 
 
+@_synchronized_acl_mutation
 def add_acl_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
     """Create dstdomain ACLs backed by files with active blacklist domains.
 
@@ -404,6 +564,8 @@ def add_acl_blocklist(acl_name: str, config_manager) -> tuple[bool, str]:
     """
     if not acl_name:
         return False, "Debe proporcionar un nombre para la ACL de blocklist"
+    if _is_protected_kerberos_acl(acl_name, config_manager):
+        return _managed_acl_error(acl_name)
 
     # ------------------------------------------------------------------
     # 1. Fetch active domains grouped by source_url

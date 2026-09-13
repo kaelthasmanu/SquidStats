@@ -16,6 +16,7 @@ from . import (
     database,
     delay_pools,
     http_access,
+    kerberos_config,
     ldap_config,
     logs,
     quota,
@@ -35,6 +36,7 @@ database.register_routes(admin_bp)
 squid_config.register_routes(admin_bp)
 acls.register_routes(admin_bp)
 http_access.register_routes(admin_bp)
+kerberos_config.register_routes(admin_bp)
 delay_pools.register_routes(admin_bp)
 quota.register_routes(admin_bp)
 logs.register_routes(admin_bp)

@@ -1,18 +1,42 @@
+import glob
 import os
 import re
-import subprocess  # nosec B404
-import tempfile
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 from flask_babel import gettext as _
 from loguru import logger
+
+from utils.admin import SquidConfigManager, squid_config_write_lock
+
+_KERBEROS_MANAGED_MARKERS = (
+    "# BEGIN SquidStats Kerberos authentication",
+    "# END SquidStats Kerberos authentication",
+    "# BEGIN SquidStats Kerberos access rule",
+    "# END SquidStats Kerberos access rule",
+    "# SQUIDSTATS KERBEROS AUTH START",
+    "# SQUIDSTATS KERBEROS AUTH END",
+)
+_NEGOTIATE_AUTH_RE = re.compile(r"^\s*auth_param\s+negotiate\b", re.I | re.M)
+_INCLUDE_RE = re.compile(r"^\s*include\s+(.+?)\s*$", re.I)
 
 
 @dataclass(frozen=True)
 class Rule:
     filename: str
     patterns: list[re.Pattern]
+
+
+@dataclass
+class _FileSnapshot:
+    """Original state of one output file in a split transaction."""
+
+    path: str
+    resolved_path: str
+    existed: bool
+    content: str | None
+    written_content: str | None = None
 
 
 class SquidConfigSplitter:
@@ -25,7 +49,13 @@ class SquidConfigSplitter:
         self.unknown_file = "999_unknown.conf"
         self.has_auth = False
         self.auth_lines = []
-        self.auth_patterns = [re.compile(r"^auth_param\b"), re.compile(r"^acl auth\b")]
+        self.auth_patterns = [
+            re.compile(r"^auth_param\b"),
+            # Authentication ACLs need to be loaded after auth_param and
+            # before rules in 120_http_access.conf. Kerberos names its ACL
+            # explicitly (for example, `kerberos_auth`), not just `auth`.
+            re.compile(r"^acl\s+\S+(?:\s+-\S+)*\s+proxy_auth\b"),
+        ]
         self.rules = self._compile_rules()
 
     def _compile_rules(self) -> list[Rule]:
@@ -132,15 +162,16 @@ class SquidConfigSplitter:
             Rule(
                 "50_auth.conf",
                 [
-                    re.compile(r"^auth_param\b"),
+                    *self.auth_patterns,
                     re.compile(r"^authenticate_"),
-                    re.compile(r"^acl auth\b"),
                 ],
             ),
             Rule(
                 "100_acls.conf",
                 [
-                    re.compile(r"^acl(?! auth\b)(?!.*\bat_step\b)"),
+                    re.compile(
+                        r"^acl(?!\s+auth\b)(?!.*\bat_step\b)(?!.*\bproxy_auth\b)"
+                    ),
                     re.compile(r"^external_acl_type\b"),
                 ],
             ),
@@ -217,45 +248,262 @@ class SquidConfigSplitter:
         return self.unknown_file
 
     @staticmethod
-    def _atomic_write(path: str, content: str, encoding: str = "utf-8") -> None:
-        """Write *content* to *path* atomically via a temp file + os.replace.
+    def _contains_kerberos_configuration(content: str) -> bool:
+        """Whether a source contains managed or manually configured Negotiate.
 
-        A plain open(path, 'w') truncates the file immediately; if the process
-        dies mid-write the config file ends up empty/corrupt.  Writing to a
-        temporary file in the same directory and calling os.replace() is atomic
-        on POSIX — the destination is either the old content or the new content,
-        never a partial write.
+        Splitting moves generic include directives into a normalized load order.
+        That cannot preserve the position of a Kerberos challenge relative to
+        arbitrary nested policy fragments, so the safe path is to refuse a
+        split until the administrator has removed or migrated it deliberately.
         """
-        abs_path = os.path.abspath(path)
-        dir_name = os.path.dirname(abs_path)
-        tmp_path = None
-        try:
-            with tempfile.NamedTemporaryFile(
-                mode="w",
-                encoding=encoding,
-                dir=dir_name,
-                delete=False,
-                suffix=".squidstats.tmp",
-            ) as tmp:
-                tmp.write(content)
-                tmp_path = tmp.name
-            os.replace(tmp_path, abs_path)
-        except Exception:
-            if tmp_path and os.path.exists(tmp_path):
+        # Squid permits directives to continue on the next physical line.
+        # Test the logical directive as well; otherwise a split
+        # ``auth_param`` / ``negotiate`` directive evades this guard and can
+        # reorder a live Kerberos policy.
+        logical_content = re.sub(r"\\[ \t]*\r?\n[ \t]*", " ", content)
+        return _NEGOTIATE_AUTH_RE.search(logical_content) is not None or any(
+            marker in content for marker in _KERBEROS_MANAGED_MARKERS
+        )
+
+    def _has_existing_kerberos_configuration(self, input_content: str) -> bool:
+        """Inspect direct and recursively active sources before splitting."""
+        seen = {os.path.realpath(self.input_file)}
+
+        def logical_lines(content: str) -> list[str]:
+            result: list[str] = []
+            pending = ""
+            for raw_line in content.splitlines():
+                line = raw_line.split("#", 1)[0].strip()
+                if not line:
+                    continue
+                if pending:
+                    line = f"{pending} {line.lstrip()}"
+                if line.rstrip().endswith("\\"):
+                    pending = line.rstrip()[:-1].rstrip()
+                    continue
+                result.append(line)
+                pending = ""
+            if pending:
+                result.append(pending)
+            return result
+
+        def visit(content: str, directory: str, depth: int = 0) -> bool:
+            if self._contains_kerberos_configuration(content):
+                return True
+            if depth >= 8:
+                # A deeper active config could contain a challenge whose
+                # order this splitter cannot preserve.
+                return any(_INCLUDE_RE.fullmatch(line) for line in logical_lines(content))
+            for line in logical_lines(content):
+                match = _INCLUDE_RE.fullmatch(line)
+                if not match:
+                    continue
+                include_path = os.path.expanduser(match.group(1).strip().strip('"'))
+                pattern = os.path.abspath(
+                    include_path
+                    if os.path.isabs(include_path)
+                    else os.path.join(directory, include_path)
+                )
                 try:
-                    os.unlink(tmp_path)
-                except Exception as cleanup_err:
-                    logger.warning(
-                        "Could not remove temporary file %s: %s", tmp_path, cleanup_err
-                    )
-            raise
+                    candidates = sorted(glob.glob(pattern))
+                except OSError:
+                    return True
+                for candidate in candidates:
+                    real_candidate = os.path.realpath(candidate)
+                    if real_candidate in seen or not os.path.isfile(real_candidate):
+                        continue
+                    seen.add(real_candidate)
+                    try:
+                        with open(real_candidate, encoding="utf-8") as included:
+                            included_content = included.read()
+                    except (OSError, UnicodeDecodeError):
+                        # Do not rewrite an ordered configuration whose
+                        # active source cannot be inspected.
+                        return True
+                    if visit(included_content, os.path.dirname(real_candidate), depth + 1):
+                        return True
+            return False
+
+        if visit(input_content, os.path.dirname(os.path.abspath(self.input_file))):
+            return True
+        if not os.path.isdir(self.output_dir):
+            return False
+        for filename in ("50_auth.conf", "120_http_access.conf"):
+            path = os.path.join(self.output_dir, filename)
+            try:
+                with open(path, encoding="utf-8") as module:
+                    if self._contains_kerberos_configuration(module.read()):
+                        return True
+            except FileNotFoundError:
+                continue
+            except (OSError, UnicodeDecodeError):
+                # An unreadable conventional module must not be overwritten
+                # by the splitter while its policy state is unknown.
+                return True
+        return False
+
+    @staticmethod
+    def _atomic_write(path: str, content: str, encoding: str = "utf-8") -> None:
+        """Use the shared metadata-preserving Squid configuration writer.
+
+        Splitting must retain a package's owner, mode, extended ACLs, and
+        symbolic main-config link just like all other configuration editors.
+        """
+        SquidConfigManager._atomic_write(path, content, encoding)
+
+    @staticmethod
+    def _snapshot_file(path: str) -> _FileSnapshot:
+        """Read an output target before replacing it, without following it later.
+
+        The resolved path is retained so rollback can refuse to overwrite a
+        target that another process has moved or changed while this transaction
+        was in progress.
+        """
+        resolved_path = os.path.realpath(os.path.abspath(path))
+        try:
+            with open(resolved_path, encoding="utf-8") as existing:
+                return _FileSnapshot(
+                    path=path,
+                    resolved_path=resolved_path,
+                    existed=True,
+                    content=existing.read(),
+                )
+        except FileNotFoundError:
+            return _FileSnapshot(
+                path=path,
+                resolved_path=resolved_path,
+                existed=False,
+                content=None,
+            )
+        except (OSError, UnicodeDecodeError) as exc:
+            raise RuntimeError(
+                f"No se pudo respaldar el módulo de salida {os.path.basename(path)}."
+            ) from exc
+
+    @staticmethod
+    def _assert_snapshot_is_current(snapshot: _FileSnapshot) -> None:
+        """Refuse to replace a target changed after its transaction snapshot.
+
+        The common flock protects cooperative SquidStats writers.  This
+        additional compare immediately before replacement protects against a
+        manually edited or otherwise non-cooperating file between the initial
+        transaction snapshot and the final write.  A regular file system
+        cannot provide a perfect CAS against a process that deliberately
+        ignores locks, but this prevents the normal stale-write path and
+        leaves its newer content untouched on failure.
+        """
+        current_path = os.path.realpath(os.path.abspath(snapshot.path))
+        if current_path != snapshot.resolved_path:
+            raise RuntimeError(
+                f"La ruta de {os.path.basename(snapshot.path)} cambió durante la operación."
+            )
+        try:
+            with open(snapshot.resolved_path, encoding="utf-8") as current:
+                current_content: str | None = current.read()
+        except FileNotFoundError:
+            current_content = None
+        except (OSError, UnicodeDecodeError) as exc:
+            raise RuntimeError(
+                f"No se pudo verificar {os.path.basename(snapshot.path)} antes de escribir."
+            ) from exc
+        if current_content != snapshot.content:
+            raise RuntimeError(
+                f"{os.path.basename(snapshot.path)} cambió durante la operación; no se sobrescribió."
+            )
+
+    def _restore_output_snapshot(self, snapshot: _FileSnapshot) -> str | None:
+        """Restore one changed output file, avoiding an out-of-band overwrite."""
+        if snapshot.written_content is None:
+            return None
+        if os.path.realpath(os.path.abspath(snapshot.path)) != snapshot.resolved_path:
+            return f"{os.path.basename(snapshot.path)} (la ruta cambió durante la operación)"
+        try:
+            try:
+                with open(snapshot.resolved_path, encoding="utf-8") as current:
+                    current_content: str | None = current.read()
+            except FileNotFoundError:
+                current_content = None
+            if current_content != snapshot.written_content:
+                return f"{os.path.basename(snapshot.path)} (cambió durante la operación)"
+            if snapshot.existed:
+                self._atomic_write(snapshot.path, snapshot.content or "")
+            elif current_content is not None:
+                os.unlink(snapshot.resolved_path)
+        except OSError:
+            logger.exception("Could not restore generated split module %s", snapshot.path)
+            return os.path.basename(snapshot.path)
+        return None
+
+    def _rollback_split_transaction(
+        self,
+        output_snapshots: list[_FileSnapshot],
+        *,
+        main_content: str,
+        main_resolved_path: str,
+        generated_main_content: str | None,
+        created_output_dir: bool,
+    ) -> list[str]:
+        """Restore all changed files and return any incomplete rollback targets."""
+        failures: list[str] = []
+        if generated_main_content is not None:
+            try:
+                if os.path.realpath(os.path.abspath(self.input_file)) != main_resolved_path:
+                    failures.append("squid.conf (la ruta cambió durante la operación)")
+                else:
+                    with open(main_resolved_path, encoding="utf-8") as current:
+                        current_content = current.read()
+                    if current_content != generated_main_content:
+                        failures.append("squid.conf (cambió durante la operación)")
+                    else:
+                        self._atomic_write(self.input_file, main_content)
+            except (OSError, UnicodeDecodeError):
+                logger.exception("Rollback of squid.conf failed")
+                failures.append("squid.conf")
+
+        for snapshot in reversed(output_snapshots):
+            failure = self._restore_output_snapshot(snapshot)
+            if failure:
+                failures.append(failure)
+
+        if created_output_dir:
+            try:
+                os.rmdir(self.output_dir)
+            except FileNotFoundError:
+                pass
+            except OSError:
+                # It is safe to leave an empty/new directory behind.  Do not
+                # remove a directory that acquired an external file while the
+                # transaction was running.
+                logger.warning("Could not remove newly-created output directory %s", self.output_dir)
+        return failures
 
     def split_config(self) -> dict[str, int]:
-        # Verify that the input file exists
-        if not os.path.exists(self.input_file):
+        """Split under the same inter-process lock as all config writers."""
+        with squid_config_write_lock(self.input_file):
+            return self._split_config_locked()
+
+    def _split_config_locked(self) -> dict[str, int]:
+        # Capture the input before creating output files. This snapshot is
+        # also compared just before the generated main config replaces it.
+        main_snapshot = self._snapshot_file(self.input_file)
+        if not main_snapshot.existed:
             raise FileNotFoundError(f"File not found: {self.input_file}")
 
-        # Create the output directory if it doesn't exist
+        # Read before creating output files. A split normalizes include order,
+        # which can move a previously safe Kerberos challenge behind an allow
+        # rule or separate its managed markers. Do not alter such a setup.
+        _original_content = main_snapshot.content or ""
+        if self._has_existing_kerberos_configuration(_original_content):
+            raise RuntimeError(
+                "No se puede dividir una configuración que contiene Kerberos/Negotiate "
+                "o un include activo que no se pudo verificar. Migra o deshabilita "
+                "Kerberos desde su pantalla dedicada y revisa los includes antes de "
+                "dividir squid.conf."
+            )
+
+        # Create the output directory if it doesn't exist. Track ownership so
+        # a failed transaction can remove only the empty directory it created.
+        created_output_dir = not os.path.exists(self.output_dir)
         try:
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir, exist_ok=True)
@@ -273,15 +521,17 @@ class SquidConfigSplitter:
                 f"Failed to create output directory: {self.output_dir}"
             ) from e
 
-        # Read original content into memory so we can restore squid.conf atomically
-        # if validation fails after _generate_main_config() has already overwritten it.
-        # (File-based backup is intentionally disabled; in-memory copy avoids I/O cost.)
-        with open(self.input_file, encoding="utf-8") as f:
-            _original_content = f.read()
-
         buffers: dict[str, list[str]] = {}
         pending_comments: list[str] = []
         results: dict[str, int] = {}
+        output_snapshots: list[_FileSnapshot] = []
+        main_resolved_path = main_snapshot.resolved_path
+        generated_main_content: str | None = None
+        validation_error: str | None = None
+        # A splitter instance may be reused by a caller; auth collection is a
+        # property of this input transaction, not of the instance lifetime.
+        self.has_auth = False
+        self.auth_lines = []
 
         try:
             with open(self.input_file, encoding="utf-8") as f:
@@ -345,159 +595,145 @@ class SquidConfigSplitter:
             # Ensure auth file is created if auth config exists
             self._ensure_auth_file(buffers)
 
+            # Snapshot every output before any write.  This makes an invalid
+            # generated main file fully reversible even when it already
+            # included this directory through a wildcard before the split.
+            seen_output_targets: set[str] = set()
+            snapshots_by_path: dict[str, _FileSnapshot] = {}
+            for filename in sorted(buffers):
+                path = os.path.join(self.output_dir, filename)
+                snapshot = self._snapshot_file(path)
+                if snapshot.resolved_path in seen_output_targets:
+                    raise RuntimeError(
+                        "Dos módulos de salida resuelven al mismo archivo; no es seguro dividir la configuración."
+                    )
+                seen_output_targets.add(snapshot.resolved_path)
+                output_snapshots.append(snapshot)
+                snapshots_by_path[path] = snapshot
+
             # Final writing
             for filename, content in sorted(buffers.items()):
                 path = os.path.join(self.output_dir, filename)
+                rendered_content = "".join(content)
+                snapshot = snapshots_by_path[path]
                 try:
-                    self._atomic_write(path, "".join(content))
+                    self._assert_snapshot_is_current(snapshot)
+                    if not (snapshot.existed and snapshot.content == rendered_content):
+                        self._atomic_write(path, rendered_content)
+                        snapshot.written_content = rendered_content
                     results[filename] = len(content)
                     logger.info(f"[OK] {path} ({len(content)} lines)")
                 except PermissionError:
                     logger.exception("Permission denied writing to file: %s", path)
                     raise RuntimeError("Permission denied writing generated file")
+                except RuntimeError:
+                    # Keep a stale-snapshot error actionable. The outer
+                    # transaction handler will roll back only files it wrote,
+                    # preserving the external change that caused this abort.
+                    raise
                 except Exception:
                     logger.exception("Failed to write file: %s", path)
                     raise RuntimeError("Failed to write generated file")
 
             # Generate the new main squid.conf with includes
-            self._generate_main_config(buffers)
+            self._assert_snapshot_is_current(main_snapshot)
+            generated_main_content = self._generate_main_config(buffers)
             logger.info(f"Generated new main config: {self.input_file}")
 
             # Validate Squid configuration
             validation_result = self._validate_squid_config()
             if not validation_result["success"]:
-                error_details = validation_result.get("error_message", "Unknown error")
+                validation_error = validation_result.get(
+                    "error_message", "Unknown error"
+                )
                 logger.error(
                     "Squid configuration validation failed. Rolling back changes. Error: %s",
-                    error_details,
+                    validation_error,
                 )
-                # Restore squid.conf from the in-memory copy taken before any
-                # writes.  _generate_main_config() has already overwritten it with
-                # include-only content, so this is the only way to get it back.
-                try:
-                    self._atomic_write(self.input_file, _original_content)
-                    logger.info(
-                        "squid.conf rolled back to original content successfully"
-                    )
-                except Exception:
-                    logger.exception(
-                        "Rollback of squid.conf FAILED — manual intervention required!"
-                    )
-                raise RuntimeError(
-                    f"Squid configuration validation failed. Changes have been reverted.\n\nSquid output:\n{error_details}"
-                )
+                raise RuntimeError("Squid configuration validation failed.")
 
             logger.info("Squid configuration validated successfully.")
             return results
 
-        except Exception:
+        except Exception as exc:
+            rollback_failures = self._rollback_split_transaction(
+                output_snapshots,
+                main_content=_original_content,
+                main_resolved_path=main_resolved_path,
+                generated_main_content=generated_main_content,
+                created_output_dir=created_output_dir,
+            )
+            if rollback_failures:
+                details = ", ".join(dict.fromkeys(rollback_failures))
+                raise RuntimeError(
+                    "No se pudo dividir squid.conf y la restauración quedó incompleta "
+                    f"({details}). Revisa los archivos antes de recargar Squid."
+                ) from exc
+            if validation_error is not None:
+                raise RuntimeError(
+                    "Squid configuration validation failed. Changes have been reverted.\n\n"
+                    f"Squid output:\n{validation_error}"
+                ) from exc
             logger.exception("Error splitting configuration file")
             raise
 
     def _validate_squid_config(self) -> dict:
+        """Validate the exact local or Docker runtime selected for Squid.
+
+        Reuse the Kerberos runtime selection so an installed host binary never
+        masks a Docker deployment, and so Docker receives its configured
+        ``-f`` path rather than whatever its image happens to default to.
         """
-        Validate Squid configuration using 'squid -k parse'.
-        First tries the system squid command; if not found, falls back to Docker.
-        Returns dict with 'success' (bool), 'output' (str), and 'error_message' (str) if failed.
-        """
-
-        def _run_command(cmd: list[str]) -> dict:
-            """Run a validation command and return a result dict."""
-            try:
-                result = subprocess.run(  # nosec B603  # noqa: S603
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    timeout=30,
-                )
-                stdout_output = result.stdout.strip() if result.stdout else ""
-                stderr_output = result.stderr.strip() if result.stderr else ""
-                full_output = ""
-                if stdout_output:
-                    full_output += f"STDOUT:\n{stdout_output}\n"
-                if stderr_output:
-                    full_output += f"STDERR:\n{stderr_output}\n"
-                if not full_output:
-                    full_output = "No output from squid command"
-                return {
-                    "ran": True,
-                    "returncode": result.returncode,
-                    "output": full_output,
-                }
-            except subprocess.TimeoutExpired as e:
-                stdout_partial = e.stdout.strip() if e.stdout else ""
-                stderr_partial = e.stderr.strip() if e.stderr else ""
-                partial_output = ""
-                if stdout_partial:
-                    partial_output += f"STDOUT (partial):\n{stdout_partial}\n"
-                if stderr_partial:
-                    partial_output += f"STDERR (partial):\n{stderr_partial}\n"
-                return {
-                    "ran": True,
-                    "returncode": -1,
-                    "output": partial_output,
-                    "timeout": True,
-                }
-            except FileNotFoundError:
-                return {"ran": False, "output": ""}
-            except Exception as e:
-                return {"ran": True, "returncode": -1, "output": str(e)}
-
-        # --- Try system squid first ---
-        logger.info("Validating Squid configuration with 'squid -k parse'...")
-        res = _run_command(["squid", "-k", "parse"])
-
-        if not res["ran"]:
-            # squid binary not found on the system, try Docker
-            logger.warning(
-                "'squid' not found on system. Trying Docker fallback "
-                "('docker exec squid_proxy squid -k parse')..."
-            )
-            res = _run_command(
-                ["docker", "exec", "squid_proxy", "squid", "-k", "parse"]
-            )
-
-            if not res["ran"]:
-                error_msg = (
-                    "Neither 'squid' nor 'docker' command found. "
-                    "Cannot validate configuration. "
-                    "Please ensure Squid is installed (system or Docker)."
-                )
-                logger.error(error_msg)
-                return {"success": False, "error_message": error_msg}
-
-        # --- Evaluate result ---
-        if res.get("timeout"):
-            error_msg = f"Squid configuration validation timed out after 30 seconds.\n{res['output']}"
-            logger.error(error_msg)
-            return {
-                "success": False,
-                "error_message": error_msg,
-                "output": res["output"],
-            }
-
-        if res["returncode"] == 0:
-            logger.info(
-                f"Squid configuration is valid.\nCommand output:\n{res['output']}"
-            )
-            return {
-                "success": True,
-                "output": res["output"],
-                "return_code": res["returncode"],
-            }
-
-        error_msg = (
-            f"Validation failed with return code {res['returncode']}\n{res['output']}"
+        # Imported lazily to keep this generic splitter independent at module
+        # load time while sharing one authoritative runtime policy.
+        from services.squid.kerberos_config_service import (  # noqa: PLC0415
+            _docker_config_mount_status,
+            _docker_mounts,
+            _find_squid_runtime,
+            _runtime_selection_error,
+            validate_squid_configuration,
         )
-        logger.error(f"Squid configuration validation failed:\n{error_msg}")
-        return {
-            "success": False,
-            "error_message": error_msg,
-            "output": res["output"],
-            "return_code": res["returncode"],
-        }
 
-    def _generate_main_config(self, buffers: dict[str, list[str]]) -> None:
+        runtime = _find_squid_runtime()
+        if runtime is None:
+            message = _runtime_selection_error() or (
+                "No se encontró el runtime Squid configurado para validar la división."
+            )
+            logger.error(message)
+            return {"success": False, "error_message": message}
+
+        if runtime.kind == "docker":
+            if not runtime.container_config_path:
+                message = (
+                    "SQUID_CONTAINER_CONFIG_PATH no es una ruta absoluta segura "
+                    "dentro del contenedor Docker."
+                )
+                logger.error(message)
+                return {"success": False, "error_message": message}
+            mount_status = _docker_config_mount_status(
+                runtime,
+                Path(self.input_file),
+                mounts=_docker_mounts(runtime),
+                mounts_checked=True,
+            )
+            if mount_status.get("mapped") is not True:
+                message = (
+                    "No se pudo comprobar que el squid.conf a dividir sea el archivo "
+                    "cargado por el contenedor Docker configurado."
+                )
+                logger.error(message)
+                return {"success": False, "error_message": message}
+
+        result = validate_squid_configuration(self.input_file, runtime)
+        if result.get("available") and result.get("valid"):
+            logger.info("Squid configuration validated successfully.")
+            return {"success": True, "output": result.get("message", "")}
+
+        message = result.get("message") or "Squid rechazó la configuración."
+        logger.error("Squid configuration validation failed: %s", message)
+        return {"success": False, "error_message": message}
+
+    def _generate_main_config(self, buffers: dict[str, list[str]]) -> str:
         header = [
             "# ============================================================\n",
             "# Archivo generado automáticamente por SquidStats\n",
@@ -514,11 +750,13 @@ class SquidConfigSplitter:
                 include_path = os.path.join(self.output_dir, filename)
                 includes.append(f"include {include_path}\n")
 
+        generated_content = "".join(header) + "".join(includes)
         try:
-            self._atomic_write(self.input_file, "".join(header) + "".join(includes))
+            self._atomic_write(self.input_file, generated_content)
             logger.info(
                 f"Main configuration file regenerated with {len(includes)} includes in correct dependency order"
             )
+            return generated_content
         except Exception:
             logger.exception("Failed to generate main config")
             raise RuntimeError("Failed to generate main config")
