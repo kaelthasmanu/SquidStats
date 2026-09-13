@@ -874,8 +874,7 @@ git push origin nombre-caracteristica
 
 > **_¿Necesitas ayuda?_**
 > **_No dudes en contactarme 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
-
-Proyecto relacionado: ([CuCuota](https://github.com/kaelthasmanu/cucuota))
+> **_También puedes escribirme por Telegram: [@king_0f_deathhh](https://t.me/king_0f_deathhh)_**
 
 ## Tecnologías Utilizadas
 

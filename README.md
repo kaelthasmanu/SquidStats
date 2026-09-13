@@ -850,8 +850,7 @@ _The SquidStats project is released under the <a href="https://github.com/kaelth
 
 > **_Need help?_**
 > **_Feel free to contact me 📨 [manuelalberto.gorrin@gmail.com](mailto:manuelalberto.gorrin@gmail.com?Subject=SquidStats_issues)_**
-
-Related project: ([CuCuota](https://github.com/kaelthasmanu/cucuota))
+> **_You can also reach me on Telegram: [@king_0f_deathhh](https://t.me/king_0f_deathhh)_**
 
 ## Technologies Used
 
