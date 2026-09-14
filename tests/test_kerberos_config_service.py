@@ -1142,6 +1142,71 @@ def test_docker_runtime_commands_never_pass_a_host_config_path():
     ]
 
 
+def test_docker_validation_rejects_unmapped_host_config(monkeypatch, tmp_path):
+    """A host path that is not mounted as Squid's container config must not run."""
+    runtime = kerberos._SquidRuntime(
+        kind="docker",
+        executable="/usr/bin/docker",
+        container_name="squid_proxy",
+        container_config_path="/etc/squid/squid.conf",
+    )
+    host_path = tmp_path / "squid.conf"
+    host_path.write_text("http_port 3128\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        kerberos,
+        "_docker_mounts",
+        lambda _runtime: [(tmp_path / "other", PurePosixPath("/etc/squid/other.conf"))],
+    )
+    called = False
+
+    def fail_run(*_args, **_kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("subprocess.run should not be called when Docker config is unmapped")
+
+    monkeypatch.setattr(kerberos.subprocess, "run", fail_run)
+
+    result = kerberos.validate_squid_configuration(host_path, runtime)
+
+    assert result["available"] is True
+    assert result["valid"] is False
+    assert "montado como el archivo cargado por el contenedor" in result["message"]
+    assert called is False
+
+
+def test_docker_reconfigure_rejects_unmapped_host_config(monkeypatch, tmp_path):
+    """Reloads must stop before executing Docker when the mapped config is wrong."""
+    runtime = kerberos._SquidRuntime(
+        kind="docker",
+        executable="/usr/bin/docker",
+        container_name="squid_proxy",
+        container_config_path="/etc/squid/squid.conf",
+    )
+    host_path = tmp_path / "squid.conf"
+    host_path.write_text("http_port 3128\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        kerberos,
+        "_docker_mounts",
+        lambda _runtime: [(tmp_path / "other", PurePosixPath("/etc/squid/other.conf"))],
+    )
+    called = False
+
+    def fail_run(*_args, **_kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("subprocess.run should not be called for an unmapped Docker config")
+
+    monkeypatch.setattr(kerberos.subprocess, "run", fail_run)
+
+    ok, message = kerberos.reconfigure_squid(host_path, runtime)
+
+    assert ok is False
+    assert "montado como el archivo cargado por el contenedor" in message
+    assert called is False
+
+
 def test_docker_apply_uses_a_relative_include_visible_to_host_and_container(
     tmp_path, kerberos_data, monkeypatch
 ):
