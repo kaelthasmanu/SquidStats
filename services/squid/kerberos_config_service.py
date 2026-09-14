@@ -1965,6 +1965,30 @@ def validate_squid_configuration(
             "message": runtime_error
             or "No se encontró un runtime Squid local ni Docker.",
         }
+    if runtime.kind == "docker":
+        if not runtime.container_config_path:
+            return {
+                "available": True,
+                "valid": False,
+                "message": (
+                    "SQUID_CONTAINER_CONFIG_PATH no es una ruta absoluta segura dentro del contenedor."
+                ),
+            }
+        mount_status = _docker_config_mount_status(
+            runtime,
+            Path(config_path),
+            mounts=_docker_mounts(runtime),
+            mounts_checked=True,
+        )
+        if mount_status.get("mapped") is not True:
+            return {
+                "available": True,
+                "valid": False,
+                "message": (
+                    "No se pudo comprobar que el squid.conf que edita SquidStats esté montado como "
+                    "el archivo cargado por el contenedor Docker. Revisa SQUID_CONTAINER_CONFIG_PATH y el volumen."
+                ),
+            }
     try:
         result = subprocess.run(  # nosec B603  # noqa: S603
             _squid_runtime_command(runtime, "parse", config_path),
@@ -2003,6 +2027,24 @@ def reconfigure_squid(
     runtime = runtime or _find_squid_runtime()
     if runtime is None:
         return False, "No se encontró un runtime Squid para recargar la configuración."
+    if runtime.kind == "docker":
+        if not runtime.container_config_path:
+            return (
+                False,
+                "SQUID_CONTAINER_CONFIG_PATH no es una ruta absoluta segura dentro del contenedor.",
+            )
+        mount_status = _docker_config_mount_status(
+            runtime,
+            Path(config_path),
+            mounts=_docker_mounts(runtime),
+            mounts_checked=True,
+        )
+        if mount_status.get("mapped") is not True:
+            return (
+                False,
+                "No se pudo comprobar que el squid.conf que edita SquidStats esté montado como "
+                "el archivo cargado por el contenedor Docker. Revisa SQUID_CONTAINER_CONFIG_PATH y el volumen.",
+            )
     try:
         result = subprocess.run(  # nosec B603  # noqa: S603
             _squid_runtime_command(runtime, "reconfigure", config_path),
