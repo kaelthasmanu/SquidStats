@@ -189,7 +189,8 @@ quota_disabled
 !README.md
 !README_es.md
 !CONTRIBUTING.md
-
+!AGENTS.md
+!.github/copilot-instructions.md
 
 # Language files
 *.po
