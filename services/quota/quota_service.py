@@ -93,7 +93,9 @@ def _managed_kerberos_modular_layout_is_supported(cm: SquidConfigManager) -> boo
             cm, inspection_errors=inspection_errors
         )
     except Exception as exc:
-        logger.error("No se pudieron inspeccionar includes para cuotas Kerberos: {}", exc)
+        logger.error(
+            "No se pudieron inspeccionar includes para cuotas Kerberos: {}", exc
+        )
         return False
 
     main_path = os.path.realpath(cm.config_path)
@@ -109,9 +111,7 @@ def _managed_kerberos_modular_layout_is_supported(cm: SquidConfigManager) -> boo
     expected_paths = {
         "auth": os.path.realpath(os.path.join(cm.config_dir, "50_auth.conf")),
         "acls": os.path.realpath(os.path.join(cm.config_dir, "100_acls.conf")),
-        "access": os.path.realpath(
-            os.path.join(cm.config_dir, "120_http_access.conf")
-        ),
+        "access": os.path.realpath(os.path.join(cm.config_dir, "120_http_access.conf")),
     }
     active_contents = {os.path.realpath(path): content for path, content in sources}
     auth_content = active_contents.get(expected_paths["auth"], "")
@@ -153,9 +153,9 @@ def _proxy_auth_deny_insert_index(lines: list[str]) -> int:
         (
             index
             for index, line in enumerate(lines)
-            if _normalised_http_access_line(line).casefold().startswith(
-                "http_access allow"
-            )
+            if _normalised_http_access_line(line)
+            .casefold()
+            .startswith("http_access allow")
             and not _is_local_cache_manager_allow(line)
         ),
         None,
@@ -180,9 +180,9 @@ def _proxy_auth_deny_insert_index(lines: list[str]) -> int:
         (
             index
             for index, line in enumerate(lines[:first_client_allow])
-            if _normalised_http_access_line(line).casefold().startswith(
-                "http_access deny"
-            )
+            if _normalised_http_access_line(line)
+            .casefold()
+            .startswith("http_access deny")
         ),
         default=None,
     )
@@ -198,8 +198,10 @@ def _ensure_quota_http_rule(
     uses ``proxy_auth`` is ordered deliberately because touching it before the
     Cache Manager exception can turn local manager requests into 407s.
     """
+
     def is_quota_rule(line: str) -> bool:
         return _normalised_http_access_line(line).casefold() == http_line.casefold()
+
     if use_src:
         if any(is_quota_rule(line) for line in lines):
             return lines
@@ -207,9 +209,9 @@ def _ensure_quota_http_rule(
             (
                 index
                 for index, line in enumerate(lines)
-                if _normalised_http_access_line(line).casefold().startswith(
-                    "http_access "
-                )
+                if _normalised_http_access_line(line)
+                .casefold()
+                .startswith("http_access ")
             ),
             len(lines),
         )
@@ -260,11 +262,7 @@ def _sync_blocked_file_to_docker(blocked_path: str) -> bool:
     reconfiguration.
     """
     runtime = _find_squid_runtime()
-    if (
-        runtime is None
-        or runtime.kind != "docker"
-        or not runtime.container_name
-    ):
+    if runtime is None or runtime.kind != "docker" or not runtime.container_name:
         logger.debug(
             "No se sincronizó %s por docker cp: el runtime Squid seleccionado no es Docker",
             blocked_path,
@@ -312,9 +310,7 @@ def _is_valid_src_value(value: str) -> bool:
 def _is_valid_proxy_auth_value(value: str) -> bool:
     """Return whether a value is safe as one line of a proxy_auth list."""
     return (
-        bool(value)
-        and "#" not in value
-        and not any(char.isspace() for char in value)
+        bool(value) and "#" not in value and not any(char.isspace() for char in value)
     )
 
 
@@ -385,7 +381,9 @@ def _render_block_entry(username: str, use_src: bool) -> str | None:
     value = str(username).strip()
     if use_src:
         if not _is_valid_src_value(value):
-            logger.warning("Se omitió una cuota sin IP/red válida para ACL src: %s", value)
+            logger.warning(
+                "Se omitió una cuota sin IP/red válida para ACL src: %s", value
+            )
             return None
         return f"acl usuarios_bloqueados src {value}"
     if not _is_valid_proxy_auth_value(value):
@@ -584,9 +582,7 @@ def _sync_quota_squid_rules_locked(
     # syntax.  A transition supplies ``blocked_file_ready`` because it stages
     # the converted file inside this same transaction.
     if blocked_file_ready is None:
-        blocked_file_ready = _has_compatible_blocked_file_content(
-            blocked_path, use_src
-        )
+        blocked_file_ready = _has_compatible_blocked_file_content(blocked_path, use_src)
     enabled = enabled and blocked_file_ready
     logger.debug(
         "_sync_quota_squid_rules: blocked_path={}, should_enable_acl={}",
@@ -689,18 +685,16 @@ def _sync_quota_squid_rules_locked(
                     else:
                         inserted = False
                         for i, line in enumerate(lines):
-                            if line.strip().startswith("acl ") or line.strip().startswith(
-                                "http_access "
-                            ):
+                            if line.strip().startswith(
+                                "acl "
+                            ) or line.strip().startswith("http_access "):
                                 lines.insert(i, acl_line)
                                 inserted = True
                                 break
                         if not inserted:
                             lines.append(acl_line)
 
-                    lines = _ensure_quota_http_rule(
-                        lines, http_line, use_src=use_src
-                    )
+                    lines = _ensure_quota_http_rule(lines, http_line, use_src=use_src)
                 else:
                     lines = [line for line in lines if not _is_http_line(line)]
 
@@ -865,9 +859,8 @@ def _sync_blocked_users_and_squid_rules(
             return False, set()
 
         existed, previous_content, _mode = snapshot
-        file_will_change = (
-            (not existed and planned_content is not None)
-            or (existed and previous_content != planned_content)
+        file_will_change = (not existed and planned_content is not None) or (
+            existed and previous_content != planned_content
         )
         blocked_file_ready = bool(_render_block_entries(usernames, use_src))
         file_changed = False
@@ -889,8 +882,9 @@ def _sync_blocked_users_and_squid_rules(
             )
             if not file_changed:
                 return not file_will_change
-            if planned_content is not None and not _sync_blocked_file_to_selected_runtime(
-                file_path
+            if (
+                planned_content is not None
+                and not _sync_blocked_file_to_selected_runtime(file_path)
             ):
                 logger.error(
                     "No se pudo sincronizar el archivo de cuotas al runtime Docker seleccionado"
