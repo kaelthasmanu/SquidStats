@@ -20,7 +20,9 @@ def test_blocked_user_copy_uses_selected_docker_container(monkeypatch):
     monkeypatch.setattr(quota_service, "_find_squid_runtime", lambda: runtime)
     monkeypatch.setattr(quota_service.subprocess, "run", fake_run)
 
-    assert quota_service._sync_blocked_file_to_docker("/etc/squid/usuarios_bloqueados.txt")
+    assert quota_service._sync_blocked_file_to_docker(
+        "/etc/squid/usuarios_bloqueados.txt"
+    )
     assert calls == [
         (
             [
