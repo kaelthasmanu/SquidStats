@@ -75,12 +75,8 @@ def test_generic_acl_editor_cannot_mutate_managed_kerberos_identity_acl():
         [{"name": "kerberos_auth", "line_number": 3}],
     )
 
-    assert add_acl("kerberos_auth", "src", ["10.0.0.0/8"], [], "", manager)[
-        0
-    ] is False
-    assert edit_acl(
-        0, "other_name", "src", ["10.0.0.0/8"], [], "", manager
-    )[0] is False
+    assert add_acl("kerberos_auth", "src", ["10.0.0.0/8"], [], "", manager)[0] is False
+    assert edit_acl(0, "other_name", "src", ["10.0.0.0/8"], [], "", manager)[0] is False
     assert delete_acl(0, manager)[0] is False
     assert manager.saved == []
 
@@ -171,9 +167,11 @@ def test_proxy_auth_quota_rule_stays_after_manager_and_kerberos_blocks():
     assert updated.index("http_access allow manager localhost") < updated.index(
         "http_access deny usuarios_bloqueados"
     )
-    assert updated.index("# END SquidStats Kerberos access rule") < updated.index(
-        "http_access deny usuarios_bloqueados"
-    ) < updated.index("http_access allow localnet")
+    assert (
+        updated.index("# END SquidStats Kerberos access rule")
+        < updated.index("http_access deny usuarios_bloqueados")
+        < updated.index("http_access allow localnet")
+    )
 
 
 def test_proxy_auth_quota_rule_respects_reversed_manager_exception():
@@ -190,9 +188,11 @@ def test_proxy_auth_quota_rule_respects_reversed_manager_exception():
         lines, "http_access deny usuarios_bloqueados", use_src=False
     )
 
-    assert updated.index("http_access allow localhost manager") < updated.index(
-        "http_access deny usuarios_bloqueados"
-    ) < updated.index("http_access allow localnet")
+    assert (
+        updated.index("http_access allow localhost manager")
+        < updated.index("http_access deny usuarios_bloqueados")
+        < updated.index("http_access allow localnet")
+    )
 
 
 def test_existing_proxy_auth_quota_rule_is_repositioned_safely():
@@ -396,5 +396,7 @@ def test_stale_modular_snapshot_is_not_overwritten(tmp_path):
     }
     manager.is_valid = True
 
-    assert manager.save_modular_config("120_http_access.conf", "quota snapshot\n") is False
+    assert (
+        manager.save_modular_config("120_http_access.conf", "quota snapshot\n") is False
+    )
     assert module_path.read_text(encoding="utf-8") == "newer Kerberos challenge\n"
