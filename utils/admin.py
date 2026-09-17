@@ -49,9 +49,7 @@ def squid_config_write_lock(config_path: str = SQUID_CONFIG_PATH):
         effective_config_path, _unused_config_dir = _normalize_squid_paths(
             SQUID_CONFIG_PATH, ACL_FILES_DIR
         )
-    lock_key = os.path.dirname(
-        os.path.realpath(os.path.abspath(effective_config_path))
-    )
+    lock_key = os.path.dirname(os.path.realpath(os.path.abspath(effective_config_path)))
     held = getattr(_SQUID_WRITE_LOCK_STATE, "held", None)
     if held is None:
         held = {}
@@ -115,9 +113,7 @@ def _normalize_squid_paths(config_path: str, config_dir: str) -> tuple[str, str]
     return config_path, config_dir
 
 
-def _replacement_ownership(
-    previous_metadata, *, warn: bool = True
-) -> tuple[int, int]:
+def _replacement_ownership(previous_metadata, *, warn: bool = True) -> tuple[int, int]:
     """Return ownership that an atomic replacement can safely restore.
 
     An unprivileged service may replace a configuration file through a
@@ -374,9 +370,7 @@ class SquidConfigManager:
                     # SquidStats. Replacing a config file with it without
                     # restoring metadata can make Squid unable to read its
                     # own configuration after a successful-looking update.
-                    restore_uid, restore_gid = _replacement_ownership(
-                        previous_metadata
-                    )
+                    restore_uid, restore_gid = _replacement_ownership(previous_metadata)
                     if restore_uid != -1 or restore_gid != -1:
                         os.fchown(
                             tmp.fileno(),
@@ -436,7 +430,9 @@ class SquidConfigManager:
 
                 backup_created = self.create_backup()
                 if not backup_created:
-                    logger.warning("Could not create backup, but continuing with save...")
+                    logger.warning(
+                        "Could not create backup, but continuing with save..."
+                    )
 
                 self._atomic_write(self.config_path, content)
 
@@ -983,10 +979,7 @@ class SquidConfigManager:
                     continue
                 for candidate in candidates:
                     real_candidate = os.path.realpath(candidate)
-                    if (
-                        real_candidate in seen
-                        or not os.path.isfile(real_candidate)
-                    ):
+                    if real_candidate in seen or not os.path.isfile(real_candidate):
                         continue
                     try:
                         if os.path.getsize(real_candidate) > 1024 * 1024:
@@ -1033,7 +1026,11 @@ class SquidConfigManager:
                         filename,
                     )
                     return False
-                if not snapshot_known and current_content is not None and current_content != content:
+                if (
+                    not snapshot_known
+                    and current_content is not None
+                    and current_content != content
+                ):
                     logger.warning(
                         "Refusing to overwrite modular config %s without a loaded snapshot",
                         filename,
