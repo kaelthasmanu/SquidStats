@@ -242,8 +242,8 @@ def _keytab_contains_principal(output: str, service_principal: str) -> bool:
     )
     expected_service_host, separator, expected_realm = service_principal.partition("@")
     for principal in principals:
-        candidate_service_host, candidate_separator, candidate_realm = principal.partition(
-            "@"
+        candidate_service_host, candidate_separator, candidate_realm = (
+            principal.partition("@")
         )
         # DNS host names are case-insensitive, while a Kerberos realm is an
         # opaque, case-sensitive component.  Folding the complete principal
@@ -395,7 +395,9 @@ def _logical_squid_line_locations(
         if stripped.endswith("\\"):
             pending = stripped[:-1].rstrip()
             continue
-        locations.append((start_index if start_index is not None else index, index, line))
+        locations.append(
+            (start_index if start_index is not None else index, index, line)
+        )
         pending = ""
         start_index = None
     if pending:
@@ -682,7 +684,9 @@ def _has_proxy_auth_quota_acl(contents: list[str]) -> bool:
     return False
 
 
-def _take_proxy_auth_quota_deny(content: str, acl_contents: list[str]) -> tuple[str, str | None]:
+def _take_proxy_auth_quota_deny(
+    content: str, acl_contents: list[str]
+) -> tuple[str, str | None]:
     """Temporarily remove the generated quota denial before inserting auth.
 
     Returning the first physical rule preserves an administrator's harmless
@@ -733,7 +737,9 @@ def _is_management_exception(acls: list[str]) -> bool:
     return normalised == {"manager", "localhost"}
 
 
-def _active_acl_definitions(contents: list[str], name: str) -> list[tuple[str, list[str]]]:
+def _active_acl_definitions(
+    contents: list[str], name: str
+) -> list[tuple[str, list[str]]]:
     """Collect active definitions of an ACL name, including Squid options."""
     definitions: list[tuple[str, list[str]]] = []
     for content in contents:
@@ -966,9 +972,7 @@ def _read_optional_module(
 
 def _target_from_module(config_manager, filename: str) -> _ConfigTarget:
     config_dir = Path(str(getattr(config_manager, "config_dir", "")))
-    existing = _read_optional_module(
-        config_manager, filename, require_readable=True
-    )
+    existing = _read_optional_module(config_manager, filename, require_readable=True)
     original = existing if existing is not None else ""
     return _ConfigTarget(
         name=filename,
@@ -1151,7 +1155,9 @@ def _include_tree_requires_auth(
     generated auth include in relation to the tree, so an unreadable or too
     deeply nested source cannot safely be treated as unrelated.
     """
-    if any(_is_auth_dependent_directive(line) for line in _logical_squid_lines(content)):
+    if any(
+        _is_auth_dependent_directive(line) for line in _logical_squid_lines(content)
+    ):
         return True
     if depth >= 8:
         if any(_include_path(line) for line in _logical_squid_lines(content)):
@@ -1289,7 +1295,9 @@ def _active_included_configuration_sources(
 
     def visit(content: str, directory: Path, depth: int = 0) -> None:
         if depth >= 8:
-            logger.warning("Maximum Squid include depth reached while checking Kerberos")
+            logger.warning(
+                "Maximum Squid include depth reached while checking Kerberos"
+            )
             if any(_include_path(line) for line in _logical_squid_lines(content)):
                 record_inspection_error(
                     str(directory), "se alcanzó la profundidad máxima de includes"
@@ -1326,7 +1334,9 @@ def _active_included_configuration_sources(
                 try:
                     included_content = Path(canonical_path).read_text(encoding="utf-8")
                 except (OSError, UnicodeDecodeError):
-                    record_inspection_error(canonical_path, "no se pudo leer como UTF-8")
+                    record_inspection_error(
+                        canonical_path, "no se pudo leer como UTF-8"
+                    )
                     continue
                 sources.append((canonical_path, included_content))
                 visit(included_content, Path(canonical_path).parent, depth + 1)
@@ -1357,9 +1367,7 @@ def _configuration_source_inspection_errors(config_manager) -> list[str]:
     return list(dict.fromkeys(errors))
 
 
-def _main_directly_includes_module(
-    main: _ConfigTarget, module_path: Path
-) -> bool:
+def _main_directly_includes_module(main: _ConfigTarget, module_path: Path) -> bool:
     """Whether ``squid.conf`` itself loads a module (possibly via a glob)."""
     lines = main.content.splitlines(keepends=True)
     return any(
@@ -1420,7 +1428,9 @@ def _ensure_include(
     if insertion_index == len(lines) and include_entries:
         insertion_index = include_entries[-1][0] + 1
 
-    include_line = f"include {include_value if include_value is not None else module_path}\n"
+    include_line = (
+        f"include {include_value if include_value is not None else module_path}\n"
+    )
     if insertion_index == len(lines):
         if lines and not lines[-1].endswith("\n"):
             lines[-1] += "\n"
@@ -1492,7 +1502,9 @@ def _ensure_auth_include_before_access(
             include_value=include_value,
         )
 
-    include_line = f"include {include_value if include_value is not None else module_path}\n"
+    include_line = (
+        f"include {include_value if include_value is not None else module_path}\n"
+    )
     prefix = (
         ""
         if first_consumer == 0 or lines[first_consumer - 1].endswith("\n\n")
@@ -1670,8 +1682,8 @@ def _docker_path_mapping_status(
     if expected_container_path is None:
         status["mapped"] = True
     else:
-        status["mapped"] = (
-            str(mapped_path) == str(PurePosixPath(expected_container_path))
+        status["mapped"] = str(mapped_path) == str(
+            PurePosixPath(expected_container_path)
         )
     return status
 
@@ -1860,7 +1872,9 @@ def _runtime_selection_error() -> str | None:
         return "SQUID_RUNTIME debe ser auto, local o docker."
     if preference == "local":
         if not _find_squid_binary():
-            return "SQUID_RUNTIME=local está configurado, pero no se encontró Squid local."
+            return (
+                "SQUID_RUNTIME=local está configurado, pero no se encontró Squid local."
+            )
         return None
     if preference == "docker":
         if not _docker_runtime():
@@ -2245,9 +2259,7 @@ def _keytab_status(
             status["application_readable"] = squid_user_readable is True
         if not status["regular_file"] or not status["application_readable"]:
             return status
-        result = _docker_exec(
-            runtime, ["klist", "-k", keytab_path], user=squid_user
-        )
+        result = _docker_exec(runtime, ["klist", "-k", keytab_path], user=squid_user)
         if result and result.returncode == 0:
             status["spn_checked"] = True
             output = f"{result.stdout}\n{result.stderr}"
@@ -2374,11 +2386,7 @@ def _proxy_mode_status(config_manager) -> dict[str, Any]:
     # ``accel`` turns a listener into reverse/accelerator mode.  It is not an
     # explicit forward proxy even though it lacks the interception keywords;
     # Negotiate's Proxy-Authorization exchange cannot be used there.
-    accelerated = [
-        line
-        for line in ports
-        if re.search(r"(?:^|\s)accel(?:\s|$)", line)
-    ]
+    accelerated = [line for line in ports if re.search(r"(?:^|\s)accel(?:\s|$)", line)]
     # Connection-oriented authentication is how Negotiate/Kerberos works on
     # a forward-proxy listener. Squid documents connection-auth=off as
     # disabling forwarding of those exchanges, so a listener with that option
@@ -2503,9 +2511,8 @@ def get_preflight(
         errors.append(
             "SquidStats no tiene permiso para escribir el squid.conf configurado."
         )
-    if (
-        manual_write_message is None
-        and bool(getattr(config_manager, "is_modular", False))
+    if manual_write_message is None and bool(
+        getattr(config_manager, "is_modular", False)
     ):
         config_dir = Path(str(getattr(config_manager, "config_dir", "")))
         if not config_dir.is_dir() or not os.access(config_dir, os.W_OK):
@@ -2554,8 +2561,10 @@ def get_preflight(
             errors.append("No se encontró el keytab indicado.")
         elif not keytab["regular_file"]:
             errors.append("La ruta del keytab no es un archivo regular.")
-        elif runtime is not None and runtime.kind == "docker" and not keytab.get(
-            "permissions_checked", False
+        elif (
+            runtime is not None
+            and runtime.kind == "docker"
+            and not keytab.get("permissions_checked", False)
         ):
             errors.append(
                 "No se pudieron comprobar los permisos del keytab dentro del contenedor Docker."
@@ -2770,11 +2779,7 @@ def load_configuration(config_manager) -> dict[str, Any]:
 
     managed_candidate_paths = {
         os.path.realpath(str(main.path)),
-        *(
-            [os.path.realpath(str(auth.path))]
-            if auth is not None
-            else []
-        ),
+        *([os.path.realpath(str(auth.path))] if auth is not None else []),
     }
     external_candidates = [
         (path, content)
@@ -2840,7 +2845,10 @@ def load_configuration(config_manager) -> dict[str, Any]:
         "other_auth_schemes": sorted(
             {
                 scheme
-                for content in [*candidate_contents, *(content for _path, content in included_sources)]
+                for content in [
+                    *candidate_contents,
+                    *(content for _path, content in included_sources),
+                ]
                 for scheme in _other_auth_program_schemes(content)
             }
         ),
@@ -2929,9 +2937,7 @@ def _write_targets(targets: list[_ConfigTarget]) -> list[_ConfigTarget]:
             result = _rollback_result_message(
                 f"No se pudo guardar {target.name}.", rollback_failures
             )
-            raise KerberosConfigurationError(
-                result
-            ) from exc
+            raise KerberosConfigurationError(result) from exc
         if not saved:
             # Most managers return False before changing a file, but include
             # the failed target as well in case an implementation wrote before
@@ -3224,7 +3230,10 @@ def _apply_configuration(
     )
 
     if settings.enforce_auth:
-        if _has_access_rule(access.content, settings.acl_name) and not settings.replace_existing_negotiate:
+        if (
+            _has_access_rule(access.content, settings.acl_name)
+            and not settings.replace_existing_negotiate
+        ):
             raise KerberosConfigurationError(
                 "Ya existe una regla http_access manual para esta ACL. Activa el reemplazo "
                 "solo después de revisarla, o usa otra ACL."
@@ -3297,9 +3306,7 @@ def _apply_configuration(
         written = _write_targets(targets)
         validation = validate_squid_configuration(main.path, runtime)
         if validation["available"] and not validation["valid"]:
-            raise KerberosConfigurationError(
-                "Squid rechazó la configuración."
-            )
+            raise KerberosConfigurationError("Squid rechazó la configuración.")
         if settings.reload_squid:
             if not validation["available"]:
                 raise KerberosConfigurationError(
