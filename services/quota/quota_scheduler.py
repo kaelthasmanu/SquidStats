@@ -183,8 +183,8 @@ def register_quota_scheduler_tasks(scheduler):
                         )
 
             exceeded_usernames = {user.username for user in exceeded_users}
-            quota_state_synced, existing_blocked_usernames = _sync_blocked_users_and_squid_rules(
-                file_path, exceeded_usernames
+            quota_state_synced, existing_blocked_usernames = (
+                _sync_blocked_users_and_squid_rules(file_path, exceeded_usernames)
             )
             if quota_state_synced:
                 newly_blocked = [
