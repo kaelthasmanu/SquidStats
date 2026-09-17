@@ -1,0 +1,20 @@
+Squid configuration writes
+==========================
+
+The packaged squidstats.service intentionally runs as the unprivileged
+``squidstats`` account with ``ProtectSystem=full``.  In particular, it does
+not have a writable exception for /etc/squid, which may contain Kerberos
+keytabs and other credentials.
+
+The Kerberos administration page is consequently manual-only in the Debian
+package.  It may generate a validated preview, but it will not write
+squid.conf or keytabs.  Apply the preview through the site's controlled
+administrative configuration procedure and validate it with Squid before
+reloading the service.
+
+Do not make /etc/squid broadly writable and do not grant the web process
+access to keytabs.  A deployment that needs managed writes must first provide
+a separate, narrowly scoped and audited privileged mechanism.  Only then may
+it explicitly set SQUIDSTATS_SQUID_CONFIG_WRITE_MODE=managed in a systemd
+drop-in; that setting changes the application contract, but grants no
+filesystem permission by itself.

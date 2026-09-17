@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
+from services.squid import kerberos_config_service as kerberos
 from services.squid.squid_config_splitter import SquidConfigSplitter
 
 
@@ -32,6 +33,7 @@ class TestClassifyLine:
             ("refresh_pattern . 0 20% 4320", "40_refresh_patterns.conf"),
             ("auth_param basic program /usr/lib/squid/basic_ncsa_auth", "50_auth.conf"),
             ("acl auth proxy_auth REQUIRED", "50_auth.conf"),
+            ("acl kerberos_auth proxy_auth REQUIRED", "50_auth.conf"),
             ("ssl_bump bump all", "55_ssl_bump.conf"),
             (
                 "sslcrtd_program /usr/lib/squid/security_file_certgen",
@@ -242,6 +244,226 @@ class TestSplitConfig:
         auth_file = output_dir / "50_auth.conf"
         assert auth_file.exists()
         assert splitter.has_auth is True
+
+    def test_split_rejects_an_active_managed_kerberos_configuration(self, tmp_path):
+        """The splitter cannot preserve arbitrary Kerberos policy ordering."""
+        conf = tmp_path / "squid.conf"
+        original = (
+            "http_port 3128\n"
+            "# BEGIN SquidStats Kerberos authentication\n"
+            "auth_param negotiate program /opt/helper -k /etc/squid/HTTP.keytab "
+            "-s HTTP/proxy.example@EXAMPLE\n"
+            "acl kerberos_auth proxy_auth REQUIRED\n"
+            "# END SquidStats Kerberos authentication\n"
+            "# BEGIN SquidStats Kerberos access rule\n"
+            "http_access deny !kerberos_auth\n"
+            "# END SquidStats Kerberos access rule\n"
+            "http_access allow localnet\n"
+            "http_access deny all\n"
+        )
+        conf.write_text(original, encoding="utf-8")
+        output_dir = tmp_path / "squid.d"
+
+        splitter = SquidConfigSplitter(input_file=str(conf), output_dir=str(output_dir))
+
+        with pytest.raises(RuntimeError, match="Kerberos/Negotiate"):
+            splitter.split_config()
+
+        assert conf.read_text(encoding="utf-8") == original
+        assert not output_dir.exists()
+
+    def test_split_rejects_negotiate_from_an_active_nested_include(self, tmp_path):
+        """A modular Kerberos helper is protected even when main only includes a parent."""
+        conf = tmp_path / "squid.conf"
+        parent = tmp_path / "parent.conf"
+        parent.write_text(
+            "auth_param negotiate program /opt/helper -k /etc/squid/HTTP.keytab "
+            "-s HTTP/proxy.example@EXAMPLE\n",
+            encoding="utf-8",
+        )
+        conf.write_text("include parent.conf\n", encoding="utf-8")
+        splitter = SquidConfigSplitter(
+            input_file=str(conf), output_dir=str(tmp_path / "squid.d")
+        )
+
+        with pytest.raises(RuntimeError, match="Kerberos/Negotiate"):
+            splitter.split_config()
+
+        assert conf.read_text(encoding="utf-8") == "include parent.conf\n"
+
+    def test_split_rejects_multiline_negotiate_directive(self, tmp_path):
+        """A valid backslash continuation cannot evade the Kerberos guard."""
+        conf = tmp_path / "squid.conf"
+        original = (
+            "http_port 3128\n"
+            + "auth_param "
+            + "\\"
+            + "\n"
+            + "    negotiate program /opt/helper -k /etc/squid/HTTP.keytab "
+            + "-s HTTP/proxy.example@EXAMPLE\n"
+            + "acl kerberos_auth proxy_auth REQUIRED\n"
+            + "http_access deny !kerberos_auth\n"
+            + "http_access allow localnet\n"
+            + "http_access deny all\n"
+        )
+        conf.write_text(original, encoding="utf-8")
+        output_dir = tmp_path / "squid.d"
+        splitter = SquidConfigSplitter(input_file=str(conf), output_dir=str(output_dir))
+
+        with pytest.raises(RuntimeError, match="Kerberos/Negotiate"):
+            splitter.split_config()
+
+        assert conf.read_text(encoding="utf-8") == original
+        assert not output_dir.exists()
+
+    def test_split_validation_uses_the_selected_docker_runtime(
+        self, tmp_path, monkeypatch
+    ):
+        """Docker validation must use its configured container config path."""
+        config_path = tmp_path / "squid.conf"
+        config_path.write_text("http_port 3128\n", encoding="utf-8")
+        splitter = SquidConfigSplitter(input_file=str(config_path))
+        runtime = kerberos._SquidRuntime(
+            kind="docker",
+            executable="/usr/bin/docker",
+            container_name="configured-squid",
+            container_config_path="/etc/squid/custom.conf",
+        )
+        captured: list[tuple[str, object]] = []
+        monkeypatch.setattr(kerberos, "_find_squid_runtime", lambda: runtime)
+        monkeypatch.setattr(kerberos, "_docker_mounts", lambda _runtime: [])
+        monkeypatch.setattr(
+            kerberos,
+            "_docker_config_mount_status",
+            lambda *args, **kwargs: {"mapped": True},
+        )
+
+        def validate(path, selected_runtime):
+            captured.append((str(path), selected_runtime))
+            return {"available": True, "valid": True, "message": "ok"}
+
+        monkeypatch.setattr(kerberos, "validate_squid_configuration", validate)
+
+        result = splitter._validate_squid_config()
+
+        assert result["success"] is True
+        assert captured == [(str(config_path), runtime)]
+
+    def test_split_rejects_docker_with_an_invalid_container_config_path(
+        self, tmp_path, monkeypatch
+    ):
+        """Do not validate the image default after editing another host config."""
+        config_path = tmp_path / "squid.conf"
+        config_path.write_text("http_port 3128\n", encoding="utf-8")
+        splitter = SquidConfigSplitter(input_file=str(config_path))
+        runtime = kerberos._SquidRuntime(
+            kind="docker",
+            executable="/usr/bin/docker",
+            container_name="configured-squid",
+            container_config_path=None,
+        )
+        monkeypatch.setattr(kerberos, "_find_squid_runtime", lambda: runtime)
+
+        result = splitter._validate_squid_config()
+
+        assert result["success"] is False
+        assert "SQUID_CONTAINER_CONFIG_PATH" in result["error_message"]
+
+    def test_failed_split_restores_every_generated_module(self, tmp_path):
+        """Validation failure cannot leave active wildcard modules behind."""
+        output_dir = tmp_path / "squid.d"
+        output_dir.mkdir()
+        old_ports = "# Existing module loaded by the original wildcard\n"
+        (output_dir / "00_ports.conf").write_text(old_ports, encoding="utf-8")
+        conf = tmp_path / "squid.conf"
+        original = (
+            "http_port 3128\n"
+            "include squid.d/*.conf\n"
+            "acl localnet src 10.0.0.0/8\n"
+            "http_access allow localnet\n"
+            "http_access deny all\n"
+        )
+        conf.write_text(original, encoding="utf-8")
+        splitter = SquidConfigSplitter(input_file=str(conf), output_dir=str(output_dir))
+
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": False, "error_message": "synthetic parse error"},
+        ):
+            with pytest.raises(RuntimeError, match="Changes have been reverted"):
+                splitter.split_config()
+
+        assert conf.read_text(encoding="utf-8") == original
+        assert (output_dir / "00_ports.conf").read_text(encoding="utf-8") == old_ports
+        assert not (output_dir / "100_acls.conf").exists()
+        assert not (output_dir / "120_http_access.conf").exists()
+
+    def test_split_does_not_overwrite_a_module_changed_after_snapshot(
+        self, tmp_path, monkeypatch
+    ):
+        """A manual change between snapshot and write aborts without losing it."""
+        output_dir = tmp_path / "squid.d"
+        output_dir.mkdir()
+        acl_path = output_dir / "100_acls.conf"
+        acl_path.write_text("acl legacy src 10.0.0.0/8\n", encoding="utf-8")
+        conf = tmp_path / "squid.conf"
+        original = (
+            "http_port 3128\n"
+            "acl localnet src 192.168.0.0/16\n"
+            "http_access allow localnet\n"
+            "http_access deny all\n"
+        )
+        conf.write_text(original, encoding="utf-8")
+        splitter = SquidConfigSplitter(input_file=str(conf), output_dir=str(output_dir))
+        original_assert = splitter._assert_snapshot_is_current
+        injected = False
+
+        def assert_with_external_change(snapshot):
+            nonlocal injected
+            if snapshot.path == str(acl_path) and not injected:
+                acl_path.write_text(
+                    "# changed outside the transaction\n", encoding="utf-8"
+                )
+                injected = True
+            original_assert(snapshot)
+
+        monkeypatch.setattr(
+            splitter, "_assert_snapshot_is_current", assert_with_external_change
+        )
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": True, "output": ""},
+        ):
+            with pytest.raises(RuntimeError, match="cambió durante la operación"):
+                splitter.split_config()
+
+        assert injected is True
+        assert conf.read_text(encoding="utf-8") == original
+        assert (
+            acl_path.read_text(encoding="utf-8")
+            == "# changed outside the transaction\n"
+        )
+
+    def test_split_preserves_a_symbolic_main_config_link(self, tmp_path):
+        """The splitter uses the same symlink-safe writer as other editors."""
+        target = tmp_path / "actual-squid.conf"
+        target.write_text("http_port 3128\nhttp_access deny all\n", encoding="utf-8")
+        config_path = tmp_path / "squid.conf"
+        config_path.symlink_to(target.name)
+
+        with patch.object(
+            SquidConfigSplitter,
+            "_validate_squid_config",
+            return_value={"success": True, "output": ""},
+        ):
+            SquidConfigSplitter(
+                input_file=str(config_path), output_dir=str(tmp_path / "squid.d")
+            ).split_config()
+
+        assert config_path.is_symlink()
+        assert "include" in target.read_text(encoding="utf-8")
 
     def test_backup_disabled(self, tmp_squid_conf, tmp_path):
         """Backup creation is currently disabled — no .bak files should appear."""

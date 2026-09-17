@@ -1,0 +1,511 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ _('Kerberos / SPNEGO | Admin Squid') }}{% endblock %}
+
+{% block content %}
+{% set settings = kerberos.settings %}
+{% set preflight = kerberos.preflight %}
+{% set docker_config = preflight.get('docker_config') %}
+{% set squid_writes_manual = preflight.config.get('write_mode') == 'manual' %}
+<div class="max-w-7xl mx-auto space-y-6">
+    <div class="bg-white rounded-lg border border-gray-200 shadow p-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-ticket-alt text-indigo-600"></i>
+                    {{ _('Autenticación Kerberos / SPNEGO') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-600">
+                    {{ _('Configura el helper Negotiate de Squid. LDAP del panel y Kerberos del proxy son configuraciones independientes.') }}
+                </p>
+            </div>
+            {% if kerberos.detected and kerberos.managed %}
+                <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-semibold text-emerald-800">
+                    <i class="fas fa-check-circle"></i>{{ _('Administrado por SquidStats') }}
+                </span>
+            {% elif kerberos.detected %}
+                <span class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800">
+                    <i class="fas fa-exclamation-triangle"></i>{{ _('Configuración manual detectada') }}
+                </span>
+            {% else %}
+                <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-700">
+                    <i class="fas fa-minus-circle"></i>{{ _('No configurado') }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 flex gap-3">
+        <i class="fas fa-shield-alt mt-0.5 text-blue-600"></i>
+        <p>{{ _('El keytab no se sube, no se copia ni se muestra aquí. Debe existir ya en el runtime donde se ejecuta Squid (host o contenedor); este formulario solo guarda su ruta en squid.conf.') }}</p>
+    </div>
+
+    {% if squid_writes_manual %}
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex gap-3">
+            <i class="fas fa-lock mt-0.5"></i>
+            <p>{{ _('Este despliegue está en modo manual para squid.conf. La unidad Debian incluida usa este modo para proteger /etc/squid; puedes generar y copiar la vista previa para aplicarla mediante el procedimiento administrativo controlado. Los botones de escritura permanecen deshabilitados.') }}</p>
+        </div>
+    {% endif %}
+
+    {% if kerberos.configuration_error %}
+        <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex gap-3">
+            <i class="fas fa-exclamation-circle mt-0.5"></i>
+            <p>{{ kerberos.configuration_error }}</p>
+        </div>
+    {% endif %}
+
+    {% if kerberos.form_error %}
+        <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex gap-3" role="alert">
+            <i class="fas fa-exclamation-circle mt-0.5"></i>
+            <p>{{ kerberos.form_error }}</p>
+        </div>
+    {% endif %}
+
+    {% if kerberos.unmanaged_negotiate %}
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex gap-3">
+            <i class="fas fa-exclamation-triangle mt-0.5"></i>
+            <p>{{ _('Se detectó una directiva Negotiate que no administra SquidStats. Revisa su fuente: esta pantalla solo puede reemplazar de forma segura squid.conf o 50_auth.conf; un include distinto debe migrarse manualmente antes de aplicar.') }}</p>
+        </div>
+    {% endif %}
+
+    {% if kerberos.inactive_conventional_sources %}
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex gap-3">
+            <i class="fas fa-unlink mt-0.5"></i>
+            <p>{{ _('Se encontraron bloques Kerberos en módulos que no están incluidos activamente:') }} <code>{{ kerberos.inactive_conventional_sources|join(', ') }}</code>. {{ _('No se están aplicando; revisa el include antes de activarlos o elimina los bloques obsoletos.') }}</p>
+        </div>
+    {% endif %}
+
+    {% if kerberos.other_auth_schemes %}
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex gap-3">
+            <i class="fas fa-exclamation-triangle mt-0.5"></i>
+            <p>{{ _('Se detectaron helpers de autenticación alternativos:') }} <code>{{ kerberos.other_auth_schemes|join(', ') }}</code>. {{ _('La pantalla Kerberos no los combina automáticamente; revísalos antes de aplicar.') }}</p>
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <section class="xl:col-span-2 bg-white rounded-lg border border-gray-200 shadow p-6">
+            <form id="kerberos-config-form" method="POST" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="action" value="apply" />
+
+                <div class="flex items-start gap-3 rounded-lg bg-gray-50 p-4">
+                    <input type="hidden" name="enabled" value="false" />
+                    <input id="kerberos-enabled" name="enabled" value="true" type="checkbox"
+                        {% if settings.enabled %}checked{% endif %}
+                        class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <div>
+                        <label for="kerberos-enabled" class="font-semibold text-gray-800">{{ _('Habilitar Kerberos / Negotiate') }}</label>
+                        <p class="mt-1 text-sm text-gray-600">{{ _('Requiere un proxy explícito, DNS/FQDN y un SPN que coincidan con el keytab.') }}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="helper-path" class="mb-1 block text-sm font-medium text-gray-700">{{ _('Ruta del helper') }}</label>
+                        <input id="helper-path" name="helper_path" type="text" autocomplete="off" data-kerberos-required
+                            value="{{ settings.helper_path }}" placeholder="/usr/lib/squid/negotiate_kerberos_auth"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                        <p class="mt-1 text-xs text-gray-500">{{ _('En RHEL suele ser /usr/lib64/squid/…; comprueba la ruta instalada.') }}</p>
+                    </div>
+                    <div>
+                        <label for="keytab-path" class="mb-1 block text-sm font-medium text-gray-700">{{ _('Ruta del keytab existente') }}</label>
+                        <input id="keytab-path" name="keytab_path" type="text" autocomplete="off" data-kerberos-required
+                            value="{{ settings.keytab_path }}" placeholder="/var/run/squid/HTTP.keytab"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                        <p class="mt-1 text-xs text-gray-500">{{ _('Usa una ruta persistente si /var/run se limpia al reiniciar.') }}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="service-principal" class="mb-1 block text-sm font-medium text-gray-700">{{ _('SPN del servicio') }}</label>
+                        <input id="service-principal" name="service_principal" type="text" autocomplete="off" spellcheck="false" data-kerberos-required
+                            value="{{ settings.service_principal }}" placeholder="HTTP/inutil.cu@INUTIL.CU"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                        <p class="mt-1 text-xs text-gray-500">{{ _('Usa el SPN completo recomendado (HTTP/proxy.ejemplo@REALM). HTTP/proxy.ejemplo sin realm solo sirve si Kerberos resuelve el realm predeterminado; no uses barras de escape.') }}</p>
+                    </div>
+                </div>
+
+                <fieldset class="rounded-lg border border-gray-200 p-4">
+                    <legend class="px-1 text-sm font-semibold text-gray-800">{{ _('Procesos del helper') }}</legend>
+                    <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label for="children" class="mb-1 block text-sm text-gray-700">children</label>
+                            <input id="children" name="children" type="number" min="1" max="128" value="{{ settings.children }}" data-kerberos-required
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                        </div>
+                        <div>
+                            <label for="startup" class="mb-1 block text-sm text-gray-700">startup</label>
+                            <input id="startup" name="startup" type="number" min="0" max="128" value="{{ settings.startup }}" data-kerberos-required
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                        </div>
+                        <div>
+                            <label for="idle" class="mb-1 block text-sm text-gray-700">idle</label>
+                            <input id="idle" name="idle" type="number" min="0" max="128" value="{{ settings.idle }}" data-kerberos-required
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                        </div>
+                    </div>
+                    <p class="mt-3 text-xs text-gray-500">{{ _('startup e idle no pueden superar children. Ajusta la capacidad después de medir la carga real.') }}</p>
+                </fieldset>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="acl-name" class="mb-1 block text-sm font-medium text-gray-700">{{ _('Nombre de ACL') }}</label>
+                        <input id="acl-name" name="acl_name" type="text" autocomplete="off" value="{{ settings.acl_name }}" data-kerberos-required
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                    </div>
+                    <div class="space-y-3 pt-1">
+                        <div class="flex items-start gap-2">
+                            <input type="hidden" name="keep_alive" value="false" />
+                            <input id="keep-alive" name="keep_alive" value="true" type="checkbox" {% if settings.keep_alive %}checked{% endif %}
+                                class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                            <label for="keep-alive" class="text-sm text-gray-700">{{ _('Mantener conexiones del helper activas (keep_alive)') }}</label>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <input type="hidden" name="strip_realm" value="false" />
+                            <input id="strip-realm" name="strip_realm" value="true" type="checkbox" {% if settings.strip_realm %}checked{% endif %}
+                                class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                            <label for="strip-realm" class="text-sm text-gray-700">{{ _('Quitar el realm del usuario devuelto (-r)') }}</label>
+                        </div>
+                        <p class="text-xs text-gray-500">{{ _('Con -r, logs y cuotas usan normalmente usuario; sin -r usan normalmente usuario@REALM.') }}</p>
+                    </div>
+                </div>
+
+                <fieldset class="rounded-lg border border-indigo-100 bg-indigo-50 p-4 space-y-3">
+                    <legend class="px-1 text-sm font-semibold text-indigo-900">{{ _('Política de acceso') }}</legend>
+                    <div class="flex items-start gap-2">
+                        <input type="hidden" name="enforce_auth" value="false" />
+                        <input id="enforce-auth" name="enforce_auth" value="true" type="checkbox" {% if settings.enforce_auth %}checked{% endif %}
+                            class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                        <label for="enforce-auth" class="text-sm text-indigo-950">
+                            {{ _('Exigir autenticación antes de las reglas allow de clientes') }}
+                            <span class="block mt-1 text-xs text-indigo-700">{{ _('Genera http_access deny !ACL después de los deny de seguridad y antes del primer allow de clientes; conserva la política de autorización que ya existe.') }}</span>
+                        </label>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <input type="hidden" name="replace_existing_negotiate" value="false" />
+                        <input id="replace-existing" name="replace_existing_negotiate" value="true" type="checkbox" {% if settings.replace_existing_negotiate %}checked{% endif %}
+                            class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                        <label for="replace-existing" class="text-sm text-indigo-950">
+                            {{ _('Reemplazar directivas Negotiate existentes') }}
+                            <span class="block mt-1 text-xs text-indigo-700">{{ _('Úsalo solo después de revisar una configuración manual detectada. Reemplaza también la ACL REQUIRED y la regla http_access con el mismo nombre; no combina helpers alternativos.') }}</span>
+                        </label>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <input type="hidden" name="reload_squid" value="false" />
+                        <input id="reload-squid" name="reload_squid" value="true" type="checkbox" {% if settings.reload_squid %}checked{% endif %}
+                            class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                        <label for="reload-squid" class="text-sm text-indigo-950">
+                            {{ _('Validar y recargar Squid al aplicar') }}
+                            <span class="block mt-1 text-xs text-indigo-700">{{ _('Si el proceso no tiene permisos para recargar, desmárcalo y haz la recarga manualmente después de validar.') }}</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                    <button id="update-preview" type="button" class="rounded-lg border border-indigo-300 bg-white px-4 py-2.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">
+                        <i class="fas fa-code mr-1"></i>{{ _('Actualizar vista previa') }}
+                    </button>
+                    <div class="flex flex-col gap-3 sm:flex-row">
+                        <button type="submit" name="action" value="apply"
+                            class="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            {% if squid_writes_manual %}disabled aria-disabled="true" title="{{ _('La unidad Debian está en modo manual para squid.conf.') }}"{% endif %}>
+                            <i class="fas fa-save mr-1"></i>{{ _('Validar y aplicar') }}
+                        </button>
+                        <button type="submit" name="action" value="disable" formnovalidate
+                            class="rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            {% if squid_writes_manual %}disabled aria-disabled="true" title="{{ _('La unidad Debian está en modo manual para squid.conf.') }}"{% endif %}
+                            onclick="return confirm({{ _('¿Retirar solo los bloques Kerberos administrados?')|tojson }});">
+                            <i class="fas fa-power-off mr-1"></i>{{ _('Deshabilitar y retirar bloques') }}
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500">{{ _('Deshabilitar elimina solamente los bloques administrados y requiere reiniciar Squid para descargar el esquema de autenticación.') }}</p>
+            </form>
+        </section>
+
+        <aside class="space-y-6">
+            <section class="bg-white rounded-lg border border-gray-200 shadow p-5">
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-stethoscope text-indigo-600"></i>{{ _('Comprobaciones del servidor') }}</h3>
+                <dl class="mt-4 space-y-3 text-sm">
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">squid.conf</dt><dd class="text-right font-mono text-xs text-gray-800 break-all">{{ preflight.config.path }}</dd></div>
+                    <div class="flex justify-between gap-3">
+                        <dt class="text-gray-500">{{ _('Fuente Kerberos') }}</dt>
+                        <dd class="text-right text-xs text-gray-800 break-all">
+                            {% if kerberos.detected %}
+                                <code class="font-mono">{{ kerberos.source }}</code>
+                                <span class="ml-1 {{ 'text-emerald-700' if kerberos.managed else 'text-amber-700' }}">{{ _('Administrada') if kerberos.managed else _('Manual') }}</span>
+                            {% else %}
+                                <span class="text-gray-500">{{ _('No se detectaron directivas activas') }}</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="flex justify-between gap-3">
+                        <dt class="text-gray-500">{{ _('Destino administrado') }}</dt>
+                        <dd class="text-right font-mono text-xs text-gray-800 break-all">{{ '50_auth.conf + 120_http_access.conf' if preflight.config.modular else 'squid.conf' }}</dd>
+                    </div>
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">{{ _('Escritura') }}</dt><dd class="font-medium {{ 'text-amber-700' if squid_writes_manual else 'text-emerald-700' if preflight.config.writable else 'text-red-700' }}">{{ _('Solo manual') if squid_writes_manual else _('Disponible') if preflight.config.writable else _('Sin permiso') }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">{{ _('Formato') }}</dt><dd class="font-medium text-gray-800">{{ _('Modular') if preflight.config.modular else _('Único archivo') }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">{{ _('Usuario de Squid') }}</dt><dd class="text-right font-medium text-gray-800">{{ preflight.squid_user or _('No declarado') }}{% if preflight.squid_user_source == 'build_default' %}<span class="block text-xs font-normal text-gray-500">{{ _('predeterminado compilado') }}</span>{% endif %}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">{{ _('Runtime Squid') }}</dt><dd class="text-right font-medium {{ 'text-emerald-700' if preflight.runtime.available else 'text-amber-700' }}">{% if not preflight.runtime.available %}{{ _('No detectado') }}{% elif preflight.runtime.kind == 'docker' %}Docker{% if preflight.runtime.container %}: {{ preflight.runtime.container }}{% endif %}{% else %}{{ _('Local') }}{% endif %}</dd></div>
+                    {% if preflight.runtime.kind == 'docker' or docker_config %}
+                        <div class="flex justify-between gap-3">
+                            <dt class="text-gray-500">{{ _('Montaje Docker') }}</dt>
+                            <dd class="text-right font-medium {{ 'text-emerald-700' if docker_config and docker_config.mapped is true else 'text-red-700' if docker_config and docker_config.mapped is false else 'text-amber-700' }}">
+                                {% if docker_config and docker_config.mapped is true %}{{ _('Verificado') }}{% elif docker_config and docker_config.mapped is false %}{{ _('No coincide') }}{% else %}{{ _('Sin comprobar') }}{% endif %}
+                            </dd>
+                        </div>
+                        {% if docker_config and docker_config.container_config_path %}
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-gray-500">{{ _('Squid carga en Docker') }}</dt>
+                                <dd class="text-right font-mono text-xs text-gray-800 break-all">{{ docker_config.container_config_path }}</dd>
+                            </div>
+                        {% endif %}
+                        {% if docker_config and docker_config.container_path and docker_config.container_path != docker_config.container_config_path %}
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-gray-500">{{ _('El volumen expone') }}</dt>
+                                <dd class="text-right font-mono text-xs text-red-700 break-all">{{ docker_config.container_path }}</dd>
+                            </div>
+                        {% endif %}
+                        {% if docker_config and docker_config.symlink %}
+                            <div class="text-xs text-gray-500">{{ _('El squid.conf del host es un enlace simbólico; se comprobó su destino resuelto.') }}</div>
+                        {% endif %}
+                    {% endif %}
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">{{ _('Versión Squid') }}</dt><dd class="font-medium {{ 'text-red-700' if preflight.squid_version.supports_auth_param is false else 'text-gray-800' }}">{% if preflight.squid_version.version %}{{ preflight.squid_version.version }}{% elif preflight.squid_version.checked %}{{ _('No reconocida') }}{% else %}{{ _('Sin comprobar') }}{% endif %}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-gray-500">{{ _('Proxy explícito') }}</dt><dd class="font-medium {{ 'text-red-700' if preflight.proxy_mode.explicit_proxy_available is false else 'text-emerald-700' }}">{% if preflight.proxy_mode.explicit_proxy_available is none %}{{ _('Sin comprobar') }}{% elif preflight.proxy_mode.explicit_proxy_available %}{{ _('Sí') }}{% else %}{{ _('No') }}{% endif %}</dd></div>
+                    {% if preflight.proxy_mode.incompatible_ports %}<div class="flex justify-between gap-3"><dt class="text-gray-500">{{ _('Puertos no compatibles') }}</dt><dd class="font-medium text-red-700">{{ preflight.proxy_mode.incompatible_ports }}</dd></div>{% endif %}
+                </dl>
+            </section>
+
+            {% if preflight.helper or preflight.keytab %}
+                <section class="bg-white rounded-lg border border-gray-200 shadow p-5">
+                    <h3 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-key text-indigo-600"></i>{{ _('Helper y keytab') }}</h3>
+                    <dl class="mt-4 space-y-3 text-sm">
+                        <div><dt class="text-gray-500">{{ _('Helper') }}</dt><dd class="mt-1 break-all font-mono text-xs text-gray-800">{{ preflight.helper.path }}</dd><dd class="mt-1 {{ 'text-emerald-700' if preflight.helper.exists and preflight.helper.executable else 'text-red-700' }}">{{ _('Existe y es ejecutable') if preflight.helper.exists and preflight.helper.executable else _('No disponible o no ejecutable') }}</dd>{% if preflight.helper.checked_in_runtime %}<dd class="mt-1 text-xs text-gray-500">{{ _('Comprobado dentro del contenedor') }}</dd>{% endif %}</div>
+                        <div><dt class="text-gray-500">Keytab</dt><dd class="mt-1 break-all font-mono text-xs text-gray-800">{{ preflight.keytab.path }}</dd><dd class="mt-1 {{ 'text-emerald-700' if preflight.keytab.exists and preflight.keytab.regular_file else 'text-red-700' }}">{{ _('Archivo encontrado') if preflight.keytab.exists and preflight.keytab.regular_file else _('Archivo no encontrado') }}</dd>{% if preflight.keytab.checked_in_runtime %}<dd class="mt-1 text-xs text-gray-500">{{ _('Comprobado dentro del contenedor') }}</dd>{% endif %}{% if preflight.keytab.mode %}<dd class="mt-1 text-xs text-gray-500">{{ _('Modo') }} {{ preflight.keytab.mode }}</dd>{% endif %}{% if preflight.keytab.squid_user_readable is not none %}<dd class="mt-1 text-xs {{ 'text-emerald-700' if preflight.keytab.squid_user_readable else 'text-amber-700' }}">{{ _('Acceso Unix para') }} {{ preflight.keytab.squid_user }}: {{ _('probable') if preflight.keytab.squid_user_readable else _('revisar permisos') }}</dd>{% endif %}</div>
+                        <div><dt class="text-gray-500">SPN</dt><dd class="mt-1 {{ 'text-emerald-700' if preflight.keytab.spn_present else 'text-amber-700' }}">{% if preflight.keytab.spn_checked %}{{ _('Presente') if preflight.keytab.spn_present else _('No encontrado') }}{% else %}{{ _('No comprobado con klist') }}{% endif %}</dd></div>
+                    </dl>
+                </section>
+            {% endif %}
+
+            {% if preflight.errors %}
+                <section class="rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-800">
+                    <h3 class="font-semibold flex items-center gap-2"><i class="fas fa-times-circle"></i>{{ _('Bloqueos antes de aplicar') }}</h3>
+                    <ul class="mt-3 list-disc pl-5 space-y-1">{% for error in preflight.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                </section>
+            {% endif %}
+            {% if preflight.warnings %}
+                <section class="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                    <h3 class="font-semibold flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i>{{ _('Revisiones manuales') }}</h3>
+                    <ul class="mt-3 list-disc pl-5 space-y-1">{% for warning in preflight.warnings %}<li>{{ warning }}</li>{% endfor %}</ul>
+                </section>
+            {% endif %}
+            <section id="draft-preflight" class="hidden rounded-lg border border-indigo-200 bg-indigo-50 p-5 text-sm text-indigo-950" aria-live="polite">
+                <h3 class="font-semibold flex items-center gap-2"><i class="fas fa-vial text-indigo-600"></i>{{ _('Comprobación de valores sin guardar') }}</h3>
+                <ul id="draft-preflight-summary" class="mt-3 space-y-1.5"></ul>
+                <div id="draft-preflight-errors" class="hidden mt-4 border-t border-red-200 pt-3 text-red-800">
+                    <p class="font-semibold">{{ _('Bloqueos antes de aplicar') }}</p>
+                    <ul id="draft-preflight-error-list" class="mt-1 list-disc pl-5 space-y-1"></ul>
+                </div>
+                <div id="draft-preflight-warnings" class="hidden mt-4 border-t border-amber-200 pt-3 text-amber-900">
+                    <p class="font-semibold">{{ _('Revisiones manuales') }}</p>
+                    <ul id="draft-preflight-warning-list" class="mt-1 list-disc pl-5 space-y-1"></ul>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <section class="bg-slate-900 rounded-lg shadow overflow-hidden">
+        <div class="flex items-center justify-between gap-4 border-b border-slate-700 px-5 py-3">
+            <h3 class="font-semibold text-white"><i class="fas fa-terminal mr-2 text-indigo-300"></i>{{ _('Vista previa de bloques gestionados') }}</h3>
+            <span id="preview-state" class="text-xs text-slate-300">{{ _('Configuración guardada') }}</span>
+        </div>
+        <p id="preview-error" class="hidden border-b border-red-800 bg-red-950 px-5 py-3 text-sm text-red-200" role="alert" aria-live="polite"></p>
+        <pre id="kerberos-preview" class="overflow-x-auto p-5 text-xs leading-6 text-emerald-200 whitespace-pre-wrap">{{ kerberos.preview }}</pre>
+    </section>
+</div>
+
+<script>
+(() => {
+    const form = document.getElementById('kerberos-config-form');
+    const button = document.getElementById('update-preview');
+    const preview = document.getElementById('kerberos-preview');
+    const previewError = document.getElementById('preview-error');
+    const previewState = document.getElementById('preview-state');
+    const enabled = document.getElementById('kerberos-enabled');
+    const requiredFields = document.querySelectorAll('[data-kerberos-required]');
+    const draftPreflight = document.getElementById('draft-preflight');
+    const draftSummary = document.getElementById('draft-preflight-summary');
+    const draftErrors = document.getElementById('draft-preflight-errors');
+    const draftErrorList = document.getElementById('draft-preflight-error-list');
+    const draftWarnings = document.getElementById('draft-preflight-warnings');
+    const draftWarningList = document.getElementById('draft-preflight-warning-list');
+    const labels = {
+        available: {{ _('Disponible')|tojson }},
+        unavailable: {{ _('No disponible')|tojson }},
+        manual: {{ _('Solo manual')|tojson }},
+        notChecked: {{ _('Sin comprobar')|tojson }},
+        enabled: {{ _('Habilitado')|tojson }},
+        disabled: {{ _('Deshabilitado')|tojson }},
+        found: {{ _('Archivo encontrado')|tojson }},
+        notFound: {{ _('Archivo no encontrado')|tojson }},
+        executable: {{ _('Existe y es ejecutable')|tojson }},
+        notExecutable: {{ _('No disponible o no ejecutable')|tojson }},
+        present: {{ _('Presente')|tojson }},
+        notPresent: {{ _('No encontrado')|tojson }},
+        likelyReadable: {{ _('probable')|tojson }},
+        reviewPermissions: {{ _('revisar permisos')|tojson }},
+        squidUser: {{ _('Usuario de Squid')|tojson }},
+        yes: {{ _('Sí')|tojson }},
+        no: {{ _('No')|tojson }},
+        local: {{ _('Local')|tojson }},
+        notDetected: {{ _('No detectado')|tojson }},
+        compiledDefault: {{ _('predeterminado compilado')|tojson }},
+        managedDestination: {{ _('Destino administrado')|tojson }},
+        modularTargets: '50_auth.conf + 120_http_access.conf',
+        dockerMount: {{ _('Montaje Docker')|tojson }},
+        mountVerified: {{ _('Verificado')|tojson }},
+        mountMismatch: {{ _('No coincide')|tojson }},
+        expected: {{ _('Esperado')|tojson }},
+        exposedAs: {{ _('El volumen expone')|tojson }},
+        resolvedSymlink: {{ _('enlace simbólico resuelto')|tojson }},
+        responseUnavailable: {{ _('El servidor no devolvió un resultado legible. Comprueba tu sesión y el token CSRF.')|tojson }}
+    };
+
+    function setRequiredFields() {
+        requiredFields.forEach((field) => {
+            field.required = enabled.checked;
+        });
+    }
+
+    function addDraftStatus(label, value, state = 'neutral') {
+        const item = document.createElement('li');
+        const labelNode = document.createElement('span');
+        const valueNode = document.createElement('span');
+        labelNode.className = 'text-indigo-800';
+        labelNode.textContent = `${label}: `;
+        valueNode.textContent = value;
+        if (state === 'ok') valueNode.className = 'font-medium text-emerald-700';
+        if (state === 'error') valueNode.className = 'font-medium text-red-700';
+        if (state === 'warning') valueNode.className = 'font-medium text-amber-700';
+        item.append(labelNode, valueNode);
+        draftSummary.append(item);
+    }
+
+    function renderDraftMessages(container, list, messages) {
+        list.replaceChildren();
+        messages.forEach((message) => {
+            const item = document.createElement('li');
+            item.textContent = message;
+            list.append(item);
+        });
+        container.classList.toggle('hidden', messages.length === 0);
+    }
+
+    function updateDraftPreflight(preflight, settings) {
+        draftPreflight.classList.remove('hidden');
+        draftSummary.replaceChildren();
+        const config = preflight.config || {};
+        const runtime = preflight.runtime || {};
+        const version = preflight.squid_version || {};
+        const proxyMode = preflight.proxy_mode || {};
+        const dockerConfig = preflight.docker_config || {};
+        const helper = preflight.helper;
+        const keytab = preflight.keytab;
+        const runtimeName = !runtime.available
+            ? labels.notDetected
+            : runtime.kind === 'docker'
+                ? `Docker${runtime.container ? `: ${runtime.container}` : ''}`
+                : labels.local;
+
+        addDraftStatus('Kerberos', settings.enabled ? labels.enabled : labels.disabled, settings.enabled ? 'ok' : 'neutral');
+        addDraftStatus('squid.conf', config.path || labels.notChecked);
+        addDraftStatus(labels.managedDestination, config.modular ? labels.modularTargets : 'squid.conf');
+        const manualWriteMode = config.write_mode === 'manual';
+        addDraftStatus({{ _('Escritura')|tojson }}, manualWriteMode ? labels.manual : (config.writable ? labels.available : labels.unavailable), manualWriteMode ? 'warning' : (config.writable ? 'ok' : 'error'));
+        addDraftStatus({{ _('Runtime Squid')|tojson }}, runtimeName, runtime.available ? 'ok' : 'warning');
+        if (preflight.squid_user) {
+            const userSource = preflight.squid_user_source === 'build_default'
+                ? ` (${labels.compiledDefault})`
+                : '';
+            addDraftStatus(labels.squidUser, `${preflight.squid_user}${userSource}`);
+        }
+        if (runtime.kind === 'docker' || dockerConfig.checked || dockerConfig.container_config_path) {
+            const expectedPath = dockerConfig.container_config_path || '';
+            let mountValue = labels.notChecked;
+            let mountState = 'warning';
+            if (dockerConfig.mapped === true) {
+                mountValue = `${labels.mountVerified}${expectedPath ? `: ${expectedPath}` : ''}`;
+                if (dockerConfig.symlink) mountValue += ` (${labels.resolvedSymlink})`;
+                mountState = 'ok';
+            } else if (dockerConfig.mapped === false) {
+                mountValue = `${labels.mountMismatch}${expectedPath ? ` — ${labels.expected}: ${expectedPath}` : ''}`;
+                if (dockerConfig.container_path) mountValue += ` — ${labels.exposedAs}: ${dockerConfig.container_path}`;
+                mountState = 'error';
+            }
+            addDraftStatus(labels.dockerMount, mountValue, mountState);
+        }
+        addDraftStatus({{ _('Versión Squid')|tojson }}, version.version || (version.checked ? labels.unavailable : labels.notChecked), version.supports_auth_param === false ? 'error' : 'neutral');
+        const explicit = proxyMode.explicit_proxy_available;
+        addDraftStatus({{ _('Proxy explícito')|tojson }}, explicit === null || explicit === undefined ? labels.notChecked : (explicit ? labels.yes : labels.no), explicit === false ? 'error' : 'neutral');
+        if (proxyMode.incompatible_ports) {
+            addDraftStatus({{ _('Puertos no compatibles')|tojson }}, String(proxyMode.incompatible_ports), 'error');
+        }
+
+        if (helper && keytab) {
+            const helperReady = helper.check_available && helper.exists && helper.executable;
+            const keytabReady = keytab.check_available && keytab.exists && keytab.regular_file;
+            addDraftStatus({{ _('Helper')|tojson }}, `${helper.path} — ${!helper.check_available ? labels.notChecked : (helperReady ? labels.executable : labels.notExecutable)}`, helperReady ? 'ok' : 'error');
+            addDraftStatus('Keytab', `${keytab.path} — ${!keytab.check_available ? labels.notChecked : (keytabReady ? labels.found : labels.notFound)}`, keytabReady ? 'ok' : 'error');
+            if (keytab.squid_user_readable !== null && keytab.squid_user_readable !== undefined) {
+                addDraftStatus(`Keytab / ${labels.squidUser}`, `${keytab.squid_user || labels.notChecked}: ${keytab.squid_user_readable ? labels.likelyReadable : labels.reviewPermissions}`, keytab.squid_user_readable ? 'ok' : 'warning');
+            }
+            addDraftStatus('SPN', !keytab.spn_checked ? labels.notChecked : (keytab.spn_present ? labels.present : labels.notPresent), keytab.spn_checked && !keytab.spn_present ? 'error' : 'neutral');
+        }
+
+        renderDraftMessages(draftErrors, draftErrorList, preflight.errors || []);
+        renderDraftMessages(draftWarnings, draftWarningList, preflight.warnings || []);
+    }
+
+    enabled.addEventListener('change', setRequiredFields);
+    setRequiredFields();
+
+    button.addEventListener('click', async () => {
+        const values = {};
+        new FormData(form).forEach((value, key) => {
+            if (key !== 'csrf_token' && key !== 'action') values[key] = value;
+        });
+        button.disabled = true;
+        previewState.textContent = {{ _('Generando…')|tojson }};
+        previewError.classList.add('hidden');
+        try {
+            const response = await fetch({{ url_for('admin.kerberos_preview')|tojson }}, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(values)
+            });
+            const responseBody = await response.text();
+            let result;
+            try {
+                result = responseBody ? JSON.parse(responseBody) : {};
+            } catch (_error) {
+                throw new Error(labels.responseUnavailable);
+            }
+            if (!response.ok || result.status !== 'success') {
+                throw new Error(result.message || {{ _('No se pudo generar la vista previa.')|tojson }});
+            }
+            preview.textContent = result.preview;
+            updateDraftPreflight(result.preflight || {}, result.settings || {});
+            previewState.textContent = {{ _('Vista previa sin guardar')|tojson }};
+        } catch (error) {
+            previewError.textContent = error.message || labels.responseUnavailable;
+            previewError.classList.remove('hidden');
+            previewState.textContent = {{ _('Corrige los campos')|tojson }};
+        } finally {
+            button.disabled = false;
+        }
+    });
+})();
+</script>
+{% endblock %}

@@ -38,7 +38,12 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li>
+          <a href="#prerequisites">Prerequisites</a>
+          <ul>
+            <li><a href="#kerberos-spnego">Kerberos / SPNEGO authentication</a></li>
+          </ul>
+        </li>
         <li>
           <a href="#installation-script">Installation Script</a>
           <ul>
@@ -237,6 +242,41 @@ When Cache Manager authentication is enabled, set `SQUID_MGR_PASS` in SquidStats
 - "Connection refused" errors when accessing cache data
 - Missing real-time connection information
 - Incomplete bandwidth and user activity reports
+
+<a name="kerberos-spnego"></a>
+#### Kerberos / SPNEGO Authentication (Explicit Proxy)
+
+Kerberos uses HTTP <code>Negotiate</code>, so Squid must operate as an <strong>explicit/forward proxy</strong>, not a transparent/intercepting proxy. Configure the browser or PAC file with the proxy FQDN, for example <code>http://inutil.cu:3128</code>; that exact name must match the SPN.
+
+Before applying it, verify that the installed Squid package includes <code>negotiate_kerberos_auth</code>, confirm the helper path for your distribution, and install the Kerberos client tools. This setup uses <code>auth_param</code>, available in auth-enabled Squid releases through v7; Squid v8 no longer supports that directive. In Active Directory, <code>HTTP/inutil.cu</code> must be a unique SPN on the service account; the keytab must contain the exact matching principal, <code>HTTP/inutil.cu@INUTIL.CU</code>, and be readable by the user that runs Squid. The panel uses <code>cache_effective_user</code> or the default user reported by the runtime to check this; declare <code>cache_effective_user</code> if it cannot determine one. DNS, the FQDN configured on clients, and the realm must also agree. Do not use an IP address or an alias without a corresponding SPN. The full <code>@REALM</code> form is preferred; <code>HTTP/inutil.cu</code> without a realm is also helper syntax when Kerberos has the correct default realm.
+
+Add <strong>one active</strong> <code>negotiate</code> helper and adjust the paths, FQDN, realm, and allowed network:
+
+~~~conf
+# Do not enable an NTLM alternative or a second negotiate helper at the same time.
+auth_param negotiate program /usr/lib/squid/negotiate_kerberos_auth -k /var/run/squid/HTTP.keytab -s HTTP/inutil.cu@INUTIL.CU
+auth_param negotiate children 10 startup=5 idle=3
+auth_param negotiate keep_alive on
+
+# Any valid Kerberos identity satisfies this ACL.
+acl kerberos_auth proxy_auth REQUIRED
+
+# Keep port/security denies and Cache Manager exceptions above this rule.
+# This challenges unauthenticated clients before an allow such as localnet.
+http_access deny !kerberos_auth
+http_access allow localnet
+http_access deny all
+~~~
+
+<code>http_access</code> order is critical: Cache Manager exceptions (<code>http_access allow ... manager</code> and <code>http_access deny manager</code>) and existing port/security denies must remain before the Kerberos rule, which must be before the first client <code>allow</code> and the final <code>http_access deny all</code>. The negated rule <code>http_access deny !kerberos_auth</code> makes Squid issue the authentication challenge before a later <code>allow localnet</code>; a lone <code>allow kerberos_auth</code> is not enough for all clients. The example is literal <code>squid.conf</code> syntax: use <code>auth_param</code> and <code>keep_alive</code>, <strong>not</strong> Markdown-escaped <code>auth\_param</code> or <code>keep\_alive</code>.
+
+In the administration panel, open <code>/admin/kerberos-config</code> to set <code>helper_path</code>, <code>keytab_path</code>, <code>service_principal</code>, <code>children</code>/<code>startup</code>/<code>idle</code>, <code>keep_alive</code>, optional realm stripping, the ACL, and its access rule. Review the generated block, apply the rule, and reload Squid only after <code>sudo squid -f /path/to/squid.conf -k parse</code> succeeds; then run <code>sudo systemctl reload squid</code> (or your distribution's reload mechanism). Realm stripping changes the identity seen by logs and quotas: with <code>-r</code> it is normally <code>user</code>; without it it is normally <code>user@REALM</code>, so keep quota entries consistent with that choice.
+
+<strong>Debian package:</strong> the bundled unit runs the application without privileges and protects <code>/etc/squid</code> with <code>ProtectSystem=full</code>. The Kerberos page is therefore manual-only: it can generate and copy a preview, but cannot write <code>squid.conf</code> or keytabs. Apply the block through a controlled administrative procedure. Other deployments retain managed mode unless they set this variable. <code>SQUIDSTATS_SQUID_CONFIG_WRITE_MODE=managed</code> is an explicit opt-in only after deploying a separate, narrowly scoped and audited privileged mechanism; changing that variable alone does not grant permission. Do not give the web process broad write access to <code>/etc/squid</code> or broad access to keytabs.
+
+When Squid runs in Docker, the <code>SQUID_CONFIG_PATH</code> edited by SquidStats must be mounted at the configuration file actually loaded by the container (for example, <code>./squid.conf:/etc/squid/squid.conf</code>). If the configuration is modular, mount the directory containing <code>50_auth.conf</code> and <code>120_http_access.conf</code> too; mounting only the main file is not enough. Set <code>SQUID_RUNTIME=docker</code> so checks and reloads run inside the container; this is required rather than relying on <code>auto</code> when a host Squid binary also exists. <code>SQUID_DOCKER_CONTAINER=squid_proxy</code> is the default, and <code>SQUID_CONTAINER_CONFIG_PATH</code> is only needed when Squid uses a different internal path. SquidStats needs Docker CLI/socket access for those checks. Mount the keytab securely in the container—the panel never copies it.
+
+Do not use the <code>squid.conf</code> split operation while Kerberos/Negotiate is active. SquidStats blocks it to avoid changing <code>include</code> order or separating managed blocks; migrate or disable Kerberos from this screen before splitting the configuration.
 
 ### Installation Script
 

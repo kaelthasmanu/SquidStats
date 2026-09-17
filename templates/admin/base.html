@@ -134,6 +134,12 @@
                     <a href="{{ url_for('admin.ldap_config') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="{{ _("Configuraciones LDAP/Active Directory") }}">
                         <i class="fas fa-network-wired mr-3"></i>{{ _("LDAP / Active Directory") }}
                     </a>
+                    <a href="{{ url_for('admin.kerberos_config') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="{{ _("Autenticación Kerberos / SPNEGO para Squid") }}">
+                        <span class="flex items-center">
+                            <i class="fas fa-ticket-alt mr-3"></i>{{ _("Kerberos / SPNEGO") }}
+                        </span>
+                        <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("Beta") }}</span>
+                    </a>
                     <a href="{{ url_for('admin.database_view') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-database mr-3"></i>{{ _("Base de Datos") }}
                     </a>

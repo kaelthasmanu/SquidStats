@@ -1,5 +1,4 @@
 import os
-import re
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -12,14 +11,15 @@ from database.database import get_dynamic_models, get_session
 from database.models.models import QuotaEvent, QuotaGroup, QuotaUser
 from services.quota.quota_service import (
     _BLOCKED_USERS_PATH,
-    _read_blocked_usernames,
-    _sync_blocked_file_to_docker,
-    _sync_blocked_users_file,
+    _sync_blocked_users_and_squid_rules,
     _sync_quota_squid_rules,
     clear_blocked_users_file,
 )
-from services.system.system_service import reload_squid
-from utils.admin import SquidConfigManager
+from services.squid.kerberos_config_service import (
+    _find_squid_runtime,
+    reconfigure_squid,
+)
+from utils.admin import SquidConfigManager, squid_config_write_lock
 
 
 def register_quota_scheduler_tasks(scheduler):
@@ -34,7 +34,6 @@ def register_quota_scheduler_tasks(scheduler):
         try:
             quota_disabled_flag = Path(__file__).resolve().parents[2] / "quota_disabled"
             quota_enabled = not quota_disabled_flag.exists()
-            _sync_quota_squid_rules(quota_enabled)
 
             # reinicio mensual 1ero del mes
             today = datetime.now().date()
@@ -68,6 +67,9 @@ def register_quota_scheduler_tasks(scheduler):
                 logger.warning(f"Error verificando reinicio mensual de cuotas: {e}")
 
             if not quota_enabled:
+                # No file representation is needed when the feature is off;
+                # remove both src/proxy_auth forms immediately.
+                _sync_quota_squid_rules(False)
                 # logger.debug(
                 #     "check_quota_users: cuota deshabilitada, omitiendo evaluación"
                 # )
@@ -75,18 +77,6 @@ def register_quota_scheduler_tasks(scheduler):
 
             session = get_session()
             file_path = _BLOCKED_USERS_PATH
-
-            # Detectar modo para saber el formato del archivo
-            cm = SquidConfigManager()
-            auth_configured = cm.is_valid and bool(
-                re.search(r"^\s*auth_param\b", cm.config_content or "", re.MULTILINE)
-                and re.search(
-                    r"^\s*acl\s+auth\b", cm.config_content or "", re.MULTILINE
-                )
-            )
-            use_src = not auth_configured
-
-            existing_blocked_usernames, _ = _read_blocked_usernames(file_path, use_src)
 
             users = session.query(QuotaUser).all()
 
@@ -193,24 +183,27 @@ def register_quota_scheduler_tasks(scheduler):
                         )
 
             exceeded_usernames = {user.username for user in exceeded_users}
-            file_changed, _ = _sync_blocked_users_file(
-                file_path, exceeded_usernames, use_src
+            quota_state_synced, existing_blocked_usernames = (
+                _sync_blocked_users_and_squid_rules(file_path, exceeded_usernames)
             )
-            newly_blocked = [
-                user
-                for user in exceeded_users
-                if user.username not in existing_blocked_usernames
-            ]
-
-            if file_changed:
-                _sync_blocked_file_to_docker(file_path)
-                _sync_quota_squid_rules(True)
+            if quota_state_synced:
+                newly_blocked = [
+                    user
+                    for user in exceeded_users
+                    if user.username not in existing_blocked_usernames
+                ]
+            else:
+                # Do not claim a user was blocked (or create a durable quota
+                # event) when the list/config transaction rolled back.
+                logger.warning(
+                    "check_quota_users: no se confirmó la sincronización de bloqueos"
+                )
+                newly_blocked = []
 
             if newly_blocked:
                 logger.debug(
-                    "check_quota_users: %d nuevos bloqueos; use_src=%s",
+                    "check_quota_users: %d nuevos bloqueos",
                     len(newly_blocked),
-                    use_src,
                 )
                 for user in newly_blocked:
                     effective_quota = (
@@ -292,8 +285,33 @@ def register_quota_scheduler_tasks(scheduler):
         logger.info(
             "reload_squid_if_quota_enabled: cuota habilitada, ejecutando recarga de squid"
         )
-        success, message, _ = reload_squid()
+        config_manager = SquidConfigManager()
+        if not config_manager.is_valid:
+            logger.warning(
+                "reload_squid_if_quota_enabled omitida: squid.conf no está disponible"
+            )
+            return
+        # A periodic reconfigure must not observe a partly-written modular
+        # transaction (for example, auth already changed but http_access not
+        # yet replaced).  All writers use this same cross-process lock.
+        with squid_config_write_lock(config_manager.config_path):
+            load_config = getattr(config_manager, "load_config", None)
+            if callable(load_config) and load_config() is False:
+                logger.warning(
+                    "reload_squid_if_quota_enabled omitida: no se pudo recargar squid.conf"
+                )
+                return
+            refresh_layout = getattr(config_manager, "_check_modular_config", None)
+            if callable(refresh_layout):
+                refresh_layout()
+            runtime = _find_squid_runtime()
+            if runtime is None:
+                logger.warning(
+                    "reload_squid_if_quota_enabled omitida: no se encontró un runtime Squid inequívoco"
+                )
+                return
+            success, message = reconfigure_squid(config_manager.config_path, runtime)
         if success:
-            logger.info("reload_squid_if_quota_enabled: %s", message)
+            logger.info("reload_squid_if_quota_enabled: {}", message)
         else:
-            logger.warning("reload_squid_if_quota_enabled falló: %s", message)
+            logger.warning("reload_squid_if_quota_enabled falló: {}", message)

@@ -4,7 +4,7 @@ from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_babel import gettext as _
 from loguru import logger
 
-from services.auth.auth_service import admin_required, api_auth_required
+from services.auth.auth_service import admin_required, api_admin_required
 from services.database.admin_helpers import load_env_vars, save_env_vars
 from services.notifications.telegram_config_service import (
     load_config as load_telegram_config,
@@ -151,7 +151,7 @@ def register_routes(bp):
             return redirect(url_for("admin.admin_dashboard"))
 
     @bp.route("/api/split-config", methods=["POST"])
-    @api_auth_required
+    @api_admin_required
     def split_config():
         """API endpoint para dividir el archivo squid.conf."""
         try:
@@ -187,7 +187,7 @@ def register_routes(bp):
             )
 
     @bp.route("/api/get-split-files", methods=["GET"])
-    @api_auth_required
+    @api_admin_required
     def get_split_files():
         """API endpoint para obtener la lista de archivos generados en squid.d."""
         splitter = SquidConfigSplitter()

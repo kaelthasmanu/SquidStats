@@ -25,6 +25,12 @@ ProtectSystem=full
 NoNewPrivileges=true
 CapabilityBoundingSet=
 
+# /etc/squid may contain keytabs and other credentials.  This unit deliberately
+# does not grant the web process a writable exception there.  The Kerberos UI
+# remains preview/manual-only unless a deployment installs a separate,
+# narrowly scoped and audited privileged write mechanism.
+Environment=SQUIDSTATS_SQUID_CONFIG_WRITE_MODE=manual
+
 # Resource limits
 MemoryMax=2G
 TimeoutStartSec=60
