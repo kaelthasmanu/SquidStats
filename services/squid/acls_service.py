@@ -86,7 +86,9 @@ def _managed_kerberos_access_is_active(config_manager) -> bool:
         try:
             contents.extend(active_contents())
         except Exception as exc:
-            logger.debug("No se pudieron leer includes activos para ACLs Kerberos: {}", exc)
+            logger.debug(
+                "No se pudieron leer includes activos para ACLs Kerberos: {}", exc
+            )
     elif bool(getattr(config_manager, "is_modular", False)):
         try:
             access_content = config_manager.read_modular_config("120_http_access.conf")
@@ -149,9 +151,7 @@ def _synchronized_acl_mutation(operation):
             config_manager = args[-1]
         config_path = getattr(config_manager, "config_path", None)
         lock = (
-            squid_config_write_lock(str(config_path))
-            if config_path
-            else nullcontext()
+            squid_config_write_lock(str(config_path)) if config_path else nullcontext()
         )
         try:
             with lock:
