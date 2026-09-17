@@ -67,9 +67,7 @@ def _as_form_bool(value: str) -> bool:
     return value.strip().casefold() in {"1", "true", "yes", "on", "si", "sí"}
 
 
-def _settings_for_failed_form(
-    saved_settings: dict, form_data: dict[str, str]
-) -> dict:
+def _settings_for_failed_form(saved_settings: dict, form_data: dict[str, str]) -> dict:
     """Preserve a submitted draft without accepting arbitrary template data."""
     settings = dict(saved_settings)
     for field in _FORM_SETTING_FIELDS:
@@ -83,12 +81,12 @@ def _settings_for_failed_form(
     return settings
 
 
-def _render_failed_form(config_manager, form_data: dict[str, str], message: str, status: int):
+def _render_failed_form(
+    config_manager, form_data: dict[str, str], message: str, status: int
+):
     """Render validation failures in place so an admin does not lose a draft."""
     kerberos = get_status(config_manager)
-    kerberos["settings"] = _settings_for_failed_form(
-        kerberos["settings"], form_data
-    )
+    kerberos["settings"] = _settings_for_failed_form(kerberos["settings"], form_data)
     kerberos["form_error"] = message
     try:
         settings = normalise_settings(form_data)
@@ -186,8 +184,15 @@ def register_routes(bp):
                 }
             )
         except KerberosConfigurationError as exc:
+            logger.warning("Kerberos preview validation failed: {}", exc)
             return _private_json(
-                {"status": "error", "message": str(exc)}, 400
+                {
+                    "status": "error",
+                    "message": _(
+                        "Los valores de configuración de Kerberos no son válidos."
+                    ),
+                },
+                400,
             )
         except Exception:
             logger.exception("Unable to generate Kerberos configuration preview")
