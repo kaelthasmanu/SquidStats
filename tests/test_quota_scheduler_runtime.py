@@ -45,7 +45,9 @@ def test_periodic_quota_reload_uses_the_selected_squid_runtime(monkeypatch):
         return True, "ok"
 
     monkeypatch.setattr(quota_scheduler, "SquidConfigManager", _ConfigManager)
-    monkeypatch.setattr(quota_scheduler, "_find_squid_runtime", lambda: selected_runtime)
+    monkeypatch.setattr(
+        quota_scheduler, "_find_squid_runtime", lambda: selected_runtime
+    )
     monkeypatch.setattr(quota_scheduler, "squid_config_write_lock", config_lock)
     monkeypatch.setattr(
         quota_scheduler,
