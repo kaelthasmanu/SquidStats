@@ -293,7 +293,9 @@ class SquidConfigSplitter:
             if depth >= 8:
                 # A deeper active config could contain a challenge whose
                 # order this splitter cannot preserve.
-                return any(_INCLUDE_RE.fullmatch(line) for line in logical_lines(content))
+                return any(
+                    _INCLUDE_RE.fullmatch(line) for line in logical_lines(content)
+                )
             for line in logical_lines(content):
                 match = _INCLUDE_RE.fullmatch(line)
                 if not match:
@@ -320,7 +322,9 @@ class SquidConfigSplitter:
                         # Do not rewrite an ordered configuration whose
                         # active source cannot be inspected.
                         return True
-                    if visit(included_content, os.path.dirname(real_candidate), depth + 1):
+                    if visit(
+                        included_content, os.path.dirname(real_candidate), depth + 1
+                    ):
                         return True
             return False
 
@@ -424,13 +428,17 @@ class SquidConfigSplitter:
             except FileNotFoundError:
                 current_content = None
             if current_content != snapshot.written_content:
-                return f"{os.path.basename(snapshot.path)} (cambió durante la operación)"
+                return (
+                    f"{os.path.basename(snapshot.path)} (cambió durante la operación)"
+                )
             if snapshot.existed:
                 self._atomic_write(snapshot.path, snapshot.content or "")
             elif current_content is not None:
                 os.unlink(snapshot.resolved_path)
         except OSError:
-            logger.exception("Could not restore generated split module %s", snapshot.path)
+            logger.exception(
+                "Could not restore generated split module %s", snapshot.path
+            )
             return os.path.basename(snapshot.path)
         return None
 
@@ -447,7 +455,10 @@ class SquidConfigSplitter:
         failures: list[str] = []
         if generated_main_content is not None:
             try:
-                if os.path.realpath(os.path.abspath(self.input_file)) != main_resolved_path:
+                if (
+                    os.path.realpath(os.path.abspath(self.input_file))
+                    != main_resolved_path
+                ):
                     failures.append("squid.conf (la ruta cambió durante la operación)")
                 else:
                     with open(main_resolved_path, encoding="utf-8") as current:
@@ -474,7 +485,10 @@ class SquidConfigSplitter:
                 # It is safe to leave an empty/new directory behind.  Do not
                 # remove a directory that acquired an external file while the
                 # transaction was running.
-                logger.warning("Could not remove newly-created output directory %s", self.output_dir)
+                logger.warning(
+                    "Could not remove newly-created output directory %s",
+                    self.output_dir,
+                )
         return failures
 
     def split_config(self) -> dict[str, int]:
