@@ -72,7 +72,9 @@ def _configure_transition(monkeypatch, tmp_path, manager, blocked_file, *, valid
 def test_enabling_kerberos_replaces_src_quota_representation(tmp_path, monkeypatch):
     """A source include must not survive next to the proxy_auth quota ACL."""
     blocked_file = tmp_path / "usuarios_bloqueados.txt"
-    blocked_file.write_text("acl usuarios_bloqueados src 10.20.30.40\n", encoding="utf-8")
+    blocked_file.write_text(
+        "acl usuarios_bloqueados src 10.20.30.40\n", encoding="utf-8"
+    )
     manager = _ConfigManager(
         tmp_path,
         "\n".join(
@@ -106,7 +108,9 @@ def test_enabling_kerberos_replaces_src_quota_representation(tmp_path, monkeypat
     assert manager.config_content.count("acl usuarios_bloqueados") == 1
 
 
-def test_disabling_kerberos_replaces_proxy_auth_quota_representation(tmp_path, monkeypatch):
+def test_disabling_kerberos_replaces_proxy_auth_quota_representation(
+    tmp_path, monkeypatch
+):
     """A plain identity list must be converted before its source include exists."""
     blocked_file = tmp_path / "usuarios_bloqueados.txt"
     blocked_file.write_text("alice@EXAMPLE.TEST\n", encoding="utf-8")
@@ -144,7 +148,9 @@ def test_disabling_kerberos_replaces_proxy_auth_quota_representation(tmp_path, m
     assert manager.config_content.count("usuarios_bloqueados") == 2
 
 
-def test_failed_kerberos_quota_transition_restores_config_and_list(tmp_path, monkeypatch):
+def test_failed_kerberos_quota_transition_restores_config_and_list(
+    tmp_path, monkeypatch
+):
     """Validation failure rolls back both halves of the mode migration."""
     blocked_file = tmp_path / "usuarios_bloqueados.txt"
     original_list = "acl usuarios_bloqueados src 10.20.30.40\n"
@@ -175,9 +181,7 @@ def test_failed_kerberos_quota_transition_restores_config_and_list(tmp_path, mon
 def test_src_value_file_drops_plain_or_injected_identity_lines(tmp_path):
     """The source include accepts only complete generated src ACL directives."""
     blocked_file = tmp_path / "usuarios_bloqueados.txt"
-    blocked_file.write_text(
-        "alice@EXAMPLE.TEST\n# operator note\n", encoding="utf-8"
-    )
+    blocked_file.write_text("alice@EXAMPLE.TEST\n# operator note\n", encoding="utf-8")
 
     changed, _existing = quota_service._sync_blocked_users_file(
         str(blocked_file), {"10.20.30.40", "bad\nhttp_access allow all"}, True
