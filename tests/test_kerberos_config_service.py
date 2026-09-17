@@ -221,9 +221,11 @@ def test_modular_apply_keeps_auth_and_access_rules_in_safe_modules(
     include_100 = f"include {module_dir / '100_acls.conf'}"
     include_120 = f"include {module_dir / '120_http_access.conf'}"
     assert include_50 in manager.config_content
-    assert manager.config_content.index(include_50) < manager.config_content.index(
-        include_100
-    ) < manager.config_content.index(include_120)
+    assert (
+        manager.config_content.index(include_50)
+        < manager.config_content.index(include_100)
+        < manager.config_content.index(include_120)
+    )
 
 
 @pytest.mark.parametrize(
@@ -457,7 +459,9 @@ def test_modular_apply_rejects_http_access_in_an_unmanaged_include(
         kerberos.apply_configuration(kerberos_data, manager)
 
     assert manager.read_modular_config("50_auth.conf") is None
-    assert manager.read_modular_config("120_http_access.conf") == "http_access deny all\n"
+    assert (
+        manager.read_modular_config("120_http_access.conf") == "http_access deny all\n"
+    )
 
 
 def test_apply_rejects_an_indirectly_loaded_auth_module(
@@ -514,7 +518,9 @@ def test_monolithic_apply_rejects_http_access_in_an_extensionless_include(
     )
     original = manager.config_content
 
-    with pytest.raises(kerberos.KerberosConfigurationError, match="fuera de squid.conf"):
+    with pytest.raises(
+        kerberos.KerberosConfigurationError, match="fuera de squid.conf"
+    ):
         kerberos.apply_configuration(kerberos_data, manager)
 
     assert manager.config_content == original
@@ -670,11 +676,7 @@ def test_general_http_access_editor_cannot_break_a_managed_kerberos_rule(
     """The generic rule editor keeps the dedicated authentication invariant."""
     manager = _ConfigManager(
         tmp_path,
-        (
-            "http_port 3128\n"
-            "http_access allow localnet\n"
-            "http_access deny all\n"
-        ),
+        ("http_port 3128\nhttp_access allow localnet\nhttp_access deny all\n"),
     )
     kerberos.apply_configuration(kerberos_data, manager)
     original = manager.config_content
@@ -1058,7 +1060,9 @@ def test_apply_does_not_replace_an_existing_unreadable_standard_module(
     with pytest.raises(kerberos.KerberosConfigurationError, match="No se pudo leer"):
         kerberos.apply_configuration(kerberos_data, manager)
 
-    assert (Path(manager.config_dir) / "50_auth.conf").read_text(encoding="utf-8") == original
+    assert (Path(manager.config_dir) / "50_auth.conf").read_text(
+        encoding="utf-8"
+    ) == original
 
 
 def test_proxy_mode_detects_intercept_on_https_port(tmp_path):
@@ -1163,7 +1167,9 @@ def test_docker_validation_rejects_unmapped_host_config(monkeypatch, tmp_path):
     def fail_run(*_args, **_kwargs):
         nonlocal called
         called = True
-        raise AssertionError("subprocess.run should not be called when Docker config is unmapped")
+        raise AssertionError(
+            "subprocess.run should not be called when Docker config is unmapped"
+        )
 
     monkeypatch.setattr(kerberos.subprocess, "run", fail_run)
 
@@ -1196,7 +1202,9 @@ def test_docker_reconfigure_rejects_unmapped_host_config(monkeypatch, tmp_path):
     def fail_run(*_args, **_kwargs):
         nonlocal called
         called = True
-        raise AssertionError("subprocess.run should not be called for an unmapped Docker config")
+        raise AssertionError(
+            "subprocess.run should not be called for an unmapped Docker config"
+        )
 
     monkeypatch.setattr(kerberos.subprocess, "run", fail_run)
 
@@ -1320,6 +1328,7 @@ def test_docker_preflight_checks_helper_and_keytab_inside_the_container(
         return True
 
     monkeypatch.setattr(kerberos, "_docker_test", docker_test)
+
     def docker_exec(_runtime, arguments, **_kwargs):
         if arguments == ["squid", "-v"]:
             output = "Squid Cache: Version 7.7\n"
@@ -1327,9 +1336,7 @@ def test_docker_preflight_checks_helper_and_keytab_inside_the_container(
             output = "0640\n"
         else:
             output = "HTTP/inutil.cu@INUTIL.CU\n"
-        return CompletedProcess(
-            args=arguments, returncode=0, stdout=output, stderr=""
-        )
+        return CompletedProcess(args=arguments, returncode=0, stdout=output, stderr="")
 
     monkeypatch.setattr(kerberos, "_docker_exec", docker_exec)
     monkeypatch.setattr(
@@ -1411,7 +1418,9 @@ def test_preflight_uses_a_detected_compiled_default_squid_user(
     assert preflight["squid_user"] == "proxy"
     assert preflight["squid_user_source"] == "build_default"
     assert checked_users == ["proxy"]
-    assert any("predeterminado compilado" in warning for warning in preflight["warnings"])
+    assert any(
+        "predeterminado compilado" in warning for warning in preflight["warnings"]
+    )
 
 
 @pytest.mark.parametrize(
@@ -1422,7 +1431,9 @@ def test_preflight_uses_a_detected_compiled_default_squid_user(
         ("--with-default-user=not/a/user", None),
     ],
 )
-def test_default_squid_user_parser_accepts_only_safe_users(version_output, expected_user):
+def test_default_squid_user_parser_accepts_only_safe_users(
+    version_output, expected_user
+):
     assert kerberos._default_squid_user(version_output) == expected_user
 
 
@@ -1609,9 +1620,7 @@ def test_preflight_rejects_squid_v8_auth_param_configuration(
     assert any("v8" in error for error in preflight["errors"])
 
 
-def test_disabling_uses_the_same_selected_runtime_for_validation(
-    tmp_path, monkeypatch
-):
+def test_disabling_uses_the_same_selected_runtime_for_validation(tmp_path, monkeypatch):
     """A Docker preference must also apply while removing managed blocks."""
     manager = _ConfigManager(
         tmp_path,
@@ -1703,7 +1712,12 @@ def test_manual_write_mode_explains_the_block_even_if_unix_checks_are_invalid(
 
 @pytest.mark.parametrize(
     ("configured_mode", "expected_mode"),
-    [(None, "managed"), ("managed", "managed"), ("manual", "manual"), ("typo", "manual")],
+    [
+        (None, "managed"),
+        ("managed", "managed"),
+        ("manual", "manual"),
+        ("typo", "manual"),
+    ],
 )
 def test_squid_config_write_mode_fails_closed_for_unrecognised_values(
     monkeypatch, configured_mode, expected_mode
@@ -1779,6 +1793,34 @@ def test_kerberos_admin_frontend_and_preview_api_require_admin(client):
     assert preview.get_json()["preview"].endswith(
         "# END SquidStats Kerberos access rule\n"
     )
+
+
+def test_kerberos_preview_api_hides_internal_exception_details(client):
+    """Kerberos validation errors should be sanitized before being sent to clients."""
+    client.application.jinja_env.globals["csrf_token"] = lambda: "test-token"
+
+    with (
+        patch(
+            "services.auth.auth_service.AuthService.get_current_user",
+            return_value={"role": "admin", "username": "admin"},
+        ),
+        patch(
+            "routes.admin.kerberos_config.normalise_settings",
+            side_effect=kerberos.KerberosConfigurationError(
+                "ACL manager no disponible: /tmp/fail.conf"
+            ),
+        ),
+    ):
+        response = client.post(
+            "/admin/api/kerberos/preview",
+            json={"enabled": True},
+        )
+
+    assert response.status_code == 400
+    assert response.get_json()["message"] == (
+        "Los valores de configuración de Kerberos no son válidos."
+    )
+    assert "ACL manager no disponible" not in response.get_data(as_text=True)
 
 
 def test_split_config_apis_require_an_administrator(client):
