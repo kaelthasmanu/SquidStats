@@ -282,11 +282,11 @@ Do not use the <code>squid.conf</code> split operation while Kerberos/Negotiate 
 
 1. Install with script:
 ```bash
- curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.3/install.sh | sudo bash
+ curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.6/install.sh | sudo bash
 ```
 or
 ```bash
-  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.3/install.sh | sudo bash
+  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.6/install.sh | sudo bash
 ```
 
 #### Installation Options
@@ -398,7 +398,7 @@ If the command returns the installed version, SquidStats is ready to use.
     Note: for use MARIADB need your own database running
    ```bash
    # Application Version
-   VERSION="2.5.3"
+   VERSION="2.6"
    
    # Security Keys
    # Generate with: python3 -c 'import secrets; print(secrets.token_hex(32))'
@@ -749,7 +749,7 @@ Warning: 🚨 The first execution may cause high CPU usage.
 1. Get Script With curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.5.3/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.6/install.sh
 ```
 
 2. Add permission execution:
