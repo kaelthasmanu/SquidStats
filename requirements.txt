@@ -164,7 +164,7 @@ tzlocal==5.4.4
     # via apscheduler
 urllib3==2.7.0
     # via requests
-uvicorn==0.52.4
+uvicorn==0.53.0
     # via -r requirements.in
 weasyprint==70.0
     # via -r requirements.in
