@@ -264,9 +264,7 @@ class TestSplitConfig:
         conf.write_text(original, encoding="utf-8")
         output_dir = tmp_path / "squid.d"
 
-        splitter = SquidConfigSplitter(
-            input_file=str(conf), output_dir=str(output_dir)
-        )
+        splitter = SquidConfigSplitter(input_file=str(conf), output_dir=str(output_dir))
 
         with pytest.raises(RuntimeError, match="Kerberos/Negotiate"):
             splitter.split_config()
@@ -310,9 +308,7 @@ class TestSplitConfig:
         )
         conf.write_text(original, encoding="utf-8")
         output_dir = tmp_path / "squid.d"
-        splitter = SquidConfigSplitter(
-            input_file=str(conf), output_dir=str(output_dir)
-        )
+        splitter = SquidConfigSplitter(input_file=str(conf), output_dir=str(output_dir))
 
         with pytest.raises(RuntimeError, match="Kerberos/Negotiate"):
             splitter.split_config()
@@ -388,9 +384,7 @@ class TestSplitConfig:
             "http_access deny all\n"
         )
         conf.write_text(original, encoding="utf-8")
-        splitter = SquidConfigSplitter(
-            input_file=str(conf), output_dir=str(output_dir)
-        )
+        splitter = SquidConfigSplitter(input_file=str(conf), output_dir=str(output_dir))
 
         with patch.object(
             SquidConfigSplitter,
@@ -421,16 +415,16 @@ class TestSplitConfig:
             "http_access deny all\n"
         )
         conf.write_text(original, encoding="utf-8")
-        splitter = SquidConfigSplitter(
-            input_file=str(conf), output_dir=str(output_dir)
-        )
+        splitter = SquidConfigSplitter(input_file=str(conf), output_dir=str(output_dir))
         original_assert = splitter._assert_snapshot_is_current
         injected = False
 
         def assert_with_external_change(snapshot):
             nonlocal injected
             if snapshot.path == str(acl_path) and not injected:
-                acl_path.write_text("# changed outside the transaction\n", encoding="utf-8")
+                acl_path.write_text(
+                    "# changed outside the transaction\n", encoding="utf-8"
+                )
                 injected = True
             original_assert(snapshot)
 
@@ -447,14 +441,15 @@ class TestSplitConfig:
 
         assert injected is True
         assert conf.read_text(encoding="utf-8") == original
-        assert acl_path.read_text(encoding="utf-8") == "# changed outside the transaction\n"
+        assert (
+            acl_path.read_text(encoding="utf-8")
+            == "# changed outside the transaction\n"
+        )
 
     def test_split_preserves_a_symbolic_main_config_link(self, tmp_path):
         """The splitter uses the same symlink-safe writer as other editors."""
         target = tmp_path / "actual-squid.conf"
-        target.write_text(
-            "http_port 3128\nhttp_access deny all\n", encoding="utf-8"
-        )
+        target.write_text("http_port 3128\nhttp_access deny all\n", encoding="utf-8")
         config_path = tmp_path / "squid.conf"
         config_path.symlink_to(target.name)
 
