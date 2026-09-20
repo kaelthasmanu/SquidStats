@@ -136,7 +136,13 @@ def logs():
                 subtitle=_("Analisis de la Actividad de los Usuarios"),
                 selected_date=date.today().isoformat(),
                 search_query="",
-                pagination={"page": 1, "per_page": 15, "total_pages": 1, "total": 0, "page_range": []},
+                pagination={
+                    "page": 1,
+                    "per_page": 15,
+                    "total_pages": 1,
+                    "total": 0,
+                    "page_range": [],
+                },
                 active_tab=active_tab,
                 group_report=group_report,
             )
