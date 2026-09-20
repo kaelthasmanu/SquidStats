@@ -27,7 +27,9 @@ def upgrade() -> None:
             sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
             sa.Column("name", sa.String(length=255), nullable=False),
             sa.Column("description", sa.Text(), nullable=True),
-            sa.Column("source", sa.String(length=50), nullable=False, server_default="custom"),
+            sa.Column(
+                "source", sa.String(length=50), nullable=False, server_default="custom"
+            ),
             sa.Column("created_at", sa.DateTime(), nullable=False),
             sa.Column("updated_at", sa.DateTime(), nullable=True),
             sa.PrimaryKeyConstraint("id"),
@@ -41,14 +43,26 @@ def upgrade() -> None:
             sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
             sa.Column("group_id", sa.Integer(), nullable=False),
             sa.Column("username", sa.String(length=255), nullable=False),
-            sa.Column("source", sa.String(length=50), nullable=False, server_default="manual"),
+            sa.Column(
+                "source", sa.String(length=50), nullable=False, server_default="manual"
+            ),
             sa.Column("created_at", sa.DateTime(), nullable=False),
             sa.ForeignKeyConstraint(["group_id"], ["ldap_groups.id"]),
             sa.PrimaryKeyConstraint("id"),
             sa.UniqueConstraint("group_id", "username", name="uq_ldap_group_member"),
         )
-        op.create_index("ix_ldap_group_members_group_id", "ldap_group_members", ["group_id"], unique=False)
-        op.create_index("ix_ldap_group_members_username", "ldap_group_members", ["username"], unique=False)
+        op.create_index(
+            "ix_ldap_group_members_group_id",
+            "ldap_group_members",
+            ["group_id"],
+            unique=False,
+        )
+        op.create_index(
+            "ix_ldap_group_members_username",
+            "ldap_group_members",
+            ["username"],
+            unique=False,
+        )
 
 
 def downgrade() -> None:
