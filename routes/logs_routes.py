@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
 from flask import Blueprint, jsonify, render_template, request
 from flask_babel import gettext as _
@@ -7,6 +7,7 @@ from loguru import logger
 from database.database import get_session
 from services.analytics.blacklist_users import find_blacklisted_sites
 from services.analytics.fetch_data_logs import get_users_logs
+from services.analytics.ldap_groups_report import get_group_traffic_summary
 
 logs_bp = Blueprint("logs", __name__)
 
@@ -96,9 +97,50 @@ def enrich_users_with_logs(users):
         user["response_summary"] = build_response_summary(logs)
 
 
+def _parse_group_report_dates():
+    today = date.today()
+    start_value = request.args.get("start_date") or today.isoformat()
+    end_value = request.args.get("end_date") or start_value
+    try:
+        start_date = datetime.strptime(start_value, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_value, "%Y-%m-%d").date()
+    except ValueError:
+        return today, today
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
+    if (end_date - start_date).days > 366:
+        start_date = end_date - timedelta(days=366)
+    return start_date, end_date
+
+
 @logs_bp.route("/logs")
 def logs():
     try:
+        active_tab = request.args.get("tab", "activity")
+        if active_tab == "groups":
+            start_date, end_date = _parse_group_report_dates()
+            selected_group_id = request.args.get("group_id", type=int)
+            db = get_session()
+            try:
+                group_report = get_group_traffic_summary(
+                    db, start_date, end_date, selected_group_id
+                )
+            finally:
+                db.close()
+            return render_template(
+                "logsView.html",
+                users=[],
+                page_icon="favicon.ico",
+                page_title=_("Actividad usuarios"),
+                icon="fas fa-user-friends",
+                subtitle=_("Analisis de la Actividad de los Usuarios"),
+                selected_date=date.today().isoformat(),
+                search_query="",
+                pagination={"page": 1, "per_page": 15, "total_pages": 1, "total": 0, "page_range": []},
+                active_tab=active_tab,
+                group_report=group_report,
+            )
+
         date_str = request.args.get("date")
         page = request.args.get("page", 1, type=int)
         search = request.args.get("search", "", type=str)
@@ -151,6 +193,8 @@ def logs():
                 "total": users_page.get("total", 0),
                 "page_range": list(range(page_start, page_end + 1)),
             },
+            active_tab=active_tab,
+            group_report=None,
         )
     except Exception as e:
         logger.error(f"Error en ruta /logs: {e}")
