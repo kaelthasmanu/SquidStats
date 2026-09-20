@@ -204,7 +204,11 @@ def list_groups() -> dict:
         }
     except Exception as exc:
         logger.error(f"Error listing ldap groups: {exc}")
-        return {"status": "error", "message": _("No se pudieron cargar los grupos."), "groups": []}
+        return {
+            "status": "error",
+            "message": _("No se pudieron cargar los grupos."),
+            "groups": [],
+        }
     finally:
         session.close()
 
@@ -233,7 +237,11 @@ def create_group(data: dict) -> dict:
             group.source = source
             group.updated_at = datetime.now()
         session.commit()
-        return {"status": "success", "message": _("Grupo guardado."), "group": _serialize_group(group, session)}
+        return {
+            "status": "success",
+            "message": _("Grupo guardado."),
+            "group": _serialize_group(group, session),
+        }
     except Exception as exc:
         session.rollback()
         logger.error(f"Error creating ldap group: {exc}")
@@ -245,7 +253,9 @@ def create_group(data: dict) -> dict:
 def add_members(data: dict) -> dict:
     group_id = data.get("group_id")
     group_name = (data.get("group_name") or "").strip()
-    usernames = _normalize_usernames(data.get("usernames") or data.get("username") or [])
+    usernames = _normalize_usernames(
+        data.get("usernames") or data.get("username") or []
+    )
     if not usernames:
         raise ValueError(_("Debe indicar al menos un usuario."))
     if any(len(username) > 255 for username in usernames):
@@ -272,7 +282,11 @@ def add_members(data: dict) -> dict:
                     )
                 )
         session.commit()
-        return {"status": "success", "message": _("Usuarios añadidos."), **list_groups()}
+        return {
+            "status": "success",
+            "message": _("Usuarios añadidos."),
+            **list_groups(),
+        }
     except Exception as exc:
         session.rollback()
         logger.error(f"Error adding ldap group members: {exc}")
@@ -304,7 +318,11 @@ def remove_member(data: dict) -> dict:
         if member is not None:
             session.delete(member)
             session.commit()
-        return {"status": "success", "message": _("Usuario eliminado."), **list_groups()}
+        return {
+            "status": "success",
+            "message": _("Usuario eliminado."),
+            **list_groups(),
+        }
     except Exception as exc:
         session.rollback()
         logger.error(f"Error removing ldap group member: {exc}")
