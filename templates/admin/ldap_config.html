@@ -1,17 +1,28 @@
 {% extends 'admin/base.html' %}
 
-{% block title %}{{ _("LDAP / Active Directory | Admin Squid") }}{% endblock %}
+{% block title %}{{ _("LDAP/AD y Grupos | Admin Squid") }}{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-6" x-data="ldapApp()" x-init="init()">
+    <div class="bg-white shadow rounded-lg border border-gray-200 p-2">
+        <nav class="flex flex-wrap gap-2" aria-label="{{ _('LDAP tabs') }}">
+            <button type="button" @click="activeTab = 'ldap'" :class="activeTab === 'ldap' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                {{ _("LDAP/AD") }}
+            </button>
+            <button type="button" @click="activeTab = 'groups'" :class="activeTab === 'groups' ? 'bg-indigo-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                {{ _("Grupos") }}
+            </button>
+        </nav>
+    </div>
 
+    <div x-show="activeTab === 'ldap'" class="space-y-6">
     <!-- ── Header ────────────────────────────────────────────────────── -->
     <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-network-wired text-blue-600"></i>
-                    {{ _("LDAP / Active Directory") }}
+                    {{ _("LDAP/AD") }}
                 </h2>
                 <p class="text-sm text-gray-500 mt-1">{{ _("Configura la conexión y explora el directorio.") }}</p>
             </div>
@@ -193,7 +204,7 @@
             <!-- Search Groups -->
             <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
-                    <i class="fas fa-layer-group text-indigo-500"></i> {{ _("Buscar Grupos") }}
+                    <i class="fas fa-layer-group text-indigo-500"></i> {{ _("Buscar Grupos en LDAP/AD") }}
                 </h3>
                 <div class="flex gap-2 mb-4">
                     <input x-model="groupQuery" @keydown.enter="searchGroups()" type="text"
@@ -280,6 +291,104 @@
 
         </div>
     </div>
+    </div>
+
+    <div x-show="activeTab === 'groups'" class="space-y-6">
+        <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-layer-group text-indigo-500"></i> {{ _("Grupos administrativos") }}
+                </h3>
+                <button @click="loadGroups()" :disabled="loadingGroups" class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold disabled:opacity-50">
+                    <i class="fas fa-sync-alt" :class="loadingGroups ? 'animate-spin' : ''"></i> {{ _("Actualizar") }}
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Nombre del grupo") }}</label>
+                    <input x-model="groupForm.name" type="text" placeholder="{{ _('Ej. directivos') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Descripción") }}</label>
+                    <input x-model="groupForm.description" type="text" placeholder="{{ _('Opcional') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ _("Origen") }}</label>
+                    <select x-model="groupForm.source" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="custom">{{ _("Personalizado") }}</option>
+                        <option value="ldap">{{ _("LDAP") }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button @click="createGroup()" :disabled="creatingGroup" class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                    <i class="fas fa-plus"></i>
+                    <span x-text="creatingGroup ? '{{ _('Creando…') }}' : '{{ _('Crear grupo') }}'"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white shadow rounded-lg border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                <i class="fas fa-users text-purple-500"></i> {{ _("Grupos creados") }}
+            </h3>
+
+            <div x-show="groupList.length === 0 && !loadingGroups" class="text-sm text-gray-500 text-center py-6">
+                <i class="fas fa-inbox mr-2"></i>{{ _("Todavía no hay grupos definidos.") }}
+            </div>
+
+            <div x-show="loadingGroups" class="flex items-center justify-center py-8 text-gray-400">
+                <i class="fas fa-circle-notch fa-spin text-2xl mr-3"></i> {{ _("Cargando grupos…") }}
+            </div>
+
+            <div class="space-y-4" x-show="groupList.length > 0 && !loadingGroups">
+                <template x-for="group in groupList" :key="group.id">
+                    <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="text-lg font-semibold text-gray-800" x-text="group.name"></h4>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide" :class="group.source === 'ldap' ? 'bg-blue-100 text-blue-700' : 'bg-indigo-100 text-indigo-700'" x-text="group.source === 'ldap' ? '{{ _('LDAP') }}' : '{{ _('Personalizado') }}'"></span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1" x-text="group.description || '{{ _('Sin descripción') }}'"></p>
+                            </div>
+                            <button @click="deleteGroup(group.id, group.name)" class="text-red-600 hover:text-red-800 text-sm font-semibold transition-colors">
+                                <i class="fas fa-trash-alt mr-1"></i>{{ _("Eliminar") }}
+                            </button>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input x-model="memberInputs[group.id]" type="text" :placeholder="'{{ _('usuario1, usuario2, ...') }}'" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                <button @click="addMembers(group.id, group.name)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-colors">
+                                    <i class="fas fa-user-plus mr-1"></i>{{ _("Añadir usuarios") }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-4" x-show="group.members && group.members.length > 0">
+                            <p class="text-xs text-gray-500 mb-2"><span x-text="group.member_count"></span> {{ _("usuario(s) asociado(s)") }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="member in group.members" :key="member.id">
+                                    <span class="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-full">
+                                        <span x-text="member.username"></span>
+                                        <button @click="removeMember(group.id, group.name, member.username)" class="text-red-500 hover:text-red-700" title="{{ _('Quitar usuario') }}">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+                        <p x-show="group.members && group.members.length === 0" class="text-sm text-gray-500 mt-3">
+                            <i class="fas fa-inbox mr-2"></i>{{ _("Este grupo aún no tiene usuarios asociados.") }}
+                        </p>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script type="application/json" id="ldap-config-data">
@@ -307,6 +416,15 @@ function ldapApp() {
         // Connection status
         connectionStatus: "{{ _('Sin probar') }}",
         clientNotice: "",
+
+        activeTab: "ldap",
+
+        // Group management
+        groupForm: { name: "", description: "", source: "custom" },
+        groupList: [],
+        loadingGroups: false,
+        creatingGroup: false,
+        memberInputs: {},
 
         // Stats
         stats:        { users: null, groups: null },
@@ -342,6 +460,7 @@ function ldapApp() {
                 this.clientNotice = '{{ _('Configuración cargada desde la base de datos.') }}';
             }
             this.$watch('cfg', () => { this.saveLocalConfig(); }, { deep: true });
+            this.loadGroups();
         },
 
         loadLocalConfig() {
@@ -423,6 +542,134 @@ function ldapApp() {
                 this.showAlert('{{ _('Error al guardar la configuración.') }}', 'error');
             } finally {
                 this.savingCfg = false;
+            }
+        },
+
+        async loadGroups() {
+            this.loadingGroups = true;
+            try {
+                const res = await fetch('/admin/api/ldap/groups', {
+                    method: 'GET',
+                    headers: { 'X-CSRFToken': this.csrfToken() },
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    this.groupList = data.groups || [];
+                } else {
+                    this.showAlert(data.message || '{{ _('No se pudieron cargar los grupos.') }}', 'error');
+                }
+            } catch (error) {
+                console.error('[LDAP DEBUG] loadGroups error', error);
+                this.showAlert('{{ _('Error al cargar los grupos.') }}', 'error');
+            } finally {
+                this.loadingGroups = false;
+            }
+        },
+
+        async createGroup() {
+            if (!this.groupForm.name.trim()) {
+                this.showAlert('{{ _('El nombre del grupo es obligatorio.') }}', 'error');
+                return;
+            }
+            this.creatingGroup = true;
+            try {
+                const res = await fetch('/admin/api/ldap/groups', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.csrfToken() },
+                    body: JSON.stringify({ action: 'create', ...this.groupForm }),
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    this.groupForm = { name: '', description: '', source: 'custom' };
+                    this.groupList = data.group ? [data.group] : this.groupList;
+                    this.loadGroups();
+                    this.showAlert(data.message, 'success');
+                } else {
+                    this.showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('[LDAP DEBUG] createGroup error', error);
+                this.showAlert('{{ _('Error al crear el grupo.') }}', 'error');
+            } finally {
+                this.creatingGroup = false;
+            }
+        },
+
+        async addMembers(groupId, groupName) {
+            const raw = this.memberInputs[groupId] || '';
+            const usernames = raw.split(/[\n,;]+/).map(item => item.trim()).filter(Boolean);
+            if (!usernames.length) {
+                this.showAlert('{{ _('Indica al menos un usuario para añadir.') }}', 'error');
+                return;
+            }
+            try {
+                const res = await fetch('/admin/api/ldap/groups', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.csrfToken() },
+                    body: JSON.stringify({ action: 'add-members', group_id: groupId, group_name: groupName, usernames }),
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    this.groupList = data.groups || [];
+                    this.memberInputs[groupId] = '';
+                    this.showAlert(data.message, 'success');
+                } else {
+                    this.showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('[LDAP DEBUG] addMembers error', error);
+                this.showAlert('{{ _('Error al añadir usuarios al grupo.') }}', 'error');
+            }
+        },
+
+        async removeMember(groupId, groupName, username) {
+            try {
+                const res = await fetch('/admin/api/ldap/groups', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.csrfToken() },
+                    body: JSON.stringify({ action: 'remove-member', group_id: groupId, group_name: groupName, username }),
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    this.groupList = data.groups || [];
+                    this.showAlert(data.message, 'success');
+                } else {
+                    this.showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('[LDAP DEBUG] removeMember error', error);
+                this.showAlert('{{ _('Error al quitar el usuario del grupo.') }}', 'error');
+            }
+        },
+
+        async deleteGroup(groupId, groupName) {
+            const removeGroup = async () => {
+                try {
+                    const res = await fetch('/admin/api/ldap/groups', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': this.csrfToken() },
+                        body: JSON.stringify({ action: 'delete', group_id: groupId, group_name: groupName }),
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        this.groupList = data.groups || [];
+                        this.showAlert(data.message, 'success');
+                    } else {
+                        this.showAlert(data.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('[LDAP DEBUG] deleteGroup error', error);
+                    this.showAlert('{{ _('Error al eliminar el grupo.') }}', 'error');
+                }
+            };
+
+            if (typeof showCustomConfirm === 'function') {
+                showCustomConfirm(
+                    {{ _('¿Está seguro de que desea eliminar este grupo y todos sus usuarios asociados?')|tojson }},
+                    removeGroup,
+                );
+            } else {
+                await removeGroup();
             }
         },
 
