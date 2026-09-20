@@ -104,7 +104,9 @@ def get_group_traffic_summary(
                 user["total_requests"] += requests
                 user["total_bytes"] += total_bytes
 
-    result["total_requests"] = sum(item["total_requests"] for item in aggregate.values())
+    result["total_requests"] = sum(
+        item["total_requests"] for item in aggregate.values()
+    )
     result["total_bytes"] = sum(item["total_bytes"] for item in aggregate.values())
 
     group_rows = []
