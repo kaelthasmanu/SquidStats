@@ -69,7 +69,13 @@ def register_routes(bp):
             return jsonify({"status": "error", "message": str(exc), "groups": []}), 400
         except Exception as exc:
             logger.exception(f"Unexpected LDAP group error: {exc}")
-            return jsonify({"status": "error", "message": _("Error interno en grupos LDAP."), "groups": []}), 500
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": _("Error interno en grupos LDAP."),
+                    "groups": [],
+                }
+            ), 500
 
     # ------------------------------------------------------------------
     # Test connection
