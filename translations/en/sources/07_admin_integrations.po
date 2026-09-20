@@ -357,6 +357,62 @@ msgstr "Network error while saving."
 msgid "Error de red al probar la conexión."
 msgstr "Network error while testing the connection."
 
+#: templates/logsView.html
+msgid "Actividad"
+msgstr "Activity"
+
+#: templates/logsView.html
+msgid "Grupos"
+msgstr "Groups"
+
+#: templates/partials/logs_groups.html
+msgid "Desde"
+msgstr "From"
+
+#: templates/partials/logs_groups.html
+msgid "Hasta"
+msgstr "To"
+
+#: templates/partials/logs_groups.html
+msgid "Hoy"
+msgstr "Today"
+
+#: templates/partials/logs_groups.html
+msgid "Periodo"
+msgstr "Period"
+
+#: templates/partials/logs_groups.html
+msgid "Datos consumidos"
+msgstr "Data consumed"
+
+#: templates/partials/logs_groups.html
+msgid "Grupo"
+msgstr "Group"
+
+#: templates/partials/logs_groups.html
+msgid "Sin grupo"
+msgstr "No group"
+
+#: templates/partials/logs_groups.html
+msgid "No hay tráfico para este periodo."
+msgstr "There is no traffic for this period."
+
+#: templates/partials/logs_groups.html
+msgid "Usuarios del grupo"
+msgstr "Group users"
+
+#: templates/partials/logs_groups.html
+msgid "solicitudes"
+msgstr "requests"
+
+#: templates/partials/logs_groups.html
+msgid "No hay usuarios con tráfico."
+msgstr "There are no users with traffic."
+
+#: templates/partials/logs_groups.html
+msgid "Selecciona un grupo para ver sus usuarios."
+msgstr "Select a group to view its users."
+
 #: templates/admin/ldap_config.html:481
 msgid "El campo de búsqueda de usuario no puede estar vacío."
 msgstr "User search field cannot be empty."
