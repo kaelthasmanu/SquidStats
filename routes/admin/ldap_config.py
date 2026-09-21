@@ -66,7 +66,17 @@ def register_routes(bp):
                 return jsonify(ldap_config_service.delete_group(data))
             return jsonify(ldap_config_service.list_groups())
         except ValueError as exc:
-            return jsonify({"status": "error", "message": str(exc), "groups": []}), 400
+            logger.warning("LDAP group validation error: {}", exc)
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": _("Solicitud inválida para grupos LDAP."),
+                        "groups": [],
+                    }
+                ),
+                400,
+            )
         except Exception as exc:
             logger.exception(f"Unexpected LDAP group error: {exc}")
             return jsonify(
