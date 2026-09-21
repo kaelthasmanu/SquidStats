@@ -78,6 +78,78 @@ msgstr "Successfully connected to LDAP/AD server."
 msgid "Usuario no encontrado."
 msgstr "User not found."
 
+#: services/ldap/ldap_config_service.py
+msgid "El identificador del grupo no es válido."
+msgstr "The group identifier is invalid."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudieron cargar los grupos."
+msgstr "Groups could not be loaded."
+
+#: services/ldap/ldap_config_service.py
+msgid "El nombre del grupo es obligatorio."
+msgstr "The group name is required."
+
+#: services/ldap/ldap_config_service.py
+msgid "El nombre del grupo no puede superar los 255 caracteres."
+msgstr "The group name cannot exceed 255 characters."
+
+#: services/ldap/ldap_config_service.py
+msgid "La descripción no puede superar los 2000 caracteres."
+msgstr "The description cannot exceed 2000 characters."
+
+#: services/ldap/ldap_config_service.py
+msgid "El origen del grupo no es válido."
+msgstr "The group source is invalid."
+
+#: services/ldap/ldap_config_service.py
+msgid "Grupo guardado."
+msgstr "Group saved."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar al menos un usuario."
+msgstr "At least one user is required."
+
+#: services/ldap/ldap_config_service.py
+msgid "El nombre de usuario no puede superar los 255 caracteres."
+msgstr "The username cannot exceed 255 characters."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se encontró el grupo."
+msgstr "Group not found."
+
+#: services/ldap/ldap_config_service.py
+msgid "Usuarios añadidos."
+msgstr "Users added."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudieron añadir los usuarios al grupo."
+msgstr "Users could not be added to the group."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar un usuario."
+msgstr "A user is required."
+
+#: services/ldap/ldap_config_service.py
+msgid "Usuario eliminado."
+msgstr "User removed."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudo quitar al usuario del grupo."
+msgstr "The user could not be removed from the group."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar el grupo a eliminar."
+msgstr "The group to delete is required."
+
+#: services/ldap/ldap_config_service.py
+msgid "Grupo eliminado."
+msgstr "Group deleted."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudo eliminar el grupo."
+msgstr "The group could not be deleted."
+
 #: services/notifications/notifications.py:302
 msgid "fa-times-circle"
 msgstr "fa-times-circle"

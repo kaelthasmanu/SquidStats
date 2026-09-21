@@ -3,6 +3,7 @@
 {% block styles %}<link rel="stylesheet" href="{{ url_for('static', filename='logs.css') }}"/>{% endblock %}
 
 {% block header_actions %}
+  {% if active_tab != 'groups' %}
   <form method="get" class="dashboard-header flex justify-between items-center mb-8 flex-wrap gap-4">
     <div class="filters-container flex gap-4 items-center w-full max-w-4xl mx-auto">
       <div class="date-filter w-full max-w-sm mx-auto rounded-[0.5rem] shadow-md overflow-hidden relative">
@@ -35,10 +36,26 @@
       </div>
     </div>
   </form>
+  {% endif %}
 {% endblock header_actions %}
 
 {% block content %}
-    {% include 'partials/logs.html' %}
+    <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-3">
+      <a href="{{ url_for('logs.logs', tab='activity', date=selected_date, search=search_query) }}"
+         class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors {% if active_tab != 'groups' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+        <i class="fas fa-list mr-2"></i>{{ _('Actividad') }}
+      </a>
+      <a href="{{ url_for('logs.logs', tab='groups') }}"
+         class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors {% if active_tab == 'groups' %}bg-indigo-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+        <i class="fas fa-layer-group mr-2"></i>{{ _('Grupos') }}
+      </a>
+    </div>
+
+    {% if active_tab == 'groups' %}
+      {% include 'partials/logs_groups.html' %}
+    {% else %}
+      {% include 'partials/logs.html' %}
+    {% endif %}
 {% endblock %}
 
 {% block scripts %}

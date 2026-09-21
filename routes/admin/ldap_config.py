@@ -44,6 +44,49 @@ def register_routes(bp):
                 {"status": "error", "message": _("Error al guardar la configuración.")}
             ), 500
 
+    @bp.route("/api/ldap/groups", methods=["GET", "POST"])
+    @api_auth_required
+    def ldap_groups_api():
+        if request.method == "GET":
+            return jsonify(ldap_config_service.list_groups())
+
+        data = request.get_json(silent=True) or {}
+        action = (data.get("action") or "").strip().lower()
+
+        try:
+            if action in ("", "list"):
+                return jsonify(ldap_config_service.list_groups())
+            if action in ("create", "save"):
+                return jsonify(ldap_config_service.create_group(data))
+            if action in ("add-member", "add-members"):
+                return jsonify(ldap_config_service.add_members(data))
+            if action == "remove-member":
+                return jsonify(ldap_config_service.remove_member(data))
+            if action == "delete":
+                return jsonify(ldap_config_service.delete_group(data))
+            return jsonify(ldap_config_service.list_groups())
+        except ValueError as exc:
+            logger.warning("LDAP group validation error: {}", exc)
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": _("Solicitud inválida para grupos LDAP."),
+                        "groups": [],
+                    }
+                ),
+                400,
+            )
+        except Exception as exc:
+            logger.exception(f"Unexpected LDAP group error: {exc}")
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": _("Error interno en grupos LDAP."),
+                    "groups": [],
+                }
+            ), 500
+
     # ------------------------------------------------------------------
     # Test connection
     # ------------------------------------------------------------------

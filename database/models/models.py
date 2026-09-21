@@ -4,9 +4,11 @@ from sqlalchemy import (
     BigInteger,
     Column,
     DateTime,
+    ForeignKey,
     Integer,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import declarative_base
@@ -232,6 +234,34 @@ class LdapConfig(Base):
     base_dn = Column(String(512), nullable=False, default="")
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class LdapGroup(Base):
+    """Custom LDAP/AD groups managed by the admin."""
+
+    __tablename__ = "ldap_groups"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False, unique=True, index=True)
+    description = Column(Text, nullable=True)
+    source = Column(String(50), nullable=False, default="custom")
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class LdapGroupMember(Base):
+    """Users assigned to a managed LDAP/AD group."""
+
+    __tablename__ = "ldap_group_members"
+    __table_args__ = (
+        UniqueConstraint("group_id", "username", name="uq_ldap_group_member"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    group_id = Column(Integer, ForeignKey("ldap_groups.id"), nullable=False, index=True)
+    username = Column(String(255), nullable=False, index=True)
+    source = Column(String(50), nullable=False, default="manual")
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
 
 
 class SquidConfig(Base):
