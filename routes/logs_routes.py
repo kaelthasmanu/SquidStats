@@ -131,9 +131,9 @@ def logs():
                 "logsView.html",
                 users=[],
                 page_icon="favicon.ico",
-                page_title=_("Actividad usuarios"),
+                page_title=_("Actividad de usuarios y Grupos"),
                 icon="fas fa-user-friends",
-                subtitle=_("Analisis de la Actividad de los Usuarios"),
+                subtitle=_("Analisis de la Actividad de los Usuarios y Grupos"),
                 selected_date=date.today().isoformat(),
                 search_query="",
                 pagination={
@@ -187,9 +187,9 @@ def logs():
             "logsView.html",
             users=users,
             page_icon="favicon.ico",
-            page_title=_("Actividad usuarios"),
+            page_title=_("Actividad de usuarios y Grupos"),
             icon="fas fa-user-friends",
-            subtitle=_("Analisis de la Actividad de los Usuarios"),
+            subtitle=_("Analisis de la Actividad de los Usuarios y Grupos"),
             selected_date=selected_date.strftime("%Y-%m-%d"),
             search_query=search or "",
             pagination={
