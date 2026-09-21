@@ -221,12 +221,12 @@ msgid "Parámetro 'username' requerido."
 msgstr "Parameter 'username' required."
 
 #: routes/logs_routes.py:24
-msgid "Actividad usuarios"
-msgstr "User Activity"
+msgid "Actividad de usuarios y Grupos"
+msgstr "User and Group Activity"
 
 #: routes/logs_routes.py:26
-msgid "Analisis de la Actividad de los Usuarios"
-msgstr "User Activity Analysis"
+msgid "Analisis de la Actividad de los Usuarios y Grupos"
+msgstr "Analysis of User and Group Activity"
 
 #: routes/logs_routes.py:90
 msgid "Registros Bloqueados"
