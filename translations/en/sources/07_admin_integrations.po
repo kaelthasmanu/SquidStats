@@ -425,6 +425,30 @@ msgstr "pages found"
 msgid "No hay páginas accedidas."
 msgstr "No pages accessed."
 
+#: templates/partials/logs_groups.html
+msgid "Exportar PDF"
+msgstr "Export PDF"
+
+#: templates/logs_groups_pdf.html
+msgid "Reporte de grupos"
+msgstr "Groups report"
+
+#: templates/logs_groups_pdf.html
+msgid "Generado"
+msgstr "Generated"
+
+#: templates/logs_groups_pdf.html
+msgid "Resumen por grupo"
+msgstr "Summary by group"
+
+#: routes/logs_routes.py
+msgid "La exportación PDF no está disponible en este momento."
+msgstr "PDF export is not available at this time."
+
+#: routes/logs_routes.py
+msgid "Error interno generando el reporte PDF."
+msgstr "Internal error generating the PDF report."
+
 #: templates/admin/ldap_config.html:481
 msgid "El campo de búsqueda de usuario no puede estar vacío."
 msgstr "User search field cannot be empty."
