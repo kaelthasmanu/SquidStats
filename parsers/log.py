@@ -235,6 +235,24 @@ def _ignore_log_line(line: str) -> bool:
     )
 
 
+def _preview_log_line(line: str | None, max_chars: int = 180) -> str:
+    if line is None:
+        return "<none>"
+    text = str(line).rstrip("\r\n")
+    if len(text) <= max_chars:
+        return text
+    return text[: max_chars - 3] + "..."
+
+
+def _count_lines(log_file: str) -> int:
+    try:
+        with open(log_file, "r", encoding="utf-8", errors="replace") as file:
+            return sum(1 for _ in file)
+    except OSError as error:
+        logger.warning("Unable to count lines in {}: {}", log_file, error)
+        return 0
+
+
 def parse_log_line(line: str, format_hint: str = FORMAT_AUTO):
     """Parse one line using a detected format or safe per-line detection."""
     if not isinstance(line, str) or not line.strip():
@@ -459,9 +477,20 @@ def _ingest_log_file(log_file, session, start_position: int = 0) -> tuple[dict, 
     pending_denied = []
     pending_stats = defaultdict(lambda: {"logs": 0, "users": 0, "denied": 0})
     start_time = time.time()
+    total_lines = _count_lines(log_file)
+    last_line_seen = None
+    last_valid_line = None
+    last_skipped_line = None
 
     detected_format = detect_log_format(log_file, start_position=start_position)
-    logger.info("Detected Squid log format: {}", detected_format)
+    logger.info(
+        "LOG_IMPORT_START file={} total_lines={} start_position={} detected_format={} size_bytes={}",
+        log_file,
+        total_lines,
+        start_position,
+        detected_format,
+        os.path.getsize(log_file),
+    )
 
     def get_models(date_suffix):
         if date_suffix not in models_by_date:
@@ -554,6 +583,7 @@ def _ingest_log_file(log_file, session, start_position: int = 0) -> tuple[dict, 
     with open(log_file, encoding="utf-8", errors="replace") as file:
         file.seek(start_position)
         for line in file:
+            last_line_seen = line.rstrip("\r\n")
             summary["processed_lines"] += 1
             current_position += len(line.encode("utf-8"))
 
@@ -561,8 +591,20 @@ def _ingest_log_file(log_file, session, start_position: int = 0) -> tuple[dict, 
             log_datetime = get_log_datetime(line)
             if not log_data or log_datetime is None:
                 summary["skipped_lines"] += 1
+                last_skipped_line = last_line_seen
+                if summary["processed_lines"] % 500 == 0:
+                    logger.warning(
+                        "LOG_IMPORT_PROGRESS file={} processed={} parsed={} skipped={} current_position={} last_skipped_line={}",
+                        log_file,
+                        summary["processed_lines"],
+                        summary["parsed_lines"],
+                        summary["skipped_lines"],
+                        current_position,
+                        _preview_log_line(last_skipped_line),
+                    )
                 continue
 
+            last_valid_line = last_line_seen
             summary["parsed_lines"] += 1
             date_suffix = log_datetime.strftime("%Y%m%d")
             DynamicUser, _ = get_models(date_suffix)
@@ -629,16 +671,36 @@ def _ingest_log_file(log_file, session, start_position: int = 0) -> tuple[dict, 
                 >= BATCH_SIZE
             ):
                 commit_batch()
+                logger.info(
+                    "LOG_IMPORT_BATCH_COMMIT file={} processed={} parsed={} skipped={} pending_users={} pending_logs={} pending_denied={} current_position={} last_valid_line={}",
+                    log_file,
+                    summary["processed_lines"],
+                    summary["parsed_lines"],
+                    summary["skipped_lines"],
+                    sum(len(items) for items in pending_users.values()),
+                    sum(len(items) for items in pending_logs.values()),
+                    len(pending_denied),
+                    current_position,
+                    _preview_log_line(last_valid_line),
+                )
 
     commit_batch()
     summary["dates"] = [date_summaries[key] for key in sorted(date_summaries)]
     elapsed = time.time() - start_time
     logger.info(
-        "Logs inserted: {}, New users: {}, Denied: {} ({} lines in {:.2f}s)",
+        "LOG_IMPORT_SUMMARY file={} total_lines={} processed={} parsed={} skipped={} inserted_logs={} inserted_users={} inserted_denied={} current_position={} last_line_seen={} last_valid_line={} last_skipped_line={} elapsed_seconds={:.2f}",
+        log_file,
+        total_lines,
+        summary["processed_lines"],
+        summary["parsed_lines"],
+        summary["skipped_lines"],
         summary["inserted_logs"],
         summary["inserted_users"],
         summary["inserted_denied"],
-        summary["processed_lines"],
+        current_position,
+        _preview_log_line(last_line_seen),
+        _preview_log_line(last_valid_line),
+        _preview_log_line(last_skipped_line),
         elapsed,
     )
     return summary, current_position
@@ -677,19 +739,41 @@ def process_logs(log_file):
 
     current_inode = get_file_inode(log_file)
     file_size = os.path.getsize(log_file)
+    line_count = _count_lines(log_file)
     session = get_session()
     try:
         metadata = session.query(LogMetadata).first()
         last_position = metadata.last_position if metadata else 0
+        last_inode = metadata.last_inode if metadata else None
+        last_updated = metadata.updated_at if metadata else None
+        logger.info(
+            "LOG_TAIL_CHECK file={} size_bytes={} inode={} line_count={} metadata_exists={} metadata_last_position={} metadata_last_inode={} metadata_updated_at={} start_position={}",
+            log_file,
+            file_size,
+            current_inode,
+            line_count,
+            bool(metadata),
+            last_position,
+            last_inode,
+            last_updated,
+            last_position,
+        )
+
         if metadata:
             if metadata.last_inode != current_inode:
                 logger.info(
-                    f"Inode changed: {metadata.last_inode} -> {current_inode}. Resetting position."
+                    "LOG_TAIL_RESET_INODE file={} old_inode={} new_inode={} reason=inode_changed",
+                    log_file,
+                    metadata.last_inode,
+                    current_inode,
                 )
                 last_position = 0
             elif file_size < last_position:
                 logger.warning(
-                    f"File truncated (size: {file_size} < position: {last_position})"
+                    "LOG_TAIL_RESET_TRUNCATE file={} size_bytes={} last_position={} reason=file_truncated",
+                    log_file,
+                    file_size,
+                    last_position,
                 )
                 last_position = 0
 
@@ -703,6 +787,19 @@ def process_logs(log_file):
         metadata.last_inode = current_inode
         metadata.updated_at = datetime.now()
         session.commit()
+        logger.info(
+            "LOG_TAIL_SAVE file={} size_bytes={} inode={} line_count={} final_position={} previous_position={} meta_updated_at={} inserted_logs={} inserted_users={} inserted_denied={}",
+            log_file,
+            file_size,
+            current_inode,
+            line_count,
+            current_position,
+            last_position,
+            metadata.updated_at,
+            summary["inserted_logs"],
+            summary["inserted_users"],
+            summary["inserted_denied"],
+        )
         return summary
     except Exception as error:
         session.rollback()
