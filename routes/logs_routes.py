@@ -253,7 +253,9 @@ def logs_groups_download_pdf():
         pdf_bytes = HTML(string=html, base_url=request.url_root).write_pdf(
             stylesheets=[CSS(string="body { font-family: Arial, sans-serif; }")]
         )
-        filename = f"squidstats_groups_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
+        filename = (
+            f"squidstats_groups_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
+        )
         buffer = BytesIO(pdf_bytes)
         buffer.seek(0)
         return send_file(
