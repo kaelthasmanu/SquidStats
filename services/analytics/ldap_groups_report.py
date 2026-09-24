@@ -138,11 +138,7 @@ def get_group_traffic_summary(
         display_item["user_count"] = len(item["users"])
         display_item["users"] = sorted(
             (
-                {
-                    key: value
-                    for key, value in user.items()
-                    if key != "pages"
-                }
+                {key: value for key, value in user.items() if key != "pages"}
                 for user in item["users"].values()
             ),
             key=lambda user: (-user["total_bytes"], user["username"].lower()),
@@ -165,11 +161,7 @@ def get_group_traffic_summary(
         selected = aggregate[str(selected_group_id)]
         selected_users = sorted(
             (
-                {
-                    key: value
-                    for key, value in user.items()
-                    if key != "pages"
-                }
+                {key: value for key, value in user.items() if key != "pages"}
                 for user in selected["users"].values()
             ),
             key=lambda user: (-user["total_bytes"], user["username"].lower()),
@@ -211,9 +203,7 @@ def get_group_traffic_summary(
                     else 0
                 )
                 if result["selected_user_total_pages"]:
-                    page_number = min(
-                        page_number, result["selected_user_total_pages"]
-                    )
+                    page_number = min(page_number, result["selected_user_total_pages"])
                     result["selected_user_page"] = page_number
                 offset = (page_number - 1) * page_size
                 result["selected_user_pages"] = all_user_pages[
