@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ _('Reporte de grupos') }}</title>
+  <style>
+    @page { size: A4; margin: 18mm 14mm; }
+    body { color: #1f2937; font-size: 10px; }
+    h1 { color: #172554; font-size: 22px; margin: 0 0 5px; }
+    h2 { color: #1e3a8a; font-size: 15px; margin: 22px 0 8px; }
+    h3 { color: #334155; font-size: 12px; margin: 16px 0 6px; }
+    .meta { color: #64748b; font-size: 9px; margin-bottom: 16px; }
+    .summary { display: table; width: 100%; margin-bottom: 18px; }
+    .metric { display: table-cell; border: 1px solid #cbd5e1; padding: 9px; width: 33%; }
+    .metric + .metric { border-left: 0; }
+    .label { color: #64748b; font-size: 9px; text-transform: uppercase; }
+    .value { color: #1e40af; font-size: 15px; font-weight: bold; margin-top: 3px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 14px; }
+    th, td { border: 1px solid #cbd5e1; padding: 6px; }
+    th { background: #eff6ff; color: #1e3a8a; text-align: left; }
+    .right { text-align: right; }
+    .group-block, .user-block { page-break-inside: avoid; }
+    .selected { background: #eef2ff; }
+    .url { word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h1>{{ _('Reporte de grupos') }}</h1>
+  <div class="meta">
+    {{ _('Periodo') }}: {{ group_report.start_date }} - {{ group_report.end_date }}
+    · {{ _('Generado') }}: {{ generated_at }}
+  </div>
+
+  <div class="summary">
+    <div class="metric">
+      <div class="label">{{ _('Solicitudes') }}</div>
+      <div class="value">{{ group_report.total_requests }}</div>
+    </div>
+    <div class="metric">
+      <div class="label">{{ _('Datos consumidos') }}</div>
+      <div class="value">{{ group_report.total_bytes|format_bytes }}</div>
+    </div>
+    <div class="metric">
+      <div class="label">{{ _('Grupos') }}</div>
+      <div class="value">{{ group_report.groups|length }}</div>
+    </div>
+  </div>
+
+  <h2>{{ _('Resumen por grupo') }}</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{{ _('Grupo') }}</th>
+        <th class="right">{{ _('Usuarios') }}</th>
+        <th class="right">{{ _('Datos') }}</th>
+        <th class="right">%</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for group in group_report.groups %}
+        <tr{% if group_report.selected_group and group_report.selected_group.id == group.id %} class="selected"{% endif %}>
+          <td>{{ loop.index }}</td>
+          <td>{{ group.name }}</td>
+          <td class="right">{{ group.user_count }}</td>
+          <td class="right">{{ group.total_bytes|format_bytes }}</td>
+          <td class="right">{{ '%.1f'|format(group.percentage) }}%</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5">{{ _('No hay tráfico para este periodo.') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if group_report.selected_group %}
+    <h2>{{ _('Usuarios del grupo') }}: {{ group_report.selected_group.name }}</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>{{ _('Usuario') }}</th>
+          <th class="right">{{ _('Solicitudes') }}</th>
+          <th class="right">{{ _('Datos') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in group_report.selected_group_users %}
+          <tr{% if group_report.selected_user and group_report.selected_user.username == user.username %} class="selected"{% endif %}>
+            <td>{{ user.username }}</td>
+            <td class="right">{{ user.total_requests }}</td>
+            <td class="right">{{ user.total_bytes|format_bytes }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3">{{ _('No hay usuarios con tráfico.') }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  {% if group_report.selected_user %}
+    <div class="user-block">
+      <h2>{{ _('Detalle del usuario') }}: {{ group_report.selected_user.username }}</h2>
+      <div class="meta">
+        {{ group_report.selected_user.total_requests }} {{ _('solicitudes') }} ·
+        {{ group_report.selected_user.total_bytes|format_bytes }} ·
+        {{ group_report.selected_user_total_count }} {{ _('páginas encontradas') }}
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ _('Página') }}</th>
+            <th class="right">{{ _('Solicitudes') }}</th>
+            <th class="right">{{ _('Datos') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for page in group_report.selected_user_pages %}
+            <tr>
+              <td class="url">{{ page.url }}</td>
+              <td class="right">{{ page.total_requests }}</td>
+              <td class="right">{{ page.total_bytes|format_bytes }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="3">{{ _('No hay páginas accedidas.') }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</body>
+</html>
