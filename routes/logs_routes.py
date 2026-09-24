@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
+from io import BytesIO
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, send_file
 from flask_babel import gettext as _
 from loguru import logger
 
@@ -8,6 +9,12 @@ from database.database import get_session
 from services.analytics.blacklist_users import find_blacklisted_sites
 from services.analytics.fetch_data_logs import get_users_logs
 from services.analytics.ldap_groups_report import get_group_traffic_summary
+
+try:
+    from weasyprint import CSS, HTML
+except Exception:
+    CSS = None
+    HTML = None
 
 logs_bp = Blueprint("logs", __name__)
 
@@ -212,6 +219,56 @@ def logs():
     except Exception as e:
         logger.error(f"Error en ruta /logs: {e}")
         return render_template("error.html", message="Error retrieving logs"), 500
+
+
+@logs_bp.route("/logs/groups/download/pdf")
+def logs_groups_download_pdf():
+    """Export the complete groups report, including selected-user details."""
+    if HTML is None or CSS is None:
+        logger.error("Groups PDF export requested but WeasyPrint is unavailable.")
+        return render_template(
+            "error.html",
+            message=_("La exportación PDF no está disponible en este momento."),
+        ), 503
+
+    start_date, end_date = _parse_group_report_dates()
+    selected_group_id = request.args.get("group_id", type=int)
+    selected_username = request.args.get("user", type=str)
+    db = get_session()
+    try:
+        group_report = get_group_traffic_summary(
+            db,
+            start_date,
+            end_date,
+            selected_group_id,
+            selected_username,
+            selected_user_page=1,
+            selected_user_page_size=1_000_000,
+        )
+        html = render_template(
+            "logs_groups_pdf.html",
+            group_report=group_report,
+            generated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        pdf_bytes = HTML(string=html, base_url=request.url_root).write_pdf(
+            stylesheets=[CSS(string="body { font-family: Arial, sans-serif; }")]
+        )
+        filename = f"squidstats_groups_{start_date.isoformat()}_{end_date.isoformat()}.pdf"
+        buffer = BytesIO(pdf_bytes)
+        buffer.seek(0)
+        return send_file(
+            buffer,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=filename,
+        )
+    except Exception:
+        logger.exception("Error generating groups PDF report")
+        return render_template(
+            "error.html", message=_("Error interno generando el reporte PDF.")
+        ), 500
+    finally:
+        db.close()
 
 
 @logs_bp.route("/get-logs-by-date", methods=["POST"])
