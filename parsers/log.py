@@ -74,6 +74,18 @@ DETAILED_REQUEST_RE = re.compile(
 )
 
 
+def _normalize_log_line(line: str) -> str:
+    """Remove transport wrappers that can surround a Squid log line."""
+    normalized = line.lstrip("\ufeff").strip()
+    if normalized.startswith('"') and len(normalized) > 1:
+        timestamp_start = normalized[1:].split(None, 1)[0]
+        if _is_number(timestamp_start):
+            normalized = normalized[1:].lstrip()
+    if '\\"' in normalized:
+        normalized = normalized.replace('\\"', '"')
+    return normalized
+
+
 def find_last_parent_proxy(log_file: str, lines_to_check: int = 5000) -> str | None:
     if not os.path.exists(log_file):
         return None
@@ -139,7 +151,7 @@ def get_log_datetime(line: str) -> datetime | None:
         return None
 
     try:
-        timestamp_token = line.lstrip("\ufeff").split(None, 1)[0]
+        timestamp_token = _normalize_log_line(line).split(None, 1)[0]
         timestamp = float(timestamp_token.split("|", 1)[0])
         if not isfinite(timestamp) or timestamp < 0:
             return None
@@ -183,7 +195,7 @@ def _is_default_line(parts: list[str]) -> bool:
 
 
 def _is_pipe_line(line: str) -> bool:
-    parts = line.strip().split("|")
+    parts = _normalize_log_line(line).split("|")
     return bool(
         len(parts) >= 14
         and _is_number(parts[0])
@@ -205,7 +217,7 @@ def _is_space_detailed_line(parts: list[str]) -> bool:
 
 
 def _is_quoted_detailed_line(line: str):
-    match = DETAILED_REQUEST_RE.match(line.strip())
+    match = DETAILED_REQUEST_RE.match(_normalize_log_line(line))
     return bool(match and match.group("method").upper() in HTTP_METHODS)
 
 
@@ -216,11 +228,12 @@ def _detect_line_format(line: str) -> str | None:
     if _is_pipe_line(line):
         return FORMAT_DETAILED
 
-    parts = line.split()
+    normalized_line = _normalize_log_line(line)
+    parts = normalized_line.split()
     if _is_default_line(parts):
         return FORMAT_DEFAULT
 
-    if _is_quoted_detailed_line(line) or _is_space_detailed_line(parts):
+    if _is_quoted_detailed_line(normalized_line) or _is_space_detailed_line(parts):
         return FORMAT_DETAILED
 
     return None
@@ -258,8 +271,9 @@ def parse_log_line(line: str, format_hint: str = FORMAT_AUTO):
     if not isinstance(line, str) or not line.strip():
         return None
 
+    normalized_line = _normalize_log_line(line)
     try:
-        if _ignore_log_line(line):
+        if _ignore_log_line(normalized_line):
             return None
     except Exception as error:
         logger.debug("Unexpected error pre-filtering log line: {}", error)
@@ -267,15 +281,15 @@ def parse_log_line(line: str, format_hint: str = FORMAT_AUTO):
 
     normalized_hint = (format_hint or FORMAT_AUTO).upper()
     if normalized_hint == FORMAT_DEFAULT:
-        return parse_log_line_default(line)
+        return parse_log_line_default(normalized_line)
     if normalized_hint == FORMAT_DETAILED:
-        return parse_log_line_detailed(line)
+        return parse_log_line_detailed(normalized_line)
 
-    detected_format = _detect_line_format(line)
+    detected_format = _detect_line_format(normalized_line)
     if detected_format == FORMAT_DEFAULT:
-        return parse_log_line_default(line)
+        return parse_log_line_default(normalized_line)
     if detected_format == FORMAT_DETAILED:
-        return parse_log_line_detailed(line)
+        return parse_log_line_detailed(normalized_line)
     return None
 
 
@@ -286,9 +300,10 @@ def parse_log_line_default(line: str):
     hierarchy content-type``
     """
     try:
-        if _ignore_log_line(line):
+        normalized_line = _normalize_log_line(line)
+        if _ignore_log_line(normalized_line):
             return None
-        parts = line.split()
+        parts = normalized_line.split()
         if not _is_default_line(parts):
             return None
 
@@ -313,12 +328,13 @@ def parse_log_line_default(line: str):
 
 def parse_log_line_detailed(line: str):
     """Parse the supported legacy DETAILED variants."""
-    if _ignore_log_line(line):
+    normalized_line = _normalize_log_line(line)
+    if _ignore_log_line(normalized_line):
         return None
-    if _is_pipe_line(line):
-        return parse_log_line_pipe_format(line)
+    if _is_pipe_line(normalized_line):
+        return parse_log_line_pipe_format(normalized_line)
 
-    quoted_match = DETAILED_REQUEST_RE.match(line.strip())
+    quoted_match = DETAILED_REQUEST_RE.match(normalized_line)
     if quoted_match:
         try:
             identity = quoted_match.group("identity")
@@ -337,7 +353,7 @@ def parse_log_line_detailed(line: str):
                 "data_transmitted": _bytes_transmitted(quoted_match.group("bytes")),
                 "method": quoted_match.group("method").upper(),
                 "status": status,
-                "is_denied": "TCP_DENIED" in line,
+                "is_denied": "TCP_DENIED" in normalized_line,
             }
         except (IndexError, TypeError, ValueError) as error:
             logger.debug(
@@ -347,12 +363,13 @@ def parse_log_line_detailed(line: str):
             )
             return None
 
-    return parse_log_line_space_format(line)
+    return parse_log_line_space_format(normalized_line)
 
 
 def parse_log_line_pipe_format(line):
-    parts = line.strip().split("|")
-    if not _is_pipe_line(line):
+    normalized_line = _normalize_log_line(line)
+    parts = normalized_line.split("|")
+    if not _is_pipe_line(normalized_line):
         return None
     try:
         username = parts[3]
@@ -376,7 +393,8 @@ def parse_log_line_pipe_format(line):
 def parse_log_line_space_format(line):
     """Parse the legacy whitespace-separated DETAILED variant."""
     try:
-        parts = line.split()
+        normalized_line = _normalize_log_line(line)
+        parts = normalized_line.split()
         if not _is_space_detailed_line(parts) or parts[3] == "-":
             return None
         status = parts[4]
@@ -388,7 +406,7 @@ def parse_log_line_space_format(line):
             "data_transmitted": int(parts[10]),
             "method": parts[5].upper(),
             "status": status,
-            "is_denied": "TCP_DENIED" in line,
+            "is_denied": "TCP_DENIED" in normalized_line,
         }
     except (IndexError, TypeError, ValueError) as error:
         logger.debug(
