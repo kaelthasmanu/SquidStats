@@ -16,6 +16,9 @@
       <a href="{{ url_for('logs.logs', tab='groups') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
         <i class="fas fa-calendar-day mr-2"></i>{{ _('Hoy') }}
       </a>
+      <a href="{{ url_for('logs.logs_groups_download_pdf', start_date=group_report.start_date, end_date=group_report.end_date, group_id=group_report.selected_group.id if group_report.selected_group else None, user=group_report.selected_user.username if group_report.selected_user else None) }}" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors" target="_blank" rel="noopener">
+        <i class="fas fa-file-pdf mr-2"></i>{{ _('Exportar PDF') }}
+      </a>
     </div>
   </form>
 
