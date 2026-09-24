@@ -413,6 +413,18 @@ msgstr "There are no users with traffic."
 msgid "Selecciona un grupo para ver sus usuarios."
 msgstr "Select a group to view its users."
 
+#: templates/partials/logs_groups.html
+msgid "Detalle del usuario"
+msgstr "User details"
+
+#: templates/partials/logs_groups.html
+msgid "páginas encontradas"
+msgstr "pages found"
+
+#: templates/partials/logs_groups.html
+msgid "No hay páginas accedidas."
+msgstr "No pages accessed."
+
 #: templates/admin/ldap_config.html:481
 msgid "El campo de búsqueda de usuario no puede estar vacío."
 msgstr "User search field cannot be empty."
