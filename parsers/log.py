@@ -246,7 +246,7 @@ def _preview_log_line(line: str | None, max_chars: int = 180) -> str:
 
 def _count_lines(log_file: str) -> int:
     try:
-        with open(log_file, "r", encoding="utf-8", errors="replace") as file:
+        with open(log_file, encoding="utf-8", errors="replace") as file:
             return sum(1 for _ in file)
     except OSError as error:
         logger.warning("Unable to count lines in {}: {}", log_file, error)
