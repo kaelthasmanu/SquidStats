@@ -28,6 +28,12 @@ def _empty_result(start_date: date, end_date: date) -> dict:
         "groups": [],
         "selected_group": None,
         "selected_group_users": [],
+        "selected_user": None,
+        "selected_user_pages": [],
+        "selected_user_page": 1,
+        "selected_user_page_size": 50,
+        "selected_user_total_pages": 0,
+        "selected_user_total_count": 0,
     }
 
 
@@ -36,6 +42,9 @@ def get_group_traffic_summary(
     start_date: date,
     end_date: date,
     selected_group_id: int | None = None,
+    selected_username: str | None = None,
+    selected_user_page: int = 1,
+    selected_user_page_size: int = 50,
 ) -> dict:
     """Aggregate traffic from daily tables and map it to managed LDAP groups."""
     result = _empty_result(start_date, end_date)
@@ -76,19 +85,20 @@ def get_group_traffic_summary(
             rows = (
                 session.query(
                     user_model.username,
+                    log_model.url,
                     func.coalesce(func.sum(log_model.request_count), 0),
                     func.coalesce(func.sum(log_model.data_transmitted), 0),
                 )
                 .join(log_model, user_model.id == log_model.user_id)
                 .filter(user_model.username != "-")
-                .group_by(user_model.username)
+                .group_by(user_model.username, log_model.url)
                 .all()
             )
         except Exception as exc:
             logger.debug("Skipping unavailable log table for {}: {}", current_date, exc)
             continue
 
-        for username, requests, total_bytes in rows:
+        for username, url, requests, total_bytes in rows:
             requests = int(requests or 0)
             total_bytes = int(total_bytes or 0)
             target_ids = username_groups.get(username) or {None}
@@ -99,10 +109,21 @@ def get_group_traffic_summary(
                 bucket["total_bytes"] += total_bytes
                 user = bucket["users"].setdefault(
                     username,
-                    {"username": username, "total_requests": 0, "total_bytes": 0},
+                    {
+                        "username": username,
+                        "total_requests": 0,
+                        "total_bytes": 0,
+                        "pages": {},
+                    },
                 )
                 user["total_requests"] += requests
                 user["total_bytes"] += total_bytes
+                page = user["pages"].setdefault(
+                    url,
+                    {"url": url, "total_requests": 0, "total_bytes": 0},
+                )
+                page["total_requests"] += requests
+                page["total_bytes"] += total_bytes
 
     result["total_requests"] = sum(
         item["total_requests"] for item in aggregate.values()
@@ -113,12 +134,20 @@ def get_group_traffic_summary(
     for item in aggregate.values():
         if item["id"] is None and not item["users"]:
             continue
-        item["user_count"] = len(item["users"])
-        item["users"] = sorted(
-            item["users"].values(),
+        display_item = {key: value for key, value in item.items() if key != "users"}
+        display_item["user_count"] = len(item["users"])
+        display_item["users"] = sorted(
+            (
+                {
+                    key: value
+                    for key, value in user.items()
+                    if key != "pages"
+                }
+                for user in item["users"].values()
+            ),
             key=lambda user: (-user["total_bytes"], user["username"].lower()),
         )
-        group_rows.append(item)
+        group_rows.append(display_item)
 
     group_rows.sort(key=lambda group: (-group["total_bytes"], group["name"]))
     for item in group_rows:
@@ -134,12 +163,15 @@ def get_group_traffic_summary(
 
     if selected_group_id is not None and selected_group_id in group_by_id:
         selected = aggregate[str(selected_group_id)]
-        selected["user_count"] = len(selected["users"])
-        selected_users_source = selected["users"]
-        if isinstance(selected_users_source, dict):
-            selected_users_source = selected_users_source.values()
         selected_users = sorted(
-            selected_users_source,
+            (
+                {
+                    key: value
+                    for key, value in user.items()
+                    if key != "pages"
+                }
+                for user in selected["users"].values()
+            ),
             key=lambda user: (-user["total_bytes"], user["username"].lower()),
         )
         result["selected_group"] = {
@@ -155,5 +187,37 @@ def get_group_traffic_summary(
             ),
         }
         result["selected_group_users"] = selected_users
+
+        if selected_username:
+            selected_user = selected["users"].get(selected_username)
+            if selected_user:
+                result["selected_user"] = {
+                    "username": selected_user["username"],
+                    "total_requests": selected_user["total_requests"],
+                    "total_bytes": selected_user["total_bytes"],
+                }
+                all_user_pages = sorted(
+                    selected_user["pages"].values(),
+                    key=lambda page: (-page["total_bytes"], page["url"].lower()),
+                )
+                page_size = max(1, selected_user_page_size)
+                page_number = max(1, selected_user_page)
+                result["selected_user_page_size"] = page_size
+                result["selected_user_page"] = page_number
+                result["selected_user_total_count"] = len(all_user_pages)
+                result["selected_user_total_pages"] = (
+                    (len(all_user_pages) + page_size - 1) // page_size
+                    if all_user_pages
+                    else 0
+                )
+                if result["selected_user_total_pages"]:
+                    page_number = min(
+                        page_number, result["selected_user_total_pages"]
+                    )
+                    result["selected_user_page"] = page_number
+                offset = (page_number - 1) * page_size
+                result["selected_user_pages"] = all_user_pages[
+                    offset : offset + page_size
+                ]
 
     return result
