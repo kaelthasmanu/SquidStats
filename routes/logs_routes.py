@@ -120,10 +120,17 @@ def logs():
         if active_tab == "groups":
             start_date, end_date = _parse_group_report_dates()
             selected_group_id = request.args.get("group_id", type=int)
+            selected_username = request.args.get("user", type=str)
+            selected_user_page = request.args.get("user_page", 1, type=int)
             db = get_session()
             try:
                 group_report = get_group_traffic_summary(
-                    db, start_date, end_date, selected_group_id
+                    db,
+                    start_date,
+                    end_date,
+                    selected_group_id,
+                    selected_username,
+                    selected_user_page,
                 )
             finally:
                 db.close()
