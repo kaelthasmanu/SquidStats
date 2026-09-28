@@ -69,6 +69,214 @@ msgstr "SquidStats Logo"
 msgid "Ver Detalles"
 msgstr "View Details"
 
+#: templates/captive_portal/login.html
+msgid "Portal cautivo de acceso a la red."
+msgstr "Captive portal for network access."
+
+#: templates/captive_portal/login.html
+msgid "Inicia sesión para acceder a Internet"
+msgstr "Sign in to access the Internet"
+
+#: templates/captive_portal/login.html
+msgid "Usuario"
+msgstr "Username"
+
+#: templates/captive_portal/login.html
+msgid "Contraseña"
+msgstr "Password"
+
+#: templates/captive_portal/login.html
+msgid "Ingresa tu usuario"
+msgstr "Enter your username"
+
+#: templates/captive_portal/login.html
+msgid "Ingresa tu contraseña"
+msgstr "Enter your password"
+
+#: templates/captive_portal/login.html
+msgid "Conectarme a Internet"
+msgstr "Connect to the Internet"
+
+#: templates/captive_portal/success.html routes/captive_portal_routes.py
+msgid "Acceso concedido"
+msgstr "Access granted"
+
+#: templates/captive_portal/success.html
+msgid "¡Ya tienes acceso a Internet!"
+msgstr "You now have Internet access!"
+
+#: templates/captive_portal/success.html
+msgid "Puedes cerrar esta ventana y continuar navegando."
+msgstr "You can close this window and continue browsing."
+
+#: templates/captive_portal/success.html
+msgid "Tiempo restante"
+msgstr "Time remaining"
+
+#: templates/captive_portal/success.html
+msgid "Inicio"
+msgstr "Start"
+
+#: templates/captive_portal/success.html
+msgid "Vencimiento"
+msgstr "Expiration"
+
+#: templates/captive_portal/success.html
+msgid "Cerrar sesión"
+msgstr "Log out"
+
+#: templates/captive_portal/success.html
+msgid "Sesión expirada"
+msgstr "Session expired"
+
+#: routes/captive_portal_routes.py
+msgid "Acceso concedido. Ya puedes navegar."
+msgstr "Access granted. You can now browse."
+
+#: routes/captive_portal_routes.py
+msgid "Sesión cerrada."
+msgstr "Session closed."
+
+#: templates/admin/captive_portal.html
+msgid "Portal Cautivo | Admin SquidStats"
+msgstr "Captive Portal | SquidStats Admin"
+
+#: templates/admin/captive_portal.html
+msgid "Portal Cautivo"
+msgstr "Captive Portal"
+
+#: templates/admin/captive_portal.html
+msgid "Requiere que los usuarios se autentiquen contra LDAP/AD antes de navegar. Squid consulta una ACL externa que valida la sesión por dirección IP."
+msgstr "Requires users to authenticate against LDAP/AD before browsing. Squid queries an external ACL that validates the session by IP address."
+
+#: templates/admin/captive_portal.html
+msgid "Habilitado"
+msgstr "Enabled"
+
+#: templates/admin/captive_portal.html
+msgid "Deshabilitado"
+msgstr "Disabled"
+
+#: templates/admin/captive_portal.html
+msgid "El portal autentica contra el LDAP/AD configurado en \"LDAP/AD y Grupos\". Configúralo primero si aún no lo has hecho."
+msgstr "The portal authenticates against the LDAP/AD configured in \"LDAP/AD and Groups\". Configure it first if you have not already done so."
+
+#: templates/admin/captive_portal.html
+msgid "Vista previa de squid.conf"
+msgstr "squid.conf preview"
+
+#: templates/admin/captive_portal.html
+msgid "Habilitar portal cautivo"
+msgstr "Enable captive portal"
+
+#: templates/admin/captive_portal.html
+msgid "Título del portal"
+msgstr "Portal title"
+
+#: templates/admin/captive_portal.html
+msgid "URL pública del portal"
+msgstr "Public portal URL"
+
+#: templates/admin/captive_portal.html
+msgid "Dirección donde los usuarios acceden a esta aplicación. Se usa en la redirección 302 y para permitir el tráfico hacia el propio portal."
+msgstr "Address where users access this application. It is used for the 302 redirect and to allow traffic to the portal itself."
+
+#: templates/admin/captive_portal.html
+msgid "Duración de sesión (minutos)"
+msgstr "Session duration (minutes)"
+
+#: templates/admin/captive_portal.html
+msgid "TTL de la ACL (segundos)"
+msgstr "ACL TTL (seconds)"
+
+#: templates/admin/captive_portal.html
+msgid "TTL negativo de la ACL (segundos)"
+msgstr "Negative ACL TTL (seconds)"
+
+#: templates/admin/captive_portal.html
+msgid "Guardar y aplicar"
+msgstr "Save and apply"
+
+#: templates/admin/captive_portal.html
+msgid "Sesiones activas"
+msgstr "Active sessions"
+
+#: templates/admin/captive_portal.html
+msgid "IP"
+msgstr "IP"
+
+#: templates/admin/captive_portal.html
+msgid "Creada"
+msgstr "Created"
+
+#: templates/admin/captive_portal.html
+msgid "Expira"
+msgstr "Expires"
+
+#: templates/admin/captive_portal.html
+msgid "Acciones"
+msgstr "Actions"
+
+#: templates/admin/captive_portal.html
+msgid "Revocar"
+msgstr "Revoke"
+
+#: templates/admin/captive_portal.html
+msgid "No hay sesiones activas."
+msgstr "There are no active sessions."
+
+#: routes/admin/captive_portal.py
+msgid "La URL pública debe ser una URL HTTP o HTTPS válida sin credenciales."
+msgstr "The public URL must be a valid HTTP or HTTPS URL without credentials."
+
+#: routes/admin/captive_portal.py
+msgid "El tiempo de vida de la sesión debe ser un entero positivo"
+msgstr "The session lifetime must be a positive integer"
+
+#: routes/admin/captive_portal.py
+msgid "Los valores de TTL de la ACL deben ser enteros no negativos"
+msgstr "ACL TTL values must be non-negative integers"
+
+#: routes/admin/captive_portal.py
+msgid "Debes definir la URL pública del portal antes de habilitarlo"
+msgstr "You must define the public portal URL before enabling it"
+
+#: routes/admin/captive_portal.py
+msgid "Configuración guardada, pero Squid no pudo recargarse: %s"
+msgstr "Configuration saved, but Squid could not be reloaded: %s"
+
+#: services/captive_portal/session_service.py
+msgid "Dirección IP inválida"
+msgstr "Invalid IP address"
+
+#: services/captive_portal/session_service.py
+msgid "Sesión activa para %s (%s)"
+msgstr "Active session for %s (%s)"
+
+#: services/captive_portal/session_service.py
+msgid "Error al guardar la sesión"
+msgstr "Error saving the session"
+
+#: services/captive_portal/session_service.py
+msgid "No hay sesión activa para %s"
+msgstr "There is no active session for %s"
+
+#: services/captive_portal/session_service.py
+msgid "Sesión revocada para %s"
+msgstr "Session revoked for %s"
+
+#: services/captive_portal/session_service.py
+msgid "Error al revocar la sesión"
+msgstr "Error revoking the session"
+
+#: routes/captive_portal_routes.py
+msgid "Demasiados intentos fallidos. Intenta de nuevo en %s minutos."
+msgstr "Too many failed attempts. Try again in %s minutes."
+
+#: routes/captive_portal_routes.py
+msgid "Por favor, ingresa usuario y contraseña."
+msgstr "Please enter your username and password."
+
 #~ msgid "0\" x-text=\"integrityResult.error_count + ' error(es) detectado(s)'\">"
 #~ msgstr ""
 
