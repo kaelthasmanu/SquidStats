@@ -190,8 +190,24 @@ msgid "Dirección donde los usuarios acceden a esta aplicación. Se usa en la re
 msgstr "Address where users access this application. It is used for the 302 redirect and to allow traffic to the portal itself."
 
 #: templates/admin/captive_portal.html
-msgid "Duración de sesión (minutos)"
-msgstr "Session duration (minutes)"
+msgid "Duración de sesión"
+msgstr "Session duration"
+
+#: templates/admin/captive_portal.html
+msgid "Minutos"
+msgstr "Minutes"
+
+#: templates/admin/captive_portal.html
+msgid "Horas"
+msgstr "Hours"
+
+#: templates/admin/captive_portal.html
+msgid "Días"
+msgstr "Days"
+
+#: templates/admin/captive_portal.html
+msgid "Ejemplos: 2 horas, 72 horas o 10 días."
+msgstr "Examples: 2 hours, 72 hours, or 10 days."
 
 #: templates/admin/captive_portal.html
 msgid "TTL de la ACL (segundos)"
@@ -240,6 +256,10 @@ msgstr "The public URL must be a valid HTTP or HTTPS URL without credentials."
 #: routes/admin/captive_portal.py
 msgid "El tiempo de vida de la sesión debe ser un entero positivo"
 msgstr "The session lifetime must be a positive integer"
+
+#: routes/admin/captive_portal.py
+msgid "La duración de la sesión debe ser un valor positivo y una unidad válida"
+msgstr "The session duration must be a positive value and a valid unit"
 
 #: routes/admin/captive_portal.py
 msgid "Los valores de TTL de la ACL deben ser enteros no negativos"
