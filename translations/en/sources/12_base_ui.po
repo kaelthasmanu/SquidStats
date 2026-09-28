@@ -162,6 +162,14 @@ msgid "El portal autentica contra el LDAP/AD configurado en \"LDAP/AD y Grupos\"
 msgstr "The portal authenticates against the LDAP/AD configured in \"LDAP/AD and Groups\". Configure it first if you have not already done so."
 
 #: templates/admin/captive_portal.html
+msgid "Importante:"
+msgstr "Important:"
+
+#: templates/admin/captive_portal.html
+msgid "Revisa el orden de las ACL y de todas las reglas añadidas a Squid por el portal cautivo antes de aplicar la configuración o recargar el servicio. Un orden incorrecto puede dejar el acceso bloqueado o permitir tráfico sin autenticación."
+msgstr "Review the order of the ACLs and all rules added to Squid by the captive portal before applying the configuration or reloading the service. An incorrect order can block access or allow unauthenticated traffic."
+
+#: templates/admin/captive_portal.html
 msgid "Vista previa de squid.conf"
 msgstr "squid.conf preview"
 
