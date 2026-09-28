@@ -50,7 +50,10 @@ def login():
 
         is_allowed, remaining = AuthService.check_rate_limit(f"portal:{client_ip}")
         if not is_allowed:
-            error = _("Demasiados intentos fallidos. Intenta de nuevo en %s minutos.") % remaining
+            error = (
+                _("Demasiados intentos fallidos. Intenta de nuevo en %s minutos.")
+                % remaining
+            )
         elif not username or not password:
             error = _("Por favor, ingresa usuario y contraseña.")
         else:
@@ -94,7 +97,9 @@ def success():
     session_seconds = max(
         0,
         int(
-            (active_session["expires_at"] - active_session["created_at"]).total_seconds()
+            (
+                active_session["expires_at"] - active_session["created_at"]
+            ).total_seconds()
         ),
     )
     return render_template(
