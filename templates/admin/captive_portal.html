@@ -1,0 +1,128 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ _("Portal Cautivo | Admin SquidStats") }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="bg-white rounded-lg border border-gray-200 shadow p-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-door-open text-indigo-600"></i>
+                    {{ _("Portal Cautivo") }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-600">
+                    {{ _("Requiere que los usuarios se autentiquen contra LDAP/AD antes de navegar. Squid consulta una ACL externa que valida la sesión por dirección IP.") }}
+                </p>
+            </div>
+            {% if settings.enabled %}
+                <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-semibold text-emerald-800">
+                    <i class="fas fa-check-circle"></i>{{ _("Habilitado") }}
+                </span>
+            {% else %}
+                <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-700">
+                    <i class="fas fa-minus-circle"></i>{{ _("Deshabilitado") }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 flex gap-3">
+        <i class="fas fa-info-circle mt-0.5 text-blue-600"></i>
+        <p>{{ _("El portal autentica contra el LDAP/AD configurado en \"LDAP/AD y Grupos\". Configúralo primero si aún no lo has hecho.") }}</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">{{ _("Vista previa de squid.conf") }}</h3>
+        <pre class="overflow-x-auto whitespace-pre-wrap rounded bg-gray-900 p-4 text-xs text-gray-100">{{ config_preview }}</pre>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <form method="POST" action="{{ url_for('admin.captive_portal_save') }}" class="space-y-5">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <label class="flex items-center gap-3">
+                <input type="checkbox" name="enabled" {% if settings.enabled %}checked{% endif %}
+                    class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                <span class="text-sm font-medium text-gray-700">{{ _("Habilitar portal cautivo") }}</span>
+            </label>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ _("Título del portal") }}</label>
+                <input type="text" name="portal_title" value="{{ settings.portal_title }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ _("URL pública del portal") }}</label>
+                <input type="text" name="portal_public_url" value="{{ settings.portal_public_url }}"
+                    placeholder="https://portal.miempresa.com"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs text-gray-500 mt-1">{{ _("Dirección donde los usuarios acceden a esta aplicación. Se usa en la redirección 302 y para permitir el tráfico hacia el propio portal.") }}</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _("Duración de sesión (minutos)") }}</label>
+                    <input type="number" min="1" name="session_ttl_minutes" value="{{ settings.session_ttl_minutes }}"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _("TTL de la ACL (segundos)") }}</label>
+                    <input type="number" min="0" name="acl_ttl_seconds" value="{{ settings.acl_ttl_seconds }}"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _("TTL negativo de la ACL (segundos)") }}</label>
+                    <input type="number" min="0" name="acl_negative_ttl_seconds" value="{{ settings.acl_negative_ttl_seconds }}"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                {{ _("Guardar y aplicar") }}
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ _("Sesiones activas") }}</h3>
+        {% if sessions %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead>
+                    <tr class="text-left text-gray-500">
+                        <th class="py-2 pr-4">{{ _("IP") }}</th>
+                        <th class="py-2 pr-4">{{ _("Usuario") }}</th>
+                        <th class="py-2 pr-4">{{ _("Creada") }}</th>
+                        <th class="py-2 pr-4">{{ _("Expira") }}</th>
+                        <th class="py-2 pr-4">{{ _("Acciones") }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for item in sessions %}
+                    <tr>
+                        <td class="py-2 pr-4 font-mono">{{ item.ip }}</td>
+                        <td class="py-2 pr-4">{{ item.username }}</td>
+                        <td class="py-2 pr-4">{{ item.created_at | datetime_format }}</td>
+                        <td class="py-2 pr-4">{{ item.expires_at | datetime_format }}</td>
+                        <td class="py-2 pr-4">
+                            <form method="POST" action="{{ url_for('admin.captive_portal_revoke_session') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="ip" value="{{ item.ip }}"/>
+                                <button type="submit" class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-sign-out-alt mr-1"></i>{{ _("Revocar") }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-500">{{ _("No hay sesiones activas.") }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
