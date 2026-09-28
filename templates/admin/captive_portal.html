@@ -32,6 +32,11 @@
         <p>{{ _("El portal autentica contra el LDAP/AD configurado en \"LDAP/AD y Grupos\". Configúralo primero si aún no lo has hecho.") }}</p>
     </div>
 
+    <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 flex gap-3">
+        <i class="fas fa-exclamation-triangle mt-0.5 text-amber-600"></i>
+        <p><strong>{{ _("Importante:") }}</strong> {{ _("Revisa el orden de las ACL y de todas las reglas añadidas a Squid por el portal cautivo antes de aplicar la configuración o recargar el servicio. Un orden incorrecto puede dejar el acceso bloqueado o permitir tráfico sin autenticación.") }}</p>
+    </div>
+
     <div class="bg-white rounded-lg shadow-lg p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-3">{{ _("Vista previa de squid.conf") }}</h3>
         <pre class="overflow-x-auto whitespace-pre-wrap rounded bg-gray-900 p-4 text-xs text-gray-100">{{ config_preview }}</pre>
