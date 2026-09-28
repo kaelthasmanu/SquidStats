@@ -8,8 +8,8 @@ plain ``http_access allow`` rule, so that pre-existing safety denies
 always run first.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -129,14 +129,18 @@ def _write(cm, block: str | None) -> tuple[bool, str]:
         if cm.is_modular:
             content = cm.read_modular_config(_HTTP_ACCESS_MODULE_FILENAME) or ""
             if block is None and _BLOCK_START not in content:
-                return True, _("La configuración del portal cautivo ya estaba deshabilitada")
+                return True, _(
+                    "La configuración del portal cautivo ya estaba deshabilitada"
+                )
             new_content = _apply_to_content(content, block)
             if cm.save_modular_config(_HTTP_ACCESS_MODULE_FILENAME, new_content):
                 return True, _("Configuración de portal cautivo actualizada")
             return False, _("Error al escribir la configuración modular")
 
         if block is None and _BLOCK_START not in cm.config_content:
-            return True, _("La configuración del portal cautivo ya estaba deshabilitada")
+            return True, _(
+                "La configuración del portal cautivo ya estaba deshabilitada"
+            )
         new_content = _apply_to_content(cm.config_content, block)
         if cm.save_config(new_content):
             return True, _("Configuración de portal cautivo actualizada")
