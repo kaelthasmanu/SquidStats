@@ -1,7 +1,6 @@
 """Public captive-portal routes: the login page users are redirected to by Squid."""
 
 from datetime import datetime
-from urllib.parse import urlsplit
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_babel import gettext as _
@@ -16,36 +15,17 @@ captive_portal_bp = Blueprint("captive_portal", __name__, url_prefix="/portal")
 def _client_ip() -> str:
     return request.remote_addr or ""
 
-
-def _safe_redirect_target(target: str) -> str | None:
-    """Accept only absolute HTTP(S) destinations for the post-login redirect."""
-    try:
-        parsed = urlsplit(target)
-        if (
-            parsed.scheme in {"http", "https"}
-            and parsed.hostname
-            and parsed.username is None
-            and parsed.password is None
-        ):
-            return target
-    except ValueError:
-        pass
-    return None
-
-
 @captive_portal_bp.route("/login", methods=["GET", "POST"])
 def login():
     """Show and process the captive-portal login form."""
     settings = config_service.get_config()
     if not settings["enabled"]:
         abort(404)
-    redirect_url = request.args.get("redirect", "")
     error = None
 
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        redirect_url = request.form.get("redirect", redirect_url)
         client_ip = _client_ip()
 
         is_allowed, remaining = AuthService.check_rate_limit(f"portal:{client_ip}")
@@ -68,9 +48,6 @@ def login():
                         f"Captive portal session created for {result} ({client_ip})"
                     )
                     flash(_("Acceso concedido. Ya puedes navegar."), "success")
-                    safe_target = _safe_redirect_target(redirect_url)
-                    if safe_target:
-                        return redirect(safe_target)
                     return redirect(url_for("captive_portal.success"))
                 error = message
             else:
@@ -80,7 +57,6 @@ def login():
     return render_template(
         "captive_portal/login.html",
         settings=settings,
-        redirect_url=redirect_url,
         error=error,
     )
 
