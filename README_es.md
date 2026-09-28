@@ -171,6 +171,7 @@ _Una herramienta moderna para analizar logs de Squid, proporcionando un panel f�
 - **_Sistema de Cuotas_**:
   - Quota por usuarios
   - Quota por grupos 
+- **_Portal Cautivo_**
 - **_Y Más_**
 
 ## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
@@ -282,11 +283,11 @@ No uses la función de dividir <code>squid.conf</code> mientras haya Kerberos/Ne
 1. Script para instalar:
 
 ```bash
- curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.6/install.sh | sudo bash
+ curl -fsSL https://github.com/kaelthasmanu/SquidStats/releases/download/2.6.1/install.sh | sudo bash
 ```
 o
 ```bash
-  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.6/install.sh | sudo bash
+  wget -qO- https://github.com/kaelthasmanu/SquidStats/releases/download/2.6.1/install.sh | sudo bash
 ```
 
 #### Opciones de Instalación
@@ -773,7 +774,7 @@ Advertencia: 🚨 La primera ejecución puede causar alto uso de CPU.
 1. Obtener el Script con curl o wget:
 
 ```bash
- wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.6/install.sh
+ wget https://github.com/kaelthasmanu/SquidStats/releases/download/2.6.1/install.sh
 ```
 
 2. Agregar permisos de ejecución:

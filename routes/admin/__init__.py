@@ -12,6 +12,7 @@ from . import (
     acls,
     backup,
     blacklist,
+    captive_portal,
     dashboard,
     database,
     delay_pools,
@@ -44,3 +45,4 @@ ldap_config.register_routes(admin_bp)
 backup.register_routes(admin_bp)
 system_api.register_routes(admin_bp)
 telegram_config.register_routes(admin_bp)
+captive_portal.register_routes(admin_bp)

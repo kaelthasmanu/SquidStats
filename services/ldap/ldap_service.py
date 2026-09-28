@@ -46,6 +46,75 @@ def _connect(cfg: dict) -> Connection:
 # ---------------------------------------------------------------------------
 
 
+def authenticate_user(cfg: dict, username: str, password: str) -> dict:
+    """Verify *username*/*password* against the directory (end-user login).
+
+    Resolves the user's DN with the service bind account and then attempts a
+    second bind as that DN with the supplied password. Used by the captive
+    portal, which authenticates network users rather than administrators.
+    """
+    username = (
+        (username or "").strip().replace("*", "").replace("(", "").replace(")", "")
+    )
+    if not username or not password:
+        return {"status": "error", "message": _("Usuario y contraseña requeridos.")}
+
+    lookup_username = username.rsplit("\\", 1)[-1]
+    escaped_username = _escape_ldap_filter_value(lookup_username)
+    try:
+        conn = _connect(cfg)
+    except Exception:
+        logger.exception("Error al conectar con LDAP para autenticar usuario")
+        return {
+            "status": "error",
+            "message": _("Error al conectar con el servidor LDAP"),
+        }
+
+    try:
+        conn.search(
+            cfg["base_dn"],
+            "(&(objectClass=person)(|"
+            f"(sAMAccountName={escaped_username})"
+            f"(userPrincipalName={escaped_username})))",
+            attributes=["cn"],
+        )
+        if not conn.entries:
+            return {"status": "error", "message": _("Usuario no encontrado.")}
+        user_dn = conn.entries[0].entry_dn
+    except Exception:
+        logger.exception("Error al buscar usuario LDAP para autenticación")
+        return {"status": "error", "message": _("Error al autenticar contra LDAP")}
+    finally:
+        conn.unbind()
+
+    try:
+        server = _make_server(cfg["host"], int(cfg["port"]), cfg["use_ssl"])
+        auth_method = NTLM if cfg["auth_type"] == "NTLM" else SIMPLE
+        bind_user = user_dn
+        if auth_method == NTLM:
+            domain = cfg["bind_dn"].split("\\", 1)[0] if "\\" in cfg["bind_dn"] else ""
+            bind_user = (
+                username
+                if "\\" in username or "@" in username or not domain
+                else f"{domain}\\{username}"
+            )
+        user_conn = Connection(
+            server,
+            user=bind_user,
+            password=password,
+            authentication=auth_method,
+            auto_bind=True,
+            raise_exceptions=True,
+        )
+        user_conn.unbind()
+        return {"status": "success", "username": username, "dn": user_dn}
+    except core.exceptions.LDAPBindError:
+        return {"status": "error", "message": _("Usuario o contraseña incorrectos.")}
+    except Exception:
+        logger.exception("Error de autenticación LDAP de usuario final")
+        return {"status": "error", "message": _("Error al autenticar contra LDAP")}
+
+
 def test_connection(cfg: dict) -> dict:
     """Try to bind with the provided settings. Returns status/message dict."""
     try:

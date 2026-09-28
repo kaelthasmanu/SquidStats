@@ -6,6 +6,7 @@ Contains all route blueprints organized by functionality.
 from .admin import admin_bp
 from .api_routes import api_bp
 from .auth_routes import auth_bp
+from .captive_portal_routes import captive_portal_bp
 from .i18n_routes import i18n_bp
 from .logs_routes import logs_bp
 from .main_routes import main_bp
@@ -23,3 +24,4 @@ def register_routes(app):
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(api_bp, url_prefix="/api")
     app.register_blueprint(stats_bp)
+    app.register_blueprint(captive_portal_bp)

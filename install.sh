@@ -7,7 +7,7 @@ DISTRO_TYPE=""
 # Archivo de log
 LOG_FILE="/tmp/squidstats_install.log"
 # Versión que se guarda en el archivo .env de la instalación.
-CURRENT_VERSION="2.6"
+CURRENT_VERSION="2.6.1"
 
 init_log() {
     local install_dir="${1:-}"
