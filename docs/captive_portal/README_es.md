@@ -85,7 +85,7 @@ chmod 600 .env
 Como mínimo, revisa estos valores:
 
 ```dotenv
-VERSION=2.6
+VERSION=2.6.1
 FLASK_DEBUG=False
 LISTEN_HOST=127.0.0.1
 LISTEN_PORT=5000
