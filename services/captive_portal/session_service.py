@@ -60,11 +60,7 @@ def get_active_session(ip: str) -> dict | None:
 
     session = get_session()
     try:
-        record = (
-            session.query(CaptivePortalSession)
-            .filter_by(ip=ip, active=1)
-            .first()
-        )
+        record = session.query(CaptivePortalSession).filter_by(ip=ip, active=1).first()
         if record is None or record.expires_at <= datetime.now():
             return None
         return {
