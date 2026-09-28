@@ -25,6 +25,8 @@ _DOMAIN_ACL_NAME = "squidstats_captive_portal_domain"
 
 _HTTP_ACCESS_MODULE_FILENAME = "120_http_access.conf"
 _WRITE_MODE_ENV = "SQUIDSTATS_SQUID_CONFIG_WRITE_MODE"
+_HELPER_PYTHON_ENV = "SQUIDSTATS_HELPER_PYTHON"
+_HELPER_PATH_ENV = "SQUIDSTATS_HELPER_PATH"
 
 HELPER_SCRIPT_PATH = (
     Path(__file__).resolve().parent / "helper" / "captive_portal_helper.py"
@@ -46,13 +48,14 @@ def render_block(
     acl_negative_ttl_seconds: int,
 ) -> str:
     """Build the Squid directive block for the captive portal."""
-    python_exe = sys.executable
+    python_exe = os.getenv(_HELPER_PYTHON_ENV, sys.executable).strip()
+    helper_path = os.getenv(_HELPER_PATH_ENV, str(HELPER_SCRIPT_PATH)).strip()
     lines = [
         _BLOCK_START,
         (
             f"external_acl_type {_EXTERNAL_ACL_NAME} "
             f"ttl={int(acl_ttl_seconds)} negative_ttl={int(acl_negative_ttl_seconds)} "
-            f'%SRC "{python_exe}" "{HELPER_SCRIPT_PATH}"'
+            f"%SRC {python_exe} {helper_path}"
         ),
         f"acl {_VALID_ACL_NAME} external {_EXTERNAL_ACL_NAME}",
     ]

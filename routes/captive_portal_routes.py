@@ -1,5 +1,6 @@
 """Public captive-portal routes: the login page users are redirected to by Squid."""
 
+from datetime import datetime
 from urllib.parse import urlsplit
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
@@ -83,7 +84,25 @@ def login():
 
 @captive_portal_bp.route("/success")
 def success():
-    return render_template("captive_portal/success.html")
+    active_session = session_service.get_active_session(_client_ip())
+    if active_session is None:
+        return redirect(url_for("captive_portal.login"))
+
+    remaining_seconds = max(
+        0, int((active_session["expires_at"] - datetime.now()).total_seconds())
+    )
+    session_seconds = max(
+        0,
+        int(
+            (active_session["expires_at"] - active_session["created_at"]).total_seconds()
+        ),
+    )
+    return render_template(
+        "captive_portal/success.html",
+        active_session=active_session,
+        remaining_seconds=remaining_seconds,
+        session_seconds=session_seconds,
+    )
 
 
 @captive_portal_bp.route("/logout", methods=["POST"])
