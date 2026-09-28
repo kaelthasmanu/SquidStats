@@ -72,21 +72,33 @@ def register_routes(bp):
                     and parsed_url.password is None
                     and not parsed_url.query
                     and not parsed_url.fragment
-                    and not any(char.isspace() or ord(char) < 32 for char in portal_public_url)
+                    and not any(
+                        char.isspace() or ord(char) < 32 for char in portal_public_url
+                    )
                     and len(portal_public_url) <= 512
                 )
-                parsed_url.port
+                parsed_port = parsed_url.port
+                valid_url = valid_url and (
+                    parsed_port is None or 0 <= parsed_port <= 65535
+                )
             except ValueError:
                 valid_url = False
             if not valid_url:
-                flash(_("La URL pública debe ser una URL HTTP o HTTPS válida sin credenciales."), "error")
+                flash(
+                    _(
+                        "La URL pública debe ser una URL HTTP o HTTPS válida sin credenciales."
+                    ),
+                    "error",
+                )
                 return redirect(url_for("admin.captive_portal_config"))
 
         session_ttl = get_int_form_field("session_ttl_minutes")
         acl_ttl = get_int_form_field("acl_ttl_seconds")
         acl_negative_ttl = get_int_form_field("acl_negative_ttl_seconds")
         if session_ttl is None or not 1 <= session_ttl <= 525600:
-            flash(_("El tiempo de vida de la sesión debe ser un entero positivo"), "error")
+            flash(
+                _("El tiempo de vida de la sesión debe ser un entero positivo"), "error"
+            )
             return redirect(url_for("admin.captive_portal_config"))
         if (
             acl_ttl is None
@@ -94,7 +106,10 @@ def register_routes(bp):
             or acl_negative_ttl is None
             or not 0 <= acl_negative_ttl <= 86400
         ):
-            flash(_("Los valores de TTL de la ACL deben ser enteros no negativos"), "error")
+            flash(
+                _("Los valores de TTL de la ACL deben ser enteros no negativos"),
+                "error",
+            )
             return redirect(url_for("admin.captive_portal_config"))
 
         settings = config_service.update_config(
@@ -108,9 +123,7 @@ def register_routes(bp):
 
         if settings["enabled"] and not settings["portal_public_url"]:
             flash(
-                _(
-                    "Debes definir la URL pública del portal antes de habilitarlo"
-                ),
+                _("Debes definir la URL pública del portal antes de habilitarlo"),
                 "error",
             )
             config_service.update_config(enabled=0)
@@ -124,8 +137,13 @@ def register_routes(bp):
 
         reloaded, reload_message, _details = system_service.reload_squid()
         if not reloaded:
-            logger.warning("Squid reload after captive portal update failed: %s", reload_message)
-            message = _("Configuración guardada, pero Squid no pudo recargarse: %s") % reload_message
+            logger.warning(
+                "Squid reload after captive portal update failed: %s", reload_message
+            )
+            message = (
+                _("Configuración guardada, pero Squid no pudo recargarse: %s")
+                % reload_message
+            )
             return flash_and_redirect(False, message, "admin.captive_portal_config")
         return flash_and_redirect(True, message, "admin.captive_portal_config")
 
