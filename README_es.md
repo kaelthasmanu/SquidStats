@@ -171,6 +171,7 @@ _Una herramienta moderna para analizar logs de Squid, proporcionando un panel f√
 - **_Sistema de Cuotas_**:
   - Quota por usuarios
   - Quota por grupos 
+- **_Portal Cautivo_**
 - **_Y M√°s_**
 
 ## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
