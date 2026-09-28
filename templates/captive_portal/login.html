@@ -50,7 +50,6 @@
 
         <form method="POST" action="{{ url_for('captive_portal.login') }}" class="space-y-6">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <input type="hidden" name="redirect" value="{{ redirect_url }}"/>
 
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
