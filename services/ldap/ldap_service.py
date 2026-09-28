@@ -53,8 +53,8 @@ def authenticate_user(cfg: dict, username: str, password: str) -> dict:
     second bind as that DN with the supplied password. Used by the captive
     portal, which authenticates network users rather than administrators.
     """
-    username = (username or "").strip().replace("*", "").replace("(", "").replace(
-        ")", ""
+    username = (
+        (username or "").strip().replace("*", "").replace("(", "").replace(")", "")
     )
     if not username or not password:
         return {"status": "error", "message": _("Usuario y contraseña requeridos.")}
