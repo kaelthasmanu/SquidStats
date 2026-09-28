@@ -17,6 +17,20 @@ from services.system import system_service
 
 from .helpers import flash_and_redirect, get_config_manager, get_int_form_field
 
+_SESSION_TTL_UNITS = {
+    "minutes": 1,
+    "hours": 60,
+    "days": 1440,
+}
+
+
+def _session_ttl_parts(total_minutes: int) -> tuple[int, str]:
+    """Return a readable value and unit for the stored minute value."""
+    for unit, multiplier in (("days", 1440), ("hours", 60), ("minutes", 1)):
+        if total_minutes % multiplier == 0:
+            return total_minutes // multiplier, unit
+    return total_minutes, "minutes"
+
 
 def _apply_squid_state(settings: dict) -> tuple[bool, str]:
     """(Re)apply the captive-portal directives to squid.conf per current settings."""
@@ -39,6 +53,9 @@ def register_routes(bp):
     @admin_required
     def captive_portal_config():
         settings = config_service.get_config()
+        settings["session_ttl_value"], settings["session_ttl_unit"] = (
+            _session_ttl_parts(settings["session_ttl_minutes"])
+        )
         sessions = session_service.list_active_sessions()
         login_url = (
             f"{settings['portal_public_url'].rstrip('/')}/portal/login?redirect=%s"
@@ -92,12 +109,22 @@ def register_routes(bp):
                 )
                 return redirect(url_for("admin.captive_portal_config"))
 
-        session_ttl = get_int_form_field("session_ttl_minutes")
+        session_ttl_value = get_int_form_field("session_ttl_value")
+        session_ttl_unit = request.form.get("session_ttl_unit", "").strip()
+        if session_ttl_value is None and request.form.get("session_ttl_minutes"):
+            session_ttl = get_int_form_field("session_ttl_minutes")
+        elif session_ttl_unit in _SESSION_TTL_UNITS and session_ttl_value is not None:
+            session_ttl = session_ttl_value * _SESSION_TTL_UNITS[session_ttl_unit]
+        else:
+            session_ttl = None
         acl_ttl = get_int_form_field("acl_ttl_seconds")
         acl_negative_ttl = get_int_form_field("acl_negative_ttl_seconds")
         if session_ttl is None or not 1 <= session_ttl <= 525600:
             flash(
-                _("El tiempo de vida de la sesión debe ser un entero positivo"), "error"
+                _(
+                    "La duración de la sesión debe ser un valor positivo y una unidad válida"
+                ),
+                "error",
             )
             return redirect(url_for("admin.captive_portal_config"))
         if (
