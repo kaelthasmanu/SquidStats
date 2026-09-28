@@ -1,6 +1,8 @@
 from .models import (
     AdminUser,
     BackupConfig,
+    CaptivePortalConfig,
+    CaptivePortalSession,
     DailyBase,
     DeniedLog,
     LdapConfig,
@@ -28,6 +30,8 @@ __all__ = [
     "Notification",
     "AdminUser",
     "BackupConfig",
+    "CaptivePortalConfig",
+    "CaptivePortalSession",
     "LdapConfig",
     "LdapGroup",
     "LdapGroupMember",
