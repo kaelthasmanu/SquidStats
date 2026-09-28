@@ -172,6 +172,7 @@ _A modern tool for parsing and analyzing Squid logs, providing a user-friendly d
 - **_Quota System_**:
   - Quota per users
   - Quota per group
+- **_Cautive Portal_**
 - **_And More_**
 
 ## <a href="#readme-top"><img align="right" border="0" src="https://github.com/kaelthasmanu/SquidStats/blob/main/assets/up_arrow.png" width="22" ></a>
