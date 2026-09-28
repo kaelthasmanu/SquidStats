@@ -168,6 +168,12 @@
                     <a href="/admin/blacklist" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-ban mr-3"></i>{{ _("Blacklist") }}
                     </a>
+                    <a href="{{ url_for('admin.captive_portal_config') }}" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors" title="{{ _("Portal Cautivo") }}">
+                        <span class="flex items-center">
+                            <i class="fas fa-door-open mr-3"></i>{{ _("Portal Cautivo") }}
+                        </span>
+                        <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-sm">{{ _("Beta") }}</span>
+                    </a>
                     <a href="{{ url_for('admin.view_logs') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
                         <i class="fas fa-file-alt mr-3"></i>{{ _("Logs") }}
                     </a>
