@@ -285,6 +285,36 @@ class SquidConfig(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
+class CaptivePortalConfig(Base):
+    """Single-row table that stores captive portal settings."""
+
+    __tablename__ = "captive_portal_config"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    enabled = Column(Integer, nullable=False, default=0)
+    portal_title = Column(String(255), nullable=False, default="SquidStats Portal")
+    portal_public_url = Column(String(512), nullable=False, default="")
+    session_ttl_minutes = Column(Integer, nullable=False, default=480)
+    acl_ttl_seconds = Column(Integer, nullable=False, default=60)
+    acl_negative_ttl_seconds = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class CaptivePortalSession(Base):
+    """Active captive-portal sessions keyed by client IP address."""
+
+    __tablename__ = "captive_portal_sessions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ip = Column(String(45), nullable=False, unique=True, index=True)
+    username = Column(String(255), nullable=False, index=True)
+    active = Column(Integer, nullable=False, default=1)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    expires_at = Column(DateTime, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
 def create_dynamic_models(engine, user_table_name: str, log_table_name: str):
     """Factory to create dynamic user/log models bound to a fresh declarative base.
 
