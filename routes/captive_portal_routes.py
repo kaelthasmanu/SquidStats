@@ -15,6 +15,7 @@ captive_portal_bp = Blueprint("captive_portal", __name__, url_prefix="/portal")
 def _client_ip() -> str:
     return request.remote_addr or ""
 
+
 @captive_portal_bp.route("/login", methods=["GET", "POST"])
 def login():
     """Show and process the captive-portal login form."""
