@@ -65,7 +65,7 @@ Prepara lo siguiente:
 - El entorno virtual y el código de SquidStats disponibles para el helper.
 - La base de datos migrada hasta `014_add_captive_portal`.
 - Conectividad LDAP o Active Directory desde SquidStats.
-- Una URL pública o un nombre DNS interno para el portal, por ejemplo `https://portal.example.net`.
+- Una URL pública o un nombre DNS interno para el portal, por ejemplo `https://portal.example.net:5000`.
 - Un firewall o router donde se pueda aislar la VLAN de clientes de la red de administración.
 - DNS y DHCP disponibles para clientes no autenticados.
 - Un certificado TLS si el portal se sirve por HTTPS.
@@ -239,6 +239,31 @@ Si el helper está en un host de Squid separado:
 5. Utiliza rutas absolutas para Python y el helper en `external_acl_type`.
 
 El helper no debe imprimir logs en stdout. Squid utiliza stdout para el protocolo de ACL. Los diagnósticos deben ir a stderr o al log de la aplicación.
+
+### Squid en un contenedor y SquidStats en el host
+
+`external_acl_type` ejecuta el helper localmente dentro del entorno de Squid; no realiza una llamada HTTP al Flask que corre en el host. Por tanto, el contenedor de Squid debe tener disponibles:
+
+- El ejecutable de Python y sus dependencias.
+- El código del helper y los módulos de SquidStats que importa.
+- El archivo `.env` correspondiente.
+- La misma base de datos, o conectividad hacia la misma base de datos del host.
+
+Si la aplicación del host genera la configuración que después se copia al contenedor, define las rutas que existen dentro del contenedor antes de volver a generar el bloque:
+
+```dotenv
+SQUIDSTATS_HELPER_PYTHON=/usr/bin/python3
+SQUIDSTATS_HELPER_PATH=/opt/squidstats-helper/services/captive_portal/helper/captive_portal_helper.py
+```
+
+Estas variables solo cambian las rutas escritas en `squid.conf`; no copian archivos ni instalan dependencias. Monta el código y la base de datos en esas rutas, instala las dependencias Python dentro del contenedor y prueba allí mismo:
+
+```sh
+docker exec -it squid /usr/bin/python3 \
+  /opt/squidstats-helper/services/captive_portal/helper/captive_portal_helper.py
+```
+
+Escribe una IP seguida de Enter y confirma que responde `OK` o `ERR`. Si el helper usa SQLite, el archivo montado debe ser el mismo que actualiza SquidStats; dos copias del archivo SQLite producirán sesiones aparentemente inexistentes.
 
 ## 10. Redirección del firewall con iptables
 

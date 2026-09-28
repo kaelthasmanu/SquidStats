@@ -240,6 +240,31 @@ For a helper on a separate Squid host:
 
 The helper must not print log messages to stdout. Squid uses stdout for the ACL protocol. Application diagnostics belong on stderr or in the application log.
 
+### Squid in a container and SquidStats on the host
+
+`external_acl_type` executes the helper locally inside the Squid environment; it does not make an HTTP request to Flask running on the host. Therefore, the Squid container must have access to:
+
+- The Python executable and its dependencies.
+- The helper code and the SquidStats modules it imports.
+- The corresponding `.env` file.
+- The same database, or connectivity to the host database.
+
+If the host application generates the configuration that is later copied into the container, set the paths that exist inside the container before regenerating the block:
+
+```dotenv
+SQUIDSTATS_HELPER_PYTHON=/usr/bin/python3
+SQUIDSTATS_HELPER_PATH=/opt/squidstats-helper/services/captive_portal/helper/captive_portal_helper.py
+```
+
+These variables only change the paths written to `squid.conf`; they do not copy files or install dependencies. Mount the code and database at those paths, install the Python dependencies inside the container, and test from there:
+
+```sh
+docker exec -it squid /usr/bin/python3 \
+  /opt/squidstats-helper/services/captive_portal/helper/captive_portal_helper.py
+```
+
+Type an IP followed by Enter and confirm that it returns `OK` or `ERR`. If the helper uses SQLite, the mounted file must be the same database updated by SquidStats; two SQLite copies will make sessions appear to be missing.
+
 ## 10. Firewall redirection with iptables
 
 The following is an example for a Linux gateway where:
