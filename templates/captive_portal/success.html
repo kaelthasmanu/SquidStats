@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ _("Acceso concedido") }}</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"/>
+    <script src="{{ url_for('static', filename='src/tailwind.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='all.min.css') }}">
+    <style>
+        .login-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%);
+        }
+    </style>
+</head>
+<body class="login-bg min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+        <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">{{ _("¡Ya tienes acceso a Internet!") }}</h1>
+        <p class="text-gray-500">{{ _("Puedes cerrar esta ventana y continuar navegando.") }}</p>
+        <form method="POST" action="{{ url_for('captive_portal.logout') }}" class="mt-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="px-4 py-2 text-sm font-medium text-red-700 border border-red-300 rounded-lg hover:bg-red-50">
+                {{ _("Cerrar sesión") }}
+            </button>
+        </form>
+    </div>
+</body>
+</html>
