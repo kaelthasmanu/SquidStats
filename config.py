@@ -123,7 +123,7 @@ class Config:
     )
 
     # Application version
-    VERSION = safe_get_env("VERSION", "2.6")
+    VERSION = safe_get_env("VERSION", "2.6.1")
 
     # Authentication settings
     JWT_SECRET_KEY = safe_get_env("JWT_SECRET_KEY", os.urandom(24).hex())
