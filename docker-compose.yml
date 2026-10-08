@@ -10,5 +10,5 @@ services:
       - .env
     volumes:
       - .:/app
-      - /home/manuel/Downloads/logs:/logs
+      - ./logs:/logs
     restart: unless-stopped
