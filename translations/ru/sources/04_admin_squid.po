@@ -1,0 +1,787 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/split_config.html:307
+msgid "Configuración dividida exitosamente"
+msgstr "Разделение конфигурации выполнено успешно"
+
+#: templates/admin/split_config.html:311
+msgid "Se generaron"
+msgstr "Было сгенерировано"
+
+#: templates/admin/split_config.html:312
+msgid "archivos en"
+msgstr "файлы в"
+
+#: templates/admin/split_config.html:317
+msgid "Archivos generados:"
+msgstr "Созданные файлы:"
+
+#: templates/admin/config.html:13 templates/admin/navbar.html:126
+#: templates/admin/navbar.html:185 templates/all_notifications.html:78
+#: templates/components/navbar.html:125 templates/components/navbar.html:204
+msgid "Squid"
+msgstr "Squid"
+
+#: templates/admin/config.html:19 templates/all_notifications.html:80
+msgid "Seguridad"
+msgstr "Безопасность"
+
+#: templates/admin/split_config.html:156 templates/auditoria_pdf.html:56
+msgid "Resultados"
+msgstr "Результаты"
+
+#: templates/admin/acls.html:7
+msgid "Gestión de ACLs"
+msgstr "Управление списками контроля доступа (ACL)"
+
+#: templates/admin/acls.html:9 templates/admin/acls_new.html:11
+#: templates/admin/dashboardAdmin.html:151
+#: templates/admin/dashboardAdmin.html:163 templates/admin/http_access.html:191
+#: templates/admin/http_access.html:286
+msgid "Agregar ACL"
+msgstr "Добавить ACL"
+
+#: templates/admin/acls.html:15 templates/admin/acls_modals.html:5
+msgid "Agregar Nueva ACL"
+msgstr "Добавить новый список контроля доступа (ACL)"
+
+#: templates/admin/acls.html:19 templates/admin/acls.html:57
+msgid "Nombre:"
+msgstr "Имя:"
+
+#: templates/admin/acls.html:23 templates/admin/acls.html:61
+msgid "Tipo:"
+msgstr "Тип:"
+
+#: templates/admin/acls.html:25 templates/admin/acls.html:63
+msgid "src (IP origen)"
+msgstr "src (источник IP)"
+
+#: templates/admin/acls.html:26 templates/admin/acls.html:64
+msgid "dst (IP destino)"
+msgstr "dst (адрес назначения)"
+
+#: templates/admin/acls.html:27 templates/admin/acls.html:65
+msgid "dstdomain (Dominio destino)"
+msgstr "dstdomain (Домен назначения)"
+
+#: templates/admin/acls.html:28 templates/admin/acls.html:66
+msgid "port (Puerto)"
+msgstr "port (порт)"
+
+#: templates/admin/acls.html:29 templates/admin/acls.html:67
+msgid "time (Tiempo)"
+msgstr "time (Время)"
+
+#: templates/admin/acls.html:30 templates/admin/acls.html:68
+msgid "method (Método HTTP)"
+msgstr "method (метод HTTP)"
+
+#: templates/admin/acls.html:31 templates/admin/acls.html:69
+msgid "proxy_auth (Autenticación)"
+msgstr "proxy_auth (Аутентификация)"
+
+#: templates/admin/acls.html:32 templates/admin/acls.html:70
+msgid "maxconn (Conexiones máximas)"
+msgstr "maxconn (Максимальное количество подключений)"
+
+#: templates/admin/acls.html:36 templates/admin/acls.html:74
+msgid "Valor:"
+msgstr "Значение:"
+
+#: templates/admin/acls.html:41
+msgid "Guardar ACL"
+msgstr "Сохранить ACL"
+
+#: templates/admin/acls.html:52 templates/admin/acls_modals.html:156
+msgid "Editar ACL"
+msgstr "Редактировать ACL"
+
+#: templates/admin/acls.html:79
+msgid "Actualizar ACL"
+msgstr "Обновить ACL"
+
+#: templates/admin/acls.html:94 templates/admin/ldap_config.html:162
+#: templates/admin/ldap_config.html:213
+msgid "Nombre"
+msgstr "Имя"
+
+#: templates/admin/acls.html:95 templates/admin/database.html:529
+msgid "Tipo"
+msgstr "Тип"
+
+#: templates/admin/acls.html:96
+msgid "Valor"
+msgstr "Значение"
+
+#: templates/admin/acls.html:126
+msgid "No hay ACLs configuradas"
+msgstr "ACL не настроены"
+
+#: templates/admin/acls.html:127
+msgid "Las ACLs son fundamentales para controlar el acceso en Squid"
+msgstr "ACL играют ключевую роль в управлении доступом в Squid"
+
+#: templates/admin/acls.html:133
+msgid "¿Ya tienes ACLs configuradas?"
+msgstr "У вас уже настроены ACL?"
+
+#: templates/admin/acls.html:134 templates/admin/delay_pools.html:157
+#: templates/admin/http_access.html:141
+msgid "Si tu squid.conf aún no está dividido, puedes"
+msgstr "Если ваш файл squid.conf ещё не разбит на модули, вы можете"
+
+#: templates/admin/acls.html:134 templates/admin/delay_pools.html:157
+#: templates/admin/http_access.html:141
+msgid "dividir tu configuración"
+msgstr "разделить настройки"
+
+#: templates/admin/acls.html:134 templates/admin/delay_pools.html:157
+#: templates/admin/http_access.html:141
+msgid "para una mejor gestión modular."
+msgstr "для более эффективного модульного управления."
+
+#: templates/admin/acls.html:135 templates/admin/delay_pools.html:158
+#: templates/admin/http_access.html:142
+msgid "Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde"
+msgstr "Если он уже разбит на модули, убедитесь, что файлы находятся в нужном каталоге, или отредактируйте их напрямую через раздел"
+
+#: templates/admin/acls.html:135 templates/admin/base.html:92
+#: templates/admin/base.html:121 templates/admin/config.html:5
+#: templates/admin/dashboardAdmin.html:197 templates/admin/delay_pools.html:158
+#: templates/admin/http_access.html:142
+msgid "Configuración"
+msgstr "Конфигурация"
+
+#: templates/admin/acls.html:141 templates/admin/acls_new.html:168
+msgid "Crear primera ACL"
+msgstr "Создать первый список контроля доступа (ACL)"
+
+#: templates/admin/acls_modals.html:12 templates/admin/acls_modals.html:164
+msgid "Nombre de la ACL:"
+msgstr "Название ACL:"
+
+#: templates/admin/acls_modals.html:17
+msgid "Solo letras, números, guiones y guiones bajos"
+msgstr "Только буквы, цифры, тире и нижние тире"
+
+#: templates/admin/acls_modals.html:21 templates/admin/acls_modals.html:171
+msgid "Tipo de ACL:"
+msgstr "Тип ACL:"
+
+#: templates/admin/acls_modals.html:24
+msgid "Selecciona un tipo..."
+msgstr "Выберите тип..."
+
+#: templates/admin/acls_modals.html:26
+msgid "src - IP origen del cliente"
+msgstr "src — IP-адрес клиента"
+
+#: templates/admin/acls_modals.html:27
+msgid "dst - IP destino [slow]"
+msgstr "dst — IP-адрес назначения [slow]"
+
+#: templates/admin/acls_modals.html:28
+msgid "localip - IP local de conexión"
+msgstr "localip — локальный IP-адрес подключения"
+
+#: templates/admin/acls_modals.html:29
+msgid "src_as - AS number origen"
+msgstr "src_as — исходный номер AS"
+
+#: templates/admin/acls_modals.html:30
+msgid "dst_as - AS number destino"
+msgstr "dst_as — номер AS назначения"
+
+#: templates/admin/acls_modals.html:33
+msgid "dstdomain - Dominio destino"
+msgstr "dstdomain — домен назначения"
+
+#: templates/admin/acls_modals.html:34
+msgid "srcdomain - Dominio origen [slow]"
+msgstr "srcdomain — исходный домен [медленно]"
+
+#: templates/admin/acls_modals.html:35
+msgid "dstdom_regex - Regex dominio destino"
+msgstr "dstdom_regex — регулярное выражение для домена назначения"
+
+#: templates/admin/acls_modals.html:36
+msgid "srcdom_regex - Regex dominio origen [slow]"
+msgstr "srcdom_regex — регулярное выражение для домена происхождения [медленно]"
+
+#: templates/admin/acls_modals.html:39
+msgid "port - Puerto TCP destino"
+msgstr "port — TCP-порт назначения"
+
+#: templates/admin/acls_modals.html:40
+msgid "localport - Puerto local"
+msgstr "localport — локальный порт"
+
+#: templates/admin/acls_modals.html:41
+msgid "myportname - Nombre de puerto"
+msgstr "myportname — Имя порта"
+
+#: templates/admin/acls_modals.html:44
+msgid "time - Día y hora"
+msgstr "time — День и время"
+
+#: templates/admin/acls_modals.html:47
+msgid "url_regex - Regex en URL completa"
+msgstr "url_regex — полное регулярное выражение для URL-адреса"
+
+#: templates/admin/acls_modals.html:48
+msgid "urlpath_regex - Regex en path"
+msgstr "urlpath_regex — регулярное выражение в пути"
+
+#: templates/admin/acls_modals.html:49
+msgid "urllogin - Regex en login URL"
+msgstr "urllogin — Регулярное выражение в URL-адресе входа"
+
+#: templates/admin/acls_modals.html:52
+msgid "proto - Protocolo (HTTP/FTP)"
+msgstr "proto — Протокол (HTTP/FTP)"
+
+#: templates/admin/acls_modals.html:53
+msgid "method - Método HTTP"
+msgstr "method — HTTP-метод"
+
+#: templates/admin/acls_modals.html:54
+msgid "http_status - Código HTTP"
+msgstr "http_status — код HTTP"
+
+#: templates/admin/acls_modals.html:57
+msgid "proxy_auth - Usuario proxy [slow]"
+msgstr "proxy_auth — Пользователь прокси [медленно]"
+
+#: templates/admin/acls_modals.html:58
+msgid "proxy_auth_regex - Regex usuario [slow]"
+msgstr "proxy_auth_regex — Регулярное выражение для имени пользователя [медленно]"
+
+#: templates/admin/acls_modals.html:59
+msgid "ext_user - Usuario externo [slow]"
+msgstr "ext_user — внешний пользователь [медленно]"
+
+#: templates/admin/acls_modals.html:60
+msgid "ext_user_regex - Regex usuario ext [slow]"
+msgstr "ext_user_regex — Регулярное выражение для пользователя ext [медленно]"
+
+#: templates/admin/acls_modals.html:63
+msgid "browser - User-Agent"
+msgstr "браузер — User-Agent"
+
+#: templates/admin/acls_modals.html:64
+msgid "referer_regex - Referer"
+msgstr "referer_regex — Referer"
+
+#: templates/admin/acls_modals.html:65
+msgid "req_mime_type - MIME request"
+msgstr "req_mime_type — запрос MIME"
+
+#: templates/admin/acls_modals.html:66
+msgid "rep_mime_type - MIME reply"
+msgstr "rep_mime_type — ответ MIME"
+
+#: templates/admin/acls_modals.html:67
+msgid "req_header - Header request"
+msgstr "req_header — Заголовок запроса"
+
+#: templates/admin/acls_modals.html:68
+msgid "rep_header - Header reply"
+msgstr "rep_header — Заголовок ответа"
+
+#: templates/admin/acls_modals.html:71
+msgid "ssl_error - Error SSL"
+msgstr "ssl_error — Ошибка SSL"
+
+#: templates/admin/acls_modals.html:72
+msgid "server_cert_fingerprint - Fingerprint"
+msgstr "server_cert_fingerprint — Отпечаток сертификата"
+
+#: templates/admin/acls_modals.html:73
+msgid "ssl::server_name - SNI"
+msgstr "ssl::server_name — SNI"
+
+#: templates/admin/acls_modals.html:74
+msgid "ssl::server_name_regex - SNI regex"
+msgstr "ssl::server_name_regex — регулярное выражение SNI"
+
+#: templates/admin/acls_modals.html:77
+msgid "maxconn - Max conexiones IP"
+msgstr "maxconn — максимальное количество IP-подключений"
+
+#: templates/admin/acls_modals.html:78
+msgid "max_user_ip - Max IPs usuario"
+msgstr "max_user_ip — максимальное количество IP-адресов пользователя"
+
+#: templates/admin/acls_modals.html:81
+msgid "external - Helper externo [slow]"
+msgstr "external — Внешний хелпер [медленно]"
+
+#: templates/admin/acls_modals.html:82
+msgid "random - Probabilidad random"
+msgstr "random — вероятность random"
+
+#: templates/admin/acls_modals.html:83
+msgid "note - Anotación transacción"
+msgstr "note — Примечание к транзакции"
+
+#: templates/admin/acls_modals.html:84
+msgid "any-of - Grupo OR"
+msgstr "any-of — Группа OR"
+
+#: templates/admin/acls_modals.html:85
+msgid "all-of - Grupo AND"
+msgstr "all-of — Группа AND"
+
+#: templates/admin/acls_modals.html:104
+msgid "Opciones (opcional):"
+msgstr "Параметры (необязательно):"
+
+#: templates/admin/acls_modals.html:108 templates/admin/acls_modals.html:185
+msgid "-i"
+msgstr "-i"
+
+#: templates/admin/acls_modals.html:108 templates/admin/acls_modals.html:185
+msgid "Case-insensitive"
+msgstr "Без учета регистра"
+
+#: templates/admin/acls_modals.html:112 templates/admin/acls_modals.html:189
+msgid "-n"
+msgstr "-n"
+
+#: templates/admin/acls_modals.html:112 templates/admin/acls_modals.html:189
+msgid "No lookups"
+msgstr "Без поиска"
+
+#: templates/admin/acls_modals.html:116 templates/admin/acls_modals.html:193
+msgid "-m"
+msgstr "-м"
+
+#: templates/admin/acls_modals.html:116 templates/admin/acls_modals.html:193
+msgid "List membership"
+msgstr "Членство в списке"
+
+#: templates/admin/acls_modals.html:123 templates/admin/acls_modals.html:200
+msgid "Valores:"
+msgstr "Значения:"
+
+#: templates/admin/acls_modals.html:128 templates/admin/acls_modals.html:205
+msgid "Agregar valor"
+msgstr "Создавать добавленную стоимость"
+
+#: templates/admin/acls_modals.html:134
+msgid "Comentario (opcional):"
+msgstr "Комментарий (необязательно):"
+
+#: templates/admin/acls_modals.html:135
+msgid "Descripción de esta ACL"
+msgstr "Описание данного ACL"
+
+#: templates/admin/acls_modals.html:137
+msgid "Se agregará como comentario antes de la ACL"
+msgstr "Будет добавлено в качестве комментария перед ACL"
+
+#: templates/admin/acls_modals.html:145
+msgid "Crear ACL"
+msgstr "Создать ACL"
+
+#: templates/admin/acls_modals.html:175
+msgid "El tipo no se puede cambiar, crea una nueva ACL si necesitas otro tipo"
+msgstr "Тип нельзя изменить; если вам нужен другой тип, создайте новый ACL"
+
+#: templates/admin/acls_modals.html:181
+msgid "Opciones:"
+msgstr "Варианты:"
+
+#: templates/admin/acls_modals.html:211
+msgid "Comentario:"
+msgstr "Комментарий:"
+
+#: templates/admin/acls_modals.html:221 templates/admin/config.html:65
+#: templates/admin/config.html:98 templates/admin/config.html:135
+#: templates/admin/config.html:172 templates/admin/config.html:204
+#: templates/admin/config.html:237 templates/admin/config.html:277
+#: templates/admin/delay_pools.html:350 templates/admin/edit_config.html:16
+#: templates/admin/http_access.html:301 templates/admin/user_form.html:57
+msgid "Guardar Cambios"
+msgstr "Сохранить изменения"
+
+#: templates/admin/acls_new.html:7
+msgid "Gestión de Access Control Lists (ACLs)"
+msgstr "Управление списками контроля доступа (ACL)"
+
+#: templates/admin/acls_new.html:8
+msgid "Define condiciones para controlar el acceso al proxy"
+msgstr "Определите условия для управления доступом к прокси-серверу"
+
+#: templates/admin/acls_new.html:19 templates/admin/delay_pools.html:16
+#: templates/admin/http_access.html:19 templates/admin/split_config.html:103
+msgid "¡MUY IMPORTANTE!"
+msgstr "ОЧЕНЬ ВАЖНО!"
+
+#: templates/admin/acls_new.html:21 templates/admin/delay_pools.html:18
+#: templates/admin/http_access.html:21 templates/admin/split_config.html:105
+msgid "Esta funcionalidad se encuentra en"
+msgstr "Эта функция находится в"
+
+#: templates/admin/acls_new.html:21 templates/admin/base.html:127
+#: templates/admin/base.html:142 templates/admin/base.html:148
+#: templates/admin/base.html:154 templates/admin/delay_pools.html:18
+#: templates/admin/http_access.html:21 templates/admin/split_config.html:105
+msgid "RC"
+msgstr "RC"
+
+#: templates/admin/acls_new.html:24 templates/admin/delay_pools.html:21
+#: templates/admin/http_access.html:24 templates/admin/split_config.html:108
+msgid "Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba."
+msgstr "Пожалуйста, пока не используйте её в производственной среде. Используйте её только в тестовой среде."
+
+#: templates/admin/acls_new.html:34
+msgid "Acerca de las ACLs:"
+msgstr "О списках ACL:"
+
+#: templates/admin/acls_new.html:36
+msgid "[fast]"
+msgstr "[fast]"
+
+#: templates/admin/acls_new.html:36
+msgid "ACLs rápidas - no requieren lookups externos"
+msgstr "Быстрые ACL — не требуют внешних поисков"
+
+#: templates/admin/acls_new.html:37
+msgid "[slow]"
+msgstr "[медленно]"
+
+#: templates/admin/acls_new.html:37
+msgid "ACLs lentas - pueden requerir DNS o autenticación"
+msgstr "Медленные ACL — могут требовать DNS или аутентификации"
+
+#: templates/admin/acls_new.html:38
+msgid "Usa las ACLs en reglas de http_access, http_reply_access, etc."
+msgstr "Используйте списки контроля доступа (ACL) в правилах http_access, http_reply_access и т. д."
+
+#: templates/admin/acls_new.html:39
+msgid "ACLs predefinidas:"
+msgstr "Предопределенные ACL:"
+
+#: templates/admin/acls_new.html:39
+msgid "all, manager, localhost, to_localhost, to_linklocal, CONNECT"
+msgstr "all, manager, localhost, to_localhost, to_linklocal, CONNECT"
+
+#: templates/admin/acls_new.html:52
+msgid "BUILT-IN"
+msgstr "ВСТРОЕННЫЙ"
+
+#: templates/admin/acls_new.html:165
+msgid "No hay ACLs personalizadas configuradas"
+msgstr "Настраиваемые списки контроля доступа (ACL) не настроены"
+
+#: templates/admin/acls_new.html:166
+msgid "Las ACLs predefinidas de Squid siguen disponibles"
+msgstr "Предопределенные ACL в Squid по-прежнему доступны"
+
+#: templates/admin/base.html:136 templates/admin/config.html:16
+#: templates/admin/database.html:11
+msgid "Base de Datos"
+msgstr "База данных"
+
+#: templates/admin/config.html:10
+msgid "General"
+msgstr "Общие сведения"
+
+#: templates/admin/config.html:22
+msgid "Lista Negra"
+msgstr "Черный список"
+
+#: templates/admin/config.html:25 templates/partials/conexiones.html:354
+msgid "Proxy"
+msgstr "Прокси"
+
+#: templates/admin/config.html:28 templates/partials/auditoria.html:113
+msgid "Telegram"
+msgstr "Telegram"
+
+#: templates/admin/config.html:35
+msgid "Configuración General"
+msgstr "Общие настройки"
+
+#: templates/admin/config.html:59 templates/admin/config.html:129
+#: templates/admin/config.html:166
+msgid "Esta variable está protegida y no puede ser modificada desde aquí"
+msgstr "Эта переменная защищена и не может быть изменена отсюда"
+
+#: templates/admin/config.html:79
+msgid "Configuración de Squid"
+msgstr "Настройка Squid"
+
+#: templates/admin/config.html:112
+msgid "Configuración de Base de Datos"
+msgstr "Настройка базы данных"
+
+#: templates/admin/config.html:149
+msgid "Configuración de Seguridad"
+msgstr "Настройки безопасности"
+
+#: templates/admin/config.html:186
+msgid "Lista Negra de Dominios"
+msgstr "«Черный список» доменов"
+
+#: templates/admin/config.html:218
+msgid "Configuración de Proxy"
+msgstr "Настройка прокси-сервера"
+
+#: templates/admin/config.html:251
+msgid "Configuración de Telegram"
+msgstr "Настройки Telegram"
+
+#: templates/admin/delay_pools.html:124 templates/admin/http_access.html:53
+#: templates/admin/http_access.html:170 templates/admin/http_access.html:267
+msgid "ALLOW"
+msgstr "ALLOW"
+
+#: templates/admin/delay_pools.html:126 templates/admin/http_access.html:57
+#: templates/admin/http_access.html:178 templates/admin/http_access.html:274
+msgid "DENY"
+msgstr "DENY"
+
+#: templates/admin/edit_config.html:5
+msgid "Editar Configuración de Squid"
+msgstr "Редактировать настройки Squid"
+
+#: templates/admin/edit_config.html:10
+msgid "Contenido del archivo squid.conf:"
+msgstr "Содержимое файла squid.conf:"
+
+#: templates/admin/http_access.html:7
+msgid "Reglas de Acceso HTTP"
+msgstr "Правила доступа по протоколу HTTP"
+
+#: templates/admin/http_access.html:8
+msgid "Las reglas se evalúan en orden. La primera coincidencia determina el acceso."
+msgstr "Правила проверяются по порядку. Первое совпадение определяет доступ."
+
+#: templates/admin/http_access.html:11
+msgid "Agregar Regla"
+msgstr "Добавить правило"
+
+#: templates/admin/http_access.html:34
+msgid "Importante sobre el orden:"
+msgstr "Важная информация о порядке:"
+
+#: templates/admin/http_access.html:36
+msgid "Las reglas se procesan de arriba hacia abajo"
+msgstr "Правила обрабатываются сверху вниз"
+
+#: templates/admin/http_access.html:37
+msgid "La primera regla que coincida se aplica (allow o deny)"
+msgstr "Применяется первое совпавшее правило (allow или deny)"
+
+#: templates/admin/http_access.html:38
+msgid "Si ninguna regla coincide, se aplica el comportamiento contrario a la última regla"
+msgstr "Если ни одно правило не соответствует, применяется поведение, противоположное последнему правилу"
+
+#: templates/admin/http_access.html:39
+msgid "Se recomienda terminar con \"deny all\" para evitar confusión"
+msgstr "Рекомендуется завершить строку словами «deny all», чтобы избежать путаницы"
+
+#: templates/admin/http_access.html:97
+msgid "Contiene negación (!) - se aplica cuando NO coincide con la ACL"
+msgstr "Содержит отрицание (!) — применяется, когда НЕ соответствует списку контроля доступа (ACL)"
+
+#: templates/admin/http_access.html:106
+msgid "Mover arriba"
+msgstr "Сдвинуть вверх"
+
+#: templates/admin/http_access.html:112
+msgid "Mover abajo"
+msgstr "Сдвинуть вниз"
+
+#: templates/admin/http_access.html:133
+msgid "No hay reglas HTTP access configuradas"
+msgstr "Правила доступа HTTP не настроены"
+
+#: templates/admin/http_access.html:134
+msgid "⚠️ Sin reglas, el acceso será DENEGADO por defecto"
+msgstr "⚠️ Если правила не указаны, доступ по умолчанию будет ОТКЛОНЁН"
+
+#: templates/admin/http_access.html:140
+msgid "¿Ya tienes reglas configuradas?"
+msgstr "У вас уже настроены правила?"
+
+#: templates/admin/http_access.html:148
+msgid "Crear primera regla"
+msgstr "Создать первое правило"
+
+#: templates/admin/http_access.html:158
+msgid "Agregar Regla HTTP Access"
+msgstr "Добавить правило доступа HTTP"
+
+#: templates/admin/http_access.html:164 templates/admin/http_access.html:261
+msgid "Acción:"
+msgstr "Действие:"
+
+#: templates/admin/http_access.html:171
+msgid "Permitir acceso"
+msgstr "Разрешить доступ"
+
+#: templates/admin/http_access.html:179
+msgid "Denegar acceso"
+msgstr "Запретить доступ"
+
+#: templates/admin/http_access.html:186 templates/admin/http_access.html:281
+msgid "ACLs:"
+msgstr "ACL:"
+
+#: templates/admin/http_access.html:197
+msgid "ACLs Comunes (opcional):"
+msgstr "Общие ACL (необязательно):"
+
+#: templates/admin/http_access.html:210 templates/admin/http_access.html:227
+msgid "!Safe_ports"
+msgstr "!Безопасные порты"
+
+#: templates/admin/http_access.html:213
+msgid "!SSL_ports"
+msgstr "!SSL_ports"
+
+#: templates/admin/http_access.html:216
+msgid "CONNECT"
+msgstr "CONNECT"
+
+#: templates/admin/http_access.html:220
+msgid "Haz clic en estas ACLs predefinidas para agregarlas rápidamente"
+msgstr "Нажмите на эти предустановленные списки ACL, чтобы быстро добавить их"
+
+#: templates/admin/http_access.html:227
+msgid "Tip:"
+msgstr "Совет:"
+
+#: templates/admin/http_access.html:227
+msgid "Usa"
+msgstr "Используйте"
+
+#: templates/admin/http_access.html:227
+msgid "antes del nombre de una ACL para negación. Ej:"
+msgstr "перед именем ACL для запрета. Например:"
+
+#: templates/admin/http_access.html:227
+msgid "coincide cuando NO es un puerto seguro."
+msgstr "соответствует, когда это НЕ безопасный порт."
+
+#: templates/admin/http_access.html:232 templates/admin/http_access.html:291
+msgid "Descripción (opcional):"
+msgstr "Описание (необязательно):"
+
+#: templates/admin/http_access.html:233 templates/admin/http_access.html:292
+msgid "Ej: Permitir acceso desde la red local"
+msgstr "Например: Разрешить доступ из локальной сети"
+
+#: templates/admin/http_access.html:235
+msgid "Se agregará como comentario antes de la regla"
+msgstr "Будет добавлено в качестве комментария перед правилом"
+
+#: templates/admin/http_access.html:243
+msgid "Crear Regla"
+msgstr "Создать правило"
+
+#: templates/admin/http_access.html:254
+msgid "Editar Regla HTTP Access"
+msgstr "Редактировать правило доступа HTTP"
+
+#: templates/admin/quota.html:109 templates/admin/quota.html:222
+#: templates/admin/split_config.html:42 templates/admin/users.html:19
+msgid "Estado"
+msgstr "Состояние"
+
+#: templates/admin/split_config.html:3 templates/admin/split_config.html:12
+msgid "Dividir Configuración Squid"
+msgstr "Разделение настроек Squid"
+
+#: templates/admin/split_config.html:13
+msgid "Modulariza tu archivo squid.conf para una gestión más sencilla"
+msgstr "Разделите файл squid.conf на модули для упрощения управления"
+
+#: templates/admin/split_config.html:24
+msgid "Archivo de entrada"
+msgstr "Архив входящих"
+
+#: templates/admin/split_config.html:33
+msgid "Directorio de salida"
+msgstr "Каталог вывода"
+
+#: templates/admin/split_config.html:44
+msgid "archivos generados"
+msgstr "созданные файлы"
+
+#: templates/admin/split_config.html:46
+msgid "No dividido aún"
+msgstr "Пока не разделено"
+
+#: templates/admin/split_config.html:57
+msgid "¿Qué hace esta funcionalidad?"
+msgstr "Для чего нужна эта функция?"
+
+#: templates/admin/split_config.html:60
+msgid "Esta herramienta divide tu archivo monolítico"
+msgstr "Этот инструмент разбивает ваш монолитный файл"
+
+#: templates/admin/split_config.html:61
+msgid "en múltiples archivos modulares organizados por categorías. Esto facilita:"
+msgstr "в виде множества модульных файлов, сгруппированных по категориям. Это облегчает:"
+
+#: templates/admin/split_config.html:64
+msgid "Gestión y mantenimiento más sencillo de la configuración"
+msgstr "Более простое управление и обслуживание настроек"
+
+#: templates/admin/split_config.html:65
+msgid "Mejor organización de directivas por funcionalidad"
+msgstr "Более эффективная организация руководства по функциональному принципу"
+
+#: templates/admin/split_config.html:66
+msgid "Facilita la edición desde la interfaz web"
+msgstr "Упрощает редактирование через веб-интерфейс"
+
+#: templates/admin/split_config.html:67
+msgid "Reduce errores al editar configuraciones complejas"
+msgstr "Снижает количество ошибок при редактировании сложных настроек"
+
+#: templates/admin/split_config.html:75
+msgid "Archivos que se generarán"
+msgstr "Файлы, которые будут созданы"
+
+#: templates/admin/split_config.html:118
+msgid "Modo estricto"
+msgstr "Строгий режим"
+
+#: templates/admin/split_config.html:119
+msgid "Abortar si se encuentran directivas desconocidas"
+msgstr "Прервать работу при обнаружении неизвестных директив"
+
+#: templates/admin/split_config.html:125
+msgid "Divide squid.conf en archivos modulares y crea respaldo"
+msgstr "Разделите файл squid.conf на модульные файлы и создайте резервную копию"
+
+#: templates/admin/split_config.html:127
+msgid "Dividir Configuración"
+msgstr "Разделить настройки"
+
+#: templates/admin/split_config.html:131
+msgid "Abre un modal con los archivos generados por la división"
+msgstr "Открыть модальное окно с файлами, сгенерированными в результате деления"
+
+#: templates/admin/split_config.html:133
+msgid "Ver Archivos Generados"
+msgstr "Просмотреть сгенерированные файлы"
+
+#: templates/admin/split_config.html:145
+msgid "Esta operación creará múltiples archivos en el directorio"
+msgstr "В результате этой операции в каталоге будет создано несколько файлов"
+
+#: templates/admin/split_config.html:169
+msgid "Archivos Generados"
+msgstr "Созданные файлы"
+
+#: templates/admin/split_config.html:190
+msgid "Directorio:"
+msgstr "Справочник:"
