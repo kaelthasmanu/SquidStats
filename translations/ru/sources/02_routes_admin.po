@@ -1,0 +1,292 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: routes/admin_routes.py:150
+#, python-format
+msgid "Error saving configuration: %(message)s"
+msgstr "Ошибка при сохранении настроек: %(message)s"
+
+#: routes/admin/squid_config.py:57 routes/admin_routes.py:152
+msgid "Error saving configuration"
+msgstr "Ошибка при сохранении настроек"
+
+#: routes/admin/squid_config.py:82 routes/admin_routes.py:176
+msgid "Variables de entorno guardadas exitosamente"
+msgstr "Переменные окружения успешно сохранены"
+
+#: routes/admin/acls.py:50 routes/admin/acls.py:71 routes/admin_routes.py:219
+#: routes/admin_routes.py:237
+msgid "ID de ACL inválido"
+msgstr "Недопустимый идентификатор ACL"
+
+#: routes/admin/blacklist.py:80 routes/admin_routes.py:310
+msgid "Host de Pi-hole no proporcionado"
+msgstr "Хост Pi-hole не указан"
+
+#: routes/admin/blacklist.py:88 routes/admin_routes.py:323
+msgid "Sincronización de listas iniciada (en segundo plano)"
+msgstr "Начата синхронизация списков (в фоновом режиме)"
+
+#: routes/admin/blacklist.py:101 routes/admin_routes.py:339
+msgid "Archivo importado correctamente"
+msgstr "Файл успешно импортирован"
+
+#: routes/admin_routes.py:347
+#, python-format
+msgid "Error al procesar el archivo: %(error)s"
+msgstr "Ошибка при обработке файла: %(error)s"
+
+#: routes/admin/blacklist.py:104 routes/admin_routes.py:349
+msgid "Error al procesar el archivo"
+msgstr "Ошибка при обработке файла"
+
+#: routes/admin/blacklist.py:112 routes/admin_routes.py:358
+msgid "Lista importada desde URL correctamente"
+msgstr "Список успешно импортирован с URL-адреса"
+
+#: routes/admin/blacklist.py:114 routes/admin_routes.py:360
+#, python-format
+msgid "Error importando desde URL: %(err)s"
+msgstr "Ошибка при импорте с URL: %(err)s"
+
+#: routes/admin/blacklist.py:122 routes/admin_routes.py:371
+msgid "No se encontraron dominios para importar"
+msgstr "Домены для импорта не найдены"
+
+#: routes/admin/blacklist.py:125 routes/admin_routes.py:373
+msgid "Blacklist actualizada exitosamente"
+msgstr "Черный список успешно обновлен"
+
+#: routes/admin_routes.py:381
+#, python-format
+msgid "Error al guardar blacklist: %(error)s"
+msgstr "Ошибка при сохранении черного списка: %(error)s"
+
+#: routes/admin/blacklist.py:128 routes/admin_routes.py:383
+msgid "Error al guardar blacklist"
+msgstr "Ошибка при сохранении черного списка"
+
+#: routes/admin/blacklist.py:137 routes/admin_routes.py:393
+msgid "Lista personalizada vacía"
+msgstr "Пустой настраиваемый список"
+
+#: routes/admin/blacklist.py:165 routes/admin_routes.py:406
+msgid "Lista personalizada guardada en BLACKLIST_DOMAINS"
+msgstr "Пользовательский список, сохраненный в BLACKLIST_DOMAINS"
+
+#: routes/admin_routes.py:414
+#, python-format
+msgid "Error al guardar la lista: %(error)s"
+msgstr "Ошибка при сохранении списка: %(error)s"
+
+#: routes/admin/blacklist.py:168 routes/admin_routes.py:416
+msgid "Error al guardar la lista"
+msgstr "Ошибка при сохранении списка"
+
+#: routes/admin/http_access.py:37 routes/admin/http_access.py:50
+#: routes/admin/http_access.py:81 routes/admin_routes.py:428
+#: routes/admin_routes.py:448 routes/admin_routes.py:483
+msgid "Índice de regla inválido"
+msgstr "Недопустимый индекс правила"
+
+#: routes/admin/users.py:53 routes/admin_routes.py:588
+msgid "Usuario no encontrado"
+msgstr "Пользователь не найден"
+
+#: routes/admin_routes.py:652 services/database/db_admin_service.py:16
+msgid "Nombre de tabla no proporcionado"
+msgstr "Имя таблицы не указано"
+
+#: routes/admin_routes.py:660 services/database/db_admin_service.py:19
+msgid "Nombre de tabla inválido"
+msgstr "Недопустимое имя таблицы"
+
+#: routes/admin_routes.py:668 services/database/db_admin_service.py:24
+msgid "No se puede eliminar estas tablas críticas"
+msgstr "Эти важные таблицы удалить нельзя"
+
+#: routes/admin_routes.py:682 services/analytics/blacklist_users.py:222
+#: services/database/db_admin_service.py:47
+#: services/database/db_info_service.py:33
+#: services/database/db_info_service.py:150
+msgid "Error interno del servidor"
+msgstr "Внутренняя ошибка сервера"
+
+#: routes/admin_routes.py:709
+#, python-format
+msgid "Error al cargar la vista: %(error)s"
+msgstr "Ошибка при загрузке представления: %(error)s"
+
+#: routes/admin/squid_config.py:105 routes/admin_routes.py:711
+msgid "Error al cargar la vista"
+msgstr "Ошибка при загрузке представления"
+
+#: routes/admin_routes.py:738
+msgid "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf."
+msgstr "Не найден необходимый файл. Проверьте настройки файла squid.conf."
+
+#: routes/admin_routes.py:747 services/squid/split_config_service.py:47
+msgid "No se tienen permisos suficientes para crear los archivos"
+msgstr "Не хватает прав для создания файлов"
+
+#: routes/admin_routes.py:756 services/squid/split_config_service.py:53
+msgid "Error de validación de la configuración"
+msgstr "Ошибка проверки конфигурации"
+
+#: routes/admin_routes.py:769 services/squid/split_config_service.py:59
+msgid "Error interno al dividir la configuración"
+msgstr "Внутренняя ошибка при разделении конфигурации"
+
+#: routes/admin/blacklist.py:177 routes/admin_routes.py:793
+msgid "URL no proporcionada"
+msgstr "URL не указан"
+
+#: routes/admin/blacklist.py:183 routes/admin_routes.py:798
+#, python-format
+msgid "Lista eliminada: %(url)s (%(count)s dominios)"
+msgstr "Список удалён: %(url)s (домены %(count)s)"
+
+#: routes/admin_routes.py:1221
+msgid "JSON inválido"
+msgstr "Недопустимый JSON"
+
+#: routes/admin_routes.py:1243
+msgid "Error interno al cambiar estado de blocklist"
+msgstr "Внутренняя ошибка при изменении статуса в списке заблокированных"
+
+#: routes/logs_routes.py:51
+msgid "Invalid date format"
+msgstr "Неверный формат даты"
+
+#: routes/admin/backup.py:26
+msgid "Motor de BD desconocido"
+msgstr "Неизвестный движок БД"
+
+#: routes/admin/backup.py:30
+msgid "Frecuencia inválida"
+msgstr "Недопустимая частота"
+
+#: routes/admin/backup.py:37
+msgid "Configuración guardada correctamente"
+msgstr "Настройки успешно сохранены"
+
+#: routes/admin/backup.py:55
+msgid "Error leyendo salvas"
+msgstr "Ошибка при чтении серийных сообщений"
+
+#: routes/admin/backup.py:62
+msgid "Archivo no encontrado"
+msgstr "Файл не найден"
+
+#: routes/admin/blacklist.py:156
+msgid "Lista personalizada guardada y archivo custom de Squid actualizado"
+msgstr "Сохраненный пользовательский список и обновленный пользовательский файл Squid"
+
+#: routes/admin/blacklist.py:161
+#, python-format
+msgid "Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: %(msg)s"
+msgstr "Персонализированный список сохранен в БД, но не удалось восстановить файл Squid: %(msg)s"
+
+#: routes/admin/ldap_config.py:39
+msgid "Configuración LDAP guardada."
+msgstr "Настройки LDAP сохранены."
+
+#: routes/admin/ldap_config.py:44
+msgid "Error al guardar la configuración."
+msgstr "Ошибка при сохранении настроек."
+
+#: routes/admin/ldap_config.py:64
+msgid "No se ha configurado el servidor LDAP."
+msgstr "LDAP-сервер не настроен."
+
+#: routes/admin/ldap_config.py:76
+msgid "Error interno al probar LDAP."
+msgstr "Внутренняя ошибка при проверке LDAP."
+
+#: routes/admin/ldap_config.py:92 routes/admin/ldap_config.py:125
+#: routes/admin/ldap_config.py:154 routes/admin/ldap_config.py:183
+msgid "LDAP no configurado."
+msgstr "LDAP не настроен."
+
+#: routes/admin/ldap_config.py:118 routes/admin/ldap_config.py:147
+msgid "Parámetro 'q' requerido."
+msgstr "Требуется параметр «q»."
+
+#: routes/admin/ldap_config.py:176
+msgid "Parámetro 'username' requerido."
+msgstr "Требуется параметр «username»."
+
+#: routes/logs_routes.py:24
+msgid "Actividad de usuarios y Grupos"
+msgstr "Деятельность пользователей и групп"
+
+#: routes/logs_routes.py:26
+msgid "Analisis de la Actividad de los Usuarios y Grupos"
+msgstr "Анализ активности пользователей и групп"
+
+#: routes/logs_routes.py:90
+msgid "Registros Bloqueados"
+msgstr "Заблокированные записи"
+
+#: routes/logs_routes.py:92
+msgid "Peticiones que deberian ser bloqueadas o fueron bloqueadas"
+msgstr "Запросы, которые должны быть заблокированы или были заблокированы"
+
+#: routes/main_routes.py:119
+msgid "Inicio Dashboard"
+msgstr "Главная страница Панель управления"
+
+#: routes/main_routes.py:211
+msgid "Todas las Notificaciones"
+msgstr "Все уведомления"
+
+#: routes/main_routes.py:213
+msgid "Historial completo de notificaciones del sistema"
+msgstr "Полная история системных уведомлений"
+
+#: routes/main_routes.py:235
+msgid "Error al cargar las notificaciones"
+msgstr "Ошибка при загрузке уведомлений"
+
+#: routes/reports_routes.py:67
+msgid "Reportes y gráficas"
+msgstr "Отчеты и графики"
+
+#: routes/reports_routes.py:69
+msgid "Top de la Actividad de los Usuarios y comportamiento"
+msgstr "Обзор активности пользователей и их поведения"
+
+#: routes/reports_routes.py:258
+msgid "Centro de Auditoría"
+msgstr "Аудиторский центр"
+
+#: routes/reports_routes.py:260
+msgid "Herramienta para el análisis de actividad y seguridad."
+msgstr "Инструмент для анализа активности и безопасности."
+
+#: routes/admin/database.py:47
+msgid "Selecciona un archivo de logs para importar"
+msgstr "Выберите файл журнала для импорта"
+
+#: routes/admin/database.py:61
+msgid "Importación completada correctamente"
+msgstr "Импорт успешно завершён"
+
+#: routes/admin/database.py:65
+msgid "No se pudo leer el archivo de logs"
+msgstr "Не удалось прочитать файл журнала"
+
+#: routes/admin/database.py:67
+msgid "El archivo no contiene logs de Squid válidos"
+msgstr "Файл не содержит действительных журналов Squid"
+
+#: routes/admin/database.py:70
+msgid "No se pudo importar el archivo de logs"
+msgstr "Не удалось импортировать файл журналов"
+
+#: routes/stats_routes.py:70
+msgid "Estadísticas del comportamiento del Sistema"
+msgstr "Статистика работы системы"
+
+msgid "Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Descargue e instale la última versión: dpkg -i squidstats_<version>.deb"
+msgstr "Эта программа была установлена с помощью пакета .deb, и её нельзя обновить отсюда. Загрузите и установите последнюю версию: dpkg -i squidstats_<version>.deb"

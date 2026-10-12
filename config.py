@@ -151,8 +151,9 @@ class Config:
 
     # Internationalization (i18n)
     BABEL_DEFAULT_LOCALE = safe_get_env("BABEL_DEFAULT_LOCALE", "es")
-    BABEL_SUPPORTED_LOCALES = ["es", "en"]
+    BABEL_SUPPORTED_LOCALES = ["es", "en", "ru"]
     LANGUAGES = {
         "es": "Español",
         "en": "English",
+        "ru": "Русский",
     }

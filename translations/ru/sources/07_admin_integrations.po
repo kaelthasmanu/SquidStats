@@ -1,0 +1,462 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/ldap_config.html:391
+msgid "Probando…"
+msgstr "Проверка…"
+
+#: templates/admin/ldap_config.html:8
+msgid "LDAP tabs"
+msgstr "Вкладки LDAP"
+
+#: templates/admin/base.html:135 templates/admin/ldap_config.html:3
+msgid "LDAP/AD y Grupos"
+msgstr "LDAP/AD и группы"
+
+#: templates/admin/ldap_config.html:13
+msgid "LDAP/AD"
+msgstr "LDAP/AD"
+
+#: templates/admin/ldap_config.html:302
+msgid "Grupos administrativos"
+msgstr "Административные группы"
+
+#: templates/admin/ldap_config.html:310
+msgid "Ej. directivos"
+msgstr "Например, руководители"
+
+#: templates/admin/ldap_config.html:313
+msgid "Opcional"
+msgstr "Необязательно"
+
+#: templates/admin/ldap_config.html:320
+msgid "Personalizado"
+msgstr "Индивидуальный"
+
+#: templates/admin/ldap_config.html:326
+msgid "Crear grupo"
+msgstr "Создать группу"
+
+#: templates/admin/ldap_config.html:339
+msgid "Todavía no hay grupos definidos."
+msgstr "Группы пока не сформированы."
+
+#: templates/admin/ldap_config.html:355
+msgid "Sin descripción"
+msgstr "Без описания"
+
+#: templates/admin/ldap_config.html:364
+msgid "usuario1, usuario2, ..."
+msgstr "пользователь1, пользователь2, ..."
+
+#: templates/admin/ldap_config.html:367
+msgid "Añadir usuarios"
+msgstr "Добавить пользователей"
+
+#: templates/admin/ldap_config.html:371
+msgid "usuario(s) asociado(s)"
+msgstr "связанный(е) пользователь(и)"
+
+#: templates/admin/ldap_config.html:375
+msgid "Quitar usuario"
+msgstr "Удалить пользователя"
+
+#: templates/admin/ldap_config.html:385
+msgid "Este grupo aún no tiene usuarios asociados."
+msgstr "В этой группе пока нет пользователей."
+
+#: templates/admin/ldap_config.html:591
+msgid "El nombre del grupo es obligatorio."
+msgstr "Название группы является обязательным."
+
+#: templates/admin/ldap_config.html:660
+msgid "¿Está seguro de que desea eliminar este grupo y todos sus usuarios asociados?"
+msgstr "Вы уверены, что хотите удалить эту группу и всех связанных с ней пользователей?"
+
+#: templates/admin/ldap_config.html:388
+msgid "Sin probar"
+msgstr "Не проверено"
+
+#: templates/admin/ldap_config.html:392
+msgid "Conectado"
+msgstr "Подключено"
+
+#: templates/admin/ldap_config.html:394
+msgid "Error"
+msgstr "Ошибка"
+
+#: templates/admin/ldap_config.html:401
+msgid "Error al guardar la configuración."
+msgstr "Ошибка при сохранении настроек."
+
+#: templates/admin/ldap_config.html:419
+msgid "Configuración cargada desde la base de datos."
+msgstr "Настройки загружены из базы данных."
+
+#: templates/admin/ldap_config.html:426
+msgid "Configuración cargada desde el navegador. Los cambios se guardan localmente."
+msgstr "Настройки загружены из браузера. Изменения сохраняются локально."
+
+#: templates/admin/ldap_config.html:435
+msgid "Configuración guardada localmente en el navegador."
+msgstr "Настройки, сохраненные локально в браузере."
+
+#: templates/admin/ldap_config.html:443
+msgid "Configuración local eliminada."
+msgstr "Локальные настройки удалены."
+
+#: templates/admin/base.html:133 templates/admin/ldap_config.html:14
+msgid "LDAP / Active Directory"
+msgstr "LDAP / Active Directory"
+
+#: templates/admin/ldap_config.html:3
+msgid "LDAP / Active Directory | Admin Squid"
+msgstr "LDAP / Active Directory | Администрирование Squid"
+
+#: templates/admin/ldap_config.html:16
+msgid "Configura la conexión y explora el directorio."
+msgstr "Настройте подключение и просмотрите каталог."
+
+#: templates/admin/ldap_config.html:35
+msgid "Total Usuarios"
+msgstr "Общее количество пользователей"
+
+#: templates/admin/ldap_config.html:47
+msgid "Total Grupos"
+msgstr "Всего групп"
+
+#: templates/admin/ldap_config.html:62
+msgid "Configuración de conexión"
+msgstr "Настройки подключения"
+
+#: templates/admin/ldap_config.html:66
+msgid "Servidor (host)"
+msgstr "Сервер (хост)"
+
+#: templates/admin/ldap_config.html:73
+msgid "Puerto"
+msgstr "Порт"
+
+#: templates/admin/ldap_config.html:78
+msgid "Autenticación"
+msgstr "Аутентификация"
+
+#: templates/admin/ldap_config.html:81
+msgid "SIMPLE (LDAP)"
+msgstr "SIMPLE (LDAP)"
+
+#: templates/admin/ldap_config.html:82
+msgid "NTLM (AD)"
+msgstr "NTLM (AD)"
+
+#: templates/admin/ldap_config.html:89
+msgid "Usar SSL / LDAPS"
+msgstr "Использование SSL / LDAPS"
+
+#: templates/admin/ldap_config.html:93
+msgid "Bind DN / Usuario"
+msgstr "Связать DN / Пользователь"
+
+#: templates/admin/ldap_config.html:94
+msgid "CN=admin,DC=empresa,DC=com"
+msgstr "CN=admin,DC=company,DC=com"
+
+#: templates/admin/ldap_config.html:99
+msgid "Contraseña Bind"
+msgstr "Пароль Bind"
+
+#: templates/admin/ldap_config.html:105
+msgid "Base DN"
+msgstr "Базовая DN"
+
+#: templates/admin/ldap_config.html:106
+msgid "DC=empresa,DC=com"
+msgstr "DC=company,DC=com"
+
+#: templates/admin/ldap_config.html:144
+msgid "Buscar Usuarios"
+msgstr "Поиск пользователей"
+
+#: templates/admin/ldap_config.html:148
+msgid "Nombre, usuario, email…"
+msgstr "Имя, логин, адрес электронной почты…"
+
+#: templates/admin/ldap_config.html:165
+msgid "Departamento"
+msgstr "Отдел"
+
+#: templates/admin/ldap_config.html:166
+msgid "Grupos"
+msgstr "Группы"
+
+#: templates/admin/ldap_config.html:179
+msgid "Ver grupos del usuario"
+msgstr "Просмотреть группы пользователя"
+
+#: templates/admin/ldap_config.html:180
+msgid "Ver grupos"
+msgstr "Посмотреть группы"
+
+#: templates/admin/ldap_config.html:188
+msgid "No se encontraron usuarios."
+msgstr "Пользователи не найдены."
+
+#: templates/admin/ldap_config.html:196
+msgid "Buscar Grupos"
+msgstr "Поиск групп"
+
+#: templates/admin/ldap_config.html:200
+msgid "Nombre del grupo…"
+msgstr "Название группы…"
+
+#: templates/admin/ldap_config.html:214
+msgid "Descripción"
+msgstr "Описание"
+
+#: templates/admin/ldap_config.html:215
+msgid "Miembros"
+msgstr "Участники"
+
+#: templates/admin/ldap_config.html:231
+msgid "No se encontraron grupos."
+msgstr "Групп не найдено."
+
+#: templates/admin/ldap_config.html:241
+msgid "Grupos de"
+msgstr "Группы"
+
+#: templates/admin/ldap_config.html:244
+msgid "Limpiar"
+msgstr "Очистить"
+
+#: templates/admin/ldap_config.html:250
+msgid "Cargando grupos…"
+msgstr "Загрузка групп…"
+
+#: templates/admin/ldap_config.html:263
+msgid "grupo(s) encontrado(s)"
+msgstr "найденная(ые) группа(ы)"
+
+#: templates/admin/ldap_config.html:277
+msgid "Este usuario no pertenece a ningún grupo."
+msgstr "Этот пользователь не входит ни в одну группу."
+
+#: templates/admin/telegram_config.html:11
+msgid "Notificaciones Telegram"
+msgstr "Уведомления в Telegram"
+
+#: templates/admin/telegram_config.html:13
+msgid "Configura las credenciales y los destinatarios para las alertas automáticas."
+msgstr "Настройте учетные данные и получателей для автоматических уведомлений."
+
+#: templates/admin/telegram_config.html:22
+msgid "Credenciales API"
+msgstr "Учетные данные API"
+
+#: templates/admin/telegram_config.html:37
+msgid "Habilitar notificaciones Telegram"
+msgstr "Включить уведомления в Telegram"
+
+#: templates/admin/telegram_config.html:50
+msgid "API ID"
+msgstr "Идентификатор API"
+
+#: templates/admin/telegram_config.html:61
+msgid "API Hash"
+msgstr "API Hash"
+
+#: templates/admin/telegram_config.html:67
+msgid "Guardado — dejar vacío para no cambiar"
+msgstr "Сохранено — оставить пустым, чтобы не изменять"
+
+#: templates/admin/telegram_config.html:74
+msgid "Token del Bot"
+msgstr "Токен бота"
+
+#: templates/admin/telegram_config.html:84
+msgid "(opcional si usa cuenta de usuario)"
+msgstr "(необязательно, если вы используете учетную запись пользователя)"
+
+#: templates/admin/telegram_config.html:89
+msgid "Teléfono (cuenta de usuario)"
+msgstr "Телефон (учетная запись пользователя)"
+
+#: templates/admin/telegram_config.html:96
+msgid "(opcional)"
+msgstr "(необязательно)"
+
+#: templates/admin/telegram_config.html:103
+msgid "En modo bot este campo debe estar vacío — los bots no pueden usar número de teléfono."
+msgstr "В режиме бота это поле должно оставаться пустым — боты не могут использовать номера телефонов."
+
+#: templates/admin/telegram_config.html:105
+msgid "Nombre de sesión"
+msgstr "Название сеанса"
+
+#: templates/admin/telegram_config.html:114
+msgid "Guardando…"
+msgstr "Сохраняется…"
+
+#: templates/admin/telegram_config.html:117
+msgid "Probar"
+msgstr "Проверить подключение"
+
+#: templates/admin/telegram_config.html:158
+msgid "Destinatarios"
+msgstr "Адресаты"
+
+#: templates/admin/telegram_config.html:160
+msgid "Introduce un destinatario por línea: @username, ID numérico de usuario o ID de chat/grupo."
+msgstr "Укажите одного получателя в каждой строке: @username, числовой ID пользователя или ID чата/группы."
+
+#: templates/admin/telegram_config.html:168
+msgid "Cada línea es un destinatario independiente."
+msgstr "Каждая строка — это отдельный получатель."
+
+#: templates/admin/telegram_config.html:178
+msgid "Enviar mensaje de prueba"
+msgstr "Отправить пробное сообщение"
+
+#: templates/admin/telegram_config.html:180
+msgid "Habilita Telegram para enviar mensajes de prueba."
+msgstr "Включите в Telegram возможность отправки тестовых сообщений."
+
+#: templates/admin/telegram_config.html:182
+msgid "Estado de la conexión"
+msgstr "Состояние соединения"
+
+#: templates/admin/telegram_config.html:188
+msgid "Servicio"
+msgstr "Служба"
+
+#: templates/admin/telegram_config.html:193
+msgid "Modo"
+msgstr "Режим"
+
+#: templates/admin/telegram_config.html:198
+msgid "Sesión"
+msgstr "Сессия"
+
+#: templates/admin/telegram_config.html:202
+msgid "Usuario Telegram"
+msgstr "Пользователь Telegram"
+
+#: templates/admin/telegram_config.html:214
+msgid "Actualizar estado"
+msgstr "Обновить статус"
+
+#: templates/admin/telegram_config.html:230
+msgid "Verificando…"
+msgstr "Проверка…"
+
+#: templates/admin/telegram_config.html:341
+msgid "Error de red al guardar."
+msgstr "Ошибка сети при сохранении."
+
+#: templates/admin/telegram_config.html:352
+msgid "Error de red al probar la conexión."
+msgstr "Ошибка сети при проверке подключения."
+
+#: templates/logsView.html
+msgid "Actividad"
+msgstr "Деятельность"
+
+#: templates/logsView.html
+msgid "Grupos"
+msgstr "Группы"
+
+#: templates/partials/logs_groups.html
+msgid "Desde"
+msgstr "С"
+
+#: templates/partials/logs_groups.html
+msgid "Hasta"
+msgstr "По"
+
+#: templates/partials/logs_groups.html
+msgid "Hoy"
+msgstr "Сегодня"
+
+#: templates/partials/logs_groups.html
+msgid "Periodo"
+msgstr "Период"
+
+#: templates/partials/logs_groups.html
+msgid "Datos consumidos"
+msgstr "Использованные данные"
+
+#: templates/partials/logs_groups.html
+msgid "Grupo"
+msgstr "Группа"
+
+#: templates/partials/logs_groups.html
+msgid "Sin grupo"
+msgstr "Без группы"
+
+#: templates/partials/logs_groups.html
+msgid "No hay tráfico para este periodo."
+msgstr "Данных о трафике за этот период нет."
+
+#: templates/partials/logs_groups.html
+msgid "Usuarios del grupo"
+msgstr "Пользователи группы"
+
+#: templates/partials/logs_groups.html
+msgid "solicitudes"
+msgstr "запросов"
+
+#: templates/partials/logs_groups.html
+msgid "No hay usuarios con tráfico."
+msgstr "Нет пользователей с трафиком."
+
+#: templates/partials/logs_groups.html
+msgid "Selecciona un grupo para ver sus usuarios."
+msgstr "Выберите группу, чтобы просмотреть её пользователей."
+
+#: templates/partials/logs_groups.html
+msgid "Detalle del usuario"
+msgstr "Сведения о пользователе"
+
+#: templates/partials/logs_groups.html
+msgid "páginas encontradas"
+msgstr "найденные страницы"
+
+#: templates/partials/logs_groups.html
+msgid "No hay páginas accedidas."
+msgstr "Страниц, на которые был осуществлен доступ, нет."
+
+#: templates/partials/logs_groups.html
+msgid "Exportar PDF"
+msgstr "Экспорт в PDF"
+
+#: templates/logs_groups_pdf.html
+msgid "Reporte de grupos"
+msgstr "Отчет по группам"
+
+#: templates/logs_groups_pdf.html
+msgid "Generado"
+msgstr "Создано"
+
+#: templates/logs_groups_pdf.html
+msgid "Resumen por grupo"
+msgstr "Сводная информация по группам"
+
+#: routes/logs_routes.py
+msgid "La exportación PDF no está disponible en este momento."
+msgstr "Экспорт в формат PDF в настоящее время недоступен."
+
+#: routes/logs_routes.py
+msgid "Error interno generando el reporte PDF."
+msgstr "Внутренняя ошибка при создании отчета в формате PDF."
+
+#: templates/admin/ldap_config.html:481
+msgid "El campo de búsqueda de usuario no puede estar vacío."
+msgstr "Поле ввода имени пользователя не может быть пустым."
+
+#: templates/admin/telegram_config.html:197
+msgid "Cuenta de usuario"
+msgstr "Учётная запись пользователя"
+
+#: templates/admin/ldap_config.html:207
+msgid "Buscar Grupos en LDAP/AD"
+msgstr "Поиск групп в LDAP/AD"
