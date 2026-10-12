@@ -1,0 +1,175 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: services/analytics/auditoria_service.py:41
+#: services/analytics/auditoria_service.py:116
+#: services/analytics/auditoria_service.py:212
+#: services/analytics/auditoria_service.py:283
+#: services/analytics/auditoria_service.py:454
+#: services/analytics/auditoria_service.py:534
+#: services/analytics/auditoria_service.py:637
+#: services/analytics/auditoria_service.py:680
+#: services/analytics/auditoria_service.py:726
+#: services/analytics/auditoria_service.py:771
+msgid "No data for the selected dates."
+msgstr "Keine Daten für die ausgewählten Daten."
+
+#: services/analytics/auditoria_service.py:123
+msgid "No valid domains specified for search."
+msgstr "Keine gültigen Domains für die Suche angegeben."
+
+#: services/analytics/auditoria_service.py:355
+msgid "Invalid date format. Use YYYY-MM-DD."
+msgstr "Ungültiges Datumsformat. Verwenden Sie YYYY-MM-DD."
+
+#: services/analytics/auditoria_service.py:399
+msgid "A database error occurred while calculating daily activity."
+msgstr "Bei der Berechnung der täglichen Aktivität ist ein Datenbankfehler aufgetreten."
+
+#: services/analytics/auditoria_service.py:403
+msgid "An unexpected error occurred while calculating daily activity."
+msgstr "Bei der Berechnung der täglichen Aktivität ist ein unerwarteter Fehler aufgetreten."
+
+#: services/analytics/auditoria_service.py:1149
+msgid "Tipo de auditoría inválido"
+msgstr "Ungültiger Audit-Typ"
+
+#: services/analytics/auditoria_service.py:1169
+msgid "Error interno ejecutando la auditoría"
+msgstr "Interner Fehler beim Ausführen des Audits"
+
+#: services/auth/auth_service.py:469 services/auth/auth_service.py:489
+msgid "Por favor, inicia sesión para acceder a esta página."
+msgstr "Bitte melden Sie sich an, um auf diese Seite zuzugreifen."
+
+#: services/auth/auth_service.py:494 services/auth/auth_service.py:536
+msgid "No tienes permisos para acceder a esta página."
+msgstr "Sie haben keine Berechtigung, auf diese Seite zuzugreifen."
+
+#: services/auth/auth_service.py:512 services/auth/auth_service.py:531
+msgid "Necesitas iniciar sesión como admin."
+msgstr "Sie müssen sich als Admin anmelden."
+
+#: services/database/backup_service.py:463
+msgid "Nombre de archivo inválido"
+msgstr "Ungültiger Dateiname"
+
+#: services/database/backup_service.py:466
+msgid "La salva no existe"
+msgstr "Sicherung existiert nicht"
+
+#: services/database/db_admin_service.py:32
+msgid "La tabla no existe"
+msgstr "Tabelle existiert nicht"
+
+#: services/database/db_admin_service.py:42
+msgid "Datos de la tabla eliminados correctamente"
+msgstr "Tabellendaten erfolgreich gelöscht"
+
+#: services/database/db_info_service.py:197
+msgid "Error al ejecutar la verificación"
+msgstr "Fehler beim Ausführen der Verifikation"
+
+#: services/ldap/ldap_service.py:54
+msgid "Conexión exitosa al servidor LDAP/AD."
+msgstr "Erfolgreich mit LDAP/AD-Server verbunden."
+
+#: services/ldap/ldap_service.py:190
+msgid "Usuario no encontrado."
+msgstr "Benutzer nicht gefunden."
+
+#: services/ldap/ldap_config_service.py
+msgid "El identificador del grupo no es válido."
+msgstr "Der Gruppenbezeichner ist ungültig."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudieron cargar los grupos."
+msgstr "Gruppen konnten nicht geladen werden."
+
+#: services/ldap/ldap_config_service.py
+msgid "El nombre del grupo es obligatorio."
+msgstr "Der Gruppenname ist erforderlich."
+
+#: services/ldap/ldap_config_service.py
+msgid "El nombre del grupo no puede superar los 255 caracteres."
+msgstr "Der Gruppenname darf 255 Zeichen nicht überschreiten."
+
+#: services/ldap/ldap_config_service.py
+msgid "La descripción no puede superar los 2000 caracteres."
+msgstr "Die Beschreibung darf 2000 Zeichen nicht überschreiten."
+
+#: services/ldap/ldap_config_service.py
+msgid "El origen del grupo no es válido."
+msgstr "Die Gruppenquelle ist ungültig."
+
+#: services/ldap/ldap_config_service.py
+msgid "Grupo guardado."
+msgstr "Gruppe gespeichert."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar al menos un usuario."
+msgstr "Mindestens ein Benutzer ist erforderlich."
+
+#: services/ldap/ldap_config_service.py
+msgid "El nombre de usuario no puede superar los 255 caracteres."
+msgstr "Der Benutzername darf 255 Zeichen nicht überschreiten."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se encontró el grupo."
+msgstr "Gruppe nicht gefunden."
+
+#: services/ldap/ldap_config_service.py
+msgid "Usuarios añadidos."
+msgstr "Benutzer hinzugefügt."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudieron añadir los usuarios al grupo."
+msgstr "Benutzer konnten nicht zur Gruppe hinzugefügt werden."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar un usuario."
+msgstr "Ein Benutzer ist erforderlich."
+
+#: services/ldap/ldap_config_service.py
+msgid "Usuario eliminado."
+msgstr "Benutzer entfernt."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudo quitar al usuario del grupo."
+msgstr "Der Benutzer konnte nicht aus der Gruppe entfernt werden."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar el grupo a eliminar."
+msgstr "Die zu löschende Gruppe ist erforderlich."
+
+#: services/ldap/ldap_config_service.py
+msgid "Grupo eliminado."
+msgstr "Gruppe gelöscht."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudo eliminar el grupo."
+msgstr "Die Gruppe konnte nicht gelöscht werden."
+
+#: services/notifications/notifications.py:302
+msgid "fa-times-circle"
+msgstr "fa-times-circle"
+
+#: services/squid/split_config_service.py:42
+msgid "Archivo requerido no encontrado."
+msgstr "Erforderliche Datei nicht gefunden."
+
+#: services/squid/squid_config_splitter.py:623
+msgid "No se tienen permisos suficientes para leer los archivos"
+msgstr "Unzureichende Berechtigungen zum Lesen der Dateien"
+
+#: services/squid/squid_config_splitter.py:631
+msgid "Error interno al obtener los archivos"
+msgstr "Interner Fehler beim Abrufen der Dateien"
+
+#: services/squid/ssl_bump_service.py:27
+msgid "Error al detectar la configuración SSL Bump"
+msgstr "Fehler beim Erkennen der SSL Bump-Konfiguration"
+
+#: services/system/system_info.py:194
+msgid "Internal error"
+msgstr "Interner Fehler"

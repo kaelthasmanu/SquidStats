@@ -1,0 +1,104 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/navbar.html:7 templates/auth/login.html:59
+#: templates/auth/login.html:63 templates/components/navbar.html:8
+msgid "SquidStats"
+msgstr "SquidStats"
+
+#: templates/admin/user_form.html:7 templates/admin/user_form.html:57
+#: templates/admin/users.html:8
+msgid "Crear Usuario"
+msgstr "Benutzer erstellen"
+
+#: templates/admin/user_form.html:7
+msgid "Editar Usuario"
+msgstr "Benutzer bearbeiten"
+
+#: templates/admin/user_form.html:10
+msgid "Complete el formulario para crear un nuevo usuario administrador."
+msgstr "Füllen Sie das Formular aus, um einen neuen Administrator-Benutzer zu erstellen."
+
+#: templates/admin/user_form.html:10
+msgid "Modifique los datos del usuario según sea necesario."
+msgstr "Ändern Sie die Benutzerdaten nach Bedarf."
+
+#: templates/admin/user_form.html:18
+msgid "Nombre de Usuario"
+msgstr "Benutzername"
+
+#: templates/admin/user_form.html:26 templates/auth/login.html:116
+msgid "Contraseña"
+msgstr "Passwort"
+
+#: templates/admin/user_form.html:26
+msgid "(dejar vacío para mantener la actual)"
+msgstr "(leer lassen, um das aktuelle beizubehalten)"
+
+#: templates/admin/user_form.html:31
+msgid "La contraseña debe tener al menos 8 caracteres"
+msgstr "Das Passwort muss mindestens 8 Zeichen lang sein"
+
+#: templates/admin/user_form.html:35 templates/admin/users.html:18
+msgid "Rol"
+msgstr "Rolle"
+
+#: templates/admin/user_form.html:37
+msgid "Administrador"
+msgstr "Administrator"
+
+#: templates/admin/user_form.html:47
+msgid "Usuario activo"
+msgstr "Aktiver Benutzer"
+
+#: templates/admin/users.html:6
+msgid "Gestión de Usuarios"
+msgstr "Benutzerverwaltung"
+
+#: templates/admin/users.html:16
+msgid "ID"
+msgstr "ID"
+
+#: templates/admin/users.html:20
+msgid "Último Login"
+msgstr "Letzte Anmeldung"
+
+#: templates/admin/users.html:39
+msgid "Nunca"
+msgstr "Nie"
+
+#: templates/auth/login.html:7
+msgid "Login - SquidStats Admin"
+msgstr "Anmeldung - SquidStats Admin"
+
+#: templates/auth/login.html:64
+msgid "Panel de Administración"
+msgstr "Administrationsbereich"
+
+#: templates/auth/login.html:108
+msgid "Ingresa tu usuario"
+msgstr "Geben Sie Ihren Benutzernamen ein"
+
+#: templates/auth/login.html:126
+msgid "Ingresa tu contraseña"
+msgstr "Geben Sie Ihr Passwort ein"
+
+#: templates/auth/login.html:146
+msgid "Recordarme"
+msgstr "Angemeldet bleiben"
+
+#: templates/auth/login.html:156
+msgid "Iniciar Sesión"
+msgstr "Anmelden"
+
+#: templates/auth/login.html:164
+msgid "Conexión segura con JWT"
+msgstr "Sichere Verbindung mit JWT"
+
+#: templates/auth/login.html:168
+msgid "Volver al Dashboard Principal"
+msgstr "Zurück zum Haupt-Dashboard"
+
+#: templates/auth/login.html:175
+msgid "SquidStats v"
+msgstr "SquidStats v"
