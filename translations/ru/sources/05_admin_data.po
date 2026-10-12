@@ -1,0 +1,1254 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/database.html:851
+msgid "Error al guardar la configuración."
+msgstr "Ошибка при сохранении настроек."
+
+#: templates/admin/database.html:858
+msgid "Error al ejecutar la salva"
+msgstr "Ошибка при выполнении серии выстрелов"
+
+#: templates/admin/database.html:861
+msgid "¿Eliminar la salva \"%(filename)s\"?"
+msgstr "Удалить последовательность «%(filename)s»?"
+
+#: templates/admin/quota.html:236
+msgid "¿Eliminar la cuota del usuario %(username)s?"
+msgstr "Удалить аккаунт пользователя %(username)s?"
+
+#: templates/admin/quota.html:292
+msgid "¿Eliminar la cuota del grupo %(group_name)s?"
+msgstr "Удалить квоту группы %(group_name)s?"
+
+#: templates/admin/ldap_config.html:163 templates/admin/quota.html:29
+#: templates/admin/quota.html:105 templates/admin/quota.html:146
+#: templates/admin/quota.html:189 templates/admin/quota.html:219
+#: templates/admin/user_form.html:38 templates/admin/users.html:17
+#: templates/auth/login.html:98 templates/partials/auditoria.html:56
+#: templates/reports_pdf.html:33
+msgid "Usuario"
+msgstr "Пользователь"
+
+#: templates/admin/blacklist.html:7
+msgid "Blacklist - Gestor de Listas"
+msgstr "Blacklist — Менеджер списков"
+
+#: templates/admin/blacklist.html:12
+msgid "Pi-hole"
+msgstr "Pi-hole"
+
+#: templates/admin/blacklist.html:15
+msgid "AdGuard"
+msgstr "AdGuard"
+
+#: templates/admin/blacklist.html:18 templates/admin/blacklist.html:291
+msgid "DNSmasq"
+msgstr "DNSmasq"
+
+#: templates/admin/blacklist.html:21
+msgid "Personalizada"
+msgstr "Индивидуальная"
+
+#: templates/admin/blacklist.html:24 templates/admin/blacklist.html:357
+msgid "Importar"
+msgstr "Импортировать"
+
+#: templates/admin/blacklist.html:31
+msgid "Integración Pi-hole"
+msgstr "Интеграция Pi-hole"
+
+#: templates/admin/blacklist.html:32 templates/admin/blacklist.html:292
+msgid "Funcionalidad en Beta"
+msgstr "Функция в бета-версии"
+
+#: templates/admin/blacklist.html:32 templates/admin/blacklist.html:292
+msgid "BETA"
+msgstr "БЕТА"
+
+#: templates/admin/blacklist.html:34
+msgid "Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí puedes configurar conexión y ver el estado."
+msgstr "Подключайте и синхронизируйте списки заблокированных адресов с сервера Pi-hole. Здесь можно настроить подключение и просмотреть его состояние."
+
+#: templates/admin/blacklist.html:39
+msgid "Pi-hole Host"
+msgstr "Хост Pi-hole"
+
+#: templates/admin/blacklist.html:40
+msgid "192.168.1.2 or example.com"
+msgstr "192.168.1.2 или example.com"
+
+#: templates/admin/blacklist.html:43
+msgid "API Token"
+msgstr "Токен API"
+
+#: templates/admin/blacklist.html:44
+msgid "Token (opcional)"
+msgstr "Токен (необязательно)"
+
+#: templates/admin/blacklist.html:48
+msgid "Probar Conexión"
+msgstr "Проверить соединение"
+
+#: templates/admin/blacklist.html:52
+msgid "Sincronizar Listas"
+msgstr "Синхронизировать списки"
+
+#: templates/admin/blacklist.html:59
+msgid "Integración AdGuard"
+msgstr "Интеграция с AdGuard"
+
+#: templates/admin/blacklist.html:60
+msgid "Soporte para fuentes y listas públicas compatibles con AdGuard."
+msgstr "Поддержка шрифтов и общедоступных списков, совместимых с AdGuard."
+
+#: templates/admin/blacklist.html:63
+msgid "URL de la lista"
+msgstr "URL списка"
+
+#: templates/admin/blacklist.html:66
+msgid "Agregar Lista"
+msgstr "Добавить список"
+
+#: templates/admin/blacklist.html:71
+msgid "Listas importadas"
+msgstr "Импортированные списки"
+
+#: templates/admin/blacklist.html:80 templates/admin/blacklist.html:310
+msgid "Activa en Squid"
+msgstr "Включить в Squid"
+
+#: templates/admin/blacklist.html:83 templates/admin/blacklist.html:313
+msgid "Inactiva"
+msgstr "Неактивна"
+
+#: templates/admin/blacklist.html:111
+msgid "Eliminar lista y dominios"
+msgstr "Удалить список и домены"
+
+#: templates/admin/blacklist.html:294
+msgid "Exporta o importa reglas en formato compatible con dnsmasq."
+msgstr "Экспортируйте или импортируйте правила в формате, совместимом с dnsmasq."
+
+#: templates/admin/blacklist.html:296
+msgid "Exportar archivo hosts"
+msgstr "Экспорт файла hosts"
+
+#: templates/admin/blacklist.html:304
+msgid "Lista Personalizada"
+msgstr "Индивидуальный список"
+
+#: templates/admin/blacklist.html:305
+msgid "Añade dominios manualmente o pega una lista separada por comas/lineas."
+msgstr "Добавьте домены вручную или вставьте список, разделенный запятыми/строками."
+
+#: templates/admin/blacklist.html:338
+msgid "example.com\nexample.org"
+msgstr "example.com\nexample.org"
+
+#: templates/admin/blacklist.html:349
+msgid "Importar listas"
+msgstr "Импорт списков"
+
+#: templates/admin/blacklist.html:350
+msgid "Importa desde archivos locales o pega URLs de listas públicas."
+msgstr "Импортируйте данные из локальных файлов или вставьте URL-адреса общедоступных списков."
+
+#: templates/admin/blacklist.html:354
+msgid "Subir archivo"
+msgstr "Загрузить файл"
+
+#: templates/admin/clean_data.html:3
+msgid "Limpiar Datos - Administrador Squid Proxy"
+msgstr "Очистка данных — Администратор прокси-сервера Squid"
+
+#: templates/admin/clean_data.html:10 templates/admin/clean_data.html:57
+#: templates/admin/database.html:41 templates/admin/database.html:598
+#: templates/admin/database.html:643
+msgid "Limpiar Datos"
+msgstr "Очистить данные"
+
+#: templates/admin/clean_data.html:12 templates/admin/database.html:600
+msgid "Selecciona una tabla y elimina todos sus datos"
+msgstr "Выберите таблицу и удалите все данные из неё"
+
+#: templates/admin/clean_data.html:129
+msgid "Selecciona una tabla..."
+msgstr "Выберите таблицу..."
+
+#: templates/admin/clean_data.html:20 templates/admin/database.html:608
+msgid "¡Advertencia!"
+msgstr "Внимание!"
+
+#: templates/admin/clean_data.html:21 templates/admin/database.html:609
+msgid "Esta acción es irreversible. Una vez eliminados los datos, no se pueden recuperar."
+msgstr "Это действие необратимо. После удаления данных их невозможно восстановить."
+
+#: templates/admin/clean_data.html:31 templates/admin/database.html:619
+msgid "Eliminar Datos de Tabla"
+msgstr "Удалить данные из таблицы"
+
+#: templates/admin/clean_data.html:40 templates/admin/database.html:626
+msgid "Seleccionar Tabla"
+msgstr "Выбрать таблицу"
+
+#: templates/admin/clean_data.html:43 templates/admin/database.html:629
+msgid "Cargando tablas..."
+msgstr "Загрузка таблиц..."
+
+#: templates/admin/database.html:876
+msgid "No se pudieron cargar las tablas"
+msgstr "Не удалось загрузить таблицы"
+
+#: templates/admin/clean_data.html:51 templates/admin/database.html:636
+msgid "Información de la Tabla"
+msgstr "Информация из таблицы"
+
+#: templates/admin/clean_data.html:71 templates/admin/database.html:657
+msgid "Información Importante"
+msgstr "Важная информация"
+
+#: templates/admin/clean_data.html:73 templates/admin/database.html:659
+msgid "Solo se eliminan los datos de la tabla, no la estructura"
+msgstr "Удаляются только данные из таблицы, а не сама структура"
+
+#: templates/admin/clean_data.html:74 templates/admin/database.html:660
+msgid "Las tablas con sufijo de fecha (ej: log_20240121) son tablas diarias"
+msgstr "Таблицы с суффиксом даты (например: log_20240121) являются ежедневными таблицами"
+
+#: templates/admin/clean_data.html:75 templates/admin/database.html:661
+msgid "Algunas tablas son críticas para el funcionamiento del sistema"
+msgstr "Некоторые таблицы имеют решающее значение для работы системы"
+
+#: templates/admin/clean_data.html:76 templates/admin/database.html:662
+msgid "Se recomienda hacer un respaldo antes de eliminar datos importantes"
+msgstr "Перед удалением важных данных рекомендуется создать резервную копию"
+
+#: templates/admin/database.html:3
+msgid "Base de Datos - Administrador Squid Proxy"
+msgstr "База данных — Администратор прокси-сервера Squid"
+
+#: templates/admin/database.html:12
+msgid "Monitor de salud, copias de seguridad y gestión de datos"
+msgstr "Мониторинг состояния, резервное копирование и управление данными"
+
+#: templates/admin/database.html:25
+msgid "Resumen DB"
+msgstr "Сводка по базе данных"
+
+#: templates/admin/database.html:33
+msgid "Salvas de BD"
+msgstr "Резервные копии БД"
+
+#: templates/admin/database.html:55
+msgid "Cargando información de la base de datos..."
+msgstr "Загрузка данных из базы данных..."
+
+#: templates/admin/database.html:69
+msgid "Reintentar"
+msgstr "Попробовать ещё раз"
+
+#: templates/admin/database.html:100
+msgid "Salud de la BD:"
+msgstr "Состояние БД:"
+
+#: templates/admin/database.html:110
+msgid "La base de datos tiene páginas dañadas."
+msgstr "В базе данных есть поврежденные страницы."
+
+#: templates/admin/database.html:114
+msgid "Haz un respaldo y ejecuta"
+msgstr "Сделайте резервную копию и запустите"
+
+#: templates/admin/database.html:114
+msgid "VACUUM"
+msgstr "VACUUM"
+
+#: templates/admin/database.html:114
+msgid "o restaura desde una copia sana."
+msgstr "или восстановите систему из исправной копии."
+
+#: templates/admin/database.html:119
+msgid "Fragmentación:"
+msgstr "Фрагментация:"
+
+#: templates/admin/database.html:121
+msgid "— dentro del rango normal"
+msgstr "— в пределах нормы"
+
+#: templates/admin/database.html:122
+msgid "— considera ejecutar VACUUM"
+msgstr "— рассмотреть возможность запуска VACUUM"
+
+#: templates/admin/database.html:123
+msgid "— ejecuta VACUUM urgentemente"
+msgstr "— срочно запустить VACUUM"
+
+#: templates/admin/database.html:127 templates/admin/database.html:152
+msgid "Motor"
+msgstr "Двигатель"
+
+#: templates/admin/database.html:127
+msgid "operando con normalidad"
+msgstr "работает в обычном режиме"
+
+#: templates/admin/database.html:138 templates/admin/database.html:498
+#: templates/admin/ldap_config.html:38 templates/admin/ldap_config.html:50
+msgid "Actualizar"
+msgstr "Обновить"
+
+#: templates/admin/database.html:162
+msgid "Tamaño Total"
+msgstr "Общий размер"
+
+#: templates/admin/database.html:172
+msgid "Tablas"
+msgstr "Таблицы"
+
+#: templates/admin/database.html:182
+msgid "Registros Totales"
+msgstr "Общее количество записей"
+
+#: templates/admin/database.html:195
+msgid "Detalles SQLite"
+msgstr "Подробная информация о SQLite"
+
+#: templates/admin/database.html:200
+msgid "Tamaño de Página"
+msgstr "Размер страницы"
+
+#: templates/admin/database.html:205
+msgid "Páginas Totales"
+msgstr "Общее количество страниц"
+
+#: templates/admin/database.html:210
+msgid "Páginas Libres"
+msgstr "Свободные страницы"
+
+#: templates/admin/database.html:215
+msgid "Modo Journal"
+msgstr "Режим «Журнал»"
+
+#: templates/admin/database.html:220
+msgid "Auto-Vacuum"
+msgstr "Auto-Vacuum"
+
+#: templates/admin/database.html:225
+msgid "Fragmentación"
+msgstr "Фрагментация"
+
+#: templates/admin/database.html:240
+msgid "Detalle de Corrupción"
+msgstr "Подробности о коррупции"
+
+#: templates/admin/database.html:256
+msgid "Versión del Motor"
+msgstr "Версия движка"
+
+#: templates/admin/database.html:267
+msgid "Verificación de Integridad"
+msgstr "Проверка целостности"
+
+#: templates/admin/database.html:272
+msgid "Verifica la integridad estructural de la base de datos en busca de posibles errores o corrupción."
+msgstr "Проверьте целостность структуры базы данных на наличие возможных ошибок или повреждений."
+
+#: templates/admin/database.html:274
+msgid "Esta operación puede tardar varios minutos en bases de datos grandes."
+msgstr "В случае больших баз данных эта операция может занять несколько минут."
+
+#: templates/admin/database.html:119
+msgid "La integridad se verifica manualmente desde el botón Verificar Integridad."
+msgstr "Проверка целостности выполняется вручную с помощью кнопки «Проверить целостность»."
+
+#: templates/admin/database.html:280
+msgid "Verificando..."
+msgstr "Проверка..."
+
+#: templates/admin/database.html:280
+msgid "Verificar Integridad"
+msgstr "Проверить целостность"
+
+#: templates/admin/database.html:294
+msgid "Sin errores detectados — la base de datos está íntegra."
+msgstr "Ошибок не обнаружено — база данных целостна."
+
+#: templates/admin/database.html:294
+msgid "Se encontraron errores de integridad."
+msgstr "Обнаружены ошибки целостности."
+
+#: templates/admin/database.html:296
+msgid "error(es) detectado(s)"
+msgstr "обнаруженная(ые) ошибка(и)"
+
+#: templates/admin/database.html:320
+msgid "Salvas de Base de Datos"
+msgstr "Резервные копии баз данных"
+
+#: templates/admin/database.html:321
+msgid "Configura y gestiona las copias de seguridad automáticas"
+msgstr "Настройка и управление автоматическим резервным копированием"
+
+#: templates/admin/database.html:346
+msgid "Total Salvas"
+msgstr "Всего резервных копий"
+
+#: templates/admin/database.html:355
+msgid "Última Salva"
+msgstr "Последняя резервная копия"
+
+#: templates/admin/database.html:364
+msgid "Espacio Total"
+msgstr "Общая площадь"
+
+#: templates/admin/database.html:377
+msgid "Configuración de Salvas"
+msgstr "Настройки резервного копирования"
+
+#: templates/admin/database.html:386
+msgid "Motor de Base de Datos"
+msgstr "База данных"
+
+#: templates/admin/database.html:391
+msgid "SQLite"
+msgstr "SQLite"
+
+#: templates/admin/database.html:392
+msgid "MySQL / MariaDB"
+msgstr "MySQL / MariaDB"
+
+#: templates/admin/database.html:393
+msgid "PostgreSQL"
+msgstr "PostgreSQL"
+
+#: templates/admin/database.html:402 templates/admin/database.html:408
+msgid "Requiere"
+msgstr "Требуется"
+
+#: templates/admin/database.html:402 templates/admin/database.html:408
+msgid "instalado en el servidor."
+msgstr "установлен на сервере."
+
+#: templates/admin/database.html:416
+msgid "Frecuencia"
+msgstr "Частота"
+
+#: templates/admin/database.html:421
+msgid "Diaria — máx. 3 por semana"
+msgstr "Ежедневно — не более 3 раз в неделю"
+
+#: templates/admin/database.html:422
+msgid "Diaria — máx. 3 por mes"
+msgstr "Ежедневно — не более 3 раз в месяц"
+
+#: templates/admin/database.html:438
+msgid "Retención máxima"
+msgstr "Максимальная удерживаемость"
+
+#: templates/admin/database.html:441
+msgid "Fijo: 3 salvas"
+msgstr "Максимум: 3 копии"
+
+#: templates/admin/database.html:452
+msgid "Se mantienen las 3 salvas más recientes. Las más antiguas se eliminan automáticamente."
+msgstr "Сохраняются 3 последних копии. Более старые автоматически удаляются."
+
+#: templates/admin/database.html:459
+msgid "Directorio de Salvas"
+msgstr "Каталог резервных копий"
+
+#: templates/admin/database.html:464
+msgid "Ruta absoluta donde se guardarán las salvas"
+msgstr "Абсолютный путь, в котором будут сохраняться серии"
+
+#: templates/admin/database.html:470
+msgid "Salvas automáticas"
+msgstr "Автоматические резервные копии"
+
+#: templates/admin/database.html:471
+msgid "Habilitar programación automática"
+msgstr "Включить автоматическое программирование"
+
+#: templates/admin/database.html:495
+msgid "Historial de Salvas"
+msgstr "История резервных копий"
+
+#: templates/admin/database.html:506
+msgid "Cargando salvas..."
+msgstr "Загрузка резервных копий..."
+
+#: templates/admin/database.html:516
+msgid "No hay salvas disponibles"
+msgstr "Резервные копии недоступны"
+
+#: templates/admin/database.html:517
+msgid "Realiza una salva manual o activa las automáticas"
+msgstr "Выполните ручную серию выстрелов или включите автоматический режим"
+
+#: templates/admin/database.html:526
+msgid "Archivo"
+msgstr "Архив"
+
+#: templates/admin/database.html:527 templates/admin/quota.html:347
+#: templates/partials/auditoria.html:160
+msgid "Fecha"
+msgstr "Дата"
+
+#: templates/admin/database.html:528
+msgid "Tamaño"
+msgstr "Размер"
+
+#: templates/admin/database.html:530 templates/admin/quota.html:281
+msgid "Acción"
+msgstr "Действие"
+
+#: templates/admin/database.html:543
+msgid "Reciente"
+msgstr "Недавнее"
+
+#: templates/admin/database.html:561
+msgid "Descargar"
+msgstr "Скачать"
+
+#: templates/admin/database.html:581
+msgid "Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente."
+msgstr "Не более 3 серий за период. Самые старые серии удаляются автоматически."
+
+#: templates/admin/database.html:725 templates/admin/database.html:753
+msgid "0 B"
+msgstr "0 B"
+
+#: templates/admin/database.html:740
+msgid "Corrupción detectada"
+msgstr "Выявленные случаи коррупции"
+
+#: templates/admin/database.html:741
+msgid "Saludable"
+msgstr "Полезный для здоровья"
+
+#: templates/admin/database.html:741
+msgid "Crítico"
+msgstr "Критический"
+
+#: templates/admin/database.html:752
+msgid "Sin salvas"
+msgstr "Нет резервных копий"
+
+#: templates/admin/database.html:754
+msgid "Guardando..."
+msgstr "Сохраняется..."
+
+#: templates/admin/database.html:755
+msgid "Salva Manual"
+msgstr "Сохранить вручную"
+
+#: templates/admin/database.html:756
+msgid "Guardar Configuración"
+msgstr "Сохранить настройки"
+
+#: templates/admin/database.html:757
+msgid "Se ejecuta diariamente, conservando máx. 3 salvas por semana"
+msgstr "Выполняется ежедневно, хранится не более 3 копий в неделю"
+
+#: templates/admin/database.html:758
+msgid "Se ejecuta diariamente, conservando máx. 3 salvas por mes"
+msgstr "Выполняется ежедневно, хранится не более 3 копий в месяц"
+
+#: templates/admin/delay_pools.html:6
+msgid "Gestión de Delay Pools"
+msgstr "Управление пулами задержек"
+
+#: templates/admin/delay_pools.html:8
+msgid "Agregar Pool"
+msgstr "Добавить пул"
+
+#: templates/admin/delay_pools.html:31
+msgid "¿Qué son los Delay Pools?"
+msgstr "Что такое пулы задержек?"
+
+#: templates/admin/delay_pools.html:32
+msgid "Los delay pools permiten limitar el ancho de banda de ciertas solicitudes basadas en criterios específicos, proporcionando un control justo del tráfico."
+msgstr "Пулы задержек позволяют ограничивать пропускную способность определенных запросов на основе конкретных критериев, обеспечивая справедливое управление трафиком."
+
+#: templates/admin/delay_pools.html:33
+msgid "Clases disponibles:"
+msgstr "Доступные классы:"
+
+#: templates/admin/delay_pools.html:35 templates/admin/delay_pools.html:207
+msgid "Clase 1:"
+msgstr "Класс 1:"
+
+#: templates/admin/delay_pools.html:35 templates/admin/delay_pools.html:207
+msgid "Un solo bucket agregado para todos los clientes"
+msgstr "Единый агрегированный пул для всех клиентов"
+
+#: templates/admin/delay_pools.html:36 templates/admin/delay_pools.html:220
+msgid "Clase 2:"
+msgstr "Класс 2:"
+
+#: templates/admin/delay_pools.html:36
+msgid "Bucket agregado + buckets individuales por host (/24)"
+msgstr "Общий пул + отдельные пулы для каждого хоста (/24)"
+
+#: templates/admin/delay_pools.html:37 templates/admin/delay_pools.html:238
+msgid "Clase 3:"
+msgstr "Класс 3:"
+
+#: templates/admin/delay_pools.html:37
+msgid "Buckets por subred + buckets individuales por host (/16)"
+msgstr "Пулы по подсети + отдельные пулы для каждого хоста (/16)"
+
+#: templates/admin/delay_pools.html:38
+msgid "Clase 4:"
+msgstr "Класс 4:"
+
+#: templates/admin/delay_pools.html:38 templates/admin/delay_pools.html:72
+msgid "Como clase 3 + buckets por usuario autenticado"
+msgstr "Как класс 3 + пулы для каждого авторизованного пользователя"
+
+#: templates/admin/delay_pools.html:39 templates/admin/delay_pools.html:261
+msgid "Clase 5:"
+msgstr "Класс 5:"
+
+#: templates/admin/delay_pools.html:39
+msgid "Basado en tags de external_acl_type"
+msgstr "На основе тегов external_acl_type"
+
+#: templates/admin/delay_pools.html:41
+msgid "Limitaciones importantes:"
+msgstr "Важные ограничения:"
+
+#: templates/admin/delay_pools.html:43
+msgid "No limita overheads como TCP, ICP, DNS, etc."
+msgstr "Не ограничивает накладные расходы, такие как TCP, ICP, DNS и т. д."
+
+#: templates/admin/delay_pools.html:44
+msgid "Incompatible con slow aborts; usa quick abort bajo"
+msgstr "Несовместимо с медленным прерыванием; используйте быстрое прерывание на низком уровне"
+
+#: templates/admin/delay_pools.html:45
+msgid "Una conexión puede tomar todo el ancho de banda de un bucket"
+msgstr "Одно соединение может занять всю пропускную способность пула"
+
+#: templates/admin/delay_pools.html:46
+msgid "En Squid"
+msgstr "В Squid"
+
+#: templates/admin/delay_pools.html:59
+msgid "Pool #"
+msgstr "Пул №"
+
+#: templates/admin/delay_pools.html:61
+msgid "Clase"
+msgstr "Класс"
+
+#: templates/admin/delay_pools.html:66
+msgid "Bucket único agregado para todos los clientes"
+msgstr "Единый агрегированный пул для всех клиентов"
+
+#: templates/admin/delay_pools.html:68
+msgid "Bucket agregado + 255 buckets por host (red /24)"
+msgstr "Общий пул + 255 пулов на хост (сеть /24)"
+
+#: templates/admin/delay_pools.html:70
+msgid "Buckets por subred + buckets por host (red /16)"
+msgstr "Пулы по подсети + пулы на хост (сеть /16)"
+
+#: templates/admin/delay_pools.html:74
+msgid "Buckets basados en tags de external_acl_type"
+msgstr "Контейнеры на основе тегов external_acl_type"
+
+#: templates/admin/delay_pools.html:93 templates/admin/delay_pools.html:202
+msgid "Parámetros de Velocidad:"
+msgstr "Параметры скорости:"
+
+#: templates/admin/delay_pools.html:101 templates/admin/delay_pools.html:103
+#: templates/admin/delay_pools.html:106
+msgid "Agregado:"
+msgstr "Добавлено:"
+
+#: templates/admin/delay_pools.html:104 templates/admin/delay_pools.html:108
+msgid "Individual (por host):"
+msgstr "Индивидуально (по хосту):"
+
+#: templates/admin/delay_pools.html:107
+msgid "Red:"
+msgstr "Сеть:"
+
+#: templates/admin/delay_pools.html:110
+msgid "Formato: restore/max (bytes por segundo)"
+msgstr "Формат: restore/max (байт в секунду)"
+
+#: templates/admin/delay_pools.html:118 templates/admin/delay_pools.html:333
+msgid "Reglas de Acceso:"
+msgstr "Правила доступа:"
+
+#: templates/admin/delay_pools.html:141
+msgid "Para ver los delay pools debes iniciar sesión."
+msgstr "Чтобы просмотреть пулы задержек, необходимо войти в систему."
+
+#: templates/admin/delay_pools.html:142
+msgid "Inicia sesión con una cuenta de administrador para acceder a esta sección."
+msgstr "Войдите в систему с учетной записью администратора, чтобы получить доступ к этому разделу."
+
+#: templates/admin/delay_pools.html:144
+msgid "Iniciar sesión"
+msgstr "Войти"
+
+#: templates/admin/delay_pools.html:150
+msgid "No hay delay pools configurados"
+msgstr "Пулы задержки не настроены"
+
+#: templates/admin/delay_pools.html:156
+msgid "¿Ya tienes delay pools configurados?"
+msgstr "У вас уже настроены пулы задержки?"
+
+#: templates/admin/delay_pools.html:164
+msgid "Crear primer Pool"
+msgstr "Создать первый пул"
+
+#: templates/admin/delay_pools.html:175
+msgid "Agregar Nuevo Delay Pool"
+msgstr "Добавить новый пул задержек"
+
+#: templates/admin/delay_pools.html:181 templates/admin/delay_pools.html:307
+msgid "Número de Pool:"
+msgstr "Номер пула:"
+
+#: templates/admin/delay_pools.html:185
+msgid "Número único del pool (1-255)"
+msgstr "Уникальный номер пула (1–255)"
+
+#: templates/admin/delay_pools.html:189 templates/admin/delay_pools.html:313
+msgid "Clase de Pool:"
+msgstr "Тип пула:"
+
+#: templates/admin/delay_pools.html:192
+msgid "Seleccione una clase..."
+msgstr "Выберите класс..."
+
+#: templates/admin/delay_pools.html:193 templates/admin/delay_pools.html:316
+msgid "Clase 1 - Bucket único agregado"
+msgstr "Класс 1 — Единый агрегированный пул"
+
+#: templates/admin/delay_pools.html:194 templates/admin/delay_pools.html:317
+msgid "Clase 2 - Agregado + por host (/24)"
+msgstr "Класс 2 — Общий + по хосту (/24)"
+
+#: templates/admin/delay_pools.html:195 templates/admin/delay_pools.html:318
+msgid "Clase 3 - Agregado + red + por host (/16)"
+msgstr "Класс 3 — Общий + сеть + по хосту (/16)"
+
+#: templates/admin/delay_pools.html:196 templates/admin/delay_pools.html:319
+msgid "Clase 4 - Como clase 3 + por usuario"
+msgstr "Класс 4 — Как класс 3 + по пользователю"
+
+#: templates/admin/delay_pools.html:197 templates/admin/delay_pools.html:320
+msgid "Clase 5 - Basado en tags"
+msgstr "Класс 5 — На основе тегов"
+
+#: templates/admin/delay_pools.html:210
+msgid "Agregado (restore/max en bytes/seg):"
+msgstr "Добавлено (restore/max в байтах/сек):"
+
+#: templates/admin/delay_pools.html:213
+msgid "Ej: 64000/64000 = 512 Kbps"
+msgstr "Например: 64000/64000 = 512 Кбит/с"
+
+#: templates/admin/delay_pools.html:220
+msgid "Bucket agregado + 255 buckets individuales por host"
+msgstr "Общий пул + 255 отдельных пулов для каждого хоста"
+
+#: templates/admin/delay_pools.html:223 templates/admin/delay_pools.html:241
+msgid "Agregado (restore/max):"
+msgstr "Агрегированный (restore/max):"
+
+#: templates/admin/delay_pools.html:228 templates/admin/delay_pools.html:252
+msgid "Individual por host (restore/max):"
+msgstr "Индивидуально по хосту (восстановление/максимум):"
+
+#: templates/admin/delay_pools.html:231
+msgid "Usa -1/-1 para deshabilitar este bucket"
+msgstr "Используйте -1/-1 для отключения этого пула"
+
+#: templates/admin/delay_pools.html:238
+msgid "Buckets por subred + por host"
+msgstr "Пулы по подсети + по хосту"
+
+#: templates/admin/delay_pools.html:246
+msgid "Por red (restore/max):"
+msgstr "По сети (restore/max):"
+
+#: templates/admin/delay_pools.html:249
+msgid "Usa -1/-1 para deshabilitar"
+msgstr "Используйте -1/-1 для отключения"
+
+#: templates/admin/delay_pools.html:261
+msgid "Basado en tags de external_acl_type (un bucket por tag)"
+msgstr "На основе тегов external_acl_type (один пул на тег)"
+
+#: templates/admin/delay_pools.html:264
+msgid "Parámetros por tag (restore/max):"
+msgstr "Параметры по тегам (restore/max):"
+
+#: templates/admin/delay_pools.html:272
+msgid "Reglas de Acceso (ACLs):"
+msgstr "Правила доступа (ACL):"
+
+#: templates/admin/delay_pools.html:278 templates/admin/delay_pools.html:339
+msgid "Agregar regla de acceso"
+msgstr "Добавить правило доступа"
+
+#: templates/admin/delay_pools.html:289
+msgid "Crear Pool"
+msgstr "Создать пул"
+
+#: templates/admin/delay_pools.html:300
+msgid "Editar Delay Pool"
+msgstr "Редактировать пул задержек"
+
+#: templates/admin/delay_pools.html:325
+msgid "Parámetros:"
+msgstr "Параметры:"
+
+#: templates/admin/delay_pools.html:329
+msgid "Formato: restore/max (bytes/seg)"
+msgstr "Формат: restore/max (байт/сек)"
+
+#: templates/admin/quota.html:8
+msgid "Cuotas de Usuario(Mensual) - Administración Squid"
+msgstr "Квоты пользователей (ежемесячные) — Администрирование Squid"
+
+#: templates/admin/quota.html:12
+msgid "Resumen"
+msgstr "Резюме"
+
+#: templates/admin/quota.html:13
+msgid "Por Usuario"
+msgstr "По пользователю"
+
+#: templates/admin/quota.html:14
+msgid "Por Grupo"
+msgstr "По группам"
+
+#: templates/admin/quota.html:15
+msgid "Reglas"
+msgstr "Правила"
+
+#: templates/admin/quota.html:16
+msgid "Histórico"
+msgstr "История"
+
+#: templates/admin/quota.html:22
+msgid "Editar cuota"
+msgstr "Изменить квоту"
+
+#: templates/admin/quota.html:33 templates/admin/quota.html:201
+msgid "Grupo (opcional)"
+msgstr "Группа (необязательно)"
+
+#: templates/admin/quota.html:34 templates/admin/quota.html:202
+msgid "Nombre de grupo"
+msgstr "Название группы"
+
+#: templates/admin/quota.html:40 templates/admin/quota.html:106
+#: templates/admin/quota.html:261 templates/admin/quota.html:279
+msgid "Grupo"
+msgstr "Группа"
+
+#: templates/admin/quota.html:46 templates/admin/quota.html:107
+#: templates/admin/quota.html:205 templates/admin/quota.html:220
+#: templates/admin/quota.html:265 templates/admin/quota.html:280
+msgid "Cuota (MB)"
+msgstr "Объем (МБ)"
+
+#: templates/admin/quota.html:61
+msgid "Resumen de Cuotas"
+msgstr "Сводная ведомость квот"
+
+#: templates/admin/quota.html:62
+msgid "Visualiza el estado general de las cuotas de ancho de banda y límites de datos para los usuarios y grupos."
+msgstr "Просматривайте общий статус квот на пропускную способность и ограничений на объем данных для пользователей и групп."
+
+#: templates/admin/quota.html:67
+msgid "Activa o desactiva el control de cuotas para usuarios y grupos"
+msgstr "Включить или отключить контроль квот для пользователей и групп"
+
+#: templates/admin/quota.html:79
+msgid "Pools configurados"
+msgstr "Настроенные пулы"
+
+#: templates/admin/quota.html:83 templates/admin/quota.html:95
+#: templates/admin/quota.html:215
+msgid "Usuarios con cuota"
+msgstr "Пользователи с квотой"
+
+#: templates/admin/quota.html:87
+msgid "Incidentes de exceso"
+msgstr "Случаи превышения"
+
+#: templates/admin/quota.html:96
+msgid "Ver y filtrar en tiempo real por nombre de usuario."
+msgstr "Просмотр и фильтрация в режиме реального времени по имени пользователя."
+
+#: templates/admin/quota.html:98 templates/partials/auditoria.html:58
+msgid "Buscar usuario..."
+msgstr "Поиск пользователя..."
+
+#: templates/admin/quota.html:108
+msgid "Usado (MB)"
+msgstr "Использовано (МБ)"
+
+#: templates/admin/quota.html:120 templates/admin/quota.html:233
+msgid "Excedido"
+msgstr "Превышено"
+
+#: templates/admin/quota.html:120
+msgid "Normal"
+msgstr "Обычный"
+
+#: templates/admin/quota.html:125 templates/admin/quota.html:246
+msgid "No hay usuarios con cuota configurada"
+msgstr "Нет пользователей с настроенным лимитом"
+
+#: templates/admin/quota.html:136
+msgid "Usuarios bloqueados"
+msgstr "Заблокированные пользователи"
+
+#: templates/admin/quota.html:137
+msgid "Datos extraídos del archivo de bloqueos de quota."
+msgstr "Данные, извлеченные из файла блокировок квот."
+
+#: templates/admin/quota.html:139
+msgid "Buscar bloqueado..."
+msgstr "Поиск заблокирован..."
+
+#: templates/admin/quota.html:147 templates/admin/quota.html:350
+msgid "Detalle"
+msgstr "Подробнее"
+
+#: templates/admin/quota.html:148
+msgid "Registro"
+msgstr "Регистрация"
+
+#: templates/admin/quota.html:162
+msgid "No se encontraron bloqueos (archivo vacío o no existe)."
+msgstr "Блокировок не обнаружено (файл пустой или отсутствует)."
+
+#: templates/admin/quota.html:172
+msgid "Cuotas por Usuario"
+msgstr "Квоты пользователя"
+
+#: templates/admin/quota.html:173
+msgid "Configura y revisa cuotas específicas por usuario de Squid."
+msgstr "Настройте и проверьте конкретные квоты для каждого пользователя Squid."
+
+#: templates/admin/quota.html:180
+msgid "Cuota global con el usuario"
+msgstr "Общий лимит для пользователя"
+
+#: templates/admin/quota.html:181
+msgid "Si creas un usuario llamado"
+msgstr "Если вы создадите пользователя с именем"
+
+#: templates/admin/quota.html:181
+msgid "y le asignas una cuota, ese límite se aplicará automáticamente a"
+msgstr "и установите квоту, этот лимит будет автоматически применяться к"
+
+#: templates/admin/quota.html:181
+msgid "todos los usuarios que no tengan una cuota individual"
+msgstr "все пользователи, не имеющие индивидуального лимита"
+
+#: templates/admin/quota.html:191
+msgid "Información sobre el usuario default"
+msgstr "Информация о пользователе «default»"
+
+#: templates/admin/quota.html:193
+msgid "💡 Usuario"
+msgstr "💡 Пользователь"
+
+#: templates/admin/quota.html:194
+msgid "Si creas un usuario con el nombre"
+msgstr "Если вы создадите пользователя с именем"
+
+#: templates/admin/quota.html:194
+msgid "y le asignas una cuota, esa cuota actuará como"
+msgstr "и если вы назначите ему квоту, эта квота будет действовать как"
+
+#: templates/admin/quota.html:194
+msgid "límite global"
+msgstr "общий предел"
+
+#: templates/admin/quota.html:194
+msgid "para todos los usuarios que no tengan una cuota individual configurada. La cuota individual siempre tiene prioridad sobre la global."
+msgstr "для всех пользователей, у которых не настроена индивидуальная квота. Индивидуальная квота всегда имеет приоритет над общей."
+
+#: templates/admin/quota.html:198
+msgid "Nombre de usuario"
+msgstr "Имя пользователя"
+
+#: templates/admin/quota.html:206
+msgid "Ej. 2048"
+msgstr "Пример 2048"
+
+#: templates/admin/quota.html:209
+msgid "Guardar Cuota"
+msgstr "Сохранить квоту"
+
+#: templates/admin/quota.html:221
+msgid "Uso (MB)"
+msgstr "Использование (МБ)"
+
+#: templates/admin/quota.html:255
+msgid "Cuotas por Grupo"
+msgstr "Квоты по группам"
+
+#: templates/admin/quota.html:256
+msgid "Define límites grupales para los usuarios conectados al proxy."
+msgstr "Установите групповые ограничения для пользователей, подключенных к прокси-серверу."
+
+#: templates/admin/quota.html:262
+msgid "Nombre del grupo"
+msgstr "Название группы"
+
+#: templates/admin/quota.html:266
+msgid "Ej. 10240"
+msgstr "Пример 10240"
+
+#: templates/admin/quota.html:269
+msgid "Guardar Grupo"
+msgstr "Сохранить квоту группы"
+
+#: templates/admin/quota.html:275
+msgid "Grupos con cuota"
+msgstr "Группы с квотой"
+
+#: templates/admin/quota.html:302
+msgid "No hay grupos con cuota configurada"
+msgstr "Нет групп с настроенной квотой"
+
+#: templates/admin/quota.html:311
+msgid "Reglas de Control"
+msgstr "Правила контроля"
+
+#: templates/admin/quota.html:312
+msgid "Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el acceso o degradar la velocidad)."
+msgstr "Определите, как система будет реагировать при превышении лимита. (Например: заблокировать доступ или снизить скорость)."
+
+#: templates/admin/quota.html:314
+msgid "Regla activa:"
+msgstr "Действующее правило:"
+
+#: templates/admin/quota.html:320
+msgid "Política de excedente"
+msgstr "Политика при превышении"
+
+#: templates/admin/quota.html:322
+msgid "Información sobre la política por defecto"
+msgstr "Информация о политике по умолчанию"
+
+#: templates/admin/quota.html:324
+msgid "🔒 Política por defecto:"
+msgstr "🔒 Политика по умолчанию:"
+
+#: templates/admin/quota.html:324 templates/admin/quota.html:330
+#: templates/partials/conexiones.html:301
+msgid "Bloquear"
+msgstr "Заблокировать"
+
+#: templates/admin/quota.html:325
+msgid "Aunque no haya ninguna regla guardada, el sistema aplica automáticamente la política de"
+msgstr "Даже если не сохранено ни одного правила, система автоматически применяет политику"
+
+#: templates/admin/quota.html:325
+msgid "cuando un usuario supera su cuota. Guarda explícitamente \"Bloquear\" si quieres que quede registrado."
+msgstr "когда пользователь превышает свой лимит. Явно укажите «Заблокировать», если хотите, чтобы это было зафиксировано."
+
+#: templates/admin/quota.html:331
+msgid "Degradar velocidad (próximamente)"
+msgstr "Снижение скорости (скоро)"
+
+#: templates/admin/quota.html:332
+msgid "Solo notificar (próximamente)"
+msgstr "Только уведомление (скоро)"
+
+#: templates/admin/quota.html:335
+msgid "Guardar Regla"
+msgstr "Сохранить правило"
+
+#: templates/admin/quota.html:340
+msgid "Histórico de Eventos de Cuotas"
+msgstr "История превышений"
+
+#: templates/admin/quota.html:341
+msgid "Revisa las acciones registradas cuando usuarios superaron sus límites."
+msgstr "Просмотрите действия, зарегистрированные в тех случаях, когда пользователи превысили установленные лимиты."
+
+#: templates/admin/quota.html:348
+msgid "Usuario/Grupo"
+msgstr "Пользователь/Группа"
+
+#: templates/admin/quota.html:349
+msgid "Evento"
+msgstr "Событие"
+
+#: templates/admin/quota.html:365
+msgid "No hay registros disponibles"
+msgstr "Записей нет"
+
+#: templates/admin/database.html:41
+msgid "Importar Logs"
+msgstr "Импорт журналов"
+
+#: templates/admin/database.html:608
+msgid "Importar Logs de Squid"
+msgstr "Импорт лог-файлов Squid"
+
+#: templates/admin/database.html:611
+msgid "Carga un archivo access.log histórico para incorporarlo a la base de datos"
+msgstr "Загрузите файл access.log с историческими данными для импорта в базу данных"
+
+#: templates/admin/database.html:619
+msgid "Importación automática por fecha"
+msgstr "Автоматический импорт по дате"
+
+#: templates/admin/database.html:620
+msgid "La fecha se obtiene del timestamp de cada línea. Los registros se guardan en las tablas log_YYYYMMDD y sus usuarios en user_YYYYMMDD. Puedes importar un archivo con varios días."
+msgstr "Дата определяется по временной метке каждой строки. Записи сохраняются в таблицах log_YYYYMMDD, а данные о пользователях — в таблице user_YYYYMMDD. Можно импортировать файл, охватывающий несколько дней."
+
+#: templates/admin/database.html:628
+msgid "Seleccionar archivo"
+msgstr "Выбрать файл"
+
+#: templates/admin/database.html:635
+msgid "Archivo de logs"
+msgstr "Архив журналов"
+
+#: templates/admin/database.html:640
+msgid "Se admiten los formatos de access.log soportados por SquidStats."
+msgstr "Допускаются форматы файлов access.log, поддерживаемые SquidStats."
+
+#: templates/admin/database.html:660
+msgid "Resultado de la importación"
+msgstr "Результат импорта"
+
+#: templates/admin/database.html:662
+msgid "líneas válidas"
+msgstr "допустимые строки"
+
+#: templates/admin/database.html:673
+msgid "Denegados"
+msgstr "Отклонены"
+
+#: templates/admin/database.html:678
+msgid "Omitidas"
+msgstr "Пропущены"
+
+#: templates/admin/database.html:683
+msgid "Tablas actualizadas"
+msgstr "Обновленные таблицы"
+
+#: templates/admin/database.html:992
+msgid "Importando..."
+msgstr "Импорт..."
+
+#: templates/admin/database.html:993
+msgid "Importar logs"
+msgstr "Импорт журналов"
+
+#: templates/admin/database.html:998
+msgid "Selecciona un archivo de logs"
+msgstr "Выберите файл журнала"
+
+#: templates/admin/database.html:1016
+#: templates/admin/database.html:1023
+msgid "No se pudo importar el archivo"
+msgstr "Не удалось импортировать файл"
+
+#: templates/admin/database.html:611
+msgid "Carga uno o varios archivos access.log históricos para incorporarlos a la base de datos"
+msgstr "Загрузите один или несколько архивных файлов access.log для добавления их в базу данных"
+
+#: templates/admin/database.html:1074
+msgid "Importar archivos"
+msgstr "Импорт файлов"
+
+#: templates/admin/database.html:628
+msgid "Seleccionar archivos"
+msgstr "Выбрать файлы"
+
+#: templates/admin/database.html:647
+msgid "Zona para cargar archivos de logs"
+msgstr "Область для загрузки файлов журналов"
+
+#: templates/admin/database.html:651
+msgid "Arrastra aquí tus archivos access.log"
+msgstr "Перетащите сюда свои файлы access.log"
+
+#: templates/admin/database.html:652
+msgid "o haz clic para seleccionarlos"
+msgstr "или нажмите, чтобы выбрать их"
+
+#: templates/admin/database.html:653
+msgid "Puedes seleccionar múltiples archivos a la vez."
+msgstr "Вы можете выбрать сразу несколько файлов."
+
+#: templates/admin/database.html:659
+msgid "archivos seleccionados"
+msgstr "выбранные файлы"
+
+#: templates/admin/database.html:663
+msgid "Limpiar selección"
+msgstr "Очистить выделение"
+
+#: templates/admin/database.html:677
+msgid "Quitar archivo"
+msgstr "Удалить файл"
+
+#: templates/admin/database.html:691
+msgid "Progreso de importación"
+msgstr "Ход импорта"
+
+#: templates/admin/database.html:696
+msgid "archivos completados"
+msgstr "завершенные дела"
+
+#: templates/admin/database.html:724
+msgid "Archivos importados"
+msgstr "Импортированные файлы"
+
+#: templates/admin/database.html:745
+msgid "Archivos con error"
+msgstr "Файлы с ошибками"
+
+#: templates/admin/database.html:1075
+msgid "Procesando..."
+msgstr "Обработка..."
+
+#: templates/admin/database.html:1076
+msgid "Procesando archivo"
+msgstr "Обработка файла"
+
+#: templates/admin/database.html:1078
+msgid "Error de conexión"
+msgstr "Ошибка подключения"
+
+#: templates/admin/database.html:1079
+msgid "No se pudo importar este archivo"
+msgstr "Этот файл не удалось импортировать"
+
+#: templates/admin/database.html:1080
+msgid "Selecciona al menos un archivo de logs"
+msgstr "Выберите как минимум один файл журнала"
+
+#: templates/admin/database.html:1081
+msgid "No se pudo importar ningún archivo"
+msgstr "Не удалось импортировать ни один файл"
+
+#: templates/admin/database.html:1082
+msgid "Algunos archivos se importaron correctamente y otros fallaron"
+msgstr "Некоторые файлы были импортированы успешно, а с другими возникли проблемы"
+
+#: templates/admin/database.html:1083
+msgid "Archivos importados correctamente"
+msgstr "Файлы успешно импортированы"

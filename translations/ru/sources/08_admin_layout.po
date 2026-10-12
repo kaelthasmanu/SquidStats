@@ -1,0 +1,300 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/base.html:130 templates/admin/navbar.html:64
+#: templates/admin/navbar.html:165 templates/all_notifications.html:81
+#: templates/components/navbar.html:65 templates/components/navbar.html:180
+#: templates/partials/graph_reports.html:128
+msgid "Usuarios"
+msgstr "Пользователи"
+
+#: templates/admin/base.html:7 templates/admin/base.html:27
+msgid "Administrador Squid Proxy"
+msgstr "Администратор прокси-сервера Squid"
+
+#: templates/admin/base.html:24
+msgid "SquidStats logo"
+msgstr "SquidStats logo"
+
+#: templates/admin/base.html:28
+msgid "Admin Squid"
+msgstr "Администратор Squid"
+
+#: templates/admin/base.html:33
+msgid "Recarga la configuración de Squid sin reiniciar el servicio"
+msgstr "Обновить настройки Squid без перезапуска службы"
+
+#: templates/admin/base.html:35
+msgid "Recargar"
+msgstr "Перезагрузить"
+
+#: templates/admin/base.html:37
+msgid "Reinicia Squid y vuelve a aplicar la configuración desde cero"
+msgstr "Перезапустите Squid и заново примените настройки с нуля"
+
+#: templates/admin/base.html:39
+msgid "Reiniciar"
+msgstr "Перезапустить"
+
+#: templates/admin/base.html:42 templates/components/navbar.html:135
+msgid "Idioma"
+msgstr "Язык"
+
+#: templates/admin/base.html:88
+msgid "Gestionar Usuarios"
+msgstr "Управление пользователями"
+
+#: templates/admin/base.html:97
+msgid "Cerrar Sesión"
+msgstr "Выйти из системы"
+
+#: templates/admin/base.html:115
+msgid "Dashboard"
+msgstr "Панель управления"
+
+#: templates/admin/base.html:118
+msgid "Dashboard Admin"
+msgstr "Панель администратора"
+
+#: templates/admin/base.html:125
+msgid "Dividir Squid Config"
+msgstr "Разделение конфигурации Squid"
+
+#: templates/admin/base.html:132
+msgid "Configuraciones LDAP/Active Directory"
+msgstr "Настройки LDAP/Active Directory"
+
+#: templates/admin/base.html:140
+msgid "ACLs"
+msgstr "ACLs"
+
+#: templates/admin/base.html:146 templates/admin/dashboardAdmin.html:41
+msgid "Delay Pools"
+msgstr "Пулы задержек"
+
+#: templates/admin/base.html:152
+msgid "HTTP Access"
+msgstr "HTTP Access"
+
+#: templates/admin/base.html:156 templates/admin/base.html:157
+msgid "Cuotas"
+msgstr "Квоты"
+
+#: templates/admin/base.html:158 templates/partials/conexiones.html:280
+#: templates/partials/conexiones.html:285
+msgid "Beta"
+msgstr "Beta"
+
+#: templates/admin/base.html:161 templates/admin/navbar.html:72
+#: templates/admin/navbar.html:173 templates/components/navbar.html:73
+#: templates/components/navbar.html:188
+msgid "Blacklist"
+msgstr "Черный список"
+
+#: templates/admin/base.html:164
+msgid "Logs"
+msgstr "Журналы"
+
+#: templates/admin/dashboardAdmin.html:6
+msgid "Dashboard - Resumen del Sistema"
+msgstr "Панель управления — Обзор системы"
+
+#: templates/admin/dashboardAdmin.html:15
+msgid "Total ACLs"
+msgstr "Общее количество ACL"
+
+#: templates/admin/dashboardAdmin.html:67
+msgid "Reglas HTTP"
+msgstr "Правила HTTP"
+
+#: templates/admin/dashboardAdmin.html:97
+msgid "SSL Bump"
+msgstr "SSL Bump"
+
+#: templates/admin/dashboardAdmin.html:119
+msgid "No se encontraron configuraciones"
+msgstr "Настройки не найдены"
+
+#: templates/admin/dashboardAdmin.html:120
+msgid "No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración de Squid."
+msgstr "В вашей конфигурации Squid не обнаружено ACL, HTTP-правил и пулов задержки."
+
+#: templates/admin/dashboardAdmin.html:122
+msgid "¿Tu configuración ya está dividida en módulos?"
+msgstr "Ваша конфигурация уже разбита на модули?"
+
+#: templates/admin/dashboardAdmin.html:123
+msgid "Si ya tienes tu configuración organizada en archivos separados (por ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede leerla directamente sin necesidad de unificarla."
+msgstr "Если ваши настройки уже организованы в отдельных файлах (например: acls.conf, http_access.conf, delay_pools.conf), SquidStats может считывать их напрямую, без необходимости их объединения."
+
+#: templates/admin/dashboardAdmin.html:126
+msgid "Gestionar Configuración Modular"
+msgstr "Управление модульной конфигурацией"
+
+#: templates/admin/dashboardAdmin.html:129
+msgid "Editar squid.conf"
+msgstr "Редактировать файл squid.conf"
+
+#: templates/admin/dashboardAdmin.html:140
+msgid "Acciones Rápidas"
+msgstr "Быстрые действия"
+
+#: templates/admin/dashboardAdmin.html:143
+#: templates/admin/dashboardAdmin.html:149
+msgid "Deshabilitado por errores de configuración"
+msgstr "Отключено из-за ошибок в настройках"
+
+#: templates/admin/dashboardAdmin.html:145
+#: templates/admin/dashboardAdmin.html:157
+msgid "Editar Configuración"
+msgstr "Редактировать конфигурацию"
+
+#: templates/admin/dashboardAdmin.html:146
+msgid "Modificar archivo squid.conf (deshabilitado)"
+msgstr "Изменить файл squid.conf (отключено)"
+
+#: templates/admin/dashboardAdmin.html:152
+msgid "Crear nueva regla de acceso (deshabilitado)"
+msgstr "Создать новое правило доступа (отключено)"
+
+#: templates/admin/dashboardAdmin.html:158
+msgid "Modificar archivo squid.conf"
+msgstr "Изменить файл squid.conf"
+
+#: templates/admin/dashboardAdmin.html:164
+msgid "Crear nueva regla de acceso"
+msgstr "Создать новое правило доступа"
+
+#: templates/admin/dashboardAdmin.html:170
+msgid "Ver Logs"
+msgstr "Просмотреть журналы"
+
+#: templates/admin/dashboardAdmin.html:171
+msgid "Revisar logs del sistema"
+msgstr "Проверить системные журналы"
+
+#: templates/admin/dashboardAdmin.html:176
+msgid "Reiniciar Squid"
+msgstr "Перезапустить Squid"
+
+#: templates/admin/dashboardAdmin.html:177
+msgid "Reiniciar el servicio"
+msgstr "Перезапустить службу"
+
+#: templates/admin/dashboardAdmin.html:184
+msgid "Estado del Sistema"
+msgstr "Состояние системы"
+
+#: templates/admin/dashboardAdmin.html:189
+msgid "Servicio Squid"
+msgstr "Служба Squid"
+
+#: templates/admin/dashboardAdmin.html:200
+msgid "No cargada"
+msgstr "Не загружена"
+
+#: templates/admin/dashboardAdmin.html:202
+msgid "Cargada"
+msgstr "Загружена"
+
+#: templates/admin/dashboardAdmin.html:209
+msgid "SSL Bump (MITM)"
+msgstr "SSL Bump (MITM)"
+
+#: templates/admin/dashboardAdmin.html:218
+msgid "cert:"
+msgstr "cert:"
+
+#: templates/admin/logs.html:8
+msgid "Líneas a mostrar:"
+msgstr "Отображаемые строки:"
+
+#: templates/admin/logs.html:18
+msgid "Buscar texto en los logs"
+msgstr "Поиск текста в логах"
+
+#: templates/admin/logs.html:19
+msgid "Alternar n.º de línea"
+msgstr "Переключение номера строки"
+
+#: templates/admin/logs.html:21
+msgid "Mostrando últimas"
+msgstr "Показать последние"
+
+#: templates/admin/logs.html:21
+msgid "líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes del mensaje."
+msgstr "строк. Воспользуйтесь фильтром, чтобы быстро найти ошибки, IP-адреса или фрагменты сообщения."
+
+#: templates/admin/logs.html:28
+msgid "líneas"
+msgstr "строк"
+
+#: templates/admin/navbar.html:46 templates/components/navbar.html:47
+msgid "Toggle menu"
+msgstr "Раскрыть меню"
+
+#: templates/admin/navbar.html:54 templates/components/navbar.html:55
+msgid "Panel principal con conexiones activas"
+msgstr "Главная панель с активными разъемами"
+
+#: templates/admin/navbar.html:56 templates/admin/navbar.html:155
+#: templates/components/navbar.html:57 templates/components/navbar.html:170
+msgid "Inicio"
+msgstr "Главная"
+
+#: templates/admin/navbar.html:58 templates/components/navbar.html:59
+msgid "Estadísticas de rendimiento del cache"
+msgstr "Статистика производительности кэша"
+
+#: templates/admin/navbar.html:60 templates/admin/navbar.html:161
+#: templates/components/navbar.html:61 templates/components/navbar.html:176
+msgid "Estadísticas"
+msgstr "Статистика"
+
+#: templates/admin/navbar.html:62 templates/components/navbar.html:63
+msgid "Actividad y logs de usuarios"
+msgstr "Активность и журналы пользователей"
+
+#: templates/admin/navbar.html:66 templates/components/navbar.html:67
+msgid "Reportes y gráficas avanzadas"
+msgstr "Расширенные отчеты и графики"
+
+#: templates/admin/navbar.html:68 templates/admin/navbar.html:169
+#: templates/components/navbar.html:69 templates/components/navbar.html:184
+msgid "Reportes"
+msgstr "Отчеты"
+
+#: templates/admin/navbar.html:70 templates/components/navbar.html:71
+msgid "Sitios bloqueados y actividad restringida"
+msgstr "Заблокированные сайты и ограниченная активность"
+
+#: templates/admin/navbar.html:74 templates/components/navbar.html:75
+msgid "Auditoría de actividad por usuario y fecha"
+msgstr "Аудит действий по пользователям и датам"
+
+#: templates/admin/navbar.html:76 templates/admin/navbar.html:177
+#: templates/components/navbar.html:77 templates/components/navbar.html:192
+msgid "Auditoría"
+msgstr "Аудит"
+
+#: templates/admin/navbar.html:118 templates/components/navbar.html:118
+msgid "Panel de administración del sistema"
+msgstr "Панель управления системой"
+
+#: templates/admin/navbar.html:120 templates/components/navbar.html:120
+#: templates/components/navbar.html:200
+msgid "Admin"
+msgstr "Админ"
+
+#: templates/admin/navbar.html:124 templates/components/navbar.html:123
+msgid "Actualizar paquetes y configuración de Squid"
+msgstr "Обновление пакетов и настроек Squid"
+
+#: templates/admin/navbar.html:129 templates/components/navbar.html:128
+msgid "Actualizar aplicación web SquidStats"
+msgstr "Обновить веб-приложение SquidStats"
+
+#: templates/admin/navbar.html:131 templates/admin/navbar.html:189
+#: templates/components/navbar.html:130 templates/components/navbar.html:208
+msgid "Web"
+msgstr "Web"

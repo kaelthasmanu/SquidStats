@@ -1,0 +1,5593 @@
+# English translations for SquidStats.
+# Edit the files under sources/ and then run:
+#   python tools/build_messages.py
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SquidStats\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-12 08:51+0000\n"
+"PO-Revision-Date: 2026-10-12 08:51+0000\n"
+"Last-Translator: \n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: build_messages.py\n"
+
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: routes/api_routes.py:86 routes/api_routes.py:119 routes/api_routes.py:152
+#: routes/logs_routes.py:54
+msgid "Internal server error"
+msgstr "Внутренняя ошибка сервера"
+
+#: routes/api_routes.py:99
+msgid "Invalid JSON body"
+msgstr "Некорректное тело JSON"
+
+#: routes/api_routes.py:112
+msgid "Bad request"
+msgstr "Некорректный запрос"
+
+#: routes/api_routes.py:115
+msgid "Invalid numeric value"
+msgstr "Некорректное числовое значение"
+
+#: routes/auth_routes.py:90
+#, python-format
+msgid "¡Bienvenido, %(username)s!"
+msgstr "Добро пожаловать, %(username)s!"
+
+#: routes/auth_routes.py:145
+msgid "Has cerrado sesión correctamente."
+msgstr "Вы успешно вышли из системы."
+
+#: routes/auth_routes.py:192
+msgid "Access denied. This endpoint is only accessible from localhost."
+msgstr "Доступ запрещён. Этот эндпоинт доступен только с localhost."
+
+#: routes/auth_routes.py:202
+msgid "Username and new_password are required."
+msgstr "Требуются имя пользователя и new_password."
+
+#: routes/auth_routes.py:205
+msgid "Password must be at least 8 characters long."
+msgstr "Пароль должен содержать минимум 8 символов."
+
+#: routes/auth_routes.py:215
+msgid "Password updated successfully."
+msgstr "Пароль успешно обновлён."
+
+#: routes/auth_routes.py:218
+msgid "Failed to update password. User may not exist."
+msgstr "Не удалось обновить пароль. Возможно, пользователь не существует."
+
+#: routes/i18n_routes.py:31 templates/components/confirm_modal.html:14
+#: templates/partials/conexiones.html:468
+#: templates/partials/conexiones.html:518
+msgid "Confirmar"
+msgstr "Подтвердить"
+
+#: routes/i18n_routes.py:32 templates/admin/acls.html:44
+#: templates/admin/acls.html:82 templates/admin/acls_modals.html:142
+#: templates/admin/acls_modals.html:218 templates/admin/blacklist.html:342
+#: templates/admin/delay_pools.html:285 templates/admin/delay_pools.html:346
+#: templates/admin/edit_config.html:19 templates/admin/http_access.html:240
+#: templates/admin/http_access.html:298 templates/admin/quota.html:51
+#: templates/admin/quota.html:210 templates/admin/quota.html:270
+#: templates/admin/user_form.html:54 templates/components/confirm_modal.html:11
+#: templates/partials/conexiones.html:444
+#: templates/partials/conexiones.html:466
+#: templates/partials/conexiones.html:494
+#: templates/partials/conexiones.html:516
+msgid "Cancelar"
+msgstr "Отмена"
+
+#: routes/i18n_routes.py:33 templates/admin/blacklist.html:341
+#: templates/admin/quota.html:52
+msgid "Guardar"
+msgstr "Сохранить"
+
+#: routes/i18n_routes.py:34 templates/admin/acls.html:114
+#: templates/admin/acls_new.html:155 templates/admin/database.html:566
+#: templates/admin/delay_pools.html:84 templates/admin/http_access.html:123
+#: templates/admin/quota.html:239 templates/admin/quota.html:295
+#: templates/admin/users.html:48 templates/admin/users.html:52
+msgid "Eliminar"
+msgstr "Удалить"
+
+#: routes/i18n_routes.py:35 templates/admin/acls.html:111
+#: templates/admin/acls_new.html:150 templates/admin/config.html:37
+#: templates/admin/config.html:81 templates/admin/config.html:114
+#: templates/admin/config.html:151 templates/admin/config.html:188
+#: templates/admin/config.html:220 templates/admin/config.html:253
+#: templates/admin/delay_pools.html:80 templates/admin/http_access.html:118
+#: templates/admin/quota.html:235 templates/admin/quota.html:291
+#: templates/admin/users.html:44
+msgid "Editar"
+msgstr "Редактировать"
+
+#: routes/i18n_routes.py:36 templates/admin/split_config.html:193
+msgid "Cerrar"
+msgstr "Закрыть"
+
+#: routes/i18n_routes.py:37
+msgid "Cargando..."
+msgstr "Загрузка..."
+
+#: routes/i18n_routes.py:38 templates/partials/conexiones.html:178
+#: routes/i18n_routes.py:95
+#: templates/admin/ldap_config.html:394
+msgid "Error"
+msgstr "Ошибка"
+
+#: routes/i18n_routes.py:39
+#: routes/i18n_routes.py:97
+msgid "Éxito"
+msgstr "Успех"
+
+#: routes/i18n_routes.py:40 templates/admin/database.html:741
+#: templates/admin/split_config.html:143
+#: routes/i18n_routes.py:96
+msgid "Advertencia"
+msgstr "Предупреждение"
+
+#: routes/i18n_routes.py:41 templates/all_notifications.html:71
+#: routes/i18n_routes.py:98
+msgid "Información"
+msgstr "Информация"
+
+#: routes/i18n_routes.py:42
+msgid "Sí"
+msgstr "Да"
+
+#: routes/i18n_routes.py:43
+msgid "No"
+msgstr "Нет"
+
+#: routes/i18n_routes.py:44 templates/admin/ldap_config.html:153
+#: templates/admin/ldap_config.html:205
+msgid "Buscar"
+msgstr "Поиск"
+
+#: routes/i18n_routes.py:45 templates/admin/acls.html:97
+#: templates/admin/quota.html:223 templates/admin/split_config.html:96
+#: templates/admin/users.html:21 templates/partials/conexiones.html:279
+#: templates/partials/conexiones.html:284
+#: templates/admin/captive_portal.html
+msgid "Acciones"
+msgstr "Действия"
+
+#: routes/i18n_routes.py:46
+msgid "Volver"
+msgstr "Назад"
+
+#: routes/i18n_routes.py:47 templates/partials/black_list.html:105
+#: templates/partials/black_list.html:109
+msgid "Siguiente"
+msgstr "Следующая"
+
+#: routes/i18n_routes.py:48 templates/partials/black_list.html:95
+#: templates/partials/black_list.html:99
+msgid "Anterior"
+msgstr "Предыдущая"
+
+#: routes/i18n_routes.py:49
+msgid "de"
+msgstr "из"
+
+#: routes/i18n_routes.py:50 templates/partials/conexiones.html:23
+msgid "Todos"
+msgstr "Все"
+
+#: routes/i18n_routes.py:51
+msgid "Ninguno"
+msgstr "Ничего"
+
+#: routes/i18n_routes.py:52 templates/admin/dashboardAdmin.html:99
+#: templates/admin/dashboardAdmin.html:191
+#: templates/admin/dashboardAdmin.html:213 templates/admin/users.html:32
+msgid "Activo"
+msgstr "Активен"
+
+#: routes/i18n_routes.py:53 templates/admin/dashboardAdmin.html:104
+#: templates/admin/dashboardAdmin.html:221 templates/admin/users.html:32
+msgid "Inactivo"
+msgstr "Неактивен"
+
+#: routes/i18n_routes.py:54
+#: templates/admin/captive_portal.html
+msgid "Habilitado"
+msgstr "Включено"
+
+#: routes/i18n_routes.py:55
+#: templates/admin/captive_portal.html
+msgid "Deshabilitado"
+msgstr "Отключено"
+
+#: routes/i18n_routes.py:56
+msgid "Desconocido"
+msgstr "Неизвестно"
+
+#: routes/i18n_routes.py:57
+msgid "Sin datos"
+msgstr "Нет данных"
+
+#: routes/i18n_routes.py:58
+msgid "Sin resultados"
+msgstr "Ничего не найдено"
+
+#: routes/i18n_routes.py:59
+msgid "Campo requerido"
+msgstr "Обязательное поле"
+
+#: routes/i18n_routes.py:61 templates/partials/conexiones.html:434
+msgid "Bloquear usuario"
+msgstr "Заблокировать пользователя"
+
+#: routes/i18n_routes.py:62 templates/partials/conexiones.html:460
+msgid "Desbloquear usuario"
+msgstr "Разблокировать пользователя"
+
+#: routes/i18n_routes.py:63 templates/partials/conexiones.html:290
+#: templates/partials/conexiones.html:482
+msgid "Reducir velocidad"
+msgstr "Снизить скорость"
+
+#: routes/i18n_routes.py:64 templates/partials/conexiones.html:295
+#: templates/partials/conexiones.html:510
+msgid "Restaurar velocidad"
+msgstr "Восстановить скорость"
+
+#: routes/i18n_routes.py:65
+msgid "¿Estás seguro de que deseas bloquear a este usuario?"
+msgstr "Вы уверены, что хотите заблокировать этого пользователя?"
+
+#: routes/i18n_routes.py:66
+msgid "¿Estás seguro de que deseas desbloquear a este usuario?"
+msgstr "Вы уверены, что хотите разблокировать этого пользователя?"
+
+#: routes/i18n_routes.py:67
+msgid "¿Estás seguro de que deseas reducir la velocidad de este usuario?"
+msgstr "Вы уверены, что хотите снизить скорость этому пользователю?"
+
+#: routes/i18n_routes.py:68
+msgid "¿Estás seguro de que deseas restaurar la velocidad de este usuario?"
+msgstr "Вы уверены, что хотите восстановить скорость этому пользователю?"
+
+#: routes/i18n_routes.py:69
+msgid "Operación exitosa"
+msgstr "Операция выполнена успешно"
+
+#: routes/i18n_routes.py:70
+msgid "Error en la operación"
+msgstr "Ошибка операции"
+
+#: routes/i18n_routes.py:71
+#: templates/admin/database.html:1078
+msgid "Error de conexión"
+msgstr "Ошибка подключения"
+
+#: routes/i18n_routes.py:72
+msgid "Selecciona un delay pool válido"
+msgstr "Выберите корректный delay pool"
+
+#: routes/i18n_routes.py:73
+msgid "conexiones"
+msgstr "подключений"
+
+#: routes/i18n_routes.py:74
+msgid "No hay conexiones activas"
+msgstr "Нет активных подключений"
+
+#: routes/i18n_routes.py:75
+msgid "Anónimo"
+msgstr "Аноним"
+
+#: routes/i18n_routes.py:77 templates/admin/database.html:64
+msgid "Error al cargar los datos"
+msgstr "Ошибка загрузки данных"
+
+#: routes/i18n_routes.py:78
+msgid "No se encontraron datos"
+msgstr "Данные не найдены"
+
+#: routes/i18n_routes.py:79
+msgid "Conexiones activas"
+msgstr "Активные подключения"
+
+#: routes/i18n_routes.py:80
+msgid "Ancho de banda total"
+msgstr "Общая пропускная способность"
+
+#: routes/i18n_routes.py:81
+#: templates/partials/graph_reports.html
+msgid "Usuarios únicos"
+msgstr "Уникальные пользователи"
+
+#: routes/i18n_routes.py:83 templates/admin/navbar.html:13
+#: templates/admin/navbar.html:30 templates/admin/navbar.html:83
+#: templates/admin/navbar.html:100 templates/components/navbar.html:14
+#: templates/components/navbar.html:31 templates/components/navbar.html:84
+#: templates/components/navbar.html:101
+msgid "Notificaciones"
+msgstr "Уведомления"
+
+#: routes/i18n_routes.py:84 templates/admin/navbar.html:37
+#: templates/admin/navbar.html:107 templates/components/navbar.html:38
+#: templates/components/navbar.html:108
+msgid "Cargando notificaciones..."
+msgstr "Загрузка уведомлений..."
+
+#: routes/i18n_routes.py:85 templates/all_notifications.html:206
+msgid "No hay notificaciones"
+msgstr "Нет уведомлений"
+
+#: routes/i18n_routes.py:86 templates/admin/navbar.html:41
+#: templates/admin/navbar.html:111 templates/components/navbar.html:42
+#: templates/components/navbar.html:112
+msgid "Ver todas las notificaciones"
+msgstr "Посмотреть все уведомления"
+
+#: routes/i18n_routes.py:87 templates/all_notifications.html:186
+msgid "Marcar como leída"
+msgstr "Отметить как прочитанное"
+
+#: routes/i18n_routes.py:88
+msgid "Marcar todas como leídas"
+msgstr "Отметить все как прочитанные"
+
+#: routes/i18n_routes.py:89 templates/all_notifications.html:54
+msgid "Eliminar todas"
+msgstr "Удалить все"
+
+#: routes/i18n_routes.py:90
+#: templates/admin/config.html:13 templates/admin/navbar.html:126
+#: templates/admin/navbar.html:185 templates/all_notifications.html:78
+#: templates/components/navbar.html:125 templates/components/navbar.html:204
+msgid "Squid"
+msgstr "Squid"
+
+#: routes/i18n_routes.py:91
+#: templates/all_notifications.html:82
+msgid "Git"
+msgstr "Git"
+
+#: routes/i18n_routes.py:92
+#: templates/all_notifications.html:79 templates/partials/cache_stats.html:4
+msgid "Sistema"
+msgstr "Система"
+
+#: routes/i18n_routes.py:93
+#: templates/admin/config.html:19 templates/all_notifications.html:80
+msgid "Seguridad"
+msgstr "Безопасность"
+
+#: routes/i18n_routes.py:94
+#: templates/admin/base.html:130 templates/admin/navbar.html:64
+#: templates/admin/navbar.html:165 templates/all_notifications.html:81
+#: templates/components/navbar.html:65 templates/components/navbar.html:180
+#: templates/partials/graph_reports.html:128
+msgid "Usuarios"
+msgstr "Пользователи"
+
+#: routes/i18n_routes.py:99
+msgid "Error al cargar notificaciones:"
+msgstr "Ошибка при загрузке уведомлений:"
+
+#: routes/i18n_routes.py:100
+msgid "Notificación eliminada"
+msgstr "Уведомление удалено"
+
+#: routes/i18n_routes.py:91
+msgid "¿Deseas actualizar Squid?"
+msgstr "Хотите обновить Squid?"
+
+#: routes/i18n_routes.py:92
+msgid "¿Deseas actualizar SquidStats?"
+msgstr "Хотите обновить SquidStats?"
+
+#: routes/i18n_routes.py:93
+msgid "Actualizando..."
+msgstr "Обновление..."
+
+#: routes/i18n_routes.py:94
+msgid "Actualización completada"
+msgstr "Обновление завершено"
+
+#: routes/i18n_routes.py:95
+msgid "Error en la actualización"
+msgstr "Ошибка при обновлении"
+
+#: routes/i18n_routes.py:97
+msgid "¿Estás seguro de que deseas eliminar esto?"
+msgstr "Вы уверены, что хотите удалить это?"
+
+#: routes/i18n_routes.py:98
+msgid "Esta acción no se puede deshacer"
+msgstr "Это действие нельзя отменить"
+
+#: routes/i18n_routes.py:99
+msgid "Guardado correctamente"
+msgstr "Успешно сохранено"
+
+#: routes/i18n_routes.py:100
+msgid "Eliminado correctamente"
+msgstr "Успешно удалено"
+
+#: routes/i18n_routes.py:101
+msgid "Error al guardar"
+msgstr "Ошибка при сохранении"
+
+#: routes/i18n_routes.py:102
+msgid "Error al eliminar"
+msgstr "Ошибка при удалении"
+
+#: routes/i18n_routes.py:103
+msgid "Error al cargar"
+msgstr "Ошибка загрузки"
+
+#: routes/i18n_routes.py:105
+msgid "Generando reporte..."
+msgstr "Создание отчёта..."
+
+#: routes/i18n_routes.py:106
+msgid "Reporte listo"
+msgstr "Отчёт готов"
+
+#: routes/i18n_routes.py:107 templates/partials/auditoria.html:178
+msgid "Descargar PDF"
+msgstr "Скачать PDF"
+
+#: routes/i18n_routes.py:108
+msgid "No hay datos para el reporte"
+msgstr "Нет данных для отчёта"
+
+#: routes/i18n_routes.py:109 templates/reports_pdf.html:33
+msgid "Visitas"
+msgstr "Посещения"
+
+#: routes/i18n_routes.py:110
+msgid "Número de Visitas"
+msgstr "Количество посещений"
+
+#: routes/i18n_routes.py:112
+msgid "Aciertos de caché"
+msgstr "Попадания в кэш"
+
+#: routes/i18n_routes.py:113
+msgid "Fallos de caché"
+msgstr "Промахи кэша"
+
+#: routes/i18n_routes.py:114
+msgid "Tasa de aciertos"
+msgstr "Процент попаданий"
+
+#: routes/i18n_routes.py:116
+msgid "Filtrar por fecha"
+msgstr "Фильтр по дате"
+
+#: routes/i18n_routes.py:117
+msgid "Filtrar por usuario"
+msgstr "Фильтр по пользователю"
+
+#: routes/i18n_routes.py:118
+msgid "Exportar"
+msgstr "Экспорт"
+
+#: routes/i18n_routes.py:120
+msgid "Dominio bloqueado"
+msgstr "Домен заблокирован"
+
+#: routes/i18n_routes.py:121
+msgid "Dominio desbloqueado"
+msgstr "Домен разблокирован"
+
+#: routes/i18n_routes.py:122
+msgid "Agregar dominio"
+msgstr "Добавить домен"
+
+#: routes/i18n_routes.py:124
+msgid "Cuota excedida"
+msgstr "Квота превышена"
+
+#: routes/i18n_routes.py:125
+msgid "Cuota restante"
+msgstr "Оставшаяся квота"
+
+#: routes/i18n_routes.py:127
+msgid "ACL agregada"
+msgstr "ACL добавлена"
+
+#: routes/i18n_routes.py:128
+msgid "ACL eliminada"
+msgstr "ACL удалена"
+
+#: routes/i18n_routes.py:129
+msgid "ACL actualizada"
+msgstr "ACL обновлена"
+
+#: routes/i18n_routes.py:131
+msgid "Creando respaldo..."
+msgstr "Создание резервной копии..."
+
+#: routes/i18n_routes.py:132
+msgid "Respaldo creado"
+msgstr "Резервная копия создана"
+
+#: routes/i18n_routes.py:133
+msgid "Respaldo eliminado"
+msgstr "Резервная копия удалена"
+
+#: routes/i18n_routes.py:134
+msgid "¿Estás seguro de que deseas eliminar este respaldo?"
+msgstr "Вы уверены, что хотите удалить эту резервную копию?"
+
+#: routes/i18n_routes.py:135
+msgid "Restaurando respaldo..."
+msgstr "Восстановление из резервной копии..."
+
+#: routes/i18n_routes.py:137
+msgid "Recargando Squid..."
+msgstr "Перезагрузка Squid..."
+
+#: routes/i18n_routes.py:138
+msgid "Reiniciando Squid..."
+msgstr "Перезапуск Squid..."
+
+#: routes/i18n_routes.py:139
+msgid "Squid recargado"
+msgstr "Squid перезагружен"
+
+#: routes/i18n_routes.py:140
+msgid "Squid reiniciado"
+msgstr "Squid перезапущен"
+
+#: routes/i18n_routes.py:142
+msgid "Bytes enviados"
+msgstr "Отправлено байт"
+
+#: routes/i18n_routes.py:143
+msgid "Bytes recibidos"
+msgstr "Получено байт"
+
+#: routes/i18n_routes.py:144
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Peticiones"
+msgstr "Запросы"
+
+#: routes/i18n_routes.py:145
+msgid "Tráfico"
+msgstr "Трафик"
+
+#: routes/i18n_routes.py:147 templates/partials/cache_stats.html:158
+#: templates/partials/logs_groups.html
+msgid "Hoy"
+msgstr "Сегодня"
+
+#: routes/i18n_routes.py:148
+msgid "Ayer"
+msgstr "Вчера"
+
+#: routes/i18n_routes.py:149
+msgid "Últimos 7 días"
+msgstr "Последние 7 дней"
+
+#: routes/i18n_routes.py:150
+msgid "Últimos 30 días"
+msgstr "Последние 30 дней"
+
+#: routes/i18n_routes.py:151
+#: templates/partials/logs_groups.html
+msgid "Desde"
+msgstr "С"
+
+#: routes/i18n_routes.py:152
+#: templates/partials/logs_groups.html
+msgid "Hasta"
+msgstr "По"
+
+#: routes/i18n_routes.py:154
+msgid "Buscar auditoría"
+msgstr "Поиск аудита"
+
+#: routes/i18n_routes.py:155
+msgid "Actividad del usuario"
+msgstr "Активность пользователя"
+
+#: routes/i18n_routes.py:156
+msgid "Rango de fechas"
+msgstr "Диапазон дат"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: routes/admin_routes.py:150
+#, python-format
+msgid "Error saving configuration: %(message)s"
+msgstr "Ошибка при сохранении настроек: %(message)s"
+
+#: routes/admin/squid_config.py:57 routes/admin_routes.py:152
+msgid "Error saving configuration"
+msgstr "Ошибка при сохранении настроек"
+
+#: routes/admin/squid_config.py:82 routes/admin_routes.py:176
+msgid "Variables de entorno guardadas exitosamente"
+msgstr "Переменные окружения успешно сохранены"
+
+#: routes/admin/acls.py:50 routes/admin/acls.py:71 routes/admin_routes.py:219
+#: routes/admin_routes.py:237
+msgid "ID de ACL inválido"
+msgstr "Недопустимый идентификатор ACL"
+
+#: routes/admin/blacklist.py:80 routes/admin_routes.py:310
+msgid "Host de Pi-hole no proporcionado"
+msgstr "Хост Pi-hole не указан"
+
+#: routes/admin/blacklist.py:88 routes/admin_routes.py:323
+msgid "Sincronización de listas iniciada (en segundo plano)"
+msgstr "Начата синхронизация списков (в фоновом режиме)"
+
+#: routes/admin/blacklist.py:101 routes/admin_routes.py:339
+msgid "Archivo importado correctamente"
+msgstr "Файл успешно импортирован"
+
+#: routes/admin_routes.py:347
+#, python-format
+msgid "Error al procesar el archivo: %(error)s"
+msgstr "Ошибка при обработке файла: %(error)s"
+
+#: routes/admin/blacklist.py:104 routes/admin_routes.py:349
+msgid "Error al procesar el archivo"
+msgstr "Ошибка при обработке файла"
+
+#: routes/admin/blacklist.py:112 routes/admin_routes.py:358
+msgid "Lista importada desde URL correctamente"
+msgstr "Список успешно импортирован с URL-адреса"
+
+#: routes/admin/blacklist.py:114 routes/admin_routes.py:360
+#, python-format
+msgid "Error importando desde URL: %(err)s"
+msgstr "Ошибка при импорте с URL: %(err)s"
+
+#: routes/admin/blacklist.py:122 routes/admin_routes.py:371
+msgid "No se encontraron dominios para importar"
+msgstr "Домены для импорта не найдены"
+
+#: routes/admin/blacklist.py:125 routes/admin_routes.py:373
+msgid "Blacklist actualizada exitosamente"
+msgstr "Черный список успешно обновлен"
+
+#: routes/admin_routes.py:381
+#, python-format
+msgid "Error al guardar blacklist: %(error)s"
+msgstr "Ошибка при сохранении черного списка: %(error)s"
+
+#: routes/admin/blacklist.py:128 routes/admin_routes.py:383
+msgid "Error al guardar blacklist"
+msgstr "Ошибка при сохранении черного списка"
+
+#: routes/admin/blacklist.py:137 routes/admin_routes.py:393
+msgid "Lista personalizada vacía"
+msgstr "Пустой настраиваемый список"
+
+#: routes/admin/blacklist.py:165 routes/admin_routes.py:406
+msgid "Lista personalizada guardada en BLACKLIST_DOMAINS"
+msgstr "Пользовательский список, сохраненный в BLACKLIST_DOMAINS"
+
+#: routes/admin_routes.py:414
+#, python-format
+msgid "Error al guardar la lista: %(error)s"
+msgstr "Ошибка при сохранении списка: %(error)s"
+
+#: routes/admin/blacklist.py:168 routes/admin_routes.py:416
+msgid "Error al guardar la lista"
+msgstr "Ошибка при сохранении списка"
+
+#: routes/admin/http_access.py:37 routes/admin/http_access.py:50
+#: routes/admin/http_access.py:81 routes/admin_routes.py:428
+#: routes/admin_routes.py:448 routes/admin_routes.py:483
+msgid "Índice de regla inválido"
+msgstr "Недопустимый индекс правила"
+
+#: routes/admin/users.py:53 routes/admin_routes.py:588
+msgid "Usuario no encontrado"
+msgstr "Пользователь не найден"
+
+#: routes/admin_routes.py:652 services/database/db_admin_service.py:16
+msgid "Nombre de tabla no proporcionado"
+msgstr "Имя таблицы не указано"
+
+#: routes/admin_routes.py:660 services/database/db_admin_service.py:19
+msgid "Nombre de tabla inválido"
+msgstr "Недопустимое имя таблицы"
+
+#: routes/admin_routes.py:668 services/database/db_admin_service.py:24
+msgid "No se puede eliminar estas tablas críticas"
+msgstr "Эти важные таблицы удалить нельзя"
+
+#: routes/admin_routes.py:682 services/analytics/blacklist_users.py:222
+#: services/database/db_admin_service.py:47
+#: services/database/db_info_service.py:33
+#: services/database/db_info_service.py:150
+msgid "Error interno del servidor"
+msgstr "Внутренняя ошибка сервера"
+
+#: routes/admin_routes.py:709
+#, python-format
+msgid "Error al cargar la vista: %(error)s"
+msgstr "Ошибка при загрузке представления: %(error)s"
+
+#: routes/admin/squid_config.py:105 routes/admin_routes.py:711
+msgid "Error al cargar la vista"
+msgstr "Ошибка при загрузке представления"
+
+#: routes/admin_routes.py:738
+msgid "Archivo requerido no encontrado. Verifique la configuración del archivo squid.conf."
+msgstr "Не найден необходимый файл. Проверьте настройки файла squid.conf."
+
+#: routes/admin_routes.py:747 services/squid/split_config_service.py:47
+msgid "No se tienen permisos suficientes para crear los archivos"
+msgstr "Не хватает прав для создания файлов"
+
+#: routes/admin_routes.py:756 services/squid/split_config_service.py:53
+msgid "Error de validación de la configuración"
+msgstr "Ошибка проверки конфигурации"
+
+#: routes/admin_routes.py:769 services/squid/split_config_service.py:59
+msgid "Error interno al dividir la configuración"
+msgstr "Внутренняя ошибка при разделении конфигурации"
+
+#: routes/admin/blacklist.py:177 routes/admin_routes.py:793
+msgid "URL no proporcionada"
+msgstr "URL не указан"
+
+#: routes/admin/blacklist.py:183 routes/admin_routes.py:798
+#, python-format
+msgid "Lista eliminada: %(url)s (%(count)s dominios)"
+msgstr "Список удалён: %(url)s (домены %(count)s)"
+
+#: routes/admin_routes.py:1221
+msgid "JSON inválido"
+msgstr "Недопустимый JSON"
+
+#: routes/admin_routes.py:1243
+msgid "Error interno al cambiar estado de blocklist"
+msgstr "Внутренняя ошибка при изменении статуса в списке заблокированных"
+
+#: routes/logs_routes.py:51
+msgid "Invalid date format"
+msgstr "Неверный формат даты"
+
+#: routes/admin/backup.py:26
+msgid "Motor de BD desconocido"
+msgstr "Неизвестный движок БД"
+
+#: routes/admin/backup.py:30
+msgid "Frecuencia inválida"
+msgstr "Недопустимая частота"
+
+#: routes/admin/backup.py:37
+msgid "Configuración guardada correctamente"
+msgstr "Настройки успешно сохранены"
+
+#: routes/admin/backup.py:55
+msgid "Error leyendo salvas"
+msgstr "Ошибка при чтении серийных сообщений"
+
+#: routes/admin/backup.py:62
+msgid "Archivo no encontrado"
+msgstr "Файл не найден"
+
+#: routes/admin/blacklist.py:156
+msgid "Lista personalizada guardada y archivo custom de Squid actualizado"
+msgstr "Сохраненный пользовательский список и обновленный пользовательский файл Squid"
+
+#: routes/admin/blacklist.py:161
+#, python-format
+msgid "Lista personalizada guardada en DB, pero no se pudo regenerar el archivo de Squid: %(msg)s"
+msgstr "Персонализированный список сохранен в БД, но не удалось восстановить файл Squid: %(msg)s"
+
+#: routes/admin/ldap_config.py:39
+msgid "Configuración LDAP guardada."
+msgstr "Настройки LDAP сохранены."
+
+#: routes/admin/ldap_config.py:44
+#: templates/admin/database.html:851
+#: templates/admin/ldap_config.html:401
+msgid "Error al guardar la configuración."
+msgstr "Ошибка при сохранении настроек."
+
+#: routes/admin/ldap_config.py:64
+msgid "No se ha configurado el servidor LDAP."
+msgstr "LDAP-сервер не настроен."
+
+#: routes/admin/ldap_config.py:76
+msgid "Error interno al probar LDAP."
+msgstr "Внутренняя ошибка при проверке LDAP."
+
+#: routes/admin/ldap_config.py:92 routes/admin/ldap_config.py:125
+#: routes/admin/ldap_config.py:154 routes/admin/ldap_config.py:183
+msgid "LDAP no configurado."
+msgstr "LDAP не настроен."
+
+#: routes/admin/ldap_config.py:118 routes/admin/ldap_config.py:147
+msgid "Parámetro 'q' requerido."
+msgstr "Требуется параметр «q»."
+
+#: routes/admin/ldap_config.py:176
+msgid "Parámetro 'username' requerido."
+msgstr "Требуется параметр «username»."
+
+#: routes/logs_routes.py:24
+msgid "Actividad de usuarios y Grupos"
+msgstr "Деятельность пользователей и групп"
+
+#: routes/logs_routes.py:26
+msgid "Analisis de la Actividad de los Usuarios y Grupos"
+msgstr "Анализ активности пользователей и групп"
+
+#: routes/logs_routes.py:90
+msgid "Registros Bloqueados"
+msgstr "Заблокированные записи"
+
+#: routes/logs_routes.py:92
+msgid "Peticiones que deberian ser bloqueadas o fueron bloqueadas"
+msgstr "Запросы, которые должны быть заблокированы или были заблокированы"
+
+#: routes/main_routes.py:119
+msgid "Inicio Dashboard"
+msgstr "Главная страница Панель управления"
+
+#: routes/main_routes.py:211
+msgid "Todas las Notificaciones"
+msgstr "Все уведомления"
+
+#: routes/main_routes.py:213
+msgid "Historial completo de notificaciones del sistema"
+msgstr "Полная история системных уведомлений"
+
+#: routes/main_routes.py:235
+msgid "Error al cargar las notificaciones"
+msgstr "Ошибка при загрузке уведомлений"
+
+#: routes/reports_routes.py:67
+msgid "Reportes y gráficas"
+msgstr "Отчеты и графики"
+
+#: routes/reports_routes.py:69
+msgid "Top de la Actividad de los Usuarios y comportamiento"
+msgstr "Обзор активности пользователей и их поведения"
+
+#: routes/reports_routes.py:258
+msgid "Centro de Auditoría"
+msgstr "Аудиторский центр"
+
+#: routes/reports_routes.py:260
+msgid "Herramienta para el análisis de actividad y seguridad."
+msgstr "Инструмент для анализа активности и безопасности."
+
+#: routes/admin/database.py:47
+msgid "Selecciona un archivo de logs para importar"
+msgstr "Выберите файл журнала для импорта"
+
+#: routes/admin/database.py:61
+msgid "Importación completada correctamente"
+msgstr "Импорт успешно завершён"
+
+#: routes/admin/database.py:65
+msgid "No se pudo leer el archivo de logs"
+msgstr "Не удалось прочитать файл журнала"
+
+#: routes/admin/database.py:67
+msgid "El archivo no contiene logs de Squid válidos"
+msgstr "Файл не содержит действительных журналов Squid"
+
+#: routes/admin/database.py:70
+msgid "No se pudo importar el archivo de logs"
+msgstr "Не удалось импортировать файл журналов"
+
+#: routes/stats_routes.py:70
+msgid "Estadísticas del comportamiento del Sistema"
+msgstr "Статистика работы системы"
+
+msgid "Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Descargue e instale la última versión: dpkg -i squidstats_<version>.deb"
+msgstr "Эта программа была установлена с помощью пакета .deb, и её нельзя обновить отсюда. Загрузите и установите последнюю версию: dpkg -i squidstats_<version>.deb"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: services/analytics/auditoria_service.py:41
+#: services/analytics/auditoria_service.py:116
+#: services/analytics/auditoria_service.py:212
+#: services/analytics/auditoria_service.py:283
+#: services/analytics/auditoria_service.py:454
+#: services/analytics/auditoria_service.py:534
+#: services/analytics/auditoria_service.py:637
+#: services/analytics/auditoria_service.py:680
+#: services/analytics/auditoria_service.py:726
+#: services/analytics/auditoria_service.py:771
+msgid "No data for the selected dates."
+msgstr "Данных за выбранный период нет."
+
+#: services/analytics/auditoria_service.py:123
+msgid "No valid domains specified for search."
+msgstr "Для поиска указаны недопустимые домены."
+
+#: services/analytics/auditoria_service.py:355
+msgid "Invalid date format. Use YYYY-MM-DD."
+msgstr "Неверный формат даты. Используйте формат ГГГГ-ММ-ДД."
+
+#: services/analytics/auditoria_service.py:399
+msgid "A database error occurred while calculating daily activity."
+msgstr "При расчете суточной активности произошла ошибка базы данных."
+
+#: services/analytics/auditoria_service.py:403
+msgid "An unexpected error occurred while calculating daily activity."
+msgstr "При расчете суточной активности произошла непредвиденная ошибка."
+
+#: services/analytics/auditoria_service.py:1149
+msgid "Tipo de auditoría inválido"
+msgstr "Недопустимый тип аудита"
+
+#: services/analytics/auditoria_service.py:1169
+msgid "Error interno ejecutando la auditoría"
+msgstr "Внутренняя ошибка при выполнении аудита"
+
+#: services/auth/auth_service.py:469 services/auth/auth_service.py:489
+msgid "Por favor, inicia sesión para acceder a esta página."
+msgstr "Пожалуйста, войдите в систему, чтобы получить доступ к этой странице."
+
+#: services/auth/auth_service.py:494 services/auth/auth_service.py:536
+msgid "No tienes permisos para acceder a esta página."
+msgstr "У вас нет прав доступа к этой странице."
+
+#: services/auth/auth_service.py:512 services/auth/auth_service.py:531
+msgid "Necesitas iniciar sesión como admin."
+msgstr "Вам необходимо войти в систему как администратор."
+
+#: services/database/backup_service.py:463
+msgid "Nombre de archivo inválido"
+msgstr "Неверное имя файла"
+
+#: services/database/backup_service.py:466
+msgid "La salva no existe"
+msgstr "Сальва не существует"
+
+#: services/database/db_admin_service.py:32
+msgid "La tabla no existe"
+msgstr "Таблица отсутствует"
+
+#: services/database/db_admin_service.py:42
+msgid "Datos de la tabla eliminados correctamente"
+msgstr "Данные из таблицы успешно удалены"
+
+#: services/database/db_info_service.py:197
+msgid "Error al ejecutar la verificación"
+msgstr "Ошибка при выполнении проверки"
+
+#: services/ldap/ldap_service.py:54
+msgid "Conexión exitosa al servidor LDAP/AD."
+msgstr "Подключение к серверу LDAP/AD прошло успешно."
+
+#: services/ldap/ldap_service.py:190
+msgid "Usuario no encontrado."
+msgstr "Пользователь не найден."
+
+#: services/ldap/ldap_config_service.py
+msgid "El identificador del grupo no es válido."
+msgstr "Идентификатор группы неверный."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudieron cargar los grupos."
+msgstr "Группы не удалось загрузить."
+
+#: services/ldap/ldap_config_service.py
+#: templates/admin/ldap_config.html:591
+msgid "El nombre del grupo es obligatorio."
+msgstr "Название группы является обязательным."
+
+#: services/ldap/ldap_config_service.py
+msgid "El nombre del grupo no puede superar los 255 caracteres."
+msgstr "Название группы не должно превышать 255 символов."
+
+#: services/ldap/ldap_config_service.py
+msgid "La descripción no puede superar los 2000 caracteres."
+msgstr "Объем описания не должен превышать 2000 символов."
+
+#: services/ldap/ldap_config_service.py
+msgid "El origen del grupo no es válido."
+msgstr "Источник группы неверный."
+
+#: services/ldap/ldap_config_service.py
+msgid "Grupo guardado."
+msgstr "Сохраненная группа."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar al menos un usuario."
+msgstr "Необходимо указать хотя бы одного пользователя."
+
+#: services/ldap/ldap_config_service.py
+msgid "El nombre de usuario no puede superar los 255 caracteres."
+msgstr "Длина имени пользователя не должна превышать 255 символов."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se encontró el grupo."
+msgstr "Группа не найдена."
+
+#: services/ldap/ldap_config_service.py
+msgid "Usuarios añadidos."
+msgstr "Добавлены пользователи."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudieron añadir los usuarios al grupo."
+msgstr "Не удалось добавить пользователей в группу."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar un usuario."
+msgstr "Необходимо указать имя пользователя."
+
+#: services/ldap/ldap_config_service.py
+msgid "Usuario eliminado."
+msgstr "Пользователь удален."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudo quitar al usuario del grupo."
+msgstr "Не удалось удалить пользователя из группы."
+
+#: services/ldap/ldap_config_service.py
+msgid "Debe indicar el grupo a eliminar."
+msgstr "Необходимо указать группу, которую нужно удалить."
+
+#: services/ldap/ldap_config_service.py
+msgid "Grupo eliminado."
+msgstr "Группа выбыла."
+
+#: services/ldap/ldap_config_service.py
+msgid "No se pudo eliminar el grupo."
+msgstr "Группу удалить не удалось."
+
+#: services/notifications/notifications.py:302
+msgid "fa-times-circle"
+msgstr "fa-times-circle"
+
+#: services/squid/split_config_service.py:42
+msgid "Archivo requerido no encontrado."
+msgstr "Не найден необходимый файл."
+
+#: services/squid/squid_config_splitter.py:623
+msgid "No se tienen permisos suficientes para leer los archivos"
+msgstr "Не хватает прав для чтения файлов"
+
+#: services/squid/squid_config_splitter.py:631
+msgid "Error interno al obtener los archivos"
+msgstr "Внутренняя ошибка при получении файлов"
+
+#: services/squid/ssl_bump_service.py:27
+msgid "Error al detectar la configuración SSL Bump"
+msgstr "Ошибка при определении настроек SSL Bump"
+
+#: services/system/system_info.py:194
+msgid "Internal error"
+msgstr "Внутренняя ошибка"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/split_config.html:307
+msgid "Configuración dividida exitosamente"
+msgstr "Разделение конфигурации выполнено успешно"
+
+#: templates/admin/split_config.html:311
+msgid "Se generaron"
+msgstr "Было сгенерировано"
+
+#: templates/admin/split_config.html:312
+msgid "archivos en"
+msgstr "файлы в"
+
+#: templates/admin/split_config.html:317
+msgid "Archivos generados:"
+msgstr "Созданные файлы:"
+
+#: templates/admin/split_config.html:156 templates/auditoria_pdf.html:56
+msgid "Resultados"
+msgstr "Результаты"
+
+#: templates/admin/acls.html:7
+msgid "Gestión de ACLs"
+msgstr "Управление списками контроля доступа (ACL)"
+
+#: templates/admin/acls.html:9 templates/admin/acls_new.html:11
+#: templates/admin/dashboardAdmin.html:151
+#: templates/admin/dashboardAdmin.html:163 templates/admin/http_access.html:191
+#: templates/admin/http_access.html:286
+msgid "Agregar ACL"
+msgstr "Добавить ACL"
+
+#: templates/admin/acls.html:15 templates/admin/acls_modals.html:5
+msgid "Agregar Nueva ACL"
+msgstr "Добавить новый список контроля доступа (ACL)"
+
+#: templates/admin/acls.html:19 templates/admin/acls.html:57
+msgid "Nombre:"
+msgstr "Имя:"
+
+#: templates/admin/acls.html:23 templates/admin/acls.html:61
+msgid "Tipo:"
+msgstr "Тип:"
+
+#: templates/admin/acls.html:25 templates/admin/acls.html:63
+msgid "src (IP origen)"
+msgstr "src (источник IP)"
+
+#: templates/admin/acls.html:26 templates/admin/acls.html:64
+msgid "dst (IP destino)"
+msgstr "dst (адрес назначения)"
+
+#: templates/admin/acls.html:27 templates/admin/acls.html:65
+msgid "dstdomain (Dominio destino)"
+msgstr "dstdomain (Домен назначения)"
+
+#: templates/admin/acls.html:28 templates/admin/acls.html:66
+msgid "port (Puerto)"
+msgstr "port (порт)"
+
+#: templates/admin/acls.html:29 templates/admin/acls.html:67
+msgid "time (Tiempo)"
+msgstr "time (Время)"
+
+#: templates/admin/acls.html:30 templates/admin/acls.html:68
+msgid "method (Método HTTP)"
+msgstr "method (метод HTTP)"
+
+#: templates/admin/acls.html:31 templates/admin/acls.html:69
+msgid "proxy_auth (Autenticación)"
+msgstr "proxy_auth (Аутентификация)"
+
+#: templates/admin/acls.html:32 templates/admin/acls.html:70
+msgid "maxconn (Conexiones máximas)"
+msgstr "maxconn (Максимальное количество подключений)"
+
+#: templates/admin/acls.html:36 templates/admin/acls.html:74
+msgid "Valor:"
+msgstr "Значение:"
+
+#: templates/admin/acls.html:41
+msgid "Guardar ACL"
+msgstr "Сохранить ACL"
+
+#: templates/admin/acls.html:52 templates/admin/acls_modals.html:156
+msgid "Editar ACL"
+msgstr "Редактировать ACL"
+
+#: templates/admin/acls.html:79
+msgid "Actualizar ACL"
+msgstr "Обновить ACL"
+
+#: templates/admin/acls.html:94 templates/admin/ldap_config.html:162
+#: templates/admin/ldap_config.html:213
+msgid "Nombre"
+msgstr "Имя"
+
+#: templates/admin/acls.html:95 templates/admin/database.html:529
+msgid "Tipo"
+msgstr "Тип"
+
+#: templates/admin/acls.html:96
+msgid "Valor"
+msgstr "Значение"
+
+#: templates/admin/acls.html:126
+msgid "No hay ACLs configuradas"
+msgstr "ACL не настроены"
+
+#: templates/admin/acls.html:127
+msgid "Las ACLs son fundamentales para controlar el acceso en Squid"
+msgstr "ACL играют ключевую роль в управлении доступом в Squid"
+
+#: templates/admin/acls.html:133
+msgid "¿Ya tienes ACLs configuradas?"
+msgstr "У вас уже настроены ACL?"
+
+#: templates/admin/acls.html:134 templates/admin/delay_pools.html:157
+#: templates/admin/http_access.html:141
+msgid "Si tu squid.conf aún no está dividido, puedes"
+msgstr "Если ваш файл squid.conf ещё не разбит на модули, вы можете"
+
+#: templates/admin/acls.html:134 templates/admin/delay_pools.html:157
+#: templates/admin/http_access.html:141
+msgid "dividir tu configuración"
+msgstr "разделить настройки"
+
+#: templates/admin/acls.html:134 templates/admin/delay_pools.html:157
+#: templates/admin/http_access.html:141
+msgid "para una mejor gestión modular."
+msgstr "для более эффективного модульного управления."
+
+#: templates/admin/acls.html:135 templates/admin/delay_pools.html:158
+#: templates/admin/http_access.html:142
+msgid "Si ya está dividido, verifica que los archivos estén en el directorio correcto o edítalos directamente desde"
+msgstr "Если он уже разбит на модули, убедитесь, что файлы находятся в нужном каталоге, или отредактируйте их напрямую через раздел"
+
+#: templates/admin/acls.html:135 templates/admin/base.html:92
+#: templates/admin/base.html:121 templates/admin/config.html:5
+#: templates/admin/dashboardAdmin.html:197 templates/admin/delay_pools.html:158
+#: templates/admin/http_access.html:142
+msgid "Configuración"
+msgstr "Конфигурация"
+
+#: templates/admin/acls.html:141 templates/admin/acls_new.html:168
+msgid "Crear primera ACL"
+msgstr "Создать первый список контроля доступа (ACL)"
+
+#: templates/admin/acls_modals.html:12 templates/admin/acls_modals.html:164
+msgid "Nombre de la ACL:"
+msgstr "Название ACL:"
+
+#: templates/admin/acls_modals.html:17
+msgid "Solo letras, números, guiones y guiones bajos"
+msgstr "Только буквы, цифры, тире и нижние тире"
+
+#: templates/admin/acls_modals.html:21 templates/admin/acls_modals.html:171
+msgid "Tipo de ACL:"
+msgstr "Тип ACL:"
+
+#: templates/admin/acls_modals.html:24
+msgid "Selecciona un tipo..."
+msgstr "Выберите тип..."
+
+#: templates/admin/acls_modals.html:26
+msgid "src - IP origen del cliente"
+msgstr "src — IP-адрес клиента"
+
+#: templates/admin/acls_modals.html:27
+msgid "dst - IP destino [slow]"
+msgstr "dst — IP-адрес назначения [slow]"
+
+#: templates/admin/acls_modals.html:28
+msgid "localip - IP local de conexión"
+msgstr "localip — локальный IP-адрес подключения"
+
+#: templates/admin/acls_modals.html:29
+msgid "src_as - AS number origen"
+msgstr "src_as — исходный номер AS"
+
+#: templates/admin/acls_modals.html:30
+msgid "dst_as - AS number destino"
+msgstr "dst_as — номер AS назначения"
+
+#: templates/admin/acls_modals.html:33
+msgid "dstdomain - Dominio destino"
+msgstr "dstdomain — домен назначения"
+
+#: templates/admin/acls_modals.html:34
+msgid "srcdomain - Dominio origen [slow]"
+msgstr "srcdomain — исходный домен [медленно]"
+
+#: templates/admin/acls_modals.html:35
+msgid "dstdom_regex - Regex dominio destino"
+msgstr "dstdom_regex — регулярное выражение для домена назначения"
+
+#: templates/admin/acls_modals.html:36
+msgid "srcdom_regex - Regex dominio origen [slow]"
+msgstr "srcdom_regex — регулярное выражение для домена происхождения [медленно]"
+
+#: templates/admin/acls_modals.html:39
+msgid "port - Puerto TCP destino"
+msgstr "port — TCP-порт назначения"
+
+#: templates/admin/acls_modals.html:40
+msgid "localport - Puerto local"
+msgstr "localport — локальный порт"
+
+#: templates/admin/acls_modals.html:41
+msgid "myportname - Nombre de puerto"
+msgstr "myportname — Имя порта"
+
+#: templates/admin/acls_modals.html:44
+msgid "time - Día y hora"
+msgstr "time — День и время"
+
+#: templates/admin/acls_modals.html:47
+msgid "url_regex - Regex en URL completa"
+msgstr "url_regex — полное регулярное выражение для URL-адреса"
+
+#: templates/admin/acls_modals.html:48
+msgid "urlpath_regex - Regex en path"
+msgstr "urlpath_regex — регулярное выражение в пути"
+
+#: templates/admin/acls_modals.html:49
+msgid "urllogin - Regex en login URL"
+msgstr "urllogin — Регулярное выражение в URL-адресе входа"
+
+#: templates/admin/acls_modals.html:52
+msgid "proto - Protocolo (HTTP/FTP)"
+msgstr "proto — Протокол (HTTP/FTP)"
+
+#: templates/admin/acls_modals.html:53
+msgid "method - Método HTTP"
+msgstr "method — HTTP-метод"
+
+#: templates/admin/acls_modals.html:54
+msgid "http_status - Código HTTP"
+msgstr "http_status — код HTTP"
+
+#: templates/admin/acls_modals.html:57
+msgid "proxy_auth - Usuario proxy [slow]"
+msgstr "proxy_auth — Пользователь прокси [медленно]"
+
+#: templates/admin/acls_modals.html:58
+msgid "proxy_auth_regex - Regex usuario [slow]"
+msgstr "proxy_auth_regex — Регулярное выражение для имени пользователя [медленно]"
+
+#: templates/admin/acls_modals.html:59
+msgid "ext_user - Usuario externo [slow]"
+msgstr "ext_user — внешний пользователь [медленно]"
+
+#: templates/admin/acls_modals.html:60
+msgid "ext_user_regex - Regex usuario ext [slow]"
+msgstr "ext_user_regex — Регулярное выражение для пользователя ext [медленно]"
+
+#: templates/admin/acls_modals.html:63
+msgid "browser - User-Agent"
+msgstr "браузер — User-Agent"
+
+#: templates/admin/acls_modals.html:64
+msgid "referer_regex - Referer"
+msgstr "referer_regex — Referer"
+
+#: templates/admin/acls_modals.html:65
+msgid "req_mime_type - MIME request"
+msgstr "req_mime_type — запрос MIME"
+
+#: templates/admin/acls_modals.html:66
+msgid "rep_mime_type - MIME reply"
+msgstr "rep_mime_type — ответ MIME"
+
+#: templates/admin/acls_modals.html:67
+msgid "req_header - Header request"
+msgstr "req_header — Заголовок запроса"
+
+#: templates/admin/acls_modals.html:68
+msgid "rep_header - Header reply"
+msgstr "rep_header — Заголовок ответа"
+
+#: templates/admin/acls_modals.html:71
+msgid "ssl_error - Error SSL"
+msgstr "ssl_error — Ошибка SSL"
+
+#: templates/admin/acls_modals.html:72
+msgid "server_cert_fingerprint - Fingerprint"
+msgstr "server_cert_fingerprint — Отпечаток сертификата"
+
+#: templates/admin/acls_modals.html:73
+msgid "ssl::server_name - SNI"
+msgstr "ssl::server_name — SNI"
+
+#: templates/admin/acls_modals.html:74
+msgid "ssl::server_name_regex - SNI regex"
+msgstr "ssl::server_name_regex — регулярное выражение SNI"
+
+#: templates/admin/acls_modals.html:77
+msgid "maxconn - Max conexiones IP"
+msgstr "maxconn — максимальное количество IP-подключений"
+
+#: templates/admin/acls_modals.html:78
+msgid "max_user_ip - Max IPs usuario"
+msgstr "max_user_ip — максимальное количество IP-адресов пользователя"
+
+#: templates/admin/acls_modals.html:81
+msgid "external - Helper externo [slow]"
+msgstr "external — Внешний хелпер [медленно]"
+
+#: templates/admin/acls_modals.html:82
+msgid "random - Probabilidad random"
+msgstr "random — вероятность random"
+
+#: templates/admin/acls_modals.html:83
+msgid "note - Anotación transacción"
+msgstr "note — Примечание к транзакции"
+
+#: templates/admin/acls_modals.html:84
+msgid "any-of - Grupo OR"
+msgstr "any-of — Группа OR"
+
+#: templates/admin/acls_modals.html:85
+msgid "all-of - Grupo AND"
+msgstr "all-of — Группа AND"
+
+#: templates/admin/acls_modals.html:104
+msgid "Opciones (opcional):"
+msgstr "Параметры (необязательно):"
+
+#: templates/admin/acls_modals.html:108 templates/admin/acls_modals.html:185
+msgid "-i"
+msgstr "-i"
+
+#: templates/admin/acls_modals.html:108 templates/admin/acls_modals.html:185
+msgid "Case-insensitive"
+msgstr "Без учета регистра"
+
+#: templates/admin/acls_modals.html:112 templates/admin/acls_modals.html:189
+msgid "-n"
+msgstr "-n"
+
+#: templates/admin/acls_modals.html:112 templates/admin/acls_modals.html:189
+msgid "No lookups"
+msgstr "Без поиска"
+
+#: templates/admin/acls_modals.html:116 templates/admin/acls_modals.html:193
+msgid "-m"
+msgstr "-м"
+
+#: templates/admin/acls_modals.html:116 templates/admin/acls_modals.html:193
+msgid "List membership"
+msgstr "Членство в списке"
+
+#: templates/admin/acls_modals.html:123 templates/admin/acls_modals.html:200
+msgid "Valores:"
+msgstr "Значения:"
+
+#: templates/admin/acls_modals.html:128 templates/admin/acls_modals.html:205
+msgid "Agregar valor"
+msgstr "Создавать добавленную стоимость"
+
+#: templates/admin/acls_modals.html:134
+msgid "Comentario (opcional):"
+msgstr "Комментарий (необязательно):"
+
+#: templates/admin/acls_modals.html:135
+msgid "Descripción de esta ACL"
+msgstr "Описание данного ACL"
+
+#: templates/admin/acls_modals.html:137
+msgid "Se agregará como comentario antes de la ACL"
+msgstr "Будет добавлено в качестве комментария перед ACL"
+
+#: templates/admin/acls_modals.html:145
+msgid "Crear ACL"
+msgstr "Создать ACL"
+
+#: templates/admin/acls_modals.html:175
+msgid "El tipo no se puede cambiar, crea una nueva ACL si necesitas otro tipo"
+msgstr "Тип нельзя изменить; если вам нужен другой тип, создайте новый ACL"
+
+#: templates/admin/acls_modals.html:181
+msgid "Opciones:"
+msgstr "Варианты:"
+
+#: templates/admin/acls_modals.html:211
+msgid "Comentario:"
+msgstr "Комментарий:"
+
+#: templates/admin/acls_modals.html:221 templates/admin/config.html:65
+#: templates/admin/config.html:98 templates/admin/config.html:135
+#: templates/admin/config.html:172 templates/admin/config.html:204
+#: templates/admin/config.html:237 templates/admin/config.html:277
+#: templates/admin/delay_pools.html:350 templates/admin/edit_config.html:16
+#: templates/admin/http_access.html:301 templates/admin/user_form.html:57
+msgid "Guardar Cambios"
+msgstr "Сохранить изменения"
+
+#: templates/admin/acls_new.html:7
+msgid "Gestión de Access Control Lists (ACLs)"
+msgstr "Управление списками контроля доступа (ACL)"
+
+#: templates/admin/acls_new.html:8
+msgid "Define condiciones para controlar el acceso al proxy"
+msgstr "Определите условия для управления доступом к прокси-серверу"
+
+#: templates/admin/acls_new.html:19 templates/admin/delay_pools.html:16
+#: templates/admin/http_access.html:19 templates/admin/split_config.html:103
+msgid "¡MUY IMPORTANTE!"
+msgstr "ОЧЕНЬ ВАЖНО!"
+
+#: templates/admin/acls_new.html:21 templates/admin/delay_pools.html:18
+#: templates/admin/http_access.html:21 templates/admin/split_config.html:105
+msgid "Esta funcionalidad se encuentra en"
+msgstr "Эта функция находится в"
+
+#: templates/admin/acls_new.html:21 templates/admin/base.html:127
+#: templates/admin/base.html:142 templates/admin/base.html:148
+#: templates/admin/base.html:154 templates/admin/delay_pools.html:18
+#: templates/admin/http_access.html:21 templates/admin/split_config.html:105
+msgid "RC"
+msgstr "RC"
+
+#: templates/admin/acls_new.html:24 templates/admin/delay_pools.html:21
+#: templates/admin/http_access.html:24 templates/admin/split_config.html:108
+msgid "Por favor, no la uses en producción de momento. Úsala únicamente en un entorno de prueba."
+msgstr "Пожалуйста, пока не используйте её в производственной среде. Используйте её только в тестовой среде."
+
+#: templates/admin/acls_new.html:34
+msgid "Acerca de las ACLs:"
+msgstr "О списках ACL:"
+
+#: templates/admin/acls_new.html:36
+msgid "[fast]"
+msgstr "[fast]"
+
+#: templates/admin/acls_new.html:36
+msgid "ACLs rápidas - no requieren lookups externos"
+msgstr "Быстрые ACL — не требуют внешних поисков"
+
+#: templates/admin/acls_new.html:37
+msgid "[slow]"
+msgstr "[медленно]"
+
+#: templates/admin/acls_new.html:37
+msgid "ACLs lentas - pueden requerir DNS o autenticación"
+msgstr "Медленные ACL — могут требовать DNS или аутентификации"
+
+#: templates/admin/acls_new.html:38
+msgid "Usa las ACLs en reglas de http_access, http_reply_access, etc."
+msgstr "Используйте списки контроля доступа (ACL) в правилах http_access, http_reply_access и т. д."
+
+#: templates/admin/acls_new.html:39
+msgid "ACLs predefinidas:"
+msgstr "Предопределенные ACL:"
+
+#: templates/admin/acls_new.html:39
+msgid "all, manager, localhost, to_localhost, to_linklocal, CONNECT"
+msgstr "all, manager, localhost, to_localhost, to_linklocal, CONNECT"
+
+#: templates/admin/acls_new.html:52
+msgid "BUILT-IN"
+msgstr "ВСТРОЕННЫЙ"
+
+#: templates/admin/acls_new.html:165
+msgid "No hay ACLs personalizadas configuradas"
+msgstr "Настраиваемые списки контроля доступа (ACL) не настроены"
+
+#: templates/admin/acls_new.html:166
+msgid "Las ACLs predefinidas de Squid siguen disponibles"
+msgstr "Предопределенные ACL в Squid по-прежнему доступны"
+
+#: templates/admin/base.html:136 templates/admin/config.html:16
+#: templates/admin/database.html:11
+msgid "Base de Datos"
+msgstr "База данных"
+
+#: templates/admin/config.html:10
+msgid "General"
+msgstr "Общие сведения"
+
+#: templates/admin/config.html:22
+msgid "Lista Negra"
+msgstr "Черный список"
+
+#: templates/admin/config.html:25 templates/partials/conexiones.html:354
+msgid "Proxy"
+msgstr "Прокси"
+
+#: templates/admin/config.html:28 templates/partials/auditoria.html:113
+msgid "Telegram"
+msgstr "Telegram"
+
+#: templates/admin/config.html:35
+msgid "Configuración General"
+msgstr "Общие настройки"
+
+#: templates/admin/config.html:59 templates/admin/config.html:129
+#: templates/admin/config.html:166
+msgid "Esta variable está protegida y no puede ser modificada desde aquí"
+msgstr "Эта переменная защищена и не может быть изменена отсюда"
+
+#: templates/admin/config.html:79
+msgid "Configuración de Squid"
+msgstr "Настройка Squid"
+
+#: templates/admin/config.html:112
+msgid "Configuración de Base de Datos"
+msgstr "Настройка базы данных"
+
+#: templates/admin/config.html:149
+msgid "Configuración de Seguridad"
+msgstr "Настройки безопасности"
+
+#: templates/admin/config.html:186
+msgid "Lista Negra de Dominios"
+msgstr "«Черный список» доменов"
+
+#: templates/admin/config.html:218
+msgid "Configuración de Proxy"
+msgstr "Настройка прокси-сервера"
+
+#: templates/admin/config.html:251
+msgid "Configuración de Telegram"
+msgstr "Настройки Telegram"
+
+#: templates/admin/delay_pools.html:124 templates/admin/http_access.html:53
+#: templates/admin/http_access.html:170 templates/admin/http_access.html:267
+msgid "ALLOW"
+msgstr "ALLOW"
+
+#: templates/admin/delay_pools.html:126 templates/admin/http_access.html:57
+#: templates/admin/http_access.html:178 templates/admin/http_access.html:274
+msgid "DENY"
+msgstr "DENY"
+
+#: templates/admin/edit_config.html:5
+msgid "Editar Configuración de Squid"
+msgstr "Редактировать настройки Squid"
+
+#: templates/admin/edit_config.html:10
+msgid "Contenido del archivo squid.conf:"
+msgstr "Содержимое файла squid.conf:"
+
+#: templates/admin/http_access.html:7
+msgid "Reglas de Acceso HTTP"
+msgstr "Правила доступа по протоколу HTTP"
+
+#: templates/admin/http_access.html:8
+msgid "Las reglas se evalúan en orden. La primera coincidencia determina el acceso."
+msgstr "Правила проверяются по порядку. Первое совпадение определяет доступ."
+
+#: templates/admin/http_access.html:11
+msgid "Agregar Regla"
+msgstr "Добавить правило"
+
+#: templates/admin/http_access.html:34
+msgid "Importante sobre el orden:"
+msgstr "Важная информация о порядке:"
+
+#: templates/admin/http_access.html:36
+msgid "Las reglas se procesan de arriba hacia abajo"
+msgstr "Правила обрабатываются сверху вниз"
+
+#: templates/admin/http_access.html:37
+msgid "La primera regla que coincida se aplica (allow o deny)"
+msgstr "Применяется первое совпавшее правило (allow или deny)"
+
+#: templates/admin/http_access.html:38
+msgid "Si ninguna regla coincide, se aplica el comportamiento contrario a la última regla"
+msgstr "Если ни одно правило не соответствует, применяется поведение, противоположное последнему правилу"
+
+#: templates/admin/http_access.html:39
+msgid "Se recomienda terminar con \"deny all\" para evitar confusión"
+msgstr "Рекомендуется завершить строку словами «deny all», чтобы избежать путаницы"
+
+#: templates/admin/http_access.html:97
+msgid "Contiene negación (!) - se aplica cuando NO coincide con la ACL"
+msgstr "Содержит отрицание (!) — применяется, когда НЕ соответствует списку контроля доступа (ACL)"
+
+#: templates/admin/http_access.html:106
+msgid "Mover arriba"
+msgstr "Сдвинуть вверх"
+
+#: templates/admin/http_access.html:112
+msgid "Mover abajo"
+msgstr "Сдвинуть вниз"
+
+#: templates/admin/http_access.html:133
+msgid "No hay reglas HTTP access configuradas"
+msgstr "Правила доступа HTTP не настроены"
+
+#: templates/admin/http_access.html:134
+msgid "⚠️ Sin reglas, el acceso será DENEGADO por defecto"
+msgstr "⚠️ Если правила не указаны, доступ по умолчанию будет ОТКЛОНЁН"
+
+#: templates/admin/http_access.html:140
+msgid "¿Ya tienes reglas configuradas?"
+msgstr "У вас уже настроены правила?"
+
+#: templates/admin/http_access.html:148
+msgid "Crear primera regla"
+msgstr "Создать первое правило"
+
+#: templates/admin/http_access.html:158
+msgid "Agregar Regla HTTP Access"
+msgstr "Добавить правило доступа HTTP"
+
+#: templates/admin/http_access.html:164 templates/admin/http_access.html:261
+msgid "Acción:"
+msgstr "Действие:"
+
+#: templates/admin/http_access.html:171
+msgid "Permitir acceso"
+msgstr "Разрешить доступ"
+
+#: templates/admin/http_access.html:179
+msgid "Denegar acceso"
+msgstr "Запретить доступ"
+
+#: templates/admin/http_access.html:186 templates/admin/http_access.html:281
+msgid "ACLs:"
+msgstr "ACL:"
+
+#: templates/admin/http_access.html:197
+msgid "ACLs Comunes (opcional):"
+msgstr "Общие ACL (необязательно):"
+
+#: templates/admin/http_access.html:210 templates/admin/http_access.html:227
+msgid "!Safe_ports"
+msgstr "!Безопасные порты"
+
+#: templates/admin/http_access.html:213
+msgid "!SSL_ports"
+msgstr "!SSL_ports"
+
+#: templates/admin/http_access.html:216
+msgid "CONNECT"
+msgstr "CONNECT"
+
+#: templates/admin/http_access.html:220
+msgid "Haz clic en estas ACLs predefinidas para agregarlas rápidamente"
+msgstr "Нажмите на эти предустановленные списки ACL, чтобы быстро добавить их"
+
+#: templates/admin/http_access.html:227
+msgid "Tip:"
+msgstr "Совет:"
+
+#: templates/admin/http_access.html:227
+msgid "Usa"
+msgstr "Используйте"
+
+#: templates/admin/http_access.html:227
+msgid "antes del nombre de una ACL para negación. Ej:"
+msgstr "перед именем ACL для запрета. Например:"
+
+#: templates/admin/http_access.html:227
+msgid "coincide cuando NO es un puerto seguro."
+msgstr "соответствует, когда это НЕ безопасный порт."
+
+#: templates/admin/http_access.html:232 templates/admin/http_access.html:291
+msgid "Descripción (opcional):"
+msgstr "Описание (необязательно):"
+
+#: templates/admin/http_access.html:233 templates/admin/http_access.html:292
+msgid "Ej: Permitir acceso desde la red local"
+msgstr "Например: Разрешить доступ из локальной сети"
+
+#: templates/admin/http_access.html:235
+msgid "Se agregará como comentario antes de la regla"
+msgstr "Будет добавлено в качестве комментария перед правилом"
+
+#: templates/admin/http_access.html:243
+msgid "Crear Regla"
+msgstr "Создать правило"
+
+#: templates/admin/http_access.html:254
+msgid "Editar Regla HTTP Access"
+msgstr "Редактировать правило доступа HTTP"
+
+#: templates/admin/quota.html:109 templates/admin/quota.html:222
+#: templates/admin/split_config.html:42 templates/admin/users.html:19
+msgid "Estado"
+msgstr "Состояние"
+
+#: templates/admin/split_config.html:3 templates/admin/split_config.html:12
+msgid "Dividir Configuración Squid"
+msgstr "Разделение настроек Squid"
+
+#: templates/admin/split_config.html:13
+msgid "Modulariza tu archivo squid.conf para una gestión más sencilla"
+msgstr "Разделите файл squid.conf на модули для упрощения управления"
+
+#: templates/admin/split_config.html:24
+msgid "Archivo de entrada"
+msgstr "Архив входящих"
+
+#: templates/admin/split_config.html:33
+msgid "Directorio de salida"
+msgstr "Каталог вывода"
+
+#: templates/admin/split_config.html:44
+msgid "archivos generados"
+msgstr "созданные файлы"
+
+#: templates/admin/split_config.html:46
+msgid "No dividido aún"
+msgstr "Пока не разделено"
+
+#: templates/admin/split_config.html:57
+msgid "¿Qué hace esta funcionalidad?"
+msgstr "Для чего нужна эта функция?"
+
+#: templates/admin/split_config.html:60
+msgid "Esta herramienta divide tu archivo monolítico"
+msgstr "Этот инструмент разбивает ваш монолитный файл"
+
+#: templates/admin/split_config.html:61
+msgid "en múltiples archivos modulares organizados por categorías. Esto facilita:"
+msgstr "в виде множества модульных файлов, сгруппированных по категориям. Это облегчает:"
+
+#: templates/admin/split_config.html:64
+msgid "Gestión y mantenimiento más sencillo de la configuración"
+msgstr "Более простое управление и обслуживание настроек"
+
+#: templates/admin/split_config.html:65
+msgid "Mejor organización de directivas por funcionalidad"
+msgstr "Более эффективная организация руководства по функциональному принципу"
+
+#: templates/admin/split_config.html:66
+msgid "Facilita la edición desde la interfaz web"
+msgstr "Упрощает редактирование через веб-интерфейс"
+
+#: templates/admin/split_config.html:67
+msgid "Reduce errores al editar configuraciones complejas"
+msgstr "Снижает количество ошибок при редактировании сложных настроек"
+
+#: templates/admin/split_config.html:75
+msgid "Archivos que se generarán"
+msgstr "Файлы, которые будут созданы"
+
+#: templates/admin/split_config.html:118
+msgid "Modo estricto"
+msgstr "Строгий режим"
+
+#: templates/admin/split_config.html:119
+msgid "Abortar si se encuentran directivas desconocidas"
+msgstr "Прервать работу при обнаружении неизвестных директив"
+
+#: templates/admin/split_config.html:125
+msgid "Divide squid.conf en archivos modulares y crea respaldo"
+msgstr "Разделите файл squid.conf на модульные файлы и создайте резервную копию"
+
+#: templates/admin/split_config.html:127
+msgid "Dividir Configuración"
+msgstr "Разделить настройки"
+
+#: templates/admin/split_config.html:131
+msgid "Abre un modal con los archivos generados por la división"
+msgstr "Открыть модальное окно с файлами, сгенерированными в результате деления"
+
+#: templates/admin/split_config.html:133
+msgid "Ver Archivos Generados"
+msgstr "Просмотреть сгенерированные файлы"
+
+#: templates/admin/split_config.html:145
+msgid "Esta operación creará múltiples archivos en el directorio"
+msgstr "В результате этой операции в каталоге будет создано несколько файлов"
+
+#: templates/admin/split_config.html:169
+msgid "Archivos Generados"
+msgstr "Созданные файлы"
+
+#: templates/admin/split_config.html:190
+msgid "Directorio:"
+msgstr "Справочник:"
+
+#: templates/admin/database.html:858
+msgid "Error al ejecutar la salva"
+msgstr "Ошибка при выполнении серии выстрелов"
+
+#: templates/admin/database.html:861
+msgid "¿Eliminar la salva \"%(filename)s\"?"
+msgstr "Удалить последовательность «%(filename)s»?"
+
+#: templates/admin/quota.html:236
+msgid "¿Eliminar la cuota del usuario %(username)s?"
+msgstr "Удалить аккаунт пользователя %(username)s?"
+
+#: templates/admin/quota.html:292
+msgid "¿Eliminar la cuota del grupo %(group_name)s?"
+msgstr "Удалить квоту группы %(group_name)s?"
+
+#: templates/admin/ldap_config.html:163 templates/admin/quota.html:29
+#: templates/admin/quota.html:105 templates/admin/quota.html:146
+#: templates/admin/quota.html:189 templates/admin/quota.html:219
+#: templates/admin/user_form.html:38 templates/admin/users.html:17
+#: templates/auth/login.html:98 templates/partials/auditoria.html:56
+#: templates/reports_pdf.html:33
+#: templates/captive_portal/login.html
+msgid "Usuario"
+msgstr "Пользователь"
+
+#: templates/admin/blacklist.html:7
+msgid "Blacklist - Gestor de Listas"
+msgstr "Blacklist — Менеджер списков"
+
+#: templates/admin/blacklist.html:12
+msgid "Pi-hole"
+msgstr "Pi-hole"
+
+#: templates/admin/blacklist.html:15
+msgid "AdGuard"
+msgstr "AdGuard"
+
+#: templates/admin/blacklist.html:18 templates/admin/blacklist.html:291
+msgid "DNSmasq"
+msgstr "DNSmasq"
+
+#: templates/admin/blacklist.html:21
+msgid "Personalizada"
+msgstr "Индивидуальная"
+
+#: templates/admin/blacklist.html:24 templates/admin/blacklist.html:357
+msgid "Importar"
+msgstr "Импортировать"
+
+#: templates/admin/blacklist.html:31
+msgid "Integración Pi-hole"
+msgstr "Интеграция Pi-hole"
+
+#: templates/admin/blacklist.html:32 templates/admin/blacklist.html:292
+msgid "Funcionalidad en Beta"
+msgstr "Функция в бета-версии"
+
+#: templates/admin/blacklist.html:32 templates/admin/blacklist.html:292
+msgid "BETA"
+msgstr "БЕТА"
+
+#: templates/admin/blacklist.html:34
+msgid "Conecta y sincroniza listas bloqueadas desde un servidor Pi-hole. Aquí puedes configurar conexión y ver el estado."
+msgstr "Подключайте и синхронизируйте списки заблокированных адресов с сервера Pi-hole. Здесь можно настроить подключение и просмотреть его состояние."
+
+#: templates/admin/blacklist.html:39
+msgid "Pi-hole Host"
+msgstr "Хост Pi-hole"
+
+#: templates/admin/blacklist.html:40
+msgid "192.168.1.2 or example.com"
+msgstr "192.168.1.2 или example.com"
+
+#: templates/admin/blacklist.html:43
+msgid "API Token"
+msgstr "Токен API"
+
+#: templates/admin/blacklist.html:44
+msgid "Token (opcional)"
+msgstr "Токен (необязательно)"
+
+#: templates/admin/blacklist.html:48
+msgid "Probar Conexión"
+msgstr "Проверить соединение"
+
+#: templates/admin/blacklist.html:52
+msgid "Sincronizar Listas"
+msgstr "Синхронизировать списки"
+
+#: templates/admin/blacklist.html:59
+msgid "Integración AdGuard"
+msgstr "Интеграция с AdGuard"
+
+#: templates/admin/blacklist.html:60
+msgid "Soporte para fuentes y listas públicas compatibles con AdGuard."
+msgstr "Поддержка шрифтов и общедоступных списков, совместимых с AdGuard."
+
+#: templates/admin/blacklist.html:63
+msgid "URL de la lista"
+msgstr "URL списка"
+
+#: templates/admin/blacklist.html:66
+msgid "Agregar Lista"
+msgstr "Добавить список"
+
+#: templates/admin/blacklist.html:71
+msgid "Listas importadas"
+msgstr "Импортированные списки"
+
+#: templates/admin/blacklist.html:80 templates/admin/blacklist.html:310
+msgid "Activa en Squid"
+msgstr "Включить в Squid"
+
+#: templates/admin/blacklist.html:83 templates/admin/blacklist.html:313
+msgid "Inactiva"
+msgstr "Неактивна"
+
+#: templates/admin/blacklist.html:111
+msgid "Eliminar lista y dominios"
+msgstr "Удалить список и домены"
+
+#: templates/admin/blacklist.html:294
+msgid "Exporta o importa reglas en formato compatible con dnsmasq."
+msgstr "Экспортируйте или импортируйте правила в формате, совместимом с dnsmasq."
+
+#: templates/admin/blacklist.html:296
+msgid "Exportar archivo hosts"
+msgstr "Экспорт файла hosts"
+
+#: templates/admin/blacklist.html:304
+msgid "Lista Personalizada"
+msgstr "Индивидуальный список"
+
+#: templates/admin/blacklist.html:305
+msgid "Añade dominios manualmente o pega una lista separada por comas/lineas."
+msgstr "Добавьте домены вручную или вставьте список, разделенный запятыми/строками."
+
+#: templates/admin/blacklist.html:338
+msgid "example.com\nexample.org"
+msgstr "example.com\nexample.org"
+
+#: templates/admin/blacklist.html:349
+msgid "Importar listas"
+msgstr "Импорт списков"
+
+#: templates/admin/blacklist.html:350
+msgid "Importa desde archivos locales o pega URLs de listas públicas."
+msgstr "Импортируйте данные из локальных файлов или вставьте URL-адреса общедоступных списков."
+
+#: templates/admin/blacklist.html:354
+msgid "Subir archivo"
+msgstr "Загрузить файл"
+
+#: templates/admin/clean_data.html:3
+msgid "Limpiar Datos - Administrador Squid Proxy"
+msgstr "Очистка данных — Администратор прокси-сервера Squid"
+
+#: templates/admin/clean_data.html:10 templates/admin/clean_data.html:57
+#: templates/admin/database.html:41 templates/admin/database.html:598
+#: templates/admin/database.html:643
+msgid "Limpiar Datos"
+msgstr "Очистить данные"
+
+#: templates/admin/clean_data.html:12 templates/admin/database.html:600
+msgid "Selecciona una tabla y elimina todos sus datos"
+msgstr "Выберите таблицу и удалите все данные из неё"
+
+#: templates/admin/clean_data.html:129
+msgid "Selecciona una tabla..."
+msgstr "Выберите таблицу..."
+
+#: templates/admin/clean_data.html:20 templates/admin/database.html:608
+msgid "¡Advertencia!"
+msgstr "Внимание!"
+
+#: templates/admin/clean_data.html:21 templates/admin/database.html:609
+msgid "Esta acción es irreversible. Una vez eliminados los datos, no se pueden recuperar."
+msgstr "Это действие необратимо. После удаления данных их невозможно восстановить."
+
+#: templates/admin/clean_data.html:31 templates/admin/database.html:619
+msgid "Eliminar Datos de Tabla"
+msgstr "Удалить данные из таблицы"
+
+#: templates/admin/clean_data.html:40 templates/admin/database.html:626
+msgid "Seleccionar Tabla"
+msgstr "Выбрать таблицу"
+
+#: templates/admin/clean_data.html:43 templates/admin/database.html:629
+msgid "Cargando tablas..."
+msgstr "Загрузка таблиц..."
+
+#: templates/admin/database.html:876
+msgid "No se pudieron cargar las tablas"
+msgstr "Не удалось загрузить таблицы"
+
+#: templates/admin/clean_data.html:51 templates/admin/database.html:636
+msgid "Información de la Tabla"
+msgstr "Информация из таблицы"
+
+#: templates/admin/clean_data.html:71 templates/admin/database.html:657
+msgid "Información Importante"
+msgstr "Важная информация"
+
+#: templates/admin/clean_data.html:73 templates/admin/database.html:659
+msgid "Solo se eliminan los datos de la tabla, no la estructura"
+msgstr "Удаляются только данные из таблицы, а не сама структура"
+
+#: templates/admin/clean_data.html:74 templates/admin/database.html:660
+msgid "Las tablas con sufijo de fecha (ej: log_20240121) son tablas diarias"
+msgstr "Таблицы с суффиксом даты (например: log_20240121) являются ежедневными таблицами"
+
+#: templates/admin/clean_data.html:75 templates/admin/database.html:661
+msgid "Algunas tablas son críticas para el funcionamiento del sistema"
+msgstr "Некоторые таблицы имеют решающее значение для работы системы"
+
+#: templates/admin/clean_data.html:76 templates/admin/database.html:662
+msgid "Se recomienda hacer un respaldo antes de eliminar datos importantes"
+msgstr "Перед удалением важных данных рекомендуется создать резервную копию"
+
+#: templates/admin/database.html:3
+msgid "Base de Datos - Administrador Squid Proxy"
+msgstr "База данных — Администратор прокси-сервера Squid"
+
+#: templates/admin/database.html:12
+msgid "Monitor de salud, copias de seguridad y gestión de datos"
+msgstr "Мониторинг состояния, резервное копирование и управление данными"
+
+#: templates/admin/database.html:25
+msgid "Resumen DB"
+msgstr "Сводка по базе данных"
+
+#: templates/admin/database.html:33
+msgid "Salvas de BD"
+msgstr "Резервные копии БД"
+
+#: templates/admin/database.html:55
+msgid "Cargando información de la base de datos..."
+msgstr "Загрузка данных из базы данных..."
+
+#: templates/admin/database.html:69
+msgid "Reintentar"
+msgstr "Попробовать ещё раз"
+
+#: templates/admin/database.html:100
+msgid "Salud de la BD:"
+msgstr "Состояние БД:"
+
+#: templates/admin/database.html:110
+msgid "La base de datos tiene páginas dañadas."
+msgstr "В базе данных есть поврежденные страницы."
+
+#: templates/admin/database.html:114
+msgid "Haz un respaldo y ejecuta"
+msgstr "Сделайте резервную копию и запустите"
+
+#: templates/admin/database.html:114
+msgid "VACUUM"
+msgstr "VACUUM"
+
+#: templates/admin/database.html:114
+msgid "o restaura desde una copia sana."
+msgstr "или восстановите систему из исправной копии."
+
+#: templates/admin/database.html:119
+msgid "Fragmentación:"
+msgstr "Фрагментация:"
+
+#: templates/admin/database.html:121
+msgid "— dentro del rango normal"
+msgstr "— в пределах нормы"
+
+#: templates/admin/database.html:122
+msgid "— considera ejecutar VACUUM"
+msgstr "— рассмотреть возможность запуска VACUUM"
+
+#: templates/admin/database.html:123
+msgid "— ejecuta VACUUM urgentemente"
+msgstr "— срочно запустить VACUUM"
+
+#: templates/admin/database.html:127 templates/admin/database.html:152
+msgid "Motor"
+msgstr "Двигатель"
+
+#: templates/admin/database.html:127
+msgid "operando con normalidad"
+msgstr "работает в обычном режиме"
+
+#: templates/admin/database.html:138 templates/admin/database.html:498
+#: templates/admin/ldap_config.html:38 templates/admin/ldap_config.html:50
+msgid "Actualizar"
+msgstr "Обновить"
+
+#: templates/admin/database.html:162
+msgid "Tamaño Total"
+msgstr "Общий размер"
+
+#: templates/admin/database.html:172
+msgid "Tablas"
+msgstr "Таблицы"
+
+#: templates/admin/database.html:182
+msgid "Registros Totales"
+msgstr "Общее количество записей"
+
+#: templates/admin/database.html:195
+msgid "Detalles SQLite"
+msgstr "Подробная информация о SQLite"
+
+#: templates/admin/database.html:200
+msgid "Tamaño de Página"
+msgstr "Размер страницы"
+
+#: templates/admin/database.html:205
+msgid "Páginas Totales"
+msgstr "Общее количество страниц"
+
+#: templates/admin/database.html:210
+msgid "Páginas Libres"
+msgstr "Свободные страницы"
+
+#: templates/admin/database.html:215
+msgid "Modo Journal"
+msgstr "Режим «Журнал»"
+
+#: templates/admin/database.html:220
+msgid "Auto-Vacuum"
+msgstr "Auto-Vacuum"
+
+#: templates/admin/database.html:225
+msgid "Fragmentación"
+msgstr "Фрагментация"
+
+#: templates/admin/database.html:240
+msgid "Detalle de Corrupción"
+msgstr "Подробности о коррупции"
+
+#: templates/admin/database.html:256
+msgid "Versión del Motor"
+msgstr "Версия движка"
+
+#: templates/admin/database.html:267
+msgid "Verificación de Integridad"
+msgstr "Проверка целостности"
+
+#: templates/admin/database.html:272
+msgid "Verifica la integridad estructural de la base de datos en busca de posibles errores o corrupción."
+msgstr "Проверьте целостность структуры базы данных на наличие возможных ошибок или повреждений."
+
+#: templates/admin/database.html:274
+msgid "Esta operación puede tardar varios minutos en bases de datos grandes."
+msgstr "В случае больших баз данных эта операция может занять несколько минут."
+
+#: templates/admin/database.html:119
+msgid "La integridad se verifica manualmente desde el botón Verificar Integridad."
+msgstr "Проверка целостности выполняется вручную с помощью кнопки «Проверить целостность»."
+
+#: templates/admin/database.html:280
+msgid "Verificando..."
+msgstr "Проверка..."
+
+#: templates/admin/database.html:280
+msgid "Verificar Integridad"
+msgstr "Проверить целостность"
+
+#: templates/admin/database.html:294
+msgid "Sin errores detectados — la base de datos está íntegra."
+msgstr "Ошибок не обнаружено — база данных целостна."
+
+#: templates/admin/database.html:294
+msgid "Se encontraron errores de integridad."
+msgstr "Обнаружены ошибки целостности."
+
+#: templates/admin/database.html:296
+msgid "error(es) detectado(s)"
+msgstr "обнаруженная(ые) ошибка(и)"
+
+#: templates/admin/database.html:320
+msgid "Salvas de Base de Datos"
+msgstr "Резервные копии баз данных"
+
+#: templates/admin/database.html:321
+msgid "Configura y gestiona las copias de seguridad automáticas"
+msgstr "Настройка и управление автоматическим резервным копированием"
+
+#: templates/admin/database.html:346
+msgid "Total Salvas"
+msgstr "Всего резервных копий"
+
+#: templates/admin/database.html:355
+msgid "Última Salva"
+msgstr "Последняя резервная копия"
+
+#: templates/admin/database.html:364
+msgid "Espacio Total"
+msgstr "Общая площадь"
+
+#: templates/admin/database.html:377
+msgid "Configuración de Salvas"
+msgstr "Настройки резервного копирования"
+
+#: templates/admin/database.html:386
+msgid "Motor de Base de Datos"
+msgstr "База данных"
+
+#: templates/admin/database.html:391
+msgid "SQLite"
+msgstr "SQLite"
+
+#: templates/admin/database.html:392
+msgid "MySQL / MariaDB"
+msgstr "MySQL / MariaDB"
+
+#: templates/admin/database.html:393
+msgid "PostgreSQL"
+msgstr "PostgreSQL"
+
+#: templates/admin/database.html:402 templates/admin/database.html:408
+msgid "Requiere"
+msgstr "Требуется"
+
+#: templates/admin/database.html:402 templates/admin/database.html:408
+msgid "instalado en el servidor."
+msgstr "установлен на сервере."
+
+#: templates/admin/database.html:416
+msgid "Frecuencia"
+msgstr "Частота"
+
+#: templates/admin/database.html:421
+msgid "Diaria — máx. 3 por semana"
+msgstr "Ежедневно — не более 3 раз в неделю"
+
+#: templates/admin/database.html:422
+msgid "Diaria — máx. 3 por mes"
+msgstr "Ежедневно — не более 3 раз в месяц"
+
+#: templates/admin/database.html:438
+msgid "Retención máxima"
+msgstr "Максимальная удерживаемость"
+
+#: templates/admin/database.html:441
+msgid "Fijo: 3 salvas"
+msgstr "Максимум: 3 копии"
+
+#: templates/admin/database.html:452
+msgid "Se mantienen las 3 salvas más recientes. Las más antiguas se eliminan automáticamente."
+msgstr "Сохраняются 3 последних копии. Более старые автоматически удаляются."
+
+#: templates/admin/database.html:459
+msgid "Directorio de Salvas"
+msgstr "Каталог резервных копий"
+
+#: templates/admin/database.html:464
+msgid "Ruta absoluta donde se guardarán las salvas"
+msgstr "Абсолютный путь, в котором будут сохраняться серии"
+
+#: templates/admin/database.html:470
+msgid "Salvas automáticas"
+msgstr "Автоматические резервные копии"
+
+#: templates/admin/database.html:471
+msgid "Habilitar programación automática"
+msgstr "Включить автоматическое программирование"
+
+#: templates/admin/database.html:495
+msgid "Historial de Salvas"
+msgstr "История резервных копий"
+
+#: templates/admin/database.html:506
+msgid "Cargando salvas..."
+msgstr "Загрузка резервных копий..."
+
+#: templates/admin/database.html:516
+msgid "No hay salvas disponibles"
+msgstr "Резервные копии недоступны"
+
+#: templates/admin/database.html:517
+msgid "Realiza una salva manual o activa las automáticas"
+msgstr "Выполните ручную серию выстрелов или включите автоматический режим"
+
+#: templates/admin/database.html:526
+msgid "Archivo"
+msgstr "Архив"
+
+#: templates/admin/database.html:527 templates/admin/quota.html:347
+#: templates/partials/auditoria.html:160
+msgid "Fecha"
+msgstr "Дата"
+
+#: templates/admin/database.html:528
+msgid "Tamaño"
+msgstr "Размер"
+
+#: templates/admin/database.html:530 templates/admin/quota.html:281
+msgid "Acción"
+msgstr "Действие"
+
+#: templates/admin/database.html:543
+msgid "Reciente"
+msgstr "Недавнее"
+
+#: templates/admin/database.html:561
+msgid "Descargar"
+msgstr "Скачать"
+
+#: templates/admin/database.html:581
+msgid "Máximo 3 salvas por período. Las más antiguas se eliminan automáticamente."
+msgstr "Не более 3 серий за период. Самые старые серии удаляются автоматически."
+
+#: templates/admin/database.html:725 templates/admin/database.html:753
+msgid "0 B"
+msgstr "0 B"
+
+#: templates/admin/database.html:740
+msgid "Corrupción detectada"
+msgstr "Выявленные случаи коррупции"
+
+#: templates/admin/database.html:741
+msgid "Saludable"
+msgstr "Полезный для здоровья"
+
+#: templates/admin/database.html:741
+msgid "Crítico"
+msgstr "Критический"
+
+#: templates/admin/database.html:752
+msgid "Sin salvas"
+msgstr "Нет резервных копий"
+
+#: templates/admin/database.html:754
+msgid "Guardando..."
+msgstr "Сохраняется..."
+
+#: templates/admin/database.html:755
+msgid "Salva Manual"
+msgstr "Сохранить вручную"
+
+#: templates/admin/database.html:756
+msgid "Guardar Configuración"
+msgstr "Сохранить настройки"
+
+#: templates/admin/database.html:757
+msgid "Se ejecuta diariamente, conservando máx. 3 salvas por semana"
+msgstr "Выполняется ежедневно, хранится не более 3 копий в неделю"
+
+#: templates/admin/database.html:758
+msgid "Se ejecuta diariamente, conservando máx. 3 salvas por mes"
+msgstr "Выполняется ежедневно, хранится не более 3 копий в месяц"
+
+#: templates/admin/delay_pools.html:6
+msgid "Gestión de Delay Pools"
+msgstr "Управление пулами задержек"
+
+#: templates/admin/delay_pools.html:8
+msgid "Agregar Pool"
+msgstr "Добавить пул"
+
+#: templates/admin/delay_pools.html:31
+msgid "¿Qué son los Delay Pools?"
+msgstr "Что такое пулы задержек?"
+
+#: templates/admin/delay_pools.html:32
+msgid "Los delay pools permiten limitar el ancho de banda de ciertas solicitudes basadas en criterios específicos, proporcionando un control justo del tráfico."
+msgstr "Пулы задержек позволяют ограничивать пропускную способность определенных запросов на основе конкретных критериев, обеспечивая справедливое управление трафиком."
+
+#: templates/admin/delay_pools.html:33
+msgid "Clases disponibles:"
+msgstr "Доступные классы:"
+
+#: templates/admin/delay_pools.html:35 templates/admin/delay_pools.html:207
+msgid "Clase 1:"
+msgstr "Класс 1:"
+
+#: templates/admin/delay_pools.html:35 templates/admin/delay_pools.html:207
+msgid "Un solo bucket agregado para todos los clientes"
+msgstr "Единый агрегированный пул для всех клиентов"
+
+#: templates/admin/delay_pools.html:36 templates/admin/delay_pools.html:220
+msgid "Clase 2:"
+msgstr "Класс 2:"
+
+#: templates/admin/delay_pools.html:36
+msgid "Bucket agregado + buckets individuales por host (/24)"
+msgstr "Общий пул + отдельные пулы для каждого хоста (/24)"
+
+#: templates/admin/delay_pools.html:37 templates/admin/delay_pools.html:238
+msgid "Clase 3:"
+msgstr "Класс 3:"
+
+#: templates/admin/delay_pools.html:37
+msgid "Buckets por subred + buckets individuales por host (/16)"
+msgstr "Пулы по подсети + отдельные пулы для каждого хоста (/16)"
+
+#: templates/admin/delay_pools.html:38
+msgid "Clase 4:"
+msgstr "Класс 4:"
+
+#: templates/admin/delay_pools.html:38 templates/admin/delay_pools.html:72
+msgid "Como clase 3 + buckets por usuario autenticado"
+msgstr "Как класс 3 + пулы для каждого авторизованного пользователя"
+
+#: templates/admin/delay_pools.html:39 templates/admin/delay_pools.html:261
+msgid "Clase 5:"
+msgstr "Класс 5:"
+
+#: templates/admin/delay_pools.html:39
+msgid "Basado en tags de external_acl_type"
+msgstr "На основе тегов external_acl_type"
+
+#: templates/admin/delay_pools.html:41
+msgid "Limitaciones importantes:"
+msgstr "Важные ограничения:"
+
+#: templates/admin/delay_pools.html:43
+msgid "No limita overheads como TCP, ICP, DNS, etc."
+msgstr "Не ограничивает накладные расходы, такие как TCP, ICP, DNS и т. д."
+
+#: templates/admin/delay_pools.html:44
+msgid "Incompatible con slow aborts; usa quick abort bajo"
+msgstr "Несовместимо с медленным прерыванием; используйте быстрое прерывание на низком уровне"
+
+#: templates/admin/delay_pools.html:45
+msgid "Una conexión puede tomar todo el ancho de banda de un bucket"
+msgstr "Одно соединение может занять всю пропускную способность пула"
+
+#: templates/admin/delay_pools.html:46
+msgid "En Squid"
+msgstr "В Squid"
+
+#: templates/admin/delay_pools.html:59
+msgid "Pool #"
+msgstr "Пул №"
+
+#: templates/admin/delay_pools.html:61
+msgid "Clase"
+msgstr "Класс"
+
+#: templates/admin/delay_pools.html:66
+msgid "Bucket único agregado para todos los clientes"
+msgstr "Единый агрегированный пул для всех клиентов"
+
+#: templates/admin/delay_pools.html:68
+msgid "Bucket agregado + 255 buckets por host (red /24)"
+msgstr "Общий пул + 255 пулов на хост (сеть /24)"
+
+#: templates/admin/delay_pools.html:70
+msgid "Buckets por subred + buckets por host (red /16)"
+msgstr "Пулы по подсети + пулы на хост (сеть /16)"
+
+#: templates/admin/delay_pools.html:74
+msgid "Buckets basados en tags de external_acl_type"
+msgstr "Контейнеры на основе тегов external_acl_type"
+
+#: templates/admin/delay_pools.html:93 templates/admin/delay_pools.html:202
+msgid "Parámetros de Velocidad:"
+msgstr "Параметры скорости:"
+
+#: templates/admin/delay_pools.html:101 templates/admin/delay_pools.html:103
+#: templates/admin/delay_pools.html:106
+msgid "Agregado:"
+msgstr "Добавлено:"
+
+#: templates/admin/delay_pools.html:104 templates/admin/delay_pools.html:108
+msgid "Individual (por host):"
+msgstr "Индивидуально (по хосту):"
+
+#: templates/admin/delay_pools.html:107
+msgid "Red:"
+msgstr "Сеть:"
+
+#: templates/admin/delay_pools.html:110
+msgid "Formato: restore/max (bytes por segundo)"
+msgstr "Формат: restore/max (байт в секунду)"
+
+#: templates/admin/delay_pools.html:118 templates/admin/delay_pools.html:333
+msgid "Reglas de Acceso:"
+msgstr "Правила доступа:"
+
+#: templates/admin/delay_pools.html:141
+msgid "Para ver los delay pools debes iniciar sesión."
+msgstr "Чтобы просмотреть пулы задержек, необходимо войти в систему."
+
+#: templates/admin/delay_pools.html:142
+msgid "Inicia sesión con una cuenta de administrador para acceder a esta sección."
+msgstr "Войдите в систему с учетной записью администратора, чтобы получить доступ к этому разделу."
+
+#: templates/admin/delay_pools.html:144
+msgid "Iniciar sesión"
+msgstr "Войти"
+
+#: templates/admin/delay_pools.html:150
+msgid "No hay delay pools configurados"
+msgstr "Пулы задержки не настроены"
+
+#: templates/admin/delay_pools.html:156
+msgid "¿Ya tienes delay pools configurados?"
+msgstr "У вас уже настроены пулы задержки?"
+
+#: templates/admin/delay_pools.html:164
+msgid "Crear primer Pool"
+msgstr "Создать первый пул"
+
+#: templates/admin/delay_pools.html:175
+msgid "Agregar Nuevo Delay Pool"
+msgstr "Добавить новый пул задержек"
+
+#: templates/admin/delay_pools.html:181 templates/admin/delay_pools.html:307
+msgid "Número de Pool:"
+msgstr "Номер пула:"
+
+#: templates/admin/delay_pools.html:185
+msgid "Número único del pool (1-255)"
+msgstr "Уникальный номер пула (1–255)"
+
+#: templates/admin/delay_pools.html:189 templates/admin/delay_pools.html:313
+msgid "Clase de Pool:"
+msgstr "Тип пула:"
+
+#: templates/admin/delay_pools.html:192
+msgid "Seleccione una clase..."
+msgstr "Выберите класс..."
+
+#: templates/admin/delay_pools.html:193 templates/admin/delay_pools.html:316
+msgid "Clase 1 - Bucket único agregado"
+msgstr "Класс 1 — Единый агрегированный пул"
+
+#: templates/admin/delay_pools.html:194 templates/admin/delay_pools.html:317
+msgid "Clase 2 - Agregado + por host (/24)"
+msgstr "Класс 2 — Общий + по хосту (/24)"
+
+#: templates/admin/delay_pools.html:195 templates/admin/delay_pools.html:318
+msgid "Clase 3 - Agregado + red + por host (/16)"
+msgstr "Класс 3 — Общий + сеть + по хосту (/16)"
+
+#: templates/admin/delay_pools.html:196 templates/admin/delay_pools.html:319
+msgid "Clase 4 - Como clase 3 + por usuario"
+msgstr "Класс 4 — Как класс 3 + по пользователю"
+
+#: templates/admin/delay_pools.html:197 templates/admin/delay_pools.html:320
+msgid "Clase 5 - Basado en tags"
+msgstr "Класс 5 — На основе тегов"
+
+#: templates/admin/delay_pools.html:210
+msgid "Agregado (restore/max en bytes/seg):"
+msgstr "Добавлено (restore/max в байтах/сек):"
+
+#: templates/admin/delay_pools.html:213
+msgid "Ej: 64000/64000 = 512 Kbps"
+msgstr "Например: 64000/64000 = 512 Кбит/с"
+
+#: templates/admin/delay_pools.html:220
+msgid "Bucket agregado + 255 buckets individuales por host"
+msgstr "Общий пул + 255 отдельных пулов для каждого хоста"
+
+#: templates/admin/delay_pools.html:223 templates/admin/delay_pools.html:241
+msgid "Agregado (restore/max):"
+msgstr "Агрегированный (restore/max):"
+
+#: templates/admin/delay_pools.html:228 templates/admin/delay_pools.html:252
+msgid "Individual por host (restore/max):"
+msgstr "Индивидуально по хосту (восстановление/максимум):"
+
+#: templates/admin/delay_pools.html:231
+msgid "Usa -1/-1 para deshabilitar este bucket"
+msgstr "Используйте -1/-1 для отключения этого пула"
+
+#: templates/admin/delay_pools.html:238
+msgid "Buckets por subred + por host"
+msgstr "Пулы по подсети + по хосту"
+
+#: templates/admin/delay_pools.html:246
+msgid "Por red (restore/max):"
+msgstr "По сети (restore/max):"
+
+#: templates/admin/delay_pools.html:249
+msgid "Usa -1/-1 para deshabilitar"
+msgstr "Используйте -1/-1 для отключения"
+
+#: templates/admin/delay_pools.html:261
+msgid "Basado en tags de external_acl_type (un bucket por tag)"
+msgstr "На основе тегов external_acl_type (один пул на тег)"
+
+#: templates/admin/delay_pools.html:264
+msgid "Parámetros por tag (restore/max):"
+msgstr "Параметры по тегам (restore/max):"
+
+#: templates/admin/delay_pools.html:272
+msgid "Reglas de Acceso (ACLs):"
+msgstr "Правила доступа (ACL):"
+
+#: templates/admin/delay_pools.html:278 templates/admin/delay_pools.html:339
+msgid "Agregar regla de acceso"
+msgstr "Добавить правило доступа"
+
+#: templates/admin/delay_pools.html:289
+msgid "Crear Pool"
+msgstr "Создать пул"
+
+#: templates/admin/delay_pools.html:300
+msgid "Editar Delay Pool"
+msgstr "Редактировать пул задержек"
+
+#: templates/admin/delay_pools.html:325
+msgid "Parámetros:"
+msgstr "Параметры:"
+
+#: templates/admin/delay_pools.html:329
+msgid "Formato: restore/max (bytes/seg)"
+msgstr "Формат: restore/max (байт/сек)"
+
+#: templates/admin/quota.html:8
+msgid "Cuotas de Usuario(Mensual) - Administración Squid"
+msgstr "Квоты пользователей (ежемесячные) — Администрирование Squid"
+
+#: templates/admin/quota.html:12
+msgid "Resumen"
+msgstr "Резюме"
+
+#: templates/admin/quota.html:13
+msgid "Por Usuario"
+msgstr "По пользователю"
+
+#: templates/admin/quota.html:14
+msgid "Por Grupo"
+msgstr "По группам"
+
+#: templates/admin/quota.html:15
+msgid "Reglas"
+msgstr "Правила"
+
+#: templates/admin/quota.html:16
+msgid "Histórico"
+msgstr "История"
+
+#: templates/admin/quota.html:22
+msgid "Editar cuota"
+msgstr "Изменить квоту"
+
+#: templates/admin/quota.html:33 templates/admin/quota.html:201
+msgid "Grupo (opcional)"
+msgstr "Группа (необязательно)"
+
+#: templates/admin/quota.html:34 templates/admin/quota.html:202
+msgid "Nombre de grupo"
+msgstr "Название группы"
+
+#: templates/admin/quota.html:40 templates/admin/quota.html:106
+#: templates/admin/quota.html:261 templates/admin/quota.html:279
+#: templates/partials/logs_groups.html
+msgid "Grupo"
+msgstr "Группа"
+
+#: templates/admin/quota.html:46 templates/admin/quota.html:107
+#: templates/admin/quota.html:205 templates/admin/quota.html:220
+#: templates/admin/quota.html:265 templates/admin/quota.html:280
+msgid "Cuota (MB)"
+msgstr "Объем (МБ)"
+
+#: templates/admin/quota.html:61
+msgid "Resumen de Cuotas"
+msgstr "Сводная ведомость квот"
+
+#: templates/admin/quota.html:62
+msgid "Visualiza el estado general de las cuotas de ancho de banda y límites de datos para los usuarios y grupos."
+msgstr "Просматривайте общий статус квот на пропускную способность и ограничений на объем данных для пользователей и групп."
+
+#: templates/admin/quota.html:67
+msgid "Activa o desactiva el control de cuotas para usuarios y grupos"
+msgstr "Включить или отключить контроль квот для пользователей и групп"
+
+#: templates/admin/quota.html:79
+msgid "Pools configurados"
+msgstr "Настроенные пулы"
+
+#: templates/admin/quota.html:83 templates/admin/quota.html:95
+#: templates/admin/quota.html:215
+msgid "Usuarios con cuota"
+msgstr "Пользователи с квотой"
+
+#: templates/admin/quota.html:87
+msgid "Incidentes de exceso"
+msgstr "Случаи превышения"
+
+#: templates/admin/quota.html:96
+msgid "Ver y filtrar en tiempo real por nombre de usuario."
+msgstr "Просмотр и фильтрация в режиме реального времени по имени пользователя."
+
+#: templates/admin/quota.html:98 templates/partials/auditoria.html:58
+msgid "Buscar usuario..."
+msgstr "Поиск пользователя..."
+
+#: templates/admin/quota.html:108
+msgid "Usado (MB)"
+msgstr "Использовано (МБ)"
+
+#: templates/admin/quota.html:120 templates/admin/quota.html:233
+msgid "Excedido"
+msgstr "Превышено"
+
+#: templates/admin/quota.html:120
+msgid "Normal"
+msgstr "Обычный"
+
+#: templates/admin/quota.html:125 templates/admin/quota.html:246
+msgid "No hay usuarios con cuota configurada"
+msgstr "Нет пользователей с настроенным лимитом"
+
+#: templates/admin/quota.html:136
+msgid "Usuarios bloqueados"
+msgstr "Заблокированные пользователи"
+
+#: templates/admin/quota.html:137
+msgid "Datos extraídos del archivo de bloqueos de quota."
+msgstr "Данные, извлеченные из файла блокировок квот."
+
+#: templates/admin/quota.html:139
+msgid "Buscar bloqueado..."
+msgstr "Поиск заблокирован..."
+
+#: templates/admin/quota.html:147 templates/admin/quota.html:350
+msgid "Detalle"
+msgstr "Подробнее"
+
+#: templates/admin/quota.html:148
+msgid "Registro"
+msgstr "Регистрация"
+
+#: templates/admin/quota.html:162
+msgid "No se encontraron bloqueos (archivo vacío o no existe)."
+msgstr "Блокировок не обнаружено (файл пустой или отсутствует)."
+
+#: templates/admin/quota.html:172
+msgid "Cuotas por Usuario"
+msgstr "Квоты пользователя"
+
+#: templates/admin/quota.html:173
+msgid "Configura y revisa cuotas específicas por usuario de Squid."
+msgstr "Настройте и проверьте конкретные квоты для каждого пользователя Squid."
+
+#: templates/admin/quota.html:180
+msgid "Cuota global con el usuario"
+msgstr "Общий лимит для пользователя"
+
+#: templates/admin/quota.html:181
+msgid "Si creas un usuario llamado"
+msgstr "Если вы создадите пользователя с именем"
+
+#: templates/admin/quota.html:181
+msgid "y le asignas una cuota, ese límite se aplicará automáticamente a"
+msgstr "и установите квоту, этот лимит будет автоматически применяться к"
+
+#: templates/admin/quota.html:181
+msgid "todos los usuarios que no tengan una cuota individual"
+msgstr "все пользователи, не имеющие индивидуального лимита"
+
+#: templates/admin/quota.html:191
+msgid "Información sobre el usuario default"
+msgstr "Информация о пользователе «default»"
+
+#: templates/admin/quota.html:193
+msgid "💡 Usuario"
+msgstr "💡 Пользователь"
+
+#: templates/admin/quota.html:194
+msgid "Si creas un usuario con el nombre"
+msgstr "Если вы создадите пользователя с именем"
+
+#: templates/admin/quota.html:194
+msgid "y le asignas una cuota, esa cuota actuará como"
+msgstr "и если вы назначите ему квоту, эта квота будет действовать как"
+
+#: templates/admin/quota.html:194
+msgid "límite global"
+msgstr "общий предел"
+
+#: templates/admin/quota.html:194
+msgid "para todos los usuarios que no tengan una cuota individual configurada. La cuota individual siempre tiene prioridad sobre la global."
+msgstr "для всех пользователей, у которых не настроена индивидуальная квота. Индивидуальная квота всегда имеет приоритет над общей."
+
+#: templates/admin/quota.html:198
+msgid "Nombre de usuario"
+msgstr "Имя пользователя"
+
+#: templates/admin/quota.html:206
+msgid "Ej. 2048"
+msgstr "Пример 2048"
+
+#: templates/admin/quota.html:209
+msgid "Guardar Cuota"
+msgstr "Сохранить квоту"
+
+#: templates/admin/quota.html:221
+msgid "Uso (MB)"
+msgstr "Использование (МБ)"
+
+#: templates/admin/quota.html:255
+msgid "Cuotas por Grupo"
+msgstr "Квоты по группам"
+
+#: templates/admin/quota.html:256
+msgid "Define límites grupales para los usuarios conectados al proxy."
+msgstr "Установите групповые ограничения для пользователей, подключенных к прокси-серверу."
+
+#: templates/admin/quota.html:262
+msgid "Nombre del grupo"
+msgstr "Название группы"
+
+#: templates/admin/quota.html:266
+msgid "Ej. 10240"
+msgstr "Пример 10240"
+
+#: templates/admin/quota.html:269
+msgid "Guardar Grupo"
+msgstr "Сохранить квоту группы"
+
+#: templates/admin/quota.html:275
+msgid "Grupos con cuota"
+msgstr "Группы с квотой"
+
+#: templates/admin/quota.html:302
+msgid "No hay grupos con cuota configurada"
+msgstr "Нет групп с настроенной квотой"
+
+#: templates/admin/quota.html:311
+msgid "Reglas de Control"
+msgstr "Правила контроля"
+
+#: templates/admin/quota.html:312
+msgid "Define el comportamiento al superar la cuota. (Por ejemplo: bloquear el acceso o degradar la velocidad)."
+msgstr "Определите, как система будет реагировать при превышении лимита. (Например: заблокировать доступ или снизить скорость)."
+
+#: templates/admin/quota.html:314
+msgid "Regla activa:"
+msgstr "Действующее правило:"
+
+#: templates/admin/quota.html:320
+msgid "Política de excedente"
+msgstr "Политика при превышении"
+
+#: templates/admin/quota.html:322
+msgid "Información sobre la política por defecto"
+msgstr "Информация о политике по умолчанию"
+
+#: templates/admin/quota.html:324
+msgid "🔒 Política por defecto:"
+msgstr "🔒 Политика по умолчанию:"
+
+#: templates/admin/quota.html:324 templates/admin/quota.html:330
+#: templates/partials/conexiones.html:301
+msgid "Bloquear"
+msgstr "Заблокировать"
+
+#: templates/admin/quota.html:325
+msgid "Aunque no haya ninguna regla guardada, el sistema aplica automáticamente la política de"
+msgstr "Даже если не сохранено ни одного правила, система автоматически применяет политику"
+
+#: templates/admin/quota.html:325
+msgid "cuando un usuario supera su cuota. Guarda explícitamente \"Bloquear\" si quieres que quede registrado."
+msgstr "когда пользователь превышает свой лимит. Явно укажите «Заблокировать», если хотите, чтобы это было зафиксировано."
+
+#: templates/admin/quota.html:331
+msgid "Degradar velocidad (próximamente)"
+msgstr "Снижение скорости (скоро)"
+
+#: templates/admin/quota.html:332
+msgid "Solo notificar (próximamente)"
+msgstr "Только уведомление (скоро)"
+
+#: templates/admin/quota.html:335
+msgid "Guardar Regla"
+msgstr "Сохранить правило"
+
+#: templates/admin/quota.html:340
+msgid "Histórico de Eventos de Cuotas"
+msgstr "История превышений"
+
+#: templates/admin/quota.html:341
+msgid "Revisa las acciones registradas cuando usuarios superaron sus límites."
+msgstr "Просмотрите действия, зарегистрированные в тех случаях, когда пользователи превысили установленные лимиты."
+
+#: templates/admin/quota.html:348
+msgid "Usuario/Grupo"
+msgstr "Пользователь/Группа"
+
+#: templates/admin/quota.html:349
+msgid "Evento"
+msgstr "Событие"
+
+#: templates/admin/quota.html:365
+msgid "No hay registros disponibles"
+msgstr "Записей нет"
+
+#: templates/admin/database.html:41
+msgid "Importar Logs"
+msgstr "Импорт журналов"
+
+#: templates/admin/database.html:608
+msgid "Importar Logs de Squid"
+msgstr "Импорт лог-файлов Squid"
+
+#: templates/admin/database.html:611
+msgid "Carga un archivo access.log histórico para incorporarlo a la base de datos"
+msgstr "Загрузите файл access.log с историческими данными для импорта в базу данных"
+
+#: templates/admin/database.html:619
+msgid "Importación automática por fecha"
+msgstr "Автоматический импорт по дате"
+
+#: templates/admin/database.html:620
+msgid "La fecha se obtiene del timestamp de cada línea. Los registros se guardan en las tablas log_YYYYMMDD y sus usuarios en user_YYYYMMDD. Puedes importar un archivo con varios días."
+msgstr "Дата определяется по временной метке каждой строки. Записи сохраняются в таблицах log_YYYYMMDD, а данные о пользователях — в таблице user_YYYYMMDD. Можно импортировать файл, охватывающий несколько дней."
+
+#: templates/admin/database.html:628
+msgid "Seleccionar archivo"
+msgstr "Выбрать файл"
+
+#: templates/admin/database.html:635
+msgid "Archivo de logs"
+msgstr "Архив журналов"
+
+#: templates/admin/database.html:640
+msgid "Se admiten los formatos de access.log soportados por SquidStats."
+msgstr "Допускаются форматы файлов access.log, поддерживаемые SquidStats."
+
+#: templates/admin/database.html:660
+msgid "Resultado de la importación"
+msgstr "Результат импорта"
+
+#: templates/admin/database.html:662
+msgid "líneas válidas"
+msgstr "допустимые строки"
+
+#: templates/admin/database.html:673
+msgid "Denegados"
+msgstr "Отклонены"
+
+#: templates/admin/database.html:678
+msgid "Omitidas"
+msgstr "Пропущены"
+
+#: templates/admin/database.html:683
+msgid "Tablas actualizadas"
+msgstr "Обновленные таблицы"
+
+#: templates/admin/database.html:992
+msgid "Importando..."
+msgstr "Импорт..."
+
+#: templates/admin/database.html:993
+msgid "Importar logs"
+msgstr "Импорт журналов"
+
+#: templates/admin/database.html:998
+msgid "Selecciona un archivo de logs"
+msgstr "Выберите файл журнала"
+
+#: templates/admin/database.html:1016
+#: templates/admin/database.html:1023
+msgid "No se pudo importar el archivo"
+msgstr "Не удалось импортировать файл"
+
+#: templates/admin/database.html:611
+msgid "Carga uno o varios archivos access.log históricos para incorporarlos a la base de datos"
+msgstr "Загрузите один или несколько архивных файлов access.log для добавления их в базу данных"
+
+#: templates/admin/database.html:1074
+msgid "Importar archivos"
+msgstr "Импорт файлов"
+
+#: templates/admin/database.html:628
+msgid "Seleccionar archivos"
+msgstr "Выбрать файлы"
+
+#: templates/admin/database.html:647
+msgid "Zona para cargar archivos de logs"
+msgstr "Область для загрузки файлов журналов"
+
+#: templates/admin/database.html:651
+msgid "Arrastra aquí tus archivos access.log"
+msgstr "Перетащите сюда свои файлы access.log"
+
+#: templates/admin/database.html:652
+msgid "o haz clic para seleccionarlos"
+msgstr "или нажмите, чтобы выбрать их"
+
+#: templates/admin/database.html:653
+msgid "Puedes seleccionar múltiples archivos a la vez."
+msgstr "Вы можете выбрать сразу несколько файлов."
+
+#: templates/admin/database.html:659
+msgid "archivos seleccionados"
+msgstr "выбранные файлы"
+
+#: templates/admin/database.html:663
+msgid "Limpiar selección"
+msgstr "Очистить выделение"
+
+#: templates/admin/database.html:677
+msgid "Quitar archivo"
+msgstr "Удалить файл"
+
+#: templates/admin/database.html:691
+msgid "Progreso de importación"
+msgstr "Ход импорта"
+
+#: templates/admin/database.html:696
+msgid "archivos completados"
+msgstr "завершенные дела"
+
+#: templates/admin/database.html:724
+msgid "Archivos importados"
+msgstr "Импортированные файлы"
+
+#: templates/admin/database.html:745
+msgid "Archivos con error"
+msgstr "Файлы с ошибками"
+
+#: templates/admin/database.html:1075
+msgid "Procesando..."
+msgstr "Обработка..."
+
+#: templates/admin/database.html:1076
+msgid "Procesando archivo"
+msgstr "Обработка файла"
+
+#: templates/admin/database.html:1079
+msgid "No se pudo importar este archivo"
+msgstr "Этот файл не удалось импортировать"
+
+#: templates/admin/database.html:1080
+msgid "Selecciona al menos un archivo de logs"
+msgstr "Выберите как минимум один файл журнала"
+
+#: templates/admin/database.html:1081
+msgid "No se pudo importar ningún archivo"
+msgstr "Не удалось импортировать ни один файл"
+
+#: templates/admin/database.html:1082
+msgid "Algunos archivos se importaron correctamente y otros fallaron"
+msgstr "Некоторые файлы были импортированы успешно, а с другими возникли проблемы"
+
+#: templates/admin/database.html:1083
+msgid "Archivos importados correctamente"
+msgstr "Файлы успешно импортированы"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/navbar.html:7 templates/auth/login.html:59
+#: templates/auth/login.html:63 templates/components/navbar.html:8
+msgid "SquidStats"
+msgstr "SquidStats"
+
+#: templates/admin/user_form.html:7 templates/admin/user_form.html:57
+#: templates/admin/users.html:8
+msgid "Crear Usuario"
+msgstr "Создать пользователя"
+
+#: templates/admin/user_form.html:7
+msgid "Editar Usuario"
+msgstr "Редактировать пользователя"
+
+#: templates/admin/user_form.html:10
+msgid "Complete el formulario para crear un nuevo usuario administrador."
+msgstr "Заполните форму, чтобы создать нового администратора."
+
+#: templates/admin/user_form.html:10
+msgid "Modifique los datos del usuario según sea necesario."
+msgstr "Измените данные пользователя по мере необходимости."
+
+#: templates/admin/user_form.html:18
+msgid "Nombre de Usuario"
+msgstr "Имя пользователя"
+
+#: templates/admin/user_form.html:26 templates/auth/login.html:116
+#: templates/captive_portal/login.html
+msgid "Contraseña"
+msgstr "Пароль"
+
+#: templates/admin/user_form.html:26
+msgid "(dejar vacío para mantener la actual)"
+msgstr "(оставить пустым, чтобы сохранить текущее значение)"
+
+#: templates/admin/user_form.html:31
+msgid "La contraseña debe tener al menos 8 caracteres"
+msgstr "Пароль должен состоять как минимум из 8 символов"
+
+#: templates/admin/user_form.html:35 templates/admin/users.html:18
+msgid "Rol"
+msgstr "Роль"
+
+#: templates/admin/user_form.html:37
+msgid "Administrador"
+msgstr "Администратор"
+
+#: templates/admin/user_form.html:47
+msgid "Usuario activo"
+msgstr "Активный пользователь"
+
+#: templates/admin/users.html:6
+msgid "Gestión de Usuarios"
+msgstr "Управление пользователями"
+
+#: templates/admin/users.html:16
+msgid "ID"
+msgstr "ID"
+
+#: templates/admin/users.html:20
+msgid "Último Login"
+msgstr "Последний вход в систему"
+
+#: templates/admin/users.html:39
+msgid "Nunca"
+msgstr "Никогда"
+
+#: templates/auth/login.html:7
+msgid "Login - SquidStats Admin"
+msgstr "Вход — Администратор SquidStats"
+
+#: templates/auth/login.html:64
+msgid "Panel de Administración"
+msgstr "Панель администрирования"
+
+#: templates/auth/login.html:108
+#: templates/captive_portal/login.html
+msgid "Ingresa tu usuario"
+msgstr "Введите свой логин"
+
+#: templates/auth/login.html:126
+#: templates/captive_portal/login.html
+msgid "Ingresa tu contraseña"
+msgstr "Введите пароль"
+
+#: templates/auth/login.html:146
+msgid "Recordarme"
+msgstr "Запомнить меня"
+
+#: templates/auth/login.html:156
+msgid "Iniciar Sesión"
+msgstr "Войти"
+
+#: templates/auth/login.html:164
+msgid "Conexión segura con JWT"
+msgstr "Безопасный вход с помощью JWT"
+
+#: templates/auth/login.html:168
+msgid "Volver al Dashboard Principal"
+msgstr "Вернуться на главную панель управления"
+
+#: templates/auth/login.html:175
+msgid "SquidStats v"
+msgstr "SquidStats v"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/ldap_config.html:391
+msgid "Probando…"
+msgstr "Проверка…"
+
+#: templates/admin/ldap_config.html:8
+msgid "LDAP tabs"
+msgstr "Вкладки LDAP"
+
+#: templates/admin/base.html:135 templates/admin/ldap_config.html:3
+msgid "LDAP/AD y Grupos"
+msgstr "LDAP/AD и группы"
+
+#: templates/admin/ldap_config.html:13
+msgid "LDAP/AD"
+msgstr "LDAP/AD"
+
+#: templates/admin/ldap_config.html:302
+msgid "Grupos administrativos"
+msgstr "Административные группы"
+
+#: templates/admin/ldap_config.html:310
+msgid "Ej. directivos"
+msgstr "Например, руководители"
+
+#: templates/admin/ldap_config.html:313
+msgid "Opcional"
+msgstr "Необязательно"
+
+#: templates/admin/ldap_config.html:320
+msgid "Personalizado"
+msgstr "Индивидуальный"
+
+#: templates/admin/ldap_config.html:326
+msgid "Crear grupo"
+msgstr "Создать группу"
+
+#: templates/admin/ldap_config.html:339
+msgid "Todavía no hay grupos definidos."
+msgstr "Группы пока не сформированы."
+
+#: templates/admin/ldap_config.html:355
+msgid "Sin descripción"
+msgstr "Без описания"
+
+#: templates/admin/ldap_config.html:364
+msgid "usuario1, usuario2, ..."
+msgstr "пользователь1, пользователь2, ..."
+
+#: templates/admin/ldap_config.html:367
+msgid "Añadir usuarios"
+msgstr "Добавить пользователей"
+
+#: templates/admin/ldap_config.html:371
+msgid "usuario(s) asociado(s)"
+msgstr "связанный(е) пользователь(и)"
+
+#: templates/admin/ldap_config.html:375
+msgid "Quitar usuario"
+msgstr "Удалить пользователя"
+
+#: templates/admin/ldap_config.html:385
+msgid "Este grupo aún no tiene usuarios asociados."
+msgstr "В этой группе пока нет пользователей."
+
+#: templates/admin/ldap_config.html:660
+msgid "¿Está seguro de que desea eliminar este grupo y todos sus usuarios asociados?"
+msgstr "Вы уверены, что хотите удалить эту группу и всех связанных с ней пользователей?"
+
+#: templates/admin/ldap_config.html:388
+msgid "Sin probar"
+msgstr "Не проверено"
+
+#: templates/admin/ldap_config.html:392
+#: templates/partials/conexiones.html:173
+msgid "Conectado"
+msgstr "Подключено"
+
+#: templates/admin/ldap_config.html:419
+msgid "Configuración cargada desde la base de datos."
+msgstr "Настройки загружены из базы данных."
+
+#: templates/admin/ldap_config.html:426
+msgid "Configuración cargada desde el navegador. Los cambios se guardan localmente."
+msgstr "Настройки загружены из браузера. Изменения сохраняются локально."
+
+#: templates/admin/ldap_config.html:435
+msgid "Configuración guardada localmente en el navegador."
+msgstr "Настройки, сохраненные локально в браузере."
+
+#: templates/admin/ldap_config.html:443
+msgid "Configuración local eliminada."
+msgstr "Локальные настройки удалены."
+
+#: templates/admin/base.html:133 templates/admin/ldap_config.html:14
+msgid "LDAP / Active Directory"
+msgstr "LDAP / Active Directory"
+
+#: templates/admin/ldap_config.html:3
+msgid "LDAP / Active Directory | Admin Squid"
+msgstr "LDAP / Active Directory | Администрирование Squid"
+
+#: templates/admin/ldap_config.html:16
+msgid "Configura la conexión y explora el directorio."
+msgstr "Настройте подключение и просмотрите каталог."
+
+#: templates/admin/ldap_config.html:35
+msgid "Total Usuarios"
+msgstr "Общее количество пользователей"
+
+#: templates/admin/ldap_config.html:47
+msgid "Total Grupos"
+msgstr "Всего групп"
+
+#: templates/admin/ldap_config.html:62
+msgid "Configuración de conexión"
+msgstr "Настройки подключения"
+
+#: templates/admin/ldap_config.html:66
+msgid "Servidor (host)"
+msgstr "Сервер (хост)"
+
+#: templates/admin/ldap_config.html:73
+msgid "Puerto"
+msgstr "Порт"
+
+#: templates/admin/ldap_config.html:78
+msgid "Autenticación"
+msgstr "Аутентификация"
+
+#: templates/admin/ldap_config.html:81
+msgid "SIMPLE (LDAP)"
+msgstr "SIMPLE (LDAP)"
+
+#: templates/admin/ldap_config.html:82
+msgid "NTLM (AD)"
+msgstr "NTLM (AD)"
+
+#: templates/admin/ldap_config.html:89
+msgid "Usar SSL / LDAPS"
+msgstr "Использование SSL / LDAPS"
+
+#: templates/admin/ldap_config.html:93
+msgid "Bind DN / Usuario"
+msgstr "Связать DN / Пользователь"
+
+#: templates/admin/ldap_config.html:94
+msgid "CN=admin,DC=empresa,DC=com"
+msgstr "CN=admin,DC=company,DC=com"
+
+#: templates/admin/ldap_config.html:99
+msgid "Contraseña Bind"
+msgstr "Пароль Bind"
+
+#: templates/admin/ldap_config.html:105
+msgid "Base DN"
+msgstr "Базовая DN"
+
+#: templates/admin/ldap_config.html:106
+msgid "DC=empresa,DC=com"
+msgstr "DC=company,DC=com"
+
+#: templates/admin/ldap_config.html:144
+msgid "Buscar Usuarios"
+msgstr "Поиск пользователей"
+
+#: templates/admin/ldap_config.html:148
+msgid "Nombre, usuario, email…"
+msgstr "Имя, логин, адрес электронной почты…"
+
+#: templates/admin/ldap_config.html:165
+msgid "Departamento"
+msgstr "Отдел"
+
+#: templates/admin/ldap_config.html:166
+#: templates/logsView.html
+msgid "Grupos"
+msgstr "Группы"
+
+#: templates/admin/ldap_config.html:179
+msgid "Ver grupos del usuario"
+msgstr "Просмотреть группы пользователя"
+
+#: templates/admin/ldap_config.html:180
+msgid "Ver grupos"
+msgstr "Посмотреть группы"
+
+#: templates/admin/ldap_config.html:188
+msgid "No se encontraron usuarios."
+msgstr "Пользователи не найдены."
+
+#: templates/admin/ldap_config.html:196
+msgid "Buscar Grupos"
+msgstr "Поиск групп"
+
+#: templates/admin/ldap_config.html:200
+msgid "Nombre del grupo…"
+msgstr "Название группы…"
+
+#: templates/admin/ldap_config.html:214
+msgid "Descripción"
+msgstr "Описание"
+
+#: templates/admin/ldap_config.html:215
+msgid "Miembros"
+msgstr "Участники"
+
+#: templates/admin/ldap_config.html:231
+msgid "No se encontraron grupos."
+msgstr "Групп не найдено."
+
+#: templates/admin/ldap_config.html:241
+msgid "Grupos de"
+msgstr "Группы"
+
+#: templates/admin/ldap_config.html:244
+msgid "Limpiar"
+msgstr "Очистить"
+
+#: templates/admin/ldap_config.html:250
+msgid "Cargando grupos…"
+msgstr "Загрузка групп…"
+
+#: templates/admin/ldap_config.html:263
+msgid "grupo(s) encontrado(s)"
+msgstr "найденная(ые) группа(ы)"
+
+#: templates/admin/ldap_config.html:277
+msgid "Este usuario no pertenece a ningún grupo."
+msgstr "Этот пользователь не входит ни в одну группу."
+
+#: templates/admin/telegram_config.html:11
+msgid "Notificaciones Telegram"
+msgstr "Уведомления в Telegram"
+
+#: templates/admin/telegram_config.html:13
+msgid "Configura las credenciales y los destinatarios para las alertas automáticas."
+msgstr "Настройте учетные данные и получателей для автоматических уведомлений."
+
+#: templates/admin/telegram_config.html:22
+msgid "Credenciales API"
+msgstr "Учетные данные API"
+
+#: templates/admin/telegram_config.html:37
+msgid "Habilitar notificaciones Telegram"
+msgstr "Включить уведомления в Telegram"
+
+#: templates/admin/telegram_config.html:50
+msgid "API ID"
+msgstr "Идентификатор API"
+
+#: templates/admin/telegram_config.html:61
+msgid "API Hash"
+msgstr "API Hash"
+
+#: templates/admin/telegram_config.html:67
+msgid "Guardado — dejar vacío para no cambiar"
+msgstr "Сохранено — оставить пустым, чтобы не изменять"
+
+#: templates/admin/telegram_config.html:74
+msgid "Token del Bot"
+msgstr "Токен бота"
+
+#: templates/admin/telegram_config.html:84
+msgid "(opcional si usa cuenta de usuario)"
+msgstr "(необязательно, если вы используете учетную запись пользователя)"
+
+#: templates/admin/telegram_config.html:89
+msgid "Teléfono (cuenta de usuario)"
+msgstr "Телефон (учетная запись пользователя)"
+
+#: templates/admin/telegram_config.html:96
+msgid "(opcional)"
+msgstr "(необязательно)"
+
+#: templates/admin/telegram_config.html:103
+msgid "En modo bot este campo debe estar vacío — los bots no pueden usar número de teléfono."
+msgstr "В режиме бота это поле должно оставаться пустым — боты не могут использовать номера телефонов."
+
+#: templates/admin/telegram_config.html:105
+msgid "Nombre de sesión"
+msgstr "Название сеанса"
+
+#: templates/admin/telegram_config.html:114
+msgid "Guardando…"
+msgstr "Сохраняется…"
+
+#: templates/admin/telegram_config.html:117
+msgid "Probar"
+msgstr "Проверить подключение"
+
+#: templates/admin/telegram_config.html:158
+msgid "Destinatarios"
+msgstr "Адресаты"
+
+#: templates/admin/telegram_config.html:160
+msgid "Introduce un destinatario por línea: @username, ID numérico de usuario o ID de chat/grupo."
+msgstr "Укажите одного получателя в каждой строке: @username, числовой ID пользователя или ID чата/группы."
+
+#: templates/admin/telegram_config.html:168
+msgid "Cada línea es un destinatario independiente."
+msgstr "Каждая строка — это отдельный получатель."
+
+#: templates/admin/telegram_config.html:178
+msgid "Enviar mensaje de prueba"
+msgstr "Отправить пробное сообщение"
+
+#: templates/admin/telegram_config.html:180
+msgid "Habilita Telegram para enviar mensajes de prueba."
+msgstr "Включите в Telegram возможность отправки тестовых сообщений."
+
+#: templates/admin/telegram_config.html:182
+msgid "Estado de la conexión"
+msgstr "Состояние соединения"
+
+#: templates/admin/telegram_config.html:188
+msgid "Servicio"
+msgstr "Служба"
+
+#: templates/admin/telegram_config.html:193
+msgid "Modo"
+msgstr "Режим"
+
+#: templates/admin/telegram_config.html:198
+msgid "Sesión"
+msgstr "Сессия"
+
+#: templates/admin/telegram_config.html:202
+msgid "Usuario Telegram"
+msgstr "Пользователь Telegram"
+
+#: templates/admin/telegram_config.html:214
+msgid "Actualizar estado"
+msgstr "Обновить статус"
+
+#: templates/admin/telegram_config.html:230
+msgid "Verificando…"
+msgstr "Проверка…"
+
+#: templates/admin/telegram_config.html:341
+msgid "Error de red al guardar."
+msgstr "Ошибка сети при сохранении."
+
+#: templates/admin/telegram_config.html:352
+msgid "Error de red al probar la conexión."
+msgstr "Ошибка сети при проверке подключения."
+
+#: templates/logsView.html
+msgid "Actividad"
+msgstr "Деятельность"
+
+#: templates/partials/logs_groups.html
+msgid "Periodo"
+msgstr "Период"
+
+#: templates/partials/logs_groups.html
+msgid "Datos consumidos"
+msgstr "Использованные данные"
+
+#: templates/partials/logs_groups.html
+msgid "Sin grupo"
+msgstr "Без группы"
+
+#: templates/partials/logs_groups.html
+msgid "No hay tráfico para este periodo."
+msgstr "Данных о трафике за этот период нет."
+
+#: templates/partials/logs_groups.html
+msgid "Usuarios del grupo"
+msgstr "Пользователи группы"
+
+#: templates/partials/logs_groups.html
+msgid "solicitudes"
+msgstr "запросов"
+
+#: templates/partials/logs_groups.html
+msgid "No hay usuarios con tráfico."
+msgstr "Нет пользователей с трафиком."
+
+#: templates/partials/logs_groups.html
+msgid "Selecciona un grupo para ver sus usuarios."
+msgstr "Выберите группу, чтобы просмотреть её пользователей."
+
+#: templates/partials/logs_groups.html
+msgid "Detalle del usuario"
+msgstr "Сведения о пользователе"
+
+#: templates/partials/logs_groups.html
+msgid "páginas encontradas"
+msgstr "найденные страницы"
+
+#: templates/partials/logs_groups.html
+msgid "No hay páginas accedidas."
+msgstr "Страниц, на которые был осуществлен доступ, нет."
+
+#: templates/partials/logs_groups.html
+msgid "Exportar PDF"
+msgstr "Экспорт в PDF"
+
+#: templates/logs_groups_pdf.html
+msgid "Reporte de grupos"
+msgstr "Отчет по группам"
+
+#: templates/logs_groups_pdf.html
+msgid "Generado"
+msgstr "Создано"
+
+#: templates/logs_groups_pdf.html
+msgid "Resumen por grupo"
+msgstr "Сводная информация по группам"
+
+#: routes/logs_routes.py
+msgid "La exportación PDF no está disponible en este momento."
+msgstr "Экспорт в формат PDF в настоящее время недоступен."
+
+#: routes/logs_routes.py
+msgid "Error interno generando el reporte PDF."
+msgstr "Внутренняя ошибка при создании отчета в формате PDF."
+
+#: templates/admin/ldap_config.html:481
+msgid "El campo de búsqueda de usuario no puede estar vacío."
+msgstr "Поле ввода имени пользователя не может быть пустым."
+
+#: templates/admin/telegram_config.html:197
+msgid "Cuenta de usuario"
+msgstr "Учётная запись пользователя"
+
+#: templates/admin/ldap_config.html:207
+msgid "Buscar Grupos en LDAP/AD"
+msgstr "Поиск групп в LDAP/AD"
+
+#: templates/admin/base.html:7 templates/admin/base.html:27
+msgid "Administrador Squid Proxy"
+msgstr "Администратор прокси-сервера Squid"
+
+#: templates/admin/base.html:24
+msgid "SquidStats logo"
+msgstr "SquidStats logo"
+
+#: templates/admin/base.html:28
+msgid "Admin Squid"
+msgstr "Администратор Squid"
+
+#: templates/admin/base.html:33
+msgid "Recarga la configuración de Squid sin reiniciar el servicio"
+msgstr "Обновить настройки Squid без перезапуска службы"
+
+#: templates/admin/base.html:35
+msgid "Recargar"
+msgstr "Перезагрузить"
+
+#: templates/admin/base.html:37
+msgid "Reinicia Squid y vuelve a aplicar la configuración desde cero"
+msgstr "Перезапустите Squid и заново примените настройки с нуля"
+
+#: templates/admin/base.html:39
+msgid "Reiniciar"
+msgstr "Перезапустить"
+
+#: templates/admin/base.html:42 templates/components/navbar.html:135
+msgid "Idioma"
+msgstr "Язык"
+
+#: templates/admin/base.html:88
+msgid "Gestionar Usuarios"
+msgstr "Управление пользователями"
+
+#: templates/admin/base.html:97
+msgid "Cerrar Sesión"
+msgstr "Выйти из системы"
+
+#: templates/admin/base.html:115
+msgid "Dashboard"
+msgstr "Панель управления"
+
+#: templates/admin/base.html:118
+msgid "Dashboard Admin"
+msgstr "Панель администратора"
+
+#: templates/admin/base.html:125
+msgid "Dividir Squid Config"
+msgstr "Разделение конфигурации Squid"
+
+#: templates/admin/base.html:132
+msgid "Configuraciones LDAP/Active Directory"
+msgstr "Настройки LDAP/Active Directory"
+
+#: templates/admin/base.html:140
+msgid "ACLs"
+msgstr "ACLs"
+
+#: templates/admin/base.html:146 templates/admin/dashboardAdmin.html:41
+msgid "Delay Pools"
+msgstr "Пулы задержек"
+
+#: templates/admin/base.html:152
+msgid "HTTP Access"
+msgstr "HTTP Access"
+
+#: templates/admin/base.html:156 templates/admin/base.html:157
+msgid "Cuotas"
+msgstr "Квоты"
+
+#: templates/admin/base.html:158 templates/partials/conexiones.html:280
+#: templates/partials/conexiones.html:285
+msgid "Beta"
+msgstr "Beta"
+
+#: templates/admin/base.html:161 templates/admin/navbar.html:72
+#: templates/admin/navbar.html:173 templates/components/navbar.html:73
+#: templates/components/navbar.html:188
+msgid "Blacklist"
+msgstr "Черный список"
+
+#: templates/admin/base.html:164
+msgid "Logs"
+msgstr "Журналы"
+
+#: templates/admin/dashboardAdmin.html:6
+msgid "Dashboard - Resumen del Sistema"
+msgstr "Панель управления — Обзор системы"
+
+#: templates/admin/dashboardAdmin.html:15
+msgid "Total ACLs"
+msgstr "Общее количество ACL"
+
+#: templates/admin/dashboardAdmin.html:67
+msgid "Reglas HTTP"
+msgstr "Правила HTTP"
+
+#: templates/admin/dashboardAdmin.html:97
+msgid "SSL Bump"
+msgstr "SSL Bump"
+
+#: templates/admin/dashboardAdmin.html:119
+msgid "No se encontraron configuraciones"
+msgstr "Настройки не найдены"
+
+#: templates/admin/dashboardAdmin.html:120
+msgid "No se han detectado ACLs, reglas HTTP ni delay pools en tu configuración de Squid."
+msgstr "В вашей конфигурации Squid не обнаружено ACL, HTTP-правил и пулов задержки."
+
+#: templates/admin/dashboardAdmin.html:122
+msgid "¿Tu configuración ya está dividida en módulos?"
+msgstr "Ваша конфигурация уже разбита на модули?"
+
+#: templates/admin/dashboardAdmin.html:123
+msgid "Si ya tienes tu configuración organizada en archivos separados (por ejemplo: acls.conf, http_access.conf, delay_pools.conf), SquidStats puede leerla directamente sin necesidad de unificarla."
+msgstr "Если ваши настройки уже организованы в отдельных файлах (например: acls.conf, http_access.conf, delay_pools.conf), SquidStats может считывать их напрямую, без необходимости их объединения."
+
+#: templates/admin/dashboardAdmin.html:126
+msgid "Gestionar Configuración Modular"
+msgstr "Управление модульной конфигурацией"
+
+#: templates/admin/dashboardAdmin.html:129
+msgid "Editar squid.conf"
+msgstr "Редактировать файл squid.conf"
+
+#: templates/admin/dashboardAdmin.html:140
+msgid "Acciones Rápidas"
+msgstr "Быстрые действия"
+
+#: templates/admin/dashboardAdmin.html:143
+#: templates/admin/dashboardAdmin.html:149
+msgid "Deshabilitado por errores de configuración"
+msgstr "Отключено из-за ошибок в настройках"
+
+#: templates/admin/dashboardAdmin.html:145
+#: templates/admin/dashboardAdmin.html:157
+msgid "Editar Configuración"
+msgstr "Редактировать конфигурацию"
+
+#: templates/admin/dashboardAdmin.html:146
+msgid "Modificar archivo squid.conf (deshabilitado)"
+msgstr "Изменить файл squid.conf (отключено)"
+
+#: templates/admin/dashboardAdmin.html:152
+msgid "Crear nueva regla de acceso (deshabilitado)"
+msgstr "Создать новое правило доступа (отключено)"
+
+#: templates/admin/dashboardAdmin.html:158
+msgid "Modificar archivo squid.conf"
+msgstr "Изменить файл squid.conf"
+
+#: templates/admin/dashboardAdmin.html:164
+msgid "Crear nueva regla de acceso"
+msgstr "Создать новое правило доступа"
+
+#: templates/admin/dashboardAdmin.html:170
+msgid "Ver Logs"
+msgstr "Просмотреть журналы"
+
+#: templates/admin/dashboardAdmin.html:171
+msgid "Revisar logs del sistema"
+msgstr "Проверить системные журналы"
+
+#: templates/admin/dashboardAdmin.html:176
+msgid "Reiniciar Squid"
+msgstr "Перезапустить Squid"
+
+#: templates/admin/dashboardAdmin.html:177
+msgid "Reiniciar el servicio"
+msgstr "Перезапустить службу"
+
+#: templates/admin/dashboardAdmin.html:184
+msgid "Estado del Sistema"
+msgstr "Состояние системы"
+
+#: templates/admin/dashboardAdmin.html:189
+msgid "Servicio Squid"
+msgstr "Служба Squid"
+
+#: templates/admin/dashboardAdmin.html:200
+msgid "No cargada"
+msgstr "Не загружена"
+
+#: templates/admin/dashboardAdmin.html:202
+msgid "Cargada"
+msgstr "Загружена"
+
+#: templates/admin/dashboardAdmin.html:209
+msgid "SSL Bump (MITM)"
+msgstr "SSL Bump (MITM)"
+
+#: templates/admin/dashboardAdmin.html:218
+msgid "cert:"
+msgstr "cert:"
+
+#: templates/admin/logs.html:8
+msgid "Líneas a mostrar:"
+msgstr "Отображаемые строки:"
+
+#: templates/admin/logs.html:18
+msgid "Buscar texto en los logs"
+msgstr "Поиск текста в логах"
+
+#: templates/admin/logs.html:19
+msgid "Alternar n.º de línea"
+msgstr "Переключение номера строки"
+
+#: templates/admin/logs.html:21
+msgid "Mostrando últimas"
+msgstr "Показать последние"
+
+#: templates/admin/logs.html:21
+msgid "líneas. Usa el filtro para encontrar rápidamente errores, IPs o partes del mensaje."
+msgstr "строк. Воспользуйтесь фильтром, чтобы быстро найти ошибки, IP-адреса или фрагменты сообщения."
+
+#: templates/admin/logs.html:28
+msgid "líneas"
+msgstr "строк"
+
+#: templates/admin/navbar.html:46 templates/components/navbar.html:47
+msgid "Toggle menu"
+msgstr "Раскрыть меню"
+
+#: templates/admin/navbar.html:54 templates/components/navbar.html:55
+msgid "Panel principal con conexiones activas"
+msgstr "Главная панель с активными разъемами"
+
+#: templates/admin/navbar.html:56 templates/admin/navbar.html:155
+#: templates/components/navbar.html:57 templates/components/navbar.html:170
+#: templates/captive_portal/success.html
+msgid "Inicio"
+msgstr "Главная"
+
+#: templates/admin/navbar.html:58 templates/components/navbar.html:59
+msgid "Estadísticas de rendimiento del cache"
+msgstr "Статистика производительности кэша"
+
+#: templates/admin/navbar.html:60 templates/admin/navbar.html:161
+#: templates/components/navbar.html:61 templates/components/navbar.html:176
+msgid "Estadísticas"
+msgstr "Статистика"
+
+#: templates/admin/navbar.html:62 templates/components/navbar.html:63
+msgid "Actividad y logs de usuarios"
+msgstr "Активность и журналы пользователей"
+
+#: templates/admin/navbar.html:66 templates/components/navbar.html:67
+msgid "Reportes y gráficas avanzadas"
+msgstr "Расширенные отчеты и графики"
+
+#: templates/admin/navbar.html:68 templates/admin/navbar.html:169
+#: templates/components/navbar.html:69 templates/components/navbar.html:184
+msgid "Reportes"
+msgstr "Отчеты"
+
+#: templates/admin/navbar.html:70 templates/components/navbar.html:71
+msgid "Sitios bloqueados y actividad restringida"
+msgstr "Заблокированные сайты и ограниченная активность"
+
+#: templates/admin/navbar.html:74 templates/components/navbar.html:75
+msgid "Auditoría de actividad por usuario y fecha"
+msgstr "Аудит действий по пользователям и датам"
+
+#: templates/admin/navbar.html:76 templates/admin/navbar.html:177
+#: templates/components/navbar.html:77 templates/components/navbar.html:192
+msgid "Auditoría"
+msgstr "Аудит"
+
+#: templates/admin/navbar.html:118 templates/components/navbar.html:118
+msgid "Panel de administración del sistema"
+msgstr "Панель управления системой"
+
+#: templates/admin/navbar.html:120 templates/components/navbar.html:120
+#: templates/components/navbar.html:200
+msgid "Admin"
+msgstr "Админ"
+
+#: templates/admin/navbar.html:124 templates/components/navbar.html:123
+msgid "Actualizar paquetes y configuración de Squid"
+msgstr "Обновление пакетов и настроек Squid"
+
+#: templates/admin/navbar.html:129 templates/components/navbar.html:128
+msgid "Actualizar aplicación web SquidStats"
+msgstr "Обновить веб-приложение SquidStats"
+
+#: templates/admin/navbar.html:131 templates/admin/navbar.html:189
+#: templates/components/navbar.html:130 templates/components/navbar.html:208
+msgid "Web"
+msgstr "Web"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/partials/auditoria.html:41
+msgid "Auditoría Técnica"
+msgstr "Технический аудит"
+
+#: templates/all_notifications.html:105 templates/partials/black_list.html:89
+msgid "Mostrando"
+msgstr "Отображение"
+
+#: templates/auditoria_pdf.html:41 templates/partials/black_list.html:27
+msgid "Total peticiones:"
+msgstr "Общее количество запросов:"
+
+#: templates/index.html:25 templates/partials/conexiones.html:496
+msgid "Aplicar"
+msgstr "Применить"
+
+#: templates/partials/black_list.html:23 templates/reports_pdf.html:24
+msgid "Total usuarios:"
+msgstr "Общее количество пользователей:"
+
+#: templates/partials/conexiones.html:335
+#: templates/partials/graph_reports.html:77 templates/reports_pdf.html:50
+msgid "URL"
+msgstr "URL"
+
+#: templates/partials/auditoria.html:9
+msgid "Tipo de Auditoría"
+msgstr "Тип аудита"
+
+#: templates/partials/auditoria.html:16
+msgid "Resumen por Usuario"
+msgstr "Отчет по пользователям"
+
+#: templates/partials/auditoria.html:18
+msgid "Top 10 Usuarios (Datos)"
+msgstr "10 лучших пользователей (данные)"
+
+#: templates/partials/auditoria.html:19
+msgid "Top 15 URLs (Datos)"
+msgstr "15 самых популярных URL-адресов (данные)"
+
+#: templates/partials/auditoria.html:20
+msgid "Top 10 Usuarios (Peticiones)"
+msgstr "10 лучших пользователей (запросы)"
+
+#: templates/partials/auditoria.html:21
+msgid "Top 10 IPs (Datos)"
+msgstr "Топ-10 IP-адресов (данные)"
+
+#: templates/partials/auditoria.html:23
+msgid "Total de Datos Consumidos"
+msgstr "Общий объем использованных данных"
+
+#: templates/partials/auditoria.html:26
+msgid "Actividad Diaria"
+msgstr "Ежедневная деятельность"
+
+#: templates/partials/auditoria.html:33
+msgid "Búsqueda por Palabra Clave"
+msgstr "Поиск по ключевому слову"
+
+#: templates/partials/auditoria.html:38
+msgid "Actividad en Redes Sociales"
+msgstr "Активность в социальных сетях"
+
+#: templates/partials/auditoria.html:43
+msgid "Actividad por Dirección IP"
+msgstr "Активность по IP-адресу"
+
+#: templates/partials/auditoria.html:48
+msgid "Análisis por Código de Respuesta"
+msgstr "Анализ по коду ответа"
+
+#: templates/partials/auditoria.html:67
+msgid "-- Todos --"
+msgstr "-- Все --"
+
+#: templates/partials/auditoria.html:71
+msgid "Palabra Clave"
+msgstr "Ключевое слово"
+
+#: templates/partials/auditoria.html:72
+msgid "Ej: juegos, descargas..."
+msgstr "Например: игры, загрузки..."
+
+#: templates/partials/auditoria.html:75
+msgid "Dirección IP"
+msgstr "IP-адрес"
+
+#: templates/partials/auditoria.html:76
+msgid "Ej: 192.168.1.100"
+msgstr "Например: 192.168.1.100"
+
+#: templates/partials/auditoria.html:79
+msgid "Redes Sociales"
+msgstr "Социальные сети"
+
+#: templates/partials/auditoria.html:83
+msgid "Facebook"
+msgstr "Facebook"
+
+#: templates/partials/auditoria.html:85 templates/partials/auditoria.html:91
+#: templates/partials/auditoria.html:97 templates/partials/auditoria.html:103
+#: templates/partials/auditoria.html:109 templates/partials/auditoria.html:115
+#: templates/partials/auditoria.html:121
+msgid "Selección múltiple"
+msgstr "Выбор нескольких элементов"
+
+#: templates/partials/auditoria.html:89
+msgid "Instagram"
+msgstr "Instagram"
+
+#: templates/partials/auditoria.html:95
+msgid "YouTube"
+msgstr "YouTube"
+
+#: templates/partials/auditoria.html:101
+msgid "Twitter/X"
+msgstr "Twitter/X"
+
+#: templates/partials/auditoria.html:107
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+#: templates/partials/auditoria.html:119
+msgid "Pinterest"
+msgstr "Pinterest"
+
+#: templates/partials/auditoria.html:126
+msgid "Código HTTP"
+msgstr "HTTP-код"
+
+#: templates/partials/auditoria.html:128
+msgid "-- Seleccione un código --"
+msgstr "-- Выберите код --"
+
+#: templates/partials/auditoria.html:130
+msgid "200 OK"
+msgstr "200 OK"
+
+#: templates/partials/auditoria.html:133
+msgid "301 Moved Permanently"
+msgstr "301 Перенаправление навсегда"
+
+#: templates/partials/auditoria.html:134
+msgid "302 Found"
+msgstr "302 Найден"
+
+#: templates/partials/auditoria.html:135
+msgid "304 Not Modified"
+msgstr "304 Не изменено"
+
+#: templates/partials/auditoria.html:138
+msgid "400 Bad Request"
+msgstr "400 Неверный запрос"
+
+#: templates/partials/auditoria.html:139
+msgid "401 Unauthorized"
+msgstr "401 Неавторизованный доступ"
+
+#: templates/partials/auditoria.html:140
+msgid "403 Forbidden"
+msgstr "403 Запрещен"
+
+#: templates/partials/auditoria.html:141
+msgid "404 Not Found"
+msgstr "404 Не найдено"
+
+#: templates/partials/auditoria.html:144
+msgid "500 Internal Server Error"
+msgstr "Ошибка 500: Внутренняя ошибка сервера"
+
+#: templates/partials/auditoria.html:145
+msgid "502 Bad Gateway"
+msgstr "502 Ошибка шлюза"
+
+#: templates/partials/auditoria.html:146
+msgid "503 Service Unavailable"
+msgstr "503 — Услуга недоступна"
+
+#: templates/partials/auditoria.html:147
+msgid "504 Gateway Timeout"
+msgstr "504. Таймаут шлюза"
+
+#: templates/partials/auditoria.html:156
+msgid "Fecha del Reporte"
+msgstr "Дата отчета"
+
+#: templates/partials/auditoria.html:165
+msgid "Fecha de Fin"
+msgstr "Дата окончания"
+
+#: templates/partials/auditoria.html:174
+msgid "Generar Reporte"
+msgstr "Создать отчет"
+
+#: templates/partials/auditoria.html:189
+msgid "Seleccione los filtros y genere un reporte"
+msgstr "Выберите фильтры и сформируйте отчет"
+
+#: templates/partials/auditoria.html:191
+msgid "Los resultados de su auditoría aparecerán aquí."
+msgstr "Результаты аудита будут отображаться здесь."
+
+#: templates/partials/black_list.html:10
+msgid "Análisis parcial — límite de dominios activo"
+msgstr "Частичный анализ — предел активных доменов"
+
+#: templates/partials/black_list.html:12
+msgid "La blacklist contiene más de"
+msgstr "В черном списке содержится более"
+
+#: templates/partials/black_list.html:12
+msgid "dominios activos. Para evitar un alto consumo de recursos, la consulta se ha limitado a los primeros"
+msgstr "активные домены. Чтобы избежать чрезмерного потребления ресурсов, запрос был ограничен первыми"
+
+#: templates/partials/black_list.html:13
+msgid "dominios. Es posible que algunos accesos bloqueados no aparezcan en este listado."
+msgstr "домены. Некоторые заблокированные адреса могут отсутствовать в этом списке."
+
+#: templates/partials/black_list.html:32
+msgid "Mostrar:"
+msgstr "Показать:"
+
+#: templates/partials/black_list.html:57
+msgid "Intentos Bloqueados"
+msgstr "Заблокированные попытки"
+
+#: templates/partials/black_list.html:80
+msgid "No se encontraron registros"
+msgstr "Записей не найдено"
+
+#: templates/partials/black_list.html:81
+msgid "No hay actividad en sitios bloqueados para mostrar."
+msgstr "На заблокированных сайтах нет активности, которую можно было бы отобразить."
+
+#: templates/partials/black_list.html:89
+msgid "usuarios en esta página."
+msgstr "пользователи на этой странице."
+
+#: templates/partials/cache_stats.html:8
+msgid "Caché"
+msgstr "Кэш"
+
+#: templates/partials/cache_stats.html:11
+msgid "Red"
+msgstr "Сеть"
+
+#: templates/partials/cache_stats.html:22
+msgid "Estadísticas del Sistema"
+msgstr "Статистика системы"
+
+#: templates/partials/cache_stats.html:34
+#: templates/partials/cache_stats.html:172
+msgid "CPU"
+msgstr "Процессор"
+
+#: templates/partials/cache_stats.html:36
+msgid "núcleos"
+msgstr "ядра"
+
+#: templates/partials/cache_stats.html:44
+#: templates/partials/cache_stats.html:57
+msgid "0G"
+msgstr "0G"
+
+#: templates/partials/cache_stats.html:47
+#: templates/partials/cache_stats.html:177
+msgid "RAM"
+msgstr "RAM"
+
+#: templates/partials/cache_stats.html:60
+#: templates/partials/cache_stats.html:182
+msgid "SWAP"
+msgstr "SWAP"
+
+#: templates/partials/cache_stats.html:72
+msgid "Información del Sistema"
+msgstr "Сведения о системе"
+
+#: templates/partials/cache_stats.html:80
+msgid "Nombre del Host"
+msgstr "Имя хоста"
+
+#: templates/partials/cache_stats.html:91
+msgid "Direcciones IP"
+msgstr "IP-адреса"
+
+#: templates/partials/cache_stats.html:103
+msgid "Sistema Operativo"
+msgstr "Операционная система"
+
+#: templates/partials/cache_stats.html:114
+msgid "Tiempo Encendido"
+msgstr "Время работы"
+
+#: templates/partials/cache_stats.html:125
+msgid "Zona Horaria"
+msgstr "Часовой пояс"
+
+#: templates/partials/cache_stats.html:136
+msgid "Hora Local"
+msgstr "Местное время"
+
+#: templates/partials/cache_stats.html:151
+msgid "Gráficas del Sistema"
+msgstr "Графики системы"
+
+#: templates/partials/cache_stats.html:164
+msgid "24 Horas"
+msgstr "24 часа"
+
+#: templates/partials/cache_stats.html:203
+msgid "Estadísticas de Caché"
+msgstr "Статистика кэша"
+
+#: templates/partials/cache_stats.html:220
+#: templates/partials/cache_stats.html:237
+#: templates/partials/conexiones.html:269
+#: templates/partials/conexiones.html:383
+#: templates/partials/graph_reports.html:103
+msgid "MB"
+msgstr "МБ"
+
+#: templates/partials/cache_stats.html:224
+#: templates/partials/cache_stats.html:241
+#: templates/partials/graph_reports.html:25
+msgid "GB"
+msgstr "GB"
+
+#: templates/partials/cache_stats.html:263
+msgid "Tráfico de Red"
+msgstr "Сетевой трафик"
+
+#: templates/partials/conexiones.html:7
+msgid "Proxies:"
+msgstr "Прокси-серверы:"
+
+#: templates/partials/conexiones.html:62
+msgid "Servidor Squid:"
+msgstr "Сервер Squid:"
+
+#: templates/partials/conexiones.html:76
+msgid "Total Bandwidth"
+msgstr "Общая пропускная способность"
+
+#: templates/partials/conexiones.html:97
+msgid "Usuarios Activos"
+msgstr "Активные пользователи"
+
+#: templates/partials/conexiones.html:108
+msgid "Conexiones Totales"
+msgstr "Общее количество подключений"
+
+#: templates/partials/conexiones.html:126
+msgid "Tiempo Activo"
+msgstr "Активное время"
+
+#: templates/partials/conexiones.html:141
+msgid "Peticiones HTTP"
+msgstr "HTTP-запросы"
+
+#: templates/partials/conexiones.html:156
+msgid "Peticiones/Min"
+msgstr "Запросы/мин"
+
+#: templates/partials/conexiones.html:171
+msgid "Estado Squid"
+msgstr "Состояние Squid"
+
+#: templates/partials/conexiones.html:174
+msgid "Error Parsing"
+msgstr "Ошибка анализа"
+
+#: templates/partials/conexiones.html:175
+msgid "Timeout"
+msgstr "Таймаут"
+
+#: templates/partials/conexiones.html:176
+msgid "Rechazado"
+msgstr "Отклонено"
+
+#: templates/partials/conexiones.html:177
+msgid "Error DNS"
+msgstr "Ошибка DNS"
+
+#: templates/partials/conexiones.html:191
+msgid "Tipo de Sistema"
+msgstr "Тип системы"
+
+#: templates/partials/conexiones.html:204
+msgid "Ver Resumen"
+msgstr "См. краткое изложение"
+
+#: templates/partials/conexiones.html:234
+msgid "IP del Cliente"
+msgstr "IP-адрес клиента"
+
+#: templates/partials/conexiones.html:239
+msgid "Conexiones totales de este usuario"
+msgstr "Общее количество подключений этого пользователя"
+
+#: templates/partials/conexiones.html:251
+msgid "Total de velocidad del usuario"
+msgstr "Общая скорость пользователя"
+
+#: templates/partials/conexiones.html:267
+msgid "Total de datos transferidos"
+msgstr "Общий объем переданных данных"
+
+#: templates/partials/conexiones.html:272
+msgid "Total de solicitudes"
+msgstr "Общее количество заявок"
+
+#: templates/partials/conexiones.html:306
+msgid "Desbloquear"
+msgstr "Разблокировать"
+
+#: templates/partials/conexiones.html:311
+msgid "Resetear conexiones"
+msgstr "Сброс настроек подключений"
+
+#: templates/partials/conexiones.html:311
+msgid "(Próx.)"
+msgstr "(Сл.)"
+
+#: templates/partials/conexiones.html:329
+msgid "Duración"
+msgstr "Продолжительность"
+
+#: templates/partials/conexiones.html:332
+msgid "Método"
+msgstr "Метод"
+
+#: templates/partials/conexiones.html:338
+msgid "Datos"
+msgstr "Данные"
+
+#: templates/partials/conexiones.html:341
+msgid "Velocidad"
+msgstr "Скорость"
+
+#: templates/partials/conexiones.html:344
+msgid "Delay Pool"
+msgstr "Пул задержек"
+
+#: templates/partials/conexiones.html:347
+msgid "Solicitudes"
+msgstr "Запросы"
+
+#: templates/partials/conexiones.html:350
+msgid "Dir. Remota"
+msgstr "Удал. адрес"
+
+#: templates/partials/conexiones.html:384
+msgid "N/A"
+msgstr "Н/Д"
+
+#: templates/partials/conexiones.html:394
+msgid "Pool"
+msgstr "Пул"
+
+#: templates/partials/conexiones.html:439
+msgid "Esta acción bloqueará todo el tráfico del usuario. Se añadirá"
+msgstr "Это действие заблокирует весь трафик пользователя. Будет добавлено"
+
+#: templates/partials/conexiones.html:440
+msgid "http_access deny"
+msgstr "http_access deny"
+
+#: templates/partials/conexiones.html:441
+msgid "en Squid y se guardará en la base de datos para persistencia."
+msgstr "в Squid и будет сохранено в базе данных для обеспечения постоянства."
+
+#: templates/partials/conexiones.html:446
+msgid "Confirmar bloqueo"
+msgstr "Подтвердить блокировку"
+
+#: templates/partials/conexiones.html:464
+msgid "Se eliminará el bloqueo activo para esta IP y se recargará la configuración de Squid."
+msgstr "Активная блокировка для этого IP-адреса будет снята, и настройки Squid будут перезагружены."
+
+#: templates/partials/conexiones.html:487
+msgid "Asigna la IP del usuario a un"
+msgstr "Присваивает IP-адрес пользователя"
+
+#: templates/partials/conexiones.html:487
+msgid "delay pool"
+msgstr "пул задержек"
+
+#: templates/partials/conexiones.html:487
+msgid "existente. Sus conexiones estarán sujetas a los límites de ancho de banda configurados en ese pool."
+msgstr "существующий. Его соединения будут подчиняться ограничениям пропускной способности, настроенным в этом пуле."
+
+#: templates/partials/conexiones.html:489
+msgid "Selecciona el delay pool"
+msgstr "Выберите пул задержек"
+
+#: templates/partials/conexiones.html:491
+msgid "Cargando pools..."
+msgstr "Загрузка пулов..."
+
+#: templates/partials/conexiones.html:514
+msgid "Se eliminará la restricción de velocidad activa para esta IP y se recargará la configuración de Squid."
+msgstr "Активное ограничение скорости для этого IP-адреса будет снято, и настройки Squid будут перезагружены."
+
+#: templates/partials/graph_reports.html:6
+msgid "Usuarios Totales"
+msgstr "Общее количество пользователей"
+
+#: templates/partials/graph_reports.html:14
+msgid "Registros de Log"
+msgstr "Журналы"
+
+#: templates/partials/graph_reports.html:22
+#: templates/partials/graph_reports.html:86
+msgid "Datos Transmitidos"
+msgstr "Переданные данные"
+
+#: templates/partials/graph_reports.html:29
+#: templates/partials/graph_reports.html:80
+msgid "Total de Peticiones"
+msgstr "Общее количество запросов"
+
+#: templates/partials/graph_reports.html:40
+msgid "Top 20 Usuarios por Actividad"
+msgstr "20 самых активных пользователей"
+
+#: templates/partials/graph_reports.html:49
+msgid "Top 20 Usuarios por Datos Transmitidos"
+msgstr "Топ-20 пользователей по объему переданных данных"
+
+#: templates/partials/graph_reports.html:60
+#: templates/partials/graph_reports.html:70
+msgid "Distribución de Códigos HTTP"
+msgstr "Распределение кодов HTTP"
+
+#: templates/partials/graph_reports.html:67
+msgid "Países más visitados"
+msgstr "Самые посещаемые страны"
+
+#: templates/partials/graph_reports.html:70
+msgid "Top 20 Páginas Más Visitadas"
+msgstr "20 самых посещаемых страниц"
+
+#: templates/partials/graph_reports.html:83
+msgid "Visitas Únicas"
+msgstr "Уникальные посещения"
+
+#: templates/partials/graph_reports.html:115
+msgid "IPs Compartidas por Múltiples Usuarios"
+msgstr "IP-адреса, используемые несколькими пользователями"
+
+#: templates/partials/graph_reports.html:122
+#: templates/admin/captive_portal.html
+msgid "IP"
+msgstr "IP"
+
+#: templates/partials/graph_reports.html:125
+msgid "Número de Usuarios"
+msgstr "Количество пользователей"
+
+#: templates/partials/graph_reports.html
+msgid "Usuarios únicos con actividad"
+msgstr "Уникальные пользователи, проявившие активность"
+
+#: templates/partials/graph_reports.html
+msgid "Eventos registrados"
+msgstr "Зарегистрированные события"
+
+#: templates/partials/graph_reports.html
+msgid "Promedio:"
+msgstr "Среднее значение:"
+
+#: templates/partials/graph_reports.html
+msgid "KB por petición"
+msgstr "KB по запросу"
+
+#: templates/partials/graph_reports.html
+msgid "Redirecciones:"
+msgstr "Перенаправления:"
+
+#: templates/partials/graph_reports.html
+msgid "Calidad y seguridad del tráfico"
+msgstr "Качество и безопасность трафика"
+
+#: templates/partials/graph_reports.html
+msgid "Indicadores calculados para la fecha seleccionada"
+msgstr "Показатели, рассчитанные на выбранную дату"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Tasa de éxito HTTP:"
+msgstr "Коэффициент успешности HTTP:"
+
+#: templates/partials/graph_reports.html
+msgid "Tasa de éxito HTTP"
+msgstr "Коэффициент успешности HTTP"
+
+#: templates/partials/graph_reports.html
+msgid "peticiones 2xx"
+msgstr "запросы 2xx"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Errores HTTP:"
+msgstr "Ошибки HTTP:"
+
+#: templates/partials/graph_reports.html
+msgid "Errores HTTP"
+msgstr "HTTP-ошибки"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Accesos bloqueados:"
+msgstr "Заблокированные входы:"
+
+#: templates/partials/graph_reports.html
+msgid "Accesos bloqueados"
+msgstr "Доступ заблокирован"
+
+#: templates/partials/graph_reports.html
+msgid "Usuarios afectados"
+msgstr "Пользователи, которых это касается"
+
+#: templates/partials/graph_reports.html
+msgid "Destinos únicos"
+msgstr "Уникальные направления"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Hora pico:"
+msgstr "Час пик:"
+
+#: templates/partials/graph_reports.html
+msgid "Sin actividad"
+msgstr "Нет активности"
+
+#: templates/partials/graph_reports.html
+msgid "Actividad por hora"
+msgstr "Почасовая активность"
+
+#: templates/partials/graph_reports.html
+msgid "Peticiones y datos transferidos durante la fecha seleccionada"
+msgstr "Запросы и данные, переданные в течение выбранного периода"
+
+#: templates/partials/graph_reports.html
+msgid "Destinos por TLD"
+msgstr "Направления по TLD"
+
+#: templates/partials/graph_reports.html
+msgid "Estimado a partir del dominio de destino; no es geolocalización."
+msgstr "Оценивается на основе домена назначения; это не геолокация."
+
+#: templates/partials/graph_reports.html
+msgid "No hay actividad para esta fecha."
+msgstr "На эту дату мероприятий нет."
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "Top dominios de destino"
+msgstr "Самые популярные домены назначения"
+
+#: templates/partials/graph_reports.html templates/reports_pdf.html
+msgid "No hay destinos identificables para esta fecha."
+msgstr "На эту дату нет определённых пунктов назначения."
+
+#: templates/partials/graph_reports.html
+msgid "URLs con mayor consumo de datos"
+msgstr "URL-адреса с наибольшим потреблением данных"
+
+#: templates/partials/graph_reports.html
+msgid "No se detectaron IPs compartidas."
+msgstr "Общих IP-адресов обнаружено не было."
+
+#: templates/partials/logs.html:5
+msgid "First page"
+msgstr "Первая страница"
+
+#: templates/partials/logs.html:8
+msgid "Previous page"
+msgstr "Предыдущая страница"
+
+#: templates/partials/logs.html:15
+msgid "Next page"
+msgstr "Следующая страница"
+
+#: templates/partials/logs.html:19
+msgid "Last page"
+msgstr "Последняя страница"
+
+#: templates/partials/logs.html:30
+msgid "ACTIVIDAD"
+msgstr "ДЕЯТЕЛЬНОСТЬ"
+
+#: templates/partials/logs.html:65
+msgid "Actividad reciente -"
+msgstr "Последние действия —"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/auditoria_pdf.html:6
+msgid "Auditoría -"
+msgstr "Аудит —"
+
+#: templates/auditoria_pdf.html:19
+msgid "Auditoría:"
+msgstr "Аудит:"
+
+#: templates/auditoria_pdf.html:20
+msgid "Generado:"
+msgstr "Создано:"
+
+#: templates/auditoria_pdf.html:20
+msgid "| Filtros:"
+msgstr "| Фильтры:"
+
+#: templates/auditoria_pdf.html:23
+msgid "Error:"
+msgstr "Ошибка:"
+
+#: templates/auditoria_pdf.html:28
+msgid "Resumen de Usuario"
+msgstr "Краткая информация о пользователе"
+
+#: templates/auditoria_pdf.html:29 templates/auditoria_pdf.html:39
+#: templates/reports_pdf.html:25
+msgid "Total solicitudes:"
+msgstr "Общее количество заявок:"
+
+#: templates/auditoria_pdf.html:30 templates/auditoria_pdf.html:41
+msgid "Datos totales (GB):"
+msgstr "Общий объем данных (ГБ):"
+
+#: templates/auditoria_pdf.html:33
+msgid "Top dominios"
+msgstr "Популярные домены"
+
+#: templates/auditoria_pdf.html:33
+msgid "Dominio"
+msgstr "Домен"
+
+#: templates/auditoria_pdf.html:33 templates/auditoria_pdf.html:36
+#: templates/reports_pdf.html:67
+msgid "Conteo"
+msgstr "Подсчет"
+
+#: templates/auditoria_pdf.html:36
+msgid "Resumen de respuestas"
+msgstr "Сводка ответов"
+
+#: templates/auditoria_pdf.html:36 templates/reports_pdf.html:67
+msgid "Código"
+msgstr "Код"
+
+#: templates/auditoria_pdf.html:39
+msgid "Actividad diaria"
+msgstr "Ежедневная деятельность"
+
+#: templates/auditoria_pdf.html:39
+msgid "Hora"
+msgstr "Время"
+
+#: templates/auditoria_pdf.html:39
+msgid "Requests"
+msgstr "Запросы"
+
+#: templates/auditoria_pdf.html:41
+msgid "Consumo total"
+msgstr "Общее потребление"
+
+#: templates/auditoria_pdf.html:41
+msgid "Rango:"
+msgstr "Ранг:"
+
+#: templates/auditoria_pdf.html:44
+msgid "Top usuarios por datos"
+msgstr "Лучшие пользователи по объему данных"
+
+#: templates/auditoria_pdf.html:47
+msgid "Top usuarios por solicitudes"
+msgstr "Лучшие пользователи по количеству запросов"
+
+#: templates/auditoria_pdf.html:50
+msgid "Top URLs por datos"
+msgstr "Популярные URL-адреса по данным"
+
+#: templates/auditoria_pdf.html:53
+msgid "Top IPs por datos"
+msgstr "Лучшие IP-адреса по данным"
+
+#: templates/auditoria_pdf.html:58
+msgid "No hay datos disponibles para esta auditoría."
+msgstr "Данных для данной проверки нет."
+
+#: templates/reports.html:30
+msgid "Ver"
+msgstr "Смотреть"
+
+#: templates/reports.html:42
+msgid "PDF"
+msgstr "PDF"
+
+#: templates/reports_pdf.html:6
+msgid "Reportes SquidStats -"
+msgstr "Отчеты SquidStats —"
+
+#: templates/reports_pdf.html:19
+msgid "Reportes SquidStats"
+msgstr "Отчеты SquidStats"
+
+#: templates/reports_pdf.html:20
+msgid "Fecha del reporte:"
+msgstr "Дата отчета:"
+
+#: templates/reports_pdf.html:20
+msgid "- Generado:"
+msgstr "- Создано:"
+
+#: templates/reports_pdf.html:23
+msgid "Resumen General"
+msgstr "Общий обзор"
+
+#: templates/reports_pdf.html:26
+msgid "Datos consumidos (MB):"
+msgstr "Объем использованных данных (МБ):"
+
+#: templates/reports_pdf.html:30
+msgid "Top usuarios por actividad"
+msgstr "Лучшие пользователи по активности"
+
+#: templates/reports_pdf.html:47
+msgid "Top URLs por consumo de datos"
+msgstr "Самые популярные URL-адреса по объему переданных данных"
+
+#: templates/reports_pdf.html:50
+msgid "Datos (MB)"
+msgstr "Данные (МБ)"
+
+#: templates/reports_pdf.html:64
+msgid "Distribución de códigos HTTP"
+msgstr "Распределение кодов HTTP"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/all_notifications.html:41
+msgid "No leídas"
+msgstr "Непрочитанные"
+
+#: templates/all_notifications.html:48
+msgid "Marcar todas"
+msgstr "Выделить все"
+
+#: templates/all_notifications.html:65
+msgid "Filtrar por:"
+msgstr "Отфильтровать по:"
+
+#: templates/all_notifications.html:67
+msgid "Todos los tipos"
+msgstr "Все типы"
+
+#: templates/all_notifications.html:68
+msgid "Errores"
+msgstr "Ошибки"
+
+#: templates/all_notifications.html:69
+msgid "Advertencias"
+msgstr "Предупреждения"
+
+#: templates/all_notifications.html:70
+msgid "Éxitos"
+msgstr "Хиты"
+
+#: templates/all_notifications.html:77
+msgid "Todas las fuentes"
+msgstr "Все источники"
+
+#: templates/all_notifications.html:88
+msgid "Todos los estados"
+msgstr "Все статусы"
+
+#: templates/all_notifications.html:89
+msgid "Sin leer"
+msgstr "Не прочитав"
+
+#: templates/all_notifications.html:90
+msgid "Leída"
+msgstr "Прочитано"
+
+#: templates/all_notifications.html:96
+msgid "Limpiar filtros"
+msgstr "Очистить фильтры"
+
+#: templates/all_notifications.html:115 templates/blacklist.html:6
+msgid "Página"
+msgstr "Страница"
+
+#: templates/all_notifications.html:162
+msgid "No leída"
+msgstr "Непрочитанное"
+
+#: templates/all_notifications.html:192
+msgid "Eliminar notificación"
+msgstr "Удалить уведомление"
+
+#: templates/all_notifications.html:207
+msgid "Todas las notificaciones aparecerán aquí. ¡Mantente atento a las actualizaciones del sistema!"
+msgstr "Все уведомления будут отображаться здесь. Следите за обновлениями системы!"
+
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/error.html:6
+msgid "Error - Squid Monitor"
+msgstr "Ошибка — Squid Monitor"
+
+#: templates/error.html:45
+msgid "Disculpamos las molestias. Por favor, intenta de nuevo más tarde o contacta al soporte si el problema persiste."
+msgstr "Приносим извинения за неудобства. Пожалуйста, попробуйте повторить попытку позже или обратитесь в службу поддержки, если проблема не устранится."
+
+#: templates/error.html:47
+msgid "Volver al Inicio"
+msgstr "Вернуться на главную страницу"
+
+#: templates/index.html:18
+msgid "Intervalo de refresco (segundos)"
+msgstr "Период обновления (секунды)"
+
+#: templates/logsView.html:13
+msgid "Buscar por usuario..."
+msgstr "Поиск по пользователю..."
+
+#: templates/logsView.html:16
+msgid "Limpiar búsqueda"
+msgstr "Очистить поиск"
+
+#: templates/macros.html:6
+msgid "Gbps"
+msgstr "Gbps"
+
+#: templates/macros.html:8
+msgid "Mbps"
+msgstr "Mbps"
+
+#: templates/macros.html:10
+msgid "Kbps"
+msgstr "Kbps"
+
+#: templates/macros.html:12
+msgid "0 kbps"
+msgstr "0 кбит/с"
+
+#: templates/components/confirm_modal.html:6
+msgid "Confirmar Acción"
+msgstr "Подтвердить действие"
+
+#: templates/components/loading_spinner.html:2
+msgid "Importando lista"
+msgstr "Импорт списка"
+
+#: templates/components/loading_spinner.html:13
+msgid "Importando lista de bloqueo"
+msgstr "Импорт списка заблокированных"
+
+#: templates/components/loading_spinner.html:14
+msgid "Validando URL y procesando dominios..."
+msgstr "Проверка URL-адресов и обработка доменов..."
+
+#: templates/components/navbar.html:7
+msgid "Logo SquidStats"
+msgstr "Логотип SquidStats"
+
+#: templates/index.html:43
+msgid "Ver Detalles"
+msgstr "Посмотреть подробности"
+
+#: templates/captive_portal/login.html
+msgid "Portal cautivo de acceso a la red."
+msgstr "Портал авторизованного доступа к сети."
+
+#: templates/captive_portal/login.html
+msgid "Inicia sesión para acceder a Internet"
+msgstr "Войдите в систему, чтобы получить доступ к Интернету"
+
+#: templates/captive_portal/login.html
+msgid "Conectarme a Internet"
+msgstr "Подключиться к Интернету"
+
+#: templates/captive_portal/success.html routes/captive_portal_routes.py
+msgid "Acceso concedido"
+msgstr "Доступ предоставлен"
+
+#: templates/captive_portal/success.html
+msgid "¡Ya tienes acceso a Internet!"
+msgstr "Теперь у вас есть доступ к Интернету!"
+
+#: templates/captive_portal/success.html
+msgid "Puedes cerrar esta ventana y continuar navegando."
+msgstr "Вы можете закрыть это окно и продолжить просмотр сайта."
+
+#: templates/captive_portal/success.html
+msgid "Tiempo restante"
+msgstr "Оставшееся время"
+
+#: templates/captive_portal/success.html
+msgid "Vencimiento"
+msgstr "Срок погашения"
+
+#: templates/captive_portal/success.html
+msgid "Cerrar sesión"
+msgstr "Выйти из системы"
+
+#: templates/captive_portal/success.html
+msgid "Sesión expirada"
+msgstr "Сессия истекла"
+
+#: routes/captive_portal_routes.py
+msgid "Acceso concedido. Ya puedes navegar."
+msgstr "Доступ предоставлен. Теперь вы можете просматривать сайт."
+
+#: routes/captive_portal_routes.py
+msgid "Sesión cerrada."
+msgstr "Закрытое заседание."
+
+#: templates/admin/captive_portal.html
+msgid "Portal Cautivo | Admin SquidStats"
+msgstr "Портал авторизации | Администратор SquidStats"
+
+#: templates/admin/captive_portal.html
+msgid "Portal Cautivo"
+msgstr "Портал авторизации"
+
+#: templates/admin/captive_portal.html
+msgid "Requiere que los usuarios se autentiquen contra LDAP/AD antes de navegar. Squid consulta una ACL externa que valida la sesión por dirección IP."
+msgstr "Требует, чтобы пользователи проходили аутентификацию через LDAP/AD перед началом просмотра веб-страниц. Squid обращается к внешнему списку контроля доступа (ACL), который проверяет сессия по IP-адресу."
+
+#: templates/admin/captive_portal.html
+msgid "El portal autentica contra el LDAP/AD configurado en \"LDAP/AD y Grupos\". Configúralo primero si aún no lo has hecho."
+msgstr "Портал осуществляет аутентификацию через LDAP/AD, настроенный в разделе «LDAP/AD и группы». Сначала настройте его, если вы этого ещё не сделали."
+
+#: templates/admin/captive_portal.html
+msgid "Importante:"
+msgstr "Важно:"
+
+#: templates/admin/captive_portal.html
+msgid "Revisa el orden de las ACL y de todas las reglas añadidas a Squid por el portal cautivo antes de aplicar la configuración o recargar el servicio. Un orden incorrecto puede dejar el acceso bloqueado o permitir tráfico sin autenticación."
+msgstr "Перед применением настроек или перезапуском службы проверьте порядок ACL и всех правил, добавленных в Squid через портал авторизации. Неправильный порядок может привести к блокировке доступа или разрешить трафик без аутентификации."
+
+#: templates/admin/captive_portal.html
+msgid "Vista previa de squid.conf"
+msgstr "Предварительный просмотр файла squid.conf"
+
+#: templates/admin/captive_portal.html
+msgid "Habilitar portal cautivo"
+msgstr "Включить портал авторизации"
+
+#: templates/admin/captive_portal.html
+msgid "Título del portal"
+msgstr "Название портала"
+
+#: templates/admin/captive_portal.html
+msgid "URL pública del portal"
+msgstr "Публичный URL-адрес портала"
+
+#: templates/admin/captive_portal.html
+msgid "Dirección donde los usuarios acceden a esta aplicación. Se usa en la redirección 302 y para permitir el tráfico hacia el propio portal."
+msgstr "Адрес, по которому пользователи получают доступ к этому приложению. Используется при перенаправлении 302 и для пропуска трафика на сам портал."
+
+#: templates/admin/captive_portal.html
+msgid "Duración de sesión"
+msgstr "Продолжительность сеанса"
+
+#: templates/admin/captive_portal.html
+msgid "Minutos"
+msgstr "Протоколы"
+
+#: templates/admin/captive_portal.html
+msgid "Horas"
+msgstr "Часы"
+
+#: templates/admin/captive_portal.html
+msgid "Días"
+msgstr "Дни"
+
+#: templates/admin/captive_portal.html
+msgid "Ejemplos: 2 horas, 72 horas o 10 días."
+msgstr "Примеры: 2 часа, 72 часа или 10 дней."
+
+#: templates/admin/captive_portal.html
+msgid "TTL de la ACL (segundos)"
+msgstr "TTL ACL (секунды)"
+
+#: templates/admin/captive_portal.html
+msgid "TTL negativo de la ACL (segundos)"
+msgstr "Отрицательный TTL ACL (секунды)"
+
+#: templates/admin/captive_portal.html
+msgid "Guardar y aplicar"
+msgstr "Сохранить и применить"
+
+#: templates/admin/captive_portal.html
+msgid "Sesiones activas"
+msgstr "Активные сессии"
+
+#: templates/admin/captive_portal.html
+msgid "Creada"
+msgstr "Создана"
+
+#: templates/admin/captive_portal.html
+msgid "Expira"
+msgstr "Истекает"
+
+#: templates/admin/captive_portal.html
+msgid "Revocar"
+msgstr "Отменить"
+
+#: templates/admin/captive_portal.html
+msgid "No hay sesiones activas."
+msgstr "Активных сессий нет."
+
+#: routes/admin/captive_portal.py
+msgid "La URL pública debe ser una URL HTTP o HTTPS válida sin credenciales."
+msgstr "Публичный URL должен быть действительным URL-адресом в формате HTTP или HTTPS без учетных данных."
+
+#: routes/admin/captive_portal.py
+msgid "El tiempo de vida de la sesión debe ser un entero positivo"
+msgstr "Срок действия сеанса должен быть положительным целым числом"
+
+#: routes/admin/captive_portal.py
+msgid "La duración de la sesión debe ser un valor positivo y una unidad válida"
+msgstr "Продолжительность сеанса должна быть положительным числом и выражаться в допустимой единице измерения"
+
+#: routes/admin/captive_portal.py
+msgid "Los valores de TTL de la ACL deben ser enteros no negativos"
+msgstr "Значения TTL в ACL должны быть неотрицательными целыми числами"
+
+#: routes/admin/captive_portal.py
+msgid "Debes definir la URL pública del portal antes de habilitarlo"
+msgstr "Перед тем как активировать портал, необходимо указать его публичный URL-адрес"
+
+#: routes/admin/captive_portal.py
+msgid "Configuración guardada, pero Squid no pudo recargarse: %s"
+msgstr "Настройки сохранены, но Squid не удалось перезагрузить: %s"
+
+#: services/captive_portal/session_service.py
+msgid "Dirección IP inválida"
+msgstr "Недопустимый IP-адрес"
+
+#: services/captive_portal/session_service.py
+msgid "Sesión activa para %s (%s)"
+msgstr "Активная сессия для %s (%s)"
+
+#: services/captive_portal/session_service.py
+msgid "Error al guardar la sesión"
+msgstr "Ошибка при сохранении сеанса"
+
+#: services/captive_portal/session_service.py
+msgid "No hay sesión activa para %s"
+msgstr "Для %s нет активной сессии"
+
+#: services/captive_portal/session_service.py
+msgid "Sesión revocada para %s"
+msgstr "Сессия для %s отменена"
+
+#: services/captive_portal/session_service.py
+msgid "Error al revocar la sesión"
+msgstr "Ошибка при прекращении сеанса"
+
+#: routes/captive_portal_routes.py
+msgid "Demasiados intentos fallidos. Intenta de nuevo en %s minutos."
+msgstr "Слишком много неудачных попыток. Попробуйте снова через %s минут."
+
+#: routes/captive_portal_routes.py
+msgid "Por favor, ingresa usuario y contraseña."
+msgstr "Пожалуйста, введите логин и пароль."
+
+msgid "Auditoría completada"
+msgstr "Аудит завершен"
+
+msgid "Error de conexión con el servidor"
+msgstr "Ошибка подключения к серверу"
+
+msgid "Error de red"
+msgstr "Сбой сети"
+
+msgid "Error en la auditoría"
+msgstr "Ошибка в ходе аудита"
+
+msgid "Por favor, seleccione un usuario."
+msgstr "Пожалуйста, выберите пользователя."
+
+msgid "Por favor, ingrese una palabra clave."
+msgstr "Пожалуйста, введите ключевое слово."
+
+msgid "Por favor, ingrese una dirección IP."
+msgstr "Пожалуйста, введите IP-адрес."
+
+msgid "Por favor, seleccione un código de respuesta."
+msgstr "Пожалуйста, выберите код ответа."
+
+msgid "Por favor, seleccione al menos una red social."
+msgstr "Пожалуйста, выберите хотя бы одну социальную сеть."
+
+msgid "Error interno: Renderers no cargados."
+msgstr "Внутренняя ошибка: рендереры не загружены."
+
+msgid "Distribución de Peticiones para {user} el {date}"
+msgstr "Распределение запросов для {user} и {date}"
+
+msgid "Total de Peticiones en el día:"
+msgstr "Общее количество запросов за день:"
+
+msgid "No se encontraron peticiones para la fecha y usuario seleccionado."
+msgstr "Запросов по указанной дате и пользователю не найдено."
+
+msgid "Resultados para la palabra clave {keyword} para: {user}"
+msgstr "Результаты по ключевому слову {keyword} для: {user}"
+
+msgid "Resultados de Búsqueda para la IP: {ip}"
+msgstr "Результаты поиска по IP-адресу: {ip}"
+
+msgid "Resultados por Código de Respuesta {code} para: {user}"
+msgstr "Результаты по коду ответа {code} для: {user}"
+
+msgid "Actividad en Redes Sociales ({sites}) para: {user}"
+msgstr "Активность в социальных сетях ({sites}) для: {user}"
+
+msgid "Tipo de reporte no reconocido."
+msgstr "Неизвестный тип отчета."
+
+msgid "Error de red o del servidor:"
+msgstr "Ошибка сети или сервера:"
+
+msgid "No se encontraron registros."
+msgstr "Записей не найдено."
+
+msgid "Hora (Últ. Acceso)"
+msgstr "Время (последнее посещение)"
+
+msgid "Intentos"
+msgstr "Попытки"
+
+msgid "Resumen de Actividad"
+msgstr "Отчет о деятельности"
+
+msgid "Peticiones Totales"
+msgstr "Общее количество запросов"
+
+msgid "GB Consumidos"
+msgstr "Использовано ГБ"
+
+msgid "Resumen de Respuestas"
+msgstr "Сводка ответов"
+
+msgid "Top 15 Dominios Visitados"
+msgstr "15 самых посещаемых доменов"
+
+msgid "Distribución de Respuestas HTTP"
+msgstr "Распределение HTTP-ответов"
+
+msgid "Top 10 Usuarios por Consumo de Datos"
+msgstr "Топ-10 пользователей по объему потребления данных"
+
+msgid "Datos Consumidos"
+msgstr "Использованные данные"
+
+msgid "Top 15 URLs por Consumo de Datos"
+msgstr "15 самых популярных URL-адресов по объему передачи данных"
+
+msgid "Top 10 Usuarios por Peticiones"
+msgstr "Топ-10 пользователей по количеству запросов"
+
+msgid "Top 10 IPs por Consumo de Datos"
+msgstr "Топ-10 IP-адресов по объему передачи данных"
+
+msgid "Peticiones por Hora"
+msgstr "Запросы в час"
+
+msgid "Hora del Día"
+msgstr "Время суток"
+
+msgid "Número de Peticiones"
+msgstr "Количество запросов"
+
+msgid "Total de Datos Consumidos del {startDate} al {endDate}"
+msgstr "Общий объем данных, переданных от {startDate} до {endDate}"
+
+msgid "Total de datos consumidos en el período seleccionado"
+msgstr "Общий объем данных, использованных за выбранный период"
+
+msgid "peticiones totales"
+msgstr "общее количество запросов"
+
+msgid "tablas procesadas"
+msgstr "обработанные таблицы"
+
+msgid "Equivalente a {bytes} bytes"
+msgstr "Соответствует {bytes} байтам"
+
+msgid "Error al cargar la lista de usuarios"
+msgstr "Ошибка при загрузке списка пользователей"
+
+msgid "Error de carga"
+msgstr "Ошибка загрузки"
+
+msgid "Fecha de Inicio"
+msgstr "Дата начала"
+
+msgid "Seleccionar usuario..."
+msgstr "Выбрать пользователя..."
+
+msgid "Buscar usuario... (Opcional)"
+msgstr "Поиск пользователя... (Необязательно)"
+
+msgid "No hay notificaciones nuevas"
+msgstr "Новых уведомлений нет"
+
+msgid "Error HTTP:"
+msgstr "Ошибка HTTP:"
+
+msgid "Error del servidor al marcar como leída:"
+msgstr "Ошибка сервера при пометке как прочитанное:"
+
+msgid "Error al marcar notificación como leída:"
+msgstr "Ошибка при помещении уведомления в статус «прочитанное»:"
+
+msgid "Error al obtener notificaciones:"
+msgstr "Ошибка при получении уведомлений:"
+
+msgid "Error al actualizar Squid"
+msgstr "Ошибка при обновлении Squid"
+
+msgid "Error al recargar Squid"
+msgstr "Ошибка при перезагрузке Squid"
+
+msgid "Error al reiniciar Squid"
+msgstr "Ошибка при перезапуске Squid"
+
+msgid "Error al actualizar la aplicación web"
+msgstr "Ошибка при обновлении веб-приложения"
+
+msgid "¿Estás seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio."
+msgstr "Вы уверены, что хотите перезагрузить Squid? Это приведет к применению изменений в настройках без прерывания работы сервиса."
+
+msgid "¿Estás seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio."
+msgstr "Вы уверены, что хотите перезапустить Squid? Это приведет к временному прерыванию работы службы."
+
+msgid "¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente."
+msgstr "Вы уверены, что хотите обновить службу Squid? Сохраните настройки, прежде чем продолжить — служба будет автоматически перезапущена."
+
+msgid "¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad."
+msgstr "Вы уверены, что хотите обновить SquidStats? Будут обновлены веб-интерфейс, функциональные возможности и исправления, связанные с безопасностью."
+
+msgid "Error al cargar notificaciones"
+msgstr "Ошибка при загрузке уведомлений"
+
+msgid "No hay notificaciones sin leer"
+msgstr "Непрочитанных уведомлений нет"
+
+msgid "¿Estás seguro de que quieres eliminar esta notificación?"
+msgstr "Вы уверены, что хотите удалить это уведомление?"
+
+msgid "Error al eliminar notificación:"
+msgstr "Ошибка при удалении уведомления:"
+
+msgid "¿Estás seguro de que quieres eliminar TODAS las notificaciones? Esta acción no se puede deshacer."
+msgstr "Вы уверены, что хотите удалить ВСЕ уведомления? Это действие нельзя отменить."
+
+msgid "Todas las notificaciones han sido eliminadas"
+msgstr "Все уведомления были удалены"
+
+msgid "Error al eliminar notificaciones:"
+msgstr "Ошибка при удалении уведомлений:"
+
+msgid "Filtros limpiados"
+msgstr "Очищенные фильтры"
+
+msgid "Error de conexión:"
+msgstr "Ошибка подключения:"
+
+msgid "Error desconocido"
+msgstr "Неизвестная ошибка"
+
+msgid "Hace unos momentos"
+msgstr "Всего несколько минут назад"
+
+msgid "Hace {count} minuto"
+msgstr "{count} минут назад"
+
+msgid "Hace {count} minutos"
+msgstr "{count} минут назад"
+
+msgid "Hace {count} hora"
+msgstr "{count} час назад"
+
+msgid "Hace {count} horas"
+msgstr "{count} часов назад"
+
+msgid "Hace {count} día"
+msgstr "{count} дней назад"
+
+msgid "Hace {count} días"
+msgstr "{count} дней назад"
+
+msgid "Swap Usada"
+msgstr "Подержанный своп"
+
+msgid "SWAP Usada: "
+msgstr "Подержанный SWAP: "
+
+msgid "Instalación .deb detectada."
+msgstr "Обнаружен пакет .deb."
+
+msgid "Esta versión fue instalada con un paquete .deb y no puede actualizarse desde el botón \"Web\"."
+msgstr "Эта версия была установлена с помощью пакета .deb и не может быть обновлена с помощью кнопки «Веб»."
+
+msgid "Para actualizar, descargue e instale la última versión desde"
+msgstr "Чтобы обновить программу, загрузите и установите последнюю версию с сайта"
+
+msgid "Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Para actualizar, descargue e instale la última versión desde GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest"
+msgstr "Эта программа была установлена с помощью пакета .deb и не может быть обновлена отсюда. Для обновления загрузите и установите последнюю версию с GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest"
+
+#~ msgid "0\" x-text=\"integrityResult.error_count + ' error(es) detectado(s)'\">"
+#~ msgstr ""
+#~ msgid "0\" class=\"mt-2 space-y-1\">"
+#~ msgstr ""
+#~ msgid "{editor}: Editing failed"
+#~ msgstr "{editor}: Editing failed"
+#~ msgid "{editor}: Editing failed: {e}"
+#~ msgstr "{editor}: Editing failed: {e}"
+#~ msgid "{text} {deprecated_message}"
+#~ msgstr "{text} {deprecated_message}"
+#~ msgid "Options"
+#~ msgstr "Options"
+#~ msgid "Got unexpected extra argument ({args})"
+#~ msgid_plural "Got unexpected extra arguments ({args})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+#~ msgstr "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+#~ msgid "Aborted!"
+#~ msgstr "Aborted!"
+#~ msgid "Commands"
+#~ msgstr "Commands"
+#~ msgid "Missing command."
+#~ msgstr "Missing command."
+#~ msgid "No such command {name!r}."
+#~ msgstr "No such command {name!r}."
+#~ msgid "Value must be an iterable."
+#~ msgstr "Value must be an iterable."
+#~ msgid "Takes {nargs} values but 1 was given."
+#~ msgid_plural "Takes {nargs} values but {len} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+#~ msgstr ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+#~ msgid "env var: {var}"
+#~ msgstr "env var: {var}"
+#~ msgid "default: {default}"
+#~ msgstr "default: {default}"
+#~ msgid "required"
+#~ msgstr "required"
+#~ msgid "(dynamic)"
+#~ msgstr "(dynamic)"
+#~ msgid "%(prog)s, version %(version)s"
+#~ msgstr "%(prog)s, version %(version)s"
+#~ msgid "Show the version and exit."
+#~ msgstr "Show the version and exit."
+#~ msgid "Show this message and exit."
+#~ msgstr "Show this message and exit."
+#~ msgid "Error: {message}"
+#~ msgstr "Error: {message}"
+#~ msgid "Try '{command} {option}' for help."
+#~ msgstr "Try '{command} {option}' for help."
+#~ msgid "Invalid value: {message}"
+#~ msgstr "Invalid value: {message}"
+#~ msgid "Invalid value for {param_hint}: {message}"
+#~ msgstr "Invalid value for {param_hint}: {message}"
+#~ msgid "Missing argument"
+#~ msgstr "Missing argument"
+#~ msgid "Missing option"
+#~ msgstr "Missing option"
+#~ msgid "Missing parameter"
+#~ msgstr "Missing parameter"
+#~ msgid "Missing {param_type}"
+#~ msgstr "Missing {param_type}"
+#~ msgid "Missing parameter: {param_name}"
+#~ msgstr "Missing parameter: {param_name}"
+#~ msgid "No such option: {name}"
+#~ msgstr "No such option: {name}"
+#~ msgid "Did you mean {possibility}?"
+#~ msgid_plural "(Possible options: {possibilities})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "unknown error"
+#~ msgstr "unknown error"
+#~ msgid "Could not open file {filename!r}: {message}"
+#~ msgstr "Could not open file {filename!r}: {message}"
+#~ msgid "Usage:"
+#~ msgstr "Usage:"
+#~ msgid "Argument {name!r} takes {nargs} values."
+#~ msgstr "Argument {name!r} takes {nargs} values."
+#~ msgid "Option {name!r} does not take a value."
+#~ msgstr "Option {name!r} does not take a value."
+#~ msgid "Option {name!r} requires an argument."
+#~ msgid_plural "Option {name!r} requires {nargs} arguments."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "Shell completion is not supported for Bash versions older than 4.4."
+#~ msgstr "Shell completion is not supported for Bash versions older than 4.4."
+#~ msgid "Couldn't detect Bash version, shell completion is not supported."
+#~ msgstr "Couldn't detect Bash version, shell completion is not supported."
+#~ msgid "Repeat for confirmation"
+#~ msgstr "Repeat for confirmation"
+#~ msgid "Error: The value you entered was invalid."
+#~ msgstr "Error: The value you entered was invalid."
+#~ msgid "Error: {e.message}"
+#~ msgstr "Error: {e.message}"
+#~ msgid "Error: The two entered values do not match."
+#~ msgstr "Error: The two entered values do not match."
+#~ msgid "Error: invalid input"
+#~ msgstr "Error: invalid input"
+#~ msgid "Press any key to continue..."
+#~ msgstr "Press any key to continue..."
+#~ msgid ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+#~ msgstr ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+#~ msgid "{value!r} is not {choice}."
+#~ msgid_plural "{value!r} is not one of {choices}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "{value!r} does not match the format {format}."
+#~ msgid_plural "{value!r} does not match the formats {formats}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "{value!r} is not a valid {number_type}."
+#~ msgstr "{value!r} is not a valid {number_type}."
+#~ msgid "{value} is not in the range {range}."
+#~ msgstr "{value} is not in the range {range}."
+#~ msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+#~ msgstr "{value!r} is not a valid boolean. Recognized values: {states}"
+#~ msgid "{value!r} is not a valid UUID."
+#~ msgstr "{value!r} is not a valid UUID."
+#~ msgid "file"
+#~ msgstr "file"
+#~ msgid "directory"
+#~ msgstr "directory"
+#~ msgid "path"
+#~ msgstr "path"
+#~ msgid "{name} {filename!r} does not exist."
+#~ msgstr "{name} {filename!r} does not exist."
+#~ msgid "{name} {filename!r} is a file."
+#~ msgstr "{name} {filename!r} is a file."
+#~ msgid "{name} {filename!r} is a directory."
+#~ msgstr "{name} {filename!r} is a directory."
+#~ msgid "{name} {filename!r} is not readable."
+#~ msgstr "{name} {filename!r} is not readable."
+#~ msgid "{name} {filename!r} is not writable."
+#~ msgstr "{name} {filename!r} is not writable."
+#~ msgid "{name} {filename!r} is not executable."
+#~ msgstr "{name} {filename!r} is not executable."
+#~ msgid "{len_type} values are required, but {len_value} was given."
+#~ msgid_plural "{len_type} values are required, but {len_value} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "This field is required."
+#~ msgstr "This field is required."
+#~ msgid "File does not have an approved extension: {extensions}"
+#~ msgstr "File does not have an approved extension: {extensions}"
+#~ msgid "File does not have an approved extension."
+#~ msgstr "File does not have an approved extension."
+#~ msgid "Invalid field name '%s'."
+#~ msgstr "Invalid field name '%s'."
+#~ msgid "Field must be equal to %(other_name)s."
+#~ msgstr "Field must be equal to %(other_name)s."
+#~ msgid "Field must be at least %(min)d character long."
+#~ msgid_plural "Field must be at least %(min)d characters long."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "Field cannot be longer than %(max)d character."
+#~ msgid_plural "Field cannot be longer than %(max)d characters."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "Field must be exactly %(max)d character long."
+#~ msgid_plural "Field must be exactly %(max)d characters long."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "Field must be between %(min)d and %(max)d characters long."
+#~ msgstr "Field must be between %(min)d and %(max)d characters long."
+#~ msgid "Number must be at least %(min)s."
+#~ msgstr "Number must be at least %(min)s."
+#~ msgid "Number must be at most %(max)s."
+#~ msgstr "Number must be at most %(max)s."
+#~ msgid "Number must be between %(min)s and %(max)s."
+#~ msgstr "Number must be between %(min)s and %(max)s."
+#~ msgid "Invalid input."
+#~ msgstr "Invalid input."
+#~ msgid "Invalid email address."
+#~ msgstr "Invalid email address."
+#~ msgid "Invalid IP address."
+#~ msgstr "Invalid IP address."
+#~ msgid "Invalid Mac address."
+#~ msgstr "Invalid Mac address."
+#~ msgid "Invalid URL."
+#~ msgstr "Invalid URL."
+#~ msgid "Invalid UUID."
+#~ msgstr "Invalid UUID."
+#~ msgid "Invalid value, must be one of: %(values)s."
+#~ msgstr "Invalid value, must be one of: %(values)s."
+#~ msgid "Invalid value, can't be any of: %(values)s."
+#~ msgstr "Invalid value, can't be any of: %(values)s."
+#~ msgid "This field cannot be edited."
+#~ msgstr "This field cannot be edited."
+#~ msgid "This field is disabled and cannot have a value."
+#~ msgstr "This field is disabled and cannot have a value."
+#~ msgid "Invalid CSRF Token."
+#~ msgstr "Invalid CSRF Token."
+#~ msgid "CSRF token missing."
+#~ msgstr "CSRF token missing."
+#~ msgid "CSRF failed."
+#~ msgstr "CSRF failed."
+#~ msgid "CSRF token expired."
+#~ msgstr "CSRF token expired."
+#~ msgid "Invalid Choice: could not coerce."
+#~ msgstr "Invalid Choice: could not coerce."
+#~ msgid "Choices cannot be None."
+#~ msgstr "Choices cannot be None."
+#~ msgid "Not a valid choice."
+#~ msgstr "Not a valid choice."
+#~ msgid "Invalid choice(s): one or more data inputs could not be coerced."
+#~ msgstr "Invalid choice(s): one or more data inputs could not be coerced."
+#~ msgid "'%(value)s' is not a valid choice for this field."
+#~ msgid_plural "'%(value)s' are not valid choices for this field."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+#~ msgid "Not a valid datetime value."
+#~ msgstr "Not a valid datetime value."
+#~ msgid "Not a valid date value."
+#~ msgstr "Not a valid date value."
+#~ msgid "Not a valid time value."
+#~ msgstr "Not a valid time value."
+#~ msgid "Not a valid week value."
+#~ msgstr "Not a valid week value."
+#~ msgid "Not a valid integer value."
+#~ msgstr "Not a valid integer value."
+#~ msgid "Not a valid decimal value."
+#~ msgstr "Not a valid decimal value."
+#~ msgid "Not a valid float value."
+#~ msgstr "Not a valid float value."
+msgid "Reporte generado exitosamente"
+msgstr "Отчёт успешно создан"
