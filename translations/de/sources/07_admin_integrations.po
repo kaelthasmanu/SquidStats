@@ -1,0 +1,454 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/admin/ldap_config.html:391
+msgid "Probando…"
+msgstr "Wird getestet…"
+
+#: templates/admin/ldap_config.html:8
+msgid "LDAP tabs"
+msgstr "LDAP-Registerkarten"
+
+#: templates/admin/base.html:135 templates/admin/ldap_config.html:3
+msgid "LDAP/AD y Grupos"
+msgstr "LDAP/AD und Gruppen"
+
+#: templates/admin/ldap_config.html:13
+msgid "LDAP/AD"
+msgstr "LDAP/AD"
+
+#: templates/admin/ldap_config.html:302
+msgid "Grupos administrativos"
+msgstr "Administrative Gruppen"
+
+#: templates/admin/ldap_config.html:310
+msgid "Ej. directivos"
+msgstr "Z. B. Führungskräfte"
+
+#: templates/admin/ldap_config.html:313
+msgid "Opcional"
+msgstr "Optional"
+
+#: templates/admin/ldap_config.html:320
+msgid "Personalizado"
+msgstr "Benutzerdefiniert"
+
+#: templates/admin/ldap_config.html:326
+msgid "Crear grupo"
+msgstr "Gruppe erstellen"
+
+#: templates/admin/ldap_config.html:339
+msgid "Todavía no hay grupos definidos."
+msgstr "Es wurden noch keine Gruppen definiert."
+
+#: templates/admin/ldap_config.html:355
+msgid "Sin descripción"
+msgstr "Keine Beschreibung"
+
+#: templates/admin/ldap_config.html:364
+msgid "usuario1, usuario2, ..."
+msgstr "Benutzer1, Benutzer2, ..."
+
+#: templates/admin/ldap_config.html:367
+msgid "Añadir usuarios"
+msgstr "Benutzer hinzufügen"
+
+#: templates/admin/ldap_config.html:371
+msgid "usuario(s) asociado(s)"
+msgstr "zugeordnete(r) Benutzer"
+
+#: templates/admin/ldap_config.html:375
+msgid "Quitar usuario"
+msgstr "Benutzer entfernen"
+
+#: templates/admin/ldap_config.html:385
+msgid "Este grupo aún no tiene usuarios asociados."
+msgstr "Diese Gruppe hat noch keine zugeordneten Benutzer."
+
+#: templates/admin/ldap_config.html:591
+msgid "El nombre del grupo es obligatorio."
+msgstr "Der Gruppenname ist erforderlich."
+
+#: templates/admin/ldap_config.html:660
+msgid "¿Está seguro de que desea eliminar este grupo y todos sus usuarios asociados?"
+msgstr "Sind Sie sicher, dass Sie diese Gruppe und alle zugeordneten Benutzer löschen möchten?"
+
+#: templates/admin/ldap_config.html:388
+msgid "Sin probar"
+msgstr "Nicht getestet"
+
+#: templates/admin/ldap_config.html:392
+msgid "Conectado"
+msgstr "Verbunden"
+
+#: templates/admin/ldap_config.html:394
+msgid "Error"
+msgstr "Fehler"
+
+#: templates/admin/ldap_config.html:401
+msgid "Error al guardar la configuración."
+msgstr "Fehler beim Speichern der Konfiguration."
+
+#: templates/admin/ldap_config.html:419
+msgid "Configuración cargada desde la base de datos."
+msgstr "Konfiguration aus der Datenbank geladen."
+
+#: templates/admin/ldap_config.html:426
+msgid "Configuración cargada desde el navegador. Los cambios se guardan localmente."
+msgstr "Konfiguration aus dem Browser geladen. Änderungen werden lokal gespeichert."
+
+#: templates/admin/ldap_config.html:435
+msgid "Configuración guardada localmente en el navegador."
+msgstr "Konfiguration lokal im Browser gespeichert."
+
+#: templates/admin/ldap_config.html:443
+msgid "Configuración local eliminada."
+msgstr "Lokale Konfiguration entfernt."
+
+#: templates/admin/base.html:133 templates/admin/ldap_config.html:14
+msgid "LDAP / Active Directory"
+msgstr "LDAP / Active Directory"
+
+#: templates/admin/ldap_config.html:3
+msgid "LDAP / Active Directory | Admin Squid"
+msgstr "LDAP / Active Directory | Squid Admin"
+
+#: templates/admin/ldap_config.html:16
+msgid "Configura la conexión y explora el directorio."
+msgstr "Konfigurieren Sie die Verbindung und durchsuchen Sie das Verzeichnis."
+
+#: templates/admin/ldap_config.html:35
+msgid "Total Usuarios"
+msgstr "Benutzer gesamt"
+
+#: templates/admin/ldap_config.html:47
+msgid "Total Grupos"
+msgstr "Gruppen gesamt"
+
+#: templates/admin/ldap_config.html:62
+msgid "Configuración de conexión"
+msgstr "Verbindungskonfiguration"
+
+#: templates/admin/ldap_config.html:66
+msgid "Servidor (host)"
+msgstr "Server (Host)"
+
+#: templates/admin/ldap_config.html:73
+msgid "Puerto"
+msgstr "Port"
+
+#: templates/admin/ldap_config.html:78
+msgid "Autenticación"
+msgstr "Authentifizierung"
+
+#: templates/admin/ldap_config.html:81
+msgid "SIMPLE (LDAP)"
+msgstr "SIMPLE (LDAP)"
+
+#: templates/admin/ldap_config.html:82
+msgid "NTLM (AD)"
+msgstr "NTLM (AD)"
+
+#: templates/admin/ldap_config.html:89
+msgid "Usar SSL / LDAPS"
+msgstr "SSL / LDAPS verwenden"
+
+#: templates/admin/ldap_config.html:93
+msgid "Bind DN / Usuario"
+msgstr "Bind DN / Benutzer"
+
+#: templates/admin/ldap_config.html:94
+msgid "CN=admin,DC=empresa,DC=com"
+msgstr "CN=admin,DC=company,DC=com"
+
+#: templates/admin/ldap_config.html:99
+msgid "Contraseña Bind"
+msgstr "Bind-Passwort"
+
+#: templates/admin/ldap_config.html:105
+msgid "Base DN"
+msgstr "Base DN"
+
+#: templates/admin/ldap_config.html:106
+msgid "DC=empresa,DC=com"
+msgstr "DC=company,DC=com"
+
+#: templates/admin/ldap_config.html:144
+msgid "Buscar Usuarios"
+msgstr "Benutzer suchen"
+
+#: templates/admin/ldap_config.html:148
+msgid "Nombre, usuario, email…"
+msgstr "Name, Benutzer, E-Mail…"
+
+#: templates/admin/ldap_config.html:165
+msgid "Departamento"
+msgstr "Abteilung"
+
+#: templates/admin/ldap_config.html:166
+msgid "Grupos"
+msgstr "Gruppen"
+
+#: templates/admin/ldap_config.html:179
+msgid "Ver grupos del usuario"
+msgstr "Gruppen des Benutzers anzeigen"
+
+#: templates/admin/ldap_config.html:180
+msgid "Ver grupos"
+msgstr "Gruppen anzeigen"
+
+#: templates/admin/ldap_config.html:188
+msgid "No se encontraron usuarios."
+msgstr "Keine Benutzer gefunden."
+
+#: templates/admin/ldap_config.html:196
+msgid "Buscar Grupos"
+msgstr "Gruppen suchen"
+
+#: templates/admin/ldap_config.html:200
+msgid "Nombre del grupo…"
+msgstr "Gruppenname…"
+
+#: templates/admin/ldap_config.html:214
+msgid "Descripción"
+msgstr "Beschreibung"
+
+#: templates/admin/ldap_config.html:215
+msgid "Miembros"
+msgstr "Mitglieder"
+
+#: templates/admin/ldap_config.html:231
+msgid "No se encontraron grupos."
+msgstr "Keine Gruppen gefunden."
+
+#: templates/admin/ldap_config.html:241
+msgid "Grupos de"
+msgstr "Gruppen von"
+
+#: templates/admin/ldap_config.html:244
+msgid "Limpiar"
+msgstr "Leeren"
+
+#: templates/admin/ldap_config.html:250
+msgid "Cargando grupos…"
+msgstr "Gruppen werden geladen…"
+
+#: templates/admin/ldap_config.html:263
+msgid "grupo(s) encontrado(s)"
+msgstr "Gruppe(n) gefunden"
+
+#: templates/admin/ldap_config.html:277
+msgid "Este usuario no pertenece a ningún grupo."
+msgstr "Dieser Benutzer gehört keiner Gruppe an."
+
+#: templates/admin/telegram_config.html:11
+msgid "Notificaciones Telegram"
+msgstr "Telegram-Benachrichtigungen"
+
+#: templates/admin/telegram_config.html:13
+msgid "Configura las credenciales y los destinatarios para las alertas automáticas."
+msgstr "Konfigurieren Sie Anmeldedaten und Empfänger für automatische Warnungen."
+
+#: templates/admin/telegram_config.html:22
+msgid "Credenciales API"
+msgstr "API-Anmeldedaten"
+
+#: templates/admin/telegram_config.html:37
+msgid "Habilitar notificaciones Telegram"
+msgstr "Telegram-Benachrichtigungen aktivieren"
+
+#: templates/admin/telegram_config.html:50
+msgid "API ID"
+msgstr "API ID"
+
+#: templates/admin/telegram_config.html:61
+msgid "API Hash"
+msgstr "API Hash"
+
+#: templates/admin/telegram_config.html:67
+msgid "Guardado — dejar vacío para no cambiar"
+msgstr "Gespeichert — leer lassen, um nicht zu ändern"
+
+#: templates/admin/telegram_config.html:74
+msgid "Token del Bot"
+msgstr "Bot-Token"
+
+#: templates/admin/telegram_config.html:84
+msgid "(opcional si usa cuenta de usuario)"
+msgstr "(optional bei Verwendung eines Benutzerkontos)"
+
+#: templates/admin/telegram_config.html:89
+msgid "Teléfono (cuenta de usuario)"
+msgstr "Telefon (Benutzerkonto)"
+
+#: templates/admin/telegram_config.html:96
+msgid "(opcional)"
+msgstr "(optional)"
+
+#: templates/admin/telegram_config.html:103
+msgid "En modo bot este campo debe estar vacío — los bots no pueden usar número de teléfono."
+msgstr "Im Bot-Modus muss dieses Feld leer sein — Bots können keine Telefonnummer verwenden."
+
+#: templates/admin/telegram_config.html:105
+msgid "Nombre de sesión"
+msgstr "Sitzungsname"
+
+#: templates/admin/telegram_config.html:114
+msgid "Guardando…"
+msgstr "Wird gespeichert…"
+
+#: templates/admin/telegram_config.html:117
+msgid "Probar"
+msgstr "Testen"
+
+#: templates/admin/telegram_config.html:158
+msgid "Destinatarios"
+msgstr "Empfänger"
+
+#: templates/admin/telegram_config.html:160
+msgid "Introduce un destinatario por línea: @username, ID numérico de usuario o ID de chat/grupo."
+msgstr "Geben Sie einen Empfänger pro Zeile ein: @username, numerische Benutzer-ID oder Chat-/Gruppen-ID."
+
+#: templates/admin/telegram_config.html:168
+msgid "Cada línea es un destinatario independiente."
+msgstr "Jede Zeile ist ein separater Empfänger."
+
+#: templates/admin/telegram_config.html:178
+msgid "Enviar mensaje de prueba"
+msgstr "Testnachricht senden"
+
+#: templates/admin/telegram_config.html:180
+msgid "Habilita Telegram para enviar mensajes de prueba."
+msgstr "Aktivieren Sie Telegram, um Testnachrichten zu senden."
+
+#: templates/admin/telegram_config.html:182
+msgid "Estado de la conexión"
+msgstr "Verbindungsstatus"
+
+#: templates/admin/telegram_config.html:188
+msgid "Servicio"
+msgstr "Dienst"
+
+#: templates/admin/telegram_config.html:193
+msgid "Modo"
+msgstr "Modus"
+
+#: templates/admin/telegram_config.html:198
+msgid "Sesión"
+msgstr "Sitzung"
+
+#: templates/admin/telegram_config.html:202
+msgid "Usuario Telegram"
+msgstr "Telegram-Benutzer"
+
+#: templates/admin/telegram_config.html:214
+msgid "Actualizar estado"
+msgstr "Status aktualisieren"
+
+#: templates/admin/telegram_config.html:230
+msgid "Verificando…"
+msgstr "Wird überprüft…"
+
+#: templates/admin/telegram_config.html:341
+msgid "Error de red al guardar."
+msgstr "Netzwerkfehler beim Speichern."
+
+#: templates/admin/telegram_config.html:352
+msgid "Error de red al probar la conexión."
+msgstr "Netzwerkfehler beim Testen der Verbindung."
+
+#: templates/logsView.html
+msgid "Actividad"
+msgstr "Aktivität"
+
+#: templates/logsView.html
+msgid "Grupos"
+msgstr "Gruppen"
+
+#: templates/partials/logs_groups.html
+msgid "Desde"
+msgstr "Von"
+
+#: templates/partials/logs_groups.html
+msgid "Hasta"
+msgstr "Bis"
+
+#: templates/partials/logs_groups.html
+msgid "Hoy"
+msgstr "Heute"
+
+#: templates/partials/logs_groups.html
+msgid "Periodo"
+msgstr "Zeitraum"
+
+#: templates/partials/logs_groups.html
+msgid "Datos consumidos"
+msgstr "Verbrauchte Daten"
+
+#: templates/partials/logs_groups.html
+msgid "Grupo"
+msgstr "Gruppe"
+
+#: templates/partials/logs_groups.html
+msgid "Sin grupo"
+msgstr "Keine Gruppe"
+
+#: templates/partials/logs_groups.html
+msgid "No hay tráfico para este periodo."
+msgstr "Für diesen Zeitraum gibt es keinen Datenverkehr."
+
+#: templates/partials/logs_groups.html
+msgid "Usuarios del grupo"
+msgstr "Benutzer der Gruppe"
+
+#: templates/partials/logs_groups.html
+msgid "solicitudes"
+msgstr "Anfragen"
+
+#: templates/partials/logs_groups.html
+msgid "No hay usuarios con tráfico."
+msgstr "Es gibt keine Benutzer mit Datenverkehr."
+
+#: templates/partials/logs_groups.html
+msgid "Selecciona un grupo para ver sus usuarios."
+msgstr "Wählen Sie eine Gruppe aus, um ihre Benutzer anzuzeigen."
+
+#: templates/partials/logs_groups.html
+msgid "Detalle del usuario"
+msgstr "Benutzerdetails"
+
+#: templates/partials/logs_groups.html
+msgid "páginas encontradas"
+msgstr "Seiten gefunden"
+
+#: templates/partials/logs_groups.html
+msgid "No hay páginas accedidas."
+msgstr "Keine Seiten aufgerufen."
+
+#: templates/partials/logs_groups.html
+msgid "Exportar PDF"
+msgstr "PDF exportieren"
+
+#: templates/logs_groups_pdf.html
+msgid "Reporte de grupos"
+msgstr "Gruppenbericht"
+
+#: templates/logs_groups_pdf.html
+msgid "Generado"
+msgstr "Erstellt"
+
+#: templates/logs_groups_pdf.html
+msgid "Resumen por grupo"
+msgstr "Zusammenfassung nach Gruppe"
+
+#: routes/logs_routes.py
+msgid "La exportación PDF no está disponible en este momento."
+msgstr "PDF-Export ist derzeit nicht verfügbar."
+
+#: routes/logs_routes.py
+msgid "Error interno generando el reporte PDF."
+msgstr "Interner Fehler beim Erstellen des PDF-Berichts."
+
+#: templates/admin/ldap_config.html:481
+msgid "El campo de búsqueda de usuario no puede estar vacío."
+msgstr "Das Benutzersuchfeld darf nicht leer sein."

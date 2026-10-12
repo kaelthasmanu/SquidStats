@@ -1,0 +1,144 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/auditoria_pdf.html:6
+msgid "Auditoría -"
+msgstr "Audit -"
+
+#: templates/auditoria_pdf.html:19
+msgid "Auditoría:"
+msgstr "Audit:"
+
+#: templates/auditoria_pdf.html:20
+msgid "Generado:"
+msgstr "Erzeugt:"
+
+#: templates/auditoria_pdf.html:20
+msgid "| Filtros:"
+msgstr "| Filter:"
+
+#: templates/auditoria_pdf.html:23
+msgid "Error:"
+msgstr "Fehler:"
+
+#: templates/auditoria_pdf.html:28
+msgid "Resumen de Usuario"
+msgstr "Benutzerzusammenfassung"
+
+#: templates/auditoria_pdf.html:29 templates/auditoria_pdf.html:39
+#: templates/reports_pdf.html:25
+msgid "Total solicitudes:"
+msgstr "Anfragen gesamt:"
+
+#: templates/auditoria_pdf.html:30 templates/auditoria_pdf.html:41
+msgid "Datos totales (GB):"
+msgstr "Daten gesamt (GB):"
+
+#: templates/auditoria_pdf.html:33
+msgid "Top dominios"
+msgstr "Top-Domains"
+
+#: templates/auditoria_pdf.html:33
+msgid "Dominio"
+msgstr "Domain"
+
+#: templates/auditoria_pdf.html:33 templates/auditoria_pdf.html:36
+#: templates/reports_pdf.html:67
+msgid "Conteo"
+msgstr "Anzahl"
+
+#: templates/auditoria_pdf.html:36
+msgid "Resumen de respuestas"
+msgstr "Antwortzusammenfassung"
+
+#: templates/auditoria_pdf.html:36 templates/reports_pdf.html:67
+msgid "Código"
+msgstr "Code"
+
+#: templates/auditoria_pdf.html:39
+msgid "Actividad diaria"
+msgstr "Tägliche Aktivität"
+
+#: templates/auditoria_pdf.html:39
+msgid "Hora"
+msgstr "Uhrzeit"
+
+#: templates/auditoria_pdf.html:39
+msgid "Requests"
+msgstr "Anfragen"
+
+#: templates/auditoria_pdf.html:41
+msgid "Consumo total"
+msgstr "Gesamtverbrauch"
+
+#: templates/auditoria_pdf.html:41
+msgid "Rango:"
+msgstr "Bereich:"
+
+#: templates/auditoria_pdf.html:44
+msgid "Top usuarios por datos"
+msgstr "Top-Benutzer nach Daten"
+
+#: templates/auditoria_pdf.html:47
+msgid "Top usuarios por solicitudes"
+msgstr "Top-Benutzer nach Anfragen"
+
+#: templates/auditoria_pdf.html:50
+msgid "Top URLs por datos"
+msgstr "Top-URLs nach Daten"
+
+#: templates/auditoria_pdf.html:53
+msgid "Top IPs por datos"
+msgstr "Top-IPs nach Daten"
+
+#: templates/auditoria_pdf.html:58
+msgid "No hay datos disponibles para esta auditoría."
+msgstr "Für dieses Audit sind keine Daten verfügbar."
+
+#: templates/reports.html:30
+msgid "Ver"
+msgstr "Anzeigen"
+
+#: templates/reports.html:42
+msgid "PDF"
+msgstr "PDF"
+
+#: templates/reports_pdf.html:6
+msgid "Reportes SquidStats -"
+msgstr "SquidStats-Berichte -"
+
+#: templates/reports_pdf.html:19
+msgid "Reportes SquidStats"
+msgstr "SquidStats-Berichte"
+
+#: templates/reports_pdf.html:20
+msgid "Fecha del reporte:"
+msgstr "Berichtsdatum:"
+
+#: templates/reports_pdf.html:20
+msgid "- Generado:"
+msgstr "- Erzeugt:"
+
+#: templates/reports_pdf.html:23
+msgid "Resumen General"
+msgstr "Allgemeine Zusammenfassung"
+
+#: templates/reports_pdf.html:26
+msgid "Datos consumidos (MB):"
+msgstr "Verbrauchte Daten (MB):"
+
+#: templates/reports_pdf.html:30
+msgid "Top usuarios por actividad"
+msgstr "Top-Benutzer nach Aktivität"
+
+#: templates/reports_pdf.html:47
+msgid "Top URLs por consumo de datos"
+msgstr "Top-URLs nach Datenverbrauch"
+
+#: templates/reports_pdf.html:50
+msgid "Datos (MB)"
+msgstr "Daten (MB)"
+
+#: templates/reports_pdf.html:64
+msgid "Distribución de códigos HTTP"
+msgstr "Verteilung der HTTP-Codes"

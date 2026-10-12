@@ -1,0 +1,892 @@
+# SquidStats — English translations
+# Edit this file here and keep it in sync manually if desired.
+#
+#: templates/error.html:6
+msgid "Error - Squid Monitor"
+msgstr "Fehler - Squid Monitor"
+
+#: templates/error.html:45
+msgid ""
+"Disculpamos las molestias. Por favor, intenta de nuevo más tarde o "
+"contacta al soporte si el problema persiste."
+msgstr "Wir entschuldigen uns für die Unannehmlichkeiten. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support, falls das Problem weiterhin besteht."
+
+#: templates/error.html:47
+msgid "Volver al Inicio"
+msgstr "Zurück zur Startseite"
+
+#: templates/index.html:18
+msgid "Intervalo de refresco (segundos)"
+msgstr "Aktualisierungsintervall (Sekunden)"
+
+#: templates/logsView.html:13
+msgid "Buscar por usuario..."
+msgstr "Nach Benutzer suchen..."
+
+#: templates/logsView.html:16
+msgid "Limpiar búsqueda"
+msgstr "Suche löschen"
+
+#: templates/macros.html:6
+msgid "Gbps"
+msgstr "Gbps"
+
+#: templates/macros.html:8
+msgid "Mbps"
+msgstr "Mbps"
+
+#: templates/macros.html:10
+msgid "Kbps"
+msgstr "Kbps"
+
+#: templates/macros.html:12
+msgid "0 kbps"
+msgstr "0 kbps"
+
+#: templates/components/confirm_modal.html:6
+msgid "Confirmar Acción"
+msgstr "Aktion bestätigen"
+
+#: templates/components/loading_spinner.html:2
+msgid "Importando lista"
+msgstr "Liste wird importiert"
+
+#: templates/components/loading_spinner.html:13
+msgid "Importando lista de bloqueo"
+msgstr "Sperrliste wird importiert"
+
+#: templates/components/loading_spinner.html:14
+msgid "Validando URL y procesando dominios..."
+msgstr "URL wird validiert und Domänen werden verarbeitet..."
+
+#: templates/components/navbar.html:7
+msgid "Logo SquidStats"
+msgstr "SquidStats-Logo"
+
+#: templates/index.html:43
+msgid "Ver Detalles"
+msgstr "Details anzeigen"
+
+#: templates/captive_portal/login.html
+msgid "Portal cautivo de acceso a la red."
+msgstr "Captive Portal für Netzwerkzugang."
+
+#: templates/captive_portal/login.html
+msgid "Inicia sesión para acceder a Internet"
+msgstr "Melden Sie sich an, um auf das Internet zuzugreifen"
+
+#: templates/captive_portal/login.html
+msgid "Usuario"
+msgstr "Benutzername"
+
+#: templates/captive_portal/login.html
+msgid "Contraseña"
+msgstr "Passwort"
+
+#: templates/captive_portal/login.html
+msgid "Ingresa tu usuario"
+msgstr "Geben Sie Ihren Benutzernamen ein"
+
+#: templates/captive_portal/login.html
+msgid "Ingresa tu contraseña"
+msgstr "Geben Sie Ihr Passwort ein"
+
+#: templates/captive_portal/login.html
+msgid "Conectarme a Internet"
+msgstr "Mit dem Internet verbinden"
+
+#: templates/captive_portal/success.html routes/captive_portal_routes.py
+msgid "Acceso concedido"
+msgstr "Zugriff gewährt"
+
+#: templates/captive_portal/success.html
+msgid "¡Ya tienes acceso a Internet!"
+msgstr "Sie haben jetzt Internetzugang!"
+
+#: templates/captive_portal/success.html
+msgid "Puedes cerrar esta ventana y continuar navegando."
+msgstr "Sie können dieses Fenster schließen und weiter surfen."
+
+#: templates/captive_portal/success.html
+msgid "Tiempo restante"
+msgstr "Verbleibende Zeit"
+
+#: templates/captive_portal/success.html
+msgid "Inicio"
+msgstr "Start"
+
+#: templates/captive_portal/success.html
+msgid "Vencimiento"
+msgstr "Ablauf"
+
+#: templates/captive_portal/success.html
+msgid "Cerrar sesión"
+msgstr "Abmelden"
+
+#: templates/captive_portal/success.html
+msgid "Sesión expirada"
+msgstr "Sitzung abgelaufen"
+
+#: routes/captive_portal_routes.py
+msgid "Acceso concedido. Ya puedes navegar."
+msgstr "Zugriff gewährt. Sie können jetzt surfen."
+
+#: routes/captive_portal_routes.py
+msgid "Sesión cerrada."
+msgstr "Sitzung geschlossen."
+
+#: templates/admin/captive_portal.html
+msgid "Portal Cautivo | Admin SquidStats"
+msgstr "Captive Portal | SquidStats-Admin"
+
+#: templates/admin/captive_portal.html
+msgid "Portal Cautivo"
+msgstr "Captive Portal"
+
+#: templates/admin/captive_portal.html
+msgid "Requiere que los usuarios se autentiquen contra LDAP/AD antes de navegar. Squid consulta una ACL externa que valida la sesión por dirección IP."
+msgstr "Erfordert, dass sich Benutzer vor dem Surfen gegen LDAP/AD authentifizieren. Squid fragt eine externe ACL ab, die die Sitzung anhand der IP-Adresse validiert."
+
+#: templates/admin/captive_portal.html
+msgid "Habilitado"
+msgstr "Aktiviert"
+
+#: templates/admin/captive_portal.html
+msgid "Deshabilitado"
+msgstr "Deaktiviert"
+
+#: templates/admin/captive_portal.html
+msgid "El portal autentica contra el LDAP/AD configurado en \"LDAP/AD y Grupos\". Configúralo primero si aún no lo has hecho."
+msgstr "Das Portal authentifiziert sich gegen das unter \"LDAP/AD und Gruppen\" konfigurierte LDAP/AD. Konfigurieren Sie es zuerst, falls noch nicht geschehen."
+
+#: templates/admin/captive_portal.html
+msgid "Importante:"
+msgstr "Wichtig:"
+
+#: templates/admin/captive_portal.html
+msgid "Revisa el orden de las ACL y de todas las reglas añadidas a Squid por el portal cautivo antes de aplicar la configuración o recargar el servicio. Un orden incorrecto puede dejar el acceso bloqueado o permitir tráfico sin autenticación."
+msgstr "Überprüfen Sie die Reihenfolge der ACLs und aller vom Captive Portal zu Squid hinzugefügten Regeln, bevor Sie die Konfiguration anwenden oder den Dienst neu laden. Eine falsche Reihenfolge kann den Zugang blockieren oder nicht authentifizierten Verkehr zulassen."
+
+#: templates/admin/captive_portal.html
+msgid "Vista previa de squid.conf"
+msgstr "Vorschau der squid.conf"
+
+#: templates/admin/captive_portal.html
+msgid "Habilitar portal cautivo"
+msgstr "Captive Portal aktivieren"
+
+#: templates/admin/captive_portal.html
+msgid "Título del portal"
+msgstr "Titel des Portals"
+
+#: templates/admin/captive_portal.html
+msgid "URL pública del portal"
+msgstr "Öffentliche Portal-URL"
+
+#: templates/admin/captive_portal.html
+msgid "Dirección donde los usuarios acceden a esta aplicación. Se usa en la redirección 302 y para permitir el tráfico hacia el propio portal."
+msgstr "Adresse, über die Benutzer auf diese Anwendung zugreifen. Sie wird für die 302-Weiterleitung und zum Zulassen des Datenverkehrs zum Portal selbst verwendet."
+
+#: templates/admin/captive_portal.html
+msgid "Duración de sesión"
+msgstr "Sitzungsdauer"
+
+#: templates/admin/captive_portal.html
+msgid "Minutos"
+msgstr "Minuten"
+
+#: templates/admin/captive_portal.html
+msgid "Horas"
+msgstr "Stunden"
+
+#: templates/admin/captive_portal.html
+msgid "Días"
+msgstr "Tage"
+
+#: templates/admin/captive_portal.html
+msgid "Ejemplos: 2 horas, 72 horas o 10 días."
+msgstr "Beispiele: 2 Stunden, 72 Stunden oder 10 Tage."
+
+#: templates/admin/captive_portal.html
+msgid "TTL de la ACL (segundos)"
+msgstr "ACL-TTL (Sekunden)"
+
+#: templates/admin/captive_portal.html
+msgid "TTL negativo de la ACL (segundos)"
+msgstr "Negativer ACL-TTL (Sekunden)"
+
+#: templates/admin/captive_portal.html
+msgid "Guardar y aplicar"
+msgstr "Speichern und anwenden"
+
+#: templates/admin/captive_portal.html
+msgid "Sesiones activas"
+msgstr "Aktive Sitzungen"
+
+#: templates/admin/captive_portal.html
+msgid "IP"
+msgstr "IP"
+
+#: templates/admin/captive_portal.html
+msgid "Creada"
+msgstr "Erstellt"
+
+#: templates/admin/captive_portal.html
+msgid "Expira"
+msgstr "Läuft ab"
+
+#: templates/admin/captive_portal.html
+msgid "Acciones"
+msgstr "Aktionen"
+
+#: templates/admin/captive_portal.html
+msgid "Revocar"
+msgstr "Widerrufen"
+
+#: templates/admin/captive_portal.html
+msgid "No hay sesiones activas."
+msgstr "Keine aktiven Sitzungen vorhanden."
+
+#: routes/admin/captive_portal.py
+msgid "La URL pública debe ser una URL HTTP o HTTPS válida sin credenciales."
+msgstr "Die öffentliche URL muss eine gültige HTTP- oder HTTPS-URL ohne Anmeldedaten sein."
+
+#: routes/admin/captive_portal.py
+msgid "El tiempo de vida de la sesión debe ser un entero positivo"
+msgstr "Die Sitzungslebensdauer muss eine positive Ganzzahl sein"
+
+#: routes/admin/captive_portal.py
+msgid "La duración de la sesión debe ser un valor positivo y una unidad válida"
+msgstr "Die Sitzungsdauer muss ein positiver Wert und eine gültige Einheit sein"
+
+#: routes/admin/captive_portal.py
+msgid "Los valores de TTL de la ACL deben ser enteros no negativos"
+msgstr "ACL-TTL-Werte müssen nicht-negative Ganzzahlen sein"
+
+#: routes/admin/captive_portal.py
+msgid "Debes definir la URL pública del portal antes de habilitarlo"
+msgstr "Sie müssen die öffentliche Portal-URL festlegen, bevor Sie es aktivieren"
+
+#: routes/admin/captive_portal.py
+msgid "Configuración guardada, pero Squid no pudo recargarse: %s"
+msgstr "Konfiguration gespeichert, aber Squid konnte nicht neu geladen werden: %s"
+
+#: services/captive_portal/session_service.py
+msgid "Dirección IP inválida"
+msgstr "Ungültige IP-Adresse"
+
+#: services/captive_portal/session_service.py
+msgid "Sesión activa para %s (%s)"
+msgstr "Aktive Sitzung für %s (%s)"
+
+#: services/captive_portal/session_service.py
+msgid "Error al guardar la sesión"
+msgstr "Fehler beim Speichern der Sitzung"
+
+#: services/captive_portal/session_service.py
+msgid "No hay sesión activa para %s"
+msgstr "Keine aktive Sitzung für %s vorhanden"
+
+#: services/captive_portal/session_service.py
+msgid "Sesión revocada para %s"
+msgstr "Sitzung für %s widerrufen"
+
+#: services/captive_portal/session_service.py
+msgid "Error al revocar la sesión"
+msgstr "Fehler beim Widerrufen der Sitzung"
+
+#: routes/captive_portal_routes.py
+msgid "Demasiados intentos fallidos. Intenta de nuevo en %s minutos."
+msgstr "Zu viele fehlgeschlagene Versuche. Versuchen Sie es in %s Minuten erneut."
+
+#: routes/captive_portal_routes.py
+msgid "Por favor, ingresa usuario y contraseña."
+msgstr "Bitte geben Sie Benutzername und Passwort ein."
+
+#~ msgid "0\" x-text=\"integrityResult.error_count + ' error(es) detectado(s)'\">"
+#~ msgstr ""
+
+#~ msgid "0\" class=\"mt-2 space-y-1\">"
+#~ msgstr ""
+
+#~ msgid "{editor}: Editing failed"
+#~ msgstr "{editor}: Editing failed"
+
+#~ msgid "{editor}: Editing failed: {e}"
+#~ msgstr "{editor}: Editing failed: {e}"
+
+#~ msgid "{text} {deprecated_message}"
+#~ msgstr "{text} {deprecated_message}"
+
+#~ msgid "Options"
+#~ msgstr "Options"
+
+#~ msgid "Got unexpected extra argument ({args})"
+#~ msgid_plural "Got unexpected extra arguments ({args})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+#~ msgstr "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+
+#~ msgid "Aborted!"
+#~ msgstr "Aborted!"
+
+#~ msgid "Commands"
+#~ msgstr "Commands"
+
+#~ msgid "Missing command."
+#~ msgstr "Missing command."
+
+#~ msgid "No such command {name!r}."
+#~ msgstr "No such command {name!r}."
+
+#~ msgid "Value must be an iterable."
+#~ msgstr "Value must be an iterable."
+
+#~ msgid "Takes {nargs} values but 1 was given."
+#~ msgid_plural "Takes {nargs} values but {len} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+#~ msgstr ""
+#~ "DeprecationWarning: The {param_type} {name!r} "
+#~ "is deprecated.{extra_message}"
+
+#~ msgid "env var: {var}"
+#~ msgstr "env var: {var}"
+
+#~ msgid "default: {default}"
+#~ msgstr "default: {default}"
+
+#~ msgid "required"
+#~ msgstr "required"
+
+#~ msgid "(dynamic)"
+#~ msgstr "(dynamic)"
+
+#~ msgid "%(prog)s, version %(version)s"
+#~ msgstr "%(prog)s, version %(version)s"
+
+#~ msgid "Show the version and exit."
+#~ msgstr "Show the version and exit."
+
+#~ msgid "Show this message and exit."
+#~ msgstr "Show this message and exit."
+
+#~ msgid "Error: {message}"
+#~ msgstr "Error: {message}"
+
+#~ msgid "Try '{command} {option}' for help."
+#~ msgstr "Try '{command} {option}' for help."
+
+#~ msgid "Invalid value: {message}"
+#~ msgstr "Invalid value: {message}"
+
+#~ msgid "Invalid value for {param_hint}: {message}"
+#~ msgstr "Invalid value for {param_hint}: {message}"
+
+#~ msgid "Missing argument"
+#~ msgstr "Missing argument"
+
+#~ msgid "Missing option"
+#~ msgstr "Missing option"
+
+#~ msgid "Missing parameter"
+#~ msgstr "Missing parameter"
+
+#~ msgid "Missing {param_type}"
+#~ msgstr "Missing {param_type}"
+
+#~ msgid "Missing parameter: {param_name}"
+#~ msgstr "Missing parameter: {param_name}"
+
+#~ msgid "No such option: {name}"
+#~ msgstr "No such option: {name}"
+
+#~ msgid "Did you mean {possibility}?"
+#~ msgid_plural "(Possible options: {possibilities})"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "unknown error"
+#~ msgstr "unknown error"
+
+#~ msgid "Could not open file {filename!r}: {message}"
+#~ msgstr "Could not open file {filename!r}: {message}"
+
+#~ msgid "Usage:"
+#~ msgstr "Usage:"
+
+#~ msgid "Argument {name!r} takes {nargs} values."
+#~ msgstr "Argument {name!r} takes {nargs} values."
+
+#~ msgid "Option {name!r} does not take a value."
+#~ msgstr "Option {name!r} does not take a value."
+
+#~ msgid "Option {name!r} requires an argument."
+#~ msgid_plural "Option {name!r} requires {nargs} arguments."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Shell completion is not supported for Bash versions older than 4.4."
+#~ msgstr "Shell completion is not supported for Bash versions older than 4.4."
+
+#~ msgid "Couldn't detect Bash version, shell completion is not supported."
+#~ msgstr "Couldn't detect Bash version, shell completion is not supported."
+
+#~ msgid "Repeat for confirmation"
+#~ msgstr "Repeat for confirmation"
+
+#~ msgid "Error: The value you entered was invalid."
+#~ msgstr "Error: The value you entered was invalid."
+
+#~ msgid "Error: {e.message}"
+#~ msgstr "Error: {e.message}"
+
+#~ msgid "Error: The two entered values do not match."
+#~ msgstr "Error: The two entered values do not match."
+
+#~ msgid "Error: invalid input"
+#~ msgstr "Error: invalid input"
+
+#~ msgid "Press any key to continue..."
+#~ msgstr "Press any key to continue..."
+
+#~ msgid ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+#~ msgstr ""
+#~ "Choose from:\n"
+#~ "\t{choices}"
+
+#~ msgid "{value!r} is not {choice}."
+#~ msgid_plural "{value!r} is not one of {choices}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "{value!r} does not match the format {format}."
+#~ msgid_plural "{value!r} does not match the formats {formats}."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "{value!r} is not a valid {number_type}."
+#~ msgstr "{value!r} is not a valid {number_type}."
+
+#~ msgid "{value} is not in the range {range}."
+#~ msgstr "{value} is not in the range {range}."
+
+#~ msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+#~ msgstr "{value!r} is not a valid boolean. Recognized values: {states}"
+
+#~ msgid "{value!r} is not a valid UUID."
+#~ msgstr "{value!r} is not a valid UUID."
+
+#~ msgid "file"
+#~ msgstr "file"
+
+#~ msgid "directory"
+#~ msgstr "directory"
+
+#~ msgid "path"
+#~ msgstr "path"
+
+#~ msgid "{name} {filename!r} does not exist."
+#~ msgstr "{name} {filename!r} does not exist."
+
+#~ msgid "{name} {filename!r} is a file."
+#~ msgstr "{name} {filename!r} is a file."
+
+#~ msgid "{name} {filename!r} is a directory."
+#~ msgstr "{name} {filename!r} is a directory."
+
+#~ msgid "{name} {filename!r} is not readable."
+#~ msgstr "{name} {filename!r} is not readable."
+
+#~ msgid "{name} {filename!r} is not writable."
+#~ msgstr "{name} {filename!r} is not writable."
+
+#~ msgid "{name} {filename!r} is not executable."
+#~ msgstr "{name} {filename!r} is not executable."
+
+#~ msgid "{len_type} values are required, but {len_value} was given."
+#~ msgid_plural "{len_type} values are required, but {len_value} were given."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "This field is required."
+#~ msgstr "This field is required."
+
+#~ msgid "File does not have an approved extension: {extensions}"
+#~ msgstr "File does not have an approved extension: {extensions}"
+
+#~ msgid "File does not have an approved extension."
+#~ msgstr "File does not have an approved extension."
+
+#~ msgid "Invalid field name '%s'."
+#~ msgstr "Invalid field name '%s'."
+
+#~ msgid "Field must be equal to %(other_name)s."
+#~ msgstr "Field must be equal to %(other_name)s."
+
+#~ msgid "Field must be at least %(min)d character long."
+#~ msgid_plural "Field must be at least %(min)d characters long."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field cannot be longer than %(max)d character."
+#~ msgid_plural "Field cannot be longer than %(max)d characters."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field must be exactly %(max)d character long."
+#~ msgid_plural "Field must be exactly %(max)d characters long."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Field must be between %(min)d and %(max)d characters long."
+#~ msgstr "Field must be between %(min)d and %(max)d characters long."
+
+#~ msgid "Number must be at least %(min)s."
+#~ msgstr "Number must be at least %(min)s."
+
+#~ msgid "Number must be at most %(max)s."
+#~ msgstr "Number must be at most %(max)s."
+
+#~ msgid "Number must be between %(min)s and %(max)s."
+#~ msgstr "Number must be between %(min)s and %(max)s."
+
+#~ msgid "Invalid input."
+#~ msgstr "Invalid input."
+
+#~ msgid "Invalid email address."
+#~ msgstr "Invalid email address."
+
+#~ msgid "Invalid IP address."
+#~ msgstr "Invalid IP address."
+
+#~ msgid "Invalid Mac address."
+#~ msgstr "Invalid Mac address."
+
+#~ msgid "Invalid URL."
+#~ msgstr "Invalid URL."
+
+#~ msgid "Invalid UUID."
+#~ msgstr "Invalid UUID."
+
+#~ msgid "Invalid value, must be one of: %(values)s."
+#~ msgstr "Invalid value, must be one of: %(values)s."
+
+#~ msgid "Invalid value, can't be any of: %(values)s."
+#~ msgstr "Invalid value, can't be any of: %(values)s."
+
+#~ msgid "This field cannot be edited."
+#~ msgstr "This field cannot be edited."
+
+#~ msgid "This field is disabled and cannot have a value."
+#~ msgstr "This field is disabled and cannot have a value."
+
+#~ msgid "Invalid CSRF Token."
+#~ msgstr "Invalid CSRF Token."
+
+#~ msgid "CSRF token missing."
+#~ msgstr "CSRF token missing."
+
+#~ msgid "CSRF failed."
+#~ msgstr "CSRF failed."
+
+#~ msgid "CSRF token expired."
+#~ msgstr "CSRF token expired."
+
+#~ msgid "Invalid Choice: could not coerce."
+#~ msgstr "Invalid Choice: could not coerce."
+
+#~ msgid "Choices cannot be None."
+#~ msgstr "Choices cannot be None."
+
+#~ msgid "Not a valid choice."
+#~ msgstr "Not a valid choice."
+
+#~ msgid "Invalid choice(s): one or more data inputs could not be coerced."
+#~ msgstr "Invalid choice(s): one or more data inputs could not be coerced."
+
+#~ msgid "'%(value)s' is not a valid choice for this field."
+#~ msgid_plural "'%(value)s' are not valid choices for this field."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Not a valid datetime value."
+#~ msgstr "Not a valid datetime value."
+
+#~ msgid "Not a valid date value."
+#~ msgstr "Not a valid date value."
+
+#~ msgid "Not a valid time value."
+#~ msgstr "Not a valid time value."
+
+#~ msgid "Not a valid week value."
+#~ msgstr "Not a valid week value."
+
+#~ msgid "Not a valid integer value."
+#~ msgstr "Not a valid integer value."
+
+#~ msgid "Not a valid decimal value."
+#~ msgstr "Not a valid decimal value."
+
+#~ msgid "Not a valid float value."
+#~ msgstr "Not a valid float value."
+
+msgid "Reporte generado exitosamente"
+msgstr "Bericht erfolgreich generiert"
+
+msgid "Auditoría completada"
+msgstr "Prüfung abgeschlossen"
+
+msgid "Error de conexión con el servidor"
+msgstr "Serververbindungsfehler"
+
+msgid "Error de red"
+msgstr "Netzwerkfehler"
+
+msgid "Error en la auditoría"
+msgstr "Prüfungsfehler"
+
+msgid "Por favor, seleccione un usuario."
+msgstr "Bitte wählen Sie einen Benutzer aus."
+
+msgid "Por favor, ingrese una palabra clave."
+msgstr "Bitte geben Sie ein Schlüsselwort ein."
+
+msgid "Por favor, ingrese una dirección IP."
+msgstr "Bitte geben Sie eine IP-Adresse ein."
+
+msgid "Por favor, seleccione un código de respuesta."
+msgstr "Bitte wählen Sie einen Antwortcode aus."
+
+msgid "Por favor, seleccione al menos una red social."
+msgstr "Bitte wählen Sie mindestens ein soziales Netzwerk aus."
+
+msgid "Error interno: Renderers no cargados."
+msgstr "Interner Fehler: Renderer nicht geladen."
+
+msgid "Distribución de Peticiones para {user} el {date}"
+msgstr "Verteilung der Anfragen für {user} am {date}"
+
+msgid "Total de Peticiones en el día:"
+msgstr "Gesamtanzahl der Anfragen für den Tag:"
+
+msgid "No se encontraron peticiones para la fecha y usuario seleccionado."
+msgstr "Keine Anfragen für das ausgewählte Datum und den Benutzer gefunden."
+
+msgid "Resultados para la palabra clave {keyword} para: {user}"
+msgstr "Ergebnisse für das Schlüsselwort {keyword} für: {user}"
+
+msgid "Resultados de Búsqueda para la IP: {ip}"
+msgstr "Suchergebnisse für IP: {ip}"
+
+msgid "Resultados por Código de Respuesta {code} para: {user}"
+msgstr "Ergebnisse nach Antwortcode {code} für: {user}"
+
+msgid "Actividad en Redes Sociales ({sites}) para: {user}"
+msgstr "Aktivität in sozialen Netzwerken ({sites}) für: {user}"
+
+msgid "Tipo de reporte no reconocido."
+msgstr "Unbekannter Berichtstyp."
+
+msgid "Error de red o del servidor:"
+msgstr "Netzwerk- oder Serverfehler:"
+
+msgid "No se encontraron registros."
+msgstr "Keine Datensätze gefunden."
+
+msgid "Hora (Últ. Acceso)"
+msgstr "Zeit (letzter Zugriff)"
+
+msgid "Intentos"
+msgstr "Versuche"
+
+msgid "Resumen de Actividad"
+msgstr "Aktivitätsübersicht"
+
+msgid "Peticiones Totales"
+msgstr "Gesamtanfragen"
+
+msgid "GB Consumidos"
+msgstr "Verbrauchte GB"
+
+msgid "Resumen de Respuestas"
+msgstr "Antwortübersicht"
+
+msgid "Top 15 Dominios Visitados"
+msgstr "Top 15 besuchte Domänen"
+
+msgid "Distribución de Respuestas HTTP"
+msgstr "Verteilung der HTTP-Antworten"
+
+msgid "Top 10 Usuarios por Consumo de Datos"
+msgstr "Top 10 Benutzer nach Datenverbrauch"
+
+msgid "Datos Consumidos"
+msgstr "Verbrauchte Daten"
+
+msgid "Top 15 URLs por Consumo de Datos"
+msgstr "Top 15 URLs nach Datenverbrauch"
+
+msgid "Top 10 Usuarios por Peticiones"
+msgstr "Top 10 Benutzer nach Anfragen"
+
+msgid "Top 10 IPs por Consumo de Datos"
+msgstr "Top 10 IPs nach Datenverbrauch"
+
+msgid "Peticiones por Hora"
+msgstr "Anfragen pro Stunde"
+
+msgid "Hora del Día"
+msgstr "Tageszeit"
+
+msgid "Número de Peticiones"
+msgstr "Anzahl der Anfragen"
+
+msgid "Total de Datos Consumidos del {startDate} al {endDate}"
+msgstr "Insgesamt verbrauchte Daten vom {startDate} bis {endDate}"
+
+msgid "Total de datos consumidos en el período seleccionado"
+msgstr "Gesamtverbrauchte Daten im ausgewählten Zeitraum"
+
+msgid "peticiones totales"
+msgstr "Gesamtanfragen"
+
+msgid "tablas procesadas"
+msgstr "verarbeitete Tabellen"
+
+msgid "Equivalente a {bytes} bytes"
+msgstr "Entspricht {bytes} Bytes"
+
+msgid "Error al cargar la lista de usuarios"
+msgstr "Fehler beim Laden der Benutzerliste"
+
+msgid "Error de carga"
+msgstr "Ladefehler"
+
+msgid "Fecha de Inicio"
+msgstr "Startdatum"
+
+msgid "Seleccionar usuario..."
+msgstr "Benutzer auswählen..."
+
+msgid "Buscar usuario... (Opcional)"
+msgstr "Benutzer suchen... (optional)"
+
+msgid "No hay notificaciones nuevas"
+msgstr "Keine neuen Benachrichtigungen"
+
+msgid "Error HTTP:"
+msgstr "HTTP-Fehler:"
+
+msgid "Error del servidor al marcar como leída:"
+msgstr "Serverfehler beim Markieren als gelesen:"
+
+msgid "Error al marcar notificación como leída:"
+msgstr "Fehler beim Markieren der Benachrichtigung als gelesen:"
+
+msgid "Error al obtener notificaciones:"
+msgstr "Fehler beim Abrufen von Benachrichtigungen:"
+
+msgid "Error al actualizar Squid"
+msgstr "Fehler beim Aktualisieren von Squid"
+
+msgid "Error al recargar Squid"
+msgstr "Fehler beim Neuladen von Squid"
+
+msgid "Error al reiniciar Squid"
+msgstr "Fehler beim Neustart von Squid"
+
+msgid "Error al actualizar la aplicación web"
+msgstr "Fehler beim Aktualisieren der Webanwendung"
+
+msgid "¿Estás seguro de que desea recargar Squid? Esto aplicará los cambios de configuración sin interrumpir el servicio."
+msgstr "Sind Sie sicher, dass Sie Squid neu laden möchten? Dadurch werden Konfigurationsänderungen ohne Unterbrechung des Dienstes angewendet."
+
+msgid "¿Estás seguro de que desea reiniciar Squid? Esto interrumpirá temporalmente el servicio."
+msgstr "Sind Sie sicher, dass Sie Squid neu starten möchten? Dadurch wird der Dienst vorübergehend unterbrochen."
+
+msgid "¿Estás seguro de que deseas actualizar el servicio Squid? Guarda tu configuración antes de continuar, el servicio se reiniciará automáticamente."
+msgstr "Sind Sie sicher, dass Sie den Squid-Dienst aktualisieren möchten? Speichern Sie Ihre Konfiguration, bevor Sie fortfahren. Der Dienst wird automatisch neu gestartet."
+
+msgid "¿Estás seguro de que deseas actualizar SquidStats? Se actualizará la interfaz web, funcionalidades y correcciones de seguridad."
+msgstr "Sind Sie sicher, dass Sie SquidStats aktualisieren möchten? Weboberfläche, Funktionen und Sicherheitskorrekturen werden aktualisiert."
+
+msgid "Error al cargar notificaciones"
+msgstr "Fehler beim Laden von Benachrichtigungen"
+
+msgid "No hay notificaciones sin leer"
+msgstr "Keine ungelesenen Benachrichtigungen"
+
+msgid "¿Estás seguro de que quieres eliminar esta notificación?"
+msgstr "Sind Sie sicher, dass Sie diese Benachrichtigung löschen möchten?"
+
+msgid "Notificación eliminada"
+msgstr "Benachrichtigung gelöscht"
+
+msgid "Error al eliminar notificación:"
+msgstr "Fehler beim Löschen der Benachrichtigung:"
+
+msgid "¿Estás seguro de que quieres eliminar TODAS las notificaciones? Esta acción no se puede deshacer."
+msgstr "Sind Sie sicher, dass Sie ALLE Benachrichtigungen löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+
+msgid "Todas las notificaciones han sido eliminadas"
+msgstr "Alle Benachrichtigungen wurden gelöscht"
+
+msgid "Error al eliminar notificaciones:"
+msgstr "Fehler beim Löschen der Benachrichtigungen:"
+
+msgid "Filtros limpiados"
+msgstr "Filter gelöscht"
+
+msgid "Error de conexión:"
+msgstr "Verbindungsfehler:"
+
+msgid "Error desconocido"
+msgstr "Unbekannter Fehler"
+
+msgid "Hace unos momentos"
+msgstr "Vor wenigen Augenblicken"
+
+msgid "Hace {count} minuto"
+msgstr "{count} Minute her"
+
+msgid "Hace {count} minutos"
+msgstr "{count} Minuten her"
+
+msgid "Hace {count} hora"
+msgstr "{count} Stunde her"
+
+msgid "Hace {count} horas"
+msgstr "{count} Stunden her"
+
+msgid "Hace {count} día"
+msgstr "{count} Tag her"
+
+msgid "Hace {count} días"
+msgstr "{count} Tagen her"
+
+msgid "Swap Usada"
+msgstr "SWAP Belegt"
+
+msgid "SWAP Usada: "
+msgstr "SWAP Belegt: "
+
+msgid "Instalación .deb detectada."
+msgstr ".deb-Paketinstallation erkannt."
+
+msgid "Esta versión fue instalada con un paquete .deb y no puede actualizarse desde el botón \"Web\"."
+msgstr "Diese Version wurde mit einem .deb-Paket installiert und kann nicht über die Schaltfläche \"Web\" aktualisiert werden."
+
+msgid "Para actualizar, descargue e instale la última versión desde"
+msgstr "Um zu aktualisieren, laden Sie die neueste Version herunter und installieren Sie sie von"
+
+msgid "Esta instalación fue realizada con un paquete .deb y no puede actualizarse desde aquí. Para actualizar, descargue e instale la última versión desde GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest"
+msgstr "This installation was done with a .deb package and cannot be updated from here. Um zu aktualisieren, laden Sie die neueste Version herunter und installieren Sie sie von GitHub Releases: https://github.com/kaelthasmanu/SquidStats/releases/latest"
