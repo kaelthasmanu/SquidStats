@@ -1,6 +1,14 @@
 // Render functions (sin cambios funcionales)
 (function(){
   const i18n = window.__AUD_I18N__ || {};
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+
   function renderNestedAccordionResults(title, results) {
     if (!results || results.length === 0) {
       return `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">${title}</h2><p class="text-gray-500">${i18n.noRecordsFound || 'No se encontraron registros.'}</p></div>`;
@@ -10,12 +18,16 @@
       if (!usersData[item.username]) usersData[item.username] = {};
       const dateStr = `${item.log_date.substring(0,4)}-${item.log_date.substring(4,6)}-${item.log_date.substring(6,8)}`;
       if (!usersData[item.username][dateStr]) {
-        usersData[item.username][dateStr] = { daily_requests: 0, daily_data: 0, activities: [] };
+        usersData[item.username][dateStr] = { daily_requests: 0, daily_data: 0, activities: [], ip_addresses: [] };
       }
       const dateGroup = usersData[item.username][dateStr];
       dateGroup.activities.push(item);
       dateGroup.daily_requests += Number(item.access_count) || 0;
       dateGroup.daily_data += Number(item.total_data) || 0;
+      const ipAddress = typeof item.ip === 'string' ? item.ip.trim() : '';
+      if (ipAddress && !dateGroup.ip_addresses.includes(ipAddress)) {
+        dateGroup.ip_addresses.push(ipAddress);
+      }
     });
     let html = `<h2 class="text-2xl font-bold mb-4">${title}</h2>`;
     for (const username in usersData) {
@@ -24,10 +36,14 @@
       const sortedDates = Object.keys(userDataByDate).sort().reverse();
       for (const date of sortedDates) {
         const dateData = userDataByDate[date];
-        html += `<div class="border-b last:border-b-0"><div class="bg-blue-50 p-2 pl-6 flex justify-between items-center cursor-pointer hover:bg-blue-100" onclick="toggleDetails(this)"><h4 class="font-semibold text-blue-800"><i class="fas fa-calendar-alt mr-2"></i>${date}</h4><div class="flex items-center space-x-4 text-sm"><span class="font-medium text-blue-700"><i class="fas fa-hashtag mr-1"></i>${dateData.daily_requests.toLocaleString()} ${i18n.requestsCol || 'Peticiones'}</span><span class="font-medium text-green-700"><i class="fas fa-database mr-1"></i>${formatBytes(dateData.daily_data)}</span><i class="fas fa-chevron-down toggle-icon transition-transform text-xs"></i></div></div><div class="date-details p-3" style="display: none;"><table class="w-full text-left text-sm mt-2"><thead class="border-b-2 border-gray-300"><tr><th class="py-1 px-2 text-center">${i18n.lastAccessHeader || 'Hora (Últ. Acceso)'}</th><th class="py-1 px-2">${i18n.urlHeader || 'URL'}</th><th class="py-1 px-2 text-center">${i18n.attemptsHeader || 'Intentos'}</th><th class="py-1 px-2">${i18n.dataHeader || 'Datos'}</th></tr></thead><tbody class="divide-y divide-gray-100">`;
+        const ipAddresses = dateData.ip_addresses.map(escapeHtml).join(', ');
+        const ipSummary = ipAddresses
+          ? `<span class="font-medium text-gray-700"><i class="fas fa-network-wired mr-1"></i>${i18n.ipHeader || 'IP'}: ${ipAddresses}</span>`
+          : '';
+        html += `<div class="border-b last:border-b-0"><div class="bg-blue-50 p-2 pl-6 flex flex-wrap justify-between items-center gap-2 cursor-pointer hover:bg-blue-100" onclick="toggleDetails(this)"><h4 class="font-semibold text-blue-800"><i class="fas fa-calendar-alt mr-2"></i>${date}</h4><div class="flex flex-wrap items-center gap-4 text-sm"><span class="font-medium text-blue-700"><i class="fas fa-hashtag mr-1"></i>${dateData.daily_requests.toLocaleString()} ${i18n.requestsCol || 'Peticiones'}</span><span class="font-medium text-green-700"><i class="fas fa-database mr-1"></i>${formatBytes(dateData.daily_data)}</span>${ipSummary}<i class="fas fa-chevron-down toggle-icon transition-transform text-xs"></i></div></div><div class="date-details p-3" style="display: none;"><table class="w-full text-left text-sm mt-2"><thead class="border-b-2 border-gray-300"><tr><th class="py-1 px-2 text-center">${i18n.lastAccessHeader || 'Hora (Últ. Acceso)'}</th><th class="py-1 px-2">${i18n.urlHeader || 'URL'}</th><th class="py-1 px-2">${i18n.ipHeader || 'IP'}</th><th class="py-1 px-2 text-center">${i18n.attemptsHeader || 'Intentos'}</th><th class="py-1 px-2">${i18n.dataHeader || 'Datos'}</th></tr></thead><tbody class="divide-y divide-gray-100">`;
         const ensureProtocol = (url) => (url.startsWith('http') ? url : `http://${url}`);
         dateData.activities.forEach((activity) => {
-          html += `<tr class="hover:bg-gray-50"><td class="py-1 px-2 text-center font-mono text-xs">${formatTime(activity.last_seen)}</td><td class="py-1 px-2 truncate"><a href="${ensureProtocol(activity.url)}" target="_blank" class="text-blue-600 hover:underline" title="${activity.url}">${activity.url}</a></td><td class="py-1 px-2 text-center">${activity.access_count}</td><td class="py-1 px-2">${formatBytes(activity.total_data)}</td></tr>`;
+          html += `<tr class="hover:bg-gray-50"><td class="py-1 px-2 text-center font-mono text-xs">${formatTime(activity.last_seen)}</td><td class="py-1 px-2 truncate"><a href="${ensureProtocol(activity.url)}" target="_blank" class="text-blue-600 hover:underline" title="${activity.url}">${activity.url}</a></td><td class="py-1 px-2 font-mono">${escapeHtml(activity.ip || '')}</td><td class="py-1 px-2 text-center">${activity.access_count}</td><td class="py-1 px-2">${formatBytes(activity.total_data)}</td></tr>`;
         });
         html += `</tbody></table></div></div>`;
       }
