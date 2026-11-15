@@ -36,6 +36,9 @@ def test_dashboard_renders_web_update_button(client, monkeypatch):
     assert 'id="web-update-btn"' in html
     assert 'onclick="confirmWebUpdate()"' in html
     assert "fetch('/update'" in html
+    assert "const restartMessage" in html
+    assert "toastr.success(restartMessage)" in html
+    assert "window.location.reload(), 2500" in html
 
 
 def test_update_status_returns_web_update_state(client, monkeypatch):
