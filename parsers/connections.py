@@ -199,3 +199,26 @@ def group_by_user(connections):
         grouped[key]["connections"].append(connection)
 
     return dict(grouped)
+
+
+def sort_connections_by_bandwidth(connections):
+    """Return connections ordered from highest to lowest bandwidth."""
+    return sorted(
+        connections,
+        key=lambda connection: float(connection.get("bandwidth_kbps", 0) or 0),
+        reverse=True,
+    )
+
+
+def sort_grouped_users_by_bandwidth(grouped_connections):
+    """Return users ordered by their total bandwidth, highest first."""
+    return dict(
+        sorted(
+            grouped_connections.items(),
+            key=lambda item: sum(
+                float(connection.get("bandwidth_kbps", 0) or 0)
+                for connection in item[1]["connections"]
+            ),
+            reverse=True,
+        )
+    )

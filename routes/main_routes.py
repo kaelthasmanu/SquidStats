@@ -7,7 +7,12 @@ from flask_babel import gettext as _
 from loguru import logger
 
 from config import Config
-from parsers.connections import group_by_user, parse_raw_data
+from parsers.connections import (
+    group_by_user,
+    parse_raw_data,
+    sort_connections_by_bandwidth,
+    sort_grouped_users_by_bandwidth,
+)
 from parsers.squid_info import fetch_squid_info_stats
 from routes.admin.helpers import json_error, json_success, sanitize_error_page_message
 from services.notifications.notifications import get_all_notifications
@@ -137,10 +142,11 @@ def _get_dashboard_context() -> tuple[dict[str, Any] | None, tuple[Any, int] | N
         # logger.error("All Squid proxies returned errors")
         # return None, _build_error_page("No data from any Squid proxy", 502)
 
-        connections = all_connections
+        connections = sort_connections_by_bandwidth(all_connections)
 
         try:
             grouped_connections = group_by_user(connections)
+            grouped_connections = sort_grouped_users_by_bandwidth(grouped_connections)
         except Exception:
             logger.exception("Error grouping connections by user")
             grouped_connections = {}
