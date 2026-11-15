@@ -72,8 +72,7 @@ def test_update_web_redirects_with_success_flash(client, monkeypatch):
     updater.assert_called_once_with()
     with client.session_transaction() as session:
         assert any(
-            category == "success"
-            and "actualizado correctamente" in message
+            category == "success" and "actualizado correctamente" in message
             for category, message in session["_flashes"]
         )
 
@@ -115,7 +114,9 @@ def test_check_web_update_detects_newer_release(monkeypatch):
     response = Mock()
     response.json.return_value = {"tag_name": "v2.7.0"}
     response.raise_for_status.return_value = None
-    monkeypatch.setattr(updateSquidStats.requests, "get", lambda *args, **kwargs: response)
+    monkeypatch.setattr(
+        updateSquidStats.requests, "get", lambda *args, **kwargs: response
+    )
     monkeypatch.setattr(
         updateSquidStats,
         "_WEB_UPDATE_CACHE",
@@ -134,6 +135,7 @@ def test_check_web_update_detects_newer_release(monkeypatch):
 
 def test_check_web_update_handles_github_failure(monkeypatch):
     """A GitHub failure hides the indicator and exposes an error state."""
+
     def fail_request(*args, **kwargs):
         raise RuntimeError("GitHub unavailable")
 
