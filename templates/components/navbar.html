@@ -833,7 +833,15 @@
             alert({{ _('Error al actualizar la aplicación web')|tojson }});
           }
         } catch (error) {
-          alert({{ _('Error de conexión')|tojson }});
+          // The web update restarts the service, which can close this request
+          // before fetch receives the final response.
+          const restartMessage = {{ _('La actualización se inició correctamente. La aplicación se está reiniciando.')|tojson }};
+          if (window.toastr) {
+            toastr.success(restartMessage);
+          } else {
+            alert(restartMessage);
+          }
+          setTimeout(() => window.location.reload(), 2500);
         }
       }
     );
