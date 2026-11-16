@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
         datasets: [
           {
             type: "bar",
-            label: "Peticiones",
+            label: chartData.chartLabels.requests,
             data: payload.requests || [],
             yAxisID: "requests",
             backgroundColor: "#3B82F6B3",
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
           requests: {
             position: "left",
             beginAtZero: true,
-            title: { display: true, text: "Peticiones", color: getTextColor() },
+            title: { display: true, text: chartData.chartLabels.requests, color: getTextColor() },
             ticks: { color: getTextColor(), precision: 0 },
           },
           data: {
@@ -221,10 +221,10 @@ document.addEventListener("DOMContentLoaded", function () {
   buildBarChart(
     "usersActivityChart",
     chartData.usersActivity,
-    "Número de Visitas",
+    chartData.chartLabels.numberOfVisits,
     ""
   );
-  buildBarChart("usersDataChart", chartData.usersData, "Datos (MB)", "MB");
+  buildBarChart("usersDataChart", chartData.usersData, chartData.chartLabels.dataMb, "MB");
   buildHourlyActivityChart(chartData.hourlyActivity);
   buildPieChart("httpCodesChart", chartData.httpCodes);
   buildPieChart("countriesChart", chartData.countries);

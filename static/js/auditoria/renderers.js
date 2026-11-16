@@ -110,7 +110,7 @@
       data:{
         labels:domains.map(d=>d.domain),
         datasets:[{
-          label:'Requests',
+          label: i18n.requestsLabel || 'Peticiones',
           data:domains.map(d=>d.count),
           backgroundColor:generateColors(domains.length)
         }]
@@ -160,7 +160,7 @@
       data:{
         labels:responses.map(r=>`HTTP ${r.code}`),
         datasets:[{
-          label:'Respuestas',
+          label: i18n.responsesLabel || 'Respuestas',
             data:responses.map(r=>r.count),
             backgroundColor:responses.map(r=>getResponseColor(r.code)),
             borderWidth:1
