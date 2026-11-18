@@ -140,11 +140,11 @@ rsa==4.9.1
     # via telethon
 simple-websocket==1.1.0
     # via python-engineio
-sqlalchemy==2.1.8
+sqlalchemy==2.1.9
     # via
     #   -r requirements.in
     #   alembic
-telethon==1.45.0
+telethon==1.46.0
     # via -r requirements.in
 tinycss2==1.5.1
     # via
