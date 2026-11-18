@@ -881,6 +881,30 @@ msgstr "Swap Used"
 msgid "SWAP Usada: "
 msgstr "SWAP Used: "
 
+#: templates/cacheView.html
+msgid "Uso de CPU (%)"
+msgstr "CPU Usage (%)"
+
+#: templates/cacheView.html
+msgid "RAM Usada"
+msgstr "RAM Used"
+
+#: templates/cacheView.html
+msgid "RAM Usada: "
+msgstr "RAM Used: "
+
+#: templates/cacheView.html
+msgid "Subida (Mbps)"
+msgstr "Upload (Mbps)"
+
+#: templates/cacheView.html
+msgid "Bajada (Mbps)"
+msgstr "Download (Mbps)"
+
+#: templates/auditor.html
+msgid "Respuestas"
+msgstr "Responses"
+
 msgid "Instalación .deb detectada."
 msgstr "Deb package installation detected."
 

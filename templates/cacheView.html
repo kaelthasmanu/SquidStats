@@ -198,7 +198,7 @@
         labels: [],
         datasets: [
           {
-            label: "Uso de CPU (%)",
+            label: {{ _("Uso de CPU (%)") | tojson }},
             data: [],
             borderColor: "#ef4444",
             backgroundColor: "rgba(239, 68, 68, 0.1)",
@@ -224,7 +224,7 @@
         labels: [],
         datasets: [
           {
-            label: "RAM Usada",
+            label: {{ _("RAM Usada") | tojson }},
             data: [],
             borderColor: "#3b82f6",
             backgroundColor: "rgba(59, 130, 246, 0.1)",
@@ -246,7 +246,7 @@
           ...chartOptions.plugins,
           tooltip: {
             callbacks: {
-              label: (ctx) => "RAM Usada: " + formatSizeCompact(ctx.raw),
+              label: (ctx) => {{ _("RAM Usada: ") | tojson }} + formatSizeCompact(ctx.raw),
             },
           },
         },
@@ -292,14 +292,14 @@
         labels: [],
         datasets: [
           {
-            label: "Subida (Mbps)",
+            label: {{ _("Subida (Mbps)") | tojson }},
             data: [],
             borderColor: "#06b6d4",
             backgroundColor: "rgba(6,182,212,0.1)",
             pointBackgroundColor: "#06b6d4",
           },
           {
-            label: "Bajada (Mbps)",
+            label: {{ _("Bajada (Mbps)") | tojson }},
             data: [],
             borderColor: "#f59e42",
             backgroundColor: "rgba(245,158,66,0.1)",

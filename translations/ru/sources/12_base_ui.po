@@ -775,6 +775,30 @@ msgstr "Подержанный своп"
 msgid "SWAP Usada: "
 msgstr "Подержанный SWAP: "
 
+#: templates/cacheView.html
+msgid "Uso de CPU (%)"
+msgstr "Использование процессора (%)"
+
+#: templates/cacheView.html
+msgid "RAM Usada"
+msgstr "Используемая оперативная память"
+
+#: templates/cacheView.html
+msgid "RAM Usada: "
+msgstr "Используемая оперативная память: "
+
+#: templates/cacheView.html
+msgid "Subida (Mbps)"
+msgstr "Отправка (Мбит/с)"
+
+#: templates/cacheView.html
+msgid "Bajada (Mbps)"
+msgstr "Загрузка (Мбит/с)"
+
+#: templates/auditor.html
+msgid "Respuestas"
+msgstr "Ответы"
+
 msgid "Instalación .deb detectada."
 msgstr "Обнаружен пакет .deb."
 
