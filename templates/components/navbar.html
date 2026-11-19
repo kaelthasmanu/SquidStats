@@ -124,7 +124,7 @@
             <button onclick="confirmSquidUpdate()" id="squid-update-btn" class="action-btn update-btn relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 hover:-translate-y-0.5 transition-all duration-300" data-base-tooltip="{{ _("Actualizar paquetes y configuración de Squid") }}">
               <span id="squid-update-badge" class="update-badge update-badge--squid hidden">1</span>
               <i id="squid-update-icon" class="fas fa-sync-alt"></i>
-              <span id="squid-update-label" data-loading-label="{{ _('Actualizando...') }} Squid">{{ _("Squid") }}</span>
+              <span id="squid-update-label" data-loading-label="{{ _('Actualizando...') }}">{{ _("Squid") }}</span>
             </button>
             <div id="squid-update-tooltip" class="update-tooltip"></div>
           </div>
@@ -133,7 +133,7 @@
             <button onclick="confirmWebUpdate()" id="web-update-btn" class="action-btn update-btn relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 hover:-translate-y-0.5 transition-all duration-300" data-base-tooltip="{{ _("Actualizar aplicación web SquidStats") }}">
               <span id="web-update-badge" class="update-badge update-badge--web hidden">1</span>
               <i id="web-update-icon" class="fas fa-cloud-download-alt"></i>
-              <span id="web-update-label" data-loading-label="{{ _('Actualizando...') }} SquidStats">{{ _("Web") }}</span>
+              <span id="web-update-label" data-loading-label="{{ _('Actualizando...') }}">{{ _("Web") }}</span>
             </button>
             <div id="web-update-tooltip" class="update-tooltip"></div>
           </div>
@@ -209,12 +209,12 @@
           </a>
           <button onclick="confirmSquidUpdate(); mobileMenuOpen = false" id="squid-update-btn-mobile" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow hover:from-emerald-700 hover:to-emerald-600 transition-all duration-300">
             <i id="squid-update-icon-mobile" class="fas fa-sync-alt"></i>
-            <span id="squid-update-label-mobile" data-loading-label="{{ _('Actualizando...') }} Squid">{{ _("Squid") }}</span>
+            <span id="squid-update-label-mobile" data-loading-label="{{ _('Actualizando...') }}">{{ _("Squid") }}</span>
             <span id="squid-update-chip-mobile" class="update-chip update-chip--squid hidden">NEW</span>
           </button>
           <button onclick="confirmWebUpdate(); mobileMenuOpen = false" id="web-update-btn-mobile" class="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-purple-600 to-purple-400 text-white shadow hover:from-purple-700 hover:to-purple-600 transition-all duration-300">
             <i id="web-update-icon-mobile" class="fas fa-cloud-download-alt"></i>
-            <span id="web-update-label-mobile" data-loading-label="{{ _('Actualizando...') }} SquidStats">{{ _("Web") }}</span>
+            <span id="web-update-label-mobile" data-loading-label="{{ _('Actualizando...') }}">{{ _("Web") }}</span>
             <span id="web-update-chip-mobile" class="update-chip update-chip--web hidden">NEW</span>
           </button>
         </div>
@@ -775,18 +775,44 @@
     return metaTag ? metaTag.getAttribute('content') : '';
   }
 
+  function fitUpdateLabel(button, label) {
+    const icon = button.querySelector('i');
+    if (!icon) return;
+
+    const buttonStyle = getComputedStyle(button);
+    const availableWidth = Math.max(
+      0,
+      button.clientWidth
+        - parseFloat(buttonStyle.paddingLeft)
+        - parseFloat(buttonStyle.paddingRight)
+        - icon.getBoundingClientRect().width
+        - (parseFloat(buttonStyle.columnGap) || 0)
+    );
+
+    label.style.display = 'inline-block';
+    label.style.flex = '0 0 auto';
+    label.style.whiteSpace = 'nowrap';
+    const textWidth = label.getBoundingClientRect().width;
+    const scale = textWidth > availableWidth ? availableWidth / textWidth : 1;
+    label.style.flex = `0 0 ${availableWidth}px`;
+    label.style.transform = `scaleX(${scale})`;
+    label.style.transformOrigin = 'left center';
+  }
+
   function setUpdateButtonLoading(type, isLoading) {
     const config = {
       squid: {
         buttonIds: ['squid-update-btn', 'squid-update-btn-mobile'],
         iconIds: ['squid-update-icon', 'squid-update-icon-mobile'],
         labelIds: ['squid-update-label', 'squid-update-label-mobile'],
+        chipIds: ['squid-update-chip-mobile'],
         idleIcon: 'fa-sync-alt'
       },
       web: {
         buttonIds: ['web-update-btn', 'web-update-btn-mobile'],
         iconIds: ['web-update-icon', 'web-update-icon-mobile'],
         labelIds: ['web-update-label', 'web-update-label-mobile'],
+        chipIds: ['web-update-chip-mobile'],
         idleIcon: 'fa-cloud-download-alt'
       }
     }[type];
@@ -794,8 +820,22 @@
     config.buttonIds.forEach((id) => {
       const button = document.getElementById(id);
       if (button) {
+        if (isLoading) button.style.width = `${button.getBoundingClientRect().width}px`;
+        else button.style.removeProperty('width');
         button.disabled = isLoading;
         button.setAttribute('aria-busy', String(isLoading));
+      }
+    });
+
+    config.chipIds.forEach((id) => {
+      const chip = document.getElementById(id);
+      if (!chip) return;
+      if (isLoading) {
+        chip.dataset.wasHidden = String(chip.classList.contains('hidden'));
+        chip.classList.add('hidden');
+      } else {
+        chip.classList.toggle('hidden', chip.dataset.wasHidden !== 'false');
+        delete chip.dataset.wasHidden;
       }
     });
 
@@ -812,7 +852,14 @@
       const label = document.getElementById(id);
       if (!label) return;
       if (!label.dataset.idleLabel) label.dataset.idleLabel = label.textContent;
-      label.textContent = isLoading ? label.dataset.loadingLabel : label.dataset.idleLabel;
+      if (isLoading) {
+        label.textContent = label.dataset.loadingLabel;
+        const button = label.closest('button');
+        if (button) fitUpdateLabel(button, label);
+      } else {
+        label.textContent = label.dataset.idleLabel;
+        label.removeAttribute('style');
+      }
     });
   }
 
