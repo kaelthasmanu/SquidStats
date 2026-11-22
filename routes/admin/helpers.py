@@ -150,7 +150,10 @@ def _sanitize_response_payload(payload: dict) -> dict:
 
 def json_success(message: str, *, extra: dict | None = None):
     """Build a standard JSON success response."""
-    resp = {"status": "success", "message": message}
+    resp = {
+        "status": "success",
+        "message": _sanitize_response_value("message", message),
+    }
     if extra:
         resp.update(_sanitize_response_payload(extra))
     return jsonify(resp)
