@@ -16,7 +16,7 @@ from services.auth.auth_service import (
 from services.database import backup_service
 from services.database.db_info_service import get_db_health, run_integrity_check
 
-from .helpers import json_error, json_success
+from .helpers import json_error
 
 
 def register_routes(bp):
