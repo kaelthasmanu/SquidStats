@@ -29,11 +29,13 @@ def set_language(lang):
 
     referrer = request.referrer or ""
     parsed_referrer = urlparse(referrer)
-    # Use only the path component to prevent open redirects
     path = parsed_referrer.path or "/"
-    if parsed_referrer.query:
-        path += "?" + parsed_referrer.query
-    redirect_target = path if path.startswith("/") else "/"
+    # Reject protocol-relative and backslash paths that browsers may treat as external.
+    redirect_target = (
+        path
+        if path.startswith("/") and not path.startswith("//") and "\\" not in path
+        else "/"
+    )
 
     response = make_response(redirect(redirect_target))
     response.set_cookie(
