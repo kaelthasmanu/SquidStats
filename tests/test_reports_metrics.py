@@ -1,6 +1,7 @@
 """Focused behavioural coverage for the reports metrics service."""
 
 from datetime import date, datetime
+from html.parser import HTMLParser
 
 import pytest
 from flask import render_template
@@ -8,6 +9,26 @@ from flask import render_template
 from database.models.models import DeniedLog, create_dynamic_models
 from routes import reports_routes
 from services.analytics.get_reports import get_important_metrics
+
+
+class _TableCellParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.cells: list[str] = []
+        self._current_cell: list[str] | None = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "td":
+            self._current_cell = []
+
+    def handle_data(self, data):
+        if self._current_cell is not None:
+            self._current_cell.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "td" and self._current_cell is not None:
+            self.cells.append("".join(self._current_cell).strip())
+            self._current_cell = None
 
 
 @pytest.fixture()
@@ -279,4 +300,6 @@ def test_reports_pdf_includes_the_new_summary_and_destination_metrics(
 
     assert "Tasa de éxito HTTP:" in document
     assert "Top dominios de destino" in document
-    assert "example.com" in document
+    table_cells = _TableCellParser()
+    table_cells.feed(document)
+    assert any(cell == "example.com" for cell in table_cells.cells)
