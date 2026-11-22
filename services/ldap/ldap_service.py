@@ -14,6 +14,7 @@ from ldap3 import (
     core,
 )
 from ldap3.utils.conv import escape_filter_chars
+from ldap3.utils.dn import safe_dn
 from loguru import logger
 
 # ---------------------------------------------------------------------------
@@ -72,7 +73,7 @@ def authenticate_user(cfg: dict, username: str, password: str) -> dict:
 
     try:
         conn.search(
-            cfg["base_dn"],
+            _safe_ldap_search_base(cfg["base_dn"]),
             "(&(objectClass=person)(|"
             f"(sAMAccountName={escaped_username})"
             f"(userPrincipalName={escaped_username})))",
@@ -141,7 +142,7 @@ def _paged_count(cfg: dict, object_class: str) -> int:
     count = 0
     try:
         for entry in conn.extend.standard.paged_search(
-            search_base=cfg["base_dn"],
+            search_base=_safe_ldap_search_base(cfg["base_dn"]),
             search_filter=search_filter,
             search_scope=SUBTREE,
             attributes=["cn"],
@@ -176,6 +177,11 @@ def _escape_ldap_filter_value(value: str) -> str:
     return escape_filter_chars(value or "")
 
 
+def _safe_ldap_search_base(value: str) -> str:
+    """Escape a configured DN before using it as an LDAP search base."""
+    return safe_dn(value or "")
+
+
 def search_users(cfg: dict, query: str, limit: int = 50) -> dict:
     """Search users whose cn, sAMAccountName or mail matches *query*."""
     query = query.strip().replace("*", "").replace("(", "").replace(")", "")
@@ -187,7 +193,7 @@ def search_users(cfg: dict, query: str, limit: int = 50) -> dict:
     try:
         conn = _connect(cfg)
         conn.search(
-            cfg["base_dn"],
+            _safe_ldap_search_base(cfg["base_dn"]),
             filter_str,
             attributes=[
                 "cn",
@@ -238,7 +244,7 @@ def search_groups(cfg: dict, query: str, limit: int = 50) -> dict:
     try:
         conn = _connect(cfg)
         conn.search(
-            cfg["base_dn"],
+            _safe_ldap_search_base(cfg["base_dn"]),
             filter_str,
             attributes=["cn", "description", "member"],
             size_limit=limit,
@@ -275,7 +281,7 @@ def get_user_groups(cfg: dict, username: str) -> dict:
 
         # Find the user DN first
         conn.search(
-            cfg["base_dn"],
+            _safe_ldap_search_base(cfg["base_dn"]),
             f"(&(objectClass=person)(sAMAccountName={escaped_username}))",
             attributes=["distinguishedName", "memberOf", "cn", "displayName"],
         )
