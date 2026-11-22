@@ -155,7 +155,11 @@ def json_success(message: str, *, extra: dict | None = None):
         "message": _sanitize_response_value("message", message),
     }
     if extra:
-        resp.update(_sanitize_response_payload(extra))
+        for key, value in extra.items():
+            if key == "unread_count" and type(value) is int:
+                resp[key] = value
+            else:
+                resp[key] = "[REDACTED]"
     return jsonify(resp)
 
 
