@@ -156,17 +156,21 @@ def _normalize_backup_filename(filename: str) -> Path | None:
 
 
 def _get_safe_backup_path(backup_dir: Path, filename: str) -> Path | None:
-    """Return a safe backup path inside the configured backup directory."""
+    """Find a backup by name without constructing a path from user input."""
     normalized = _normalize_backup_filename(filename)
     if normalized is None:
         return None
 
     safe_root = os.path.realpath(backup_dir)
-    fullpath = os.path.realpath(os.path.join(backup_dir, str(normalized)))
-    if not fullpath.startswith(safe_root + os.sep) and fullpath != safe_root:
-        return None
+    for candidate in _list_backup_files(backup_dir):
+        if candidate.name != normalized.name:
+            continue
 
-    return Path(fullpath)
+        fullpath = os.path.realpath(candidate)
+        if fullpath.startswith(safe_root + os.sep) or fullpath == safe_root:
+            return candidate
+
+    return None
 
 
 def _human_size(size_bytes: int) -> str:
