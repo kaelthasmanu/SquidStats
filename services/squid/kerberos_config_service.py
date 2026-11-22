@@ -24,6 +24,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from flask_babel import gettext as _
 from loguru import logger
 
 from utils.admin import squid_config_write_lock
@@ -1363,7 +1364,10 @@ def _configuration_source_inspection_errors(config_manager) -> list[str]:
             try:
                 _read_optional_module(config_manager, filename, require_readable=True)
             except KerberosConfigurationError as exc:
-                errors.append(str(exc))
+                logger.warning(
+                    "Unable to inspect Kerberos module {}: {}", filename, exc
+                )
+                errors.append(_("No se pudo obtener el estado de Kerberos."))
     return list(dict.fromkeys(errors))
 
 
@@ -2865,7 +2869,8 @@ def get_status(config_manager) -> dict[str, Any]:
         # Do not let a partially hand-edited marker hide the recovery UI.
         # Applying a change remains blocked by the same marker check until an
         # administrator repairs it manually.
-        load_error = str(exc)
+        logger.warning("Unable to load Kerberos configuration status: {}", exc)
+        load_error = _("No se pudo obtener el estado de Kerberos.")
         configuration = {
             "settings": default_settings().to_dict(),
             "detected": False,
@@ -2886,6 +2891,8 @@ def get_status(config_manager) -> dict[str, Any]:
     except KerberosConfigurationError as exc:
         # A hand-edited, incomplete configuration should remain visible in the
         # form instead of turning the administration page into a 500 error.
+        logger.warning("Unable to prepare Kerberos status: {}", exc)
+        status_error = _("No se pudo obtener el estado de Kerberos.")
         settings = KerberosSettings(**configuration["settings"])
         preview = "# La configuración existente tiene valores inválidos; corrígelos antes de aplicar.\n"
         runtime = _find_squid_runtime()
@@ -2894,7 +2901,7 @@ def get_status(config_manager) -> dict[str, Any]:
         preflight = {
             "ready": False,
             "errors": [
-                str(exc),
+                status_error,
                 *([manual_write_message] if manual_write_message else []),
             ],
             "warnings": [],
@@ -2916,7 +2923,7 @@ def get_status(config_manager) -> dict[str, Any]:
             "squid_version": squid_version,
             "squid_binary_available": runtime is not None,
         }
-        configuration_error = str(exc)
+        configuration_error = status_error
     return {
         **configuration,
         "preflight": preflight,
