@@ -3,9 +3,7 @@ Internationalization (i18n) routes.
 Provides language switching and JS translation endpoint.
 """
 
-from urllib.parse import urlparse
-
-from flask import Blueprint, jsonify, make_response, redirect, request, session
+from flask import Blueprint, jsonify, make_response, redirect, request, session, url_for
 from flask_babel import gettext as _
 from loguru import logger
 
@@ -27,17 +25,7 @@ def set_language(lang):
     )
     session["lang"] = selected_lang
 
-    referrer = request.referrer or ""
-    parsed_referrer = urlparse(referrer)
-    path = parsed_referrer.path or "/"
-    # Reject protocol-relative and backslash paths that browsers may treat as external.
-    redirect_target = (
-        path
-        if path.startswith("/") and not path.startswith("//") and "\\" not in path
-        else "/"
-    )
-
-    response = make_response(redirect(redirect_target))
+    response = make_response(redirect(url_for("main.index")))
     response.set_cookie(
         "lang", selected_lang, max_age=365 * 24 * 60 * 60, samesite="Lax"
     )
