@@ -1364,10 +1364,7 @@ def _configuration_source_inspection_errors(config_manager) -> list[str]:
             try:
                 _read_optional_module(config_manager, filename, require_readable=True)
             except KerberosConfigurationError as exc:
-                logger.warning(
-                    "Unable to inspect Kerberos module {}: {}", filename, exc
-                )
-                errors.append(_("No se pudo obtener el estado de Kerberos."))
+                errors.append(str(exc))
     return list(dict.fromkeys(errors))
 
 
