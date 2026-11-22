@@ -57,9 +57,12 @@ def register_routes(bp):
                 uploaded_file.save(temporary_file)
 
             summary = import_log_file(temporary_path)
-            return json_success(
-                _("Importación completada correctamente"),
-                extra={"summary": summary},
+            return jsonify(
+                {
+                    "status": "success",
+                    "message": _("Importación completada correctamente"),
+                    "summary": summary,
+                }
             )
         except FileNotFoundError:
             return json_error(_("No se pudo leer el archivo de logs"), 400)
