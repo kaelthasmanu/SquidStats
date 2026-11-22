@@ -5,6 +5,8 @@ Centralizes repetitive patterns: flash+redirect, debug detection,
 form field parsing, JSON error responses, and config_manager access.
 """
 
+import re
+
 from flask import current_app, flash, jsonify, redirect, request, url_for
 from loguru import logger
 
@@ -87,8 +89,11 @@ def get_int_form_field(name: str) -> int | None:
 def _contains_stack_trace_error_hint(text: str) -> bool:
     """Detect indicators of stack traces or exception text."""
     normalized = text.lower()
-    suspects = ("traceback", "exception", "stack", "stack_trace", "stacktrace", "error")
-    return any(token in normalized for token in suspects)
+    suspects = ("traceback", "stack trace", "stack_trace", "stacktrace")
+    if any(token in normalized for token in suspects):
+        return True
+    exception_pattern = r"\b[A-Za-z_][A-Za-z0-9_.]*(?:Error|Exception):"
+    return re.search(exception_pattern, text) is not None
 
 
 def _sanitize_error_details(details: str) -> str:
@@ -108,7 +113,10 @@ def json_error(message: str, status_code: int = 400, *, details: str | None = No
     When the app is in debug mode and *details* is provided, the details
     are included in the payload.
     """
-    resp = {"status": "error", "message": message}
+    resp = {
+        "status": "error",
+        "message": _sanitize_response_value("message", message),
+    }
     if is_debug() and details:
         resp["details"] = _sanitize_error_details(details)
     return jsonify(resp), status_code
